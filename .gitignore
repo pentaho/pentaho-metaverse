@@ -1,0 +1,6 @@
+/target
+/.classpath
+*.iml
+*.ipr
+*.iws
+/atlassian-ide-plugin.xml
