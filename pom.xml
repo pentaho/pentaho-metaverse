@@ -1,84 +1,135 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  
   <groupId>com.pentaho</groupId>
   <artifactId>pentaho-metaverse-ee</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>pentaho-metaverse-ee</name>
-  <url>http://maven.apache.org</url>
+  <version>1.0.0-SNAPSHOT</version>
 
   <parent>
     <groupId>org.pentaho</groupId>
-    <artifactId>pentaho-ce-parent-pom</artifactId>
-    <version>1.0.0</version>
+    <!-- TODO: change this to the pentaho-ee-jar-parent-pom to add the Proguard obfuscation -->
+    <artifactId>pentaho-ce-jar-parent-pom</artifactId>
+    <!-- recommend only setting this to a specific version upon migration to maintenance -->
+    <version>RELEASE</version>
   </parent>
+  
+  <name>Pentaho Enterprise Edition Project: ${project.artifactId}</name>
+  <description>a Pentaho closed source project</description>
+  <url>http://www.pentaho.com</url>
+
+  <licenses>
+    <license>
+      <name>Pentaho Proprietary License</name>
+      <!-- TODO: figure out if the proprietary license is publically available -->
+      <url>http://www.pentaho.com</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  
+  <developers>
+    <developer>
+      <name>Rob Fellows</name>
+      <email>rfellows@pentaho.com</email>
+      <roles>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
+  
+  <properties>
+    <blueprints-core.version>2.5.0</blueprints-core.version>
+    <pentaho-platform-api.version>METAVERSE-SNAPSHOT</pentaho-platform-api.version>
+    <pentaho-platform-core.version>TRUNK-SNAPSHOT</pentaho-platform-core.version>
+    <pentaho-platform-repository.version>TRUNK-SNAPSHOT</pentaho-platform-repository.version>
+    <jcr.version>2.0</jcr.version>
+    <spring.version>2.5.6</spring.version>
+    <mockito-all.version>1.9.5</mockito-all.version>
+  </properties>
+
+  <scm>
+    <connection>scm:git:git@github.com:${github.user}/${project.artifactId}.git</connection>
+    <url>scm:git:git@github.com:${github.user}/${project.artifactId}.git</url>
+    <developerConnection>scm:git:git@github.com:${github.user}/${project.artifactId}.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
   <dependencies>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.4</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>1.9.5</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
+  
+    <!-- 'COMPILE' SCOPED DEPS -->
+     <dependency>
       <groupId>com.tinkerpop.blueprints</groupId>
       <artifactId>blueprints-core</artifactId>
-      <version>2.5.0</version>
+      <version>${blueprints-core.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-api</artifactId>
-      <version>METAVERSE-SNAPSHOT</version>
+      <version>${pentaho-platform-api.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <version>TRUNK-SNAPSHOT</version>
+      <version>${pentaho-platform-core.version}</version>
+      <scope>compile</scope>
     </dependency>
+    
     <dependency>
       <groupId>javax.jcr</groupId>
       <artifactId>jcr</artifactId>
-      <version>2.0</version>
+      <version>${jcr.version}</version>
+      <scope>compile</scope>
     </dependency>
+    
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring</artifactId>
-      <version>2.5.6</version>
+      <version>${spring.version}</version>
+      <scope>compile</scope>
     </dependency>
+    
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
-      <version>TRUNK-SNAPSHOT</version>
+      <version>${pentaho-platform-repository.version}</version>
+      <scope>compile</scope>
     </dependency>
+    
+    <!-- 'RUNTIME' SCOPED DEPS -->
+    
+    <!-- 'PROVIDED' SCOPED DEPS -->
+    
+    <!-- 'TEST' SCOPED DEPS -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>${mockito-all.version}</version>
+      <scope>test</scope>
+    </dependency>
+  
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.6</version>
-        <configuration>
-          <formats>
-            <format>html</format>
-            <format>xml</format>
-          </formats>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+  
+  
+  <!-- this is for bootstrapping only; you should really just add this to your settings.xml -->
+  <repositories>
+    <repository>
+      <id>pentaho.resolve.repo</id>
+      <name>Pentaho Group Resolve Repository</name>
+      <url>http://nexus.pentaho.org/content/groups/omni/</url>
+      <releases>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+    </repository>
+  </repositories>
 
 </project>
