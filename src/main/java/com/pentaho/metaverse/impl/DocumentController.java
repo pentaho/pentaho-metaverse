@@ -34,11 +34,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Coordinates passing IDocumentEvent's to the appropriate IDocumentAnalyzer's
  */
 public class DocumentController implements IDocumentListener, IMetaverseBuilder, IDocumentAnalyzerProvider {
+  private static final Logger logger = LoggerFactory.getLogger(DocumentController.class);
 
   private IMetaverseBuilder metaverseBuilder = null;
   private Set<IDocumentAnalyzer> analyzers = new HashSet<IDocumentAnalyzer>();

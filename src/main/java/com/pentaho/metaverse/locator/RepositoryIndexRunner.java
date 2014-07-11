@@ -23,7 +23,8 @@
 package com.pentaho.metaverse.locator;
 
 import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 
@@ -36,6 +37,7 @@ import com.pentaho.metaverse.impl.MetaverseDocument;
  *
  */
 public class RepositoryIndexRunner implements Runnable {
+  private static final Logger logger = LoggerFactory.getLogger(RepositoryIndexRunner.class);
 
   /**
    * The top-level repository files and folders to search into
@@ -56,6 +58,7 @@ public class RepositoryIndexRunner implements Runnable {
    * A flag to identify we if are currently crawling the repository
    */
   private boolean running;
+
 
   public void setRepoTop( List<RepositoryFileTree> repoTop ) {
     this.repoTop = repoTop;
