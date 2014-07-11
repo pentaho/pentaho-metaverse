@@ -82,7 +82,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     assertEquals( "Event count is wrong", 7, events.size() );
 
     for ( IDocumentEvent event : events ) {
-      System.out.println( event.getDocument().getID() );
+      System.out.println( event.getDocument().getStringID() );
       assertNotNull( event.getDocument() );
       MetaverseDocument document = (MetaverseDocument) event.getDocument();
       assertNotNull( document.getContent() );

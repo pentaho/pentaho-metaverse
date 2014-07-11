@@ -1,0 +1,141 @@
+/*!
+ * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
+ *
+ * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ *
+ * NOTICE: All information including source code contained herein is, and
+ * remains the sole property of Pentaho and its licensors. The intellectual
+ * and technical concepts contained herein are proprietary and confidential
+ * to, and are trade secrets of Pentaho and may be covered by U.S. and foreign
+ * patents, or patents in process, and are protected by trade secret and
+ * copyright laws. The receipt or possession of this source code and/or related
+ * information does not convey or imply any rights to reproduce, disclose or
+ * distribute its contents, or to manufacture, use, or sell anything that it
+ * may describe, in whole or in part. Any reproduction, modification, distribution,
+ * or public display of this information without the express written authorization
+ * from Pentaho is strictly prohibited and in violation of applicable laws and
+ * international treaties. Access to the source code contained herein is strictly
+ * prohibited to anyone except those individuals and entities who have executed
+ * confidentiality and non-disclosure agreements or other agreements with Pentaho,
+ * explicitly covering such access.
+ */
+package com.pentaho.metaverse.analyzer.kettle;
+
+import java.io.ByteArrayInputStream;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.pentaho.di.core.exception.KettleMissingPluginsException;
+import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocumentAnalyzer {
+
+  private static final long serialVersionUID = 3147152759123052372L;
+
+  private static final Logger logger = LoggerFactory.getLogger( TransformationAnalyzer.class );
+
+  private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
+    {
+      add( "ktr" );
+    }
+  };
+  
+  protected IMetaverseBuilder metaverseBuilder = null;
+
+  @Override
+  public void analyze( IMetaverseDocument document ) {
+    
+    if(document == null) {
+      return;
+    }
+    
+    Object repoObject = document.getContent();
+
+    if(repoObject == null) {
+      return;
+    }
+    
+    TransMeta transMeta = null;
+    if ( repoObject instanceof String ) {
+      // hydrate the transformation
+      try {
+        String content = (String) repoObject;
+        ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
+        transMeta = new TransMeta( xmlStream, null, false, null, null );
+      } catch ( KettleXMLException e ) {
+        e.printStackTrace();
+        return;
+      } catch ( KettleMissingPluginsException e ) {
+        e.printStackTrace();
+        return;
+      }
+    } else if ( repoObject instanceof TransMeta ) {
+      transMeta = (TransMeta) repoObject;
+    }
+
+    // Create a metaverse node and start filling in details
+    IMetaverseObjectFactory factory = getMetaverseObjectFactory();
+    
+    IMetaverseNode node = factory.createNodeObject();
+    
+    // pull out the standard fields
+    String description = transMeta.getDescription();
+    
+    //indexObject.setDescription( description );
+    Date createdDate = transMeta.getCreatedDate();
+    //indexObject.setCreatedDate( createdDate );
+    Date lastModifiedDate = transMeta.getModifiedDate();
+    //indexObject.setLastModifiedDate( lastModifiedDate );
+
+    // handle the steps
+    for ( int stepNr = 0; stepNr < transMeta.nrSteps(); stepNr++ ) {
+      StepMeta stepMeta = transMeta.getStep( stepNr );
+      StepMetaInterface stepMetaInterface = stepMeta.getStepMetaInterface();
+      if ( stepMetaInterface != null ) {
+        // TODO get StepAnalyzer and integrate returned model
+      }
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.pentaho.platform.api.metaverse.IDocumentAnalyzer#getSupportedTypes()
+   */
+  @Override
+  public Set<String> getSupportedTypes() {
+    return defaultSupportedTypes;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.pentaho.platform.api.metaverse.IDocumentAnalyzer#setMetaverseBuilder(org.pentaho.platform.api.metaverse.
+   * IMetaverseBuilder)
+   */
+  @Override
+  public void setMetaverseBuilder( IMetaverseBuilder metaverseBuilder ) {
+    this.metaverseBuilder = metaverseBuilder;
+  }
+  
+  protected IMetaverseBuilder getMetaverseBuilder() {
+    return metaverseBuilder;
+  }
+  
+  protected IMetaverseObjectFactory getMetaverseObjectFactory() {
+    return (IMetaverseObjectFactory)PentahoSystem.get( IMetaverseObjectFactory.class );
+  }
+
+}

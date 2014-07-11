@@ -22,53 +22,37 @@
 
 package com.pentaho.metaverse.impl;
 
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 /**
- * Implementation of an @see org.pentaho.platform.api.metaverse.IMetaverseDocument
- * @author jdixon
+ * @author mburgess
  *
  */
-public class MetaverseDocument implements IMetaverseDocument {
+public class MetaverseNode implements IMetaverseNode {
+  
+  protected String id;
+  protected String name;
+  protected String type;
 
-  /**
-   * The name of the item
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getName()
    */
-  private String name;
-  private String id;
-  private String type;
-  private Object content;
-
-  public void setID( String id ) {
-    this.id = id;
-  }
-
-  public Object getContent() {
-    return content;
-  }
-
-  public void setContent( Object content ) {
-    this.content = content;
-  }
-
-  public void setName( String name ) {
-    this.name = name;
-  }
-
-  public void setType( String type ) {
-    this.type = type;
-  }
-
   @Override
   public String getName() {
     return name;
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getStringID()
+   */
   @Override
   public String getStringID() {
     return id;
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getType()
+   */
   @Override
   public String getType() {
     return type;
