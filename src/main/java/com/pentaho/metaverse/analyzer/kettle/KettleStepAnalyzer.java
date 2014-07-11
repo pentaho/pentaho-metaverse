@@ -20,58 +20,18 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl;
+package com.pentaho.metaverse.analyzer.kettle;
 
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.di.trans.step.StepMetaInterface;
 
 /**
- * Implementation of an @see org.pentaho.platform.api.metaverse.IMetaverseDocument
- * @author jdixon
+ * @author mburgess
  *
  */
-public class MetaverseDocument implements IMetaverseDocument {
-
-  /**
-   * The name of the item
-   */
-  private String name;
-  private String id;
-  private String type;
-  private Object content;
-
-  public void setID( String id ) {
-    this.id = id;
-  }
-
-  public Object getContent() {
-    return content;
-  }
-
-  public void setContent( Object content ) {
-    this.content = content;
-  }
-
-  public void setName( String name ) {
-    this.name = name;
-  }
-
-  public void setType( String type ) {
-    this.type = type;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public String getStringID() {
-    return id;
-  }
-
-  @Override
-  public String getType() {
-    return type;
+public class KettleStepAnalyzer {
+  
+  public void analyze(StepMetaInterface stepMetaInterface) {
+    
   }
 
 }
