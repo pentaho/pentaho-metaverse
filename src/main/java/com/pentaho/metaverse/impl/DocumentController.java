@@ -40,13 +40,20 @@ import java.util.Set;
  */
 public class DocumentController implements IDocumentListener, IMetaverseBuilder, IDocumentAnalyzerProvider {
 
-  private IMetaverseBuilder metaverseBuilder = null;
+  private IMetaverseBuilder metaverseBuilder;
   private Set<IDocumentAnalyzer> analyzers = new HashSet<IDocumentAnalyzer>();
   private Map<String, HashSet<IDocumentAnalyzer>> analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>( );
 
+  /**
+   * Empty constructor
+   */
   public DocumentController() {
   }
 
+  /**
+   * Constructor that takes in an IMetaverseBuilder
+   * @param metaverseBuilder builder to delegate building calls to
+   */
   public DocumentController( IMetaverseBuilder metaverseBuilder ) {
     this.metaverseBuilder = metaverseBuilder;
   }
@@ -70,22 +77,21 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
       return getDocumentAnalyzers();
     }
 
-    if ( analyzerTypeMap.size() == 0 ) {
-      loadAnalyzerTypeMap();
-    }
     return analyzerTypeMap.get( type );
   }
 
+  /**
+   * Set the analyzers that are available in the system
+   * @param analyzers the complete Set of IDocumentAnalyzers
+   */
   public void setDocumentAnalyzers( Set<IDocumentAnalyzer> analyzers ) {
     this.analyzers = analyzers;
+    // reset the analyzer type map
+    loadAnalyzerTypeMap();
   }
 
   @Override
   public void onEvent( IDocumentEvent event ) {
-    if ( analyzerTypeMap.size() == 0 ) {
-      loadAnalyzerTypeMap();
-    }
-
     Set<IDocumentAnalyzer> matchingAnalyzers = getDocumentAnalyzers( event.getDocument().getType() );
     for ( IDocumentAnalyzer analyzer : matchingAnalyzers ) {
       Set<String> types = analyzer.getSupportedTypes();
@@ -99,6 +105,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
    * Loads up a Map of document types to supporting IDocumentAnalyzer(s)
    */
   protected void loadAnalyzerTypeMap() {
+    analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>( );
     for ( IDocumentAnalyzer analyzer : analyzers ) {
       Set<String> types = analyzer.getSupportedTypes();
 
@@ -121,8 +128,8 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   /**
    * Fires a IDocumentEvent to an IDocumentAnalyzer in a separate Thread
-   * @param event
-   * @param analyzer
+   * @param event IDocumentEvent to fire
+   * @param analyzer IDocumentAnalyzer to use for the Document that needs processed
    */
   protected void fireDocumentEvent( final IDocumentEvent event, final IDocumentAnalyzer analyzer ) {
     analyzer.setMetaverseBuilder( getMetaverseBuilder() );
