@@ -22,7 +22,14 @@
       <version>4.4</version>
       <scope>test</scope>
     </dependency>
-    
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
        <groupId>com.tinkerpop.blueprints</groupId>
        <artifactId>blueprints-core</artifactId>
@@ -33,6 +40,7 @@
        <groupId>pentaho</groupId>
        <artifactId>pentaho-platform-api</artifactId>
        <version>METAVERSE-SNAPSHOT</version>
+       <scope>compile</scope>
     </dependency>
 
   <dependency>

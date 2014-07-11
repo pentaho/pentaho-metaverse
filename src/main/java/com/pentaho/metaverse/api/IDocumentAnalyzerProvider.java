@@ -20,38 +20,25 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl;
+package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IDocumentEvent;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 
-/**
- * Simple implementation of @see org.pentaho.platform.api.metaverse.IDocumentEvent
- * @author jdixon
- *
- */
-public class DocumentEvent implements IDocumentEvent {
+import java.util.Set;
 
-  private IMetaverseDocument document;
+public interface IDocumentAnalyzerProvider {
 
-  private String type;
+  /**
+   * Get all of the known IDocumentAnalyzer's
+   * @return
+   */
+  Set<IDocumentAnalyzer> getDocumentAnalyzers( );
 
-  @Override
-  public IMetaverseDocument getDocument() {
-    return document;
-  }
-
-  public void setDocument( IMetaverseDocument document ) {
-    this.document = document;
-  }
-
-  @Override
-  public String getEventType() {
-    return type;
-  }
-
-  public void setType( String type ) {
-    this.type = type;
-  }
+  /**
+   * Gets the IDocumentAnalyzer(s) that support a specific type
+   * @param type
+   * @return
+   */
+  Set<IDocumentAnalyzer> getDocumentAnalyzers( String type );
 
 }
