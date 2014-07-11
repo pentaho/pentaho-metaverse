@@ -24,6 +24,10 @@ package com.pentaho.metaverse.locator;
 
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.StringObjectId;
@@ -41,6 +45,7 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
  *
  */
 public class DIRepositoryLocator extends RepositoryIndexer {
+  private static final Logger logger = LoggerFactory.getLogger(DIRepositoryLocator.class);
 
   /**
    * The type for this locator
@@ -114,6 +119,11 @@ public class DIRepositoryLocator extends RepositoryIndexer {
   @Override
   public String[] getTypes() {
     return new String[] {};
+  }
+
+  @Override
+  public Log getLogger() {
+    return LogFactory.getLog(DIRepositoryLocator.class);
   }
 
 }
