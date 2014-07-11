@@ -37,18 +37,19 @@ import org.pentaho.platform.api.metaverse.IDocumentListener;
 
 import com.pentaho.metaverse.impl.MetaverseDocument;
 
+/**
+ * Test class for the DIRepositoryLocator
+ * @author jdixon
+ *
+ */
 @SuppressWarnings( { "all" } )
-
 public class DIRepositoryLocatorTest implements IDocumentListener {
 
   private List<IDocumentEvent> events;
-  
-  public DIRepositoryLocatorTest() throws Exception {
 
-    
-    
-  }
-
+  /**
+   * Initializes the kettle system
+   */
   @Before
   public void init() {
     try {
@@ -59,12 +60,16 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     }
 
   }
-  
+
+  /**
+   * Runs the locator and checks the results
+   * @throws Exception When bad things happen
+   */
   @Test
-  public void testStartIndexer() throws Exception {
+  public void testStartLocator() throws Exception {
 
     DIRepositoryLocator locator = new DIRepositoryLocator();
-    
+
     locator.addDocumentListener( this );
     locator.setRepository( new TestDiRepository() );
     locator.setUnifiedRepository( new TestDiUnifiedRepository() );
@@ -72,17 +77,17 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     assertNotNull("Indexer type is null", locator.getIndexerType() );
     events = new ArrayList<IDocumentEvent>();
     locator.startScan();
-    Thread.sleep(3000);
+    Thread.sleep( 3000 );
 
     assertEquals( "Event count is wrong", 7, events.size() );
 
-    for( IDocumentEvent event : events ) {
-      System.out.println(event.getDocument().getID());
+    for ( IDocumentEvent event : events ) {
+      System.out.println( event.getDocument().getID() );
       assertNotNull( event.getDocument() );
       MetaverseDocument document = (MetaverseDocument) event.getDocument();
       assertNotNull( document.getContent() );
     }
-    
+
   }
 
   @Override

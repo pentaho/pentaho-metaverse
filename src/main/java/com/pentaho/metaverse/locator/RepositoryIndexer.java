@@ -32,27 +32,48 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.pentaho.platform.repository2.ClientRepositoryPaths;
 
+/**
+ * An abstract implementation of a document locator for Pentaho repositories
+ * @author jdixon
+ *
+ */
 public abstract class RepositoryIndexer extends BaseLocator {
 
   private static final long serialVersionUID = 3308953622126327699L;
 
-  private static final Log logger = LogFactory.getLog( RepositoryIndexer.class );
+  private static final Log LOGGER = LogFactory.getLog( RepositoryIndexer.class );
+
+  private static final int POLLING_INTERVAL = 100;
 
   private IUnifiedRepository unifiedRepository;
 
+  private RepositoryIndexRunner indexRunner;
+
+  /**
+   * A method that returns the IUnifiedRepository for this environment
+   * @param session The user session to use
+   * @return The IUnifiedRepository
+   * @throws Exception When the repository instance cannot be accessed
+   */
   protected abstract IUnifiedRepository getUnifiedRepository( IPentahoSession session ) throws Exception;
 
+  /**
+   * A method that returns the payload (object or XML) for a document
+   * @param file The repository file
+   * @param type The type of the file
+   * @return The object or XML payload
+   * @throws Exception When the document contents cannot be retrieved
+   */
   protected abstract Object getFileContents( RepositoryFile file, String type ) throws Exception;
 
-  private RepositoryIndexRunner indexRunner = null;
-
+  @Override
   public String getId( String... tokens ) {
-    return getIndexerType()+"."+getRepositoryId()+"."+tokens[0];
+    return getIndexerType() + "." + getRepositoryId() + "." + tokens[0];
   }
-  
+
   @Override
   public void startScan() {
-    if( indexRunner != null ) {
+    if ( indexRunner != null ) {
 //      throw new Exception("Locator is already scanning");
       return;
     }
@@ -64,10 +85,10 @@ public abstract class RepositoryIndexer extends BaseLocator {
         return;
       }
     }
-    
+
     RepositoryFileTree root = unifiedRepository.getTree( ClientRepositoryPaths.getRootFolderPath(), -1, null, true );
     List<RepositoryFileTree> kids = root.getChildren();
-    
+
     indexRunner = new RepositoryIndexRunner();
     indexRunner.setRepositoryIndexer( this );
     indexRunner.setRepoTop( kids );
@@ -77,19 +98,20 @@ public abstract class RepositoryIndexer extends BaseLocator {
   @Override
   public void stopScan() {
     indexRunner.stop();
-    while( indexRunner.isRunning() ) {
+    while ( indexRunner.isRunning() ) {
       try {
-        Thread.sleep( 100 );
+        Thread.sleep( POLLING_INTERVAL );
       } catch ( InterruptedException e ) {
         // intentional
+        break;
       }
     }
     indexRunner = null;
   }
-  
+
   @Override
   public Log getLogger() {
-    return logger;
+    return LOGGER;
   }
 
   protected IUnifiedRepository getRepo() {

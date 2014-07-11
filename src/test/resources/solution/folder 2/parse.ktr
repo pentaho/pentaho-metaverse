@@ -1137,7 +1137,7 @@ dayNo += (tmp &lt; 10) ? &quot;0&quot; + tmp : tmp;
     <passing_through_fields>N</passing_through_fields>
     <accept_field>filename2</accept_field>
     <accept_stepname>merge</accept_stepname>
-    <separator>	</separator>
+    <separator>;</separator>
     <enclosure/>
     <enclosure_breaks>N</enclosure_breaks>
     <escapechar/>

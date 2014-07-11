@@ -36,7 +36,6 @@ import org.pentaho.di.core.Condition;
 import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.exception.KettleSecurityException;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.partition.PartitionSchema;
@@ -57,23 +56,31 @@ import org.pentaho.di.repository.RepositorySecurityProvider;
 import org.pentaho.di.shared.SharedObjects;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metastore.api.IMetaStore;
-import org.pentaho.metastore.stores.memory.MemoryMetaStore;
 
+/**
+ * A mock DI repository object for testing
+ * @author jdixon
+ *
+ */
 public class TestDiRepository implements Repository {
 
-  protected MemoryMetaStore metaStore;
-  public long delay = 0;
-  
+  private static final int BUFFER_SIZE = 2048;
+
+  /**
+   * Delay to slow down the speed of the repository so that cancelling can be tested
+   */
+  public long delay;
+
   @Override
   public void clearSharedObjectCache() {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
-  public void connect( String arg0, String arg1 ) throws KettleException, KettleSecurityException {
+  public void connect( String arg0, String arg1 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -98,49 +105,49 @@ public class TestDiRepository implements Repository {
   @Override
   public void deleteClusterSchema( ObjectId arg0 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void deleteDatabaseMeta( String arg0 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void deleteJob( ObjectId arg0 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void deletePartitionSchema( ObjectId arg0 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void deleteRepositoryDirectory( RepositoryDirectoryInterface arg0 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void deleteSlave( ObjectId arg0 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void deleteTransformation( ObjectId arg0 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void disconnect() {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -205,7 +212,8 @@ public class TestDiRepository implements Repository {
   }
 
   @Override
-  public RepositoryDirectoryInterface getDefaultSaveDirectory( RepositoryElementInterface arg0 ) throws KettleException {
+  public RepositoryDirectoryInterface getDefaultSaveDirectory(
+      RepositoryElementInterface arg0 ) throws KettleException {
     // TODO Auto-generated method stub
     return null;
   }
@@ -491,13 +499,13 @@ public class TestDiRepository implements Repository {
   @Override
   public void init( RepositoryMeta arg0 ) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void insertJobEntryDatabase( ObjectId arg0, ObjectId arg1, ObjectId arg2 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -509,7 +517,7 @@ public class TestDiRepository implements Repository {
   @Override
   public void insertStepDatabase( ObjectId arg0, ObjectId arg1, ObjectId arg2 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -565,12 +573,12 @@ public class TestDiRepository implements Repository {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     }
-    File file = new File(arg0.getId());
+    File file = new File( arg0.getId() );
     String content = "";
     try {
 
       InputStream in = new FileInputStream( file );
-      byte[] buffer = new byte[2048];
+      byte[] buffer = new byte[BUFFER_SIZE];
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       int n = 0;
       try {
@@ -586,12 +594,12 @@ public class TestDiRepository implements Repository {
       content = new String( out.toByteArray() );
       ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
       return new JobMeta( xmlStream, null, null );
-      
+
     } catch ( Throwable e ) {
       e.printStackTrace();
     }
-    
-    return null;  
+
+    return null;
   }
 
   @Override
@@ -621,12 +629,12 @@ public class TestDiRepository implements Repository {
 
   @Override
   public TransMeta loadTransformation( ObjectId arg0, String arg1 ) throws KettleException {
-    File file = new File(arg0.getId());
+    File file = new File( arg0.getId() );
     String content = "";
     try {
 
       InputStream in = new FileInputStream( file );
-      byte[] buffer = new byte[2048];
+      byte[] buffer = new byte[BUFFER_SIZE];
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       int n = 0;
       try {
@@ -642,11 +650,11 @@ public class TestDiRepository implements Repository {
       content = new String( out.toByteArray() );
       ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
       return new TransMeta( xmlStream, null, false, null, null );
-      
+
     } catch ( Throwable e ) {
+      // intentional
+      return null;
     }
-    
-    return null;
   }
 
   @Override
@@ -695,154 +703,155 @@ public class TestDiRepository implements Repository {
   }
 
   @Override
-  public void save( RepositoryElementInterface arg0, String arg1, ProgressMonitorListener arg2 ) throws KettleException {
+  public void save( RepositoryElementInterface arg0, String arg1,
+      ProgressMonitorListener arg2 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void save( RepositoryElementInterface arg0, String arg1, ProgressMonitorListener arg2, boolean arg3 )
     throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void save( RepositoryElementInterface arg0, String arg1, Calendar arg2, ProgressMonitorListener arg3,
       boolean arg4 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveConditionStepAttribute( ObjectId arg0, ObjectId arg1, String arg2, Condition arg3 )
     throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveDatabaseMetaJobEntryAttribute( ObjectId arg0, ObjectId arg1, String arg2, String arg3,
       DatabaseMeta arg4 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveDatabaseMetaJobEntryAttribute( ObjectId arg0, ObjectId arg1, int arg2, String arg3, String arg4,
       DatabaseMeta arg5 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveDatabaseMetaStepAttribute( ObjectId arg0, ObjectId arg1, String arg2, DatabaseMeta arg3 )
     throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveJobEntryAttribute( ObjectId arg0, ObjectId arg1, String arg2, String arg3 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveJobEntryAttribute( ObjectId arg0, ObjectId arg1, String arg2, boolean arg3 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveJobEntryAttribute( ObjectId arg0, ObjectId arg1, String arg2, long arg3 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveJobEntryAttribute( ObjectId arg0, ObjectId arg1, int arg2, String arg3, String arg4 )
     throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveJobEntryAttribute( ObjectId arg0, ObjectId arg1, int arg2, String arg3, boolean arg4 )
     throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveJobEntryAttribute( ObjectId arg0, ObjectId arg1, int arg2, String arg3, long arg4 )
     throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveRepositoryDirectory( RepositoryDirectoryInterface arg0 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveStepAttribute( ObjectId arg0, ObjectId arg1, String arg2, String arg3 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveStepAttribute( ObjectId arg0, ObjectId arg1, String arg2, boolean arg3 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveStepAttribute( ObjectId arg0, ObjectId arg1, String arg2, long arg3 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveStepAttribute( ObjectId arg0, ObjectId arg1, String arg2, double arg3 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveStepAttribute( ObjectId arg0, ObjectId arg1, int arg2, String arg3, String arg4 )
     throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveStepAttribute( ObjectId arg0, ObjectId arg1, int arg2, String arg3, boolean arg4 )
     throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveStepAttribute( ObjectId arg0, ObjectId arg1, int arg2, String arg3, long arg4 )
     throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void saveStepAttribute( ObjectId arg0, ObjectId arg1, int arg2, String arg3, double arg4 )
     throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void undeleteObject( RepositoryElementMetaInterface arg0 ) throws KettleException {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

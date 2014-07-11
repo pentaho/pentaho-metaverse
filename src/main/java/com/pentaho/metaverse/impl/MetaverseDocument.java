@@ -24,13 +24,21 @@ package com.pentaho.metaverse.impl;
 
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 
+/**
+ * Implementation of an @see org.pentaho.platform.api.metaverse.IMetaverseDocument
+ * @author jdixon
+ *
+ */
 public class MetaverseDocument implements IMetaverseDocument {
 
-  String name;
-  String id;
-  String type;
-  Object content;
-  
+  /**
+   * The name of the item
+   */
+  private String name;
+  private String id;
+  private String type;
+  private Object content;
+
   public void setID( String id ) {
     this.id = id;
   }
