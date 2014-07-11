@@ -50,7 +50,7 @@ public class DocumentEvent implements IDocumentEvent {
     return type;
   }
 
-  public void setType( String type ) {
+  public void setEventType( String type ) {
     this.type = type;
   }
 
