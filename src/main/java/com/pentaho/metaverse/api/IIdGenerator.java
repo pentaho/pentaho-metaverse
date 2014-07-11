@@ -32,17 +32,17 @@ public interface IIdGenerator {
 
   /**
    * Returns the types of artifacts that this id generator supports
-   * @return
+   * @return An array of supported types
    */
-  public String[] getTypes();
-  
+  String[] getTypes();
+
   /**
    * Returns an id given a collection of tokens that represent an artifact. The number of tokens
    * is variable because some artifacts only need one e.g. a file system path where as others
    * such as a database column need more.
-   * @param tokens
-   * @return
+   * @param tokens A list of tokens that can be used to create an id
+   * @return The unique id for the artifact
    */
-  public String getId( String... tokens );
-  
+  String getId( String... tokens );
+
 }
