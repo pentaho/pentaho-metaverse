@@ -34,12 +34,15 @@ import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pentaho.metaverse.impl.MetaverseDocument;
 
 @SuppressWarnings( { "all" } )
 
 public class DIRepositoryLocatorTest implements IDocumentListener {
+  private static final Logger logger = LoggerFactory.getLogger(DIRepositoryLocatorTest.class);
 
   private List<IDocumentEvent> events;
   
@@ -77,7 +80,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     assertEquals( "Event count is wrong", 7, events.size() );
 
     for( IDocumentEvent event : events ) {
-      System.out.println(event.getDocument().getID());
+      logger.debug(event.getDocument().getID());
       assertNotNull( event.getDocument() );
       MetaverseDocument document = (MetaverseDocument) event.getDocument();
       assertNotNull( document.getContent() );

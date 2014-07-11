@@ -24,8 +24,8 @@ package com.pentaho.metaverse.locator;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
@@ -33,10 +33,9 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.pentaho.platform.repository2.ClientRepositoryPaths;
 
 public abstract class RepositoryIndexer extends BaseLocator {
+  private static final Logger logger = LoggerFactory.getLogger(RepositoryIndexer.class);
 
   private static final long serialVersionUID = 3308953622126327699L;
-
-  private static final Log logger = LogFactory.getLog( RepositoryIndexer.class );
 
   private IUnifiedRepository unifiedRepository;
 
@@ -87,10 +86,6 @@ public abstract class RepositoryIndexer extends BaseLocator {
     indexRunner = null;
   }
   
-  @Override
-  public Log getLogger() {
-    return logger;
-  }
 
   protected IUnifiedRepository getRepo() {
     return unifiedRepository;

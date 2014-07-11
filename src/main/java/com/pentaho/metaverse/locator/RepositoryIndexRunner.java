@@ -23,7 +23,8 @@
 package com.pentaho.metaverse.locator;
 
 import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 
@@ -31,7 +32,8 @@ import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.impl.MetaverseDocument;
 
 public class RepositoryIndexRunner implements Runnable {
-
+  private static final Logger logger = LoggerFactory.getLogger(RepositoryIndexRunner.class);
+  
   List<RepositoryFileTree> repoTop;
   RepositoryIndexer repositoryIndexer;
   boolean stopping = false;

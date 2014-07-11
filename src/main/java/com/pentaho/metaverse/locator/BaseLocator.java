@@ -24,7 +24,8 @@ package com.pentaho.metaverse.locator;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
@@ -34,6 +35,7 @@ import org.pentaho.platform.engine.core.system.PentahoBase;
 import com.pentaho.metaverse.api.IIdGenerator;
 
 public abstract class BaseLocator extends PentahoBase implements IDocumentLocator, IIdGenerator {
+  private static final Logger logger = LoggerFactory.getLogger(BaseLocator.class);
 
   private static final long serialVersionUID = 693428630030858039L;
 
