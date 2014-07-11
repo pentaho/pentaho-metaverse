@@ -59,11 +59,11 @@ public class RepositoryIndexRunner implements Runnable {
   public void stop() {
     stopping = true;
   }
-  
+
   private void indexFileTree( List<RepositoryFileTree> roots ) {
 
     for ( RepositoryFileTree fileTree : roots ) {
-      if( stopping ) {
+      if ( stopping ) {
         return;
       }
       if ( fileTree.getFile() != null ) {
@@ -83,7 +83,7 @@ public class RepositoryIndexRunner implements Runnable {
 
   private void indexFile( RepositoryFile file ) {
 
-    if( stopping ) {
+    if ( stopping ) {
       return;
     }
     if ( file.isHidden() ) {
@@ -105,7 +105,7 @@ public class RepositoryIndexRunner implements Runnable {
     try {
       Object contents = repositoryIndexer.getFileContents( file, extension );
       DocumentEvent event = new DocumentEvent();
-      event.setType( "add" );
+      event.setEventType( "add" );
       MetaverseDocument metaverseDocument = new MetaverseDocument();
       metaverseDocument.setContent( contents );
       metaverseDocument.setID( id );
@@ -114,9 +114,9 @@ public class RepositoryIndexRunner implements Runnable {
       event.setDocument( metaverseDocument );
       repositoryIndexer.notifyListeners( event );
     } catch ( Exception e ) {
-      repositoryIndexer.error("Could not get file contents for "+file.getPath());
+      repositoryIndexer.error( "Could not get file contents for " + file.getPath() );
     }
-    
+
 /*
     SearchContentItem obj;
     try {
@@ -135,5 +135,5 @@ public class RepositoryIndexRunner implements Runnable {
     }
     */
   }
-  
+
 }
