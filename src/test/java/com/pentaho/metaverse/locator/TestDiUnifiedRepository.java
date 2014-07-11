@@ -43,6 +43,11 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.pentaho.platform.api.repository2.unified.RepositoryRequest;
 import org.pentaho.platform.api.repository2.unified.VersionSummary;
 
+/**
+ * A mock DI unified repository object for testing
+ * @author jdixon
+ *
+ */
 public class TestDiUnifiedRepository implements IUnifiedRepository {
 
   @Override
@@ -150,8 +155,8 @@ public class TestDiUnifiedRepository implements IUnifiedRepository {
   }
 
   @Override
-  public <T extends IRepositoryFileData> T
-    getDataAtVersionForRead( Serializable arg0, Serializable arg1, Class<T> arg2 ) {
+  public <T extends IRepositoryFileData> T getDataAtVersionForRead(
+      Serializable arg0, Serializable arg1, Class<T> arg2 ) {
     // TODO Auto-generated method stub
     return null;
   }
@@ -300,13 +305,18 @@ public class TestDiUnifiedRepository implements IUnifiedRepository {
     return null;
   }
 
+  /**
+   * Returns a repository file tree generated from the test source files
+   * @param root The root filesystem folder
+   * @return The RepositoryFileTree
+   */
   private RepositoryFileTree createFileTree( File root ) {
 
-    RepositoryFile repFile = new RepositoryFile( root.getPath(), root.getName(), 
+    RepositoryFile repFile = new RepositoryFile( root.getPath(), root.getName(),
         root.isDirectory(), false,
-        false, null, root.getAbsolutePath(), new Date(root.lastModified()), 
-        new Date(root.lastModified()), false, null, null, null, null, root.getName(), 
-        null, null, null, 20, "Admin", null );
+        false, null, root.getAbsolutePath(), new Date( root.lastModified() ),
+        new Date( root.lastModified() ), false, null, null, null, null, root.getName(),
+        null, null, null, root.length(), "Admin", null );
     List<RepositoryFileTree> children = new ArrayList<RepositoryFileTree>();
 
     File[] files = root.listFiles();
@@ -314,28 +324,28 @@ public class TestDiUnifiedRepository implements IUnifiedRepository {
       if ( file.isHidden() ) {
         continue;
       }
-      
+
       if ( file.isDirectory() ) {
         RepositoryFileTree kid = createFileTree( file );
         children.add( kid );
       } else if ( file.isFile() ) {
-        RepositoryFile kid = new RepositoryFile( file.getPath(), file.getName(), 
+        RepositoryFile kid = new RepositoryFile( file.getPath(), file.getName(),
             file.isDirectory(), false,
-            false, null, file.getPath(), new Date(file.lastModified()), 
-            new Date(file.lastModified()), false, null, null, null, null, file.getName(), 
-            null, null, null, 20, "Admin", null );
-        RepositoryFileTree kidTree = new RepositoryFileTree(kid, null);
+            false, null, file.getPath(), new Date( file.lastModified() ),
+            new Date( file.lastModified() ), false, null, null, null, null, file.getName(),
+            null, null, null, root.length(), "Admin", null );
+        RepositoryFileTree kidTree = new RepositoryFileTree( kid, null );
         children.add( kidTree );
       }
     }
-    RepositoryFileTree fileTree = new RepositoryFileTree(repFile, children);
+    RepositoryFileTree fileTree = new RepositoryFileTree( repFile, children );
     return fileTree;
   }
-  
+
   @Override
   public RepositoryFileTree getTree( String arg0, int arg1, String arg2, boolean arg3 ) {
 
-    File root = new File("src/test/resources/solution");
+    File root = new File( "src/test/resources/solution" );
     RepositoryFileTree rft = createFileTree(root );
 
     return rft;

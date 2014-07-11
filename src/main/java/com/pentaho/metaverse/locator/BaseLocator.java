@@ -33,18 +33,38 @@ import org.pentaho.platform.engine.core.system.PentahoBase;
 
 import com.pentaho.metaverse.api.IIdGenerator;
 
+/**
+ * Base implementation for all @see org.pentaho.platform.api.metaverse.IDocumentLocator implementations
+ * @author jdixon
+ *
+ */
 public abstract class BaseLocator extends PentahoBase implements IDocumentLocator, IIdGenerator {
 
   private static final long serialVersionUID = 693428630030858039L;
 
+  /**
+   * The user session to use for the locator to use
+   */
   protected IPentahoSession session;
-  
+
+  /**
+   * The unique id of the locator
+   */
   protected String id = "";
-  
+
+  /**
+   * The unique type of the locator
+   */
   protected String indexerType;
-  
+
   private List<IDocumentListener> listeners = new ArrayList<IDocumentListener>();
-  
+
+  /**
+   * Condstructor for the abstract super class
+   */
+  public BaseLocator() {
+  }
+
   @Override
   public void addDocumentListener( IDocumentListener listener ) {
     listeners.add( listener );
@@ -52,7 +72,7 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
 
   @Override
   public void notifyListeners( IDocumentEvent event ) {
-    for( IDocumentListener listener : listeners ) {
+    for ( IDocumentListener listener : listeners ) {
       listener.onEvent( event );
     }
   }
@@ -60,9 +80,6 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
   @Override
   public void removeDocumentListener( IDocumentListener listener ) {
     listeners.remove( listener );
-  }
-  
-  public BaseLocator() {
   }
 
   public String getRepositoryId() {
@@ -80,5 +97,5 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
   public void setIndexerType( String indexerType ) {
     this.indexerType = indexerType;
   }
-  
+
 }

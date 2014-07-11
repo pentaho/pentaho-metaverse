@@ -35,41 +35,57 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 
+/**
+ * A document locator for the DI repository @see org.pentaho.platform.api.metaverse.IDocumentLocator
+ * @author jdixon
+ *
+ */
 public class DIRepositoryLocator extends RepositoryIndexer {
+
+  /**
+   * The type for this locator
+   */
+  public static final String LOCATOR_TYPE = "DIRepo";
 
   private static final long serialVersionUID = 1324202912891938340L;
 
-  public static final String INDEXER_TYPE = "DIRepo";
-  
-  private Repository repository = null;
-  private IUnifiedRepository unifiedRepository = null;
+  private Repository repository;
+  private IUnifiedRepository unifiedRepository;
 
+  /**
+   * The constructor for the DIRepositoryLocator
+   */
   public DIRepositoryLocator() {
     super();
-    setIndexerType( INDEXER_TYPE );
+    setIndexerType( LOCATOR_TYPE );
   }
-    
+
   public void setUnifiedRepository( IUnifiedRepository unifiedRepository ) {
     this.unifiedRepository = unifiedRepository;
   }
-  
+
   public void setRepository( Repository repository ) {
     this.repository = repository;
   }
-  
+
+  /**
+   * Returns the DI repository instance to use
+   * @return DI repository instance
+   * @throws Exception If the repository instance cannot be returned
+   */
   protected Repository getRepository() throws Exception {
-    if( repository == null  ) {
+    if ( repository == null  ) {
       TransformationMap transformationMap = CarteSingleton.getInstance().getTransformationMap();
       SlaveServerConfig slaveServerConfig = transformationMap.getSlaveServerConfig();
       repository = slaveServerConfig.getRepository();
     }
     return repository;
   }
-  
+
   @Override
   protected IUnifiedRepository getUnifiedRepository( IPentahoSession session ) throws Exception {
 
-    if ( unifiedRepository == null && !(repository instanceof KettleFileRepository)) {
+    if ( unifiedRepository == null && !( repository instanceof KettleFileRepository ) ) {
       getRepository();
       Method method = repository.getClass().getMethod( "getPur" );
       Object result = method.invoke( repository );
@@ -78,7 +94,6 @@ public class DIRepositoryLocator extends RepositoryIndexer {
         return repo;
       }
     }
-        
     return unifiedRepository;
   }
 

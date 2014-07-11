@@ -30,12 +30,32 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.impl.MetaverseDocument;
 
+/**
+ * A runnable (and stoppable) class for crawling a Pentaho repository for documents
+ * @author jdixon
+ *
+ */
 public class RepositoryIndexRunner implements Runnable {
 
-  List<RepositoryFileTree> repoTop;
-  RepositoryIndexer repositoryIndexer;
-  boolean stopping = false;
-  boolean running = false;
+  /**
+   * The top-level repository files and folders to search into
+   */
+  private List<RepositoryFileTree> repoTop;
+
+  /**
+   * The repository crawler to use for getting document contents and generating ids
+   */
+  private RepositoryIndexer repositoryIndexer;
+
+  /**
+   * A flag to identify if we should stop crawling the repository (due to an external cancel event)
+   */
+  private boolean stopping;
+
+  /**
+   * A flag to identify we if are currently crawling the repository
+   */
+  private boolean running;
 
   public void setRepoTop( List<RepositoryFileTree> repoTop ) {
     this.repoTop = repoTop;
@@ -56,14 +76,21 @@ public class RepositoryIndexRunner implements Runnable {
     return running;
   }
 
+  /**
+   * Stops the crawling of the repository
+   */
   public void stop() {
     stopping = true;
   }
-  
-  private void indexFileTree( List<RepositoryFileTree> roots ) {
 
-    for ( RepositoryFileTree fileTree : roots ) {
-      if( stopping ) {
+  /**
+   * Indexes a set of files/folders. Folders are recursed into and files are passed to indexFile.
+   * @param fileTrees The files/folders to examine
+   */
+  private void indexFileTree( List<RepositoryFileTree> fileTrees ) {
+
+    for ( RepositoryFileTree fileTree : fileTrees ) {
+      if ( stopping ) {
         return;
       }
       if ( fileTree.getFile() != null ) {
@@ -81,9 +108,13 @@ public class RepositoryIndexRunner implements Runnable {
     }
   }
 
+  /**
+   * Gets the content of a document and notifies the repository document locator listeners of it
+   * @param file The file to examine
+   */
   private void indexFile( RepositoryFile file ) {
 
-    if( stopping ) {
+    if ( stopping ) {
       return;
     }
     if ( file.isHidden() ) {
@@ -114,9 +145,9 @@ public class RepositoryIndexRunner implements Runnable {
       event.setDocument( metaverseDocument );
       repositoryIndexer.notifyListeners( event );
     } catch ( Exception e ) {
-      repositoryIndexer.error("Could not get file contents for "+file.getPath());
+      repositoryIndexer.error( "Could not get file contents for " + file.getPath() );
     }
-    
+
 /*
     SearchContentItem obj;
     try {
@@ -135,5 +166,5 @@ public class RepositoryIndexRunner implements Runnable {
     }
     */
   }
-  
+
 }
