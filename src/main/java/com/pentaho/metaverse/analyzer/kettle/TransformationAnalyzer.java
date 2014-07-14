@@ -19,6 +19,7 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
+
 package com.pentaho.metaverse.analyzer.kettle;
 
 import java.io.ByteArrayInputStream;
@@ -31,14 +32,16 @@ import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.pentaho.metaverse.util.MetaverseUtil;
 
 public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocumentAnalyzer {
 
@@ -51,22 +54,22 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
       add( "ktr" );
     }
   };
-  
+
   protected IMetaverseBuilder metaverseBuilder = null;
 
   @Override
   public void analyze( IMetaverseDocument document ) {
-    
-    if(document == null) {
+
+    if ( document == null ) {
       return;
     }
-    
+
     Object repoObject = document.getContent();
 
-    if(repoObject == null) {
+    if ( repoObject == null ) {
       return;
     }
-    
+
     TransMeta transMeta = null;
     if ( repoObject instanceof String ) {
       // hydrate the transformation
@@ -86,31 +89,41 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
     }
 
     // Create a metaverse node and start filling in details
-    IMetaverseObjectFactory factory = getMetaverseObjectFactory();
-    
+    IMetaverseObjectFactory factory = MetaverseUtil.getMetaverseObjectFactory();
+
     IMetaverseNode node = factory.createNodeObject();
-    
+
+    // TODO get unique ID and set it on the node
+
     // pull out the standard fields
     String description = transMeta.getDescription();
-    
-    //indexObject.setDescription( description );
+    node.setProperty( "description", description );
+
     Date createdDate = transMeta.getCreatedDate();
-    //indexObject.setCreatedDate( createdDate );
+    node.setProperty( "createdDate", createdDate );
+
     Date lastModifiedDate = transMeta.getModifiedDate();
-    //indexObject.setLastModifiedDate( lastModifiedDate );
+    node.setProperty( "lastModifiedDate", lastModifiedDate );
 
     // handle the steps
     for ( int stepNr = 0; stepNr < transMeta.nrSteps(); stepNr++ ) {
       StepMeta stepMeta = transMeta.getStep( stepNr );
       StepMetaInterface stepMetaInterface = stepMeta.getStepMetaInterface();
       if ( stepMetaInterface != null ) {
-        // TODO get StepAnalyzer and integrate returned model
+        IAnalyzer<StepMetaInterface> stepAnalyzer = getStepAnalyzer( stepMetaInterface );
+        if ( stepAnalyzer == null ) {
+          stepAnalyzer = new KettleStepAnalyzer();
+          stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
+        }
+        stepAnalyzer.analyze( stepMetaInterface );
       }
     }
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * Returns a set of strings corresponding to which types of content are supported by this analyzer
+   * 
+   * @return the supported types (as a set of Strings)
    * 
    * @see org.pentaho.platform.api.metaverse.IDocumentAnalyzer#getSupportedTypes()
    */
@@ -129,13 +142,24 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
   public void setMetaverseBuilder( IMetaverseBuilder metaverseBuilder ) {
     this.metaverseBuilder = metaverseBuilder;
   }
-  
+
   protected IMetaverseBuilder getMetaverseBuilder() {
     return metaverseBuilder;
   }
-  
-  protected IMetaverseObjectFactory getMetaverseObjectFactory() {
-    return (IMetaverseObjectFactory)PentahoSystem.get( IMetaverseObjectFactory.class );
-  }
 
+  protected IAnalyzer<StepMetaInterface> getStepAnalyzer( StepMetaInterface stepMetaInterface ) {
+
+    // TODO Look for implementing analyzers for this step.
+    //
+    // Choices might include:
+    //
+    //  - Class.forName(<step name + StepAnalyzer>)
+    //  - Annotation
+    //  - PentahoSystem.get()
+    //
+    // If none can be found, a default handler should be returned. 
+    
+    return new KettleStepAnalyzer();
+
+  }
 }

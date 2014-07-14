@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.metaverse.api.IDocumentAnalyzerProvider;
+
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
@@ -36,41 +37,69 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Coordinates passing IDocumentEvent's to the appropriate IDocumentAnalyzer's
+ * Coordinates passing IDocumentEvent's to the appropriate IDocumentAnalyzer's.
  */
 public class DocumentController implements IDocumentListener, IMetaverseBuilder, IDocumentAnalyzerProvider {
 
+  /** The metaverse builder. */
   private IMetaverseBuilder metaverseBuilder;
+
+  /** The analyzers. */
   private Set<IDocumentAnalyzer> analyzers = new HashSet<IDocumentAnalyzer>();
-  private Map<String, HashSet<IDocumentAnalyzer>> analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>( );
+
+  /** The analyzer type map. */
+  private Map<String, HashSet<IDocumentAnalyzer>> analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>();
 
   /**
-   * Empty constructor
+   * Empty constructor.
    */
   public DocumentController() {
   }
 
   /**
-   * Constructor that takes in an IMetaverseBuilder
-   * @param metaverseBuilder builder to delegate building calls to
+   * Constructor that takes in an IMetaverseBuilder.
+   * 
+   * @param metaverseBuilder
+   *          builder to delegate building calls to
    */
   public DocumentController( IMetaverseBuilder metaverseBuilder ) {
     this.metaverseBuilder = metaverseBuilder;
   }
 
+  /**
+   * Gets the metaverse builder.
+   * 
+   * @return the metaverse builder
+   */
   public IMetaverseBuilder getMetaverseBuilder() {
     return metaverseBuilder;
   }
 
+  /**
+   * Sets the metaverse builder.
+   * 
+   * @param metaverseBuilder
+   *          the new metaverse builder
+   */
   public void setMetaverseBuilder( IMetaverseBuilder metaverseBuilder ) {
     this.metaverseBuilder = metaverseBuilder;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.pentaho.metaverse.api.IDocumentAnalyzerProvider#getDocumentAnalyzers()
+   */
   @Override
   public Set<IDocumentAnalyzer> getDocumentAnalyzers() {
     return analyzers;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.pentaho.metaverse.api.IDocumentAnalyzerProvider#getDocumentAnalyzers(java.lang.String)
+   */
   @Override
   public Set<IDocumentAnalyzer> getDocumentAnalyzers( String type ) {
     if ( type == null ) {
@@ -81,8 +110,10 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   }
 
   /**
-   * Set the analyzers that are available in the system
-   * @param analyzers the complete Set of IDocumentAnalyzers
+   * Set the analyzers that are available in the system.
+   * 
+   * @param analyzers
+   *          the complete Set of IDocumentAnalyzers
    */
   public void setDocumentAnalyzers( Set<IDocumentAnalyzer> analyzers ) {
     this.analyzers = analyzers;
@@ -90,6 +121,12 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
     loadAnalyzerTypeMap();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IDocumentListener#onEvent(org.pentaho.platform.api.metaverse.IDocumentEvent)
+   */
   @Override
   public void onEvent( IDocumentEvent event ) {
     Set<IDocumentAnalyzer> matchingAnalyzers = getDocumentAnalyzers( event.getDocument().getType() );
@@ -102,10 +139,10 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   }
 
   /**
-   * Loads up a Map of document types to supporting IDocumentAnalyzer(s)
+   * Loads up a Map of document types to supporting IDocumentAnalyzer(s).
    */
   protected void loadAnalyzerTypeMap() {
-    analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>( );
+    analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>();
     for ( IDocumentAnalyzer analyzer : analyzers ) {
       Set<String> types = analyzer.getSupportedTypes();
 
@@ -127,15 +164,19 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   }
 
   /**
-   * Fires a IDocumentEvent to an IDocumentAnalyzer in a separate Thread
-   * @param event IDocumentEvent to fire
-   * @param analyzer IDocumentAnalyzer to use for the Document that needs processed
+   * Fires a IDocumentEvent to an IDocumentAnalyzer in a separate Thread.
+   * 
+   * @param event
+   *          IDocumentEvent to fire
+   * @param analyzer
+   *          IDocumentAnalyzer to use for the Document that needs processed
    */
   protected void fireDocumentEvent( final IDocumentEvent event, final IDocumentAnalyzer analyzer ) {
     analyzer.setMetaverseBuilder( getMetaverseBuilder() );
 
     Runnable analyerRunner = new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         analyzer.analyze( event.getDocument() );
       }
     };
@@ -145,34 +186,82 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#addNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
+   */
   @Override
   public IMetaverseBuilder addNode( IMetaverseNode iMetaverseNode ) {
     return metaverseBuilder.addNode( iMetaverseNode );
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#addLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
+   */
   @Override
   public IMetaverseBuilder addLink( IMetaverseLink iMetaverseLink ) {
     return metaverseBuilder.addLink( iMetaverseLink );
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#deleteNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
+   */
   @Override
   public IMetaverseBuilder deleteNode( IMetaverseNode iMetaverseNode ) {
     return metaverseBuilder.deleteNode( iMetaverseNode );
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#deleteLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
+   */
   @Override
   public IMetaverseBuilder deleteLink( IMetaverseLink iMetaverseLink ) {
     return metaverseBuilder.deleteLink( iMetaverseLink );
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#updateNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
+   */
   @Override
   public IMetaverseBuilder updateNode( IMetaverseNode iMetaverseNode ) {
     return metaverseBuilder.updateNode( iMetaverseNode );
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#updateLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
+   */
   @Override
   public IMetaverseBuilder updateLink( IMetaverseLink iMetaverseLink ) {
     return metaverseBuilder.updateLink( iMetaverseLink );
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#addLink(org.pentaho.platform.api.metaverse.IMetaverseNode,
+   * java.lang.String, org.pentaho.platform.api.metaverse.IMetaverseNode)
+   */
+  @Override
+  public IMetaverseBuilder addLink( IMetaverseNode fromNode, String label, IMetaverseNode toNode ) {
+    return metaverseBuilder.addLink( fromNode, label, toNode );
   }
 
 }

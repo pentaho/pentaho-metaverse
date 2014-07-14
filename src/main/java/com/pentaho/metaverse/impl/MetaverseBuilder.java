@@ -28,6 +28,8 @@ import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
+import com.pentaho.metaverse.util.MetaverseUtil;
+
 /**
  * @author mburgess
  *
@@ -93,7 +95,7 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
    */
   @Override
   public IMetaverseDocument createDocumentObject() {
-    return new MetaverseDocument();
+    return MetaverseUtil.getMetaverseObjectFactory().createDocumentObject();
   }
 
   /* (non-Javadoc)
@@ -101,8 +103,7 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
    */
   @Override
   public IMetaverseLink createLinkObject() {
-    // TODO Auto-generated method stub
-    return null;
+    return MetaverseUtil.getMetaverseObjectFactory().createLinkObject();
   }
 
   /* (non-Javadoc)
@@ -110,7 +111,27 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
    */
   @Override
   public IMetaverseNode createNodeObject() {
-    return new MetaverseNode();
+    return MetaverseUtil.getMetaverseObjectFactory().createNodeObject();
+  }
+  
+  /**
+   * Adds the specified link to the model
+   *
+   * @param fromNode the from node
+   * @param label the label
+   * @param toNode the to node
+   * @return the i metaverse builder
+   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#addLink(org.pentaho.platform.api.metaverse.IMetaverseNode, java.lang.String, org.pentaho.platform.api.metaverse.IMetaverseNode)
+   */
+  @Override
+  public IMetaverseBuilder addLink( IMetaverseNode fromNode, String label, IMetaverseNode toNode ) {
+    IMetaverseObjectFactory factory = MetaverseUtil.getMetaverseObjectFactory();
+    IMetaverseLink link = factory.createLinkObject();
+    
+    link.setFromNode( fromNode );
+    link.setLabel( label);
+    link.setToNode( toNode );
+    return addLink( link );
   }
 
 }

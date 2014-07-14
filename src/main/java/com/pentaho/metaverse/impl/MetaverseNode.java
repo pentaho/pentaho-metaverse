@@ -22,24 +22,31 @@
 
 package com.pentaho.metaverse.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 /**
- * @author mburgess
+ * An implementation of a metaverse node
  *
  */
 public class MetaverseNode implements IMetaverseNode {
   
-  protected String id;
-  protected String name;
-  protected String type;
-
+  protected Map<String,Object> propertyMap = new HashMap<String,Object>(5);
+  
+  
   /* (non-Javadoc)
    * @see org.pentaho.platform.api.metaverse.IIdentifiable#getName()
    */
   @Override
   public String getName() {
-    return name;
+    Object name = propertyMap.get("name");
+    if(name == null) {
+      return null;
+    }
+    return (String)name;
   }
 
   /* (non-Javadoc)
@@ -47,7 +54,11 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getStringID() {
-    return id;
+    Object id = propertyMap.get("id");
+    if(id == null) {
+      return null;
+    }
+    return (String)id;
   }
 
   /* (non-Javadoc)
@@ -55,7 +66,67 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getType() {
-    return type;
+    Object type = propertyMap.get("type");
+    if(type == null) {
+      return null;
+    }
+    return (String)type;
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setName(java.lang.String)
+   */
+  @Override
+  public void setName( String name ) {
+    propertyMap.put( "name", name );    
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setStringID(java.lang.String)
+   */
+  @Override
+  public void setStringID( String id ) {
+    propertyMap.put( "id", id );
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setType(java.lang.String)
+   */
+  @Override
+  public void setType( String type ) {
+    propertyMap.put( "type", type );
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#getProperty(java.lang.String)
+   */
+  @Override
+  public <T> T getProperty( String key ) {
+    return (T)propertyMap.get(key);
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#getPropertyKeys()
+   */
+  @Override
+  public Set<String> getPropertyKeys() {
+    return propertyMap.keySet();
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#setProperty(java.lang.String, java.lang.Object)
+   */
+  @Override
+  public void setProperty( String key, Object value ) {
+    propertyMap.put( key, value );
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#removeProperty(java.lang.String)
+   */
+  @Override
+  public <T> T removeProperty( String key ) {
+    return (T) propertyMap.remove( key );
   }
 
 }
