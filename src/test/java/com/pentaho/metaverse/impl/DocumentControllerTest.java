@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -105,6 +106,7 @@ public class DocumentControllerTest {
     docController.updateLink( mockLink );
     docController.deleteLink( mockLink );
     docController.deleteNode( mockNode );
+    docController.addLink( mockNode, "is self", mockNode );
 
     verify( mockBuilder, times( 1 ) ).addNode( mockNode );
     verify( mockBuilder, times( 1 ) ).addLink( mockLink );
@@ -112,7 +114,13 @@ public class DocumentControllerTest {
     verify( mockBuilder, times( 1 ) ).updateLink( mockLink );
     verify( mockBuilder, times( 1 ) ).deleteNode( mockNode );
     verify( mockBuilder, times( 1 ) ).deleteLink( mockLink );
+    verify( mockBuilder, times( 1 ) ).addLink( mockNode, "is self", mockNode );
 
+  }
+
+  @Test
+  public void testGetMetaverseBuilder() {
+    assertNotNull( docController.getMetaverseBuilder() );
   }
 
 }

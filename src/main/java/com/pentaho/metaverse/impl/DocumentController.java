@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.metaverse.api.IDocumentAnalyzerProvider;
-
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
@@ -35,9 +34,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
- * Coordinates passing IDocumentEvent's to the appropriate IDocumentAnalyzer's.
+ * Coordinates passing IDocumentEvent's to the appropriate IDocumentAnalyzer's
  */
 public class DocumentController implements IDocumentListener, IMetaverseBuilder, IDocumentAnalyzerProvider {
 
@@ -50,17 +52,17 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   /** The analyzer type map. */
   private Map<String, HashSet<IDocumentAnalyzer>> analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>();
 
+  private final ExecutorService pool = Executors.newFixedThreadPool( 5 );
+
   /**
-   * Empty constructor.
+   * Empty constructor
    */
   public DocumentController() {
   }
 
   /**
-   * Constructor that takes in an IMetaverseBuilder.
-   * 
-   * @param metaverseBuilder
-   *          builder to delegate building calls to
+   * Constructor that takes in an IMetaverseBuilder
+   * @param metaverseBuilder builder to delegate building calls to
    */
   public DocumentController( IMetaverseBuilder metaverseBuilder ) {
     this.metaverseBuilder = metaverseBuilder;
@@ -71,7 +73,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
    * 
    * @return the metaverse builder
    */
-  public IMetaverseBuilder getMetaverseBuilder() {
+  protected IMetaverseBuilder getMetaverseBuilder() {
     return metaverseBuilder;
   }
 
@@ -110,10 +112,8 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   }
 
   /**
-   * Set the analyzers that are available in the system.
-   * 
-   * @param analyzers
-   *          the complete Set of IDocumentAnalyzers
+   * Set the analyzers that are available in the system
+   * @param analyzers the complete Set of IDocumentAnalyzers
    */
   public void setDocumentAnalyzers( Set<IDocumentAnalyzer> analyzers ) {
     this.analyzers = analyzers;
@@ -139,12 +139,13 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   }
 
   /**
-   * Loads up a Map of document types to supporting IDocumentAnalyzer(s).
+   * Loads up a Map of document types to supporting IDocumentAnalyzer(s)
    */
   protected void loadAnalyzerTypeMap() {
-    analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>();
+    analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>( );
     for ( IDocumentAnalyzer analyzer : analyzers ) {
       Set<String> types = analyzer.getSupportedTypes();
+      analyzer.setMetaverseBuilder( this );
 
       if ( types != null ) {
         for ( String type : types ) {
@@ -164,25 +165,20 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   }
 
   /**
-   * Fires a IDocumentEvent to an IDocumentAnalyzer in a separate Thread.
-   * 
-   * @param event
-   *          IDocumentEvent to fire
-   * @param analyzer
-   *          IDocumentAnalyzer to use for the Document that needs processed
+   * Fires a IDocumentEvent to an IDocumentAnalyzer in a separate Thread
+   * @param event IDocumentEvent to fire
+   * @param analyzer IDocumentAnalyzer to use for the Document that needs processed
+   * @return Future object
    */
-  protected void fireDocumentEvent( final IDocumentEvent event, final IDocumentAnalyzer analyzer ) {
-    analyzer.setMetaverseBuilder( getMetaverseBuilder() );
+  protected Future<?> fireDocumentEvent( final IDocumentEvent event, final IDocumentAnalyzer analyzer ) {
 
-    Runnable analyerRunner = new Runnable() {
-      @Override
-      public void run() {
+    Runnable analyzerRunner = new Runnable() {
+      @Override public void run() {
         analyzer.analyze( event.getDocument() );
       }
     };
 
-    Thread t = new Thread( analyerRunner );
-    t.start();
+    return pool.submit( analyzerRunner, null );
 
   }
 
