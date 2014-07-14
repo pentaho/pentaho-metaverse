@@ -19,24 +19,32 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.class )
 public class DocumentControllerTest {
 
   private DocumentController docController;
   private Set<IDocumentAnalyzer> analyzers;
 
-  @Mock private IDocumentAnalyzer dummyAnalyzer;
-  @Mock private IDocumentAnalyzer testAndDummyAnalyzer;
-  @Mock private IDocumentAnalyzer anotherAnalyzer;
-  @Mock private IMetaverseBuilder mockBuilder;
-  @Mock private IMetaverseNode mockNode;
-  @Mock private IMetaverseLink mockLink;
-  @Mock private IDocumentEvent mockEvent;
-  @Mock private IMetaverseDocument mockDoc;
+  @Mock
+  private IDocumentAnalyzer dummyAnalyzer;
+  @Mock
+  private IDocumentAnalyzer testAndDummyAnalyzer;
+  @Mock
+  private IDocumentAnalyzer anotherAnalyzer;
+  @Mock
+  private IMetaverseBuilder mockBuilder;
+  @Mock
+  private IMetaverseNode mockNode;
+  @Mock
+  private IMetaverseLink mockLink;
+  @Mock
+  private IDocumentEvent mockEvent;
+  @Mock
+  private IMetaverseDocument mockDoc;
 
   @Before
   public void setup() {
-    docController = new DocumentController( );
+    docController = new DocumentController();
 
     IMetaverseBuilder builder = mock( IMetaverseBuilder.class );
     docController.setMetaverseBuilder( builder );
@@ -92,8 +100,8 @@ public class DocumentControllerTest {
     docController.onEvent( mockEvent );
 
     // timeout to give our asynchronous analyzers a chance to be called
-    verify( dummyAnalyzer, timeout(100).times( 1 ) ).analyze( mockDoc );
-    verify( testAndDummyAnalyzer, timeout(100).times( 1 ) ).analyze( mockDoc );
+    verify( dummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDoc );
+    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDoc );
   }
 
   @Test

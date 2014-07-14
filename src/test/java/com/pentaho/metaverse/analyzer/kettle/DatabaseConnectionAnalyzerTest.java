@@ -22,37 +22,63 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.Mock;
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 
 /**
- * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
+ * @author mburgess
+ *
  */
-public class DatabaseConnectionAnalyzer implements IAnalyzer<DatabaseMeta> {
+public class DatabaseConnectionAnalyzerTest {
 
-  /** A reference to the metaverse builder. */
-  protected IMetaverseBuilder metaverseBuilder;
+  DatabaseConnectionAnalyzer dbConnectionAnalyzer;
+
+  @Mock
+  private DatabaseMeta databaseMeta;
 
   /**
-   * Analyzes a database connection for metadata.
-   *
-   * @param object the object
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
+   * @throws java.lang.Exception
    */
-  @Override
-  public void analyze( DatabaseMeta object ) {
-    // TODO
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
   }
 
-  /** 
-   * @see
-   * org.pentaho.platform.api.metaverse.IAnalyzer#
-   * setMetaverseBuilder(org.pentaho.platform.api.metaverse.IMetaverseBuilder)
+  /**
+   * @throws java.lang.Exception
    */
-  @Override
-  public void setMetaverseBuilder( IMetaverseBuilder builder ) {
-    this.metaverseBuilder = builder;
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+  }
+
+  /**
+   * @throws java.lang.Exception
+   */
+  @Before
+  public void setUp() throws Exception {
+    dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
+    IMetaverseBuilder builder = mock( IMetaverseBuilder.class );
+    dbConnectionAnalyzer.setMetaverseBuilder( builder );
+  }
+
+  /**
+   * @throws java.lang.Exception
+   */
+  @After
+  public void tearDown() throws Exception {
+  }
+
+  @Test
+  public void testSetMetaverseBuilder() {
+    assertNotNull( dbConnectionAnalyzer.metaverseBuilder );
   }
 
 }

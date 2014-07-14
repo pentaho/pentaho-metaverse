@@ -22,36 +22,20 @@
 
 package com.pentaho.metaverse.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
+import org.pentaho.platform.api.metaverse.IIdentifierModifiable;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.VertexQuery;
-
 /**
- * The MetaverseNode class is a wrapper around a corresponding Blueprints Vertex object, and delegates all methods to
- * that vertex.
+ * An implementation of a metaverse node
  * 
- * @author mburgess
  */
-public class MetaverseNode implements IMetaverseNode {
+public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifiable {
 
-  /** The Blueprints-backed Vertex for this metaverse node */
-  protected Vertex v;
-
-  /**
-   * Private constructor to prevent instantiation without an ID or backing Vertex
-   */
-  @SuppressWarnings( "unused" )
-  private MetaverseNode() {
-  }
-
-  public MetaverseNode( Vertex v ) {
-    this.v = v;
-  }
+  protected Map<String, Object> propertyMap = new HashMap<String, Object>( 5 );
 
   /*
    * (non-Javadoc)
@@ -60,7 +44,11 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getName() {
-    return v.getProperty( "name" );
+    Object name = propertyMap.get( "name" );
+    if ( name == null ) {
+      return null;
+    }
+    return (String) name;
   }
 
   /*
@@ -70,7 +58,11 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getStringID() {
-    return ( v.getId() == null ) ? null : v.getId().toString();
+    Object id = propertyMap.get( "id" );
+    if ( id == null ) {
+      return null;
+    }
+    return (String) id;
   }
 
   /*
@@ -80,29 +72,41 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getType() {
-    return v.getProperty( "type" );
+    Object type = propertyMap.get( "type" );
+    if ( type == null ) {
+      return null;
+    }
+    return (String) type;
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#setName(java.lang.String)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setName(java.lang.String)
    */
   @Override
   public void setName( String name ) {
-    v.setProperty( "name", name );
-
+    propertyMap.put( "name", name );
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#setType(java.lang.String)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setStringID(java.lang.String)
+   */
+  @Override
+  public void setStringID( String id ) {
+    propertyMap.put( "id", id );
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setType(java.lang.String)
    */
   @Override
   public void setType( String type ) {
-    v.setProperty( "type", type );
-
+    propertyMap.put( "type", type );
   }
 
   /*
@@ -112,7 +116,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public <T> T getProperty( String key ) {
-    return v.getProperty( key );
+    return (T) propertyMap.get( key );
   }
 
   /*
@@ -122,7 +126,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public Set<String> getPropertyKeys() {
-    return v.getPropertyKeys();
+    return propertyMap.keySet();
   }
 
   /*
@@ -132,7 +136,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public void setProperty( String key, Object value ) {
-    v.setProperty( key, value );
+    propertyMap.put( key, value );
   }
 
   /*
@@ -142,71 +146,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public <T> T removeProperty( String key ) {
-    return v.removeProperty( key );
-  }
-
-  /**
-   * Adds the edge.
-   * 
-   * @param arg0
-   *          the arg0
-   * @param arg1
-   *          the arg1
-   * @return the edge
-   */
-  public Edge addEdge( String arg0, Vertex arg1 ) {
-    return v.addEdge( arg0, arg1 );
-  }
-
-  /**
-   * Gets the edges.
-   * 
-   * @param arg0
-   *          the arg0
-   * @param arg1
-   *          the arg1
-   * @return the edges
-   */
-  public Iterable<Edge> getEdges( Direction arg0, String... arg1 ) {
-    return v.getEdges( arg0, arg1 );
-  }
-
-  /**
-   * Gets the id.
-   * 
-   * @return the id
-   */
-  public Object getId() {
-    return v.getId();
-  }
-
-  /**
-   * Gets the vertices.
-   * 
-   * @param arg0
-   *          the arg0
-   * @param arg1
-   *          the arg1
-   * @return the vertices
-   */
-  public Iterable<Vertex> getVertices( Direction arg0, String... arg1 ) {
-    return v.getVertices( arg0, arg1 );
-  }
-
-  /**
-   * Query.
-   * 
-   * @return the vertex query
-   */
-  public VertexQuery query() {
-    return v.query();
-  }
-
-  /**
-   * Removes the.
-   */
-  public void remove() {
-    v.remove();
+    return (T) propertyMap.remove( key );
   }
 
 }

@@ -38,16 +38,12 @@ import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.pentaho.metaverse.util.MetaverseUtil;
 
 public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocumentAnalyzer {
 
   private static final long serialVersionUID = 3147152759123052372L;
-
-  private static final Logger logger = LoggerFactory.getLogger( TransformationAnalyzer.class );
 
   private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
     {
@@ -91,9 +87,8 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
     // Create a metaverse node and start filling in details
     IMetaverseObjectFactory factory = MetaverseUtil.getMetaverseObjectFactory();
 
-    IMetaverseNode node = factory.createNodeObject();
-
     // TODO get unique ID and set it on the node
+    IMetaverseNode node = factory.createNodeObject( "TODO" );
 
     // pull out the standard fields
     String description = transMeta.getDescription();
@@ -153,13 +148,12 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
     //
     // Choices might include:
     //
-    //  - Class.forName(<step name + StepAnalyzer>)
-    //  - Annotation
-    //  - PentahoSystem.get()
+    // - Class.forName(<step name + StepAnalyzer>)
+    // - Annotation
+    // - PentahoSystem.get()
     //
-    // If none can be found, a default handler should be returned. 
-    
-    return new KettleStepAnalyzer();
+    // If none can be found, a default handler should be returned.
 
+    return new KettleStepAnalyzer();
   }
 }

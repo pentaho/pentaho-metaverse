@@ -29,6 +29,4 @@ public abstract class BaseKettleAnalyzer implements Serializable, IDocumentAnaly
 
   private static final long serialVersionUID = 8122643311387257050L;
 
-  
-
 }

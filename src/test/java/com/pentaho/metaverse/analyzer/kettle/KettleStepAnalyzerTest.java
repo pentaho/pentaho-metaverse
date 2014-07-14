@@ -20,25 +20,65 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.util;
+package com.pentaho.metaverse.analyzer.kettle;
 
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
-import com.pentaho.metaverse.api.IMetaverseReader;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 
 /**
- * The MetaverseUtil class provides static utility methods for interacting with the metaverse
+ * @author mburgess
  * 
  */
-public class MetaverseUtil {
+public class KettleStepAnalyzerTest {
 
-  public static IMetaverseObjectFactory getMetaverseObjectFactory() {
-    return (IMetaverseObjectFactory) PentahoSystem.get( IMetaverseObjectFactory.class );
+  KettleStepAnalyzer kettleStepAnalyzer;
+
+  @Mock
+  private StepMetaInterface mockStepMetaInterface;
+
+  /**
+   * @throws java.lang.Exception
+   */
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
   }
 
-  public static IMetaverseReader getMetaverseReader() {
-    return (IMetaverseReader) PentahoSystem.get( IMetaverseReader.class );
+  /**
+   * @throws java.lang.Exception
+   */
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+  }
+
+  /**
+   * @throws java.lang.Exception
+   */
+  @Before
+  public void setUp() throws Exception {
+    kettleStepAnalyzer = new KettleStepAnalyzer();
+    IMetaverseBuilder builder = mock( IMetaverseBuilder.class );
+    kettleStepAnalyzer.setMetaverseBuilder( builder );
+  }
+
+  /**
+   * @throws java.lang.Exception
+   */
+  @After
+  public void tearDown() throws Exception {
+  }
+
+  @Test
+  public void testSetMetaverseBuilder() {
+    assertNotNull( kettleStepAnalyzer.metaverseBuilder );
   }
 
 }
