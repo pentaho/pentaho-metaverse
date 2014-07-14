@@ -20,34 +20,19 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.util;
 
-import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 /**
- * The Class KettleStepAnalyzer.
+ * The MetaverseUtil class provides static utility methods for interacting with the metaverse
+ *
  */
-public class KettleStepAnalyzer implements IAnalyzer<StepMetaInterface> {
-
-  /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
-   */
-  public void analyze( StepMetaInterface stepMetaInterface ) {
-
-  }
-
-  /**
-   * Sets the metaverse builder.
-   *
-   * @param builder the new metaverse builder
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#setMetaverseBuilder(org.pentaho.platform.api.metaverse.IMetaverseBuilder)
-   */
-  @Override
-  public void setMetaverseBuilder( IMetaverseBuilder builder ) {
-    // TODO Auto-generated method stub
-    
+public class MetaverseUtil {
+  
+  public static IMetaverseObjectFactory getMetaverseObjectFactory() {
+    return (IMetaverseObjectFactory)PentahoSystem.get( IMetaverseObjectFactory.class );
   }
 
 }

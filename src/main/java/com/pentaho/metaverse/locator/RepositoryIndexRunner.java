@@ -139,7 +139,7 @@ public class RepositoryIndexRunner implements Runnable {
       event.setEventType( "add" );
       MetaverseDocument metaverseDocument = new MetaverseDocument();
       metaverseDocument.setContent( contents );
-      metaverseDocument.setID( id );
+      metaverseDocument.setStringID( id );
       metaverseDocument.setName( name );
       metaverseDocument.setType( extension );
       event.setDocument( metaverseDocument );

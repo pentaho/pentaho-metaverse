@@ -29,62 +29,6 @@ public abstract class BaseKettleAnalyzer implements Serializable, IDocumentAnaly
 
   private static final long serialVersionUID = 8122643311387257050L;
 
-  /*protected void addPhysicalTableToSearchIndex( String datasourceName, String tableName,
-      String[] fieldNames, ISearchProvider metaIndex ) throws Exception {
-
-    MetaIndexObject obj = new MetaIndexObject();
-    obj.setTitle( datasourceName );
-    obj.setName( datasourceName );
-    obj.setPath( MetaIndexConst.DATASOURCE + "." + datasourceName );
-    obj.setType( MetaIndexConst.DATASOURCE );
-    obj.setContent( MetaIndexConst.DATASOURCE + " " + datasourceName );
-    metaIndex.addDocumentToIndex( obj );
-
-    if ( tableName != null ) {
-      obj = new MetaIndexObject();
-      String uniquePath = MetaIndexConst.DATASOURCE + "." + datasourceName + "." + tableName;
-      obj.setTitle( tableName );
-      obj.setName( tableName );
-      obj.setPath( uniquePath );
-      obj.setType( MetaIndexConst.PHYSICAL_TABLE );
-      obj.setContent( MetaIndexConst.DATASOURCE + " " + datasourceName + " " + tableName );
-      metaIndex.addDocumentToIndex( obj );
-      for ( String fieldName : fieldNames ) {
-        obj = new MetaIndexObject();
-        uniquePath = MetaIndexConst.DATASOURCE + "." + datasourceName + "." + tableName + "." + fieldName;
-        obj.setTitle( fieldName );
-        obj.setName( fieldName );
-        obj.setPath( uniquePath );
-        obj.setType( MetaIndexConst.PHYSICAL_FIELD );
-        obj.setContent( MetaIndexConst.PHYSICAL_FIELD + " " + datasourceName + " " + tableName + " " + fieldName );
-        metaIndex.addDocumentToIndex( obj );
-      }
-    }
-  }
-
-  protected void addPhysicalFileToSearchIndex( String fileName, String[] fieldNames,
-      ISearchProvider metaIndex ) throws Exception {
-    MetaIndexObject obj = new MetaIndexObject();
-    String uniquePath = MetaIndexConst.PHYSICAL_FILE + "." + fileName;
-    obj.setId( uniquePath );
-    obj.setTitle( fileName );
-    obj.setName( fileName );
-    obj.setPath( uniquePath );
-    obj.setType( MetaIndexConst.PHYSICAL_FILE );
-    obj.setContent( MetaIndexConst.PHYSICAL_FILE + " " + fileName );
-    metaIndex.addDocumentToIndex( obj );
-    for ( String fieldName : fieldNames ) {
-      obj = new MetaIndexObject();
-      uniquePath = MetaIndexConst.PHYSICAL_FILE + "." + fileName + "." + fieldName;
-      obj.setId( uniquePath );
-      obj.setTitle( fieldName );
-      obj.setName( fieldName );
-      obj.setPath( uniquePath );
-      obj.setType( MetaIndexConst.PHYSICAL_FIELD );
-      obj.setContent( MetaIndexConst.PHYSICAL_FIELD + " " + fileName + " " + fieldName );
-      metaIndex.addDocumentToIndex( obj );
-    }
-
-  }*/
+  
 
 }

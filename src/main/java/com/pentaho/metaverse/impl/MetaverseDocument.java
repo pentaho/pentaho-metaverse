@@ -26,52 +26,89 @@ import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 
 /**
  * Implementation of an @see org.pentaho.platform.api.metaverse.IMetaverseDocument
+ * 
  * @author jdixon
- *
+ * 
  */
 public class MetaverseDocument implements IMetaverseDocument {
 
-  /**
-   * The name of the item
-   */
+  /** The name of the document. */
   private String name;
+  
+  /** The identifier for this document. */
   private String id;
+  
+  /** The type of this document. */
   private String type;
+  
+  /** The content of this document. */
   private Object content;
 
-  public void setID( String id ) {
-    this.id = id;
-  }
-
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getContent()
+   */
   public Object getContent() {
     return content;
   }
 
+  /**
+   * Sets the content object for this document
+   *
+   * @param content the new content
+   */
   public void setContent( Object content ) {
     this.content = content;
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setName(java.lang.String)
+   */
+  @Override
   public void setName( String name ) {
     this.name = name;
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setType(java.lang.String)
+   */
+  @Override
   public void setType( String type ) {
     this.type = type;
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getName()
+   */
   @Override
   public String getName() {
     return name;
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getStringID()
+   */
   @Override
   public String getStringID() {
     return id;
   }
 
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getType()
+   */
   @Override
   public String getType() {
     return type;
+  }
+
+  /**
+   * Sets the string ID for this document.
+   *
+   * @param id          the ID to set
+   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setStringID(java.lang.String)
+   */
+  @Override
+  public void setStringID( String id ) {
+    this.id = id;
   }
 
 }
