@@ -27,8 +27,21 @@ import java.io.OutputStream;
 
 import com.tinkerpop.blueprints.Graph;
 
+/**
+ * The IGraphWriter interface allows for a Graph object to be written to an output stream.
+ */
 public interface IGraphWriter {
-  
-  void outputGraph(final Graph graph, final OutputStream graphMLOutputStream) throws IOException;
+
+  /**
+   * Output the specified graph to the specified output stream
+   * 
+   * @param graph
+   *          the graph
+   * @param outputStream
+   *          the output stream
+   * @throws IOException
+   *           Signals that an I/O exception has occurred.
+   */
+  void outputGraph( final Graph graph, final OutputStream outputStream ) throws IOException;
 
 }

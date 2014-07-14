@@ -32,12 +32,15 @@ import com.pentaho.metaverse.util.MetaverseUtil;
 
 /**
  * @author mburgess
- *
+ * 
  */
 public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFactory {
 
-  /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#addLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#
+   * addLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
    */
   @Override
   public IMetaverseBuilder addLink( IMetaverseLink arg0 ) {
@@ -45,8 +48,11 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#addNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#
+   * addNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder addNode( IMetaverseNode arg0 ) {
@@ -54,8 +60,11 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#deleteLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#deleteLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
    */
   @Override
   public IMetaverseBuilder deleteLink( IMetaverseLink arg0 ) {
@@ -63,8 +72,11 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#deleteNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#deleteNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder deleteNode( IMetaverseNode arg0 ) {
@@ -72,8 +84,11 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#updateLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#updateLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
    */
   @Override
   public IMetaverseBuilder updateLink( IMetaverseLink arg0 ) {
@@ -81,8 +96,11 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#updateNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#updateNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder updateNode( IMetaverseNode arg0 ) {
@@ -90,7 +108,9 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     return null;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.pentaho.platform.api.metaverse.IMetaverseObjectFactory#createDocumentObject()
    */
   @Override
@@ -98,7 +118,9 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     return MetaverseUtil.getMetaverseObjectFactory().createDocumentObject();
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.pentaho.platform.api.metaverse.IMetaverseObjectFactory#createLinkObject()
    */
   @Override
@@ -106,30 +128,38 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     return MetaverseUtil.getMetaverseObjectFactory().createLinkObject();
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.pentaho.platform.api.metaverse.IMetaverseObjectFactory#createNodeObject()
    */
   @Override
-  public IMetaverseNode createNodeObject() {
-    return MetaverseUtil.getMetaverseObjectFactory().createNodeObject();
+  public IMetaverseNode createNodeObject( String id ) {
+    return MetaverseUtil.getMetaverseObjectFactory().createNodeObject( id );
   }
-  
+
   /**
    * Adds the specified link to the model
-   *
-   * @param fromNode the from node
-   * @param label the label
-   * @param toNode the to node
-   * @return the i metaverse builder
-   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#addLink(org.pentaho.platform.api.metaverse.IMetaverseNode, java.lang.String, org.pentaho.platform.api.metaverse.IMetaverseNode)
+   * 
+   * @param fromNode
+   *          the from node
+   * @param label
+   *          the label
+   * @param toNode
+   *          the to node
+   * @return this metaverse builder
+   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#addLink(
+   *    org.pentaho.platform.api.metaverse.IMetaverseNode,
+   *    java.lang.String,
+   *    org.pentaho.platform.api.metaverse.IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder addLink( IMetaverseNode fromNode, String label, IMetaverseNode toNode ) {
     IMetaverseObjectFactory factory = MetaverseUtil.getMetaverseObjectFactory();
     IMetaverseLink link = factory.createLinkObject();
-    
+
     link.setFromNode( fromNode );
-    link.setLabel( label);
+    link.setLabel( label );
     link.setToNode( toNode );
     return addLink( link );
   }

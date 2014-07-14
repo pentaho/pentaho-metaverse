@@ -34,19 +34,20 @@ public class MetaverseDocument implements IMetaverseDocument {
 
   /** The name of the document. */
   private String name;
-  
+
   /** The identifier for this document. */
   private String id;
-  
+
   /** The type of this document. */
   private String type;
-  
+
   /** The content of this document. */
   private Object content;
 
   /* (non-Javadoc)
    * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getContent()
    */
+  @Override
   public Object getContent() {
     return content;
   }
@@ -56,6 +57,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    *
    * @param content the new content
    */
+  @Override
   public void setContent( Object content ) {
     this.content = content;
   }
@@ -104,7 +106,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    * Sets the string ID for this document.
    *
    * @param id          the ID to set
-   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setStringID(java.lang.String)
+   * @see org.pentaho.platform.api.metaverse.IIdentifierModifiable#setStringID(java.lang.String)
    */
   @Override
   public void setStringID( String id ) {
