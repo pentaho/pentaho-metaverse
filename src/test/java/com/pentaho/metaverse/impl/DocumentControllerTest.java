@@ -75,7 +75,7 @@ public class DocumentControllerTest {
 
   @Test
   public void testGetDocumentAnalyzers() {
-    Set<IDocumentAnalyzer> analyzers = docController.getDocumentAnalyzers();
+    Set<IDocumentAnalyzer> analyzers = docController.getAnalyzers();
     assertEquals( this.analyzers.size(), analyzers.size() );
   }
 
@@ -111,7 +111,7 @@ public class DocumentControllerTest {
     docController.addNode( mockNode );
     docController.addLink( mockLink );
     docController.updateNode( mockNode );
-    docController.updateLink( mockLink );
+    docController.updateLinkLabel( mockLink, "myLabel" );
     docController.deleteLink( mockLink );
     docController.deleteNode( mockNode );
     docController.addLink( mockNode, "is self", mockNode );
@@ -119,7 +119,7 @@ public class DocumentControllerTest {
     verify( mockBuilder, times( 1 ) ).addNode( mockNode );
     verify( mockBuilder, times( 1 ) ).addLink( mockLink );
     verify( mockBuilder, times( 1 ) ).updateNode( mockNode );
-    verify( mockBuilder, times( 1 ) ).updateLink( mockLink );
+    verify( mockBuilder, times( 1 ) ).updateLinkLabel( mockLink, "myLabel" );
     verify( mockBuilder, times( 1 ) ).deleteNode( mockNode );
     verify( mockBuilder, times( 1 ) ).deleteLink( mockLink );
     verify( mockBuilder, times( 1 ) ).addLink( mockNode, "is self", mockNode );

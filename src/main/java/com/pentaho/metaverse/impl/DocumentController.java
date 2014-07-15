@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.metaverse.api.IDocumentAnalyzerProvider;
+
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
@@ -62,7 +63,9 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   /**
    * Constructor that takes in an IMetaverseBuilder
-   * @param metaverseBuilder builder to delegate building calls to
+   * 
+   * @param metaverseBuilder
+   *          builder to delegate building calls to
    */
   public DocumentController( IMetaverseBuilder metaverseBuilder ) {
     this.metaverseBuilder = metaverseBuilder;
@@ -93,7 +96,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
    * @see com.pentaho.metaverse.api.IDocumentAnalyzerProvider#getDocumentAnalyzers()
    */
   @Override
-  public Set<IDocumentAnalyzer> getDocumentAnalyzers() {
+  public Set<IDocumentAnalyzer> getAnalyzers() {
     return analyzers;
   }
 
@@ -105,15 +108,30 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   @Override
   public Set<IDocumentAnalyzer> getDocumentAnalyzers( String type ) {
     if ( type == null ) {
-      return getDocumentAnalyzers();
+      return getAnalyzers();
     }
 
     return analyzerTypeMap.get( type );
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.pentaho.metaverse.api.IAnalyzerProvider#getAnalyzers(java.util.Set)
+   */
+  @Override
+  public Set<IDocumentAnalyzer> getAnalyzers( Set<Class<?>> types ) {
+    if ( types == null || ( types.size() == 1 && types.contains( IDocumentAnalyzer.class ) ) ) {
+      return getAnalyzers();
+    }
+    return null;
+  }
+
   /**
    * Set the analyzers that are available in the system
-   * @param analyzers the complete Set of IDocumentAnalyzers
+   * 
+   * @param analyzers
+   *          the complete Set of IDocumentAnalyzers
    */
   public void setDocumentAnalyzers( Set<IDocumentAnalyzer> analyzers ) {
     this.analyzers = analyzers;
@@ -142,7 +160,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
    * Loads up a Map of document types to supporting IDocumentAnalyzer(s)
    */
   protected void loadAnalyzerTypeMap() {
-    analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>( );
+    analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>();
     for ( IDocumentAnalyzer analyzer : analyzers ) {
       Set<String> types = analyzer.getSupportedTypes();
       analyzer.setMetaverseBuilder( this );
@@ -166,14 +184,18 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   /**
    * Fires a IDocumentEvent to an IDocumentAnalyzer in a separate Thread
-   * @param event IDocumentEvent to fire
-   * @param analyzer IDocumentAnalyzer to use for the Document that needs processed
+   * 
+   * @param event
+   *          IDocumentEvent to fire
+   * @param analyzer
+   *          IDocumentAnalyzer to use for the Document that needs processed
    * @return Future object
    */
   protected Future<?> fireDocumentEvent( final IDocumentEvent event, final IDocumentAnalyzer analyzer ) {
 
     Runnable analyzerRunner = new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         analyzer.analyze( event.getDocument() );
       }
     };
@@ -240,12 +262,12 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#updateLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#
+   * updateLinkLabel(org.pentaho.platform.api.metaverse.IMetaverseLink , java.lang.String)
    */
   @Override
-  public IMetaverseBuilder updateLink( IMetaverseLink iMetaverseLink ) {
-    return metaverseBuilder.updateLink( iMetaverseLink );
+  public IMetaverseBuilder updateLinkLabel( IMetaverseLink iMetaverseLink, String newLabel ) {
+    return metaverseBuilder.updateLinkLabel( iMetaverseLink, newLabel );
   }
 
   /*
