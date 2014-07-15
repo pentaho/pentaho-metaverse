@@ -20,41 +20,18 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.api;
 
-import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import java.util.Set;
 
 /**
- * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
+ * @author mburgess
+ * 
  */
-public class DatabaseConnectionAnalyzer implements IAnalyzer<DatabaseMeta> {
+public interface IAnalyzerProvider<T> {
 
-  /** A reference to the metaverse builder. */
-  protected IMetaverseBuilder metaverseBuilder;
+  public Set<T> getAnalyzers();
 
-  /**
-   * Analyzes a database connection for metadata.
-   * 
-   * @param object
-   *          the object
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
-   */
-  @Override
-  public IMetaverseNode analyze( DatabaseMeta object ) {
-    // TODO
-    return null;
-  }
-
-  /**
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#
-   *      setMetaverseBuilder(org.pentaho.platform.api.metaverse.IMetaverseBuilder)
-   */
-  @Override
-  public void setMetaverseBuilder( IMetaverseBuilder builder ) {
-    this.metaverseBuilder = builder;
-  }
+  public Set<T> getAnalyzers( Set<Class<?>> types );
 
 }

@@ -46,6 +46,11 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
   private static final long serialVersionUID = 3147152759123052372L;
 
   private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
+    /**
+     * Default serial ID for
+     */
+    private static final long serialVersionUID = -7433589337075366681L;
+
     {
       add( "ktr" );
     }
@@ -54,16 +59,18 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
   protected IMetaverseBuilder metaverseBuilder = null;
 
   @Override
-  public void analyze( IMetaverseDocument document ) {
+  public IMetaverseNode analyze( IMetaverseDocument document ) {
 
     if ( document == null ) {
-      return;
+      // TODO throw MetaverseAnalyzerException?
+      return null;
     }
 
     Object repoObject = document.getContent();
 
     if ( repoObject == null ) {
-      return;
+      // TODO throw MetaverseAnalyzerException?
+      return null;
     }
 
     TransMeta transMeta = null;
@@ -74,11 +81,13 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
         ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
         transMeta = new TransMeta( xmlStream, null, false, null, null );
       } catch ( KettleXMLException e ) {
+        // TODO throw MetaverseAnalyzerException?
         e.printStackTrace();
-        return;
+        return null;
       } catch ( KettleMissingPluginsException e ) {
+        // TODO throw MetaverseAnalyzerException?
         e.printStackTrace();
-        return;
+        return null;
       }
     } else if ( repoObject instanceof TransMeta ) {
       transMeta = (TransMeta) repoObject;
@@ -113,6 +122,9 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
         stepAnalyzer.analyze( stepMetaInterface );
       }
     }
+
+    metaverseBuilder.addNode( node );
+    return node;
   }
 
   /**

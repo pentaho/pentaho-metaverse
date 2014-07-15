@@ -91,7 +91,7 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
    * org.pentaho.platform.api.metaverse.IMetaverseBuilder#updateLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
    */
   @Override
-  public IMetaverseBuilder updateLink( IMetaverseLink arg0 ) {
+  public IMetaverseBuilder updateLinkLabel( IMetaverseLink arg0, String newLabel ) {
     // TODO Auto-generated method stub
     return null;
   }
@@ -148,10 +148,9 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
    * @param toNode
    *          the to node
    * @return this metaverse builder
-   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#addLink(
-   *    org.pentaho.platform.api.metaverse.IMetaverseNode,
-   *    java.lang.String,
-   *    org.pentaho.platform.api.metaverse.IMetaverseNode)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#
+   *      addLink(org.pentaho.platform.api.metaverse.IMetaverseNode, java.lang.String,
+   *      org.pentaho.platform.api.metaverse.IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder addLink( IMetaverseNode fromNode, String label, IMetaverseNode toNode ) {

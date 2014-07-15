@@ -29,13 +29,7 @@ import java.util.Set;
 /**
  * The IDocumentAnalyzerProvider provides known IDocumentAnalyzers of the system
  */
-public interface IDocumentAnalyzerProvider {
-
-  /**
-   * Get all of the known IDocumentAnalyzer's
-   * @return
-   */
-  Set<IDocumentAnalyzer> getDocumentAnalyzers( );
+public interface IDocumentAnalyzerProvider extends IAnalyzerProvider<IDocumentAnalyzer> {
 
   /**
    * Gets the IDocumentAnalyzer(s) that support a specific type

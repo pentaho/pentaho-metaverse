@@ -22,35 +22,36 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 /**
- * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
+ * The TableOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself
+ * and other metaverse entities (such as physical fields and tables
+ * 
  */
-public class DatabaseConnectionAnalyzer implements IAnalyzer<DatabaseMeta> {
+public class TableOutputStepAnalyzer implements IAnalyzer<TableOutputMeta> {
 
-  /** A reference to the metaverse builder. */
   protected IMetaverseBuilder metaverseBuilder;
 
-  /**
-   * Analyzes a database connection for metadata.
+  /*
+   * (non-Javadoc)
    * 
-   * @param object
-   *          the object
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
    */
   @Override
-  public IMetaverseNode analyze( DatabaseMeta object ) {
+  public IMetaverseNode analyze( TableOutputMeta object ) {
     // TODO
     return null;
   }
 
-  /**
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#
-   *      setMetaverseBuilder(org.pentaho.platform.api.metaverse.IMetaverseBuilder)
+   * setMetaverseBuilder(org.pentaho.platform.api.metaverse.IMetaverseBuilder)
    */
   @Override
   public void setMetaverseBuilder( IMetaverseBuilder builder ) {
