@@ -22,9 +22,14 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
+import com.pentaho.metaverse.impl.MetaverseBuilder;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -33,6 +38,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
 /**
  * @author mburgess
@@ -41,6 +48,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 public class DatabaseConnectionAnalyzerTest {
 
   DatabaseConnectionAnalyzer dbConnectionAnalyzer;
+  DatabaseConnectionAnalyzer spyAnalyzer;
 
   @Mock
   private DatabaseMeta databaseMeta;
@@ -64,9 +72,19 @@ public class DatabaseConnectionAnalyzerTest {
    */
   @Before
   public void setUp() throws Exception {
+
+    databaseMeta = mock( DatabaseMeta.class );
+
     dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
+    spyAnalyzer = spy(dbConnectionAnalyzer);
+
+    IMetaverseObjectFactory factory = new MetaverseBuilder();
+    doReturn( factory ).when( spyAnalyzer ).getMetaverseObjectFactory();
+
     IMetaverseBuilder builder = mock( IMetaverseBuilder.class );
-    dbConnectionAnalyzer.setMetaverseBuilder( builder );
+    spyAnalyzer.setMetaverseBuilder( builder );
+
+
   }
 
   /**
@@ -78,7 +96,16 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Test
   public void testSetMetaverseBuilder() {
-    assertNotNull( dbConnectionAnalyzer.metaverseBuilder );
+    assertNotNull( spyAnalyzer.metaverseBuilder );
+  }
+
+  @Test
+  public void testAnalyze(){
+
+    IMetaverseNode node = spyAnalyzer.analyze( databaseMeta );
+    assertNotNull( node );
+    assertEquals(12, node.getPropertyKeys().size());
+
   }
 
 }
