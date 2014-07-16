@@ -12,6 +12,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.HashSet;
@@ -51,6 +52,10 @@ public class DocumentControllerTest {
 
     IMetaverseBuilder builder = mock( IMetaverseBuilder.class );
     docController.setMetaverseBuilder( builder );
+
+    IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
+    docController.setMetaverseObjectFactory( objectFactory );
+
     initAnalyzers();
   }
 

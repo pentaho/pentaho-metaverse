@@ -30,6 +30,7 @@ import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.HashMap;
@@ -47,6 +48,9 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   /** The metaverse builder. */
   private IMetaverseBuilder metaverseBuilder;
+
+  /** the metaverse object factory */
+  private IMetaverseObjectFactory metaverseObjectFactory;
 
   /** The analyzers. */
   private Set<IDocumentAnalyzer> analyzers = new HashSet<IDocumentAnalyzer>();
@@ -91,11 +95,27 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
     this.metaverseBuilder = metaverseBuilder;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.pentaho.metaverse.api.IDocumentAnalyzerProvider#getDocumentAnalyzers()
+  /**
+   * Gets the metaverse object factory
+   * @return the metaverse object factory
    */
+  public IMetaverseObjectFactory getMetaverseObjectFactory() {
+    return metaverseObjectFactory;
+  }
+
+  /**
+   * Sets the metaverse object factory
+   * @param metaverseObjectFactory the new metaverse object factory
+   */
+  public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
+    this.metaverseObjectFactory = metaverseObjectFactory;
+  }
+
+  /*
+     * (non-Javadoc)
+     *
+     * @see com.pentaho.metaverse.api.IDocumentAnalyzerProvider#getDocumentAnalyzers()
+     */
   @Override
   public Set<IDocumentAnalyzer> getAnalyzers() {
     return analyzers;
@@ -164,7 +184,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
     for ( IDocumentAnalyzer analyzer : analyzers ) {
       Set<String> types = analyzer.getSupportedTypes();
       analyzer.setMetaverseBuilder( this );
-
+      analyzer.setMetaverseObjectFactory( metaverseObjectFactory );
       if ( types != null ) {
         for ( String type : types ) {
           HashSet<IDocumentAnalyzer> analyzerSet = null;
