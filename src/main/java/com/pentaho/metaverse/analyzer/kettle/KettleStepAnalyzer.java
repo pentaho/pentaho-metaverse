@@ -34,11 +34,8 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 /**
  * KettleStepAnalyzer provides a default implementation for analyzing PDI steps to gather metadata for the metaverse.
  */
-public class KettleStepAnalyzer implements IAnalyzer<StepMeta> {
+public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
 
-  protected IMetaverseBuilder metaverseBuilder;
-
-  protected IMetaverseObjectFactory metaverseObjectFactory;
 
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
@@ -79,30 +76,6 @@ public class KettleStepAnalyzer implements IAnalyzer<StepMeta> {
     }
 
     return node;
-  }
-
-  /**
-   * Sets the metaverse builder for this analyzer.
-   * 
-   * @param builder
-   *          the new metaverse builder
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#
-   *      setMetaverseBuilder(org.pentaho.platform.api.metaverse.IMetaverseBuilder)
-   */
-  @Override
-  public void setMetaverseBuilder( IMetaverseBuilder builder ) {
-    this.metaverseBuilder = builder;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#setMetaverseObjectFactory(org.pentaho.platform.api.metaverse.
-   * IMetaverseObjectFactory)
-   */
-  @Override
-  public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
-    this.metaverseObjectFactory = metaverseObjectFactory;
   }
 
 }

@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
@@ -34,13 +33,7 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
  * other metaverse entities (such as physical fields and tables
  * 
  */
-public class TableOutputStepAnalyzer implements IAnalyzer<TableOutputMeta> {
-
-  /** The metaverse builder. */
-  protected IMetaverseBuilder metaverseBuilder;
-
-  /** The metaverse object factory. */
-  protected IMetaverseObjectFactory metaverseObjectFactory;
+public class TableOutputStepAnalyzer extends AbstractAnalyzer<TableOutputMeta> {
 
   /*
    * (non-Javadoc)
@@ -67,28 +60,6 @@ public class TableOutputStepAnalyzer implements IAnalyzer<TableOutputMeta> {
     // TODO
 
     return node;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#
-   * setMetaverseBuilder(org.pentaho.platform.api.metaverse.IMetaverseBuilder)
-   */
-  @Override
-  public void setMetaverseBuilder( IMetaverseBuilder builder ) {
-    this.metaverseBuilder = builder;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#
-   * setMetaverseObjectFactory(org.pentaho.platform.api.metaverse.IMetaverseObjectFactory)
-   */
-  @Override
-  public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
-    this.metaverseObjectFactory = metaverseObjectFactory;
   }
 
 }
