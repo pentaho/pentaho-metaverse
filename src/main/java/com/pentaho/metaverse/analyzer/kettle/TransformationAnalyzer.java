@@ -110,6 +110,7 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
         if ( stepAnalyzer == null ) {
           stepAnalyzer = new KettleStepAnalyzer();
           stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
+          stepAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
         }
         stepAnalyzer.analyze( stepMeta );
       }

@@ -25,11 +25,9 @@ package com.pentaho.metaverse.analyzer.kettle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
-import com.pentaho.metaverse.impl.MetaverseTransientNode;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -38,10 +36,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -62,10 +57,10 @@ public class DatabaseConnectionAnalyzerTest {
   private DatabaseMeta databaseMeta;
 
   @Mock
+  private IMetaverseBuilder builder;
+
   private IMetaverseObjectFactory factory;
 
-  @Mock
-  private IMetaverseBuilder builder;
 
   /**
    * @throws java.lang.Exception
@@ -87,17 +82,7 @@ public class DatabaseConnectionAnalyzerTest {
   @Before
   public void setUp() throws Exception {
 
-    databaseMeta = mock( DatabaseMeta.class );
-
-    when( factory.createNodeObject( Mockito.anyString() ) ).thenAnswer( new Answer<IMetaverseNode>() {
-
-      @Override
-      public IMetaverseNode answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        return new MetaverseTransientNode( (String) args[0] );
-      }
-
-    } );
+    factory = MetaverseTestUtils.getMetaverseObjectFactory();
 
     dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
     dbConnectionAnalyzer.setMetaverseObjectFactory( factory );

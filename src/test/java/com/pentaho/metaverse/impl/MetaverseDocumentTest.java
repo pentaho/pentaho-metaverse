@@ -20,9 +20,9 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.impl;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -32,10 +32,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 
@@ -43,18 +41,7 @@ import com.pentaho.metaverse.testutils.MetaverseTestUtils;
  * @author mburgess
  * 
  */
-@RunWith( MockitoJUnitRunner.class )
-public class KettleStepAnalyzerTest {
-
-  KettleStepAnalyzer kettleStepAnalyzer;
-
-  @Mock
-  private IMetaverseBuilder builder;
-
-  private IMetaverseObjectFactory factory;
-
-  @Mock
-  private StepMeta mockStepMeta;
+public class MetaverseDocumentTest {
 
   /**
    * @throws java.lang.Exception
@@ -75,12 +62,6 @@ public class KettleStepAnalyzerTest {
    */
   @Before
   public void setUp() throws Exception {
-
-    factory = MetaverseTestUtils.getMetaverseObjectFactory();
-
-    kettleStepAnalyzer = new KettleStepAnalyzer();
-    kettleStepAnalyzer.setMetaverseBuilder( builder );
-    kettleStepAnalyzer.setMetaverseObjectFactory( factory );
   }
 
   /**
@@ -91,22 +72,32 @@ public class KettleStepAnalyzerTest {
   }
 
   @Test
-  public void testSetMetaverseBuilder() {
-    assertNotNull( kettleStepAnalyzer.metaverseBuilder );
+  public void testNullProperties() {
+    MetaverseDocument document = new MetaverseDocument();
+    assertNull( document.getName() );
+    assertNull( document.getStringID() );
+    assertNull( document.getType() );
+    assertNull( document.getContent() );
   }
 
   @Test
-  public void testSetMetaverseObjectFactory() {
-    assertNotNull( kettleStepAnalyzer.metaverseObjectFactory );
+  public void testSetName() {
+    MetaverseDocument document = new MetaverseDocument();
+    document.setName( "myName" );
+    assertEquals( "myName", document.getName() );
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
-    kettleStepAnalyzer.analyze( null );
+  @Test
+  public void testSetStringID() {
+    MetaverseDocument document = new MetaverseDocument();
+    document.setStringID( "myID" );
+    assertEquals( "myID", document.getStringID() );
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyze() throws MetaverseAnalyzerException {
-    kettleStepAnalyzer.analyze( new StepMeta() );
+  @Test
+  public void testSetType() {
+    MetaverseDocument document = new MetaverseDocument();
+    document.setType( "myType" );
+    assertEquals( "myType", document.getType() );
   }
 }

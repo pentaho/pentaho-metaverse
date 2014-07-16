@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -44,17 +44,14 @@ import com.pentaho.metaverse.testutils.MetaverseTestUtils;
  * 
  */
 @RunWith( MockitoJUnitRunner.class )
-public class KettleStepAnalyzerTest {
+public class TableOutputStepAnalyzerTest {
 
-  KettleStepAnalyzer kettleStepAnalyzer;
+  private TableOutputStepAnalyzer analyzer;
 
   @Mock
   private IMetaverseBuilder builder;
 
   private IMetaverseObjectFactory factory;
-
-  @Mock
-  private StepMeta mockStepMeta;
 
   /**
    * @throws java.lang.Exception
@@ -75,12 +72,11 @@ public class KettleStepAnalyzerTest {
    */
   @Before
   public void setUp() throws Exception {
-
     factory = MetaverseTestUtils.getMetaverseObjectFactory();
 
-    kettleStepAnalyzer = new KettleStepAnalyzer();
-    kettleStepAnalyzer.setMetaverseBuilder( builder );
-    kettleStepAnalyzer.setMetaverseObjectFactory( factory );
+    analyzer = new TableOutputStepAnalyzer();
+    analyzer.setMetaverseBuilder( builder );
+    analyzer.setMetaverseObjectFactory( factory );
   }
 
   /**
@@ -92,21 +88,21 @@ public class KettleStepAnalyzerTest {
 
   @Test
   public void testSetMetaverseBuilder() {
-    assertNotNull( kettleStepAnalyzer.metaverseBuilder );
+    assertNotNull( analyzer.metaverseBuilder );
   }
 
   @Test
   public void testSetMetaverseObjectFactory() {
-    assertNotNull( kettleStepAnalyzer.metaverseObjectFactory );
+    assertNotNull( analyzer.metaverseObjectFactory );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testNullAnalyze() throws MetaverseAnalyzerException {
-    kettleStepAnalyzer.analyze( null );
+    analyzer.analyze( null );
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyze() throws MetaverseAnalyzerException {
-    kettleStepAnalyzer.analyze( new StepMeta() );
+  @Test
+  public void testAnalyzeTransDocument() throws MetaverseAnalyzerException {
+    assertNotNull( analyzer.analyze( new TableOutputMeta() ) );
   }
 }
