@@ -148,9 +148,8 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   @Override
   public void onEvent( IDocumentEvent event ) {
     Set<IDocumentAnalyzer> matchingAnalyzers = getDocumentAnalyzers( event.getDocument().getType() );
-    for ( IDocumentAnalyzer analyzer : matchingAnalyzers ) {
-      Set<String> types = analyzer.getSupportedTypes();
-      if ( types != null && types.contains( event.getDocument().getType() ) ) {
+    if ( matchingAnalyzers != null ) {
+      for ( IDocumentAnalyzer analyzer : matchingAnalyzers ) {
         fireDocumentEvent( event, analyzer );
       }
     }

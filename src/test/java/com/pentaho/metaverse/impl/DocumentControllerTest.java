@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
@@ -17,6 +18,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
@@ -64,7 +66,7 @@ public class DocumentControllerTest {
 
     Set<String> supportedTypes3 = new HashSet<String>();
     supportedTypes3.add( "another" );
-    when( anotherAnalyzer.getSupportedTypes() ).thenReturn( supportedTypes3 );
+    when( anotherAnalyzer.getSupportedTypes() ).thenReturn( null );
 
     analyzers.add( dummyAnalyzer );
     analyzers.add( testAndDummyAnalyzer );
@@ -77,6 +79,37 @@ public class DocumentControllerTest {
   public void testGetDocumentAnalyzers() {
     Set<IDocumentAnalyzer> analyzers = docController.getAnalyzers();
     assertEquals( this.analyzers.size(), analyzers.size() );
+  }
+
+  @Test
+  public void testGetAnalyzers_nullSet() {
+    assertNotNull( docController.getAnalyzers( null ) );
+  }
+  @Test
+  public void testGetAnalyzers_OnlyDocAnalyzersSet() {
+    Set<Class<?>> types = new HashSet<>();
+    types.add( IDocumentAnalyzer.class );
+
+    Set<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
+    assertNotNull( documentAnalyzers );
+    assertEquals( docController.getAnalyzers(), documentAnalyzers );
+  }
+  @Test
+  public void testGetAnalyzers_mutipleAnalyzersSet() {
+    Set<Class<?>> types = new HashSet<>();
+    types.add( IDocumentAnalyzer.class );
+    types.add( IAnalyzer.class );
+
+    Set<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
+    assertNull( documentAnalyzers );
+  }
+  @Test
+  public void testGetAnalyzers_notDocAnalyzerSet() {
+    Set<Class<?>> types = new HashSet<>();
+    types.add( IAnalyzer.class );
+
+    Set<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
+    assertNull( documentAnalyzers );
   }
 
   @Test
@@ -102,6 +135,31 @@ public class DocumentControllerTest {
     // timeout to give our asynchronous analyzers a chance to be called
     verify( dummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDoc );
     verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDoc );
+  }
+
+  @Test
+  public void testOnEvent_notAllAnalyzersFire() {
+    when( mockEvent.getDocument() ).thenReturn( mockDoc );
+    when( mockDoc.getType() ).thenReturn( "test" );
+
+    docController.onEvent( mockEvent );
+
+    // timeout to give our asynchronous analyzers a chance to be called
+    verify( dummyAnalyzer, timeout( 100 ).never() ).analyze( mockDoc );
+    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDoc );
+  }
+
+  @Test
+  public void testOnEvent_noSupportingAnalyzers() {
+    when( mockEvent.getDocument() ).thenReturn( mockDoc );
+    when( mockDoc.getType() ).thenReturn( "notSupported" );
+
+    docController.onEvent( mockEvent );
+
+    // make sure noe of the analyzers are fired for this un supported type
+    verify( dummyAnalyzer, timeout( 100 ).never() ).analyze( mockDoc );
+    verify( anotherAnalyzer, timeout( 100 ).never() ).analyze( mockDoc );
+    verify( testAndDummyAnalyzer, timeout( 100 ).never() ).analyze( mockDoc );
   }
 
   @Test

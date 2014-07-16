@@ -148,7 +148,11 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
    * @return a matching Vertex or null if none found
    */
   protected Vertex getVertexForNode( IMetaverseNode node ) {
-    return graph.getVertex( node.getStringID() );
+    if ( node != null ) {
+      return graph.getVertex( node.getStringID() );
+    } else {
+      return null;
+    }
   }
 
   @Override
@@ -165,6 +169,10 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
    * @return true/false if the delete happened
    */
   private boolean deleteLink( IMetaverseLink link, boolean removeVirtualNodes ) {
+    if ( link == null ) {
+      return false;
+    }
+
     // is there an edge in the graph that corresponds to the link?
     Vertex fromVertex = getVertexForNode( link.getFromNode() );
     Vertex toVertex = null;
@@ -219,11 +227,10 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
    */
   @Override
   public IMetaverseBuilder updateLinkLabel( IMetaverseLink link, String label ) {
-    if ( deleteLink( link, false ) ) {
+    if ( label != null && deleteLink( link, false ) ) {
       link.setLabel( label );
       addLink( link );
     }
-
     return this;
   }
 
