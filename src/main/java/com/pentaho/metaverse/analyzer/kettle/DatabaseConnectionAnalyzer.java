@@ -22,10 +22,12 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.pentaho.metaverse.util.MetaverseUtil;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
 /**
  * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
@@ -44,8 +46,59 @@ public class DatabaseConnectionAnalyzer implements IAnalyzer<DatabaseMeta> {
    */
   @Override
   public IMetaverseNode analyze( DatabaseMeta object ) {
-    // TODO
-    return null;
+
+    if ( object == null ) {
+      return null;
+    }
+
+    // TODO get unique ID and set it on the node
+    IMetaverseNode node = getMetaverseObjectFactory().createNodeObject( "TODO" );
+
+    // TODO Is this appropriate? What are our name conventions?
+    node.setName( object.getName() );
+
+    // TODO What are our valid list of types?
+    node.setType( "datasource" );
+
+    int accessType = object.getAccessType();
+    node.setProperty( "accessType", accessType );
+
+    String accessTypeDesc = object.getAccessTypeDesc();
+    node.setProperty( "accessTypeDesc", accessTypeDesc );
+
+    String databaseName = object.getDatabaseName();
+    node.setProperty( "databaseName", databaseName );
+
+    String port = object.getDatabasePortNumberString();
+    node.setProperty( "port", port );
+
+    String host = object.getHostname();
+    node.setProperty( "hostName", host );
+
+    String user = object.getUsername();
+    node.setProperty( "userName", user );
+
+    String pass = object.getPassword();
+    node.setProperty( "password", pass );
+
+    boolean shared = object.isShared();
+    node.setProperty( "shared", shared );
+
+    // TODO If these attributes are important, we will need to
+    // TODO account for the same attributes in partitions in clusters
+
+    metaverseBuilder.addNode( node );
+
+    return node;
+
+  }
+
+  /**
+   * package-protected for unit testing
+   * @return factory for object creation
+   */
+  IMetaverseObjectFactory getMetaverseObjectFactory() {
+    return MetaverseUtil.getMetaverseObjectFactory();
   }
 
   /**
