@@ -24,8 +24,6 @@ package com.pentaho.metaverse.locator;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
@@ -37,17 +35,15 @@ import org.pentaho.platform.repository2.ClientRepositoryPaths;
  * @author jdixon
  *
  */
-public abstract class RepositoryIndexer extends BaseLocator {
+public abstract class RepositoryLocator extends BaseLocator {
 
   private static final long serialVersionUID = 3308953622126327699L;
-
-  private static final Log LOGGER = LogFactory.getLog( RepositoryIndexer.class );
 
   private static final int POLLING_INTERVAL = 100;
 
   private IUnifiedRepository unifiedRepository;
 
-  private RepositoryIndexRunner indexRunner;
+  private RepositoryLocatorRunner indexRunner;
 
   /**
    * A method that returns the IUnifiedRepository for this environment
@@ -89,17 +85,20 @@ public abstract class RepositoryIndexer extends BaseLocator {
     RepositoryFileTree root = unifiedRepository.getTree( ClientRepositoryPaths.getRootFolderPath(), -1, null, true );
     List<RepositoryFileTree> kids = root.getChildren();
 
-    indexRunner = new RepositoryIndexRunner();
+    indexRunner = new RepositoryLocatorRunner();
     indexRunner.setRepositoryIndexer( this );
     indexRunner.setRepoTop( kids );
-    indexRunner.run();
+    Thread runnerThread = new Thread( indexRunner );
+    runnerThread.start();
   }
 
   @Override
   public void stopScan() {
+    System.out.println( "RepositoryLocator stopScan" );
     indexRunner.stop();
     while ( indexRunner.isRunning() ) {
       try {
+        System.out.println( "RepositoryLocator stopScan polling" );
         Thread.sleep( POLLING_INTERVAL );
       } catch ( InterruptedException e ) {
         // intentional
@@ -107,15 +106,6 @@ public abstract class RepositoryIndexer extends BaseLocator {
       }
     }
     indexRunner = null;
-  }
-
-  @Override
-  public Log getLogger() {
-    return LOGGER;
-  }
-
-  protected IUnifiedRepository getRepo() {
-    return unifiedRepository;
   }
 
 }

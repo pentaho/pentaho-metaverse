@@ -1,16 +1,16 @@
 package com.pentaho.metaverse.graph;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
@@ -46,7 +46,7 @@ public class TinkerGraphMetaverseReaderTest {
       vertexCount++;
       vertices.next();
     }
-    assertEquals( "Vertex count is wrong", 29, vertexCount );
+    assertEquals( "Vertex count is wrong", 30, vertexCount );
 
     Iterator<Edge> edges = graph.getEdges().iterator();
     int edgeCount = 0;
@@ -69,6 +69,10 @@ public class TinkerGraphMetaverseReaderTest {
     assertEquals( "Type is wrong", "file", node.getType() );
     assertEquals( "Name is wrong", "Text file: data.txt", node.getName() );
 
+    node = metaverseReader.findNode( "bogus" );
+
+    assertNull( "Node is not null", node );
+
   }
 
   @Test
@@ -78,6 +82,42 @@ public class TinkerGraphMetaverseReaderTest {
     assertNotNull( "Node is null", g );
 
     metaverseReader.dumpGraph( g, "testGetGraph.graphml" );
+
+    g = metaverseReader.getGraph( "bogus" );
+    assertNull( "Node is not null", g );
+
+  }
+
+  @Test
+  public void testFindLink() throws Exception {
+    TestTinkerGraphMetaverseReader metaverseReader = new TestTinkerGraphMetaverseReader();
+
+    IMetaverseLink link = metaverseReader.findLink( "datasource1.table1.field1", "populates", "trans2.ktr;field1", Direction.OUT );
+    assertNotNull( "Link is null", link );
+    assertEquals( "Label is wrong", "populates", link.getLabel() );
+    assertEquals( "Id is wrong", "datasource1.table1.field1", link.getFromNode().getStringID() );
+    assertEquals( "Id is wrong", "trans2.ktr;field1", link.getToNode().getStringID() );
+
+    link = metaverseReader.findLink( "bogus", "populates", "trans2.ktr;field1", Direction.OUT );
+    assertNull( "Link is not null", link );
+
+    link = metaverseReader.findLink( "datasource1.table1.field1", "bogus", "trans2.ktr;field1", Direction.OUT );
+    assertNull( "Link is not null", link );
+
+    link = metaverseReader.findLink( "datasource1.table1.field1", "populates", "bogus", Direction.OUT );
+    assertNull( "Link is not null", link );
+
+    link = metaverseReader.findLink( "datasource1.table1.field1", "populates", "trans2.ktr;field1", Direction.IN );
+    assertNull( "Link is not null", link );
+
+    link = metaverseReader.findLink( "job2.kjb", "populates", "trans2.ktr;field1", Direction.OUT );
+    assertNull( "Link is not null", link );
+
+    link = metaverseReader.findLink( "trans2.ktr;field1", "populates", "datasource1.table1.field1", Direction.IN );
+    assertNotNull( "Link is null", link );
+    assertEquals( "Label is wrong", "populates", link.getLabel() );
+    assertEquals( "Id is wrong", "datasource1.table1.field1", link.getFromNode().getStringID() );
+    assertEquals( "Id is wrong", "trans2.ktr;field1", link.getToNode().getStringID() );
 
   }
 

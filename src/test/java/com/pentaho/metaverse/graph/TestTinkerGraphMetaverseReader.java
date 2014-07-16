@@ -37,9 +37,10 @@ public class TestTinkerGraphMetaverseReader extends BaseGraphMetaverseReader {
     return logger;
   }
 
-  private void init() {
+  private void init() throws Exception {
 
-    graph = new TinkerGraph();
+    TinkerGraphMetaverseReader reader = new TinkerGraphMetaverseReader();
+    graph = (TinkerGraph) reader.getGraph();
     // these are the nodes
     Vertex textFile = createVertex( "data.txt", "file", "Text file: data.txt" );
     Vertex textField1 = createVertex( "data.txt;field1", "filefield", "Text field: IP Addr" );
@@ -70,6 +71,7 @@ public class TestTinkerGraphMetaverseReader extends BaseGraphMetaverseReader {
     Vertex table2field2 = createVertex( "datasource1.table2.field2", "tablefield", "Table field: Product" );
     Vertex table2field3 = createVertex( "datasource1.table2.field3", "tablefield", "Table field: City" );
     Vertex table2field4 = createVertex( "datasource1.table2.field4", "tablefield", "Table field: Sales" );
+    createVertex( "job2.kjb", "job", "Job: job2.kjb" );
 
     // these are the links
     graph.addEdge( null, job1, trans1, GraphConst.LINK_EXECUTES );

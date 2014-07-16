@@ -21,6 +21,22 @@
  */
 package com.pentaho.metaverse.locator;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -33,20 +49,9 @@ import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class LocatorTestUtils {
+
+  public static long delay = 0;
 
   public static Repository getMockDiRepository() {
     Repository diRepo = mock( Repository.class );
@@ -92,6 +97,13 @@ public class LocatorTestUtils {
 
   /*************** load job and trans methods for the mock diRepo *****************/
   private static JobMeta loadJob( ObjectId arg0, String arg1 ) throws KettleException {
+    if ( delay != 0 ) {
+      try {
+        Thread.sleep( delay );
+      } catch ( InterruptedException e ) {
+      }
+    }
+    System.out.println( "loadJob " + arg0 );
     File file = new File( arg0.getId() );
     String content = "";
     try {
@@ -113,6 +125,13 @@ public class LocatorTestUtils {
   }
 
   private static TransMeta loadTransformation( ObjectId arg0, String arg1 ) throws KettleException {
+    if ( delay != 0 ) {
+      try {
+        Thread.sleep( delay );
+      } catch ( InterruptedException e ) {
+      }
+    }
+    System.out.println( "loadJob " + arg0 );
     File file = new File( arg0.getId() );
     String content = "";
     try {

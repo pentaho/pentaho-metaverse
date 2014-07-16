@@ -24,6 +24,8 @@ package com.pentaho.metaverse.locator;
 
 import java.lang.reflect.Method;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.StringObjectId;
@@ -40,12 +42,14 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
  * @author jdixon
  *
  */
-public class DIRepositoryLocator extends RepositoryIndexer {
+public class DIRepositoryLocator extends RepositoryLocator {
 
   /**
    * The type for this locator
    */
   public static final String LOCATOR_TYPE = "DIRepo";
+
+  private static final Log LOGGER = LogFactory.getLog( RepositoryLocator.class );
 
   private static final long serialVersionUID = 1324202912891938340L;
 
@@ -114,6 +118,11 @@ public class DIRepositoryLocator extends RepositoryIndexer {
   @Override
   public String[] getTypes() {
     return new String[] {};
+  }
+
+  @Override
+  public Log getLogger() {
+    return LOGGER;
   }
 
 }
