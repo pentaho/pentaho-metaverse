@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -47,6 +48,20 @@ public class KettleStepAnalyzer implements IAnalyzer<StepMeta> {
   @Override
   public IMetaverseNode analyze( StepMeta stepMeta ) throws MetaverseAnalyzerException {
 
+    if ( stepMeta == null ) {
+      throw new MetaverseAnalyzerException( "TableOutputMeta is null!" );
+    }
+
+    StepMetaInterface stepMetaInterface = stepMeta.getStepMetaInterface();
+
+    if ( stepMetaInterface == null ) {
+      throw new MetaverseAnalyzerException( "StepMetaInterface is null!" );
+    }
+
+    if ( metaverseObjectFactory == null ) {
+      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
+    }
+
     // Add yourself
     IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
 
@@ -54,7 +69,7 @@ public class KettleStepAnalyzer implements IAnalyzer<StepMeta> {
 
     metaverseBuilder.addNode( node );
 
-    DatabaseMeta[] dbs = stepMeta.getStepMetaInterface().getUsedDatabaseConnections();
+    DatabaseMeta[] dbs = stepMetaInterface.getUsedDatabaseConnections();
     /*
      * for(DatabaseMeta db : dbs) { getAnalyzer(db).analyze(db); metaverseBuilder.addLink( this, "uses",
      * getIdGenerator(db).getVertex(dbID) ) }

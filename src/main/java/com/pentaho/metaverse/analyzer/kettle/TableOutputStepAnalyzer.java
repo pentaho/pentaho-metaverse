@@ -27,6 +27,7 @@ import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
  * The TableOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
@@ -37,7 +38,7 @@ public class TableOutputStepAnalyzer implements IAnalyzer<TableOutputMeta> {
 
   /** The metaverse builder. */
   protected IMetaverseBuilder metaverseBuilder;
-  
+
   /** The metaverse object factory. */
   protected IMetaverseObjectFactory metaverseObjectFactory;
 
@@ -47,9 +48,25 @@ public class TableOutputStepAnalyzer implements IAnalyzer<TableOutputMeta> {
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
    */
   @Override
-  public IMetaverseNode analyze( TableOutputMeta object ) {
+  public IMetaverseNode analyze( TableOutputMeta object ) throws MetaverseAnalyzerException {
+    if ( object == null ) {
+      throw new MetaverseAnalyzerException( "TableOutputMeta is null!" );
+    }
+
+    if ( metaverseObjectFactory == null ) {
+      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
+    }
+
+    // Add yourself
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
+
+    node.setName( object.getName() );
+
+    metaverseBuilder.addNode( node );
+
     // TODO
-    return null;
+
+    return node;
   }
 
   /*
