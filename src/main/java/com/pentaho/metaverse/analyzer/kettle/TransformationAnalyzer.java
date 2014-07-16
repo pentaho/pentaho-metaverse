@@ -31,15 +31,13 @@ import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-
-import com.pentaho.metaverse.util.MetaverseUtil;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocumentAnalyzer {
 
@@ -56,21 +54,22 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
     }
   };
 
-  protected IMetaverseBuilder metaverseBuilder = null;
+  protected IMetaverseBuilder metaverseBuilder;
+
+  /** The metaverse object factory. */
+  protected IMetaverseObjectFactory metaverseObjectFactory;
 
   @Override
-  public IMetaverseNode analyze( IMetaverseDocument document ) {
+  public IMetaverseNode analyze( IMetaverseDocument document ) throws MetaverseAnalyzerException {
 
     if ( document == null ) {
-      // TODO throw MetaverseAnalyzerException?
-      return null;
+      throw new MetaverseAnalyzerException( "Document is null!" );
     }
 
     Object repoObject = document.getContent();
 
     if ( repoObject == null ) {
-      // TODO throw MetaverseAnalyzerException?
-      return null;
+      throw new MetaverseAnalyzerException( "Document has no content!" );
     }
 
     TransMeta transMeta = null;
@@ -81,23 +80,17 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
         ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
         transMeta = new TransMeta( xmlStream, null, false, null, null );
       } catch ( KettleXMLException e ) {
-        // TODO throw MetaverseAnalyzerException?
-        e.printStackTrace();
-        return null;
+        throw new MetaverseAnalyzerException( e );
       } catch ( KettleMissingPluginsException e ) {
-        // TODO throw MetaverseAnalyzerException?
-        e.printStackTrace();
-        return null;
+        throw new MetaverseAnalyzerException( e );
       }
     } else if ( repoObject instanceof TransMeta ) {
       transMeta = (TransMeta) repoObject;
     }
 
     // Create a metaverse node and start filling in details
-    IMetaverseObjectFactory factory = MetaverseUtil.getMetaverseObjectFactory();
-
     // TODO get unique ID and set it on the node
-    IMetaverseNode node = factory.createNodeObject( "TODO" );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
 
     // pull out the standard fields
     String description = transMeta.getDescription();
@@ -112,14 +105,13 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
     // handle the steps
     for ( int stepNr = 0; stepNr < transMeta.nrSteps(); stepNr++ ) {
       StepMeta stepMeta = transMeta.getStep( stepNr );
-      StepMetaInterface stepMetaInterface = stepMeta.getStepMetaInterface();
-      if ( stepMetaInterface != null ) {
-        IAnalyzer<StepMetaInterface> stepAnalyzer = getStepAnalyzer( stepMetaInterface );
+      if ( stepMeta != null ) {
+        IAnalyzer<StepMeta> stepAnalyzer = getStepAnalyzer( stepMeta );
         if ( stepAnalyzer == null ) {
           stepAnalyzer = new KettleStepAnalyzer();
           stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
         }
-        stepAnalyzer.analyze( stepMetaInterface );
+        stepAnalyzer.analyze( stepMeta );
       }
     }
 
@@ -154,7 +146,7 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
     return metaverseBuilder;
   }
 
-  protected IAnalyzer<StepMetaInterface> getStepAnalyzer( StepMetaInterface stepMetaInterface ) {
+  protected IAnalyzer<StepMeta> getStepAnalyzer( StepMeta stepMeta ) {
 
     // TODO Look for implementing analyzers for this step.
     //
@@ -167,5 +159,16 @@ public class TransformationAnalyzer extends BaseKettleAnalyzer implements IDocum
     // If none can be found, a default handler should be returned.
 
     return new KettleStepAnalyzer();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#
+   * setMetaverseObjectFactory(org.pentaho.platform.api.metaverse.IMetaverseObjectFactory)
+   */
+  @Override
+  public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
+    this.metaverseObjectFactory = metaverseObjectFactory;
   }
 }

@@ -29,13 +29,30 @@ import java.util.Set;
 import org.pentaho.platform.api.metaverse.IIdentifierModifiable;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
+// TODO: Auto-generated Javadoc
 /**
- * An implementation of a metaverse node
- * 
+ * An implementation of a metaverse node.
  */
 public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifiable {
 
+  /** The property map. */
   protected Map<String, Object> propertyMap = new HashMap<String, Object>( 5 );
+
+  /**
+   * Instantiates a new (empty) metaverse transient node.
+   */
+  public MetaverseTransientNode() {
+  }
+
+  /**
+   * Instantiates a new metaverse transient node.
+   *
+   * @param id the id
+   */
+  public MetaverseTransientNode( String id ) {
+    this();
+    setStringID( id );
+  }
 
   /*
    * (non-Javadoc)

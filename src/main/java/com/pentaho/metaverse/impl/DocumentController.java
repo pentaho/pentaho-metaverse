@@ -30,6 +30,7 @@ import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -195,7 +196,14 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
     Runnable analyzerRunner = new Runnable() {
       @Override
       public void run() {
-        analyzer.analyze( event.getDocument() );
+        try {
+          analyzer.analyze( event.getDocument() );
+
+        } catch ( MetaverseAnalyzerException mae ) {
+          // TODO
+          mae.printStackTrace( System.err );
+        }
+
       }
     };
 

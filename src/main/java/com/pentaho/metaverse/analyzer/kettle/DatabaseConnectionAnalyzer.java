@@ -22,12 +22,12 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import com.pentaho.metaverse.util.MetaverseUtil;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
  * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
@@ -37,6 +37,9 @@ public class DatabaseConnectionAnalyzer implements IAnalyzer<DatabaseMeta> {
   /** A reference to the metaverse builder. */
   protected IMetaverseBuilder metaverseBuilder;
 
+  /** The metaverse object factory. */
+  protected IMetaverseObjectFactory metaverseObjectFactory;
+
   /**
    * Analyzes a database connection for metadata.
    * 
@@ -45,14 +48,18 @@ public class DatabaseConnectionAnalyzer implements IAnalyzer<DatabaseMeta> {
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
    */
   @Override
-  public IMetaverseNode analyze( DatabaseMeta object ) {
+  public IMetaverseNode analyze( DatabaseMeta object ) throws MetaverseAnalyzerException {
 
     if ( object == null ) {
-      return null;
+      throw new MetaverseAnalyzerException( "DatabaseMeta is null!" );
+    }
+
+    if ( metaverseObjectFactory == null ) {
+      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
     }
 
     // TODO get unique ID and set it on the node
-    IMetaverseNode node = getMetaverseObjectFactory().createNodeObject( "TODO" );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
 
     // TODO Is this appropriate? What are our name conventions?
     node.setName( object.getName() );
@@ -94,20 +101,23 @@ public class DatabaseConnectionAnalyzer implements IAnalyzer<DatabaseMeta> {
   }
 
   /**
-   * package-protected for unit testing
-   * @return factory for object creation
-   */
-  IMetaverseObjectFactory getMetaverseObjectFactory() {
-    return MetaverseUtil.getMetaverseObjectFactory();
-  }
-
-  /**
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#
    *      setMetaverseBuilder(org.pentaho.platform.api.metaverse.IMetaverseBuilder)
    */
   @Override
   public void setMetaverseBuilder( IMetaverseBuilder builder ) {
     this.metaverseBuilder = builder;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#
+   * setMetaverseObjectFactory(org.pentaho.platform.api.metaverse.IMetaverseObjectFactory)
+   */
+  @Override
+  public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
+    this.metaverseObjectFactory = metaverseObjectFactory;
   }
 
 }

@@ -12,6 +12,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -85,6 +86,7 @@ public class DocumentControllerTest {
   public void testGetAnalyzers_nullSet() {
     assertNotNull( docController.getAnalyzers( null ) );
   }
+
   @Test
   public void testGetAnalyzers_OnlyDocAnalyzersSet() {
     Set<Class<?>> types = new HashSet<>();
@@ -94,6 +96,7 @@ public class DocumentControllerTest {
     assertNotNull( documentAnalyzers );
     assertEquals( docController.getAnalyzers(), documentAnalyzers );
   }
+
   @Test
   public void testGetAnalyzers_mutipleAnalyzersSet() {
     Set<Class<?>> types = new HashSet<>();
@@ -103,6 +106,7 @@ public class DocumentControllerTest {
     Set<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
     assertNull( documentAnalyzers );
   }
+
   @Test
   public void testGetAnalyzers_notDocAnalyzerSet() {
     Set<Class<?>> types = new HashSet<>();
@@ -126,7 +130,7 @@ public class DocumentControllerTest {
   }
 
   @Test
-  public void testOnEvent() {
+  public void testOnEvent() throws MetaverseAnalyzerException {
     when( mockEvent.getDocument() ).thenReturn( mockDoc );
     when( mockDoc.getType() ).thenReturn( "dummy" );
 
@@ -138,7 +142,7 @@ public class DocumentControllerTest {
   }
 
   @Test
-  public void testOnEvent_notAllAnalyzersFire() {
+  public void testOnEvent_notAllAnalyzersFire() throws MetaverseAnalyzerException {
     when( mockEvent.getDocument() ).thenReturn( mockDoc );
     when( mockDoc.getType() ).thenReturn( "test" );
 
@@ -150,7 +154,7 @@ public class DocumentControllerTest {
   }
 
   @Test
-  public void testOnEvent_noSupportingAnalyzers() {
+  public void testOnEvent_noSupportingAnalyzers() throws MetaverseAnalyzerException {
     when( mockEvent.getDocument() ).thenReturn( mockDoc );
     when( mockDoc.getType() ).thenReturn( "notSupported" );
 

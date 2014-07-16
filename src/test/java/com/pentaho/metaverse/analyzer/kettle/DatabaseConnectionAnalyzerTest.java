@@ -24,27 +24,35 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doReturn;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-import com.pentaho.metaverse.impl.MetaverseBuilder;
+import com.pentaho.metaverse.impl.MetaverseTransientNode;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
- * @author mburgess
- *
+ * This class tests the DatabaseConnectionAnalyzer methods.
+ * 
  */
+@RunWith( MockitoJUnitRunner.class )
 public class DatabaseConnectionAnalyzerTest {
 
   DatabaseConnectionAnalyzer dbConnectionAnalyzer;
@@ -52,6 +60,12 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Mock
   private DatabaseMeta databaseMeta;
+
+  @Mock
+  private IMetaverseObjectFactory factory;
+
+  @Mock
+  private IMetaverseBuilder builder;
 
   /**
    * @throws java.lang.Exception
@@ -75,16 +89,20 @@ public class DatabaseConnectionAnalyzerTest {
 
     databaseMeta = mock( DatabaseMeta.class );
 
+    when( factory.createNodeObject( Mockito.anyString() ) ).thenAnswer( new Answer<IMetaverseNode>() {
+
+      @Override
+      public IMetaverseNode answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        return new MetaverseTransientNode( (String) args[0] );
+      }
+
+    } );
+
     dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
-    spyAnalyzer = spy(dbConnectionAnalyzer);
-
-    IMetaverseObjectFactory factory = new MetaverseBuilder();
-    doReturn( factory ).when( spyAnalyzer ).getMetaverseObjectFactory();
-
-    IMetaverseBuilder builder = mock( IMetaverseBuilder.class );
-    spyAnalyzer.setMetaverseBuilder( builder );
-
-
+    dbConnectionAnalyzer.setMetaverseObjectFactory( factory );
+    dbConnectionAnalyzer.setMetaverseBuilder( builder );
+    spyAnalyzer = spy( dbConnectionAnalyzer );
   }
 
   /**
@@ -104,25 +122,27 @@ public class DatabaseConnectionAnalyzerTest {
   @Test
   public void testSetMetaverseObjectFactory() {
 
-    assertNotNull(spyAnalyzer.getMetaverseObjectFactory());
+    assertNotNull( spyAnalyzer.metaverseObjectFactory );
 
   }
 
   @Test
-  public void testAnalyze(){
+  public void testAnalyze() {
 
-    IMetaverseNode node = spyAnalyzer.analyze( databaseMeta );
-    assertNotNull( node );
-    assertEquals(12, node.getPropertyKeys().size());
+    try {
+      IMetaverseNode node = spyAnalyzer.analyze( databaseMeta );
+      assertNotNull( node );
+      assertEquals( 11, node.getPropertyKeys().size() );
+    } catch ( MetaverseAnalyzerException e ) {
+      fail( "analyze() should not throw an exception!" );
+    }
 
   }
 
-  @Test
-  public void testNullAnalyze(){
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testNullAnalyze() throws MetaverseAnalyzerException {
 
-    IMetaverseNode node = spyAnalyzer.analyze( null );
-    assertNull( node );
-
+    spyAnalyzer.analyze( null );
   }
 
 }
