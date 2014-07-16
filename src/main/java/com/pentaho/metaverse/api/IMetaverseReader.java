@@ -86,4 +86,11 @@ public interface IMetaverseReader {
    */
   Graph search( List<String> resultTypes, List<String> startNodeIDs );
 
+  /**
+   * Returns the graph for a given element
+   * @param id The id of the root node
+   * @return A graph of the upstream and downstream nodes that are connected
+   */
+  Graph getGraph( String id );
+
 }

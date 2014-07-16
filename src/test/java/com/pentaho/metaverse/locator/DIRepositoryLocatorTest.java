@@ -24,6 +24,7 @@ package com.pentaho.metaverse.locator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 
@@ -85,7 +88,11 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
       System.out.println( event.getDocument().getStringID() );
       assertNotNull( event.getDocument() );
       MetaverseDocument document = (MetaverseDocument) event.getDocument();
-      assertNotNull( document.getContent() );
+      if ( document.getType().equals( "ktr" ) ) {
+        assertTrue( document.getContent() instanceof TransMeta );
+      } else if ( document.getType().equals( "kjb" ) ) {
+        assertTrue( document.getContent() instanceof JobMeta );
+      }
     }
 
   }
