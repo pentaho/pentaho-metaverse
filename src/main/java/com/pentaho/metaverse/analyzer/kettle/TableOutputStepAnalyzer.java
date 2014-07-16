@@ -26,15 +26,20 @@ import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
 /**
- * The TableOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself
- * and other metaverse entities (such as physical fields and tables
+ * The TableOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
+ * other metaverse entities (such as physical fields and tables
  * 
  */
 public class TableOutputStepAnalyzer implements IAnalyzer<TableOutputMeta> {
 
+  /** The metaverse builder. */
   protected IMetaverseBuilder metaverseBuilder;
+  
+  /** The metaverse object factory. */
+  protected IMetaverseObjectFactory metaverseObjectFactory;
 
   /*
    * (non-Javadoc)
@@ -56,6 +61,17 @@ public class TableOutputStepAnalyzer implements IAnalyzer<TableOutputMeta> {
   @Override
   public void setMetaverseBuilder( IMetaverseBuilder builder ) {
     this.metaverseBuilder = builder;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#
+   * setMetaverseObjectFactory(org.pentaho.platform.api.metaverse.IMetaverseObjectFactory)
+   */
+  @Override
+  public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
+    this.metaverseObjectFactory = metaverseObjectFactory;
   }
 
 }

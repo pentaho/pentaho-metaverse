@@ -30,7 +30,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,8 +38,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.tinkerpop.blueprints.Vertex;
-
-import java.util.HashSet;
 
 /**
  * @author mburgess

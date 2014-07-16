@@ -41,7 +41,7 @@ public class MetaverseBuilderTest {
 
     // make sure the node was added to the graph
     Vertex result = graph.getVertex( node.getStringID() );
-    assertNotNull("Node was not added as a Vertex in the graph", result);
+    assertNotNull( "Node was not added as a Vertex in the graph", result );
     assertEquals( node.getStringID(), result.getId() );
     assertEquals( node.getType(), result.getProperty( "type" ) );
 
@@ -57,7 +57,7 @@ public class MetaverseBuilderTest {
     builder.addNode( node );
 
     Vertex result = graph.getVertex( node.getStringID() );
-    assertNotNull( "Node was not added as a Vertex in the graph", result);
+    assertNotNull( "Node was not added as a Vertex in the graph", result );
     assertEquals( "Node name property was not set", "node1 name", result.getProperty( "name" ) );
     assertEquals( "Node type property was not set", "test type", result.getProperty( "type" ) );
 
@@ -92,7 +92,7 @@ public class MetaverseBuilderTest {
     assertTrue( (Boolean) toResult.getProperty( MetaverseBuilder.VIRTUAL ) );
 
     assertNotNull( fromResult.getEdges( Direction.OUT, "uses" ) );
-    for( Edge e : fromResult.getEdges( Direction.OUT, "uses" ) ) {
+    for ( Edge e : fromResult.getEdges( Direction.OUT, "uses" ) ) {
       assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
       assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
       // we added this node implicitly through the addLink, it should be flagged as virtual
@@ -100,7 +100,7 @@ public class MetaverseBuilderTest {
     }
 
     assertNotNull( toResult.getEdges( Direction.IN, "uses" ) );
-    for( Edge e : fromResult.getEdges( Direction.IN, "uses" ) ) {
+    for ( Edge e : fromResult.getEdges( Direction.IN, "uses" ) ) {
       assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
       assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
       // we added this node implicitly through the addLink, it should be flagged as virtual
@@ -126,7 +126,7 @@ public class MetaverseBuilderTest {
     assertTrue( (Boolean) toResult.getProperty( MetaverseBuilder.VIRTUAL ) );
 
     assertNotNull( fromResult.getEdges( Direction.OUT, "uses" ) );
-    for( Edge e : fromResult.getEdges( Direction.OUT, "uses" ) ) {
+    for ( Edge e : fromResult.getEdges( Direction.OUT, "uses" ) ) {
       assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
       assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
       // we added this node implicitly through the addLink, it should be flagged as virtual
@@ -134,7 +134,7 @@ public class MetaverseBuilderTest {
     }
 
     assertNotNull( toResult.getEdges( Direction.IN, "uses" ) );
-    for( Edge e : fromResult.getEdges( Direction.IN, "uses" ) ) {
+    for ( Edge e : fromResult.getEdges( Direction.IN, "uses" ) ) {
       assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
       assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
       // we added this node implicitly through the addLink, it should be flagged as virtual
@@ -157,7 +157,7 @@ public class MetaverseBuilderTest {
     Vertex fromResult = graph.getVertex( node.getStringID() );
     Vertex toResult = graph.getVertex( node2.getStringID() );
 
-      // we added this node explicitly through the addNode, it should be flagged as NOT virtual
+    // we added this node explicitly through the addNode, it should be flagged as NOT virtual
     assertFalse( (Boolean) fromResult.getProperty( MetaverseBuilder.VIRTUAL ) );
 
     // we added this node implicitly through the addLink, it should be flagged as virtual
@@ -170,7 +170,7 @@ public class MetaverseBuilderTest {
     builder.addNode( node );
 
     Vertex result = graph.getVertex( node.getStringID() );
-    assertNotNull( "Node was not added as a Vertex in the graph", result);
+    assertNotNull( "Node was not added as a Vertex in the graph", result );
 
     builder.deleteNode( node );
     result = graph.getVertex( node.getStringID() );
@@ -182,7 +182,7 @@ public class MetaverseBuilderTest {
     builder.addNode( node );
 
     Vertex result = graph.getVertex( node.getStringID() );
-    assertNotNull( "Node was not added as a Vertex in the graph", result);
+    assertNotNull( "Node was not added as a Vertex in the graph", result );
 
     builder.deleteNode( null );
     result = graph.getVertex( node.getStringID() );
@@ -285,7 +285,7 @@ public class MetaverseBuilderTest {
 
     Vertex beforeDeleteFrom = graph.getVertex( link.getFromNode().getStringID() );
     int count = 0;
-    for( Edge edge : beforeDeleteFrom.getEdges( Direction.OUT, "uses" ) ) {
+    for ( Edge edge : beforeDeleteFrom.getEdges( Direction.OUT, "uses" ) ) {
       count++;
       System.out.println( edge.toString() );
     }
@@ -305,7 +305,7 @@ public class MetaverseBuilderTest {
     // the uses link should be gone
     // the "another" link should still be there
     count = 0;
-    for( Edge edge : fromResult.getEdges( Direction.OUT, "uses" ) ) {
+    for ( Edge edge : fromResult.getEdges( Direction.OUT, "uses" ) ) {
       count++;
       assertEquals( "another", edge.getVertex( Direction.IN ).getId() );
       System.out.println( edge.toString() );
@@ -317,7 +317,6 @@ public class MetaverseBuilderTest {
 
     assertNotNull( anotherResult );
   }
-
 
   @Test
   public void testUpdateNode() {

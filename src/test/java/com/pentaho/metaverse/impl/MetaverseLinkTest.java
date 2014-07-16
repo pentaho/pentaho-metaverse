@@ -27,7 +27,6 @@ import org.mockito.Mock;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 public class MetaverseLinkTest {
@@ -86,6 +85,5 @@ public class MetaverseLinkTest {
     assertEquals( "value", link.removeProperty( "TEST" ) );
     assertNull( link.getProperty( "TEST" ) );
   }
-
 
 }
