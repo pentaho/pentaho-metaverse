@@ -24,12 +24,12 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import com.pentaho.metaverse.impl.MetaverseBuilder;
-import com.pentaho.metaverse.util.MetaverseUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -96,7 +96,16 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Test
   public void testSetMetaverseBuilder() {
+
     assertNotNull( spyAnalyzer.metaverseBuilder );
+
+  }
+
+  @Test
+  public void testSetMetaverseObjectFactory() {
+
+    assertNotNull(spyAnalyzer.getMetaverseObjectFactory());
+
   }
 
   @Test
@@ -105,6 +114,14 @@ public class DatabaseConnectionAnalyzerTest {
     IMetaverseNode node = spyAnalyzer.analyze( databaseMeta );
     assertNotNull( node );
     assertEquals(12, node.getPropertyKeys().size());
+
+  }
+
+  @Test
+  public void testNullAnalyze(){
+
+    IMetaverseNode node = spyAnalyzer.analyze( null );
+    assertNull( node );
 
   }
 
