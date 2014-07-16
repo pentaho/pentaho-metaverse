@@ -49,6 +49,10 @@ public class MetaverseNode implements IMetaverseNode {
   private MetaverseNode() {
   }
 
+  /**
+   * Constructor that builds a MetaverseNode from a Vertex.
+   * @param v Vertex
+   */
   public MetaverseNode( Vertex v ) {
     this.v = v;
   }
