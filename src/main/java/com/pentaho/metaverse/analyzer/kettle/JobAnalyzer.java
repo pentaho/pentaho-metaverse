@@ -22,33 +22,24 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
+import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.platform.api.metaverse.*;
+
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.pentaho.di.core.exception.KettleMissingPluginsException;
-import org.pentaho.di.core.exception.KettleXMLException;
-import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
-import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements IDocumentAnalyzer {
 
-public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements IDocumentAnalyzer {
 
-  private static final long serialVersionUID = 3147152759123052372L;
 
   private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
-    /**
-     * Default serial ID for
-     */
-    private static final long serialVersionUID = -7433589337075366681L;
 
     {
-      add( "ktr" );
+      add( "kjb" );
     }
   };
 
@@ -65,20 +56,28 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
       throw new MetaverseAnalyzerException( "Document has no content!" );
     }
 
-    TransMeta transMeta = null;
+    if ( metaverseObjectFactory == null ) {
+      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
+    }
+
+    if ( metaverseBuilder == null ) {
+      throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
+    }
+
+    JobMeta job = null;
     if ( repoObject instanceof String ) {
-      // hydrate the transformation
+
+      // hydrate the job
       try {
         String content = (String) repoObject;
         ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
-        transMeta = new TransMeta( xmlStream, null, false, null, null );
+        job = new JobMeta( xmlStream, null,  null );
       } catch ( KettleXMLException e ) {
         throw new MetaverseAnalyzerException( e );
-      } catch ( KettleMissingPluginsException e ) {
-        throw new MetaverseAnalyzerException( e );
       }
-    } else if ( repoObject instanceof TransMeta ) {
-      transMeta = (TransMeta) repoObject;
+
+    } else if ( repoObject instanceof JobMeta ) {
+      job = (JobMeta) repoObject;
     }
 
     // Create a metaverse node and start filling in details
@@ -86,26 +85,26 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
     IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
 
     // pull out the standard fields
-    String description = transMeta.getDescription();
+    String description = job.getDescription();
     node.setProperty( "description", description );
 
-    Date createdDate = transMeta.getCreatedDate();
+    Date createdDate = job.getCreatedDate();
     node.setProperty( "createdDate", createdDate );
 
-    Date lastModifiedDate = transMeta.getModifiedDate();
+    Date lastModifiedDate = job.getModifiedDate();
     node.setProperty( "lastModifiedDate", lastModifiedDate );
 
-    // handle the steps
-    for ( int stepNr = 0; stepNr < transMeta.nrSteps(); stepNr++ ) {
-      StepMeta stepMeta = transMeta.getStep( stepNr );
-      if ( stepMeta != null ) {
-        IAnalyzer<StepMeta> stepAnalyzer = getStepAnalyzer( stepMeta );
-        if ( stepAnalyzer == null ) {
-          stepAnalyzer = new KettleStepAnalyzer();
-          stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-          stepAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
+    // handle the entries
+    for ( int i = 0; i < job.nrJobEntries(); i++ ) {
+      JobEntryCopy entry = job.getJobEntry( i );
+      if ( entry != null ) {
+        IAnalyzer<JobEntryCopy> analyzer = getJobEntryAnalyzer( entry );
+        if ( analyzer == null ) {
+          analyzer = new JobEntryAnalyzer();
+          analyzer.setMetaverseBuilder( metaverseBuilder );
+          analyzer.setMetaverseObjectFactory( metaverseObjectFactory );
         }
-        stepAnalyzer.analyze( stepMeta );
+        analyzer.analyze( entry );
       }
     }
 
@@ -113,19 +112,7 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
     return node;
   }
 
-  /**
-   * Returns a set of strings corresponding to which types of content are supported by this analyzer
-   * 
-   * @return the supported types (as a set of Strings)
-   * 
-   * @see org.pentaho.platform.api.metaverse.IDocumentAnalyzer#getSupportedTypes()
-   */
-  public Set<String> getSupportedTypes() {
-    return defaultSupportedTypes;
-  }
-
-
-  protected IAnalyzer<StepMeta> getStepAnalyzer( StepMeta stepMeta ) {
+  protected IAnalyzer<JobEntryCopy> getJobEntryAnalyzer( JobEntryCopy jobEntry ) {
 
     // TODO Look for implementing analyzers for this step.
     //
@@ -137,7 +124,20 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
     //
     // If none can be found, a default handler should be returned.
 
-    return new KettleStepAnalyzer();
+    return null; // new JobEntryAnalyzer();
+  }
+
+
+  /**
+   * Returns a set of strings corresponding to which types of content are supported by this analyzer
+   *
+   * @return the supported types (as a set of Strings)
+   *
+   * @see org.pentaho.platform.api.metaverse.IDocumentAnalyzer#getSupportedTypes()
+   */
+  @Override
+  public Set<String> getSupportedTypes() {
+    return defaultSupportedTypes;
   }
 
 }
