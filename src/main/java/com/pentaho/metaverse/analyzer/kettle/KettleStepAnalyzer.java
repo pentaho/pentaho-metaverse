@@ -70,10 +70,13 @@ public class KettleStepAnalyzer implements IAnalyzer<StepMeta> {
     metaverseBuilder.addNode( node );
 
     DatabaseMeta[] dbs = stepMetaInterface.getUsedDatabaseConnections();
-    /*
-     * for(DatabaseMeta db : dbs) { getAnalyzer(db).analyze(db); metaverseBuilder.addLink( this, "uses",
-     * getIdGenerator(db).getVertex(dbID) ) }
-     */
+
+    // TODO get DB analyzer from somewhere else
+    DatabaseConnectionAnalyzer dbAnalyzer = new DatabaseConnectionAnalyzer();
+    for ( DatabaseMeta db : dbs ) {
+      IMetaverseNode dbNode = dbAnalyzer.analyze( db );
+      metaverseBuilder.addLink( node, "uses", dbNode );
+    }
 
     return node;
   }
