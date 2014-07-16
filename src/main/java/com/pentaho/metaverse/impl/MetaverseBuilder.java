@@ -137,7 +137,10 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
       if ( propertyKey.equals( "id" ) || propertyKey.equals( VIRTUAL ) ) {
         continue;
       } else {
-        v.setProperty( propertyKey, node.getProperty( propertyKey ) );
+        Object value = node.getProperty( propertyKey );
+        if ( value != null ) {
+          v.setProperty( propertyKey, value );
+        }
       }
     }
   }

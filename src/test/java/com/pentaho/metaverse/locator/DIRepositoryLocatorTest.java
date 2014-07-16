@@ -74,8 +74,8 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     DIRepositoryLocator locator = new DIRepositoryLocator();
 
     locator.addDocumentListener( this );
-    locator.setRepository( new TestDiRepository() );
-    locator.setUnifiedRepository( new TestDiUnifiedRepository() );
+    locator.setRepository( LocatorTestUtils.getMockDiRepository() );
+    locator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
 
     assertNotNull("Indexer type is null", locator.getIndexerType() );
     events = new ArrayList<IDocumentEvent>();
