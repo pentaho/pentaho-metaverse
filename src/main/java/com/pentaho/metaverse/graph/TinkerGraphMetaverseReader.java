@@ -5,7 +5,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import com.tinkerpop.blueprints.util.io.graphml.GraphMLReader;
 
 /**
  * A concrete sub-class of BaseGraphMetaverseReader that uses in-memory TinkerGraph as the graph
@@ -31,6 +30,7 @@ public class TinkerGraphMetaverseReader extends BaseGraphMetaverseReader {
    * @throws Exception If a problem is encountered
    */
   public TinkerGraphMetaverseReader() throws Exception {
+    /* is this useful code?
     if ( filePath != null ) {
       if ( filePath.endsWith( ".dat" ) ) {
         graph = new TinkerGraph( filePath );
@@ -40,8 +40,9 @@ public class TinkerGraphMetaverseReader extends BaseGraphMetaverseReader {
         reader.inputGraph( filePath );
       }
     } else {
-      graph = new TinkerGraph();
     }
+    */
+    graph = new TinkerGraph();
   }
 
   @Override

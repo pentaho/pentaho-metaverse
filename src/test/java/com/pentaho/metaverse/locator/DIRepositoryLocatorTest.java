@@ -76,6 +76,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     locator.addDocumentListener( this );
     locator.setRepository( LocatorTestUtils.getMockDiRepository() );
     locator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
+    LocatorTestUtils.delay = 0;
 
     assertNotNull("Indexer type is null", locator.getIndexerType() );
     events = new ArrayList<IDocumentEvent>();
@@ -83,6 +84,50 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     Thread.sleep( 3000 );
 
     assertEquals( "Event count is wrong", 7, events.size() );
+
+    for ( IDocumentEvent event : events ) {
+      System.out.println( event.getDocument().getStringID() );
+      assertNotNull( event.getDocument() );
+      MetaverseDocument document = (MetaverseDocument) event.getDocument();
+      if ( document.getType().equals( "ktr" ) ) {
+        assertTrue( document.getContent() instanceof TransMeta );
+      } else if ( document.getType().equals( "kjb" ) ) {
+        assertTrue( document.getContent() instanceof JobMeta );
+      }
+    }
+
+    locator.removeDocumentListener( this );
+    events = new ArrayList<IDocumentEvent>();
+    locator.startScan();
+    Thread.sleep( 3000 );
+
+    assertEquals( "Event count is wrong", 0, events.size() );
+
+  }
+
+  /**
+   * Runs the locator and checks the results
+   * @throws Exception When bad things happen
+   */
+  @Test
+  public void testStopLocatorScan() throws Exception {
+
+    DIRepositoryLocator locator = new DIRepositoryLocator();
+
+    locator.addDocumentListener( this );
+    locator.setRepository( LocatorTestUtils.getMockDiRepository() );
+    locator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
+    LocatorTestUtils.delay = 300;
+
+    assertNotNull("Indexer type is null", locator.getIndexerType() );
+    events = new ArrayList<IDocumentEvent>();
+    System.out.println( "call startScan" );
+    locator.startScan();
+    Thread.sleep( 1000 );
+    System.out.println( "call stopScan" );
+    locator.stopScan();
+
+    assertTrue( "Event count is wrong", events.size() < 5 );
 
     for ( IDocumentEvent event : events ) {
       System.out.println( event.getDocument().getStringID() );

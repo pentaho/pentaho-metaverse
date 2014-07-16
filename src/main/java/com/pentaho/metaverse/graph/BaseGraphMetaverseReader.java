@@ -13,6 +13,7 @@ import org.pentaho.platform.engine.core.system.PentahoBase;
 
 import com.pentaho.metaverse.api.GraphConst;
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.impl.MetaverseLink;
 import com.pentaho.metaverse.impl.MetaverseNode;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
@@ -48,7 +49,34 @@ public abstract class BaseGraphMetaverseReader extends PentahoBase implements IM
 
   @Override
   public IMetaverseLink findLink( String leftNodeID, String linkType, String rightNodeID, Direction direction ) {
-    // TODO Auto-generated method stub
+    Vertex vertex = getGraph().getVertex( leftNodeID );
+    if ( vertex == null ) {
+      return null;
+    }
+    Iterable<Edge> edges = linkType == null ? vertex.getEdges( direction ) : vertex.getEdges( direction, linkType );
+    IMetaverseLink link = new MetaverseLink();
+    IMetaverseNode node1 = new MetaverseNode( vertex );
+    Direction opDirection = direction == Direction.IN ? Direction.OUT : Direction.IN;
+    Vertex vertex2 = null;
+    if ( rightNodeID != null ) {
+      Iterator<Edge> it = edges.iterator();
+      while ( it.hasNext() ) {
+        Edge edge = it.next();
+        if ( rightNodeID.equals( (String) edge.getVertex( opDirection ).getId() ) ) {
+          vertex2 = edge.getVertex( opDirection );
+          IMetaverseNode node2 = new MetaverseNode( vertex2 );
+          link.setLabel( edge.getLabel() );
+          if ( direction == Direction.OUT ) {
+            link.setFromNode( node1 );
+            link.setToNode( node2 );
+          } else {
+            link.setFromNode( node2 );
+            link.setToNode( node1 );
+          }
+          return link;
+        }
+      }
+    }
     return null;
   }
 
@@ -105,7 +133,6 @@ public abstract class BaseGraphMetaverseReader extends PentahoBase implements IM
    */
   private void traceVertices( Vertex vertex, Vertex clone, Direction direction,
       Graph graph1, Graph graph2, Set<String> edgeTypes ) {
-    // first clo
     Direction opDirection = direction == Direction.IN ? Direction.OUT : Direction.IN;
     Iterator<Edge> edges = vertex.getEdges( direction ).iterator();
     while ( edges.hasNext() ) {

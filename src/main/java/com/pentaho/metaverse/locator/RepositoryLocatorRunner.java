@@ -35,7 +35,7 @@ import com.pentaho.metaverse.impl.MetaverseDocument;
  * @author jdixon
  *
  */
-public class RepositoryIndexRunner implements Runnable {
+public class RepositoryLocatorRunner implements Runnable {
 
   /**
    * The top-level repository files and folders to search into
@@ -45,7 +45,7 @@ public class RepositoryIndexRunner implements Runnable {
   /**
    * The repository crawler to use for getting document contents and generating ids
    */
-  private RepositoryIndexer repositoryIndexer;
+  private RepositoryLocator repositoryIndexer;
 
   /**
    * A flag to identify if we should stop crawling the repository (due to an external cancel event)
@@ -61,7 +61,7 @@ public class RepositoryIndexRunner implements Runnable {
     this.repoTop = repoTop;
   }
 
-  public void setRepositoryIndexer( RepositoryIndexer repositoryIndexer ) {
+  public void setRepositoryIndexer( RepositoryLocator repositoryIndexer ) {
     this.repositoryIndexer = repositoryIndexer;
   }
 
@@ -91,6 +91,7 @@ public class RepositoryIndexRunner implements Runnable {
 
     for ( RepositoryFileTree fileTree : fileTrees ) {
       if ( stopping ) {
+        System.out.println( "RepositoryLocatorRunner indexFileTree stopping" );
         return;
       }
       if ( fileTree.getFile() != null ) {
@@ -115,6 +116,7 @@ public class RepositoryIndexRunner implements Runnable {
   private void indexFile( RepositoryFile file ) {
 
     if ( stopping ) {
+      System.out.println( "RepositoryLocatorRunner indexFile stopping" );
       return;
     }
     if ( file.isHidden() ) {
