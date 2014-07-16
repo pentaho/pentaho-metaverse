@@ -12,6 +12,8 @@ import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author: rfellows
@@ -175,6 +177,19 @@ public class MetaverseBuilderTest {
     assertNull( "Node was not deleted from the graph", result );
   }
 
+  @Test
+  public void testDeleteNode_null() {
+    builder.addNode( node );
+
+    Vertex result = graph.getVertex( node.getStringID() );
+    assertNotNull( "Node was not added as a Vertex in the graph", result);
+
+    builder.deleteNode( null );
+    result = graph.getVertex( node.getStringID() );
+    // should still be there
+    assertNotNull( "Node was deleted from the graph when it should not have been", result );
+  }
+
   private IMetaverseLink createAndTestLink() {
     builder.addNode( node );
 
@@ -203,7 +218,6 @@ public class MetaverseBuilderTest {
     return link;
   }
 
-
   @Test
   public void testDeleteLink() {
     IMetaverseLink link = createAndTestLink();
@@ -224,6 +238,86 @@ public class MetaverseBuilderTest {
     assertNull( toResult );
 
   }
+
+  @Test
+  public void testDeleteLink_emptyLink() {
+    IMetaverseLink link = builder.createLinkObject();
+
+    // now lets try to delete the link, no errors should happen
+    builder.deleteLink( link );
+  }
+
+  @Test
+  public void testDeleteLink_nonExistentFromNode() {
+    IMetaverseLink link = createAndTestLink();
+    IMetaverseNode origFrom = link.getFromNode();
+    IMetaverseNode mockFrom = mock( IMetaverseNode.class );
+    link.setFromNode( mockFrom );
+
+    when( mockFrom.getStringID() ).thenReturn( "not in graph" );
+    // now lets try to delete the link
+    builder.deleteLink( link );
+
+    Vertex fromResult = graph.getVertex( origFrom.getStringID() );
+    Vertex toResult = graph.getVertex( link.getToNode().getStringID() );
+
+    // the from node was explicitly added, it should still be there
+    assertNotNull( fromResult );
+
+    // the link should still be there
+    assertTrue( fromResult.getEdges( Direction.OUT, "uses" ).iterator().hasNext() );
+
+    // should still be there
+    assertNotNull( toResult );
+
+  }
+
+  @Test
+  public void testDeleteLink_fromNodeHasMutipleLinks() {
+    IMetaverseLink link = createAndTestLink();
+
+    // add another link using the same test node
+    IMetaverseNode node3 = builder.createNodeObject( "another" );
+    node3.setName( "to name" );
+
+    // add another link
+    builder.addLink( node, "uses", node3 );
+
+    Vertex beforeDeleteFrom = graph.getVertex( link.getFromNode().getStringID() );
+    int count = 0;
+    for( Edge edge : beforeDeleteFrom.getEdges( Direction.OUT, "uses" ) ) {
+      count++;
+      System.out.println( edge.toString() );
+    }
+    // we should have 2 edges for this node before we delete one
+    assertEquals( 2, count );
+
+    // now lets try to delete the link
+    builder.deleteLink( link );
+
+    Vertex fromResult = graph.getVertex( link.getFromNode().getStringID() );
+    Vertex toResult = graph.getVertex( link.getToNode().getStringID() );
+    Vertex anotherResult = graph.getVertex( node3.getStringID() );
+
+    // the from node was explicitly added, it should still be there
+    assertNotNull( fromResult );
+
+    // the uses link should be gone
+    // the "another" link should still be there
+    count = 0;
+    for( Edge edge : fromResult.getEdges( Direction.OUT, "uses" ) ) {
+      count++;
+      assertEquals( "another", edge.getVertex( Direction.IN ).getId() );
+      System.out.println( edge.toString() );
+    }
+    assertEquals( 1, count );
+
+    // any virtual nodes that were associated with the link should also be removed
+    assertNull( toResult );
+
+    assertNotNull( anotherResult );
+  }
+
 
   @Test
   public void testUpdateNode() {
@@ -250,6 +344,12 @@ public class MetaverseBuilderTest {
   }
 
   @Test
+  public void testUpdateNode_null() {
+    // make sure no NPE is thrown in this scenario
+    builder.updateNode( null );
+  }
+
+  @Test
   public void testUpdateLinkLabel() {
     IMetaverseLink link = createAndTestLink();
     Vertex v = graph.getVertex( link.getFromNode().getStringID() );
@@ -262,7 +362,27 @@ public class MetaverseBuilderTest {
     v = graph.getVertex( link.getFromNode().getStringID() );
     assertFalse( v.getEdges( Direction.OUT, "uses" ).iterator().hasNext() );
     assertTrue( v.getEdges( Direction.OUT, "owns" ).iterator().hasNext() );
+  }
 
+  @Test
+  public void testUpdateLinkLabel_nullLabel() {
+    // if a null value is passed in for a label, it should NOT perform an update
+    IMetaverseLink link = createAndTestLink();
+    Vertex v = graph.getVertex( link.getFromNode().getStringID() );
+    assertNotNull( v.getEdges( Direction.OUT, "uses" ) );
+
+    builder.updateLinkLabel( link, null );
+
+    assertEquals( "uses", link.getLabel() );
+
+    v = graph.getVertex( link.getFromNode().getStringID() );
+    assertTrue( v.getEdges( Direction.OUT, "uses" ).iterator().hasNext() );
+  }
+
+  @Test
+  public void testUpdateLinkLabel_nullLink() {
+    // make sure no NPE is thrown in this scenario
+    builder.updateLinkLabel( null, "owns" );
   }
 
   @Test
@@ -287,4 +407,15 @@ public class MetaverseBuilderTest {
 
   }
 
+  @Test
+  public void testIsVirtual_noVirtualProperty() {
+    builder.addNode( node );
+    Vertex v = graph.getVertex( node.getStringID() );
+
+    assertFalse( builder.isVirtual( v ) );
+
+    IMetaverseNode virtual = builder.createNodeObject( "virtual node" );
+    Vertex virtualVertex = graph.addVertex( virtual.getStringID() );
+    assertFalse( builder.isVirtual( virtualVertex ) );
+  }
 }
