@@ -1,4 +1,4 @@
-package com.pentaho.metaverse.impl;
+package com.pentaho.dictionary;
 
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -10,6 +10,7 @@ import java.util.Set;
 /**
  * Metaverse Link
  */
+@SuppressWarnings( "rawtypes" )
 public class MetaverseLink implements IMetaverseLink {
 
   /**

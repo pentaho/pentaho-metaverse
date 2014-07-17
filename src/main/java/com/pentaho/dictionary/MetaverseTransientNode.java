@@ -20,23 +20,30 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl;
+package com.pentaho.dictionary;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.pentaho.platform.api.metaverse.IIdentifierModifiable;
+import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
-// TODO: Auto-generated Javadoc
 /**
  * An implementation of a metaverse node.
  */
 public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifiable {
 
+  private static final int INITIAL_PROPERTY_SIZE = 5;
+
   /** The property map. */
-  protected Map<String, Object> propertyMap = new HashMap<String, Object>( 5 );
+  protected Map<String, Object> propertyMap = new HashMap<String, Object>( INITIAL_PROPERTY_SIZE );
+
+  /** The links from this node */
+  protected List<IMetaverseLink> links = new ArrayList<IMetaverseLink>();
 
   /**
    * Instantiates a new (empty) metaverse transient node.
@@ -61,7 +68,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public String getName() {
-    Object name = propertyMap.get( "name" );
+    Object name = propertyMap.get( DictionaryConst.PROPERTY_NAME );
     if ( name == null ) {
       return null;
     }
@@ -75,7 +82,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public String getStringID() {
-    Object id = propertyMap.get( "id" );
+    Object id = propertyMap.get( DictionaryConst.PROPERTY_ID );
     if ( id == null ) {
       return null;
     }
@@ -89,7 +96,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public String getType() {
-    Object type = propertyMap.get( "type" );
+    Object type = propertyMap.get( DictionaryConst.PROPERTY_TYPE );
     if ( type == null ) {
       return null;
     }
@@ -103,7 +110,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public void setName( String name ) {
-    propertyMap.put( "name", name );
+    propertyMap.put( DictionaryConst.PROPERTY_NAME, name );
   }
 
   /*
@@ -113,7 +120,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public void setStringID( String id ) {
-    propertyMap.put( "id", id );
+    propertyMap.put( DictionaryConst.PROPERTY_ID, id );
   }
 
   /*
@@ -164,6 +171,30 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
   @Override
   public <T> T removeProperty( String key ) {
     return (T) propertyMap.remove( key );
+  }
+
+  /**
+   * Adds a link to this node
+   * @param link The link to add
+   */
+  public void addLink( IMetaverseLink link ) {
+    links.add( link );
+  }
+
+  /**
+   * Removes a link from this node
+   * @param link The link to remove
+   */
+  public void removeLink( IMetaverseLink link ) {
+    links.remove( link );
+  }
+
+  /**
+   * Returns the set of links for this node
+   * @return
+   */
+  public List<IMetaverseLink> getLinks() {
+    return links;
   }
 
 }

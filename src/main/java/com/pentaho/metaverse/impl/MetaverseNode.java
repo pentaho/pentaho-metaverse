@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
@@ -64,7 +65,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getName() {
-    return v.getProperty( "name" );
+    return v.getProperty( DictionaryConst.PROPERTY_NAME );
   }
 
   /*
@@ -84,7 +85,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getType() {
-    return v.getProperty( "type" );
+    return v.getProperty( DictionaryConst.PROPERTY_TYPE );
   }
 
   /*
@@ -94,7 +95,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public void setName( String name ) {
-    v.setProperty( "name", name );
+    v.setProperty( DictionaryConst.PROPERTY_NAME, name );
 
   }
 
@@ -105,7 +106,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public void setType( String type ) {
-    v.setProperty( "type", type );
+    v.setProperty( DictionaryConst.PROPERTY_TYPE, type );
 
   }
 

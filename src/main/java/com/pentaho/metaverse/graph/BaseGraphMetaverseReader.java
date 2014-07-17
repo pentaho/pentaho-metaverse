@@ -3,17 +3,20 @@ package com.pentaho.metaverse.graph;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.engine.core.system.PentahoBase;
 
-import com.pentaho.metaverse.api.GraphConst;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.MetaverseLink;
 import com.pentaho.metaverse.api.IMetaverseReader;
-import com.pentaho.metaverse.impl.MetaverseLink;
 import com.pentaho.metaverse.impl.MetaverseNode;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
@@ -104,8 +107,73 @@ public abstract class BaseGraphMetaverseReader extends PentahoBase implements IM
 
   @Override
   public Graph search( List<String> resultTypes, List<String> startNodeIDs ) {
-    // TODO Auto-generated method stub
-    return null;
+
+    Graph g = new TinkerGraph();
+
+    for ( String startNodeID : startNodeIDs ) {
+      Graph subGraph = getGraph( startNodeID );
+      if ( subGraph != null ) {
+        // traverse look for paths to the results
+        Vertex startVertex = subGraph.getVertex( startNodeID );
+        GraphPath path = new GraphPath();
+        Set<Object> done = new HashSet<Object>();
+        Map<Object, GraphPath> shortestPaths = new HashMap<Object, GraphPath>();
+        traverseGraph( startVertex, subGraph, resultTypes, path, done, shortestPaths );
+
+        Iterator<Map.Entry<Object, GraphPath>> paths = shortestPaths.entrySet().iterator();
+        while ( paths.hasNext() ) {
+          Map.Entry<Object, GraphPath> entry = paths.next();
+          GraphPath shortPath = entry.getValue();
+          shortPath.addToGraph( g );
+        }
+
+      }
+    }
+    return g;
+  }
+
+  private void traverseGraph( Vertex startVertex, Graph subGraph, List<String> resultTypes, GraphPath path,
+      Set<Object> done, Map<Object, GraphPath> shortestPaths ) {
+    boolean isTargetType = resultTypes.contains( startVertex.getProperty( DictionaryConst.PROPERTY_TYPE ) );
+    if ( !isTargetType && done.contains( startVertex.getId() ) ) {
+      return;
+    }
+    path.addVertex( startVertex );
+    if ( isTargetType ) {
+      // this is one of our target types
+      GraphPath shortestPath = shortestPaths.get( startVertex.getId() );
+      if ( shortestPath == null || path.getLength() < shortestPath.getLength()  ) {
+        shortestPaths.put( startVertex.getId(), path.clone() );
+      }
+      if ( done.contains( startVertex.getId() ) ) {
+        path.pop();
+        return;
+      }
+    }
+    done.add( startVertex.getId() );
+    Iterator<Edge> edges = startVertex.getEdges( Direction.IN ).iterator();
+    while ( edges.hasNext() ) {
+      Edge edge = edges.next();
+      if ( done.contains( edge.getId() ) ) {
+        continue;
+      }
+      path.addEdge( edge );
+      Vertex nextVertex = edge.getVertex( Direction.OUT );
+      traverseGraph( nextVertex, subGraph, resultTypes, path, done, shortestPaths );
+      path.pop();
+    }
+    edges = startVertex.getEdges( Direction.OUT ).iterator();
+    while ( edges.hasNext() ) {
+      Edge edge = edges.next();
+      if ( done.contains( edge.getId() ) ) {
+        continue;
+      }
+      path.addEdge( edge );
+      Vertex nextVertex = edge.getVertex( Direction.IN );
+      traverseGraph( nextVertex, subGraph, resultTypes, path, done, shortestPaths );
+      path.pop();
+    }
+    path.pop();
   }
 
   @Override
@@ -116,7 +184,7 @@ public abstract class BaseGraphMetaverseReader extends PentahoBase implements IM
     }
     Graph g = new TinkerGraph();
     // find the upstream nodes
-    Vertex clone = cloneVertexIntoGraph( root, g );
+    Vertex clone = GraphUtil.cloneVertexIntoGraph( root, g );
     traceVertices( root, clone, Direction.IN, getGraph(), g, null );
     traceVertices( root, clone, Direction.OUT, getGraph(), g, null );
     return g;
@@ -141,7 +209,7 @@ public abstract class BaseGraphMetaverseReader extends PentahoBase implements IM
         continue;
       }
       Vertex nextVertex = edge.getVertex( opDirection );
-      Vertex target = cloneVertexIntoGraph( nextVertex, graph2 );
+      Vertex target = GraphUtil.cloneVertexIntoGraph( nextVertex, graph2 );
       Vertex node1 = direction == Direction.IN ? target : clone;
       Vertex node2 = direction == Direction.IN ? clone : target;
       String edgeId = (String) node1.getId() + ">" + (String) node2.getId();
@@ -154,30 +222,9 @@ public abstract class BaseGraphMetaverseReader extends PentahoBase implements IM
       }
       traceVertices( nextVertex, target, direction, graph1, graph2, edgeTypes );
       if ( direction == Direction.OUT ) {
-        traceVertices( nextVertex, target, Direction.IN, graph1, graph2, GraphConst.STRUCTURAL_LINK_MAP );
+        traceVertices( nextVertex, target, Direction.IN, graph1, graph2, DictionaryConst.STRUCTURAL_LINK_MAP );
       }
     }
-  }
-
-  /**
-   * Clones a provided vertex into a new graph. The graph should not be the graph that the
-   * provided vertex belongs to.
-   * @param vertex The vertex to clone
-   * @param g The graph to clone the vertex into.
-   * @return The vertex in the sub-graph
-   */
-  private Vertex cloneVertexIntoGraph( Vertex vertex, Graph g ) {
-    Vertex clone = g.getVertex( vertex.getId() );
-    if ( clone != null ) {
-      return clone;
-    }
-    clone = g.addVertex( vertex.getId() );
-    Set<String> keys = vertex.getPropertyKeys();
-    for ( String key : keys ) {
-      String value = vertex.getProperty( key );
-      clone.setProperty( key, value );
-    }
-    return clone;
   }
 
 }
