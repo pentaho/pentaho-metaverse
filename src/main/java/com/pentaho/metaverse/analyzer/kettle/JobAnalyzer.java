@@ -22,7 +22,6 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import com.pentaho.metaverse.api.GraphConst;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
@@ -31,6 +30,8 @@ import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+
+import com.pentaho.dictionary.DictionaryConst;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;
@@ -107,7 +108,7 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
       if ( entry != null ) {
         IAnalyzer<JobEntryCopy> analyzer = getJobEntryAnalyzer( entry );
         IMetaverseNode entryNode = analyzer.analyze( entry );
-        metaverseBuilder.addLink( node, GraphConst.LINK_CONTAINS, entryNode );
+        metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, entryNode );
       }
 
     }

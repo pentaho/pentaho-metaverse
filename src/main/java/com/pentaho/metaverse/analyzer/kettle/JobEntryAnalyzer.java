@@ -1,9 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
-import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -25,7 +23,7 @@ public class JobEntryAnalyzer extends AbstractAnalyzer<JobEntryCopy> {
       throw new MetaverseAnalyzerException( "JobEntryInterface is null!" );
     }
 
-    if ( metaverseBuilder == null ){
+    if ( metaverseBuilder == null ) {
       throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
     }
 
