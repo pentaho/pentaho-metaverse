@@ -64,6 +64,11 @@ public class DictionaryConst {
   public static final String LINK_WRITESTO = "writesto";
 
   /**
+   * Label for a "used by" edge in the graph, e.g. a databaseMeta is used by a step
+   */
+  public static final String LINK_USEDBY = "usedby";
+
+  /**
    * Label for an "creates" edge in the graph, e.g. a transformation step creates a transformation field
    */
   public static final String LINK_CREATES = "creates";
@@ -105,6 +110,7 @@ public class DictionaryConst {
     DATAFLOW_LINK_MAP.add( LINK_POPULATES );
     DATAFLOW_LINK_MAP.add( LINK_READBY );
     DATAFLOW_LINK_MAP.add( LINK_WRITESTO );
+    DATAFLOW_LINK_MAP.add( LINK_USEDBY );
   }
 
 }

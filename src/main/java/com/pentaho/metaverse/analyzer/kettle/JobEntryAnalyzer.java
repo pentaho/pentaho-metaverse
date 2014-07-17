@@ -1,9 +1,8 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
-import org.pentaho.di.core.database.DatabaseMeta;
+import com.pentaho.dictionary.DictionaryConst;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -25,7 +24,7 @@ public class JobEntryAnalyzer extends AbstractAnalyzer<JobEntryCopy> {
       throw new MetaverseAnalyzerException( "JobEntryInterface is null!" );
     }
 
-    if ( metaverseBuilder == null ){
+    if ( metaverseBuilder == null ) {
       throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
     }
 
@@ -37,9 +36,7 @@ public class JobEntryAnalyzer extends AbstractAnalyzer<JobEntryCopy> {
     IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
 
     node.setName( entry.getName() );
-
-    // TODO What are these types? They belong in the dictionary, yes?
-    node.setType( "jobEntry" );
+    node.setType( DictionaryConst.NODE_TYPE_JOB_ENTRY );
 
     metaverseBuilder.addNode( node );
 
