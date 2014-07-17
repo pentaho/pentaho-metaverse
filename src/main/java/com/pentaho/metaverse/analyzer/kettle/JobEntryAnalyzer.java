@@ -1,11 +1,11 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
+import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.di.job.entry.JobEntryInterface;
+import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
 /**
  * Created by gmoran on 7/16/14.
@@ -13,8 +13,39 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 public class JobEntryAnalyzer extends AbstractAnalyzer<JobEntryCopy> {
 
   @Override
-  public IMetaverseNode analyze( JobEntryCopy object ) throws MetaverseAnalyzerException {
-    return null;
+  public IMetaverseNode analyze( JobEntryCopy entry ) throws MetaverseAnalyzerException {
+
+    if ( entry == null ) {
+      throw new MetaverseAnalyzerException( "TableOutputMeta is null!" );
+    }
+
+    JobEntryInterface jobEntryInterface = entry.getEntry();
+
+    if ( jobEntryInterface == null ) {
+      throw new MetaverseAnalyzerException( "JobEntryInterface is null!" );
+    }
+
+    if ( metaverseBuilder == null ){
+      throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
+    }
+
+    if ( metaverseObjectFactory == null ) {
+      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
+    }
+
+    // Add yourself
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
+
+    node.setName( entry.getName() );
+
+    // TODO What are these types? They belong in the dictionary, yes?
+    node.setType( "jobEntry" );
+
+    metaverseBuilder.addNode( node );
+
+
+    return node;
+
   }
 
 }

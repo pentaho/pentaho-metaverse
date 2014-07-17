@@ -22,10 +22,15 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.pentaho.metaverse.api.GraphConst;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
-import org.pentaho.platform.api.metaverse.*;
+import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
+import org.pentaho.platform.api.metaverse.IAnalyzer;
+import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;
@@ -34,10 +39,7 @@ import java.util.Set;
 
 public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements IDocumentAnalyzer {
 
-
-
   private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
-
     {
       add( "kjb" );
     }
@@ -84,6 +86,10 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
     // TODO get unique ID and set it on the node
     IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
 
+    // TODO Where are these types? dictionary?
+    node.setType( "job" );
+    node.setName( job.getName() );
+
     // pull out the standard fields
     String description = job.getDescription();
     node.setProperty( "description", description );
@@ -97,15 +103,13 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
     // handle the entries
     for ( int i = 0; i < job.nrJobEntries(); i++ ) {
       JobEntryCopy entry = job.getJobEntry( i );
+
       if ( entry != null ) {
         IAnalyzer<JobEntryCopy> analyzer = getJobEntryAnalyzer( entry );
-        if ( analyzer == null ) {
-          analyzer = new JobEntryAnalyzer();
-          analyzer.setMetaverseBuilder( metaverseBuilder );
-          analyzer.setMetaverseObjectFactory( metaverseObjectFactory );
-        }
-        analyzer.analyze( entry );
+        IMetaverseNode entryNode = analyzer.analyze( entry );
+        metaverseBuilder.addLink( node, GraphConst.LINK_CONTAINS, entryNode );
       }
+
     }
 
     metaverseBuilder.addNode( node );
@@ -124,7 +128,11 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
     //
     // If none can be found, a default handler should be returned.
 
-    return null; // new JobEntryAnalyzer();
+    IAnalyzer<JobEntryCopy> entryAnalyzer = new JobEntryAnalyzer();
+    entryAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
+    entryAnalyzer.setMetaverseBuilder( metaverseBuilder );
+
+    return entryAnalyzer;
   }
 
 
