@@ -23,7 +23,9 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**

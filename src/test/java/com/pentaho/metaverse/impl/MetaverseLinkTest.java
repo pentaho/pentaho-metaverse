@@ -26,8 +26,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
-import com.pentaho.dictionary.MetaverseLink;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 

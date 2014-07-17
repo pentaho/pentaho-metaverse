@@ -23,8 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.platform.api.metaverse.*;
 
 /**
  * DatabaseConnectionAnalyzer collects metadata about a PDI database connection

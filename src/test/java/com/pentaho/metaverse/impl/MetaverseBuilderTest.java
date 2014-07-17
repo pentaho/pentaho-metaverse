@@ -1,13 +1,10 @@
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.dictionary.MetaverseLink;
-import com.pentaho.dictionary.MetaverseTransientNode;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
