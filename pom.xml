@@ -46,7 +46,7 @@
     <jcr.version>2.0</jcr.version>
     <spring.version>2.5.6</spring.version>
     <mockito-all.version>1.9.5</mockito-all.version>
-  <pentaho-pur-repository.version>5.1.0.0-752</pentaho-pur-repository.version>
+    <pentaho-pur-repository.version>TRUNK-SNAPSHOT</pentaho-pur-repository.version>
   </properties>
 
   <scm>
