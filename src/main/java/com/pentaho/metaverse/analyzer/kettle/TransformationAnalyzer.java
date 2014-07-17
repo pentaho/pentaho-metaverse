@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.pentaho.metaverse.api.GraphConst;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.trans.TransMeta;
@@ -37,6 +36,8 @@ import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+
+import com.pentaho.dictionary.DictionaryConst;
 
 public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements IDocumentAnalyzer {
 
@@ -109,7 +110,7 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
           stepAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
         }
         IMetaverseNode stepNode = stepAnalyzer.analyze( stepMeta );
-        metaverseBuilder.addLink( node, GraphConst.LINK_CONTAINS, stepNode );
+        metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, stepNode );
       }
     }
 

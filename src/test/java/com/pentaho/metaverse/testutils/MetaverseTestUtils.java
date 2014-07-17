@@ -31,9 +31,9 @@ import org.mockito.stubbing.Answer;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
+import com.pentaho.dictionary.MetaverseLink;
+import com.pentaho.dictionary.MetaverseTransientNode;
 import com.pentaho.metaverse.impl.MetaverseDocument;
-import com.pentaho.metaverse.impl.MetaverseLink;
-import com.pentaho.metaverse.impl.MetaverseTransientNode;
 
 /**
  * @author mburgess
