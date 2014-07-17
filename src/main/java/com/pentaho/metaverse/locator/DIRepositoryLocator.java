@@ -22,14 +22,13 @@
 
 package com.pentaho.metaverse.locator;
 
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
+import org.pentaho.di.repository.pur.PurRepository;
 import org.pentaho.di.www.CarteSingleton;
 import org.pentaho.di.www.SlaveServerConfig;
 import org.pentaho.di.www.TransformationMap;
@@ -91,10 +90,9 @@ public class DIRepositoryLocator extends RepositoryLocator {
 
     if ( unifiedRepository == null && !( repository instanceof KettleFileRepository ) ) {
       getRepository();
-      Method method = repository.getClass().getMethod( "getPur" );
-      Object result = method.invoke( repository );
-      if ( result instanceof IUnifiedRepository ) {
-        IUnifiedRepository repo = (IUnifiedRepository) result;
+      if ( repository instanceof PurRepository ) {
+        PurRepository purRepository = (PurRepository) repository;
+        IUnifiedRepository repo = purRepository.getPur();
         return repo;
       }
     }

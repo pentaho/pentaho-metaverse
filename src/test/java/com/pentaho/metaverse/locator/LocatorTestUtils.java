@@ -44,6 +44,7 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
+import org.pentaho.di.repository.pur.PurRepository;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
@@ -54,7 +55,7 @@ public class LocatorTestUtils {
   public static long delay = 0;
 
   public static Repository getMockDiRepository() {
-    Repository diRepo = mock( Repository.class );
+    PurRepository diRepo = mock( PurRepository.class );
 
     try {
       when( diRepo.loadJob( any( ObjectId.class ), anyString() ) ).thenAnswer( new Answer<JobMeta>() {
@@ -70,6 +71,13 @@ public class LocatorTestUtils {
         public TransMeta answer( InvocationOnMock invocationOnMock ) throws Throwable {
           Object[] args = invocationOnMock.getArguments();
           return loadTransformation( (ObjectId) args[ 0 ], (String) args[ 1 ] );
+        }
+      } );
+
+      when( diRepo.getPur() ).thenAnswer( new Answer<IUnifiedRepository>() {
+        @Override
+        public IUnifiedRepository answer( InvocationOnMock invocationOnMock ) throws Throwable {
+          return getMockIUnifiedRepository();
         }
       } );
 
