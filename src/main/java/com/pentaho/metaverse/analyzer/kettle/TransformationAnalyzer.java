@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.pentaho.metaverse.api.GraphConst;
+import com.pentaho.dictionary.DictionaryConst;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.trans.TransMeta;
@@ -86,7 +86,7 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
     // TODO get unique ID and set it on the node
     IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
     node.setName( transMeta.getName() );
-    node.setType( "transformation" );
+    node.setType( DictionaryConst.NODE_TYPE_TRANS );
 
     // pull out the standard fields
     String description = transMeta.getDescription();
@@ -109,7 +109,7 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
           stepAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
         }
         IMetaverseNode stepNode = stepAnalyzer.analyze( stepMeta );
-        metaverseBuilder.addLink( node, GraphConst.LINK_CONTAINS, stepNode );
+        metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, stepNode );
       }
     }
 
