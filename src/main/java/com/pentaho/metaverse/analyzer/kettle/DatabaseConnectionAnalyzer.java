@@ -22,8 +22,10 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.pentaho.dictionary.DictionaryConst;
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.platform.api.metaverse.*;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
  * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
@@ -59,8 +61,7 @@ public class DatabaseConnectionAnalyzer extends AbstractAnalyzer<DatabaseMeta> {
     // TODO Is this appropriate? What are our name conventions?
     node.setName( object.getName() );
 
-    // TODO What are our valid list of types?
-    node.setType( "datasource" );
+    node.setType( DictionaryConst.NODE_TYPE_DATASOURCE );
 
     int accessType = object.getAccessType();
     node.setProperty( "accessType", accessType );

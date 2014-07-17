@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import com.pentaho.metaverse.api.GraphConst;
+import com.pentaho.dictionary.DictionaryConst;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
@@ -41,7 +41,7 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
 
   private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
     {
-      add( "kjb" );
+      add( DictionaryConst.NODE_TYPE_JOB );
     }
   };
 
@@ -86,8 +86,7 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
     // TODO get unique ID and set it on the node
     IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
 
-    // TODO Where are these types? dictionary?
-    node.setType( "job" );
+    node.setType(  DictionaryConst.NODE_TYPE_JOB);
     node.setName( job.getName() );
 
     // pull out the standard fields
@@ -107,7 +106,7 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
       if ( entry != null ) {
         IAnalyzer<JobEntryCopy> analyzer = getJobEntryAnalyzer( entry );
         IMetaverseNode entryNode = analyzer.analyze( entry );
-        metaverseBuilder.addLink( node, GraphConst.LINK_CONTAINS, entryNode );
+        metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, entryNode );
       }
 
     }
