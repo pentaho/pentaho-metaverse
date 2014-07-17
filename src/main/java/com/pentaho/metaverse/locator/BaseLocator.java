@@ -31,7 +31,7 @@ import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
 import org.pentaho.platform.engine.core.system.PentahoBase;
 
-import com.pentaho.metaverse.api.IIdGenerator;
+import com.pentaho.dictionary.IIdGenerator;
 
 /**
  * Base implementation for all @see org.pentaho.platform.api.metaverse.IDocumentLocator implementations

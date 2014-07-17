@@ -22,10 +22,14 @@
 
 package com.pentaho.metaverse.impl;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.MetaverseLink;
+import com.pentaho.dictionary.MetaverseTransientNode;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
@@ -134,7 +138,7 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
   private void copyNodePropertiesToVertex( IMetaverseNode node, Vertex v ) {
     // set all of the properties, except the id and virtual (since that is an internally set prop)
     for ( String propertyKey : node.getPropertyKeys() ) {
-      if ( propertyKey.equals( "id" ) || propertyKey.equals( VIRTUAL ) ) {
+      if ( propertyKey.equals( DictionaryConst.PROPERTY_ID ) || propertyKey.equals( VIRTUAL ) ) {
         continue;
       } else {
         Object value = node.getProperty( propertyKey );

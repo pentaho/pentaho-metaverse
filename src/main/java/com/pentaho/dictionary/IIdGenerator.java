@@ -20,7 +20,7 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.api;
+package com.pentaho.dictionary;
 
 /**
  * An IIdGenerator generates unique ids for a given type of artifact. Artifact types include

@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.pentaho.metaverse.api.GraphConst;
+import com.pentaho.dictionary.DictionaryConst;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
@@ -74,49 +74,49 @@ public class TestTinkerGraphMetaverseReader extends BaseGraphMetaverseReader {
     createVertex( "job2.kjb", "job", "Job: job2.kjb" );
 
     // these are the links
-    graph.addEdge( null, job1, trans1, GraphConst.LINK_EXECUTES );
-    graph.addEdge( null, job1, trans2, GraphConst.LINK_EXECUTES );
-    graph.addEdge( null, trans1, trans1Step1, GraphConst.LINK_EXECUTES );
-    graph.addEdge( null, trans1, trans1Step2, GraphConst.LINK_EXECUTES );
-    graph.addEdge( null, trans1, trans1Step3, GraphConst.LINK_EXECUTES );
-    graph.addEdge( null, textFile, trans1Step1, GraphConst.LINK_READBY );
-    graph.addEdge( null, textFile, textField1, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, textFile, textField2, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, trans1Step1, trans1Field1, GraphConst.LINK_CREATES );
-    graph.addEdge( null, trans1Step1, trans1Field2, GraphConst.LINK_CREATES );
-    graph.addEdge( null, textField1, trans1Field1, GraphConst.LINK_POPULATES );
-    graph.addEdge( null, textField2, trans1Field2, GraphConst.LINK_POPULATES );
-    graph.addEdge( null, trans1Step2, trans1Field3, GraphConst.LINK_CREATES );
-    graph.addEdge( null, trans1Step3, table1, GraphConst.LINK_WRITESTO );
-    graph.addEdge( null, datasource1, table1, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, table1, table1field1, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, table1, table1field2, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, table1, table1field3, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, trans1Field1, table1field1, GraphConst.LINK_POPULATES );
-    graph.addEdge( null, trans1Field2, table1field2, GraphConst.LINK_POPULATES );
-    graph.addEdge( null, trans1Field3, table1field3, GraphConst.LINK_POPULATES );
+    graph.addEdge( null, job1, trans1, DictionaryConst.LINK_EXECUTES );
+    graph.addEdge( null, job1, trans2, DictionaryConst.LINK_EXECUTES );
+    graph.addEdge( null, trans1, trans1Step1, DictionaryConst.LINK_EXECUTES );
+    graph.addEdge( null, trans1, trans1Step2, DictionaryConst.LINK_EXECUTES );
+    graph.addEdge( null, trans1, trans1Step3, DictionaryConst.LINK_EXECUTES );
+    graph.addEdge( null, textFile, trans1Step1, DictionaryConst.LINK_READBY );
+    graph.addEdge( null, textFile, textField1, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, textFile, textField2, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, trans1Step1, trans1Field1, DictionaryConst.LINK_CREATES );
+    graph.addEdge( null, trans1Step1, trans1Field2, DictionaryConst.LINK_CREATES );
+    graph.addEdge( null, textField1, trans1Field1, DictionaryConst.LINK_POPULATES );
+    graph.addEdge( null, textField2, trans1Field2, DictionaryConst.LINK_POPULATES );
+    graph.addEdge( null, trans1Step2, trans1Field3, DictionaryConst.LINK_CREATES );
+    graph.addEdge( null, trans1Step3, table1, DictionaryConst.LINK_WRITESTO );
+    graph.addEdge( null, datasource1, table1, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, table1, table1field1, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, table1, table1field2, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, table1, table1field3, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, trans1Field1, table1field1, DictionaryConst.LINK_POPULATES );
+    graph.addEdge( null, trans1Field2, table1field2, DictionaryConst.LINK_POPULATES );
+    graph.addEdge( null, trans1Field3, table1field3, DictionaryConst.LINK_POPULATES );
 
-    graph.addEdge( null, trans2, trans2Step1, GraphConst.LINK_EXECUTES );
-    graph.addEdge( null, trans2, trans2Step2, GraphConst.LINK_EXECUTES );
-    graph.addEdge( null, trans2, trans2Step3, GraphConst.LINK_EXECUTES );
-    graph.addEdge( null, table1, trans2Step1, GraphConst.LINK_READBY );
-    graph.addEdge( null, trans2Step1, trans2Field1, GraphConst.LINK_CREATES );
-    graph.addEdge( null, trans2Step1, trans2Field2, GraphConst.LINK_CREATES );
-    graph.addEdge( null, trans2Step1, trans2Field3, GraphConst.LINK_CREATES );
-    graph.addEdge( null, table1field1, trans2Field1, GraphConst.LINK_POPULATES );
-    graph.addEdge( null, table1field2, trans2Field2, GraphConst.LINK_POPULATES );
-    graph.addEdge( null, table1field3, trans2Field3, GraphConst.LINK_POPULATES );
-    graph.addEdge( null, trans2Step2, trans2Field4, GraphConst.LINK_CREATES );
-    graph.addEdge( null, trans2Step3, table2, GraphConst.LINK_WRITESTO );
-    graph.addEdge( null, datasource1, table2, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, table2, table2field1, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, table2, table2field2, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, table2, table2field3, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, table2, table2field4, GraphConst.LINK_CONTAINS );
-    graph.addEdge( null, trans2Field1, table2field1, GraphConst.LINK_POPULATES );
-    graph.addEdge( null, trans2Field2, table2field2, GraphConst.LINK_POPULATES );
-    graph.addEdge( null, trans2Field3, table2field3, GraphConst.LINK_POPULATES );
-    graph.addEdge( null, trans2Field4, table2field4, GraphConst.LINK_POPULATES );
+    graph.addEdge( null, trans2, trans2Step1, DictionaryConst.LINK_EXECUTES );
+    graph.addEdge( null, trans2, trans2Step2, DictionaryConst.LINK_EXECUTES );
+    graph.addEdge( null, trans2, trans2Step3, DictionaryConst.LINK_EXECUTES );
+    graph.addEdge( null, table1, trans2Step1, DictionaryConst.LINK_READBY );
+    graph.addEdge( null, trans2Step1, trans2Field1, DictionaryConst.LINK_CREATES );
+    graph.addEdge( null, trans2Step1, trans2Field2, DictionaryConst.LINK_CREATES );
+    graph.addEdge( null, trans2Step1, trans2Field3, DictionaryConst.LINK_CREATES );
+    graph.addEdge( null, table1field1, trans2Field1, DictionaryConst.LINK_POPULATES );
+    graph.addEdge( null, table1field2, trans2Field2, DictionaryConst.LINK_POPULATES );
+    graph.addEdge( null, table1field3, trans2Field3, DictionaryConst.LINK_POPULATES );
+    graph.addEdge( null, trans2Step2, trans2Field4, DictionaryConst.LINK_CREATES );
+    graph.addEdge( null, trans2Step3, table2, DictionaryConst.LINK_WRITESTO );
+    graph.addEdge( null, datasource1, table2, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, table2, table2field1, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, table2, table2field2, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, table2, table2field3, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, table2, table2field4, DictionaryConst.LINK_CONTAINS );
+    graph.addEdge( null, trans2Field1, table2field1, DictionaryConst.LINK_POPULATES );
+    graph.addEdge( null, trans2Field2, table2field2, DictionaryConst.LINK_POPULATES );
+    graph.addEdge( null, trans2Field3, table2field3, DictionaryConst.LINK_POPULATES );
+    graph.addEdge( null, trans2Field4, table2field4, DictionaryConst.LINK_POPULATES );
 
   }
 
@@ -138,10 +138,10 @@ public class TestTinkerGraphMetaverseReader extends BaseGraphMetaverseReader {
 
   }
 
-  private Vertex createVertex( String id, String type, String label ) {
+  private Vertex createVertex( String id, String type, String name ) {
     Vertex v = graph.addVertex( id );
-    v.setProperty( "type", type );
-    v.setProperty( "name", label );
+    v.setProperty( DictionaryConst.PROPERTY_TYPE, type );
+    v.setProperty( DictionaryConst.PROPERTY_NAME, name );
     return v;
   }
 

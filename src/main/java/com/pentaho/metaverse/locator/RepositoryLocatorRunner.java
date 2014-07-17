@@ -91,7 +91,6 @@ public class RepositoryLocatorRunner implements Runnable {
 
     for ( RepositoryFileTree fileTree : fileTrees ) {
       if ( stopping ) {
-        System.out.println( "RepositoryLocatorRunner indexFileTree stopping" );
         return;
       }
       if ( fileTree.getFile() != null ) {
@@ -116,7 +115,6 @@ public class RepositoryLocatorRunner implements Runnable {
   private void indexFile( RepositoryFile file ) {
 
     if ( stopping ) {
-      System.out.println( "RepositoryLocatorRunner indexFile stopping" );
       return;
     }
     if ( file.isHidden() ) {
