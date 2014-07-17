@@ -34,6 +34,16 @@ public class DictionaryConst {
   public static final String PROPERTY_NAME = "name";
 
   /**
+   * Property key for "author"
+   */
+  public static final String PROPERTY_AUTHOR = "author";
+
+  /**
+   * Property key for "last modified"
+   */
+  public static final String PROPERTY_LAST_MODIFED = "lastmodified";
+
+  /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
    */
   public static final String LINK_EXECUTES = "executes";
