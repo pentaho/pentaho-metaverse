@@ -46,7 +46,7 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
   public IMetaverseNode analyze( StepMeta stepMeta ) throws MetaverseAnalyzerException {
 
     if ( stepMeta == null ) {
-      throw new MetaverseAnalyzerException( "TableOutputMeta is null!" );
+      throw new MetaverseAnalyzerException( "StepMeta is null!" );
     }
 
     StepMetaInterface stepMetaInterface = stepMeta.getStepMetaInterface();
@@ -63,6 +63,7 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
     IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
 
     node.setName( stepMeta.getName() );
+    node.setType( "step" );
 
     metaverseBuilder.addNode( node );
 
