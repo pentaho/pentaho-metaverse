@@ -102,6 +102,8 @@ public class DictionaryConst {
   public static final String NODE_TYPE_LOGICAL_FIELD = "modelfield";
   public static final String NODE_TYPE_USER_CONTENT = "content";
 
+  public static final String NODE_VIRTUAL = "virtual";
+
   /**
    * The set of structural link types
    */

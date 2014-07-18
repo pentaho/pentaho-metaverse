@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.engine.core.system.PentahoBase;
@@ -29,16 +31,28 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
  * @author jdixon
  *
  */
-public abstract class BaseGraphMetaverseReader extends PentahoBase implements IMetaverseReader {
+public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMetaverseReader {
 
   private static final long serialVersionUID = -3813738340722424284L;
+  private static final Log LOGGER = LogFactory.getLog( BlueprintsGraphMetaverseReader.class );
+
+  private Graph graph;
 
   /**
-   * Subclasses must implement this method and return the instance of Graph that the system
-   * should use.
-   * @return The Blueprint graph
+   * Constructor that accepts a Graph
+   * @param graph the Graph to read from
    */
-  protected abstract Graph getGraph();
+  public BlueprintsGraphMetaverseReader( Graph graph ) {
+    this.graph = graph;
+  }
+
+  /**
+   * Gets the complete, underlying graph
+   * @return the entire Graph
+   */
+  protected Graph getGraph() {
+    return graph;
+  }
 
   @Override
   public IMetaverseNode findNode( String id ) {
@@ -227,4 +241,7 @@ public abstract class BaseGraphMetaverseReader extends PentahoBase implements IM
     }
   }
 
+  @Override public Log getLogger() {
+    return LOGGER;
+  }
 }
