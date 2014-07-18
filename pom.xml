@@ -119,7 +119,21 @@
       <version>${mockito-all.version}</version>
       <scope>test</scope>
     </dependency>
-  
+
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-platform-core-test</artifactId>
+      <version>${pentaho-platform-repository.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>

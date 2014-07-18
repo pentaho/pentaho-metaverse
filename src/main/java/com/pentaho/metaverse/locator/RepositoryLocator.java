@@ -25,6 +25,7 @@ package com.pentaho.metaverse.locator;
 import java.util.List;
 
 import org.pentaho.platform.api.engine.IPentahoSession;
+import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
@@ -44,6 +45,21 @@ public abstract class RepositoryLocator extends BaseLocator {
   private IUnifiedRepository unifiedRepository;
 
   private RepositoryLocatorRunner indexRunner;
+
+  /**
+   * Default Constructor
+   */
+  protected RepositoryLocator() {
+    super();
+  }
+
+  /**
+   * Constructor that takes in a List of IDocumentListeners
+   * @param documentListeners the List of listeners
+   */
+  public RepositoryLocator( List<IDocumentListener> documentListeners ) {
+    super( documentListeners );
+  }
 
   /**
    * A method that returns the IUnifiedRepository for this environment

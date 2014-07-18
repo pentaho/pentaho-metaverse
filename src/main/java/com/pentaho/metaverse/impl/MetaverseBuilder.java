@@ -60,6 +60,10 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     this.graph = graph;
   }
 
+  protected Graph getGraph() {
+    return graph;
+  }
+
   /**
    * Adds a link between 2 nodes in the underlying graph. If either node does not exist, it will be created.
    * @param link
@@ -91,7 +95,8 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     // update the to vertex properties from the toNode
     copyNodePropertiesToVertex( link.getToNode(), toVertex );
 
-    graph.addEdge( null, fromVertex, toVertex, link.getLabel() );
+    Edge e = graph.addEdge( null, fromVertex, toVertex, link.getLabel() );
+    e.setProperty( "text", link.getLabel() );
 
     return this;
   }

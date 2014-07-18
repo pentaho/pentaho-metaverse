@@ -33,8 +33,11 @@ import org.pentaho.di.www.CarteSingleton;
 import org.pentaho.di.www.SlaveServerConfig;
 import org.pentaho.di.www.TransformationMap;
 import org.pentaho.platform.api.engine.IPentahoSession;
+import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
+
+import java.util.List;
 
 /**
  * A document locator for the DI repository @see org.pentaho.platform.api.metaverse.IDocumentLocator
@@ -60,6 +63,15 @@ public class DIRepositoryLocator extends RepositoryLocator {
    */
   public DIRepositoryLocator() {
     super();
+    setIndexerType( LOCATOR_TYPE );
+  }
+
+  /**
+   * Constructor that takes in a List of IDocumentListeners
+   * @param documentListeners the List of listeners
+   */
+  public DIRepositoryLocator( List<IDocumentListener> documentListeners ) {
+    super( documentListeners );
     setIndexerType( LOCATOR_TYPE );
   }
 
@@ -103,7 +115,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
   protected Object getFileContents( RepositoryFile file, String type ) throws Exception {
 
     Object object = null;
-    ObjectId objectId = new StringObjectId( file.getId().toString() );
+    ObjectId objectId = new StringObjectId( file.getPath() );
     if ( "ktr".equals( type ) ) {
       object = repository.loadTransformation( objectId, null );
     } else if ( "kjb".equals( type ) ) {
