@@ -53,7 +53,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   private IMetaverseObjectFactory metaverseObjectFactory;
 
   /** The analyzers. */
-  private Set<IDocumentAnalyzer> analyzers = new HashSet<IDocumentAnalyzer>();
+  private Set<IDocumentAnalyzer> documentAnalyzers = new HashSet<IDocumentAnalyzer>();
 
   /** The analyzer type map. */
   private Map<String, HashSet<IDocumentAnalyzer>> analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>();
@@ -118,7 +118,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
      */
   @Override
   public Set<IDocumentAnalyzer> getAnalyzers() {
-    return analyzers;
+    return documentAnalyzers;
   }
 
   /*
@@ -151,11 +151,11 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
   /**
    * Set the analyzers that are available in the system
    * 
-   * @param analyzers
+   * @param documentAnalyzers
    *          the complete Set of IDocumentAnalyzers
    */
-  public void setDocumentAnalyzers( Set<IDocumentAnalyzer> analyzers ) {
-    this.analyzers = analyzers;
+  public void setDocumentAnalyzers( Set<IDocumentAnalyzer> documentAnalyzers ) {
+    this.documentAnalyzers = documentAnalyzers;
     // reset the analyzer type map
     loadAnalyzerTypeMap();
   }
@@ -181,7 +181,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
    */
   protected void loadAnalyzerTypeMap() {
     analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>();
-    for ( IDocumentAnalyzer analyzer : analyzers ) {
+    for ( IDocumentAnalyzer analyzer : documentAnalyzers ) {
       Set<String> types = analyzer.getSupportedTypes();
       analyzer.setMetaverseBuilder( this );
       analyzer.setMetaverseObjectFactory( metaverseObjectFactory );

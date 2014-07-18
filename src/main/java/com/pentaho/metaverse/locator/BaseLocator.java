@@ -60,9 +60,17 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
   private List<IDocumentListener> listeners = new ArrayList<IDocumentListener>();
 
   /**
-   * Condstructor for the abstract super class
+   * Constructor for the abstract super class
    */
   public BaseLocator() {
+  }
+
+  /**
+   * Constructor that takes in a List of IDocumentListeners
+   * @param documentListeners the List of listeners
+   */
+  public BaseLocator( List<IDocumentListener> documentListeners ) {
+    this.listeners = documentListeners;
   }
 
   @Override

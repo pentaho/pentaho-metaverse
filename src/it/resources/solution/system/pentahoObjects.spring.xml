@@ -1,0 +1,64 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"
+       default-lazy-init="true">
+
+  <!-- Configure our graph using the GraphFactory and a configuration file -->
+  <bean id="MetaverseGraphImpl" class="com.tinkerpop.blueprints.GraphFactory" factory-method="open">
+    <constructor-arg value="src/it/resources/graph.properties" />
+  </bean>
+
+  <bean id="IMetaverseBuilder" class="com.pentaho.metaverse.impl.MetaverseBuilder" scope="singleton">
+    <property name="graph" ref="MetaverseGraphImpl"/>
+  </bean>
+
+  <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.impl.MetaverseBuilder" scope="singleton" />
+
+  <bean id="TransformationAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer"/>
+  <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer"/>
+
+  <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    <property name="metaverseObjectFactory" ref="IMetaverseObjectFactory"/>
+    <property name="documentAnalyzers">
+      <set>
+        <ref bean="TransformationAnalyzer"/>
+        <ref bean="JobAnalyzer"/>
+      </set>
+    </property>
+  </bean>
+
+  <bean id="IMetaverseReader" class="com.pentaho.metaverse.graph.TinkerGraphMetaverseReader"/>
+
+  <bean id="DIRepositoryLocator" class="com.pentaho.metaverse.locator.DIRepositoryLocator">
+    <constructor-arg>
+      <list>
+        <ref bean="IDocumentListener"/>
+      </list>
+    </constructor-arg>
+    <property name="repository" ref="Repository"/>
+    <property name="unifiedRepository" ref="IUnifiedRepository"/>
+  </bean>
+
+  <bean id="IDocumentLocatorProvider" class="com.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider">
+    <constructor-arg>
+      <set>
+        <ref bean="DIRepositoryLocator"/>
+      </set>
+    </constructor-arg>
+  </bean>
+
+  <bean id="IUnifiedRepository" class="org.pentaho.platform.repository2.unified.fs.FileSystemBackedUnifiedRepository" scope="singleton">
+    <constructor-arg value="src/test/resources/solution"/>
+  </bean>
+
+  <bean id="Repository" class="org.pentaho.di.repository.filerep.KettleFileRepository">
+    <property name="repositoryMeta" ref="repositoryMeta"/>
+  </bean>
+  <bean id="repositoryMeta" class="org.pentaho.di.repository.filerep.KettleFileRepositoryMeta">
+    <constructor-arg value="repoId"/>
+    <constructor-arg value="repoName"/>
+    <constructor-arg value="repoDescription"/>
+    <constructor-arg value="src/test/resources/solution"/>
+  </bean>
+
+</beans>

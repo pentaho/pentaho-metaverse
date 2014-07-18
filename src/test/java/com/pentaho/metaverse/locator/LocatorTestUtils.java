@@ -52,6 +52,7 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 
 public class LocatorTestUtils {
 
+  private static final String SOLUTION_PATH = "src/test/resources/solution";
   public static long delay = 0;
 
   public static Repository getMockDiRepository() {
@@ -162,7 +163,7 @@ public class LocatorTestUtils {
 
   public static RepositoryFileTree getTree( String arg0, int arg1, String arg2, boolean arg3 ) {
 
-    File root = new File( "src/test/resources/solution" );
+    File root = new File( SOLUTION_PATH );
     RepositoryFileTree rft = createFileTree(root );
 
     return rft;
