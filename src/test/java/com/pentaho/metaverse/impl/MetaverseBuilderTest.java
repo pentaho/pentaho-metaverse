@@ -1,5 +1,6 @@
 package com.pentaho.metaverse.impl;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.MetaverseLink;
 import com.pentaho.dictionary.MetaverseTransientNode;
 import com.tinkerpop.blueprints.Direction;
@@ -29,9 +30,8 @@ public class MetaverseBuilderTest {
 
   @Before
   public void before() {
-    builder = new MetaverseBuilder();
     graph = new TinkerGraph();
-    builder.setGraph( graph );
+    builder = new MetaverseBuilder( graph );
 
     node.setStringID( "node1" );
     node.setName( "node1 name" );
@@ -49,8 +49,8 @@ public class MetaverseBuilderTest {
     assertEquals( node.getType(), result.getProperty( "type" ) );
 
     // this should be a non-virtual node
-    assertNotNull( result.getProperty( MetaverseBuilder.VIRTUAL ) );
-    assertFalse( (Boolean) result.getProperty( MetaverseBuilder.VIRTUAL ) );
+    assertNotNull( result.getProperty( DictionaryConst.NODE_VIRTUAL ) );
+    assertFalse( (Boolean) result.getProperty( DictionaryConst.NODE_VIRTUAL ) );
 
   }
 
@@ -90,16 +90,16 @@ public class MetaverseBuilderTest {
     Vertex toResult = graph.getVertex( node2.getStringID() );
 
     // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) fromResult.getProperty( MetaverseBuilder.VIRTUAL ) );
+    assertTrue( (Boolean) fromResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
     // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) toResult.getProperty( MetaverseBuilder.VIRTUAL ) );
+    assertTrue( (Boolean) toResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
 
     assertNotNull( fromResult.getEdges( Direction.OUT, "uses" ) );
     for ( Edge e : fromResult.getEdges( Direction.OUT, "uses" ) ) {
       assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
       assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
       // we added this node implicitly through the addLink, it should be flagged as virtual
-      assertTrue( (Boolean) e.getVertex( Direction.OUT ).getProperty( MetaverseBuilder.VIRTUAL ) );
+      assertTrue( (Boolean) e.getVertex( Direction.OUT ).getProperty( DictionaryConst.NODE_VIRTUAL ) );
     }
 
     assertNotNull( toResult.getEdges( Direction.IN, "uses" ) );
@@ -107,7 +107,7 @@ public class MetaverseBuilderTest {
       assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
       assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
       // we added this node implicitly through the addLink, it should be flagged as virtual
-      assertTrue( (Boolean) e.getVertex( Direction.IN ).getProperty( MetaverseBuilder.VIRTUAL ) );
+      assertTrue( (Boolean) e.getVertex( Direction.IN ).getProperty( DictionaryConst.NODE_VIRTUAL ) );
     }
   }
 
@@ -124,16 +124,16 @@ public class MetaverseBuilderTest {
     Vertex toResult = graph.getVertex( node2.getStringID() );
 
     // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) fromResult.getProperty( MetaverseBuilder.VIRTUAL ) );
+    assertTrue( (Boolean) fromResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
     // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) toResult.getProperty( MetaverseBuilder.VIRTUAL ) );
+    assertTrue( (Boolean) toResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
 
     assertNotNull( fromResult.getEdges( Direction.OUT, "uses" ) );
     for ( Edge e : fromResult.getEdges( Direction.OUT, "uses" ) ) {
       assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
       assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
       // we added this node implicitly through the addLink, it should be flagged as virtual
-      assertTrue( (Boolean) e.getVertex( Direction.OUT ).getProperty( MetaverseBuilder.VIRTUAL ) );
+      assertTrue( (Boolean) e.getVertex( Direction.OUT ).getProperty( DictionaryConst.NODE_VIRTUAL ) );
     }
 
     assertNotNull( toResult.getEdges( Direction.IN, "uses" ) );
@@ -141,7 +141,7 @@ public class MetaverseBuilderTest {
       assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
       assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
       // we added this node implicitly through the addLink, it should be flagged as virtual
-      assertTrue( (Boolean) e.getVertex( Direction.IN ).getProperty( MetaverseBuilder.VIRTUAL ) );
+      assertTrue( (Boolean) e.getVertex( Direction.IN ).getProperty( DictionaryConst.NODE_VIRTUAL ) );
     }
   }
 
@@ -161,10 +161,10 @@ public class MetaverseBuilderTest {
     Vertex toResult = graph.getVertex( node2.getStringID() );
 
     // we added this node explicitly through the addNode, it should be flagged as NOT virtual
-    assertFalse( (Boolean) fromResult.getProperty( MetaverseBuilder.VIRTUAL ) );
+    assertFalse( (Boolean) fromResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
 
     // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) toResult.getProperty( MetaverseBuilder.VIRTUAL ) );
+    assertTrue( (Boolean) toResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
 
   }
 
@@ -210,9 +210,9 @@ public class MetaverseBuilderTest {
     Vertex toResult = graph.getVertex( node2.getStringID() );
 
     // we added this node explicitly through addNode, it should NOT be flagged as virtual
-    assertFalse( (Boolean) fromResult.getProperty( MetaverseBuilder.VIRTUAL ) );
+    assertFalse( (Boolean) fromResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
     // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) toResult.getProperty( MetaverseBuilder.VIRTUAL ) );
+    assertTrue( (Boolean) toResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
 
     // verify the link is there
     assertNotNull( fromResult.getEdges( Direction.OUT, "uses" ) );
@@ -402,7 +402,7 @@ public class MetaverseBuilderTest {
 
     IMetaverseNode virtual = builder.createNodeObject( "virtual node" );
     Vertex virtualVertex = graph.addVertex( virtual.getStringID() );
-    virtualVertex.setProperty( builder.VIRTUAL, virtual.getProperty( builder.VIRTUAL ) );
+    virtualVertex.setProperty( DictionaryConst.NODE_VIRTUAL, virtual.getProperty( DictionaryConst.NODE_VIRTUAL ) );
     assertTrue( builder.isVirtual( virtualVertex ) );
 
     assertFalse( builder.isVirtual( null ) );

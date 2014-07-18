@@ -8,10 +8,10 @@
   </bean>
 
   <bean id="IMetaverseBuilder" class="com.pentaho.metaverse.impl.MetaverseBuilder" scope="singleton">
-    <property name="graph" ref="MetaverseGraphImpl"/>
+    <constructor-arg ref="MetaverseGraphImpl"/>
   </bean>
 
-  <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.impl.MetaverseBuilder" scope="singleton" />
+  <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.impl.MetaverseObjectFactory" scope="singleton"/>
 
   <bean id="TransformationAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer"/>
   <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer"/>
@@ -27,9 +27,11 @@
     </property>
   </bean>
 
-  <bean id="IMetaverseReader" class="com.pentaho.metaverse.graph.TinkerGraphMetaverseReader"/>
+  <bean id="IMetaverseReader" class="com.pentaho.metaverse.graph.BlueprintsGraphMetaverseReader" scope="singleton">
+    <constructor-arg ref="MetaverseGraphImpl"/>
+  </bean>
 
-  <bean id="DIRepositoryLocator" class="com.pentaho.metaverse.locator.DIRepositoryLocator">
+  <bean id="DIRepositoryLocator" class="com.pentaho.metaverse.locator.DIRepositoryLocator" scope="singleton">
     <constructor-arg>
       <list>
         <ref bean="IDocumentListener"/>
@@ -39,7 +41,7 @@
     <property name="unifiedRepository" ref="IUnifiedRepository"/>
   </bean>
 
-  <bean id="IDocumentLocatorProvider" class="com.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider">
+  <bean id="IDocumentLocatorProvider" class="com.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider" scope="singleton">
     <constructor-arg>
       <set>
         <ref bean="DIRepositoryLocator"/>
@@ -51,10 +53,10 @@
     <constructor-arg value="src/test/resources/solution"/>
   </bean>
 
-  <bean id="Repository" class="org.pentaho.di.repository.filerep.KettleFileRepository">
+  <bean id="Repository" class="org.pentaho.di.repository.filerep.KettleFileRepository" scope="singleton">
     <property name="repositoryMeta" ref="repositoryMeta"/>
   </bean>
-  <bean id="repositoryMeta" class="org.pentaho.di.repository.filerep.KettleFileRepositoryMeta">
+  <bean id="repositoryMeta" class="org.pentaho.di.repository.filerep.KettleFileRepositoryMeta" scope="singleton">
     <constructor-arg value="repoId"/>
     <constructor-arg value="repoName"/>
     <constructor-arg value="repoDescription"/>

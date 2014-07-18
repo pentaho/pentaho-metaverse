@@ -22,9 +22,11 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
+import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.graph.GraphMLWriter;
 import com.pentaho.metaverse.locator.DIRepositoryLocator;
 import com.tinkerpop.blueprints.Graph;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,6 +46,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.FileSystemResource;
+import sun.misc.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,12 +56,10 @@ import static org.junit.Assert.assertTrue;
 
 public class MetaverseBuilderIT {
 
-  private IDocumentListener controller;
   private MetaverseBuilder builder;
   private Graph graph;
   private Set<IDocumentLocator> locators;
-  private DIRepositoryLocator diLocator;
-
+  private IMetaverseReader reader;
   private IDocumentLocatorProvider documentLocatorProvider;
 
   public static String getSolutionPath() {
@@ -113,13 +114,15 @@ public class MetaverseBuilderIT {
     builder = (MetaverseBuilder) PentahoSystem.get( IMetaverseBuilder.class );
     documentLocatorProvider = PentahoSystem.get( IDocumentLocatorProvider.class );
     graph = builder.getGraph();
+    reader = PentahoSystem.get( IMetaverseReader.class );
 
   }
 
   @Test
-  public void testLocatorAndDocumentAnalyzers() throws Exception {
+  public void testBuildingAndReading() throws Exception {
     locators = documentLocatorProvider.getDocumentLocators();
 
+    // build it
     for( IDocumentLocator locator : locators ) {
       locator.startScan();
       Thread.sleep( 1000 );
@@ -128,10 +131,13 @@ public class MetaverseBuilderIT {
     assertTrue( graph.getVertices().iterator().hasNext() );
     assertTrue( graph.getEdges().iterator().hasNext() );
 
+    Graph readerGraph = reader.getMetaverse();
+    assertTrue( readerGraph.getVertices().iterator().hasNext() );
+    assertTrue( readerGraph.getEdges().iterator().hasNext() );
+
     // write out the graph so we can look at it
-    FileOutputStream fos = new FileOutputStream( "src/it/resources/testGraph.graphml" );
-    GraphMLWriter writer = new GraphMLWriter();
-    writer.outputGraph( graph, fos );
+    File exportFile = new File( "src/it/resources/testGraph.graphml" );
+    FileUtils.writeStringToFile(exportFile, reader.export(), "UTF-8" );
 
   }
 

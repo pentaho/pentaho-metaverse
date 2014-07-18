@@ -23,40 +23,28 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.MetaverseLink;
-import com.pentaho.dictionary.MetaverseTransientNode;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
-
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
 /**
  * @author mburgess
  * 
  */
-public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFactory {
+public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaverseBuilder {
 
 
-  /**
-   * Property
-   */
-  public static final String VIRTUAL = "virtual";
   private Graph graph;
 
   /**
    * Instantiates a new Metaverse builder.
+   * @param graph the Graph to write to
    */
-  public MetaverseBuilder() {
-
-  }
-
-  public void setGraph( Graph graph ) {
+  public MetaverseBuilder( Graph graph ) {
     this.graph = graph;
   }
 
@@ -81,7 +69,7 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     if ( fromVertex == null ) {
       fromVertex = addVertex( link.getFromNode() );
       // set the virtual node property to true since this is an implicit adding of a node
-      fromVertex.setProperty( VIRTUAL, true );
+      fromVertex.setProperty( DictionaryConst.NODE_VIRTUAL, true );
     }
     // update the vertex properties from the fromNode
     copyNodePropertiesToVertex( link.getFromNode(), fromVertex );
@@ -90,7 +78,7 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     if ( toVertex == null ) {
       toVertex = addVertex( link.getToNode() );
       // set the virtual node property to true since this is an implicit adding of a node
-      toVertex.setProperty( VIRTUAL, true );
+      toVertex.setProperty( DictionaryConst.NODE_VIRTUAL, true );
     }
     // update the to vertex properties from the toNode
     copyNodePropertiesToVertex( link.getToNode(), toVertex );
@@ -118,7 +106,7 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     }
 
     // adding this node means that it is no longer a virtual node
-    v.setProperty( VIRTUAL, false );
+    v.setProperty( DictionaryConst.NODE_VIRTUAL, false );
 
     copyNodePropertiesToVertex( node, v );
 
@@ -143,7 +131,7 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
   private void copyNodePropertiesToVertex( IMetaverseNode node, Vertex v ) {
     // set all of the properties, except the id and virtual (since that is an internally set prop)
     for ( String propertyKey : node.getPropertyKeys() ) {
-      if ( propertyKey.equals( DictionaryConst.PROPERTY_ID ) || propertyKey.equals( VIRTUAL ) ) {
+      if ( propertyKey.equals( DictionaryConst.PROPERTY_ID ) || propertyKey.equals( DictionaryConst.NODE_VIRTUAL ) ) {
         continue;
       } else {
         Object value = node.getProperty( propertyKey );
@@ -263,24 +251,6 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
     return this;
   }
 
-  @Override
-  public IMetaverseDocument createDocumentObject() {
-    return new MetaverseDocument( );
-  }
-
-  @Override
-  public IMetaverseLink createLinkObject() {
-    return new MetaverseLink( );
-  }
-
-  @Override
-  public IMetaverseNode createNodeObject( String id ) {
-    MetaverseTransientNode node = new MetaverseTransientNode();
-    node.setStringID( id );
-    node.setProperty( VIRTUAL, true );
-    return node;
-  }
-
   /**
    * Adds the specified link to the model
    * 
@@ -317,7 +287,7 @@ public class MetaverseBuilder implements IMetaverseBuilder, IMetaverseObjectFact
       return false;
     }
 
-    Boolean isVirtual = vertex.getProperty( VIRTUAL );
+    Boolean isVirtual = vertex.getProperty( DictionaryConst.NODE_VIRTUAL );
     return isVirtual == null ? false : isVirtual;
   }
 
