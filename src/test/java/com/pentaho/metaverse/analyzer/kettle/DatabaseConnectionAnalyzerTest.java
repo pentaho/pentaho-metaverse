@@ -87,6 +87,7 @@ public class DatabaseConnectionAnalyzerTest {
     dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
     dbConnectionAnalyzer.setMetaverseObjectFactory( factory );
     dbConnectionAnalyzer.setMetaverseBuilder( builder );
+
     spyAnalyzer = spy( dbConnectionAnalyzer );
   }
 
@@ -126,7 +127,6 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testNullAnalyze() throws MetaverseAnalyzerException {
-
     spyAnalyzer.analyze( null );
   }
 

@@ -1,14 +1,22 @@
 package com.pentaho.dictionary;
 
+
+import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java .util.Set;
+import java.util.Enumeration;
 import java.util.Properties;
-import java.util.Set;
-
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 /**
  * A helper class for the Pentaho Dictionary
@@ -22,6 +30,47 @@ public class DictionaryHelper {
 
   private static Map<Class, IIdGenerator> classIdGeneratorMap = new HashMap<Class, IIdGenerator>();
   private static List<Class> classList = new ArrayList<Class>();
+
+  // TODO This is temporary
+  static {
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+      {
+        add( TransMeta.class );
+      }
+    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS ) );
+
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+      {
+        add( JobMeta.class );
+      }
+    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_JOB ) );
+
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+      {
+        add( StepMeta.class );
+        add( TableOutputMeta.class );
+      }
+    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_STEP ) );
+
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+      {
+        add( TransMeta.class );
+      }
+    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS ) );
+
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+      {
+        add( JobEntryCopy.class );
+      }
+    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_JOB_ENTRY ) );
+
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+      {
+        add( DatabaseMeta.class );
+      }
+    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATASOURCE ) );
+
+  }
 
   /**
    * Adds an Id generator to the dictionary. Id generators may be looked up using a 

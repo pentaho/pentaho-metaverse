@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.trans.TransMeta;
@@ -84,7 +85,9 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
 
     // Create a metaverse node and start filling in details
     // TODO get unique ID and set it on the node
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
+         DictionaryHelper.getId( transMeta.getClass(), transMeta.getName() ) );
+
     node.setName( transMeta.getName() );
     node.setType( DictionaryConst.NODE_TYPE_TRANS );
 
@@ -103,11 +106,6 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
       StepMeta stepMeta = transMeta.getStep( stepNr );
       if ( stepMeta != null ) {
         IAnalyzer<StepMeta> stepAnalyzer = getStepAnalyzer( stepMeta );
-        if ( stepAnalyzer == null ) {
-          stepAnalyzer = new KettleStepAnalyzer();
-          stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-          stepAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
-        }
         IMetaverseNode stepNode = stepAnalyzer.analyze( stepMeta );
         metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, stepNode );
       }

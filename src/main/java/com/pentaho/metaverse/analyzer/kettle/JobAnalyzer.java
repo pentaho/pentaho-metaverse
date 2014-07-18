@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
@@ -84,9 +85,10 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
 
     // Create a metaverse node and start filling in details
     // TODO get unique ID and set it on the node
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
+        DictionaryHelper.getId( job.getClass(), job.getName() ) );
 
-    node.setType(  DictionaryConst.NODE_TYPE_JOB);
+    node.setType(  DictionaryConst.NODE_TYPE_JOB );
     node.setName( job.getName() );
 
     // pull out the standard fields

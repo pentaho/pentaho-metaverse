@@ -23,15 +23,16 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+
 
 /**
  * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
  */
 public class DatabaseConnectionAnalyzer extends AbstractAnalyzer<DatabaseMeta> {
-
 
   /**
    * Analyzes a database connection for metadata.
@@ -55,13 +56,15 @@ public class DatabaseConnectionAnalyzer extends AbstractAnalyzer<DatabaseMeta> {
       throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
     }
 
-    // TODO get unique ID and set it on the node
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
+    String type = DictionaryConst.NODE_TYPE_DATASOURCE;
+
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
+        DictionaryHelper.getId( object.getClass(), object.getName() ) );
 
     // TODO Is this appropriate? What are our name conventions?
     node.setName( object.getName() );
 
-    node.setType( DictionaryConst.NODE_TYPE_DATASOURCE );
+    node.setType( type );
 
     int accessType = object.getAccessType();
     node.setProperty( "accessType", accessType );

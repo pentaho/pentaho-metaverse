@@ -23,7 +23,9 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
+import com.pentaho.dictionary.DictionaryConst;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -32,10 +34,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.platform.api.metaverse.*;
 
 import com.pentaho.metaverse.impl.MetaverseDocument;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -54,6 +54,7 @@ public class TransformationAnalyzerTest {
 
   @Mock
   private IMetaverseDocument transDoc;
+
 
   private IMetaverseObjectFactory factory;
 
@@ -110,11 +111,15 @@ public class TransformationAnalyzerTest {
     analyzer.analyze( new MetaverseDocument() );
   }
 
-  /*@Test
+  @Test
   public void testAnalyzeTransDocument() throws MetaverseAnalyzerException {
-    when( transDoc.getType() ).thenReturn( "ktr" );
+
+    when( transDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( transDoc.getContent() ).thenReturn( new TransMeta() );
-    analyzer.analyze( transDoc );
-  }*/
+
+    IMetaverseNode node = analyzer.analyze( transDoc );
+
+    System.out.println(node.getStringID());
+  }
 
 }
