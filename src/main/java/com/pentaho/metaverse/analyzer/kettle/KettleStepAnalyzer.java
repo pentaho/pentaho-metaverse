@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
@@ -58,7 +59,8 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
     }
 
     // Add yourself
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
+        DictionaryHelper.getId( stepMeta.getClass(), stepMeta.getName() ) );
 
     node.setName( stepMeta.getName() );
     node.setType( DictionaryConst.NODE_TYPE_TRANS_STEP );
@@ -71,7 +73,7 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
     DatabaseConnectionAnalyzer dbAnalyzer = new DatabaseConnectionAnalyzer();
     for ( DatabaseMeta db : dbs ) {
       IMetaverseNode dbNode = dbAnalyzer.analyze( db );
-      metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_USEDBY, node);
+      metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_USEDBY, node );
     }
 
     return node;

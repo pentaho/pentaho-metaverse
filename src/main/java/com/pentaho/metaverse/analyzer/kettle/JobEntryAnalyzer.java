@@ -1,6 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -33,7 +34,8 @@ public class JobEntryAnalyzer extends AbstractAnalyzer<JobEntryCopy> {
     }
 
     // Add yourself
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
+        DictionaryHelper.getId( entry.getClass(), entry.getName() ) );
 
     node.setName( entry.getName() );
     node.setType( DictionaryConst.NODE_TYPE_JOB_ENTRY );

@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -50,7 +51,8 @@ public class TableOutputStepAnalyzer extends AbstractAnalyzer<TableOutputMeta> {
     }
 
     // Add yourself
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( "TODO" );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
+        DictionaryHelper.getId( object.getClass(), object.getName() ) );
 
     node.setName( object.getName() );
     node.setType( DictionaryConst.NODE_TYPE_TRANS_STEP );
