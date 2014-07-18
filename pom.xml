@@ -135,11 +135,22 @@
     </dependency>
 
   </dependencies>
-
   <build>
-
-    <!-- remove this once it's in the parent pom -->
     <plugins>
+      <!-- remove this once it's in the parent pom -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <formats>
+            <format>html</format>
+            <format>xml</format>
+          </formats>
+        </configuration>
+      </plugin>
+
+      <!-- remove this once it's in the parent pom -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -180,15 +191,43 @@
           </execution>
         </executions>
       </plugin>
+
+      <!-- Override here to allow "mvn checkstyle:checkstyle" to work against pentaho standards -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${maven-checkstyle-plugin.version}</version>
+        <configuration>
+          <configLocation>${checkstyle-config-url}</configLocation>
+          <propertiesLocation>${checkstyle-properties-url}</propertiesLocation>
+          <linkXRef>true</linkXRef>
+          <cacheFile></cacheFile>
+        </configuration>
+      </plugin>
+
     </plugins>
   </build>
-  
+
+
   <!-- this is for bootstrapping only; you should really just add this to your settings.xml -->
   <repositories>
     <repository>
       <id>pentaho.resolve.repo</id>
       <name>Pentaho Group Resolve Repository</name>
       <url>http://nexus.pentaho.org/content/groups/omni/</url>
+      <releases>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>old.pentaho.resolve.repo</id>
+      <name>Old (Artifactory) Pentaho Group Resolve Repository</name>
+      <url>http://repo.pentaho.org/artifactory/repo/</url>
       <releases>
         <updatePolicy>always</updatePolicy>
         <checksumPolicy>fail</checksumPolicy>
