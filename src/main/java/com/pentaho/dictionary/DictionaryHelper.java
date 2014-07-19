@@ -70,6 +70,19 @@ public class DictionaryHelper {
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATASOURCE ) );
 
+    DictionaryHelper.addIdGenerator(new HashSet<String>() {
+      {
+        add( DictionaryConst.NODE_TYPE_TRANS_FIELD );
+      }
+    }, null,
+      new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_FIELD ) );
+
+    DictionaryHelper.addIdGenerator(new HashSet<String>() {
+      {
+        add( DictionaryConst.NODE_TYPE_DATA_TABLE );
+      }
+    }, null,
+      new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATA_TABLE ) );
   }
 
   /**

@@ -51,7 +51,6 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 public class DatabaseConnectionAnalyzerTest {
 
   DatabaseConnectionAnalyzer dbConnectionAnalyzer;
-  DatabaseConnectionAnalyzer spyAnalyzer;
 
   @Mock
   private DatabaseMeta databaseMeta;
@@ -88,7 +87,6 @@ public class DatabaseConnectionAnalyzerTest {
     dbConnectionAnalyzer.setMetaverseObjectFactory( factory );
     dbConnectionAnalyzer.setMetaverseBuilder( builder );
 
-    spyAnalyzer = spy( dbConnectionAnalyzer );
   }
 
   /**
@@ -101,14 +99,14 @@ public class DatabaseConnectionAnalyzerTest {
   @Test
   public void testSetMetaverseBuilder() {
 
-    assertNotNull( spyAnalyzer.metaverseBuilder );
+    assertNotNull( dbConnectionAnalyzer.metaverseBuilder );
 
   }
 
   @Test
   public void testSetMetaverseObjectFactory() {
 
-    assertNotNull( spyAnalyzer.metaverseObjectFactory );
+    assertNotNull( dbConnectionAnalyzer.metaverseObjectFactory );
 
   }
 
@@ -116,7 +114,7 @@ public class DatabaseConnectionAnalyzerTest {
   public void testAnalyze() {
 
     try {
-      IMetaverseNode node = spyAnalyzer.analyze( databaseMeta );
+      IMetaverseNode node = dbConnectionAnalyzer.analyze( databaseMeta );
       assertNotNull( node );
       assertEquals( 11, node.getPropertyKeys().size() );
     } catch ( MetaverseAnalyzerException e ) {
@@ -127,7 +125,7 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testNullAnalyze() throws MetaverseAnalyzerException {
-    spyAnalyzer.analyze( null );
+    dbConnectionAnalyzer.analyze( null );
   }
 
 }

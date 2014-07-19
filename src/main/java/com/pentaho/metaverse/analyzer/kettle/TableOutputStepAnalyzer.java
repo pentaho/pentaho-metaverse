@@ -24,6 +24,9 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
+import org.pentaho.di.core.exception.KettleStepException;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -42,24 +45,54 @@ public class TableOutputStepAnalyzer extends AbstractAnalyzer<TableOutputMeta> {
    */
   @Override
   public IMetaverseNode analyze( TableOutputMeta object ) throws MetaverseAnalyzerException {
-    if ( object == null ) {
-      throw new MetaverseAnalyzerException( "TableOutputMeta is null!" );
-    }
 
-    if ( metaverseObjectFactory == null ) {
-      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
-    }
 
     // Add yourself
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( object.getClass(), object.getName() ) );
+    IMetaverseNode node = new KettleStepAnalyzer().analyze( object.getParentStepMeta() );
 
-    node.setName( object.getName() );
-    node.setType( DictionaryConst.NODE_TYPE_TRANS_STEP );
+    TransMeta transMeta = object.getParentStepMeta().getParentTransMeta();
 
-    metaverseBuilder.addNode( node );
+    RowMetaInterface rmi;
+    try {
+      rmi = transMeta.getPrevStepFields( object.getParentStepMeta() );
+    } catch ( KettleStepException e ) {
+      throw new MetaverseAnalyzerException( e );
+    }
 
-    // TODO
+    String tableName = object.getTableName();
+    String[] fieldNames = {};
+
+    if ( rmi != null ) {
+      fieldNames = rmi.getFieldNames();
+    }
+
+    String type = DictionaryConst.NODE_TYPE_DATA_TABLE;
+
+    IMetaverseNode tableNode = metaverseObjectFactory.createNodeObject(
+        DictionaryHelper.getId( type, object.getDatabaseMeta().getName(), tableName ) );
+
+    tableNode.setType( type );
+    tableNode.setName( tableName );
+
+    metaverseBuilder.addNode( tableNode );
+
+    // TODO originally, this link was from the trans to the table ... do we need that link?
+    // TODO if so, we may need access to the parent chain of nodes to skip levels
+    metaverseBuilder.addLink( node, DictionaryConst.LINK_WRITESTO, tableNode );
+
+    type = DictionaryConst.NODE_TYPE_TRANS_FIELD;
+    IMetaverseNode fieldNode;
+
+    for ( String fieldName : fieldNames ) {
+      fieldNode = metaverseObjectFactory.createNodeObject(
+          DictionaryHelper.getId( type, object.getDatabaseMeta().getName(), tableName, fieldName ) );
+
+      fieldNode.setName( fieldName );
+      fieldNode.setType( type );
+
+      metaverseBuilder.addNode( fieldNode );
+      metaverseBuilder.addLink( tableNode, DictionaryConst.LINK_CONTAINS, fieldNode );
+    }
 
     return node;
   }
