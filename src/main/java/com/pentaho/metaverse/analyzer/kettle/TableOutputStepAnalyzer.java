@@ -28,6 +28,7 @@ import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -46,9 +47,15 @@ public class TableOutputStepAnalyzer extends AbstractAnalyzer<TableOutputMeta> {
   @Override
   public IMetaverseNode analyze( TableOutputMeta object ) throws MetaverseAnalyzerException {
 
+    if ( object == null ) {
+      throw new MetaverseAnalyzerException( "TableOutputMeta is null!" );
+    }
 
-    // Add yourself
-    IMetaverseNode node = new KettleStepAnalyzer().analyze( object.getParentStepMeta() );
+    // TODO not lovin this
+    IAnalyzer stepAnalyzer = new KettleStepAnalyzer();
+    stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
+    stepAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
+    IMetaverseNode node = stepAnalyzer.analyze( object.getParentStepMeta() );
 
     TransMeta transMeta = object.getParentStepMeta().getParentTransMeta();
 
@@ -68,30 +75,34 @@ public class TableOutputStepAnalyzer extends AbstractAnalyzer<TableOutputMeta> {
 
     String type = DictionaryConst.NODE_TYPE_DATA_TABLE;
 
-    IMetaverseNode tableNode = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( type, object.getDatabaseMeta().getName(), tableName ) );
+    if ( tableName != null ) {
 
-    tableNode.setType( type );
-    tableNode.setName( tableName );
+      IMetaverseNode tableNode = metaverseObjectFactory.createNodeObject(
+          DictionaryHelper.getId( type, object.getDatabaseMeta().getName(), tableName ) );
 
-    metaverseBuilder.addNode( tableNode );
+      tableNode.setType( type );
+      tableNode.setName( tableName );
 
-    // TODO originally, this link was from the trans to the table ... do we need that link?
-    // TODO if so, we may need access to the parent chain of nodes to skip levels
-    metaverseBuilder.addLink( node, DictionaryConst.LINK_WRITESTO, tableNode );
+      metaverseBuilder.addNode( tableNode );
 
-    type = DictionaryConst.NODE_TYPE_TRANS_FIELD;
-    IMetaverseNode fieldNode;
+      // TODO originally, this link was from the trans to the table ... do we need that link?
+      // TODO if so, we may need access to the parent chain of nodes to skip levels
+      metaverseBuilder.addLink( node, DictionaryConst.LINK_WRITESTO, tableNode );
 
-    for ( String fieldName : fieldNames ) {
-      fieldNode = metaverseObjectFactory.createNodeObject(
-          DictionaryHelper.getId( type, object.getDatabaseMeta().getName(), tableName, fieldName ) );
+      type = DictionaryConst.NODE_TYPE_TRANS_FIELD;
+      IMetaverseNode fieldNode;
 
-      fieldNode.setName( fieldName );
-      fieldNode.setType( type );
+      for ( String fieldName : fieldNames ) {
+        fieldNode = metaverseObjectFactory.createNodeObject(
+            DictionaryHelper.getId( type, object.getDatabaseMeta().getName(), tableName, fieldName ) );
 
-      metaverseBuilder.addNode( fieldNode );
-      metaverseBuilder.addLink( tableNode, DictionaryConst.LINK_CONTAINS, fieldNode );
+        fieldNode.setName( fieldName );
+        fieldNode.setType( type );
+
+        metaverseBuilder.addNode( fieldNode );
+        metaverseBuilder.addLink( tableNode, DictionaryConst.LINK_CONTAINS, fieldNode );
+      }
+
     }
 
     return node;

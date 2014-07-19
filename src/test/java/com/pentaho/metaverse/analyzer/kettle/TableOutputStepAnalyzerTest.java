@@ -23,6 +23,8 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -32,6 +34,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
@@ -52,6 +56,12 @@ public class TableOutputStepAnalyzerTest {
   private IMetaverseBuilder builder;
 
   private IMetaverseObjectFactory factory;
+
+  @Mock
+  private TableOutputMeta tom;
+
+  @Mock
+  private TransMeta transMeta;
 
   /**
    * @throws java.lang.Exception
@@ -103,6 +113,13 @@ public class TableOutputStepAnalyzerTest {
 
   @Test
   public void testAnalyzeTransDocument() throws MetaverseAnalyzerException {
-    assertNotNull( analyzer.analyze( new TableOutputMeta() ) );
+
+    StepMeta meta = new StepMeta("test", tom);
+    StepMeta spyMeta = spy(meta);
+
+    when(tom.getParentStepMeta()).thenReturn( spyMeta );
+    when(spyMeta.getParentTransMeta()).thenReturn( transMeta );
+
+    assertNotNull( analyzer.analyze( tom ) );
   }
 }
