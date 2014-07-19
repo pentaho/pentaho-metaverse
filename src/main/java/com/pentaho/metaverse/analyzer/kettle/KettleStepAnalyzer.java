@@ -69,10 +69,14 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
 
     DatabaseMeta[] dbs = stepMetaInterface.getUsedDatabaseConnections();
 
-    DatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
-    for ( DatabaseMeta db : dbs ) {
-      IMetaverseNode dbNode = dbAnalyzer.analyze( db );
-      metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_USEDBY, node );
+    if ( dbs != null ) {
+
+      DatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
+      for ( DatabaseMeta db : dbs ) {
+        IMetaverseNode dbNode = dbAnalyzer.analyze( db );
+        metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_USEDBY, node );
+      }
+
     }
 
     return node;
