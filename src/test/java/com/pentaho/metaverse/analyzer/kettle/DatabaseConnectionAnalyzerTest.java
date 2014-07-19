@@ -110,6 +110,22 @@ public class DatabaseConnectionAnalyzerTest {
 
   }
 
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException{
+
+    dbConnectionAnalyzer.setMetaverseBuilder( null );
+    dbConnectionAnalyzer.analyze( databaseMeta );
+
+  }
+
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testSetObjectFactoryNull() throws MetaverseAnalyzerException{
+
+    dbConnectionAnalyzer.setMetaverseObjectFactory( null );
+    dbConnectionAnalyzer.analyze( databaseMeta );
+
+  }
+
   @Test
   public void testAnalyze() {
 
@@ -125,7 +141,9 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testNullAnalyze() throws MetaverseAnalyzerException {
+
     dbConnectionAnalyzer.analyze( null );
+
   }
 
 }
