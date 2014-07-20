@@ -59,6 +59,7 @@ public class TableOutputStepAnalyzer extends AbstractAnalyzer<TableOutputMeta> {
 
     TransMeta transMeta = object.getParentStepMeta().getParentTransMeta();
 
+
     RowMetaInterface rmi;
     try {
       rmi = transMeta.getPrevStepFields( object.getParentStepMeta() );

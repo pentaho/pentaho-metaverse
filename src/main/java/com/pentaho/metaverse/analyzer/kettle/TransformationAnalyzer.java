@@ -67,6 +67,14 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
       throw new MetaverseAnalyzerException( "Document has no content!" );
     }
 
+    if ( metaverseObjectFactory == null ) {
+      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
+    }
+
+    if ( metaverseBuilder == null ) {
+      throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
+    }
+
     TransMeta transMeta = null;
     if ( repoObject instanceof String ) {
       // hydrate the transformation
