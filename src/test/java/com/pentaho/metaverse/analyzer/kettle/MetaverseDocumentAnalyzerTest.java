@@ -6,6 +6,9 @@ import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.pentaho.di.core.KettleEnvironment;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.xml.XMLInterface;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.metaverse.*;
@@ -33,7 +36,7 @@ public class MetaverseDocumentAnalyzerTest {
 
   private String type;
 
-  private Object content;
+  private XMLInterface content;
 
   private IMetaverseBuilder builder;
 
@@ -46,6 +49,13 @@ public class MetaverseDocumentAnalyzerTest {
    */
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
+
+    try {
+      KettleEnvironment.init();
+    } catch ( KettleException e ) {
+      e.printStackTrace();
+    }
+
   }
 
   /**
@@ -67,9 +77,12 @@ public class MetaverseDocumentAnalyzerTest {
     analyzer.setMetaverseBuilder( builder );
     analyzer.setMetaverseObjectFactory( factory );
 
+    when( transDoc.getType() ).thenReturn( type );
+    when( transDoc.getContent() ).thenReturn( content );
+
   }
 
-  public MetaverseDocumentAnalyzerTest( IDocumentAnalyzer analyzer, String type, Object content) {
+  public MetaverseDocumentAnalyzerTest( IDocumentAnalyzer analyzer, String type, XMLInterface content) {
     this.analyzer = analyzer;
     this.type = type;
     this.content = content;
@@ -84,19 +97,28 @@ public class MetaverseDocumentAnalyzerTest {
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testNullAnalyze() throws MetaverseAnalyzerException {
+
     analyzer.analyze( null );
+
+  }
+
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testNullDcoumentContent() throws MetaverseAnalyzerException {
+
+    when( transDoc.getContent() ).thenReturn( null );
+    analyzer.analyze( transDoc );
+
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeNonTransDocument() throws MetaverseAnalyzerException {
+
     analyzer.analyze( new MetaverseDocument() );
+
   }
 
   @Test
   public void testAnalyzeTransDocument() throws MetaverseAnalyzerException {
-
-    when( transDoc.getType() ).thenReturn( type);
-    when( transDoc.getContent() ).thenReturn( content );
 
     IMetaverseNode node = analyzer.analyze( transDoc );
     assertNotNull( node );
@@ -110,6 +132,34 @@ public class MetaverseDocumentAnalyzerTest {
     assertNotNull( types );
 
   }
+
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException{
+
+    analyzer.setMetaverseBuilder( null );
+    analyzer.analyze( transDoc );
+
+  }
+
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testSetObjectFactoryNull() throws MetaverseAnalyzerException{
+
+    analyzer.setMetaverseObjectFactory( null );
+    analyzer.analyze( transDoc );
+
+  }
+
+  @Test
+  public void testAnalyzeContentFromXml() throws MetaverseAnalyzerException, KettleException {
+
+    when(transDoc.getContent()).thenReturn( content.getXML() );
+
+    IMetaverseNode node = analyzer.analyze( transDoc );
+    assertNotNull( node );
+
+  }
+
+
 
 
 }

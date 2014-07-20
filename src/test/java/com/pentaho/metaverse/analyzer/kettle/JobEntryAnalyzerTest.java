@@ -22,83 +22,61 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.when;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import static org.junit.Assert.assertNotNull;
 
-/**
- * @author mburgess
- * 
- */
 @RunWith( MockitoJUnitRunner.class )
-public class KettleStepAnalyzerTest {
+public class JobEntryAnalyzerTest {
 
-  KettleStepAnalyzer analyzer;
+  JobEntryAnalyzer analyzer;
 
   @Mock
-  private IMetaverseBuilder mockBuilder;
+  private IMetaverseBuilder builder;
 
   private IMetaverseObjectFactory factory;
 
   @Mock
-  private StepMeta mockStepMeta;
-
-  @Mock
-  DatabaseMeta mockDatabaseMeta;
-
-  @Mock
-  StepMetaInterface mockStepMetaInterface;
+  private JobEntryCopy mockEntry;
 
   /**
-   * @throws java.lang.Exception
+   * @throws Exception
    */
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
   }
 
   /**
-   * @throws java.lang.Exception
+   * @throws Exception
    */
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
   }
 
   /**
-   * @throws java.lang.Exception
+   * @throws Exception
    */
   @Before
   public void setUp() throws Exception {
 
     factory = MetaverseTestUtils.getMetaverseObjectFactory();
 
-    analyzer = new KettleStepAnalyzer();
-    analyzer.setMetaverseBuilder( mockBuilder );
+    analyzer = new JobEntryAnalyzer();
+    analyzer.setMetaverseBuilder( builder );
     analyzer.setMetaverseObjectFactory( factory );
-
-    // set random StepMetaInterface
-    when(mockStepMeta.getStepMetaInterface()).thenReturn( mockStepMetaInterface);
   }
 
   /**
-   * @throws java.lang.Exception
+   * @throws Exception
    */
   @After
   public void tearDown() throws Exception {
@@ -106,41 +84,22 @@ public class KettleStepAnalyzerTest {
 
   @Test
   public void testSetMetaverseBuilder() {
-
     assertNotNull( analyzer.metaverseBuilder );
-
   }
 
   @Test
   public void testSetMetaverseObjectFactory() {
-
     assertNotNull( analyzer.metaverseObjectFactory );
-
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testNullAnalyze() throws MetaverseAnalyzerException {
-
     analyzer.analyze( null );
-
   }
 
-  @Test
+  @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyze() throws MetaverseAnalyzerException {
-
-    IMetaverseNode node = analyzer.analyze( mockStepMeta );
-    assertNotNull( node );
-
-  }
-
-  @Test
-  public void testAnalyzeWithDatabaseMeta() throws MetaverseAnalyzerException {
-
-    when(mockStepMetaInterface.getUsedDatabaseConnections()).thenReturn( new DatabaseMeta[]{mockDatabaseMeta} );
-
-    IMetaverseNode node = analyzer.analyze( mockStepMeta );
-    assertNotNull( node );
-
+    analyzer.analyze( mockEntry );
   }
 
 }

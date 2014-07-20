@@ -79,10 +79,13 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
 
     }
 
+    // TODO Investigate interfaces to see what default input &/or
+    // TODO output fields are available ... process those here
+
     return node;
   }
 
-  private DatabaseConnectionAnalyzer getDatabaseConnectionAnalyzer() {
+  protected DatabaseConnectionAnalyzer getDatabaseConnectionAnalyzer() {
 
     DatabaseConnectionAnalyzer analyzer = new DatabaseConnectionAnalyzer();
     analyzer.setMetaverseObjectFactory( metaverseObjectFactory );
