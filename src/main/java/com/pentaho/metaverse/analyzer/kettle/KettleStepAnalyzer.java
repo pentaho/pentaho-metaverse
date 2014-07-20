@@ -54,6 +54,10 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
       throw new MetaverseAnalyzerException( "StepMetaInterface is null!" );
     }
 
+    if ( metaverseBuilder == null ) {
+      throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
+    }
+
     if ( metaverseObjectFactory == null ) {
       throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
     }

@@ -22,42 +22,61 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.job.entry.JobEntryCopy;
-import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.di.core.KettleEnvironment;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.platform.api.metaverse.*;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ *  @See com.pentaho.analyzer.kettle.MetaverseDocumentAnalyzerTest for base TransformationAnalyzer tests. Tests here
+ *  are specific to the TransformationAnalyzer.
+ */
 @RunWith( MockitoJUnitRunner.class )
-public class JobEntryAnalyzerTest {
+public class TransformationAnalyzerTest {
 
-  JobEntryAnalyzer analyzer;
+  private IDocumentAnalyzer analyzer;
+
+  @Mock
+  private TransMeta mockContent;
+
+  @Mock
+  private StepMeta mockStepMeta;
+
+  @Mock
+  private StepMetaInterface mockStepMetaInterface;
 
   @Mock
   private IMetaverseBuilder mockBuilder;
 
+  @Mock
+  private IMetaverseDocument mockTransDoc;
+
   private IMetaverseObjectFactory factory;
-
-  @Mock
-  private JobEntryCopy mockEntry;
-
-  @Mock
-  private JobEntryInterface mockJobEntryInterface;
 
   /**
    * @throws Exception
    */
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
+
+    try {
+      KettleEnvironment.init();
+    } catch ( KettleException e ) {
+      e.printStackTrace();
+    }
+
   }
 
   /**
@@ -72,15 +91,22 @@ public class JobEntryAnalyzerTest {
    */
   @Before
   public void setUp() throws Exception {
-
     factory = MetaverseTestUtils.getMetaverseObjectFactory();
+    mockBuilder = mock( IMetaverseBuilder.class );
+    mockTransDoc = mock( IMetaverseDocument.class );
 
-    analyzer = new JobEntryAnalyzer();
-
+    analyzer = new TransformationAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
     analyzer.setMetaverseObjectFactory( factory );
 
-    when( mockEntry.getEntry() ).thenReturn( mockJobEntryInterface );
+    when( mockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
+    when( mockTransDoc.getContent() ).thenReturn( mockContent );
+
+    when(mockStepMeta.getStepMetaInterface()).thenReturn( mockStepMetaInterface );
+
+    when( mockContent.nrSteps() ).thenReturn( 1 );
+    when( mockContent.getStep( 0 )).thenReturn( mockStepMeta );
+
   }
 
   /**
@@ -88,59 +114,16 @@ public class JobEntryAnalyzerTest {
    */
   @After
   public void tearDown() throws Exception {
-
   }
 
   @Test
-  public void testSetMetaverseBuilder() {
+  public void testAnalyzerTransformWithSteps() throws MetaverseAnalyzerException {
 
-    assertNotNull( analyzer.metaverseBuilder );
-
-  }
-
-  @Test
-  public void testSetMetaverseObjectFactory() {
-
-    assertNotNull( analyzer.metaverseObjectFactory );
-
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
-
-    analyzer.analyze( null );
-
-  }
-
-  public void testAnalyze() throws MetaverseAnalyzerException {
-
-    IMetaverseNode node = analyzer.analyze( mockEntry );
+    // increases line code coverage by adding steps to transformation
+    IMetaverseNode node = analyzer.analyze( mockTransDoc );
     assertNotNull( node );
 
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyzeNullJobEntryInterface() throws MetaverseAnalyzerException {
-
-    when( mockEntry.getEntry()).thenReturn( null );
-    analyzer.analyze( mockEntry );
-
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException{
-
-    analyzer.setMetaverseBuilder( null );
-    analyzer.analyze( mockEntry );
-
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testSetObjectFactoryNull() throws MetaverseAnalyzerException{
-
-    analyzer.setMetaverseObjectFactory( null );
-    analyzer.analyze( mockEntry );
-
-  }
 
 }

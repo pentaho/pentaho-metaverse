@@ -39,6 +39,11 @@ import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+/**
+ * The TransformationAnalyzer class is responsible for gathering transformation metadata, creating links
+ * to form relationships between the transformation and its child collaborators (ie, steps, dbMetas), and
+ * calling the analyzers responsible for providing the metadata for the child collaborators.
+ */
 public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements IDocumentAnalyzer {
 
   private static final long serialVersionUID = 3147152759123052372L;

@@ -38,6 +38,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * The JobAnalyzer class is responsible for gathering job metadata, creating links
+ * to form relationships between the job and its child collaborators (ie, entries, dbMetas), and
+ * calling the analyzers responsible for providing the metadata for the child collaborators.
+ */
 public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements IDocumentAnalyzer {
 
   private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
