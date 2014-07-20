@@ -94,7 +94,7 @@ public class KettleStepAnalyzerTest {
     analyzer.setMetaverseObjectFactory( factory );
 
     // set random StepMetaInterface
-    when(mockStepMeta.getStepMetaInterface()).thenReturn( mockStepMetaInterface);
+    when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockStepMetaInterface );
   }
 
   /**
@@ -140,6 +140,30 @@ public class KettleStepAnalyzerTest {
 
     IMetaverseNode node = analyzer.analyze( mockStepMeta );
     assertNotNull( node );
+
+  }
+
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testAnalyzeNullStepMetaInterface() throws MetaverseAnalyzerException {
+
+    when( mockStepMeta.getStepMetaInterface()).thenReturn( null );
+    analyzer.analyze( mockStepMeta );
+
+  }
+
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException{
+
+    analyzer.setMetaverseBuilder( null );
+    analyzer.analyze( mockStepMeta );
+
+  }
+
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testSetObjectFactoryNull() throws MetaverseAnalyzerException{
+
+    analyzer.setMetaverseObjectFactory( null );
+    analyzer.analyze( mockStepMeta );
 
   }
 
