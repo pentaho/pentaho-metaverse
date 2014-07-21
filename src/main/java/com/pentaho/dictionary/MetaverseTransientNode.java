@@ -191,7 +191,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
 
   /**
    * Returns the set of links for this node
-   * @return
+   * @return The links
    */
   public List<IMetaverseLink> getLinks() {
     return links;

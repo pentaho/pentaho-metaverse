@@ -1,6 +1,15 @@
 package com.pentaho.dictionary;
 
 
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
@@ -8,15 +17,6 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.HashSet;
-import java .util.Set;
-import java.util.Enumeration;
-import java.util.Properties;
 
 /**
  * A helper class for the Pentaho Dictionary
@@ -83,6 +83,93 @@ public class DictionaryHelper {
       }
     }, null,
       new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATA_TABLE ) );
+  }
+
+  /**
+   * The set of structural link types
+   */
+  public static final Set<String> STRUCTURAL_LINK_TYPES = new HashSet<String>();
+
+  /**
+   * The set of entity node types
+   */
+  public static final Set<String> ENTITY_NODE_TYPES = new HashSet<String>();
+
+  /**
+   * The set of data flow link types
+   */
+  public static final Set<String> DATAFLOW_LINK_TYPES = new HashSet<String>();
+
+  /**
+   * Registers a new entity type, e.g. "ktr", or "logicalmodel"
+   * @param entityType
+   */
+  public static void registerEntityType( String entityType ) {
+    ENTITY_NODE_TYPES.add( entityType );
+  }
+
+  /**
+   * Registers a new structural link, e.g. "defines", or "contains"
+   * @param linkType
+   */
+  public static void registerStructuralLinkType( String linkType ) {
+    STRUCTURAL_LINK_TYPES.add( linkType );
+  }
+
+  /**
+   * Registers a new data flow link, e.g. "populates"
+   * @param linkType
+   */
+  public static void registerDataFlowLinkType( String linkType ) {
+    DATAFLOW_LINK_TYPES.add( linkType );
+  }
+
+  /**
+   * Returns true if the link type is structural in nature, e.g. "contains"
+   * @param linkType The type of the link
+   * @return True if the link is structural
+   */
+  public static boolean isStructuralLinkType( String linkType ) {
+    return STRUCTURAL_LINK_TYPES.contains( linkType );
+  }
+
+  /**
+   * Returns true if the link type is data flow in nature, e.g. "populates"
+   * @param linkType The type of the link
+   * @return True if the link is data flow
+   */
+  public static boolean isDataFlowLinkType( String linkType ) {
+    return DATAFLOW_LINK_TYPES.contains( linkType );
+  }
+
+  /**
+   * Returns true if the node type is an entity, e.g. "ktr"
+   * @param nodeType The type of the node
+   * @return True if the node is an entity
+   */
+  public static boolean isEntityType( String nodeType ) {
+    return ENTITY_NODE_TYPES.contains( nodeType );
+  }
+
+  static {
+    registerStructuralLinkType( DictionaryConst.LINK_EXECUTES );
+    registerStructuralLinkType( DictionaryConst.LINK_CONTAINS );
+    registerStructuralLinkType( DictionaryConst.LINK_DEFINES );
+    registerStructuralLinkType( DictionaryConst.LINK_IS_A );
+
+    registerDataFlowLinkType( DictionaryConst.LINK_POPULATES );
+    registerDataFlowLinkType( DictionaryConst.LINK_READBY );
+    registerDataFlowLinkType( DictionaryConst.LINK_WRITESTO );
+    registerDataFlowLinkType( DictionaryConst.LINK_USEDBY );
+
+    registerEntityType( DictionaryConst.NODE_TYPE_DATASOURCE );
+    registerEntityType( DictionaryConst.NODE_TYPE_DATA_TABLE );
+    registerEntityType( DictionaryConst.NODE_TYPE_JOB );
+    registerEntityType( DictionaryConst.NODE_TYPE_JOB_ENTRY );
+    registerEntityType( DictionaryConst.NODE_TYPE_LOGICAL_MODEL );
+    registerEntityType( DictionaryConst.NODE_TYPE_TRANS );
+    registerEntityType( DictionaryConst.NODE_TYPE_TRANS_STEP );
+    registerEntityType( DictionaryConst.NODE_TYPE_USER_CONTENT );
   }
 
   /**

@@ -133,8 +133,8 @@ public class BlueprintsGraphMetaverseReaderTest {
     GraphMLWriter writer = new GraphMLWriter();
     writer.outputGraph( graph, new FileOutputStream( "testSearch.graphml" ) );
 
-    assertEquals( "Vertex count is wrong", 8, countVertices( graph ) );
-    assertEquals( "Edge count is wrong", 7, countEdges( graph ) );
+    assertEquals( "Vertex count is wrong", 6, countVertices( graph ) );
+    assertEquals( "Edge count is wrong", 5, countEdges( graph ) );
 
   }
 
