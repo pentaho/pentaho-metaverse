@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
@@ -55,21 +56,21 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
   public IMetaverseNode analyze( IMetaverseDocument document ) throws MetaverseAnalyzerException {
 
     if ( document == null ) {
-      throw new MetaverseAnalyzerException( "Document is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.Document.IsNull" ) );
     }
 
     Object repoObject = document.getContent();
 
     if ( repoObject == null ) {
-      throw new MetaverseAnalyzerException( "Document has no content!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.Document.HasNoContent" ) );
     }
 
     if ( metaverseObjectFactory == null ) {
-      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
     }
 
     if ( metaverseBuilder == null ) {
-      throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseBuilder.IsNull" ) );
     }
 
     JobMeta job = null;

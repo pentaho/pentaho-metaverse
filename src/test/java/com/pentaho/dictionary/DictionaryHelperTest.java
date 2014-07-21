@@ -110,4 +110,10 @@ public class DictionaryHelperTest {
     assertEquals( "Links count is wrong", 0, node1.getLinks().size() );
   }
 
+  @Test
+  public void testDictionaryConstConstructorToSatisfyCodeCoverage() {
+    DictionaryConst dc = new DictionaryConst();
+    assertNotNull( dc );
+  }
+
 }

@@ -24,6 +24,7 @@ package com.pentaho.metaverse.locator;
 
 import java.util.List;
 
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 
@@ -145,7 +146,7 @@ public class RepositoryLocatorRunner implements Runnable {
       event.setDocument( metaverseDocument );
       repositoryIndexer.notifyListeners( event );
     } catch ( Exception e ) {
-      repositoryIndexer.error( "Could not get file contents for " + file.getPath() );
+      repositoryIndexer.error( Messages.getString( "ERROR.NoContentForFile", file.getPath() ) );
     }
 
 /*

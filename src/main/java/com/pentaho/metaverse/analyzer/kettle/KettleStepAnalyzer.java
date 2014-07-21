@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
@@ -45,21 +46,21 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
   public IMetaverseNode analyze( StepMeta stepMeta ) throws MetaverseAnalyzerException {
 
     if ( stepMeta == null ) {
-      throw new MetaverseAnalyzerException( "StepMeta is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMeta.IsNull" ) );
     }
 
     StepMetaInterface stepMetaInterface = stepMeta.getStepMetaInterface();
 
     if ( stepMetaInterface == null ) {
-      throw new MetaverseAnalyzerException( "StepMetaInterface is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMetaInterface.IsNull" ) );
     }
 
     if ( metaverseBuilder == null ) {
-      throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseBuilder.IsNull" ) );
     }
 
     if ( metaverseObjectFactory == null ) {
-      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
     }
 
     // Add yourself

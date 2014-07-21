@@ -97,7 +97,7 @@ public class LocatorTestUtils {
         @Override
         public RepositoryFileTree answer( InvocationOnMock invocationOnMock ) throws Throwable {
           Object[] args = invocationOnMock.getArguments();
-          return getTree( (String) args[0], (int) args[1], (String) args[2], (boolean) args[3] );
+          return getTree( (String) args[0], (Integer) args[1], (String) args[2], (Boolean) args[3] );
         }
       } );
 

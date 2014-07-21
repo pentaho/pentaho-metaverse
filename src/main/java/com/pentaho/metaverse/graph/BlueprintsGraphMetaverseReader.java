@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
@@ -115,7 +116,7 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
       out.close();
       return out.toString();
     } catch ( IOException e ) {
-      error( "Could not export the metaverse graph", e );
+      error( Messages.getString( "ERROR.Graph.Export" ), e );
     }
     return null;
   }
