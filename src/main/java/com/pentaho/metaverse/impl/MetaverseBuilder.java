@@ -22,14 +22,16 @@
 
 package com.pentaho.metaverse.impl;
 
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseLink;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 /**
  * @author mburgess
@@ -120,6 +122,25 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    */
   private Vertex addVertex( IMetaverseNode node ) {
     Vertex v = graph.addVertex( node.getStringID() );
+
+    if ( DictionaryHelper.isEntityType( node.getType() ) ) {
+      // the node is an entity, so link it to its entity type node
+      Vertex entityType = graph.getVertex( node.getType() );
+      if ( entityType == null ) {
+        // the entity type node does not exist, so create it
+        entityType = graph.addVertex( node.getType() );
+        Vertex entity = graph.getVertex( "entity" );
+        if ( entity == null ) {
+          // the root entity node does not exist, so create it
+          entity = graph.addVertex( "entity" );
+          // add the link from the root node to the entity type
+          graph.addEdge( null, entity, entityType, DictionaryConst.LINK_IS_A );
+        }
+        // add a link from the entity type to the new node
+        graph.addEdge( null, entityType, v, DictionaryConst.LINK_IS_A );
+      }
+    }
+
     return v;
   }
 

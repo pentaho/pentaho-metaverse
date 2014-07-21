@@ -17,6 +17,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.engine.core.system.PentahoBase;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.dictionary.MetaverseLink;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.impl.MetaverseNode;
@@ -236,7 +237,7 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
       }
       traceVertices( nextVertex, target, direction, graph1, graph2, edgeTypes );
       if ( direction == Direction.OUT ) {
-        traceVertices( nextVertex, target, Direction.IN, graph1, graph2, DictionaryConst.STRUCTURAL_LINK_MAP );
+        traceVertices( nextVertex, target, Direction.IN, graph1, graph2, DictionaryHelper.STRUCTURAL_LINK_TYPES );
       }
     }
   }

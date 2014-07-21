@@ -1,7 +1,5 @@
 package com.pentaho.dictionary;
 
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Constants used in the graph building and reading.
@@ -18,10 +16,10 @@ public class DictionaryConst {
   public static final String PROPERTY_TYPE = "type";
 
   /**
-   * Property key for "subtype". If the type is NODE_TYPE_DATASOURCE, the subtype could be
-   * "rdbms" or "mongodb" etc
+   * Property key for "category". If the type is NODE_TYPE_TRANS, the category could be
+   * "ETL" etc
    */
-  public static final String PROPERTY_SUBTYPE = "subtype";
+  public static final String PROPERTY_CATEGORY = "category";
 
   /**
    * Property key for "id"
@@ -47,6 +45,11 @@ public class DictionaryConst {
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
    */
   public static final String LINK_EXECUTES = "executes";
+
+  /**
+   * Label for an "is a" edge in the graph, e.g. a ktr instance is a transformation
+   */
+  public static final String LINK_IS_A = "isa";
 
   /**
    * Label for an "contains" edge in the graph, e.g. a transformation contains a step
@@ -103,26 +106,5 @@ public class DictionaryConst {
   public static final String NODE_TYPE_USER_CONTENT = "content";
 
   public static final String NODE_VIRTUAL = "virtual";
-
-  /**
-   * The set of structural link types
-   */
-  public static final Set<String> STRUCTURAL_LINK_MAP = new HashSet<String>();
-
-  /**
-   * The set of data flow link types
-   */
-  public static final Set<String> DATAFLOW_LINK_MAP = new HashSet<String>();
-
-  static {
-    STRUCTURAL_LINK_MAP.add( LINK_EXECUTES );
-    STRUCTURAL_LINK_MAP.add( LINK_CONTAINS );
-    STRUCTURAL_LINK_MAP.add( LINK_DEFINES );
-    STRUCTURAL_LINK_MAP.add( LINK_CREATES );
-    DATAFLOW_LINK_MAP.add( LINK_POPULATES );
-    DATAFLOW_LINK_MAP.add( LINK_READBY );
-    DATAFLOW_LINK_MAP.add( LINK_WRITESTO );
-    DATAFLOW_LINK_MAP.add( LINK_USEDBY );
-  }
 
 }
