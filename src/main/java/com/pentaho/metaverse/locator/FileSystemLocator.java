@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -84,7 +85,7 @@ public class FileSystemLocator extends BaseLocator {
       }
       content = new String( out.toByteArray() );
     } catch ( Throwable e ) {
-      error( "Could not index document: " + file.getPath(), e );
+      error( Messages.getString( "ERROR.IndexingDocument", file.getPath() ), e );
     }
     return content;
   }
@@ -111,13 +112,13 @@ public class FileSystemLocator extends BaseLocator {
 
     File root = new File( rootFolder );
     if ( !root.exists() ) {
-      error( "Root folder does not exist: " + rootFolder );
+      error( Messages.getString("ERROR.FileSystemLocator.RootFolder.DoesNotExist", rootFolder ) );
 //TODO      throw new IndexException(  ); 
       return;
     }
 
     if ( !root.isDirectory() ) {
-      error( "Root is not a folder: " + rootFolder );
+      error( Messages.getString("ERROR.FileSystemLocator.RootFolder.NotAFolder", rootFolder ) );
 //TODO      throw new IndexException(  ); 
       return;
     }

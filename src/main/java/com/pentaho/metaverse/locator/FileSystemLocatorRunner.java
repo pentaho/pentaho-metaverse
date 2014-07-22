@@ -82,7 +82,7 @@ public class FileSystemLocatorRunner implements Runnable {
 
   /**
    * Indexes a set of files/folders. Folders are recursed into and files are passed to indexFile.
-   * @param fileTrees The files/folders to examine
+   * @param folder The files/folders to examine
    */
   private void indexFolder( File folder ) {
 

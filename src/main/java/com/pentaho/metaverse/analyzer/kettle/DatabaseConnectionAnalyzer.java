@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -45,15 +46,15 @@ public class DatabaseConnectionAnalyzer extends AbstractAnalyzer<DatabaseMeta> {
   public IMetaverseNode analyze( DatabaseMeta object ) throws MetaverseAnalyzerException {
 
     if ( object == null ) {
-      throw new MetaverseAnalyzerException( "DatabaseMeta is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.DatabaseMeta.IsNull" ) );
     }
 
     if ( metaverseObjectFactory == null ) {
-      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
     }
 
     if ( metaverseBuilder == null ) {
-      throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseBuilder.IsNull" ) );
     }
 
     String type = DictionaryConst.NODE_TYPE_DATASOURCE;

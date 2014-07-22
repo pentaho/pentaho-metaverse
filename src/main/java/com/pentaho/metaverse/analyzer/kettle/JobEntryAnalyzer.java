@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -40,21 +41,21 @@ public class JobEntryAnalyzer extends AbstractAnalyzer<JobEntryCopy> {
   public IMetaverseNode analyze( JobEntryCopy entry ) throws MetaverseAnalyzerException {
 
     if ( entry == null ) {
-      throw new MetaverseAnalyzerException( "TableOutputMeta is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.TableOutputMeta.IsNull" ) );
     }
 
     JobEntryInterface jobEntryInterface = entry.getEntry();
 
     if ( jobEntryInterface == null ) {
-      throw new MetaverseAnalyzerException( "JobEntryInterface is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );
     }
 
     if ( metaverseBuilder == null ) {
-      throw new MetaverseAnalyzerException( "MetaverseBuilder is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseBuilder.IsNull" ) );
     }
 
     if ( metaverseObjectFactory == null ) {
-      throw new MetaverseAnalyzerException( "MetaverseObjectFactory is null!" );
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
     }
 
     // Add yourself

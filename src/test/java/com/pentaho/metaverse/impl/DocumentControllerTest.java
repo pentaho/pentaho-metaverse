@@ -94,7 +94,7 @@ public class DocumentControllerTest {
 
   @Test
   public void testGetAnalyzers_OnlyDocAnalyzersSet() {
-    Set<Class<?>> types = new HashSet<>();
+    Set<Class<?>> types = new HashSet<Class<?>>();
     types.add( IDocumentAnalyzer.class );
 
     Set<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
@@ -104,7 +104,7 @@ public class DocumentControllerTest {
 
   @Test
   public void testGetAnalyzers_mutipleAnalyzersSet() {
-    Set<Class<?>> types = new HashSet<>();
+    Set<Class<?>> types = new HashSet<Class<?>>();
     types.add( IDocumentAnalyzer.class );
     types.add( IAnalyzer.class );
 
@@ -114,7 +114,7 @@ public class DocumentControllerTest {
 
   @Test
   public void testGetAnalyzers_notDocAnalyzerSet() {
-    Set<Class<?>> types = new HashSet<>();
+    Set<Class<?>> types = new HashSet<Class<?>>();
     types.add( IAnalyzer.class );
 
     Set<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
