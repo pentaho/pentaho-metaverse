@@ -36,7 +36,7 @@ public class Messages {
   private static final String BUNDLE_NAME = "com.pentaho.metaverse.messages.messages";
 
   private static final Map<Locale, ResourceBundle>
-    locales = Collections.synchronizedMap( new HashMap<Locale, ResourceBundle>() );
+  locales = Collections.synchronizedMap( new HashMap<Locale, ResourceBundle>() );
 
   protected static ResourceBundle getBundle() {
     Locale locale = LocaleHelper.getLocale();
