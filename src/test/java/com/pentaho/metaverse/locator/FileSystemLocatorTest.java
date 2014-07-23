@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,8 +36,12 @@ import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 
+import com.pentaho.metaverse.graph.GraphMLWriter;
+import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseDocument;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 /**
  * Test class for the FileSystemLocator
@@ -69,7 +74,11 @@ public class FileSystemLocatorTest implements IDocumentListener {
   @Test
   public void testStartLocator() throws Exception {
 
+    TinkerGraph graph = new TinkerGraph();
+    IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
+
     TestFileSystemLocator locator = new TestFileSystemLocator();
+    locator.setMetaverseBuilder( metaverseBuilder );
     locator.setRepositoryId( "testrepo" );
     locator.addDocumentListener( this );
     locator.setRootFolder( "src/test/resources/solution" );
@@ -95,7 +104,7 @@ public class FileSystemLocatorTest implements IDocumentListener {
 
     assertNotNull("Locator types is null", locator.getTypes() );
 
-    assertNotNull("Indexer type is null", locator.getIndexerType() );
+    assertNotNull("Indexer type is null", locator.getLocatorType() );
     events = new ArrayList<IDocumentEvent>();
     locator.startScan();
     Thread.sleep( 3000 );
@@ -120,6 +129,11 @@ public class FileSystemLocatorTest implements IDocumentListener {
 
     assertEquals( "Event count is wrong", 0, events.size() );
 
+    assertNotNull( "Graph is null", graph );
+
+    GraphMLWriter writer = new GraphMLWriter();
+    writer.outputGraph( graph, new FileOutputStream( "FileSystemLocatorTest.graphml" ) );
+
   }
 
   /**
@@ -129,12 +143,17 @@ public class FileSystemLocatorTest implements IDocumentListener {
   @Test
   public void testStopLocatorScan() throws Exception {
 
+    TinkerGraph graph = new TinkerGraph();
+    IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
+
     TestFileSystemLocator locator = new TestFileSystemLocator();
+    locator.setRepositoryId( "test_repo" );
+    locator.setMetaverseBuilder( metaverseBuilder );
     locator.addDocumentListener( this );
     locator.setRootFolder( "src/test/resources/solution" );
     TestFileSystemLocator.delay = 300;
 
-    assertNotNull("Indexer type is null", locator.getIndexerType() );
+    assertNotNull("Indexer type is null", locator.getLocatorType() );
     events = new ArrayList<IDocumentEvent>();
     System.out.println( "call startScan" );
     locator.startScan();

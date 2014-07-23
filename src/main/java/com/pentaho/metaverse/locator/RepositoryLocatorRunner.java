@@ -25,9 +25,14 @@ package com.pentaho.metaverse.locator;
 import java.util.List;
 
 import com.pentaho.metaverse.messages.Messages;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.MetaverseLink;
+import com.pentaho.dictionary.MetaverseTransientNode;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.impl.MetaverseDocument;
 
@@ -136,13 +141,30 @@ public class RepositoryLocatorRunner implements Runnable {
     String id = repositoryIndexer.getId( file.getPath() );
     try {
       Object contents = repositoryIndexer.getFileContents( file, extension );
-      DocumentEvent event = new DocumentEvent();
-      event.setEventType( "add" );
       MetaverseDocument metaverseDocument = new MetaverseDocument();
       metaverseDocument.setContent( contents );
       metaverseDocument.setStringID( id );
       metaverseDocument.setName( name );
       metaverseDocument.setType( extension );
+
+      IMetaverseNode locatorNode = repositoryIndexer.getLocatorNode();
+      IMetaverseBuilder metaverseBuilder = repositoryIndexer.getMetaverseBuilder();
+
+      // create a place holder node for the new document
+      IMetaverseNode documentNode = new MetaverseTransientNode( id );
+      documentNode.setType( extension );
+      documentNode.setName( name );
+      metaverseBuilder.addNode( documentNode );
+
+      // create a link from the locator node to the new document
+      MetaverseLink link = new MetaverseLink();
+      link.setFromNode( locatorNode );
+      link.setLabel( DictionaryConst.LINK_CONTAINS );
+      link.setToNode( documentNode );
+      metaverseBuilder.addLink( link );
+
+      DocumentEvent event = new DocumentEvent();
+      event.setEventType( "add" );
       event.setDocument( metaverseDocument );
       repositoryIndexer.notifyListeners( event );
     } catch ( Exception e ) {

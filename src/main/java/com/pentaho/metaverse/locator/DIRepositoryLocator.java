@@ -63,7 +63,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
    */
   public DIRepositoryLocator() {
     super();
-    setIndexerType( LOCATOR_TYPE );
+    setLocatorType( LOCATOR_TYPE );
   }
 
   /**
@@ -72,7 +72,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
    */
   public DIRepositoryLocator( List<IDocumentListener> documentListeners ) {
     super( documentListeners );
-    setIndexerType( LOCATOR_TYPE );
+    setLocatorType( LOCATOR_TYPE );
   }
 
   public void setUnifiedRepository( IUnifiedRepository unifiedRepository ) {

@@ -80,7 +80,7 @@ public abstract class RepositoryLocator extends BaseLocator {
 
   @Override
   public String getId( String... tokens ) {
-    return getIndexerType() + "." + getRepositoryId() + "." + tokens[0];
+    return getLocatorType() + "." + getRepositoryId() + "." + tokens[0];
   }
 
   @Override

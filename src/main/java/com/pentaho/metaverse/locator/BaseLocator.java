@@ -29,9 +29,14 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.engine.core.system.PentahoBase;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.dictionary.IIdGenerator;
+import com.pentaho.dictionary.MetaverseTransientNode;
 
 /**
  * Base implementation for all @see org.pentaho.platform.api.metaverse.IDocumentLocator implementations
@@ -42,10 +47,19 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
 
   private static final long serialVersionUID = 693428630030858039L;
 
+  private static final String LOCATOR_ID_PREFIX = "locator_";
+
+  protected IMetaverseNode locatorNode;
+
   /**
    * The user session to use for the locator to use
    */
   protected IPentahoSession session;
+
+  /**
+   * The metaverse builder for adding this locator and its documents to
+   */
+  protected IMetaverseBuilder metaverseBuilder;
 
   /**
    * The unique id of the locator
@@ -55,7 +69,7 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
   /**
    * The unique type of the locator
    */
-  protected String indexerType;
+  protected String locatorType;
 
   private List<IDocumentListener> listeners = new ArrayList<IDocumentListener>();
 
@@ -63,6 +77,7 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
    * Constructor for the abstract super class
    */
   public BaseLocator() {
+    DictionaryHelper.registerEntityType( DictionaryConst.NODE_TYPE_LOCATOR );
   }
 
   /**
@@ -96,14 +111,33 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
 
   public void setRepositoryId( String id ) {
     this.id = id;
+    // create a metaverse node for this locator
+    locatorNode = new MetaverseTransientNode( LOCATOR_ID_PREFIX + id );
+    locatorNode.setType( DictionaryConst.NODE_TYPE_LOCATOR );
   }
 
-  public String getIndexerType() {
-    return indexerType;
+  public String getLocatorType() {
+    return locatorType;
   }
 
-  public void setIndexerType( String indexerType ) {
-    this.indexerType = indexerType;
+  public void setLocatorType( String locatorType ) {
+    this.locatorType = locatorType;
+  }
+
+  public IMetaverseBuilder getMetaverseBuilder() {
+    return metaverseBuilder;
+  }
+
+  public void setMetaverseBuilder( IMetaverseBuilder metaverseBuilder ) {
+    this.metaverseBuilder = metaverseBuilder;
+  }
+
+  public IMetaverseNode getLocatorNode() {
+    return locatorNode;
+  }
+
+  public void setLocatorNode( IMetaverseNode locatorNode ) {
+    this.locatorNode = locatorNode;
   }
 
 }

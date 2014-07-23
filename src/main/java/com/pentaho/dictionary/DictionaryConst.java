@@ -47,9 +47,9 @@ public class DictionaryConst {
   public static final String LINK_EXECUTES = "executes";
 
   /**
-   * Label for an "is a" edge in the graph, e.g. a ktr instance is a transformation
+   * Label for an "parent concept" edge in the graph, e.g. a transformation entity is the parent concept of a ktr
    */
-  public static final String LINK_IS_A = "isa";
+  public static final String LINK_PARENT_CONCEPT = "parentconcept";
 
   /**
    * Label for an "contains" edge in the graph, e.g. a transformation contains a step
@@ -89,6 +89,7 @@ public class DictionaryConst {
   /*
    * This is a set of known content types
    */
+  public static final String NODE_TYPE_LOCATOR = "locator";
   public static final String NODE_TYPE_JOB = "kjb";
   public static final String NODE_TYPE_TRANS = "ktr";
   public static final String NODE_TYPE_TRANS_STEP = "transtep";
@@ -104,6 +105,8 @@ public class DictionaryConst {
   public static final String NODE_TYPE_LOGICAL_HIERARCHY = "modelhier";
   public static final String NODE_TYPE_LOGICAL_FIELD = "modelfield";
   public static final String NODE_TYPE_USER_CONTENT = "content";
+  public static final String NODE_TYPE_ENTITY = "entity";
+  public static final String NODE_TYPE_ROOT_ENTITY = "root_entity";
 
   public static final String NODE_VIRTUAL = "virtual";
 

@@ -39,8 +39,23 @@ import com.tinkerpop.blueprints.Vertex;
  */
 public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaverseBuilder {
 
+  private static final String METAVERSE_PREFIX = "metaverse_";
+
+  private static final String ENTITY_PREFIX = "entity_";
+
+  private static final String ENTITY_NODE_ID = "entity";
+
+  /**
+   * The id for this metaverse instance
+   */
+  private String id;
 
   private Graph graph;
+
+  /**
+   * The node that represents this metaverse instance
+   */
+  private Vertex metaverseNode;
 
   /**
    * Instantiates a new Metaverse builder.
@@ -48,6 +63,10 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    */
   public MetaverseBuilder( Graph graph ) {
     this.graph = graph;
+    metaverseNode = graph.getVertex( METAVERSE_PREFIX + id );
+    if ( metaverseNode == null ) {
+      metaverseNode = graph.addVertex( METAVERSE_PREFIX + id );
+    }
   }
 
   protected Graph getGraph() {
@@ -121,24 +140,29 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * @return the Vertex added
    */
   private Vertex addVertex( IMetaverseNode node ) {
+
     Vertex v = graph.addVertex( node.getStringID() );
 
     if ( DictionaryHelper.isEntityType( node.getType() ) ) {
       // the node is an entity, so link it to its entity type node
-      Vertex entityType = graph.getVertex( node.getType() );
+      Vertex entityType = graph.getVertex( ENTITY_PREFIX + node.getType() );
       if ( entityType == null ) {
         // the entity type node does not exist, so create it
-        entityType = graph.addVertex( node.getType() );
-        Vertex entity = graph.getVertex( "entity" );
-        if ( entity == null ) {
+        entityType = graph.addVertex( ENTITY_PREFIX + node.getType() );
+        entityType.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ENTITY );
+        entityType.setProperty( DictionaryConst.PROPERTY_NAME, node.getType() );
+        Vertex rootEntity = graph.getVertex( ENTITY_NODE_ID );
+        if ( rootEntity == null ) {
           // the root entity node does not exist, so create it
-          entity = graph.addVertex( "entity" );
-          // add the link from the root node to the entity type
-          graph.addEdge( null, entity, entityType, DictionaryConst.LINK_IS_A );
+          rootEntity = graph.addVertex( ENTITY_NODE_ID );
+          rootEntity.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ROOT_ENTITY );
+          rootEntity.setProperty( DictionaryConst.PROPERTY_NAME, "Root entity" );
         }
-        // add a link from the entity type to the new node
-        graph.addEdge( null, entityType, v, DictionaryConst.LINK_IS_A );
+        // add the link from the root node to the entity type
+        graph.addEdge( null, rootEntity, entityType, DictionaryConst.LINK_PARENT_CONCEPT );
       }
+      // add a link from the entity type to the new node
+      graph.addEdge( null, entityType, v, DictionaryConst.LINK_PARENT_CONCEPT );
     }
 
     return v;
