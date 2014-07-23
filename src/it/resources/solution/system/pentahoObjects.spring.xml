@@ -50,7 +50,7 @@
   </bean>
 
   <bean id="IUnifiedRepository" class="org.pentaho.platform.repository2.unified.fs.FileSystemBackedUnifiedRepository" scope="singleton">
-    <constructor-arg value="src/test/resources/solution"/>
+    <constructor-arg value="src/it/resources/repo"/>
   </bean>
 
   <bean id="Repository" class="org.pentaho.di.repository.filerep.KettleFileRepository" scope="singleton">
@@ -60,7 +60,7 @@
     <constructor-arg value="repoId"/>
     <constructor-arg value="repoName"/>
     <constructor-arg value="repoDescription"/>
-    <constructor-arg value="src/test/resources/solution"/>
+    <constructor-arg value="src/it/resources/repo"/>
   </bean>
 
 </beans>

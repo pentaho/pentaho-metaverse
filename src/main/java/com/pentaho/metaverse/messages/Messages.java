@@ -52,7 +52,6 @@ public class Messages {
     try {
       return Messages.getBundle().getString( key );
     } catch ( MissingResourceException e ) {
-      e.printStackTrace();
       return '!' + key + '!';
     }
   }
