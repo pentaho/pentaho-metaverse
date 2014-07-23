@@ -37,8 +37,11 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 
+import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseDocument;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 /**
  * Test class for the DIRepositoryLocator
@@ -71,8 +74,11 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
   @Test
   public void testStartLocator() throws Exception {
 
-    DIRepositoryLocator locator = new DIRepositoryLocator();
+    TinkerGraph graph = new TinkerGraph();
+    IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
 
+    DIRepositoryLocator locator = new DIRepositoryLocator();
+    locator.setMetaverseBuilder( metaverseBuilder );
     locator.addDocumentListener( this );
     locator.setRepository( LocatorTestUtils.getMockDiRepository() );
 //    locator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
@@ -85,7 +91,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
 
     assertNotNull("Locator types is null", locator.getTypes() );
 
-    assertNotNull("Indexer type is null", locator.getIndexerType() );
+    assertNotNull("Indexer type is null", locator.getLocatorType() );
     events = new ArrayList<IDocumentEvent>();
     locator.startScan();
     Thread.sleep( 3000 );
@@ -119,14 +125,17 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
   @Test
   public void testStopLocatorScan() throws Exception {
 
-    DIRepositoryLocator locator = new DIRepositoryLocator();
+    TinkerGraph graph = new TinkerGraph();
+    IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
 
+    DIRepositoryLocator locator = new DIRepositoryLocator();
+    locator.setMetaverseBuilder( metaverseBuilder );
     locator.addDocumentListener( this );
     locator.setRepository( LocatorTestUtils.getMockDiRepository() );
     locator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
     LocatorTestUtils.delay = 300;
 
-    assertNotNull("Indexer type is null", locator.getIndexerType() );
+    assertNotNull("Indexer type is null", locator.getLocatorType() );
     events = new ArrayList<IDocumentEvent>();
     System.out.println( "call startScan" );
     locator.startScan();

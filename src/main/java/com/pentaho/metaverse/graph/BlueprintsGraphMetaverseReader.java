@@ -122,20 +122,20 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
   }
 
   @Override
-  public Graph search( List<String> resultTypes, List<String> startNodeIDs ) {
+  public Graph search( List<String> resultTypes, List<String> startNodeIDs, boolean shortestOnly ) {
 
     Graph g = new TinkerGraph();
 
     for ( String startNodeID : startNodeIDs ) {
-      Graph subGraph = getGraph( startNodeID );
-      if ( subGraph != null ) {
+      if ( graph != null ) {
         // traverse look for paths to the results
-        Vertex startVertex = subGraph.getVertex( startNodeID );
+        Vertex startVertex = graph.getVertex( startNodeID );
         GraphPath path = new GraphPath();
         Set<Object> done = new HashSet<Object>();
         Map<Object, GraphPath> shortestPaths = new HashMap<Object, GraphPath>();
-        traverseGraph( startVertex, subGraph, resultTypes, path, done, shortestPaths );
-
+        traverseGraph( startVertex, graph, resultTypes, path, done, shortestPaths, Direction.IN, shortestOnly );
+        done = new HashSet<Object>();
+        traverseGraph( startVertex, graph, resultTypes, path, done, shortestPaths, Direction.OUT, shortestOnly );
         Iterator<Map.Entry<Object, GraphPath>> paths = shortestPaths.entrySet().iterator();
         while ( paths.hasNext() ) {
           Map.Entry<Object, GraphPath> entry = paths.next();
@@ -149,45 +149,70 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
   }
 
   private void traverseGraph( Vertex startVertex, Graph subGraph, List<String> resultTypes, GraphPath path,
-      Set<Object> done, Map<Object, GraphPath> shortestPaths ) {
-    boolean isTargetType = resultTypes.contains( startVertex.getProperty( DictionaryConst.PROPERTY_TYPE ) );
+      Set<Object> done, Map<Object, GraphPath> shortestPaths, Direction direction, boolean shortestOnly ) {
+    boolean isTargetType = resultTypes == null
+        || resultTypes.size() == 0
+        || resultTypes.contains( startVertex.getProperty( DictionaryConst.PROPERTY_TYPE ) );
     if ( !isTargetType && done.contains( startVertex.getId() ) ) {
       return;
     }
     path.addVertex( startVertex );
     if ( isTargetType ) {
       // this is one of our target types
-      GraphPath shortestPath = shortestPaths.get( startVertex.getId() );
-      if ( shortestPath == null || path.getLength() < shortestPath.getLength()  ) {
-        shortestPaths.put( startVertex.getId(), path.clone() );
-      }
-      if ( done.contains( startVertex.getId() ) ) {
-        path.pop();
-        return;
+      if ( shortestOnly ) {
+        GraphPath shortestPath = shortestPaths.get( startVertex.getId() );
+        if ( shortestPath == null || path.getLength() < shortestPath.getLength()  ) {
+          shortestPaths.put( startVertex.getId(), path.clone() );
+          if ( done.contains( startVertex.getId() ) ) {
+            path.pop();
+            return;
+          }
+        }
+      } else {
+        shortestPaths.put( path.toString(), path.clone() );
       }
     }
     done.add( startVertex.getId() );
-    Iterator<Edge> edges = startVertex.getEdges( Direction.IN ).iterator();
-    while ( edges.hasNext() ) {
-      Edge edge = edges.next();
-      if ( done.contains( edge.getId() ) ) {
-        continue;
+    if ( direction == Direction.IN ) {
+      Iterator<Edge> edges = startVertex.getEdges( Direction.IN ).iterator();
+      while ( edges.hasNext() ) {
+        Edge edge = edges.next();
+        if ( done.contains( edge.getId() ) ) {
+          continue;
+        }
+        path.addEdge( edge );
+        Vertex nextVertex = edge.getVertex( Direction.OUT );
+        traverseGraph( nextVertex, subGraph, resultTypes, path, done, shortestPaths, direction, shortestOnly );
+        path.pop();
       }
-      path.addEdge( edge );
-      Vertex nextVertex = edge.getVertex( Direction.OUT );
-      traverseGraph( nextVertex, subGraph, resultTypes, path, done, shortestPaths );
-      path.pop();
     }
-    edges = startVertex.getEdges( Direction.OUT ).iterator();
-    while ( edges.hasNext() ) {
-      Edge edge = edges.next();
-      if ( done.contains( edge.getId() ) ) {
-        continue;
+    if ( direction == Direction.OUT ) {
+      Iterator<Edge> edges = startVertex.getEdges( Direction.OUT ).iterator();
+      while ( edges.hasNext() ) {
+        Edge edge = edges.next();
+        if ( done.contains( edge.getId() ) ) {
+          continue;
+        }
+        path.addEdge( edge );
+        Vertex nextVertex = edge.getVertex( Direction.IN );
+        traverseGraph( nextVertex, subGraph, resultTypes, path, done, shortestPaths, direction, shortestOnly );
+        path.pop();
       }
-      path.addEdge( edge );
-      Vertex nextVertex = edge.getVertex( Direction.IN );
-      traverseGraph( nextVertex, subGraph, resultTypes, path, done, shortestPaths );
-      path.pop();
+      // go upstream to find structure
+      if ( path.getLength() > 1 ) {
+        edges = startVertex.getEdges( Direction.IN ).iterator();
+        while ( edges.hasNext() ) {
+          Edge edge = edges.next();
+          if ( done.contains( edge.getId() ) ) {
+            continue;
+          }
+          path.addEdge( edge );
+          Vertex nextVertex = edge.getVertex( Direction.OUT );
+          // go upstream to find structure
+          traverseGraph( nextVertex, subGraph, resultTypes, path, done, shortestPaths, Direction.IN, shortestOnly );
+          path.pop();
+        }
+      }
     }
     path.pop();
   }

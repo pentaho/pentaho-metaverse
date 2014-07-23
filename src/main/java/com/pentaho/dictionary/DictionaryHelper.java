@@ -155,7 +155,7 @@ public class DictionaryHelper {
     registerStructuralLinkType( DictionaryConst.LINK_EXECUTES );
     registerStructuralLinkType( DictionaryConst.LINK_CONTAINS );
     registerStructuralLinkType( DictionaryConst.LINK_DEFINES );
-    registerStructuralLinkType( DictionaryConst.LINK_IS_A );
+    registerStructuralLinkType( DictionaryConst.LINK_PARENT_CONCEPT );
 
     registerDataFlowLinkType( DictionaryConst.LINK_POPULATES );
     registerDataFlowLinkType( DictionaryConst.LINK_READBY );

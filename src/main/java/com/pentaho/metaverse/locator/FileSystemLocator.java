@@ -55,7 +55,7 @@ public class FileSystemLocator extends BaseLocator {
 
   public FileSystemLocator() {
     super();
-    setIndexerType( LOCATOR_TYPE );
+    setLocatorType( LOCATOR_TYPE );
   }
 
   /**
@@ -100,7 +100,7 @@ public class FileSystemLocator extends BaseLocator {
 
   @Override
   public String getId( String... tokens ) {
-    return getIndexerType() + "." + getRepositoryId() + "." + tokens[0];
+    return getLocatorType() + "." + getRepositoryId() + "." + tokens[0];
   }
 
   @Override
@@ -122,6 +122,9 @@ public class FileSystemLocator extends BaseLocator {
 //TODO      throw new IndexException(  ); 
       return;
     }
+
+    // make sure the locator node exists
+    metaverseBuilder.addNode( locatorNode );
 
     indexRunner = new FileSystemLocatorRunner();
     indexRunner.setRepositoryIndexer( this );

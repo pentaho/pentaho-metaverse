@@ -20,8 +20,9 @@ public class GraphPath {
     path.add( edge );
   }
 
-  public void pop() {
-    path.remove( path.size() - 1 );
+  public Object pop() {
+    Object obj = path.remove( path.size() - 1 );
+    return obj;
   }
 
   public int getLength() {
@@ -51,22 +52,19 @@ public class GraphPath {
         Vertex vertex = (Vertex) item;
         Vertex v = g.getVertex( vertex.getId() );
         if ( v == null ) {
-          v = g.addVertex( vertex.getId() );
-          // clone this
+          v = GraphUtil.cloneVertexIntoGraph( vertex, g );
         }
       } else if ( item instanceof Edge ) {
         Edge edge = (Edge) item;
         Edge e = g.getEdge( edge.getId() );
         if ( e == null ) {
-          Vertex v1 = g.getVertex( edge.getVertex( Direction.IN ) );
+          Vertex v1 = g.getVertex( edge.getVertex( Direction.OUT ) );
           if ( v1 == null ) {
             v1 = GraphUtil.cloneVertexIntoGraph( edge.getVertex( Direction.OUT ), g );
           }
-          Vertex v2 = g.getVertex( edge.getVertex( Direction.OUT ) );
+          Vertex v2 = g.getVertex( edge.getVertex( Direction.IN ) );
           if ( v2 == null ) {
-            if ( v2 == null ) {
-              v2 = GraphUtil.cloneVertexIntoGraph( edge.getVertex( Direction.IN ), g );
-            }
+            v2 = GraphUtil.cloneVertexIntoGraph( edge.getVertex( Direction.IN ), g );
           }
           e = g.addEdge( edge.getId(), v1, v2, edge.getLabel() );
         }
@@ -74,6 +72,20 @@ public class GraphPath {
 
     }
 
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder str = new StringBuilder();
+    for ( Object obj : path ) {
+      if ( obj instanceof Vertex ) {
+        if ( str.length() > 0 ) {
+          str.append( "->" );
+        }
+        str.append( ( (Vertex) obj ).getId() );
+      }
+    }
+    return str.toString();
   }
 
 }

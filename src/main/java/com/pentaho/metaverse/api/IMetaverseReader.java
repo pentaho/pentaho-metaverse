@@ -84,7 +84,7 @@ public interface IMetaverseReader {
    *          the start node i ds
    * @return the graph
    */
-  Graph search( List<String> resultTypes, List<String> startNodeIDs );
+  Graph search( List<String> resultTypes, List<String> startNodeIDs, boolean shortestOnly );
 
   /**
    * Returns the graph for a given element
