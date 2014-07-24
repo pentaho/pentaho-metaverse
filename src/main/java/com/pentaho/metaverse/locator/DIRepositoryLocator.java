@@ -113,16 +113,22 @@ public class DIRepositoryLocator extends RepositoryLocator {
 
   @Override
   protected Object getFileContents( RepositoryFile file, String type ) throws Exception {
-
     Object object = null;
-    ObjectId objectId = new StringObjectId( file.getPath() );
+
+    ObjectId objectId;
+    Repository repo = getRepository();
+    if ( repo instanceof KettleFileRepository ) {
+      objectId = new StringObjectId( file.getPath() );
+    } else {
+      objectId = new StringObjectId( file.getId().toString() );
+    }
+
     if ( "ktr".equals( type ) ) {
-      object = repository.loadTransformation( objectId, null );
+      object = repo.loadTransformation( objectId, null );
     } else if ( "kjb".equals( type ) ) {
-      object = repository.loadJob( objectId, null );
+      object = repo.loadJob( objectId, null );
     }
     return object;
-
   }
 
   @Override
