@@ -114,6 +114,7 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
     // create a metaverse node for this locator
     locatorNode = new MetaverseTransientNode( LOCATOR_ID_PREFIX + id );
     locatorNode.setType( DictionaryConst.NODE_TYPE_LOCATOR );
+    locatorNode.setName( id );
   }
 
   public String getLocatorType() {
