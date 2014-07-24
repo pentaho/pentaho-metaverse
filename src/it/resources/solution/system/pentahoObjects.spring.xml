@@ -39,6 +39,8 @@
     </constructor-arg>
     <property name="repository" ref="Repository"/>
     <property name="unifiedRepository" ref="IUnifiedRepository"/>
+    <property name="repositoryId" value="DI_REPO"/>
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
 
   <bean id="IDocumentLocatorProvider" class="com.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider" scope="singleton">
