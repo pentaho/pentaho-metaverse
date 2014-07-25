@@ -90,7 +90,7 @@ public class MetaverseBuilderIT {
     GenericApplicationContext ctx = new GenericApplicationContext();
     XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader( ctx );
     File f = new File( getSolutionPath() + "/system/pentahoObjects.spring.xml" );
-    if( f.exists() ) {
+    if ( f.exists() ) {
       try {
         reader.loadBeanDefinitions( new FileSystemResource( f ) );
       } catch ( Exception e ) {
@@ -123,7 +123,7 @@ public class MetaverseBuilderIT {
     locators = documentLocatorProvider.getDocumentLocators();
 
     // build it
-    for( IDocumentLocator locator : locators ) {
+    for ( IDocumentLocator locator : locators ) {
       locator.startScan();
       Thread.sleep( 1000 );
     }
@@ -137,7 +137,7 @@ public class MetaverseBuilderIT {
 
     // write out the graph so we can look at it
     File exportFile = new File( "src/it/resources/testGraph.graphml" );
-    FileUtils.writeStringToFile(exportFile, reader.export(), "UTF-8" );
+    FileUtils.writeStringToFile( exportFile, reader.export(), "UTF-8" );
 
   }
 

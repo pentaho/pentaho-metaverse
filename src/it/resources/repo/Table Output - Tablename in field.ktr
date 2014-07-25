@@ -74,12 +74,12 @@
   </notepads>
   <connection>
     <name>Sampledata</name>
-    <server/>
+    <server>localhost</server>
     <type>H2</type>
-    <access>JNDI</access>
+    <access>Native</access>
     <database>SampleData</database>
-    <port>1521</port>
-    <username/>
+    <port>9999</port>
+    <username>sa</username>
     <password>Encrypted</password>
     <servername/>
     <data_tablespace/>
