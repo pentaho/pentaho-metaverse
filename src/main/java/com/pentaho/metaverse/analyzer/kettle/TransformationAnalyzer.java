@@ -98,9 +98,7 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
     }
 
     // Create a metaverse node and start filling in details
-    // TODO get unique ID and set it on the node
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-         DictionaryHelper.getId( transMeta.getClass(), transMeta.getName() ) );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject( document.getStringID() );
 
     node.setName( transMeta.getName() );
     node.setType( DictionaryConst.NODE_TYPE_TRANS );
@@ -119,6 +117,9 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
     for ( int stepNr = 0; stepNr < transMeta.nrSteps(); stepNr++ ) {
       StepMeta stepMeta = transMeta.getStep( stepNr );
       if ( stepMeta != null ) {
+        if ( stepMeta.getParentTransMeta() == null ) {
+          stepMeta.setParentTransMeta( transMeta );
+        }
         IAnalyzer<StepMeta> stepAnalyzer = getStepAnalyzer( stepMeta );
         IMetaverseNode stepNode = stepAnalyzer.analyze( stepMeta );
         metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, stepNode );
@@ -131,15 +132,13 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
 
   /**
    * Returns a set of strings corresponding to which types of content are supported by this analyzer
-   * 
+   *
    * @return the supported types (as a set of Strings)
-   * 
    * @see org.pentaho.platform.api.metaverse.IDocumentAnalyzer#getSupportedTypes()
    */
   public Set<String> getSupportedTypes() {
     return defaultSupportedTypes;
   }
-
 
   protected IAnalyzer<StepMeta> getStepAnalyzer( StepMeta stepMeta ) {
 

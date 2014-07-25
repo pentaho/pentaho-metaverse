@@ -1,6 +1,5 @@
 package com.pentaho.dictionary;
 
-
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -20,10 +19,10 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 /**
  * A helper class for the Pentaho Dictionary
- * @author jdixon
  *
+ * @author jdixon
  */
-@SuppressWarnings( "rawtypes" )
+@SuppressWarnings("rawtypes")
 public class DictionaryHelper {
 
   private static Map<String, IIdGenerator> keyIdGeneratorMap = new HashMap<String, IIdGenerator>();
@@ -33,56 +32,56 @@ public class DictionaryHelper {
 
   // TODO This is temporary
   static {
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
       {
         add( TransMeta.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS ) );
 
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
       {
         add( JobMeta.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_JOB ) );
 
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
       {
         add( StepMeta.class );
         add( TableOutputMeta.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_STEP ) );
 
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
       {
         add( TransMeta.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS ) );
 
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
       {
         add( JobEntryCopy.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_JOB_ENTRY ) );
 
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
       {
         add( DatabaseMeta.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATASOURCE ) );
 
-    DictionaryHelper.addIdGenerator(new HashSet<String>() {
-      {
-        add( DictionaryConst.NODE_TYPE_TRANS_FIELD );
-      }
-    }, null,
-      new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_FIELD ) );
+    DictionaryHelper.addIdGenerator( new HashSet<String>() {
+                                       {
+                                         add( DictionaryConst.NODE_TYPE_TRANS_FIELD );
+                                       }
+                                     }, null,
+        new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_FIELD ) );
 
-    DictionaryHelper.addIdGenerator(new HashSet<String>() {
-      {
-        add( DictionaryConst.NODE_TYPE_DATA_TABLE );
-      }
-    }, null,
-      new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATA_TABLE ) );
+    DictionaryHelper.addIdGenerator( new HashSet<String>() {
+                                       {
+                                         add( DictionaryConst.NODE_TYPE_DATA_TABLE );
+                                       }
+                                     }, null,
+        new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATA_TABLE ) );
   }
 
   /**
@@ -102,6 +101,7 @@ public class DictionaryHelper {
 
   /**
    * Registers a new entity type, e.g. "ktr", or "logicalmodel"
+   *
    * @param entityType
    */
   public static void registerEntityType( String entityType ) {
@@ -110,6 +110,7 @@ public class DictionaryHelper {
 
   /**
    * Registers a new structural link, e.g. "defines", or "contains"
+   *
    * @param linkType
    */
   public static void registerStructuralLinkType( String linkType ) {
@@ -118,6 +119,7 @@ public class DictionaryHelper {
 
   /**
    * Registers a new data flow link, e.g. "populates"
+   *
    * @param linkType
    */
   public static void registerDataFlowLinkType( String linkType ) {
@@ -126,6 +128,7 @@ public class DictionaryHelper {
 
   /**
    * Returns true if the link type is structural in nature, e.g. "contains"
+   *
    * @param linkType The type of the link
    * @return True if the link is structural
    */
@@ -135,6 +138,7 @@ public class DictionaryHelper {
 
   /**
    * Returns true if the link type is data flow in nature, e.g. "populates"
+   *
    * @param linkType The type of the link
    * @return True if the link is data flow
    */
@@ -144,6 +148,7 @@ public class DictionaryHelper {
 
   /**
    * Returns true if the node type is an entity, e.g. "ktr"
+   *
    * @param nodeType The type of the node
    * @return True if the node is an entity
    */
@@ -160,7 +165,7 @@ public class DictionaryHelper {
     registerDataFlowLinkType( DictionaryConst.LINK_POPULATES );
     registerDataFlowLinkType( DictionaryConst.LINK_READBY );
     registerDataFlowLinkType( DictionaryConst.LINK_WRITESTO );
-    registerDataFlowLinkType( DictionaryConst.LINK_USEDBY );
+    registerDataFlowLinkType( DictionaryConst.LINK_USES );
 
     registerEntityType( DictionaryConst.NODE_TYPE_DATASOURCE );
     registerEntityType( DictionaryConst.NODE_TYPE_DATA_TABLE );
@@ -173,10 +178,11 @@ public class DictionaryHelper {
   }
 
   /**
-   * Adds an Id generator to the dictionary. Id generators may be looked up using a 
+   * Adds an Id generator to the dictionary. Id generators may be looked up using a
    * string token (e.g. "ktr"), a Class (e.g. Trans) or an object (instance of a Trans).
-   * @param types The string tokens that can be used to access this id generator. Can be null.
-   * @param classes The Classes that can be used to access this id generator. Can be null.
+   *
+   * @param types       The string tokens that can be used to access this id generator. Can be null.
+   * @param classes     The Classes that can be used to access this id generator. Can be null.
    * @param idGenerator The id generator
    */
   public static void addIdGenerator( Set<String> types, Set<Class> classes, IIdGenerator idGenerator ) {
@@ -196,7 +202,8 @@ public class DictionaryHelper {
 
   /**
    * Returns an id generator based on a string token
-   * @param type The string to use for the lookup
+   *
+   * @param type   The string to use for the lookup
    * @param tokens The tokens to use in the id generation
    * @return The id. This will be null if the id generator was not found.
    */
@@ -210,7 +217,8 @@ public class DictionaryHelper {
 
   /**
    * Returns an id generator based on a Class
-   * @param clazz The Class to use for the lookup
+   *
+   * @param clazz  The Class to use for the lookup
    * @param tokens The tokens to use in the id generation
    * @return The id. This will be null if the id generator was not found.
    */
@@ -226,7 +234,8 @@ public class DictionaryHelper {
    * Returns an id generator based on an object. If the object is an instance of any Class
    * that has an id generator, that id generator will be returned. The first match will be
    * returned, not necessarily the best or closest match.
-   * @param obj The Object to use for the lookup
+   *
+   * @param obj    The Object to use for the lookup
    * @param tokens The tokens to use in the id generation
    * @return The id. This will be null if the id generator was not found.
    */
@@ -242,9 +251,10 @@ public class DictionaryHelper {
 
   /**
    * Creates an in-memory metaverse node from the provided parameters
-   * @param id The id of the node. An IIdGenerator should be used to create this.
-   * @param name The name of the node
-   * @param type The type of the node
+   *
+   * @param id         The id of the node. An IIdGenerator should be used to create this.
+   * @param name       The name of the node
+   * @param type       The type of the node
    * @param properties The properties of the node
    * @return The metaverse node
    */
@@ -267,11 +277,12 @@ public class DictionaryHelper {
   /**
    * Creates a child node of a metaverse node and populates it with the provided parameters.
    * The relationship should be one of DictionaryConst.LINK_*
-   * @param id The id of the node. An IIdGenerator should be used to create this.
-   * @param name The name of the node
-   * @param type The type of the node
-   * @param properties The properties of the node
-   * @param parent The parent node
+   *
+   * @param id           The id of the node. An IIdGenerator should be used to create this.
+   * @param name         The name of the node
+   * @param type         The type of the node
+   * @param properties   The properties of the node
+   * @param parent       The parent node
    * @param relationship The type of parent-child relationship
    * @return The metaverse node
    */

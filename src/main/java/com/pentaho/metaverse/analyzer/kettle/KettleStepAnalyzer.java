@@ -26,20 +26,25 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+
+import java.util.List;
 
 /**
  * KettleStepAnalyzer provides a default implementation for analyzing PDI steps to gather metadata for the metaverse.
  */
 public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
 
-
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
-   * 
+   *
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
    */
   @Override
@@ -79,14 +84,36 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
       DatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
       for ( DatabaseMeta db : dbs ) {
         IMetaverseNode dbNode = dbAnalyzer.analyze( db );
-        metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_USEDBY, node );
+        metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_USES, node );
       }
 
     }
 
     // TODO Investigate interfaces to see what default input &/or
     // TODO output fields are available ... process those here
+    try {
+      TransMeta parentTrans = stepMeta.getParentTransMeta();
+      if ( parentTrans != null ) {
+        RowMetaInterface incomingRow = parentTrans.getPrevStepFields( stepMeta );
+        RowMetaInterface outgoingRow = parentTrans.getStepFields( stepMeta );
 
+        // Find fields that were created by this step
+        List<ValueMetaInterface> outRowValueMetas = outgoingRow.getValueMetaList();
+        if ( outRowValueMetas != null ) {
+          for ( ValueMetaInterface outRowMeta : outRowValueMetas ) {
+            if ( incomingRow.searchValueMeta( outRowMeta.getName() ) == null ) {
+              // This field didn't come into the step, so assume it has been created here
+              IMetaverseNode newFieldNode = metaverseObjectFactory.createNodeObject(
+                  DictionaryHelper.getId( outRowMeta.getClass(), outRowMeta.getName() ) );
+              node.setName( outRowMeta.getName() );
+              node.setType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
+            }
+          }
+        }
+      }
+    } catch ( KettleException ke ) {
+      throw new MetaverseAnalyzerException( ke );
+    }
     return node;
   }
 

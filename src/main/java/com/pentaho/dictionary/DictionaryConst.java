@@ -1,12 +1,11 @@
 package com.pentaho.dictionary;
 
-
 /**
  * Constants used in the graph building and reading.
  * All data flow links must be left to right (source to destination).
- * All structural links must be high to low (container to containee). 
- * @author jdixon
+ * All structural links must be high to low (container to containee).
  *
+ * @author jdixon
  */
 public class DictionaryConst {
 
@@ -77,9 +76,9 @@ public class DictionaryConst {
   public static final String LINK_WRITESTO = "writesto";
 
   /**
-   * Label for a "used by" edge in the graph, e.g. a databaseMeta is used by a step
+   * Label for a "uses" edge in the graph, e.g. a step uses a databaseMeta
    */
-  public static final String LINK_USEDBY = "usedby";
+  public static final String LINK_USES = "uses";
 
   /**
    * Label for an "creates" edge in the graph, e.g. a transformation step creates a transformation field
