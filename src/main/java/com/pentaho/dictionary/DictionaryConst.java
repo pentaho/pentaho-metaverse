@@ -88,24 +88,24 @@ public class DictionaryConst {
   /*
    * This is a set of known content types
    */
-  public static final String NODE_TYPE_LOCATOR = "locator";
-  public static final String NODE_TYPE_JOB = "kjb";
-  public static final String NODE_TYPE_TRANS = "ktr";
-  public static final String NODE_TYPE_TRANS_STEP = "transtep";
-  public static final String NODE_TYPE_JOB_ENTRY = "jobentry";
-  public static final String NODE_TYPE_DATASOURCE = "datasource";
-  public static final String NODE_TYPE_DATA_TABLE = "table";
-  public static final String NODE_TYPE_TRANS_FIELD = "transfield";
-  public static final String NODE_TYPE_DATA_COLUMN = "column";
-  public static final String NODE_TYPE_FILE = "file";
-  public static final String NODE_TYPE_FILE_FIELD = "filefield";
-  public static final String NODE_TYPE_WEBSERVICE = "service";
-  public static final String NODE_TYPE_LOGICAL_MODEL = "model";
-  public static final String NODE_TYPE_LOGICAL_HIERARCHY = "modelhier";
-  public static final String NODE_TYPE_LOGICAL_FIELD = "modelfield";
-  public static final String NODE_TYPE_USER_CONTENT = "content";
-  public static final String NODE_TYPE_ENTITY = "entity";
-  public static final String NODE_TYPE_ROOT_ENTITY = "root_entity";
+  public static final String NODE_TYPE_LOCATOR = "Locator";
+  public static final String NODE_TYPE_JOB = "Job";
+  public static final String NODE_TYPE_TRANS = "Transformation";
+  public static final String NODE_TYPE_TRANS_STEP = "Transformation Step";
+  public static final String NODE_TYPE_JOB_ENTRY = "Job Entry";
+  public static final String NODE_TYPE_DATASOURCE = "Database Connection";
+  public static final String NODE_TYPE_DATA_TABLE = "Database Table";
+  public static final String NODE_TYPE_TRANS_FIELD = "Transformation Stream field";
+  public static final String NODE_TYPE_DATA_COLUMN = "Database Column";
+  public static final String NODE_TYPE_FILE = "File";
+  public static final String NODE_TYPE_FILE_FIELD = "File Field";
+  public static final String NODE_TYPE_WEBSERVICE = "Web Service";
+  public static final String NODE_TYPE_LOGICAL_MODEL = "Logical Model";
+  public static final String NODE_TYPE_LOGICAL_HIERARCHY = "Logical Hierarchy";
+  public static final String NODE_TYPE_LOGICAL_FIELD = "Model Field";
+  public static final String NODE_TYPE_USER_CONTENT = "User Content";
+  public static final String NODE_TYPE_ENTITY = "Entity";
+  public static final String NODE_TYPE_ROOT_ENTITY = "Root_Entity";
 
   public static final String NODE_VIRTUAL = "virtual";
 

@@ -84,7 +84,7 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
       DatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
       for ( DatabaseMeta db : dbs ) {
         IMetaverseNode dbNode = dbAnalyzer.analyze( db );
-        metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_USES, node );
+        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, dbNode );
       }
 
     }
@@ -106,9 +106,15 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
               if ( incomingRow == null || incomingRow.searchValueMeta( outRowMeta.getName() ) == null ) {
                 // This field didn't come into the step, so assume it has been created here
                 IMetaverseNode newFieldNode = metaverseObjectFactory.createNodeObject(
-                    DictionaryHelper.getId( outRowMeta.getClass(), outRowMeta.getName() ) );
-                node.setName( outRowMeta.getName() );
-                node.setType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
+                    DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD, outRowMeta.getName() ) );
+                newFieldNode.setName( outRowMeta.getName() );
+                newFieldNode.setType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
+                newFieldNode.setProperty( "kettleType", outRowMeta.getTypeDesc() );
+
+                metaverseBuilder.addNode( newFieldNode );
+
+                // Add link to show that this step created the field
+                metaverseBuilder.addLink( node, DictionaryConst.LINK_CREATES, newFieldNode );
               }
             }
           }
@@ -125,6 +131,7 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
     DatabaseConnectionAnalyzer analyzer = new DatabaseConnectionAnalyzer();
     analyzer.setMetaverseObjectFactory( metaverseObjectFactory );
     analyzer.setMetaverseBuilder( metaverseBuilder );
+
     return analyzer;
 
   }
