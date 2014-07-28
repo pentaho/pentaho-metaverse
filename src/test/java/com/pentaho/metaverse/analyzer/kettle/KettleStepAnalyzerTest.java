@@ -32,11 +32,18 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.exception.KettleStepException;
+import org.pentaho.di.core.row.RowMeta;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaInteger;
+import org.pentaho.di.core.row.value.ValueMetaString;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
@@ -46,9 +53,8 @@ import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 /**
  * @author mburgess
- * 
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith(MockitoJUnitRunner.class)
 public class KettleStepAnalyzerTest {
 
   KettleStepAnalyzer analyzer;
@@ -57,6 +63,9 @@ public class KettleStepAnalyzerTest {
   private IMetaverseBuilder mockBuilder;
 
   private IMetaverseObjectFactory factory;
+
+  @Mock
+  TransMeta mockTransMeta;
 
   @Mock
   private StepMeta mockStepMeta;
@@ -95,6 +104,7 @@ public class KettleStepAnalyzerTest {
 
     // set random StepMetaInterface
     when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockStepMetaInterface );
+    when( mockStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
   }
 
   /**
@@ -118,7 +128,7 @@ public class KettleStepAnalyzerTest {
 
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
     analyzer.analyze( null );
@@ -136,35 +146,53 @@ public class KettleStepAnalyzerTest {
   @Test
   public void testAnalyzeWithDatabaseMeta() throws MetaverseAnalyzerException {
 
-    when(mockStepMetaInterface.getUsedDatabaseConnections()).thenReturn( new DatabaseMeta[]{mockDatabaseMeta} );
+    when( mockStepMetaInterface.getUsedDatabaseConnections() ).thenReturn( new DatabaseMeta[] { mockDatabaseMeta } );
 
     IMetaverseNode node = analyzer.analyze( mockStepMeta );
     assertNotNull( node );
 
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testAnalyzeNullStepMetaInterface() throws MetaverseAnalyzerException {
 
-    when( mockStepMeta.getStepMetaInterface()).thenReturn( null );
+    when( mockStepMeta.getStepMetaInterface() ).thenReturn( null );
     analyzer.analyze( mockStepMeta );
 
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException{
+  @Test(expected = MetaverseAnalyzerException.class)
+  public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
 
     analyzer.setMetaverseBuilder( null );
     analyzer.analyze( mockStepMeta );
 
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testSetObjectFactoryNull() throws MetaverseAnalyzerException{
+  @Test(expected = MetaverseAnalyzerException.class)
+  public void testSetObjectFactoryNull() throws MetaverseAnalyzerException {
 
     analyzer.setMetaverseObjectFactory( null );
     analyzer.analyze( mockStepMeta );
 
   }
 
+  @Test
+  public void testAnalyzeWithNewFields() throws MetaverseAnalyzerException, KettleStepException {
+
+    when( mockTransMeta.getStepFields( mockStepMeta ) ).thenAnswer( new Answer<RowMetaInterface>() {
+
+      @Override
+      public RowMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        RowMeta rowMeta = new RowMeta();
+        rowMeta.addValueMeta( new ValueMetaInteger( "testInt" ) );
+        rowMeta.addValueMeta( new ValueMetaString( "testString" ) );
+        return rowMeta;
+      }
+    } );
+    IMetaverseNode node = analyzer.analyze( mockStepMeta );
+    assertNotNull( node );
+
+  }
 }

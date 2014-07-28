@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
@@ -51,10 +50,11 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
 
   private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
     /**
-     * Default serial ID for
+     * Default serial ID for serialization
      */
     private static final long serialVersionUID = -7433589337075366681L;
 
+    // Statically add the supported types to the set
     {
       add( "ktr" );
     }

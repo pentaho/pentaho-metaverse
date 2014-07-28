@@ -97,16 +97,19 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
         RowMetaInterface incomingRow = parentTrans.getPrevStepFields( stepMeta );
         RowMetaInterface outgoingRow = parentTrans.getStepFields( stepMeta );
 
-        // Find fields that were created by this step
-        List<ValueMetaInterface> outRowValueMetas = outgoingRow.getValueMetaList();
-        if ( outRowValueMetas != null ) {
-          for ( ValueMetaInterface outRowMeta : outRowValueMetas ) {
-            if ( incomingRow.searchValueMeta( outRowMeta.getName() ) == null ) {
-              // This field didn't come into the step, so assume it has been created here
-              IMetaverseNode newFieldNode = metaverseObjectFactory.createNodeObject(
-                  DictionaryHelper.getId( outRowMeta.getClass(), outRowMeta.getName() ) );
-              node.setName( outRowMeta.getName() );
-              node.setType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
+        if ( outgoingRow != null ) {
+
+          // Find fields that were created by this step
+          List<ValueMetaInterface> outRowValueMetas = outgoingRow.getValueMetaList();
+          if ( outRowValueMetas != null ) {
+            for ( ValueMetaInterface outRowMeta : outRowValueMetas ) {
+              if ( incomingRow == null || incomingRow.searchValueMeta( outRowMeta.getName() ) == null ) {
+                // This field didn't come into the step, so assume it has been created here
+                IMetaverseNode newFieldNode = metaverseObjectFactory.createNodeObject(
+                    DictionaryHelper.getId( outRowMeta.getClass(), outRowMeta.getName() ) );
+                node.setName( outRowMeta.getName() );
+                node.setType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
+              }
             }
           }
         }
