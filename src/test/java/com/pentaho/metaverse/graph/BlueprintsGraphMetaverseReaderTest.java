@@ -63,7 +63,7 @@ public class BlueprintsGraphMetaverseReaderTest {
 
     assertNotNull( "Node is null", node );
     assertEquals( "Id is wrong", "data.txt", node.getStringID() );
-    assertEquals( "Type is wrong", "file", node.getType() );
+    assertEquals( "Type is wrong", DictionaryConst.NODE_TYPE_FILE, node.getType() );
     assertEquals( "Name is wrong", "Text file: data.txt", node.getName() );
 
     node = metaverseReader.findNode( "bogus" );

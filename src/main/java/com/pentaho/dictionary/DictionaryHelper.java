@@ -178,6 +178,7 @@ public class DictionaryHelper {
     registerEntityType( DictionaryConst.NODE_TYPE_LOGICAL_MODEL );
     registerEntityType( DictionaryConst.NODE_TYPE_TRANS );
     registerEntityType( DictionaryConst.NODE_TYPE_TRANS_STEP );
+    registerEntityType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
     registerEntityType( DictionaryConst.NODE_TYPE_USER_CONTENT );
   }
 
