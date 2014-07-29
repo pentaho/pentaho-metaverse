@@ -31,25 +31,39 @@
     <constructor-arg ref="MetaverseGraphImpl"/>
   </bean>
 
-  <bean id="DIRepositoryLocator" class="com.pentaho.metaverse.locator.DIRepositoryLocator" scope="singleton">
+  <bean id="FileSystemLocator" class="com.pentaho.metaverse.locator.FileSystemLocator" scope="singleton">
     <constructor-arg>
       <list>
         <ref bean="IDocumentListener"/>
       </list>
     </constructor-arg>
-    <property name="repository" ref="Repository"/>
-    <property name="unifiedRepository" ref="IUnifiedRepository"/>
-    <property name="repositoryId" value="DI_REPO"/>
+    <property name="repositoryId" value="FILE_SYSTEM_REPO"/>
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    <property name="rootFolder" value="src/it/resources/repo"/>
   </bean>
 
   <bean id="IDocumentLocatorProvider" class="com.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider" scope="singleton">
     <constructor-arg>
       <set>
-        <ref bean="DIRepositoryLocator"/>
+        <!--<ref bean="DIRepositoryLocator"/>-->
+        <ref bean="FileSystemLocator"/>
       </set>
     </constructor-arg>
   </bean>
+
+
+<!-- DI Repository config if ever needed/desired
+    <bean id="DIRepositoryLocator" class="com.pentaho.metaverse.locator.DIRepositoryLocator" scope="singleton">
+      <constructor-arg>
+        <list>
+          <ref bean="IDocumentListener"/>
+        </list>
+      </constructor-arg>
+      <property name="repository" ref="Repository"/>
+      <property name="unifiedRepository" ref="IUnifiedRepository"/>
+      <property name="repositoryId" value="DI_REPO"/>
+      <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    </bean>
 
   <bean id="IUnifiedRepository" class="org.pentaho.platform.repository2.unified.fs.FileSystemBackedUnifiedRepository" scope="singleton">
     <constructor-arg value="src/it/resources/repo"/>
@@ -64,5 +78,5 @@
     <constructor-arg value="repoDescription"/>
     <constructor-arg value="src/it/resources/repo"/>
   </bean>
-
+-->
 </beans>

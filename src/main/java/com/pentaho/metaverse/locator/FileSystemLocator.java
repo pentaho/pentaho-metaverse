@@ -22,14 +22,14 @@
 
 package com.pentaho.metaverse.locator;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-
 import com.pentaho.metaverse.messages.Messages;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pentaho.platform.api.metaverse.IDocumentListener;
+
+import java.io.File;
+import java.util.List;
 
 /**
  * An abstract implementation of a document locator for Pentaho repositories
@@ -58,6 +58,11 @@ public class FileSystemLocator extends BaseLocator {
     setLocatorType( LOCATOR_TYPE );
   }
 
+  public FileSystemLocator( List<IDocumentListener> documentListeners ) {
+    super( documentListeners );
+    setLocatorType( LOCATOR_TYPE );
+  }
+
   /**
    * A method that returns the payload (object or XML) for a document
    * @param file The repository file
@@ -68,22 +73,7 @@ public class FileSystemLocator extends BaseLocator {
   protected Object getFileContents( File file, String type ) throws Exception {
     String content = "";
     try {
-
-      InputStream in = new FileInputStream( file );
-      byte[] buffer = new byte[2048];
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      int n = 0;
-      try {
-        while ( n != -1 ) {
-          n = in.read( buffer );
-          if ( n != -1 ) {
-            out.write( buffer, 0, n );
-          }
-        }
-      } finally {
-        in.close();
-      }
-      content = new String( out.toByteArray() );
+      content = FileUtils.readFileToString( file );
     } catch ( Throwable e ) {
       error( Messages.getString( "ERROR.IndexingDocument", file.getPath() ), e );
     }
