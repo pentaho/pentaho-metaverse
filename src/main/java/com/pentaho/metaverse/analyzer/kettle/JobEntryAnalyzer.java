@@ -35,18 +35,12 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
  *
  * Created by gmoran on 7/16/14.
  */
-public class JobEntryAnalyzer extends AbstractAnalyzer<JobEntryCopy> {
+public class JobEntryAnalyzer<T extends JobEntryInterface> extends AbstractAnalyzer<JobEntryInterface> {
 
   @Override
-  public IMetaverseNode analyze( JobEntryCopy entry ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( JobEntryInterface entry ) throws MetaverseAnalyzerException {
 
     if ( entry == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.TableOutputMeta.IsNull" ) );
-    }
-
-    JobEntryInterface jobEntryInterface = entry.getEntry();
-
-    if ( jobEntryInterface == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );
     }
 
@@ -60,7 +54,7 @@ public class JobEntryAnalyzer extends AbstractAnalyzer<JobEntryCopy> {
 
     // Add yourself
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( entry.getClass(), entry.getName() ) );
+        DictionaryHelper.getId( entry, entry.getName() ) );
 
     node.setName( entry.getName() );
     node.setType( DictionaryConst.NODE_TYPE_JOB_ENTRY );
@@ -71,5 +65,6 @@ public class JobEntryAnalyzer extends AbstractAnalyzer<JobEntryCopy> {
     return node;
 
   }
+
 
 }

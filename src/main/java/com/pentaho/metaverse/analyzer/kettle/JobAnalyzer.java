@@ -28,6 +28,7 @@ import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
@@ -48,7 +49,7 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
 
   private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
     {
-      add( DictionaryConst.NODE_TYPE_JOB );
+      add( "kjb" );
     }
   };
 
@@ -91,8 +92,7 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
 
     // Create a metaverse node and start filling in details
     // TODO get unique ID and set it on the node
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( job.getClass(), job.getName() ) );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject( document.getStringID() );
 
     node.setType(  DictionaryConst.NODE_TYPE_JOB );
     node.setName( job.getName() );
@@ -112,8 +112,8 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
       JobEntryCopy entry = job.getJobEntry( i );
 
       if ( entry != null ) {
-        IAnalyzer<JobEntryCopy> analyzer = getJobEntryAnalyzer( entry );
-        IMetaverseNode entryNode = analyzer.analyze( entry );
+        IAnalyzer<JobEntryInterface> analyzer = getJobEntryAnalyzer( entry.getEntry() );
+        IMetaverseNode entryNode = analyzer.analyze( entry.getEntry() );
         metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, entryNode );
       }
 
@@ -123,7 +123,7 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
     return node;
   }
 
-  protected IAnalyzer<JobEntryCopy> getJobEntryAnalyzer( JobEntryCopy jobEntry ) {
+  protected IAnalyzer<JobEntryInterface> getJobEntryAnalyzer( JobEntryInterface jobEntry ) {
 
     // TODO Look for implementing analyzers for this step.
     //
@@ -135,7 +135,7 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
     //
     // If none can be found, a default handler should be returned.
 
-    IAnalyzer<JobEntryCopy> entryAnalyzer = new JobEntryAnalyzer();
+    IAnalyzer<JobEntryInterface> entryAnalyzer = new JobEntryAnalyzer();
     entryAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
     entryAnalyzer.setMetaverseBuilder( metaverseBuilder );
 

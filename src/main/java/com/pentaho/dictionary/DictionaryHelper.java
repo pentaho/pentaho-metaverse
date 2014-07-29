@@ -12,6 +12,7 @@ import java.util.Set;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -53,7 +54,7 @@ public class DictionaryHelper {
 
     DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
       {
-        add( JobEntryCopy.class );
+        add( JobEntryInterface.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_JOB_ENTRY ) );
 
