@@ -53,12 +53,6 @@ public class DictionaryHelper {
 
     DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
       {
-        add( TransMeta.class );
-      }
-    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS ) );
-
-    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
-      {
         add( JobEntryCopy.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_JOB_ENTRY ) );
@@ -86,6 +80,15 @@ public class DictionaryHelper {
         },
         null,
         new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATA_TABLE ) );
+
+    DictionaryHelper.addIdGenerator(
+        new HashSet<String>() {
+          {
+            add( DictionaryConst.NODE_TYPE_DATA_COLUMN );
+          }
+        },
+        null,
+        new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATA_COLUMN ) );
   }
 
   /**
@@ -173,6 +176,7 @@ public class DictionaryHelper {
 
     registerEntityType( DictionaryConst.NODE_TYPE_DATASOURCE );
     registerEntityType( DictionaryConst.NODE_TYPE_DATA_TABLE );
+    registerEntityType( DictionaryConst.NODE_TYPE_DATA_COLUMN );
     registerEntityType( DictionaryConst.NODE_TYPE_JOB );
     registerEntityType( DictionaryConst.NODE_TYPE_JOB_ENTRY );
     registerEntityType( DictionaryConst.NODE_TYPE_LOGICAL_MODEL );

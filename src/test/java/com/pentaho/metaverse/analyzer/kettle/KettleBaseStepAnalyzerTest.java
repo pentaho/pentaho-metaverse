@@ -22,14 +22,8 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.when;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -42,6 +36,7 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaInteger;
 import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
@@ -49,15 +44,16 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
 /**
  * @author mburgess
  */
-@RunWith(MockitoJUnitRunner.class)
-public class KettleStepAnalyzerTest {
+@RunWith( MockitoJUnitRunner.class )
+public class KettleBaseStepAnalyzerTest {
 
-  KettleStepAnalyzer analyzer;
+  KettleBaseStepAnalyzer analyzer;
 
   @Mock
   private IMetaverseBuilder mockBuilder;
@@ -68,7 +64,10 @@ public class KettleStepAnalyzerTest {
   TransMeta mockTransMeta;
 
   @Mock
-  private StepMeta mockStepMeta;
+  protected BaseStepMeta mockStepMeta;
+
+  @Mock
+  protected StepMeta parentStepMeta;
 
   @Mock
   DatabaseMeta mockDatabaseMeta;
@@ -77,38 +76,38 @@ public class KettleStepAnalyzerTest {
   StepMetaInterface mockStepMetaInterface;
 
   /**
-   * @throws java.lang.Exception
+   * @throws Exception
    */
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
   }
 
   /**
-   * @throws java.lang.Exception
+   * @throws Exception
    */
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
   }
 
   /**
-   * @throws java.lang.Exception
+   * @throws Exception
    */
   @Before
   public void setUp() throws Exception {
 
     factory = MetaverseTestUtils.getMetaverseObjectFactory();
 
-    analyzer = new KettleStepAnalyzer();
+    analyzer = new KettleBaseStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
     analyzer.setMetaverseObjectFactory( factory );
 
     // set random StepMetaInterface
-    when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockStepMetaInterface );
-    when( mockStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( mockStepMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
+    when( parentStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
   }
 
   /**
-   * @throws java.lang.Exception
+   * @throws Exception
    */
   @After
   public void tearDown() throws Exception {
@@ -128,7 +127,7 @@ public class KettleStepAnalyzerTest {
 
   }
 
-  @Test(expected = MetaverseAnalyzerException.class)
+  @Test( expected = MetaverseAnalyzerException.class )
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
     analyzer.analyze( null );
@@ -153,15 +152,7 @@ public class KettleStepAnalyzerTest {
 
   }
 
-  @Test(expected = MetaverseAnalyzerException.class)
-  public void testAnalyzeNullStepMetaInterface() throws MetaverseAnalyzerException {
-
-    when( mockStepMeta.getStepMetaInterface() ).thenReturn( null );
-    analyzer.analyze( mockStepMeta );
-
-  }
-
-  @Test(expected = MetaverseAnalyzerException.class)
+  @Test( expected = MetaverseAnalyzerException.class )
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
 
     analyzer.setMetaverseBuilder( null );
@@ -169,7 +160,7 @@ public class KettleStepAnalyzerTest {
 
   }
 
-  @Test(expected = MetaverseAnalyzerException.class)
+  @Test( expected = MetaverseAnalyzerException.class )
   public void testSetObjectFactoryNull() throws MetaverseAnalyzerException {
 
     analyzer.setMetaverseObjectFactory( null );
@@ -180,7 +171,7 @@ public class KettleStepAnalyzerTest {
   @Test
   public void testAnalyzeWithNewFields() throws MetaverseAnalyzerException, KettleStepException {
 
-    when( mockTransMeta.getStepFields( mockStepMeta ) ).thenAnswer( new Answer<RowMetaInterface>() {
+    when( mockTransMeta.getStepFields( mockStepMeta.getParentStepMeta() ) ).thenAnswer( new Answer<RowMetaInterface>() {
 
       @Override
       public RowMetaInterface answer( InvocationOnMock invocation ) throws Throwable {

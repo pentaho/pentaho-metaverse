@@ -24,20 +24,18 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
-import org.pentaho.di.core.exception.KettleStepException;
-import org.pentaho.di.core.row.RowMetaInterface;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
  * The TableOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
  * other metaverse entities (such as physical fields and tables)
- * 
  */
-public class TableOutputStepAnalyzer extends AbstractAnalyzer<TableOutputMeta> {
+public class TableOutputStepAnalyzer extends KettleBaseStepAnalyzer<TableOutputMeta> {
 
   /*
    * (non-Javadoc)
@@ -45,65 +43,68 @@ public class TableOutputStepAnalyzer extends AbstractAnalyzer<TableOutputMeta> {
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
    */
   @Override
-  public IMetaverseNode analyze( TableOutputMeta object ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( TableOutputMeta tableOutputMeta ) throws MetaverseAnalyzerException {
 
-    if ( object == null ) {
-      throw new MetaverseAnalyzerException( "TableOutputMeta is null!" );
+    if ( tableOutputMeta == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.TableOutputMeta.IsNull" ) );
     }
 
-    // TODO not lovin this
-    IAnalyzer stepAnalyzer = new KettleStepAnalyzer();
-    stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-    stepAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
-    IMetaverseNode node = stepAnalyzer.analyze( object.getParentStepMeta() );
+    // Do common analysis for all steps
+    IMetaverseNode node = super.analyze( tableOutputMeta );
 
-    TransMeta transMeta = object.getParentStepMeta().getParentTransMeta();
+    StepMeta parentStepMeta = tableOutputMeta.getParentStepMeta();
+    if ( parentStepMeta == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMeta.IsNull" ) );
+    }
+    TransMeta transMeta = parentStepMeta.getParentTransMeta();
 
-
-    RowMetaInterface rmi;
-    try {
-      rmi = transMeta.getPrevStepFields( object.getParentStepMeta() );
-    } catch ( KettleStepException e ) {
-      throw new MetaverseAnalyzerException( e );
+    if ( transMeta == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.ParentTransMeta.IsNull" ) );
     }
 
-    String tableName = object.getTableName();
-    String[] fieldNames = {};
-
-    if ( rmi != null ) {
-      fieldNames = rmi.getFieldNames();
-    }
-
+    String tableName = tableOutputMeta.getTableName();
+    String[] fieldNames = tableOutputMeta.getFieldStream();
+    String[] dbFieldNames = tableOutputMeta.getFieldDatabase();
     String type = DictionaryConst.NODE_TYPE_DATA_TABLE;
 
     if ( tableName != null ) {
 
       IMetaverseNode tableNode = metaverseObjectFactory.createNodeObject(
-          DictionaryHelper.getId( type, object.getDatabaseMeta().getName(), tableName ) );
+          DictionaryHelper.getId( type, tableOutputMeta.getDatabaseMeta().getName(), tableName ) );
 
       tableNode.setType( type );
       tableNode.setName( tableName );
 
       metaverseBuilder.addNode( tableNode );
-
-      // TODO originally, this link was from the trans to the table ... do we need that link?
-      // TODO if so, we may need access to the parent chain of nodes to skip levels
       metaverseBuilder.addLink( node, DictionaryConst.LINK_WRITESTO, tableNode );
 
       type = DictionaryConst.NODE_TYPE_TRANS_FIELD;
-      IMetaverseNode fieldNode;
+      if ( fieldNames != null ) {
+        for ( int i = 0; i < fieldNames.length; i++ ) {
+          String fieldName = fieldNames[i];
+          IMetaverseNode fieldNode = metaverseObjectFactory.createNodeObject(
+              DictionaryHelper.getId( type, tableOutputMeta.getDatabaseMeta().getName(), tableName, fieldName ) );
 
-      for ( String fieldName : fieldNames ) {
-        fieldNode = metaverseObjectFactory.createNodeObject(
-            DictionaryHelper.getId( type, object.getDatabaseMeta().getName(), tableName, fieldName ) );
+          fieldNode.setName( fieldName );
+          fieldNode.setType( type );
 
-        fieldNode.setName( fieldName );
-        fieldNode.setType( type );
+          metaverseBuilder.addNode( fieldNode );
+          metaverseBuilder.addLink( tableNode, DictionaryConst.LINK_CONTAINS, fieldNode );
 
-        metaverseBuilder.addNode( fieldNode );
-        metaverseBuilder.addLink( tableNode, DictionaryConst.LINK_CONTAINS, fieldNode );
+          if ( dbFieldNames != null ) {
+            String dbNodeType = DictionaryConst.NODE_TYPE_DATA_COLUMN;
+            IMetaverseNode dbFieldNode = metaverseObjectFactory.createNodeObject(
+                DictionaryHelper.getId(
+                    dbNodeType, tableOutputMeta.getDatabaseMeta().getName(), tableName, fieldName ) );
+
+            dbFieldNode.setName( dbFieldNames[i] );
+            dbFieldNode.setType( dbNodeType );
+
+            metaverseBuilder.addNode( dbFieldNode );
+            metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, dbFieldNode );
+          }
+        }
       }
-
     }
 
     return node;

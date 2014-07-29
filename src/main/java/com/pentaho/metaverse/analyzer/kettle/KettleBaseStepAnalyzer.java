@@ -30,34 +30,38 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.List;
 
 /**
- * KettleStepAnalyzer provides a default implementation for analyzing PDI steps to gather metadata for the metaverse.
+ * KettleBaseStepAnalyzer provides a default implementation for analyzing PDI steps
+ * to gather metadata for the metaverse.
  */
-public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
+public class KettleBaseStepAnalyzer<T extends BaseStepMeta> extends AbstractAnalyzer<T> {
+
+  protected RowMetaInterface prevFields = null;
+
+  protected RowMetaInterface stepFields = null;
 
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
    *
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(Object)
    */
   @Override
-  public IMetaverseNode analyze( StepMeta stepMeta ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( BaseStepMeta baseStepMeta ) throws MetaverseAnalyzerException {
 
-    if ( stepMeta == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMeta.IsNull" ) );
+    if ( baseStepMeta == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMetaInterface.IsNull" ) );
     }
 
-    StepMetaInterface stepMetaInterface = stepMeta.getStepMetaInterface();
-
-    if ( stepMetaInterface == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMetaInterface.IsNull" ) );
+    StepMeta stepMeta = baseStepMeta.getParentStepMeta();
+    if ( stepMeta == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMeta.IsNull" ) );
     }
 
     if ( metaverseBuilder == null ) {
@@ -70,14 +74,14 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
 
     // Add yourself
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( stepMeta.getClass(), stepMeta.getName() ) );
+        DictionaryHelper.getId( baseStepMeta.getClass(), baseStepMeta.getName() ) );
 
-    node.setName( stepMeta.getName() );
+    node.setName( baseStepMeta.getName() );
     node.setType( DictionaryConst.NODE_TYPE_TRANS_STEP );
 
     metaverseBuilder.addNode( node );
 
-    DatabaseMeta[] dbs = stepMetaInterface.getUsedDatabaseConnections();
+    DatabaseMeta[] dbs = baseStepMeta.getUsedDatabaseConnections();
 
     if ( dbs != null ) {
 
@@ -94,16 +98,16 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
     try {
       TransMeta parentTrans = stepMeta.getParentTransMeta();
       if ( parentTrans != null ) {
-        RowMetaInterface incomingRow = parentTrans.getPrevStepFields( stepMeta );
-        RowMetaInterface outgoingRow = parentTrans.getStepFields( stepMeta );
+        prevFields = parentTrans.getPrevStepFields( stepMeta );
+        stepFields = parentTrans.getStepFields( stepMeta );
 
-        if ( outgoingRow != null ) {
+        if ( stepFields != null ) {
 
           // Find fields that were created by this step
-          List<ValueMetaInterface> outRowValueMetas = outgoingRow.getValueMetaList();
+          List<ValueMetaInterface> outRowValueMetas = stepFields.getValueMetaList();
           if ( outRowValueMetas != null ) {
             for ( ValueMetaInterface outRowMeta : outRowValueMetas ) {
-              if ( incomingRow == null || incomingRow.searchValueMeta( outRowMeta.getName() ) == null ) {
+              if ( prevFields == null || prevFields.searchValueMeta( outRowMeta.getName() ) == null ) {
                 // This field didn't come into the step, so assume it has been created here
                 IMetaverseNode newFieldNode = metaverseObjectFactory.createNodeObject(
                     DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD, outRowMeta.getName() ) );
@@ -133,7 +137,6 @@ public class KettleStepAnalyzer extends AbstractAnalyzer<StepMeta> {
     analyzer.setMetaverseBuilder( metaverseBuilder );
 
     return analyzer;
-
   }
 
 }

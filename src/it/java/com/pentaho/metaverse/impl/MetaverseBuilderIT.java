@@ -23,8 +23,6 @@ package com.pentaho.metaverse.impl;
 
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
-import com.pentaho.metaverse.graph.GraphMLWriter;
-import com.pentaho.metaverse.locator.DIRepositoryLocator;
 import com.tinkerpop.blueprints.Graph;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -33,7 +31,6 @@ import org.junit.Test;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.platform.api.engine.IPentahoObjectFactory;
-import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.engine.core.system.PathBasedSystemSettings;
@@ -46,10 +43,8 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.FileSystemResource;
-import sun.misc.IOUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
@@ -138,7 +133,6 @@ public class MetaverseBuilderIT {
     // write out the graph so we can look at it
     File exportFile = new File( "src/it/resources/testGraph.graphml" );
     FileUtils.writeStringToFile( exportFile, reader.export(), "UTF-8" );
-
   }
 
 }
