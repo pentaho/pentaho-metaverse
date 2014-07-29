@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.logging.ChannelLogTable;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
@@ -146,7 +147,7 @@ public class FileSystemLocatorTest implements IDocumentListener {
     TinkerGraph graph = new TinkerGraph();
     IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
 
-    TestFileSystemLocator locator = new TestFileSystemLocator();
+    TestFileSystemLocator locator = new TestFileSystemLocator( new ArrayList<IDocumentListener>() );
     locator.setRepositoryId( "test_repo" );
     locator.setMetaverseBuilder( metaverseBuilder );
     locator.addDocumentListener( this );
