@@ -152,7 +152,7 @@ public class TransformationAnalyzer extends AbstractAnalyzer<IMetaverseDocument>
     //
     // If none can be found, a default handler should be returned.
 
-    IAnalyzer<StepMeta> stepAnalyzer = new KettleStepAnalyzer();
+    IAnalyzer<StepMeta> stepAnalyzer = new KettleGenericStepMetaAnalyzer();
     stepAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
     stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
 

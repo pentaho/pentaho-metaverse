@@ -22,8 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.spy;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import org.junit.After;
@@ -33,14 +32,20 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleStepException;
+import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaInteger;
+import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -50,9 +55,9 @@ import com.pentaho.metaverse.testutils.MetaverseTestUtils;
  * @author mburgess
  */
 @RunWith(MockitoJUnitRunner.class)
-public class TableOutputStepAnalyzerTest {
+public class KettleGenericStepMetaAnalyzerTest {
 
-  private TableOutputStepAnalyzer analyzer;
+  KettleGenericStepMetaAnalyzer analyzer;
 
   @Mock
   private IMetaverseBuilder mockBuilder;
@@ -60,16 +65,16 @@ public class TableOutputStepAnalyzerTest {
   private IMetaverseObjectFactory factory;
 
   @Mock
-  private TableOutputMeta mockTableOutputMeta;
+  TransMeta mockTransMeta;
 
   @Mock
-  private TransMeta mockTransMeta;
-
-  @Mock
-  private RowMetaInterface mockRowMetaInterface;
+  private StepMeta mockStepMeta;
 
   @Mock
   DatabaseMeta mockDatabaseMeta;
+
+  @Mock
+  StepMetaInterface mockStepMetaInterface;
 
   /**
    * @throws java.lang.Exception
@@ -90,11 +95,16 @@ public class TableOutputStepAnalyzerTest {
    */
   @Before
   public void setUp() throws Exception {
+
     factory = MetaverseTestUtils.getMetaverseObjectFactory();
 
-    analyzer = new TableOutputStepAnalyzer();
+    analyzer = new KettleGenericStepMetaAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
     analyzer.setMetaverseObjectFactory( factory );
+
+    // set random StepMetaInterface
+    when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockStepMetaInterface );
+    when( mockStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
   }
 
   /**
@@ -126,34 +136,63 @@ public class TableOutputStepAnalyzerTest {
   }
 
   @Test
-  public void testAnalyzeTableOutputMetaDehydrated() throws MetaverseAnalyzerException, KettleStepException {
+  public void testAnalyze() throws MetaverseAnalyzerException {
 
-    StepMeta meta = new StepMeta( "test", mockTableOutputMeta );
-    StepMeta spyMeta = spy( meta );
+    IMetaverseNode node = analyzer.analyze( mockStepMeta );
+    assertNotNull( node );
 
-    // minimum mocking needed to not throw an exception
-    when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-
-    assertNotNull( analyzer.analyze( mockTableOutputMeta ) );
   }
 
   @Test
-  public void testAnalyzeTableOutputMetaHydrated() throws MetaverseAnalyzerException, KettleStepException {
+  public void testAnalyzeWithDatabaseMeta() throws MetaverseAnalyzerException {
 
-    StepMeta meta = new StepMeta( "test", mockTableOutputMeta );
-    StepMeta spyMeta = spy( meta );
+    when( mockStepMetaInterface.getUsedDatabaseConnections() ).thenReturn( new DatabaseMeta[] { mockDatabaseMeta } );
 
-    when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    IMetaverseNode node = analyzer.analyze( mockStepMeta );
+    assertNotNull( node );
 
-    // additional hydration needed to get test lines code coverage
-    when( mockDatabaseMeta.getDatabaseName() ).thenReturn( "testDatabase" );
-    when( mockTableOutputMeta.getDatabaseMeta() ).thenReturn( mockDatabaseMeta );
-    when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
-    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "test1", "test2" } );
+  }
 
-    assertNotNull( analyzer.analyze( mockTableOutputMeta ) );
+  @Test(expected = MetaverseAnalyzerException.class)
+  public void testAnalyzeNullStepMetaInterface() throws MetaverseAnalyzerException {
+
+    when( mockStepMeta.getStepMetaInterface() ).thenReturn( null );
+    analyzer.analyze( mockStepMeta );
+
+  }
+
+  @Test(expected = MetaverseAnalyzerException.class)
+  public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
+
+    analyzer.setMetaverseBuilder( null );
+    analyzer.analyze( mockStepMeta );
+
+  }
+
+  @Test(expected = MetaverseAnalyzerException.class)
+  public void testSetObjectFactoryNull() throws MetaverseAnalyzerException {
+
+    analyzer.setMetaverseObjectFactory( null );
+    analyzer.analyze( mockStepMeta );
+
+  }
+
+  @Test
+  public void testAnalyzeWithNewFields() throws MetaverseAnalyzerException, KettleStepException {
+
+    when( mockTransMeta.getStepFields( mockStepMeta ) ).thenAnswer( new Answer<RowMetaInterface>() {
+
+      @Override
+      public RowMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        RowMeta rowMeta = new RowMeta();
+        rowMeta.addValueMeta( new ValueMetaInteger( "testInt" ) );
+        rowMeta.addValueMeta( new ValueMetaString( "testString" ) );
+        return rowMeta;
+      }
+    } );
+    IMetaverseNode node = analyzer.analyze( mockStepMeta );
+    assertNotNull( node );
+
   }
 }
