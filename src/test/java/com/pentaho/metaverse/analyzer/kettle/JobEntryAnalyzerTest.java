@@ -114,7 +114,7 @@ public class JobEntryAnalyzerTest {
 
   public void testAnalyze() throws MetaverseAnalyzerException {
 
-    IMetaverseNode node = analyzer.analyze( mockEntry );
+    IMetaverseNode node = analyzer.analyze( mockJobEntryInterface );
     assertNotNull( node );
 
   }
@@ -123,7 +123,7 @@ public class JobEntryAnalyzerTest {
   public void testAnalyzeNullJobEntryInterface() throws MetaverseAnalyzerException {
 
     when( mockEntry.getEntry()).thenReturn( null );
-    analyzer.analyze( mockEntry );
+    analyzer.analyze( mockJobEntryInterface );
 
   }
 
@@ -131,7 +131,7 @@ public class JobEntryAnalyzerTest {
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException{
 
     analyzer.setMetaverseBuilder( null );
-    analyzer.analyze( mockEntry );
+    analyzer.analyze( mockJobEntryInterface );
 
   }
 
@@ -139,7 +139,7 @@ public class JobEntryAnalyzerTest {
   public void testSetObjectFactoryNull() throws MetaverseAnalyzerException{
 
     analyzer.setMetaverseObjectFactory( null );
-    analyzer.analyze( mockEntry );
+    analyzer.analyze( mockJobEntryInterface );
 
   }
 

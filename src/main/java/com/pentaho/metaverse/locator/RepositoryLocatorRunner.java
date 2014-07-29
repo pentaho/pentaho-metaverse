@@ -141,6 +141,7 @@ public class RepositoryLocatorRunner implements Runnable {
     String id = repositoryIndexer.getId( file.getPath() );
     try {
       Object contents = repositoryIndexer.getFileContents( file, extension );
+
       MetaverseDocument metaverseDocument = new MetaverseDocument();
       metaverseDocument.setContent( contents );
       metaverseDocument.setStringID( id );
@@ -156,17 +157,13 @@ public class RepositoryLocatorRunner implements Runnable {
       documentNode.setName( name );
       metaverseBuilder.addNode( documentNode );
 
-      // create a link from the locator node to the new document
-      MetaverseLink link = new MetaverseLink();
-      link.setFromNode( locatorNode );
-      link.setLabel( DictionaryConst.LINK_CONTAINS );
-      link.setToNode( documentNode );
-      metaverseBuilder.addLink( link );
+      metaverseBuilder.addLink( locatorNode, DictionaryConst.LINK_CONTAINS, documentNode );
 
       DocumentEvent event = new DocumentEvent();
       event.setEventType( "add" );
       event.setDocument( metaverseDocument );
       repositoryIndexer.notifyListeners( event );
+
     } catch ( Exception e ) {
       repositoryIndexer.error( Messages.getString( "ERROR.NoContentForFile", file.getPath() ) );
     }
