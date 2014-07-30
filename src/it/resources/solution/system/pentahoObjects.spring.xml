@@ -16,9 +16,10 @@
   <bean id="TransformationAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer"/>
   <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer"/>
 
+  <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TableOutputStepAnalyzer"/>
+
   <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
-    <property name="metaverseObjectFactory" ref="IMetaverseObjectFactory"/>
     <property name="documentAnalyzers">
       <set>
         <ref bean="TransformationAnalyzer"/>
@@ -26,6 +27,15 @@
       </set>
     </property>
   </bean>
+
+  <bean id="IKettleStepAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.KettleStepAnalyzerProvider" scope="singleton">
+      <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+      <property name="stepAnalyzers">
+        <set>
+          <ref bean="TableOutputStepAnalyzer"/>
+        </set>
+      </property>
+    </bean>
 
   <bean id="IMetaverseReader" class="com.pentaho.metaverse.graph.BlueprintsGraphMetaverseReader" scope="singleton">
     <constructor-arg ref="MetaverseGraphImpl"/>

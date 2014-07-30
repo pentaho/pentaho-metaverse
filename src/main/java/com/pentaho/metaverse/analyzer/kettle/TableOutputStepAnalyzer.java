@@ -31,6 +31,7 @@ import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+
 /**
  * The TableOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
  * other metaverse entities (such as physical fields and tables)

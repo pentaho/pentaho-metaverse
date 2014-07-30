@@ -76,9 +76,9 @@ public class DictionaryConst {
   public static final String LINK_WRITESTO = "writesto";
 
   /**
-   * Label for a "uses" edge in the graph, e.g. a step uses a databaseMeta
+   * Label for a "dependency of" edge in the graph, e.g. a databaseMeta is a dependency of a step
    */
-  public static final String LINK_USES = "uses";
+  public static final String LINK_DEPENDENCYOF = "dependencyof";
 
   /**
    * Label for an "creates" edge in the graph, e.g. a transformation step creates a transformation field

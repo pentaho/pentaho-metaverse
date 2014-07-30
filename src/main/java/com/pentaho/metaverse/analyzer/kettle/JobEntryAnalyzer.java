@@ -30,13 +30,22 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.Set;
+
 /**
  * The JobEntryAnalyzer provides JobEntryCopy metadata to the metaverse.
  *
  * Created by gmoran on 7/16/14.
  */
-public class JobEntryAnalyzer<T extends JobEntryInterface> extends AbstractAnalyzer<JobEntryInterface> {
+public class JobEntryAnalyzer extends BaseKettleMetaverseComponent implements IJobEntryAnalyzer<JobEntryInterface> {
 
+  /**
+   * Analyzes job entries
+   *
+   * @param entry
+   * @return
+   * @throws MetaverseAnalyzerException
+   */
   @Override
   public IMetaverseNode analyze( JobEntryInterface entry ) throws MetaverseAnalyzerException {
 
@@ -66,5 +75,9 @@ public class JobEntryAnalyzer<T extends JobEntryInterface> extends AbstractAnaly
 
   }
 
+  @Override
+  public Set<Class<? super JobEntryCopy>> getSupportedEntries() {
+    return null;
+  }
 
 }

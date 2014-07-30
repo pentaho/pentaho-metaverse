@@ -32,10 +32,11 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 /**
  * @author mburgess
- * 
  */
 public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaverseBuilder {
 
@@ -58,7 +59,14 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
   private Vertex metaverseNode;
 
   /**
+   * This is a possible delegate reference to a metaverse object factory. This builder is itself a
+   * metaverse object factory, so the reference is initialized to "this".
+   */
+  private IMetaverseObjectFactory metaverseObjectFactory = this;
+
+  /**
    * Instantiates a new Metaverse builder.
+   *
    * @param graph the Graph to write to
    */
   public MetaverseBuilder( Graph graph ) {
@@ -75,8 +83,8 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
   /**
    * Adds a link between 2 nodes in the underlying graph. If either node does not exist, it will be created.
-   * @param link
-   *          the link to add
+   *
+   * @param link the link to add
    * @return the builder
    */
   @Override
@@ -112,8 +120,8 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
   /**
    * Add a node to the underlying graph. If the node already exists, it's properties will get updated
-   * @param node
-   *          the node to add
+   *
+   * @param node the node to add
    * @return the builder
    */
   @Override
@@ -136,6 +144,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
   /**
    * adds a node as a Vertex in the graph
+   *
    * @param node node to add as a Vertex
    * @return the Vertex added
    */
@@ -170,8 +179,9 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
   /**
    * Copies all properties from a node into the properties of a Vertex
+   *
    * @param node node with properties desired in a Vertex
-   * @param v Vertex to set properties on
+   * @param v    Vertex to set properties on
    */
   private void copyNodePropertiesToVertex( IMetaverseNode node, Vertex v ) {
     // set all of the properties, except the id and virtual (since that is an internally set prop)
@@ -189,6 +199,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
   /**
    * Helper method to get a Vertex from a node
+   *
    * @param node the node to find a corresponding Vertex for
    * @return a matching Vertex or null if none found
    */
@@ -209,7 +220,8 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
   /**
    * Deletes the specific link from the metaverse model and optionally removing virtual nodes associated
    * with the link
-   * @param link the link to remove
+   *
+   * @param link               the link to remove
    * @param removeVirtualNodes should any virtual nodes be removed or not?
    * @return true/false if the delete happened
    */
@@ -244,8 +256,8 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
       // now remove any "virtual" nodes associated with the link
       if ( removeVirtualNodes ) {
-        Vertex[] fromAndTo = new Vertex[] {fromVertex, toVertex};
-        for ( Vertex v: fromAndTo ) {
+        Vertex[] fromAndTo = new Vertex[] { fromVertex, toVertex };
+        for ( Vertex v : fromAndTo ) {
           if ( isVirtual( v ) ) {
             graph.removeVertex( v );
           }
@@ -279,6 +291,28 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     return this;
   }
 
+  @Override
+  public IMetaverseObjectFactory getMetaverseObjectFactory() {
+
+    // Attempt to initialize the factory if it does not yet exist (or has been reset to null)
+    if ( metaverseObjectFactory == null ) {
+      // Attempt to find an injected class
+      IMetaverseObjectFactory pentahoSystemMetaverseObjectFactory = PentahoSystem.get( IMetaverseObjectFactory.class );
+      if ( pentahoSystemMetaverseObjectFactory != null ) {
+        metaverseObjectFactory = pentahoSystemMetaverseObjectFactory;
+      } else {
+        // Default to ourselves (we are a subclass of MetaverseObjectFactory)
+        metaverseObjectFactory = this;
+      }
+    }
+    return metaverseObjectFactory;
+  }
+
+  @Override
+  public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
+    this.metaverseObjectFactory = metaverseObjectFactory;
+  }
+
   /*
    * (non-Javadoc)
    * 
@@ -298,18 +332,15 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
   /**
    * Adds the specified link to the model
-   * 
-   * @param fromNode
-   *          the from node
-   * @param label
-   *          the label
-   * @param toNode
-   *          the to node
+   *
+   * @param fromNode the from node
+   * @param label    the label
+   * @param toNode   the to node
    * @return this metaverse builder
    * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#addLink(
-   *    org.pentaho.platform.api.metaverse.IMetaverseNode,
-   *    java.lang.String,
-   *    org.pentaho.platform.api.metaverse.IMetaverseNode)
+   *org.pentaho.platform.api.metaverse.IMetaverseNode,
+   * java.lang.String,
+   * org.pentaho.platform.api.metaverse.IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder addLink( IMetaverseNode fromNode, String label, IMetaverseNode toNode ) {
@@ -324,6 +355,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
   /**
    * determines if the node passed in is a virtual node
    * (meaning it has been implicitly added to the graph by an addLink)
+   *
    * @param vertex node to determine if it is virtual
    * @return true/false
    */

@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.job.JobMeta;
@@ -45,7 +44,7 @@ import java.util.Set;
  * to form relationships between the job and its child collaborators (ie, entries, dbMetas), and
  * calling the analyzers responsible for providing the metadata for the child collaborators.
  */
-public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements IDocumentAnalyzer {
+public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocumentAnalyzer {
 
   private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
     {
@@ -126,17 +125,7 @@ public class JobAnalyzer extends AbstractAnalyzer<IMetaverseDocument> implements
   protected IAnalyzer<JobEntryInterface> getJobEntryAnalyzer( JobEntryInterface jobEntry ) {
 
     // TODO Look for implementing analyzers for this step.
-    //
-    // Choices might include:
-    //
-    // - Class.forName(<step name + StepAnalyzer>)
-    // - Annotation
-    // - PentahoSystem.get()
-    //
-    // If none can be found, a default handler should be returned.
-
     IAnalyzer<JobEntryInterface> entryAnalyzer = new JobEntryAnalyzer();
-    entryAnalyzer.setMetaverseObjectFactory( metaverseObjectFactory );
     entryAnalyzer.setMetaverseBuilder( metaverseBuilder );
 
     return entryAnalyzer;

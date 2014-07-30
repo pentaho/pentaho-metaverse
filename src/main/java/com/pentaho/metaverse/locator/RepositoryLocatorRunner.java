@@ -31,7 +31,6 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.MetaverseLink;
 import com.pentaho.dictionary.MetaverseTransientNode;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.impl.MetaverseDocument;

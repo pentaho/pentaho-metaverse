@@ -23,17 +23,19 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import java.io.Serializable;
 
-import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 
-public abstract class AbstractAnalyzer<T> implements IAnalyzer<T>, Serializable {
+public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverseBuilder, Serializable {
 
   private static final long serialVersionUID = 8122643311387257050L;
 
   protected IMetaverseBuilder metaverseBuilder;
 
-  /** The metaverse object factory. */
+  /**
+   * The metaverse object factory.
+   */
   protected IMetaverseObjectFactory metaverseObjectFactory;
 
   /*
@@ -45,16 +47,9 @@ public abstract class AbstractAnalyzer<T> implements IAnalyzer<T>, Serializable 
   @Override
   public void setMetaverseBuilder( IMetaverseBuilder metaverseBuilder ) {
     this.metaverseBuilder = metaverseBuilder;
-  }
-
-   /* (non-Javadoc)
-   *
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#
-   * setMetaverseObjectFactory(org.pentaho.platform.api.metaverse.IMetaverseObjectFactory)
-   */
-  @Override
-  public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
-    this.metaverseObjectFactory = metaverseObjectFactory;
+    if ( metaverseBuilder != null ) {
+      this.metaverseObjectFactory = metaverseBuilder.getMetaverseObjectFactory();
+    }
   }
 
 }

@@ -74,11 +74,11 @@
   </notepads>
   <connection>
     <name>Sampledata</name>
-    <server>localhost</server>
+    <server></server>
     <type>H2</type>
     <access>Native</access>
     <database>SampleData</database>
-    <port>9999</port>
+    <port></port>
     <username>sa</username>
     <password>Encrypted</password>
     <servername/>
@@ -99,7 +99,7 @@
       </attribute>
       <attribute>
         <code>PORT_NUMBER</code>
-        <attribute>1521</attribute>
+        <attribute></attribute>
       </attribute>
       <attribute>
         <code>PRESERVE_RESERVED_WORD_CASE</code>

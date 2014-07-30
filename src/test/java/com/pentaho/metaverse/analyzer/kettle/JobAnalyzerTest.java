@@ -28,6 +28,7 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.OngoingStubbing;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.JobMeta;
@@ -63,8 +64,6 @@ public class JobAnalyzerTest {
   @Mock
   private IMetaverseDocument mockJobDoc;
 
-  private IMetaverseObjectFactory factory;
-
   /**
    * @throws Exception
    */
@@ -92,13 +91,11 @@ public class JobAnalyzerTest {
   @Before
   public void setUp() throws Exception {
 
-    factory = MetaverseTestUtils.getMetaverseObjectFactory();
-    mockBuilder = mock( IMetaverseBuilder.class );
-    mockJobDoc = mock( IMetaverseDocument.class );
+    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
+    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
 
     analyzer = new JobAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.setMetaverseObjectFactory( factory );
 
     when( mockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );
     when( mockJobDoc.getContent() ).thenReturn( mockContent );
