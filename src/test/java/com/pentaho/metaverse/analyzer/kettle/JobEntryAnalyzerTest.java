@@ -48,9 +48,6 @@ public class JobEntryAnalyzerTest {
   private IMetaverseObjectFactory factory;
 
   @Mock
-  private JobEntryCopy mockEntry;
-
-  @Mock
   private JobEntryInterface mockJobEntryInterface;
 
   /**
@@ -80,7 +77,6 @@ public class JobEntryAnalyzerTest {
     analyzer.setMetaverseBuilder( mockBuilder );
     analyzer.setMetaverseObjectFactory( factory );
 
-    when( mockEntry.getEntry() ).thenReturn( mockJobEntryInterface );
   }
 
   /**
@@ -116,14 +112,6 @@ public class JobEntryAnalyzerTest {
 
     IMetaverseNode node = analyzer.analyze( mockJobEntryInterface );
     assertNotNull( node );
-
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyzeNullJobEntryInterface() throws MetaverseAnalyzerException {
-
-    when( mockEntry.getEntry()).thenReturn( null );
-    analyzer.analyze( mockJobEntryInterface );
 
   }
 
