@@ -51,4 +51,11 @@ public class MetaverseObjectFactory implements IMetaverseObjectFactory {
     return node;
   }
 
+  @Override
+  public IMetaverseNode createNodeObject( String id, String name, String type ) {
+    IMetaverseNode node = createNodeObject( id );
+    node.setName( name );
+    node.setType( type );
+    return node;
+  }
 }
