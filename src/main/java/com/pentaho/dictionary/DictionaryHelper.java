@@ -11,9 +11,9 @@ import java.util.Set;
 
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -48,6 +48,7 @@ public class DictionaryHelper {
     DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
       {
         add( StepMeta.class );
+        add( BaseStepMeta.class );
         add( TableOutputMeta.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_STEP ) );
@@ -173,17 +174,15 @@ public class DictionaryHelper {
     registerDataFlowLinkType( DictionaryConst.LINK_POPULATES );
     registerDataFlowLinkType( DictionaryConst.LINK_READBY );
     registerDataFlowLinkType( DictionaryConst.LINK_WRITESTO );
-    registerDataFlowLinkType( DictionaryConst.LINK_USES );
+    registerDataFlowLinkType( DictionaryConst.LINK_DEPENDENCYOF );
 
     registerEntityType( DictionaryConst.NODE_TYPE_DATASOURCE );
     registerEntityType( DictionaryConst.NODE_TYPE_DATA_TABLE );
-    registerEntityType( DictionaryConst.NODE_TYPE_DATA_COLUMN );
     registerEntityType( DictionaryConst.NODE_TYPE_JOB );
     registerEntityType( DictionaryConst.NODE_TYPE_JOB_ENTRY );
     registerEntityType( DictionaryConst.NODE_TYPE_LOGICAL_MODEL );
     registerEntityType( DictionaryConst.NODE_TYPE_TRANS );
     registerEntityType( DictionaryConst.NODE_TYPE_TRANS_STEP );
-    registerEntityType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
     registerEntityType( DictionaryConst.NODE_TYPE_USER_CONTENT );
   }
 

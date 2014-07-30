@@ -57,8 +57,6 @@ public class TableOutputStepAnalyzerTest {
   @Mock
   private IMetaverseBuilder mockBuilder;
 
-  private IMetaverseObjectFactory factory;
-
   @Mock
   private TableOutputMeta mockTableOutputMeta;
 
@@ -90,11 +88,11 @@ public class TableOutputStepAnalyzerTest {
    */
   @Before
   public void setUp() throws Exception {
-    factory = MetaverseTestUtils.getMetaverseObjectFactory();
+    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
+    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
 
     analyzer = new TableOutputStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.setMetaverseObjectFactory( factory );
   }
 
   /**
@@ -111,18 +109,10 @@ public class TableOutputStepAnalyzerTest {
 
   }
 
-  @Test
-  public void testSetMetaverseObjectFactory() {
-
-    assertNotNull( analyzer.metaverseObjectFactory );
-
-  }
-
   @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
     analyzer.analyze( null );
-
   }
 
   @Test

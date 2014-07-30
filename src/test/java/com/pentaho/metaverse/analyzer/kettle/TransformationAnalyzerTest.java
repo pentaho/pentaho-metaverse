@@ -33,6 +33,7 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.rowgenerator.RowGeneratorMeta;
 import org.pentaho.platform.api.metaverse.*;
 
 import static org.junit.Assert.assertNotNull;
@@ -55,15 +56,13 @@ public class TransformationAnalyzerTest {
   private StepMeta mockStepMeta;
 
   @Mock
-  private StepMetaInterface mockStepMetaInterface;
+  private RowGeneratorMeta mockGenRowsStepMeta;
 
   @Mock
   private IMetaverseBuilder mockBuilder;
 
   @Mock
   private IMetaverseDocument mockTransDoc;
-
-  private IMetaverseObjectFactory factory;
 
   /**
    * @throws Exception
@@ -91,18 +90,18 @@ public class TransformationAnalyzerTest {
    */
   @Before
   public void setUp() throws Exception {
-    factory = MetaverseTestUtils.getMetaverseObjectFactory();
-    mockBuilder = mock( IMetaverseBuilder.class );
-    mockTransDoc = mock( IMetaverseDocument.class );
+    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
+    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
 
     analyzer = new TransformationAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.setMetaverseObjectFactory( factory );
 
     when( mockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( mockTransDoc.getContent() ).thenReturn( mockContent );
 
-    when(mockStepMeta.getStepMetaInterface()).thenReturn( mockStepMetaInterface );
+    when( mockGenRowsStepMeta.getParentStepMeta() ).thenReturn( mockStepMeta );
+
+    when(mockStepMeta.getStepMetaInterface()).thenReturn( mockGenRowsStepMeta );
 
     when( mockContent.nrSteps() ).thenReturn( 1 );
     when( mockContent.getStep( 0 )).thenReturn( mockStepMeta );

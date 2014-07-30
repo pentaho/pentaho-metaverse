@@ -26,7 +26,6 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -36,12 +35,14 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * KettleBaseStepAnalyzer provides a default implementation for analyzing PDI steps
  * to gather metadata for the metaverse.
  */
-public class KettleBaseStepAnalyzer<T extends BaseStepMeta> extends AbstractAnalyzer<T> {
+public class KettleBaseStepAnalyzer<T extends BaseStepMeta>
+    extends BaseKettleMetaverseComponent implements IStepAnalyzer<T> {
 
   protected RowMetaInterface prevFields = null;
 
@@ -53,8 +54,9 @@ public class KettleBaseStepAnalyzer<T extends BaseStepMeta> extends AbstractAnal
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(Object)
    */
   @Override
-  public IMetaverseNode analyze( BaseStepMeta baseStepMeta ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( T object ) throws MetaverseAnalyzerException {
 
+    BaseStepMeta baseStepMeta = object;
     if ( baseStepMeta == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMetaInterface.IsNull" ) );
     }
@@ -74,10 +76,9 @@ public class KettleBaseStepAnalyzer<T extends BaseStepMeta> extends AbstractAnal
 
     // Add yourself
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( baseStepMeta.getClass(), baseStepMeta.getName() ) );
-
-    node.setName( baseStepMeta.getName() );
-    node.setType( DictionaryConst.NODE_TYPE_TRANS_STEP );
+        DictionaryHelper.getId( BaseStepMeta.class, stepMeta.getName() ),
+        stepMeta.getName(),
+        DictionaryConst.NODE_TYPE_TRANS_STEP );
 
     metaverseBuilder.addNode( node );
 
@@ -88,7 +89,7 @@ public class KettleBaseStepAnalyzer<T extends BaseStepMeta> extends AbstractAnal
       DatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
       for ( DatabaseMeta db : dbs ) {
         IMetaverseNode dbNode = dbAnalyzer.analyze( db );
-        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, dbNode );
+        metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, node );
       }
 
     }
@@ -98,7 +99,11 @@ public class KettleBaseStepAnalyzer<T extends BaseStepMeta> extends AbstractAnal
     try {
       TransMeta parentTrans = stepMeta.getParentTransMeta();
       if ( parentTrans != null ) {
-        prevFields = parentTrans.getPrevStepFields( stepMeta );
+        try {
+          prevFields = parentTrans.getPrevStepFields( stepMeta );
+        } catch ( Throwable t ) {
+          prevFields = null;
+        }
         stepFields = parentTrans.getStepFields( stepMeta );
 
         if ( stepFields != null ) {
@@ -107,7 +112,7 @@ public class KettleBaseStepAnalyzer<T extends BaseStepMeta> extends AbstractAnal
           List<ValueMetaInterface> outRowValueMetas = stepFields.getValueMetaList();
           if ( outRowValueMetas != null ) {
             for ( ValueMetaInterface outRowMeta : outRowValueMetas ) {
-              if ( prevFields == null || prevFields.searchValueMeta( outRowMeta.getName() ) == null ) {
+              if ( prevFields != null && prevFields.searchValueMeta( outRowMeta.getName() ) == null ) {
                 // This field didn't come into the step, so assume it has been created here
                 IMetaverseNode newFieldNode = metaverseObjectFactory.createNodeObject(
                     DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD, outRowMeta.getName() ) );
@@ -120,12 +125,14 @@ public class KettleBaseStepAnalyzer<T extends BaseStepMeta> extends AbstractAnal
                 // Add link to show that this step created the field
                 metaverseBuilder.addLink( node, DictionaryConst.LINK_CREATES, newFieldNode );
               }
+              // no else clause, if we can't determine the fields, we can't do anything else
             }
           }
         }
       }
-    } catch ( KettleException ke ) {
-      throw new MetaverseAnalyzerException( ke );
+    } catch ( Throwable t ) {
+      // TODO Don't throw an exception here, just log the error and move on
+      t.printStackTrace( System.err );
     }
     return node;
   }
@@ -133,10 +140,14 @@ public class KettleBaseStepAnalyzer<T extends BaseStepMeta> extends AbstractAnal
   protected DatabaseConnectionAnalyzer getDatabaseConnectionAnalyzer() {
 
     DatabaseConnectionAnalyzer analyzer = new DatabaseConnectionAnalyzer();
-    analyzer.setMetaverseObjectFactory( metaverseObjectFactory );
+    //analyzer.setMetaverseObjectFactory( metaverseObjectFactory );
     analyzer.setMetaverseBuilder( metaverseBuilder );
 
     return analyzer;
+  }
+
+  @Override public Set<Class<? super BaseStepMeta>> getSupportedSteps() {
+    return null;
   }
 
 }

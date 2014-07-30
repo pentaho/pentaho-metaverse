@@ -92,12 +92,13 @@ public class MetaverseDocumentAnalyzerTest {
    */
   @Before
   public void setUp() throws Exception {
-    factory = MetaverseTestUtils.getMetaverseObjectFactory();
     builder = mock( IMetaverseBuilder.class );
     transDoc = mock( IMetaverseDocument.class );
 
+    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
+    when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
+
     analyzer.setMetaverseBuilder( builder );
-    analyzer.setMetaverseObjectFactory( factory );
 
     when( transDoc.getType() ).thenReturn( type );
     when( transDoc.getContent() ).thenReturn( content );
@@ -159,14 +160,6 @@ public class MetaverseDocumentAnalyzerTest {
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException{
 
     analyzer.setMetaverseBuilder( null );
-    analyzer.analyze( transDoc );
-
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testSetObjectFactoryNull() throws MetaverseAnalyzerException{
-
-    analyzer.setMetaverseObjectFactory( null );
     analyzer.analyze( transDoc );
 
   }

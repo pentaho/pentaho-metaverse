@@ -26,6 +26,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -33,7 +34,7 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 /**
  * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
  */
-public class DatabaseConnectionAnalyzer extends AbstractAnalyzer<DatabaseMeta> {
+public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent implements IAnalyzer<DatabaseMeta> {
 
   /**
    * Analyzes a database connection for metadata.
@@ -60,12 +61,9 @@ public class DatabaseConnectionAnalyzer extends AbstractAnalyzer<DatabaseMeta> {
     String type = DictionaryConst.NODE_TYPE_DATASOURCE;
 
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( object.getClass(), object.getName() ) );
-
-    // TODO Is this appropriate? What are our name conventions?
-    node.setName( object.getName() );
-
-    node.setType( type );
+        DictionaryHelper.getId( object.getClass(), object.getName() ),
+        object.getName(),
+        type );
 
     int accessType = object.getAccessType();
     node.setProperty( "accessType", accessType );

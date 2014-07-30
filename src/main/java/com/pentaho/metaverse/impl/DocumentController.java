@@ -46,16 +46,24 @@ import java.util.concurrent.Future;
  */
 public class DocumentController implements IDocumentListener, IMetaverseBuilder, IDocumentAnalyzerProvider {
 
-  /** The metaverse builder. */
+  /**
+   * The metaverse builder.
+   */
   private IMetaverseBuilder metaverseBuilder;
 
-  /** the metaverse object factory */
+  /**
+   * the metaverse object factory
+   */
   private IMetaverseObjectFactory metaverseObjectFactory;
 
-  /** The analyzers. */
+  /**
+   * The analyzers.
+   */
   private Set<IDocumentAnalyzer> documentAnalyzers = new HashSet<IDocumentAnalyzer>();
 
-  /** The analyzer type map. */
+  /**
+   * The analyzer type map.
+   */
   private Map<String, HashSet<IDocumentAnalyzer>> analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>();
 
   private final ExecutorService pool = Executors.newFixedThreadPool( 5 );
@@ -68,9 +76,8 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   /**
    * Constructor that takes in an IMetaverseBuilder
-   * 
-   * @param metaverseBuilder
-   *          builder to delegate building calls to
+   *
+   * @param metaverseBuilder builder to delegate building calls to
    */
   public DocumentController( IMetaverseBuilder metaverseBuilder ) {
     this.metaverseBuilder = metaverseBuilder;
@@ -78,7 +85,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   /**
    * Gets the metaverse builder.
-   * 
+   *
    * @return the metaverse builder
    */
   protected IMetaverseBuilder getMetaverseBuilder() {
@@ -87,9 +94,8 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   /**
    * Sets the metaverse builder.
-   * 
-   * @param metaverseBuilder
-   *          the new metaverse builder
+   *
+   * @param metaverseBuilder the new metaverse builder
    */
   public void setMetaverseBuilder( IMetaverseBuilder metaverseBuilder ) {
     this.metaverseBuilder = metaverseBuilder;
@@ -97,18 +103,22 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   /**
    * Gets the metaverse object factory
+   *
    * @return the metaverse object factory
    */
   public IMetaverseObjectFactory getMetaverseObjectFactory() {
-    return metaverseObjectFactory;
+    return ( metaverseBuilder == null ) ? null : metaverseBuilder.getMetaverseObjectFactory();
   }
 
   /**
    * Sets the metaverse object factory
+   *
    * @param metaverseObjectFactory the new metaverse object factory
    */
   public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
-    this.metaverseObjectFactory = metaverseObjectFactory;
+    if ( metaverseBuilder != null ) {
+      metaverseBuilder.setMetaverseObjectFactory( metaverseObjectFactory );
+    }
   }
 
   /*
@@ -150,9 +160,8 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   /**
    * Set the analyzers that are available in the system
-   * 
-   * @param documentAnalyzers
-   *          the complete Set of IDocumentAnalyzers
+   *
+   * @param documentAnalyzers the complete Set of IDocumentAnalyzers
    */
   public void setDocumentAnalyzers( Set<IDocumentAnalyzer> documentAnalyzers ) {
     this.documentAnalyzers = documentAnalyzers;
@@ -184,7 +193,6 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
     for ( IDocumentAnalyzer analyzer : documentAnalyzers ) {
       Set<String> types = analyzer.getSupportedTypes();
       analyzer.setMetaverseBuilder( this );
-      analyzer.setMetaverseObjectFactory( metaverseObjectFactory );
       if ( types != null ) {
         for ( String type : types ) {
           HashSet<IDocumentAnalyzer> analyzerSet = null;
@@ -204,11 +212,9 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
 
   /**
    * Fires a IDocumentEvent to an IDocumentAnalyzer in a separate Thread
-   * 
-   * @param event
-   *          IDocumentEvent to fire
-   * @param analyzer
-   *          IDocumentAnalyzer to use for the Document that needs processed
+   *
+   * @param event    IDocumentEvent to fire
+   * @param analyzer IDocumentAnalyzer to use for the Document that needs processed
    * @return Future object
    */
   protected Future<?> fireDocumentEvent( final IDocumentEvent event, final IDocumentAnalyzer analyzer ) {

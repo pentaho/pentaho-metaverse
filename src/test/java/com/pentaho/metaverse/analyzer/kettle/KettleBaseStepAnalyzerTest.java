@@ -50,15 +50,13 @@ import static org.mockito.Mockito.when;
 /**
  * @author mburgess
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith(MockitoJUnitRunner.class)
 public class KettleBaseStepAnalyzerTest {
 
   KettleBaseStepAnalyzer analyzer;
 
   @Mock
   private IMetaverseBuilder mockBuilder;
-
-  private IMetaverseObjectFactory factory;
 
   @Mock
   TransMeta mockTransMeta;
@@ -95,11 +93,11 @@ public class KettleBaseStepAnalyzerTest {
   @Before
   public void setUp() throws Exception {
 
-    factory = MetaverseTestUtils.getMetaverseObjectFactory();
+    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
+    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
 
     analyzer = new KettleBaseStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.setMetaverseObjectFactory( factory );
 
     // set random StepMetaInterface
     when( mockStepMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
@@ -120,14 +118,7 @@ public class KettleBaseStepAnalyzerTest {
 
   }
 
-  @Test
-  public void testSetMetaverseObjectFactory() {
-
-    assertNotNull( analyzer.metaverseObjectFactory );
-
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
     analyzer.analyze( null );
@@ -152,7 +143,7 @@ public class KettleBaseStepAnalyzerTest {
 
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
 
     analyzer.setMetaverseBuilder( null );
@@ -160,13 +151,13 @@ public class KettleBaseStepAnalyzerTest {
 
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  /*@Test( expected = MetaverseAnalyzerException.class )
   public void testSetObjectFactoryNull() throws MetaverseAnalyzerException {
 
     analyzer.setMetaverseObjectFactory( null );
     analyzer.analyze( mockStepMeta );
 
-  }
+  }*/
 
   @Test
   public void testAnalyzeWithNewFields() throws MetaverseAnalyzerException, KettleStepException {
