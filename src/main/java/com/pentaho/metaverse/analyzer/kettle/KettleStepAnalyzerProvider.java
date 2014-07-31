@@ -20,8 +20,8 @@ public class KettleStepAnalyzerProvider extends BaseKettleMetaverseComponent imp
   /**
    * The analyzer type map associates step meta classes with analyzers for those classes
    */
-  private Map<Class<? super BaseStepMeta>, HashSet<IStepAnalyzer>> analyzerTypeMap =
-      new HashMap<Class<? super BaseStepMeta>, HashSet<IStepAnalyzer>>();
+  private Map<Class<? extends BaseStepMeta>, HashSet<IStepAnalyzer>> analyzerTypeMap =
+      new HashMap<Class<? extends BaseStepMeta>, HashSet<IStepAnalyzer>>();
 
   /**
    * @return
@@ -57,12 +57,12 @@ public class KettleStepAnalyzerProvider extends BaseKettleMetaverseComponent imp
    * Loads up a Map of document types to supporting IAnalyzer<BaseStepMeta>(s)
    */
   protected void loadAnalyzerTypeMap() {
-    analyzerTypeMap = new HashMap<Class<? super BaseStepMeta>, HashSet<IStepAnalyzer>>();
+    analyzerTypeMap = new HashMap<Class<? extends BaseStepMeta>, HashSet<IStepAnalyzer>>();
     for ( IStepAnalyzer analyzer : stepAnalyzers ) {
-      Set<Class<? super BaseStepMeta>> types = analyzer.getSupportedSteps();
+      Set<Class<? extends BaseStepMeta>> types = analyzer.getSupportedSteps();
       analyzer.setMetaverseBuilder( metaverseBuilder );
       if ( types != null ) {
-        for ( Class<? super BaseStepMeta> type : types ) {
+        for ( Class<? extends BaseStepMeta> type : types ) {
           HashSet<IStepAnalyzer> analyzerSet = null;
           if ( analyzerTypeMap.containsKey( type ) ) {
             // we already have someone that handles this type, add to the Set

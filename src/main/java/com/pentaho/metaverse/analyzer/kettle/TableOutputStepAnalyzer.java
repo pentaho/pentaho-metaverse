@@ -26,10 +26,14 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -111,4 +115,12 @@ public class TableOutputStepAnalyzer extends KettleBaseStepAnalyzer<TableOutputM
     return node;
   }
 
+  @Override
+  public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+    return new HashSet<Class<? extends BaseStepMeta>>() {
+      {
+        add( TableOutputMeta.class );
+      }
+    };
+  }
 }

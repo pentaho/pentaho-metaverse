@@ -26,6 +26,8 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.Set;
+
 /**
  * KettleGenericStepMetaAnalyzer provides a default implementation for analyzing PDI steps
  * to gather metadata for the metaverse.
@@ -43,4 +45,8 @@ public class KettleGenericStepMetaAnalyzer extends KettleBaseStepAnalyzer<BaseSt
     return super.analyze( baseStepMeta );
   }
 
+  @Override
+  public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+    return null;
+  }
 }

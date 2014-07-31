@@ -44,6 +44,8 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.Set;
+
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
@@ -96,7 +98,12 @@ public class KettleBaseStepAnalyzerTest {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
 
-    analyzer = new KettleBaseStepAnalyzer();
+    analyzer = new KettleBaseStepAnalyzer() {
+      @Override
+      public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+        return null;
+      }
+    };
     analyzer.setMetaverseBuilder( mockBuilder );
 
     // set random StepMetaInterface

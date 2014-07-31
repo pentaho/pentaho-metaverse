@@ -35,13 +35,12 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * KettleBaseStepAnalyzer provides a default implementation for analyzing PDI steps
  * to gather metadata for the metaverse.
  */
-public class KettleBaseStepAnalyzer<T extends BaseStepMeta>
+public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
     extends BaseKettleMetaverseComponent implements IStepAnalyzer<T> {
 
   protected RowMetaInterface prevFields = null;
@@ -140,14 +139,9 @@ public class KettleBaseStepAnalyzer<T extends BaseStepMeta>
   protected DatabaseConnectionAnalyzer getDatabaseConnectionAnalyzer() {
 
     DatabaseConnectionAnalyzer analyzer = new DatabaseConnectionAnalyzer();
-    //analyzer.setMetaverseObjectFactory( metaverseObjectFactory );
     analyzer.setMetaverseBuilder( metaverseBuilder );
 
     return analyzer;
-  }
-
-  @Override public Set<Class<? super BaseStepMeta>> getSupportedSteps() {
-    return null;
   }
 
 }
