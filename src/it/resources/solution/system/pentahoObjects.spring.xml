@@ -17,6 +17,7 @@
   <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer"/>
 
   <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TableOutputStepAnalyzer"/>
+  <bean id="TextFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TextFileInputStepAnalyzer"/>
 
   <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
@@ -33,6 +34,7 @@
       <property name="stepAnalyzers">
         <set>
           <ref bean="TableOutputStepAnalyzer"/>
+          <ref bean="TextFileInputStepAnalyzer"/>
         </set>
       </property>
     </bean>

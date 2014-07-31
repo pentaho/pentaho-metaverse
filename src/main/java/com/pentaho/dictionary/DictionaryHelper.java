@@ -16,6 +16,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 /**
@@ -50,6 +51,7 @@ public class DictionaryHelper {
         add( StepMeta.class );
         add( BaseStepMeta.class );
         add( TableOutputMeta.class );
+        add( TextFileOutputMeta.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_STEP ) );
 
@@ -91,6 +93,25 @@ public class DictionaryHelper {
         },
         null,
         new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATA_COLUMN ) );
+
+    DictionaryHelper.addIdGenerator(
+      new HashSet<String>() {
+        {
+          add( DictionaryConst.NODE_TYPE_FILE );
+        }
+      },
+      null,
+      new GenericIdGenerator( DictionaryConst.NODE_TYPE_FILE ) );
+
+    DictionaryHelper.addIdGenerator(
+      new HashSet<String>() {
+        {
+          add( DictionaryConst.NODE_TYPE_FILE_FIELD );
+        }
+      },
+      null,
+      new GenericIdGenerator( DictionaryConst.NODE_TYPE_FILE_FIELD ) );
+
   }
 
   /**

@@ -120,7 +120,7 @@ public class MetaverseBuilderIT {
     // build it
     for ( IDocumentLocator locator : locators ) {
       locator.startScan();
-      Thread.sleep( 1000 );
+      Thread.sleep( 2000 );
     }
 
     assertTrue( graph.getVertices().iterator().hasNext() );

@@ -10,5 +10,5 @@ import java.util.Set;
  */
 public interface IStepAnalyzer<T extends BaseStepMeta> extends IAnalyzer<T> {
 
-  Set<Class<? super BaseStepMeta>> getSupportedSteps();
+  Set<Class<? extends BaseStepMeta>> getSupportedSteps();
 }
