@@ -67,19 +67,19 @@ public class TableOutputStepAnalyzer extends KettleBaseStepAnalyzer<TableOutputM
     }
 
     String[] dbFieldNames = tableOutputMeta.getFieldDatabase();
-    String type = DictionaryConst.NODE_TYPE_DATA_TABLE;
 
     if ( tableName != null ) {
 
       IMetaverseNode tableNode = metaverseObjectFactory.createNodeObject(
-          DictionaryHelper.getId( type, tableOutputMeta.getDatabaseMeta().getName(), tableName ),
+          DictionaryHelper.getId( DictionaryConst.NODE_TYPE_DATA_TABLE,
+              tableOutputMeta.getDatabaseMeta().getName(),
+              tableName ),
           tableName,
-          type );
+          DictionaryConst.NODE_TYPE_DATA_TABLE );
 
       metaverseBuilder.addNode( tableNode );
       metaverseBuilder.addLink( node, DictionaryConst.LINK_WRITESTO, tableNode );
 
-      type = DictionaryConst.NODE_TYPE_TRANS_FIELD;
       if ( dbFieldNames == null || dbFieldNames.length == 0 || !tableOutputMeta.specifyFields() ) {
         // If no field names are specified, then all the incoming fields are written out by name verbatim
         dbFieldNames = fieldNames;
@@ -88,9 +88,11 @@ public class TableOutputStepAnalyzer extends KettleBaseStepAnalyzer<TableOutputM
       for ( int i = 0; i < fieldNames.length; i++ ) {
         String fieldName = fieldNames[i];
         IMetaverseNode fieldNode = metaverseObjectFactory.createNodeObject(
-            DictionaryHelper.getId( type, tableOutputMeta.getDatabaseMeta().getName(), tableName, fieldName ),
+            DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD,
+                prevFields.searchValueMeta( fieldName ).getOrigin(),
+                fieldName ),
             fieldName,
-            type );
+            DictionaryConst.NODE_TYPE_TRANS_FIELD );
 
         metaverseBuilder.addNode( fieldNode );
 
