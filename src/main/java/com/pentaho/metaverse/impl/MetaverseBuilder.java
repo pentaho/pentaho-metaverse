@@ -54,11 +54,6 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
   private Graph graph;
 
   /**
-   * The node that represents this metaverse instance
-   */
-  private Vertex metaverseNode;
-
-  /**
    * This is a possible delegate reference to a metaverse object factory. This builder is itself a
    * metaverse object factory, so the reference is initialized to "this".
    */
@@ -71,10 +66,6 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    */
   public MetaverseBuilder( Graph graph ) {
     this.graph = graph;
-    metaverseNode = graph.getVertex( METAVERSE_PREFIX + id );
-    if ( metaverseNode == null ) {
-      metaverseNode = graph.addVertex( METAVERSE_PREFIX + id );
-    }
   }
 
   protected Graph getGraph() {

@@ -168,7 +168,9 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
             if ( prevFields != null && prevFields.searchValueMeta( outRowMeta.getName() ) == null ) {
               // This field didn't come into the step, so assume it has been created here
               IMetaverseNode newFieldNode = metaverseObjectFactory.createNodeObject(
-                  DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD, outRowMeta.getName() ) );
+                  DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD,
+                      parentStepMeta.getName(),
+                      outRowMeta.getName() ) );
               newFieldNode.setName( outRowMeta.getName() );
               newFieldNode.setType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
               newFieldNode.setProperty( "kettleType", outRowMeta.getTypeDesc() );
