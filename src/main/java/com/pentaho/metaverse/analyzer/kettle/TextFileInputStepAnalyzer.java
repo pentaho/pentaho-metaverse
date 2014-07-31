@@ -53,7 +53,8 @@ public class TextFileInputStepAnalyzer extends KettleBaseStepAnalyzer<TextFileIn
     for ( String fileName : fileNames ) {
       // first add the node for the file
       IMetaverseNode textFileNode = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE, fileName ), fileName, DictionaryConst.NODE_TYPE_FILE );
+          DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE, fileName ), fileName,
+          DictionaryConst.NODE_TYPE_FILE );
 
       metaverseBuilder.addNode( textFileNode );
       metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
@@ -64,14 +65,14 @@ public class TextFileInputStepAnalyzer extends KettleBaseStepAnalyzer<TextFileIn
     if ( fields != null ) {
       for ( TextFileInputField field : fields ) {
         IMetaverseNode fieldNode = metaverseObjectFactory
-          .createNodeObject( DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE_FIELD, field.getName() ),
-            field.getName(), DictionaryConst.NODE_TYPE_FILE_FIELD );
+            .createNodeObject( DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE_FIELD, field.getName() ),
+                field.getName(), DictionaryConst.NODE_TYPE_FILE_FIELD );
 
         metaverseBuilder.addNode( fieldNode );
 
-        // get the stream field that leaves this step. It should have already been created when we called super.analyze()
+        // Get the stream field output from this step. It should've already been created when we called super.analyze()
         IMetaverseNode outNode = metaverseObjectFactory
-          .createNodeObject( DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD, field.getName() ) );
+            .createNodeObject( DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD, field.getName() ) );
 
         metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outNode );
 

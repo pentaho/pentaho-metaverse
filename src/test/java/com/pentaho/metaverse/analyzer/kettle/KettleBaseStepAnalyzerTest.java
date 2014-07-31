@@ -47,6 +47,7 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import java.util.Set;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 /**
@@ -74,6 +75,12 @@ public class KettleBaseStepAnalyzerTest {
 
   @Mock
   StepMetaInterface mockStepMetaInterface;
+
+  @Mock
+  RowMetaInterface mockPrevFields;
+
+  @Mock
+  RowMetaInterface mockStepFields;
 
   /**
    * @throws Exception
@@ -109,6 +116,9 @@ public class KettleBaseStepAnalyzerTest {
     // set random StepMetaInterface
     when( mockStepMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
     when( parentStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+
+    analyzer.parentStepMeta = parentStepMeta;
+    analyzer.parentTransMeta = mockTransMeta;
   }
 
   /**
@@ -120,24 +130,56 @@ public class KettleBaseStepAnalyzerTest {
 
   @Test
   public void testSetMetaverseBuilder() {
-
     assertNotNull( analyzer.metaverseBuilder );
-
   }
 
-  @Test(expected = MetaverseAnalyzerException.class)
+  @Test
+  public void testAddSelfNode() throws MetaverseAnalyzerException {
+    assertNotNull( analyzer.addSelfNode() );
+  }
+
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testAddSelfNodeWithException() throws MetaverseAnalyzerException {
+    analyzer.parentStepMeta = null;
+    assertNotNull( analyzer.addSelfNode() );
+  }
+
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void addDatabaseConnectionNodesWithNullStep() throws MetaverseAnalyzerException {
+    analyzer.addDatabaseConnectionNodes();
+  }
+
+  @Test
+  public void testGetDatabaseConnectionAnalyzer() {
+    assertNotNull( analyzer.getDatabaseConnectionAnalyzer() );
+  }
+
+  @Test
+  public void testLoadInputAndOutputStreamFields() throws KettleStepException {
+    when(analyzer.parentTransMeta.getPrevStepFields( analyzer.parentStepMeta )).thenReturn( mockPrevFields );
+    when(analyzer.parentTransMeta.getStepFields( analyzer.parentStepMeta )).thenReturn( mockStepFields );
+    analyzer.loadInputAndOutputStreamFields();
+    assertNotNull( analyzer.prevFields );
+    assertNotNull( analyzer.stepFields );
+  }
+
+  @Test
+  public void testLoadInputAndOutputStreamFieldsWithException() throws KettleStepException {
+    when(analyzer.parentTransMeta.getPrevStepFields( analyzer.parentStepMeta )).thenThrow( KettleStepException.class );
+    when( analyzer.parentTransMeta.getStepFields( analyzer.parentStepMeta ) ).thenThrow( KettleStepException.class );
+    analyzer.loadInputAndOutputStreamFields();
+    assertNull( analyzer.prevFields );
+    assertNull( analyzer.stepFields );
+  }
+
+  @Test( expected = MetaverseAnalyzerException.class )
   public void testNullAnalyze() throws MetaverseAnalyzerException {
-
     analyzer.analyze( null );
-
   }
 
   @Test
   public void testAnalyze() throws MetaverseAnalyzerException {
-
-    IMetaverseNode node = analyzer.analyze( mockStepMeta );
-    assertNotNull( node );
-
+    assertNotNull( analyzer.analyze( mockStepMeta ) );
   }
 
   @Test
@@ -145,26 +187,14 @@ public class KettleBaseStepAnalyzerTest {
 
     when( mockStepMetaInterface.getUsedDatabaseConnections() ).thenReturn( new DatabaseMeta[] { mockDatabaseMeta } );
 
-    IMetaverseNode node = analyzer.analyze( mockStepMeta );
-    assertNotNull( node );
-
+    assertNotNull( analyzer.analyze( mockStepMeta ) );
   }
 
-  @Test(expected = MetaverseAnalyzerException.class)
+  @Test( expected = MetaverseAnalyzerException.class )
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
-
     analyzer.setMetaverseBuilder( null );
     analyzer.analyze( mockStepMeta );
-
   }
-
-  /*@Test( expected = MetaverseAnalyzerException.class )
-  public void testSetObjectFactoryNull() throws MetaverseAnalyzerException {
-
-    analyzer.setMetaverseObjectFactory( null );
-    analyzer.analyze( mockStepMeta );
-
-  }*/
 
   @Test
   public void testAnalyzeWithNewFields() throws MetaverseAnalyzerException, KettleStepException {
