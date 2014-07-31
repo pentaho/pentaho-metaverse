@@ -24,73 +24,18 @@ package com.pentaho.metaverse.locator;
 
 import java.io.File;
 
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.MetaverseLink;
-import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.impl.DocumentEvent;
-import com.pentaho.metaverse.impl.MetaverseDocument;
-
 /**
  * A runnable (and stoppable) class for crawling a Pentaho repository for documents
  * @author jdixon
  *
  */
-public class FileSystemLocatorRunner implements Runnable {
-
-  /**
-   * The top-level repository files and folders to search into
-   */
-  private File repoTop;
-
-  /**
-   * The repository crawler to use for getting document contents and generating ids
-   */
-  private FileSystemLocator repositoryIndexer;
-
-  /**
-   * A flag to identify if we should stop crawling the repository (due to an external cancel event)
-   */
-  private boolean stopping;
-
-  /**
-   * A flag to identify we if are currently crawling the repository
-   */
-  private boolean running;
-
-  public void setRepoTop( File repoTop ) {
-    this.repoTop = repoTop;
-  }
-
-  public void setRepositoryIndexer( FileSystemLocator repositoryIndexer ) {
-    this.repositoryIndexer = repositoryIndexer;
-  }
-
-  @Override
-  public void run() {
-    running = true;
-    indexFolder( repoTop );
-    running = false;
-  }
-
-  public boolean isRunning() {
-    return running;
-  }
-
-  /**
-   * Stops the crawling of the repository
-   */
-  public void stop() {
-    stopping = true;
-  }
+public class FileSystemLocatorRunner extends LocatorRunner<File> {
 
   /**
    * Indexes a set of files/folders. Folders are recursed into and files are passed to indexFile.
    * @param folder The files/folders to examine
    */
-  private void indexFolder( File folder ) {
+  public void locate( File folder ) {
 
     File[] files = folder.listFiles();
     for ( File file : files ) {
@@ -98,84 +43,18 @@ public class FileSystemLocatorRunner implements Runnable {
         return;
       }
       if ( !file.isDirectory() ) {
-        indexFile( file );
-      } else {
-        indexFolder( file );
-      }
-    }
-  }
-
-  /**
-   * Gets the content of a document and notifies the repository document locator listeners of it
-   * @param file The file to examine
-   */
-  private void indexFile( File file ) {
-
-    if ( file.isHidden() ) {
-      // don't index hidden fields
-      return;
-    }
-    String name = file.getName();
-    String extension = "";
-    int pos = name.lastIndexOf( '.' );
-    if ( pos != -1 ) {
-      extension = name.substring( pos + 1 ).toLowerCase();
-    }
-
-    if ( "".equals( extension ) ) {
-      return;
-    }
-
-    String id = repositoryIndexer.getId( file.getPath() );
-    try {
-      Object contents = repositoryIndexer.getFileContents( file, extension );
-      MetaverseDocument metaverseDocument = new MetaverseDocument();
-      metaverseDocument.setContent( contents );
-      metaverseDocument.setStringID( id );
-      metaverseDocument.setName( name );
-      metaverseDocument.setType( extension );
-
-      IMetaverseNode locatorNode = repositoryIndexer.getLocatorNode();
-      IMetaverseBuilder metaverseBuilder = repositoryIndexer.getMetaverseBuilder();
-
-      // create a place holder node for the new document
-      IMetaverseNode documentNode = new MetaverseTransientNode( id );
-      documentNode.setType( extension );
-      documentNode.setName( name );
-      metaverseBuilder.addNode( documentNode );
-
-      // create a link from the locator node to the new document
-      MetaverseLink link = new MetaverseLink();
-      link.setFromNode( locatorNode );
-      link.setLabel( DictionaryConst.LINK_CONTAINS );
-      link.setToNode( documentNode );
-      metaverseBuilder.addLink( link );
-
-      DocumentEvent event = new DocumentEvent();
-      event.setEventType( "add" );
-      event.setDocument( metaverseDocument );
-      repositoryIndexer.notifyListeners( event );
-    } catch ( Exception e ) {
-      repositoryIndexer.error( "Could not get file contents for " + file.getPath() );
-    }
-
-/*
-    SearchContentItem obj;
-    try {
-      obj = metaIndex.getDocument( id, PentahoSessionHolder.getSession() );
-      if( obj != null ) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-        String current = sdf.format( file.getLastModifiedDate() );
-        if( current.compareTo( obj.getLastModifiedDate() ) <= 0 ) {
-          // this file has not been modified
-          return;
+        try {
+          if ( !file.isHidden( ) ) {
+            processFile( file.getName(), locator.getId( file.getPath() ), locator.getContents( file ) );
+          }
+        } catch ( Exception e ) {
+          // TODO handle exception
+          e.printStackTrace();
         }
+      } else {
+        locate( file );
       }
-        
-    } catch ( Exception e1 ) {
-      e1.printStackTrace();
     }
-    */
   }
 
 }

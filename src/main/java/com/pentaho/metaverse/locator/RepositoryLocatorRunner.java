@@ -24,75 +24,22 @@ package com.pentaho.metaverse.locator;
 
 import java.util.List;
 
-import com.pentaho.metaverse.messages.Messages;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
-
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.impl.DocumentEvent;
-import com.pentaho.metaverse.impl.MetaverseDocument;
 
 /**
  * A runnable (and stoppable) class for crawling a Pentaho repository for documents
  * @author jdixon
  *
  */
-public class RepositoryLocatorRunner implements Runnable {
-
-  /**
-   * The top-level repository files and folders to search into
-   */
-  private List<RepositoryFileTree> repoTop;
-
-  /**
-   * The repository crawler to use for getting document contents and generating ids
-   */
-  private RepositoryLocator repositoryIndexer;
-
-  /**
-   * A flag to identify if we should stop crawling the repository (due to an external cancel event)
-   */
-  private boolean stopping;
-
-  /**
-   * A flag to identify we if are currently crawling the repository
-   */
-  private boolean running;
-
-  public void setRepoTop( List<RepositoryFileTree> repoTop ) {
-    this.repoTop = repoTop;
-  }
-
-  public void setRepositoryIndexer( RepositoryLocator repositoryIndexer ) {
-    this.repositoryIndexer = repositoryIndexer;
-  }
-
-  @Override
-  public void run() {
-    running = true;
-    indexFileTree( repoTop );
-    running = false;
-  }
-
-  public boolean isRunning() {
-    return running;
-  }
-
-  /**
-   * Stops the crawling of the repository
-   */
-  public void stop() {
-    stopping = true;
-  }
+public class RepositoryLocatorRunner extends LocatorRunner<List<RepositoryFileTree>> {
 
   /**
    * Indexes a set of files/folders. Folders are recursed into and files are passed to indexFile.
    * @param fileTrees The files/folders to examine
    */
-  private void indexFileTree( List<RepositoryFileTree> fileTrees ) {
+  @Override
+  public void locate( List<RepositoryFileTree> fileTrees ) {
 
     for ( RepositoryFileTree fileTree : fileTrees ) {
       if ( stopping ) {
@@ -101,89 +48,25 @@ public class RepositoryLocatorRunner implements Runnable {
       if ( fileTree.getFile() != null ) {
         RepositoryFile file = fileTree.getFile();
         if ( !file.isFolder() ) {
-          indexFile( file );
+
+          if ( !file.isHidden() ) {
+            // don't index hidden fields
+            try {
+              processFile( file.getName(), locator.getId( file.getPath() ), locator.getContents( file ) );
+            } catch ( Exception e ) {
+             // TODO log exception here
+              e.printStackTrace( );
+            }
+          }
         } else {
           List<RepositoryFileTree> kids = fileTree.getChildren();
           if ( kids != null && kids.size() > 0 ) {
-            indexFileTree( kids );
+            locate( kids );
           }
         }
       }
 
     }
-  }
-
-  /**
-   * Gets the content of a document and notifies the repository document locator listeners of it
-   * @param file The file to examine
-   */
-  private void indexFile( RepositoryFile file ) {
-
-    if ( stopping ) {
-      return;
-    }
-    if ( file.isHidden() ) {
-      // don't index hidden fields
-      return;
-    }
-    String name = file.getName();
-    String extension = "";
-    int pos = name.lastIndexOf( '.' );
-    if ( pos != -1 ) {
-      extension = name.substring( pos + 1 ).toLowerCase();
-    }
-
-    if ( "".equals( extension ) ) {
-      return;
-    }
-
-    String id = repositoryIndexer.getId( file.getPath() );
-    try {
-      Object contents = repositoryIndexer.getFileContents( file, extension );
-
-      MetaverseDocument metaverseDocument = new MetaverseDocument();
-      metaverseDocument.setContent( contents );
-      metaverseDocument.setStringID( id );
-      metaverseDocument.setName( name );
-      metaverseDocument.setType( extension );
-
-      IMetaverseNode locatorNode = repositoryIndexer.getLocatorNode();
-      IMetaverseBuilder metaverseBuilder = repositoryIndexer.getMetaverseBuilder();
-
-      // create a place holder node for the new document
-      IMetaverseNode documentNode = new MetaverseTransientNode( id );
-      documentNode.setType( extension );
-      documentNode.setName( name );
-      metaverseBuilder.addNode( documentNode );
-
-      metaverseBuilder.addLink( locatorNode, DictionaryConst.LINK_CONTAINS, documentNode );
-
-      DocumentEvent event = new DocumentEvent();
-      event.setEventType( "add" );
-      event.setDocument( metaverseDocument );
-      repositoryIndexer.notifyListeners( event );
-
-    } catch ( Exception e ) {
-      repositoryIndexer.error( Messages.getString( "ERROR.NoContentForFile", file.getPath() ) );
-    }
-
-/*
-    SearchContentItem obj;
-    try {
-      obj = metaIndex.getDocument( id, PentahoSessionHolder.getSession() );
-      if( obj != null ) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-        String current = sdf.format( file.getLastModifiedDate() );
-        if( current.compareTo( obj.getLastModifiedDate() ) <= 0 ) {
-          // this file has not been modified
-          return;
-        }
-      }
-        
-    } catch ( Exception e1 ) {
-      e1.printStackTrace();
-    }
-    */
   }
 
 }

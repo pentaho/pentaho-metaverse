@@ -49,6 +49,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
+import org.pentaho.platform.api.repository2.unified.RepositoryRequest;
 
 public class LocatorTestUtils {
 
@@ -92,12 +93,12 @@ public class LocatorTestUtils {
   public static IUnifiedRepository getMockIUnifiedRepository() {
     IUnifiedRepository repo = mock( IUnifiedRepository.class );
 
-    when( repo.getTree( anyString(), anyInt(), anyString(), anyBoolean() ) )
+    when( repo.getTree( any(RepositoryRequest.class) ) )
       .thenAnswer( new Answer<RepositoryFileTree>() {
         @Override
         public RepositoryFileTree answer( InvocationOnMock invocationOnMock ) throws Throwable {
           Object[] args = invocationOnMock.getArguments();
-          return getTree( (String) args[0], (Integer) args[1], (String) args[2], (Boolean) args[3] );
+          return getTree( (RepositoryRequest)args[0] );
         }
       } );
 
@@ -161,7 +162,7 @@ public class LocatorTestUtils {
   }
   /*************** end -- load job and trans methods for the mock diRepo *****************/
 
-  public static RepositoryFileTree getTree( String arg0, int arg1, String arg2, boolean arg3 ) {
+  public static RepositoryFileTree getTree( RepositoryRequest req ) {
 
     File root = new File( SOLUTION_PATH );
     RepositoryFileTree rft = createFileTree(root );

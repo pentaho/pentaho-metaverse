@@ -24,9 +24,9 @@ package com.pentaho.metaverse.locator;
 
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
@@ -36,20 +36,15 @@ import java.util.List;
  * @author jdixon
  *
  */
-public class FileSystemLocator extends BaseLocator {
+public class FileSystemLocator extends BaseLocator<File> {
+  private static final long serialVersionUID = 3308953622126327699L;
 
   /**
    * The type for this locator
    */
   public static final String LOCATOR_TYPE = "FileSystem";
 
-  private static final Log LOGGER = LogFactory.getLog( RepositoryLocator.class );
-
-  private static final long serialVersionUID = 3308953622126327699L;
-
-  private static final int POLLING_INTERVAL = 100;
-
-  private FileSystemLocatorRunner indexRunner;
+  private static final Logger log = LoggerFactory.getLogger( FileSystemLocator.class );
 
   private String rootFolder;
 
@@ -66,16 +61,16 @@ public class FileSystemLocator extends BaseLocator {
   /**
    * A method that returns the payload (object or XML) for a document
    * @param file The repository file
-   * @param type The type of the file
    * @return The object or XML payload
    * @throws Exception When the document contents cannot be retrieved
    */
-  protected Object getFileContents( File file, String type ) throws Exception {
+  @Override
+  protected Object getContents( File file ) throws Exception {
     String content = "";
     try {
       content = FileUtils.readFileToString( file );
     } catch ( Throwable e ) {
-      error( Messages.getString( "ERROR.IndexingDocument", file.getPath() ), e );
+      log.error( Messages.getString( "ERROR.IndexingDocument", file.getPath() ), e );
     }
     return content;
   }
@@ -89,64 +84,29 @@ public class FileSystemLocator extends BaseLocator {
   }
 
   @Override
-  public String getId( String... tokens ) {
+  protected String getId( String... tokens ) {
     return getLocatorType() + "." + getRepositoryId() + "." + tokens[0];
   }
 
   @Override
   public void startScan() {
-    if ( indexRunner != null ) {
-//TODO      throw new Exception("Locator is already scanning");
-      return;
-    }
 
     File root = new File( rootFolder );
     if ( !root.exists() ) {
-      error( Messages.getString("ERROR.FileSystemLocator.RootFolder.DoesNotExist", rootFolder ) );
-//TODO      throw new IndexException(  ); 
+      log.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.DoesNotExist", rootFolder ) );
+      //TODO      throw new IndexException(  );
       return;
     }
 
     if ( !root.isDirectory() ) {
-      error( Messages.getString("ERROR.FileSystemLocator.RootFolder.NotAFolder", rootFolder ) );
-//TODO      throw new IndexException(  ); 
+      log.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.NotAFolder", rootFolder ) );
+      //TODO      throw new IndexException(  );
       return;
     }
 
-    // make sure the locator node exists
-    metaverseBuilder.addNode( locatorNode );
-
-    indexRunner = new FileSystemLocatorRunner();
-    indexRunner.setRepositoryIndexer( this );
-    indexRunner.setRepoTop( root );
-    Thread runnerThread = new Thread( indexRunner );
-    runnerThread.start();
-  }
-
-  @Override
-  public void stopScan() {
-    System.out.println( "RepositoryLocator stopScan" );
-    indexRunner.stop();
-    while ( indexRunner.isRunning() ) {
-      try {
-        System.out.println( "RepositoryLocator stopScan polling" );
-        Thread.sleep( POLLING_INTERVAL );
-      } catch ( InterruptedException e ) {
-        // intentional
-        break;
-      }
-    }
-    indexRunner = null;
-  }
-
-  @Override
-  public String[] getTypes() {
-    return new String[] {};
-  }
-
-  @Override
-  public Log getLogger() {
-    return LOGGER;
+    LocatorRunner lr = new FileSystemLocatorRunner();
+    lr.setRoot( root );
+    startScan( lr );
   }
 
 }
