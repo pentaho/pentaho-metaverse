@@ -22,8 +22,7 @@
 
 package com.pentaho.metaverse.locator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.io.FilenameUtils;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.StringObjectId;
@@ -36,6 +35,8 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -51,7 +52,8 @@ public class DIRepositoryLocator extends RepositoryLocator {
    */
   public static final String LOCATOR_TYPE = "DIRepo";
 
-  private static final Log LOGGER = LogFactory.getLog( RepositoryLocator.class );
+  private static final Logger log = LoggerFactory.getLogger( DIRepositoryLocator.class );
+
 
   private static final long serialVersionUID = 1324202912891938340L;
 
@@ -112,7 +114,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
   }
 
   @Override
-  protected Object getFileContents( RepositoryFile file, String type ) throws Exception {
+  protected Object getContents( RepositoryFile file ) throws Exception {
     Object object = null;
 
     ObjectId objectId;
@@ -123,22 +125,15 @@ public class DIRepositoryLocator extends RepositoryLocator {
       objectId = new StringObjectId( file.getId().toString() );
     }
 
-    if ( "ktr".equals( type ) ) {
+    String extension = FilenameUtils.getExtension( file.getName() );
+
+
+    if ( "ktr".equals( extension ) ) {
       object = repo.loadTransformation( objectId, null );
-    } else if ( "kjb".equals( type ) ) {
+    } else if ( "kjb".equals( extension ) ) {
       object = repo.loadJob( objectId, null );
     }
     return object;
-  }
-
-  @Override
-  public String[] getTypes() {
-    return new String[] {};
-  }
-
-  @Override
-  public Log getLogger() {
-    return LOGGER;
   }
 
 }

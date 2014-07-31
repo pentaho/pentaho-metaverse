@@ -25,30 +25,38 @@ package com.pentaho.metaverse.locator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.engine.core.system.PentahoBase;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
-import com.pentaho.dictionary.IIdGenerator;
-import com.pentaho.dictionary.MetaverseTransientNode;
 
 /**
  * Base implementation for all @see org.pentaho.platform.api.metaverse.IDocumentLocator implementations
  * @author jdixon
  *
  */
-public abstract class BaseLocator extends PentahoBase implements IDocumentLocator, IIdGenerator {
+public abstract class BaseLocator<T> implements IDocumentLocator {
 
   private static final long serialVersionUID = 693428630030858039L;
 
   private static final String LOCATOR_ID_PREFIX = "locator_";
 
+  private static final int POLLING_INTERVAL = 100;
+
+  private static final Logger log = LoggerFactory.getLogger( BaseLocator.class );
+
+
+  /**
+   * The node in the metaverse that represents the root of this located domain/namespace
+   */
   protected IMetaverseNode locatorNode;
 
   /**
@@ -73,12 +81,22 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
 
   private List<IDocumentListener> listeners = new ArrayList<IDocumentListener>();
 
+  protected LocatorRunner runner;
+
   /**
    * Constructor for the abstract super class
    */
   public BaseLocator() {
     DictionaryHelper.registerEntityType( DictionaryConst.NODE_TYPE_LOCATOR );
   }
+
+  /**
+   * A method that returns the payload (object or XML) for a document
+   * @param locatedItem item to harvest; ie., a file
+   * @return The object or XML payload
+   * @throws Exception When the document contents cannot be retrieved
+   */
+  protected abstract Object getContents( T locatedItem ) throws Exception;
 
   /**
    * Constructor that takes in a List of IDocumentListeners
@@ -111,10 +129,6 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
 
   public void setRepositoryId( String id ) {
     this.id = id;
-    // create a metaverse node for this locator
-    locatorNode = new MetaverseTransientNode( LOCATOR_ID_PREFIX + id );
-    locatorNode.setType( DictionaryConst.NODE_TYPE_LOCATOR );
-    locatorNode.setName( id );
   }
 
   public String getLocatorType() {
@@ -134,11 +148,63 @@ public abstract class BaseLocator extends PentahoBase implements IDocumentLocato
   }
 
   public IMetaverseNode getLocatorNode() {
+
+    if ( locatorNode == null ) {
+
+      locatorNode = metaverseBuilder.getMetaverseObjectFactory().createNodeObject(
+          LOCATOR_ID_PREFIX + id,
+          id,
+          DictionaryConst.NODE_TYPE_LOCATOR );
+
+    }
+
     return locatorNode;
   }
 
   public void setLocatorNode( IMetaverseNode locatorNode ) {
     this.locatorNode = locatorNode;
+  }
+
+  /**
+   * TODO Change this once ID generation is refactored
+   */
+  protected String getId( String... tokens ) {
+    return getLocatorType() + "." + getRepositoryId() + "." + tokens[0];
+  }
+
+  @Override
+  public void stopScan() {
+
+    System.out.println( "RepositoryLocator stopScan" );
+
+    runner.stop();
+
+    while ( runner.isRunning() ) {
+      try {
+        System.out.println( "RepositoryLocator stopScan polling" );
+        Thread.sleep( POLLING_INTERVAL );
+      } catch ( InterruptedException e ) {
+        // intentional
+        break;
+      }
+    }
+    runner = null;
+  }
+
+
+  protected void startScan( LocatorRunner locatorRunner ) {
+
+    if ( runner != null ) {
+      //TODO      throw new Exception("Locator is already scanning");
+      return;
+    }
+
+    metaverseBuilder.addNode( getLocatorNode() );
+
+    runner = locatorRunner;
+    runner.setLocator(  this );
+    Thread runnerThread = new Thread( runner );
+    runnerThread.start();
   }
 
 }

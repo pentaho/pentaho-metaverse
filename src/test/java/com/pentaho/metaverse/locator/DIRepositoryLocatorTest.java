@@ -87,10 +87,6 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     locator.setRepositoryId( "testrepo" );
     assertEquals( "Repo id is wrong", "testrepo", locator.getRepositoryId() );
 
-    assertNotNull("Locator logger is null", locator.getLogger() );
-
-    assertNotNull("Locator types is null", locator.getTypes() );
-
     assertNotNull("Indexer type is null", locator.getLocatorType() );
     events = new ArrayList<IDocumentEvent>();
     locator.startScan();

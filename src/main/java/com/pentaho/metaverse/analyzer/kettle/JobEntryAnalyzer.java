@@ -37,7 +37,8 @@ import java.util.Set;
  *
  * Created by gmoran on 7/16/14.
  */
-public class JobEntryAnalyzer extends BaseKettleMetaverseComponent implements IJobEntryAnalyzer<JobEntryInterface> {
+public class JobEntryAnalyzer<T extends JobEntryInterface> extends BaseKettleMetaverseComponent
+    implements IJobEntryAnalyzer<T> {
 
   /**
    * Analyzes job entries
@@ -47,7 +48,7 @@ public class JobEntryAnalyzer extends BaseKettleMetaverseComponent implements IJ
    * @throws MetaverseAnalyzerException
    */
   @Override
-  public IMetaverseNode analyze( JobEntryInterface entry ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( T entry ) throws MetaverseAnalyzerException {
 
     if ( entry == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );

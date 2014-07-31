@@ -21,14 +21,14 @@ public class TestFileSystemLocator extends FileSystemLocator {
   }
 
   @Override
-  protected Object getFileContents( File file, String type ) throws Exception {
+  protected Object getContents( File file ) throws Exception {
     if ( delay != 0 ) {
       try {
         Thread.sleep( delay );
       } catch ( InterruptedException e ) {
       }
     }
-    return super.getFileContents( file, type );
+    return super.getContents( file );
   }
 
 }
