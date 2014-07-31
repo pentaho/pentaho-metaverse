@@ -8,31 +8,35 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by mburgess on 7/29/14.
+ * The KettleStepAnalyzerProvider maintains a collection of analyzer objects capable of analyzing various PDI steps
  */
 public class KettleStepAnalyzerProvider extends BaseKettleMetaverseComponent implements IKettleStepAnalyzerProvider {
 
   /**
-   * The step analyzers.
+   * The set of step analyzers.
    */
-  private Set<IStepAnalyzer> stepAnalyzers = new HashSet<IStepAnalyzer>();
+  protected Set<IStepAnalyzer> stepAnalyzers = new HashSet<IStepAnalyzer>();
 
   /**
    * The analyzer type map associates step meta classes with analyzers for those classes
    */
-  private Map<Class<? extends BaseStepMeta>, HashSet<IStepAnalyzer>> analyzerTypeMap =
-      new HashMap<Class<? extends BaseStepMeta>, HashSet<IStepAnalyzer>>();
+  protected Map<Class<? extends BaseStepMeta>, Set<IStepAnalyzer>> analyzerTypeMap =
+      new HashMap<Class<? extends BaseStepMeta>, Set<IStepAnalyzer>>();
 
   /**
-   * @return
+   * Returns all registered step analyzers
+   * @return a set of step analyzers
    */
-  @Override public Set<IStepAnalyzer> getAnalyzers() {
+  @Override
+  public Set<IStepAnalyzer> getAnalyzers() {
     return stepAnalyzers;
   }
 
   /**
-   * @param types
-   * @return
+   * Returns the set of analyzers for steps with the specified classes
+   *
+   * @param types a set of classes corresponding to steps for which to retrieve the analyzers
+   * @return a set of analyzers that can process the specified steps
    */
   @Override public Set<IStepAnalyzer> getAnalyzers( Set<Class<?>> types ) {
     Set<IStepAnalyzer> stepAnalyzers = getAnalyzers();
@@ -48,31 +52,37 @@ public class KettleStepAnalyzerProvider extends BaseKettleMetaverseComponent imp
     return stepAnalyzers;
   }
 
+  /**
+   * Sets the collection of step analyzers used to analyze PDI steps
+   * @param analyzers
+   */
   public void setStepAnalyzers( Set<IStepAnalyzer> analyzers ) {
     stepAnalyzers = analyzers;
     loadAnalyzerTypeMap();
   }
 
   /**
-   * Loads up a Map of document types to supporting IAnalyzer<BaseStepMeta>(s)
+   * Loads up a Map of document types to supporting IStepAnalyzer(s)
    */
   protected void loadAnalyzerTypeMap() {
-    analyzerTypeMap = new HashMap<Class<? extends BaseStepMeta>, HashSet<IStepAnalyzer>>();
-    for ( IStepAnalyzer analyzer : stepAnalyzers ) {
-      Set<Class<? extends BaseStepMeta>> types = analyzer.getSupportedSteps();
-      analyzer.setMetaverseBuilder( metaverseBuilder );
-      if ( types != null ) {
-        for ( Class<? extends BaseStepMeta> type : types ) {
-          HashSet<IStepAnalyzer> analyzerSet = null;
-          if ( analyzerTypeMap.containsKey( type ) ) {
-            // we already have someone that handles this type, add to the Set
-            analyzerSet = analyzerTypeMap.get( type );
-          } else {
-            // no one else (yet) handles this type, add it in
-            analyzerSet = new HashSet<IStepAnalyzer>();
+    analyzerTypeMap = new HashMap<Class<? extends BaseStepMeta>, Set<IStepAnalyzer>>();
+    if ( stepAnalyzers != null ) {
+      for ( IStepAnalyzer analyzer : stepAnalyzers ) {
+        Set<Class<? extends BaseStepMeta>> types = analyzer.getSupportedSteps();
+        analyzer.setMetaverseBuilder( metaverseBuilder );
+        if ( types != null ) {
+          for ( Class<? extends BaseStepMeta> type : types ) {
+            Set<IStepAnalyzer> analyzerSet = null;
+            if ( analyzerTypeMap.containsKey( type ) ) {
+              // we already have someone that handles this type, add to the Set
+              analyzerSet = analyzerTypeMap.get( type );
+            } else {
+              // no one else (yet) handles this type, add it in
+              analyzerSet = new HashSet<IStepAnalyzer>();
+            }
+            analyzerSet.add( analyzer );
+            analyzerTypeMap.put( type, analyzerSet );
           }
-          analyzerSet.add( analyzer );
-          analyzerTypeMap.put( type, analyzerSet );
         }
       }
     }

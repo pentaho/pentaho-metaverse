@@ -25,16 +25,13 @@ package com.pentaho.metaverse.analyzer.kettle;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.messages.Messages;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.HashSet;
 import java.util.Set;
-
 
 /**
  * The TableOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
@@ -57,62 +54,63 @@ public class TableOutputStepAnalyzer extends KettleBaseStepAnalyzer<TableOutputM
     // Do common analysis for all steps
     IMetaverseNode node = super.analyze( tableOutputMeta );
 
-    StepMeta parentStepMeta = tableOutputMeta.getParentStepMeta();
-    if ( parentStepMeta == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMeta.IsNull" ) );
-    }
-    TransMeta transMeta = parentStepMeta.getParentTransMeta();
-
-    if ( transMeta == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.ParentTransMeta.IsNull" ) );
-    }
-
     String tableName = tableOutputMeta.getTableName();
+
     String[] fieldNames = tableOutputMeta.getFieldStream();
+    if ( fieldNames == null || fieldNames.length <= 0 || !tableOutputMeta.specifyFields() ) {
+      // If no incoming fields are specified, get them from the previous step
+      // NOTE: This check depends on the guarantee that super.loadInputAndOutputStreamFields() has been called.
+      //  it is not done again here for performance purposes. Currently it's being called during super.analyze()
+      if ( prevFields != null ) {
+        fieldNames = prevFields.getFieldNames();
+      }
+    }
+
     String[] dbFieldNames = tableOutputMeta.getFieldDatabase();
     String type = DictionaryConst.NODE_TYPE_DATA_TABLE;
 
     if ( tableName != null ) {
 
       IMetaverseNode tableNode = metaverseObjectFactory.createNodeObject(
-          DictionaryHelper.getId( type, tableOutputMeta.getDatabaseMeta().getName(), tableName ) );
-
-      tableNode.setType( type );
-      tableNode.setName( tableName );
+          DictionaryHelper.getId( type, tableOutputMeta.getDatabaseMeta().getName(), tableName ),
+          tableName,
+          type );
 
       metaverseBuilder.addNode( tableNode );
       metaverseBuilder.addLink( node, DictionaryConst.LINK_WRITESTO, tableNode );
 
       type = DictionaryConst.NODE_TYPE_TRANS_FIELD;
-      if ( fieldNames != null ) {
-        for ( int i = 0; i < fieldNames.length; i++ ) {
-          String fieldName = fieldNames[i];
-          IMetaverseNode fieldNode = metaverseObjectFactory.createNodeObject(
-              DictionaryHelper.getId( type, tableOutputMeta.getDatabaseMeta().getName(), tableName, fieldName ) );
+      if ( dbFieldNames == null || dbFieldNames.length == 0 || !tableOutputMeta.specifyFields() ) {
+        // If no field names are specified, then all the incoming fields are written out by name verbatim
+        dbFieldNames = fieldNames;
+      }
 
-          fieldNode.setName( fieldName );
-          fieldNode.setType( type );
+      for ( int i = 0; i < fieldNames.length; i++ ) {
+        String fieldName = fieldNames[i];
+        IMetaverseNode fieldNode = metaverseObjectFactory.createNodeObject(
+            DictionaryHelper.getId( type, tableOutputMeta.getDatabaseMeta().getName(), tableName, fieldName ),
+            fieldName,
+            type );
 
-          metaverseBuilder.addNode( fieldNode );
-          metaverseBuilder.addLink( tableNode, DictionaryConst.LINK_CONTAINS, fieldNode );
+        metaverseBuilder.addNode( fieldNode );
 
-          if ( dbFieldNames != null ) {
-            String dbNodeType = DictionaryConst.NODE_TYPE_DATA_COLUMN;
-            IMetaverseNode dbFieldNode = metaverseObjectFactory.createNodeObject(
-                DictionaryHelper.getId(
-                    dbNodeType, tableOutputMeta.getDatabaseMeta().getName(), tableName, fieldName ) );
+        if ( dbFieldNames != null ) {
+          String dbNodeType = DictionaryConst.NODE_TYPE_DATA_COLUMN;
+          IMetaverseNode dbFieldNode = metaverseObjectFactory.createNodeObject(
+              DictionaryHelper.getId(
+                  dbNodeType, tableOutputMeta.getDatabaseMeta().getName(), tableName, fieldName ) );
 
-            dbFieldNode.setName( dbFieldNames[i] );
-            dbFieldNode.setType( dbNodeType );
+          dbFieldNode.setName( dbFieldNames[i] );
+          dbFieldNode.setType( dbNodeType );
 
-            metaverseBuilder.addNode( dbFieldNode );
-            metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, dbFieldNode );
-          }
+          metaverseBuilder.addNode( dbFieldNode );
+          metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, dbFieldNode );
+          metaverseBuilder.addLink( tableNode, DictionaryConst.LINK_CONTAINS, dbFieldNode );
         }
       }
     }
 
-    return node;
+    return rootNode;
   }
 
   @Override
