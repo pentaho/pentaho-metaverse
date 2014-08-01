@@ -128,7 +128,7 @@ public class TextFileInputStepAnalyzerTest {
     TextFileInputField[] inputFields = new TextFileInputField[]{ field1, field2 };
 
     when( mockTextFileInputMeta.getInputFields() ).thenReturn( inputFields );
-    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "id", "name" } );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(new Answer<ValueMetaInterface>(){
 

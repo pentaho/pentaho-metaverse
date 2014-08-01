@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.KettleEnvironment;
@@ -89,13 +90,13 @@ public class FileSystemLocatorTest implements IDocumentListener {
     locator.setRootFolder( "bogus" );
     events = new ArrayList<IDocumentEvent>();
     locator.startScan();
-    Thread.sleep( 3000 );
+    MetaverseCompletionService.getInstance().waitTillEmpty();
     assertEquals( "Event count is wrong", 0, events.size() );
 
     locator.setRootFolder( "src/test/resources/solution/folder 2/parse.ktr" );
     events = new ArrayList<IDocumentEvent>();
     locator.startScan();
-    Thread.sleep( 3000 );
+    MetaverseCompletionService.getInstance().waitTillEmpty();
     assertEquals( "Event count is wrong", 0, events.size() );
 
     locator.setRootFolder( "src/test/resources/solution" );
@@ -104,7 +105,7 @@ public class FileSystemLocatorTest implements IDocumentListener {
     assertNotNull("Indexer type is null", locator.getLocatorType() );
     events = new ArrayList<IDocumentEvent>();
     locator.startScan();
-    Thread.sleep( 3000 );
+    MetaverseCompletionService.getInstance().waitTillEmpty();
 
     assertEquals( "Event count is wrong", 7, events.size() );
 
@@ -122,7 +123,7 @@ public class FileSystemLocatorTest implements IDocumentListener {
     locator.removeDocumentListener( this );
     events = new ArrayList<IDocumentEvent>();
     locator.startScan();
-    Thread.sleep( 3000 );
+    MetaverseCompletionService.getInstance().waitTillEmpty();
 
     assertEquals( "Event count is wrong", 0, events.size() );
 
@@ -159,6 +160,7 @@ public class FileSystemLocatorTest implements IDocumentListener {
     locator.stopScan();
 
     assertTrue( "Event count is wrong", events.size() < 5 );
+    assertTrue( "Event count is wrong", events.size() > 0 );
 
     for ( IDocumentEvent event : events ) {
       System.out.println( event.getDocument().getStringID() );

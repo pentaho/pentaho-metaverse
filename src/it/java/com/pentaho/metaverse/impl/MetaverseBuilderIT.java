@@ -23,6 +23,7 @@ package com.pentaho.metaverse.impl;
 
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.tinkerpop.blueprints.Graph;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -43,10 +44,12 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.FileSystemResource;
-
+import java.util.concurrent.Future;
 import java.io.File;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class MetaverseBuilderIT {
@@ -117,14 +120,14 @@ public class MetaverseBuilderIT {
   public void testBuildingAndReading() throws Exception {
     locators = documentLocatorProvider.getDocumentLocators();
 
+    MetaverseCompletionService mcs = MetaverseCompletionService.getInstance();
+
     // build it
     for ( IDocumentLocator locator : locators ) {
       locator.startScan();
-      Thread.sleep( 2000 );
     }
 
-    assertTrue( graph.getVertices().iterator().hasNext() );
-    assertTrue( graph.getEdges().iterator().hasNext() );
+    mcs.waitTillEmpty();
 
     Graph readerGraph = reader.getMetaverse();
     assertTrue( readerGraph.getVertices().iterator().hasNext() );

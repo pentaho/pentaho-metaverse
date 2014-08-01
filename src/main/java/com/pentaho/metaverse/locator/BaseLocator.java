@@ -25,6 +25,7 @@ package com.pentaho.metaverse.locator;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,8 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
+
+import java.util.concurrent.Future;
 
 /**
  * Base implementation for all @see org.pentaho.platform.api.metaverse.IDocumentLocator implementations
@@ -82,6 +85,10 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
   private List<IDocumentListener> listeners = new ArrayList<IDocumentListener>();
 
   protected LocatorRunner runner;
+
+  protected MetaverseCompletionService completionService = MetaverseCompletionService.getInstance();
+
+  protected Future<String> futureTask;
 
   /**
    * Constructor for the abstract super class
@@ -174,37 +181,34 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
 
   @Override
   public void stopScan() {
+    if ( futureTask == null || futureTask.isDone() || futureTask.isCancelled() ) {
+      // already stopped
+      return;
+    }
 
     System.out.println( "RepositoryLocator stopScan" );
 
     runner.stop();
-
-    while ( runner.isRunning() ) {
-      try {
-        System.out.println( "RepositoryLocator stopScan polling" );
-        Thread.sleep( POLLING_INTERVAL );
-      } catch ( InterruptedException e ) {
-        // intentional
-        break;
-      }
-    }
+    futureTask.cancel( false );
+    futureTask = null;
     runner = null;
   }
 
 
   protected void startScan( LocatorRunner locatorRunner ) {
 
-    if ( runner != null ) {
+    if ( futureTask != null && !futureTask.isDone() ) {
       //TODO      throw new Exception("Locator is already scanning");
       return;
     }
 
-    metaverseBuilder.addNode( getLocatorNode() );
+    IMetaverseNode node = getLocatorNode();
+    metaverseBuilder.addNode( node );
 
     runner = locatorRunner;
     runner.setLocator(  this );
-    Thread runnerThread = new Thread( runner );
-    runnerThread.start();
+
+    futureTask = completionService.submit( runner, node.getStringID() );
   }
 
 }
