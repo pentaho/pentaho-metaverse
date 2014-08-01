@@ -106,6 +106,7 @@ public class TableOutputStepAnalyzer extends KettleBaseStepAnalyzer<TableOutputM
           dbFieldNode.setType( dbNodeType );
 
           metaverseBuilder.addNode( dbFieldNode );
+          metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_READBY, rootNode );
           metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, dbFieldNode );
           metaverseBuilder.addLink( tableNode, DictionaryConst.LINK_CONTAINS, dbFieldNode );
         }

@@ -64,21 +64,25 @@ public class TextFileInputStepAnalyzer extends KettleBaseStepAnalyzer<TextFileIn
     TextFileInputField[] fields = textFileInputMeta.getInputFields();
     if ( fields != null ) {
       for ( TextFileInputField field : fields ) {
-        IMetaverseNode fieldNode = metaverseObjectFactory
-            .createNodeObject( DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE_FIELD, field.getName() ),
-                field.getName(), DictionaryConst.NODE_TYPE_FILE_FIELD );
+        String fieldName = field.getName();
+        IMetaverseNode fieldNode = metaverseObjectFactory.createNodeObject(
+            DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldName ),
+            fieldName,
+            DictionaryConst.NODE_TYPE_FILE_FIELD );
 
         metaverseBuilder.addNode( fieldNode );
 
         // Get the stream field output from this step. It should've already been created when we called super.analyze()
-        IMetaverseNode outNode = metaverseObjectFactory
-            .createNodeObject( DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD, field.getName() ) );
+        IMetaverseNode outNode = metaverseObjectFactory.createNodeObject(
+            DictionaryHelper.getId(
+                DictionaryConst.NODE_TYPE_TRANS_FIELD,
+                prevFields.searchValueMeta( fieldName ).getOrigin(),
+                fieldName ) );
 
         metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outNode );
 
         // add a link from the fileField to the text file input step node
         metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_READBY, node );
-
       }
     }
 
