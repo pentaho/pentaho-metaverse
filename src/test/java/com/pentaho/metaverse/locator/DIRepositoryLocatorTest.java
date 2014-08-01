@@ -90,7 +90,8 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     assertNotNull("Indexer type is null", locator.getLocatorType() );
     events = new ArrayList<IDocumentEvent>();
     locator.startScan();
-    Thread.sleep( 3000 );
+
+    locator.futureTask.get();
 
     assertEquals( "Event count is wrong", 7, events.size() );
 
@@ -108,7 +109,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     locator.removeDocumentListener( this );
     events = new ArrayList<IDocumentEvent>();
     locator.startScan();
-    Thread.sleep( 3000 );
+    locator.futureTask.get();
 
     assertEquals( "Event count is wrong", 0, events.size() );
 

@@ -76,7 +76,7 @@ public class TextFileInputStepAnalyzer extends KettleBaseStepAnalyzer<TextFileIn
         IMetaverseNode outNode = metaverseObjectFactory.createNodeObject(
             DictionaryHelper.getId(
                 DictionaryConst.NODE_TYPE_TRANS_FIELD,
-                prevFields.searchValueMeta( fieldName ).getOrigin(),
+                stepFields.searchValueMeta( fieldName ).getOrigin(),
                 fieldName ) );
 
         metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outNode );
