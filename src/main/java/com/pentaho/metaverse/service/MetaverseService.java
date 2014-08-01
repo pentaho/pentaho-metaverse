@@ -22,23 +22,31 @@
 
 package com.pentaho.metaverse.service;
 
-import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.IMetaverseReader;
-import com.pentaho.metaverse.messages.Messages;
-import org.pentaho.platform.api.metaverse.IDocumentLocator;
+import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Set;
+
+import org.pentaho.platform.api.metaverse.IDocumentLocator;
+import org.pentaho.platform.api.metaverse.IMetaverseLink;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+
+import com.pentaho.metaverse.api.IDocumentLocatorProvider;
+import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.api.IMetaverseService;
+import com.pentaho.metaverse.messages.Messages;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Graph;
 
 /**
  * REST endpoint for the metaverse. Includes Impact Analysis and Lineage
  */
 @Path( "/metaverse/api/service" )
-public class MetaverseService {
+public class MetaverseService implements IMetaverseService {
 
   private IMetaverseReader metaverseReader;
   private IDocumentLocatorProvider documentLocatorProvider;
@@ -83,7 +91,7 @@ public class MetaverseService {
     if ( metaverseReader == null ) {
       return Response.serverError().entity( Messages.getString( "ERROR.MetaverseReader.IsNull" ) ).build();
     }
-    return Response.ok( metaverseReader.export(), MediaType.APPLICATION_XML ).build();
+    return Response.ok( metaverseReader.exportToXml(), MediaType.APPLICATION_XML ).build();
   }
 
   protected void prepareMetaverse() {
@@ -95,6 +103,46 @@ public class MetaverseService {
         }
       }
     }
+  }
+
+  @Override
+  public IMetaverseNode findNode( String id ) {
+    return metaverseReader.findNode( id );
+  }
+
+  @Override
+  public IMetaverseLink findLink( String leftNodeID, String linkType, String rightNodeID, Direction direction ) {
+    return metaverseReader.findLink( leftNodeID, linkType, rightNodeID, direction );
+  }
+
+  @Override
+  public Graph getMetaverse() {
+    return metaverseReader.getMetaverse();
+  }
+
+  @Override
+  public String exportFormat( String format ) {
+    return metaverseReader.exportFormat( format );
+  }
+
+  @Override
+  public String exportToXml() {
+    return metaverseReader.exportToXml();
+  }
+
+  @Override
+  public Graph search( List<String> resultTypes, List<String> startNodeIDs, boolean shortestOnly ) {
+    return metaverseReader.search( resultTypes, startNodeIDs, shortestOnly );
+  }
+
+  @Override
+  public Graph getGraph( String id ) {
+    return metaverseReader.getGraph( id );
+  }
+
+  @Override
+  public List<IMetaverseNode> findNodes( String property, String value ) {
+    return metaverseReader.findNodes( property, value );
   }
 
 }

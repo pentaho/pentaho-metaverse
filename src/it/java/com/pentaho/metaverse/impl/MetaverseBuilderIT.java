@@ -135,7 +135,7 @@ public class MetaverseBuilderIT {
 
     // write out the graph so we can look at it
     File exportFile = new File( "src/it/resources/testGraph.graphml" );
-    FileUtils.writeStringToFile( exportFile, reader.export(), "UTF-8" );
+    FileUtils.writeStringToFile( exportFile, reader.exportToXml(), "UTF-8" );
   }
 
 }

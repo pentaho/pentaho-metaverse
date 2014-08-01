@@ -27,6 +27,7 @@ import java.util.Set;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
@@ -107,7 +108,8 @@ public class MetaverseNode implements IMetaverseNode {
   @Override
   public void setType( String type ) {
     v.setProperty( DictionaryConst.PROPERTY_TYPE, type );
-
+    String category = DictionaryHelper.getCategoryForType( type );
+    v.setProperty( DictionaryConst.PROPERTY_CATEGORY, category );
   }
 
   /*

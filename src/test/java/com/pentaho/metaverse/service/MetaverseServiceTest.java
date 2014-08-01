@@ -70,7 +70,7 @@ public class MetaverseServiceTest {
 
   @Test
   public void testExport() {
-    when( mockReader.export() ).thenReturn( TEST_XML );
+    when( mockReader.exportToXml() ).thenReturn( TEST_XML );
     when( mockProvider.getDocumentLocators() ).thenReturn( locators );
 
     Response response = service.export();
@@ -83,7 +83,7 @@ public class MetaverseServiceTest {
 
   @Test
   public void testExport_MultipleCalls() {
-    when( mockReader.export() ).thenReturn( TEST_XML );
+    when( mockReader.exportToXml() ).thenReturn( TEST_XML );
     when( mockProvider.getDocumentLocators() ).thenReturn( locators );
 
     Response response = service.export();
@@ -107,7 +107,7 @@ public class MetaverseServiceTest {
 
   @Test
   public void testExport_NoLocators() {
-    when( mockReader.export() ).thenReturn( "" );
+    when( mockReader.exportToXml() ).thenReturn( "" );
     when( mockProvider.getDocumentLocators() ).thenReturn( null );
 
     Response response = service.export();
@@ -121,7 +121,7 @@ public class MetaverseServiceTest {
 
   @Test
   public void testExport_NullReader() throws Exception {
-    when( mockReader.export() ).thenReturn( TEST_XML );
+    when( mockReader.exportToXml() ).thenReturn( TEST_XML );
     when( mockProvider.getDocumentLocators() ).thenReturn( locators );
 
     service = new MetaverseService( null, mockProvider );
@@ -133,7 +133,7 @@ public class MetaverseServiceTest {
 
   @Test
   public void testExport_NullProvider() throws Exception {
-    when( mockReader.export() ).thenReturn( "" );
+    when( mockReader.exportToXml() ).thenReturn( "" );
 
     service = new MetaverseService( mockReader, null );
     Response response = service.export();

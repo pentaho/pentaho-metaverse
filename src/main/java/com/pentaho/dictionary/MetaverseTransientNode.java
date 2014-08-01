@@ -83,9 +83,6 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
   @Override
   public String getStringID() {
     Object id = propertyMap.get( DictionaryConst.PROPERTY_ID );
-    if ( id == null ) {
-      return null;
-    }
     return (String) id;
   }
 
@@ -131,6 +128,8 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
   @Override
   public void setType( String type ) {
     propertyMap.put( "type", type );
+    String category = DictionaryHelper.getCategoryForType( type );
+    propertyMap.put( DictionaryConst.PROPERTY_CATEGORY, category );
   }
 
   /*
