@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.impl;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.Callable;
@@ -34,6 +35,11 @@ public class MetaverseCompletionServiceTest {
 
   public static final String HELLO_WORLD = "Hello World!";
   MetaverseCompletionService mcs = MetaverseCompletionService.getInstance();
+
+  @Before
+  public void setUp() throws Exception {
+    mcs.waitTillEmpty();
+  }
 
   @Test
   public void testSubmit_Callable() throws Exception {
