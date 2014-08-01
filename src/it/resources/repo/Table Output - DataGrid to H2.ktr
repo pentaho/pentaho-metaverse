@@ -83,7 +83,7 @@
     <type>H2</type>
     <access>Native</access>
     <database>test</database>
-    <port/>
+    <port></port>
     <username>sa</username>
     <password>Encrypted </password>
     <servername/>
@@ -101,12 +101,12 @@
     </attributes>
   </connection>
   <order>
-  <hop> <from>Data Grid</from><to>Table output</to><enabled>Y</enabled> </hop>
-  <hop> <from>Execute SQL script</from><to>Data Grid</to><enabled>Y</enabled> </hop>
+  <hop> <from>Text file input</from><to>Table output</to><enabled>Y</enabled> </hop>
+  <hop> <from>Execute SQL script</from><to>Text file input</to><enabled>Y</enabled> </hop>
   </order>
   <step>
-    <name>Data Grid</name>
-    <type>DataGrid</type>
+    <name>Execute SQL script</name>
+    <type>ExecSQL</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -115,49 +115,23 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <fields>
-      <field>
-        <name>a</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>100</length>
-        <precision>-1</precision>
-        <set_empty_string>N</set_empty_string>
-      </field>
-      <field>
-        <name>b</name>
-        <type>Integer</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <set_empty_string>N</set_empty_string>
-      </field>
-      <field>
-        <name>c</name>
-        <type>Boolean</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <set_empty_string>N</set_empty_string>
-      </field>
-    </fields>
-    <data>
-      <line> <item>Hello</item><item>1</item><item>Y</item> </line>
-      <line> <item>World</item><item>2</item><item>N</item> </line>
-    </data>
+    <connection>In Memory DB</connection>
+    <execute_each_row>N</execute_each_row>
+    <single_statement>N</single_statement>
+    <replace_variables>N</replace_variables>
+    <quoteString>N</quoteString>
+    <sql>DROP TABLE IF EXISTS TEST&#x3b;&#xa;CREATE TABLE TEST&#xa;&#x28;&#xa;  NotUsed VARCHAR&#x28;1&#x29;&#xa;, InternetIsKnown VARCHAR&#x28;1&#x29;&#xa;, CompuServeIsKnown VARCHAR&#x28;1&#x29;&#xa;, BTXIsKnown VARCHAR&#x28;1&#x29;&#xa;, JoguBitsIsKnown VARCHAR&#x28;1&#x29;&#xa;, InternetUsagePerWeek SMALLINT&#xa;, CompuServeUsagePerWeek SMALLINT&#xa;, BTXUsagePerWeek SMALLINT&#xa;, JoguBitsReading VARCHAR&#x28;1&#x29;&#xa;, Status VARCHAR&#x28;1&#x29;&#xa;, Faculty VARCHAR&#x28;2&#x29;&#xa;, Semester TINYINT&#xa;, Age TINYINT&#xa;, Gender VARCHAR&#x28;1&#x29;&#xa;, Question1 VARCHAR&#x28;1&#x29;&#xa;, Question2 VARCHAR&#x28;2&#x29;&#xa;, Reserved VARCHAR&#x28;4&#x29;&#xa;, Remarks VARCHAR&#x28;32&#x29;&#xa;&#x29;&#xa;&#x3b;</sql>
+    <set_params>N</set_params>
+    <insert_field/>
+    <update_field/>
+    <delete_field/>
+    <read_field/>
+    <arguments>
+    </arguments>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>179</xloc>
-      <yloc>37</yloc>
+      <xloc>58</xloc>
+      <yloc>36</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -175,9 +149,9 @@
            </partitioning>
     <connection>In Memory DB</connection>
     <schema/>
-    <table>test</table>
+    <table>TEST</table>
     <commit>1000</commit>
-    <truncate>Y</truncate>
+    <truncate>N</truncate>
     <ignore_errors>N</ignore_errors>
     <use_batch>Y</use_batch>
     <specify_fields>N</specify_fields>
@@ -201,8 +175,8 @@
     </step>
 
   <step>
-    <name>Execute SQL script</name>
-    <type>ExecSQL</type>
+    <name>Text file input</name>
+    <type>TextFileInput</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -211,23 +185,344 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>In Memory DB</connection>
-    <execute_each_row>N</execute_each_row>
-    <single_statement>N</single_statement>
-    <replace_variables>N</replace_variables>
-    <quoteString>N</quoteString>
-    <sql>CREATE TABLE test&#x28;a VARCHAR&#x28;100&#x29;, b DOUBLE, c BOOLEAN&#x29;&#x3b;</sql>
-    <set_params>N</set_params>
-    <insert_field/>
-    <update_field/>
-    <delete_field/>
-    <read_field/>
-    <arguments>
-    </arguments>
+    <accept_filenames>N</accept_filenames>
+    <passing_through_fields>N</passing_through_fields>
+    <accept_field>filenameTXT</accept_field>
+    <accept_stepname/>
+    <separator>&#x3b;</separator>
+    <enclosure>&#x22;</enclosure>
+    <enclosure_breaks>N</enclosure_breaks>
+    <escapechar/>
+    <header>N</header>
+    <nr_headerlines>1</nr_headerlines>
+    <footer>N</footer>
+    <nr_footerlines>1</nr_footerlines>
+    <line_wrapped>N</line_wrapped>
+    <nr_wraps>1</nr_wraps>
+    <layout_paged>N</layout_paged>
+    <nr_lines_per_page>80</nr_lines_per_page>
+    <nr_lines_doc_header>0</nr_lines_doc_header>
+    <noempty>N</noempty>
+    <include>N</include>
+    <include_field/>
+    <rownum>N</rownum>
+    <rownumByFile>N</rownumByFile>
+    <rownum_field/>
+    <format>mixed</format>
+    <encoding/>
+    <add_to_result_filenames>Y</add_to_result_filenames>
+    <file>
+      <name>&#x24;&#x7b;Internal.Transformation.Filename.Directory&#x7d;&#x2f;Textfile input - fixed length sample data.txt</name>
+      <filemask/>
+      <exclude_filemask/>
+      <file_required>N</file_required>
+      <include_subfolders>N</include_subfolders>
+      <type>Fixed</type>
+      <compression>None</compression>
+    </file>
+    <filters>
+    </filters>
+    <fields>
+      <field>
+        <name>NotUsed</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>0</position>
+        <length>1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>InternetIsKnown</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>1</position>
+        <length>1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>CompuServeIsKnown</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>2</position>
+        <length>1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>BTXIsKnown</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>3</position>
+        <length>1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>JoguBitsIsKnown</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>4</position>
+        <length>1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>InternetUsagePerWeek</name>
+        <type>Number</type>
+        <format/>
+        <currency/>
+        <decimal>.</decimal>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>5</position>
+        <length>3</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>CompuServeUsagePerWeek</name>
+        <type>Number</type>
+        <format/>
+        <currency/>
+        <decimal>.</decimal>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>8</position>
+        <length>3</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>BTXUsagePerWeek</name>
+        <type>Number</type>
+        <format/>
+        <currency/>
+        <decimal>.</decimal>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>11</position>
+        <length>3</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>JoguBitsReading</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>14</position>
+        <length>1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>Status</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>15</position>
+        <length>1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>Faculty</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>16</position>
+        <length>2</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>Semester</name>
+        <type>Number</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>18</position>
+        <length>2</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>Age</name>
+        <type>Number</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>20</position>
+        <length>2</length>
+        <precision>-1</precision>
+        <trim_type>both</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>Gender</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>22</position>
+        <length>1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>Question1</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>23</position>
+        <length>1</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>Question2</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>24</position>
+        <length>2</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>Reserved</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>26</position>
+        <length>4</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+      <field>
+        <name>Remarks</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <ifnull/>
+        <position>30</position>
+        <length>32</length>
+        <precision>-1</precision>
+        <trim_type>none</trim_type>
+        <repeat>N</repeat>
+      </field>
+    </fields>
+    <limit>0</limit>
+    <error_ignored>N</error_ignored>
+    <skip_bad_files>N</skip_bad_files>
+    <file_error_field/>
+    <file_error_message_field/>
+    <error_line_skipped>N</error_line_skipped>
+    <error_count_field/>
+    <error_fields_field/>
+    <error_text_field/>
+    <bad_line_files_destination_directory/>
+    <bad_line_files_extension>warning</bad_line_files_extension>
+    <error_line_files_destination_directory/>
+    <error_line_files_extension>error</error_line_files_extension>
+    <line_number_files_destination_directory/>
+    <line_number_files_extension>line</line_number_files_extension>
+    <date_format_lenient>Y</date_format_lenient>
+    <date_format_locale>de_DE</date_format_locale>
+    <shortFileFieldName/>
+    <pathFieldName/>
+    <hiddenFieldName/>
+    <lastModificationTimeFieldName/>
+    <uriNameFieldName/>
+    <rootUriNameFieldName/>
+    <extensionFieldName/>
+    <sizeFieldName/>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>58</xloc>
-      <yloc>38</yloc>
+      <xloc>185</xloc>
+      <yloc>36</yloc>
       <draw>Y</draw>
       </GUI>
     </step>

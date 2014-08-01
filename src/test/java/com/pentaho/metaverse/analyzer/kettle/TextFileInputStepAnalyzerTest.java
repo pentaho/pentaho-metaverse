@@ -28,7 +28,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
@@ -53,6 +59,9 @@ public class TextFileInputStepAnalyzerTest {
 
   @Mock
   private TransMeta mockTransMeta;
+
+  @Mock
+  private RowMetaInterface mockRowMetaInterface;
 
   @Mock
   private IMetaverseBuilder mockBuilder;
@@ -119,6 +128,17 @@ public class TextFileInputStepAnalyzerTest {
     TextFileInputField[] inputFields = new TextFileInputField[]{ field1, field2 };
 
     when( mockTextFileInputMeta.getInputFields() ).thenReturn( inputFields );
+    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "id", "name" } );
+    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(new Answer<ValueMetaInterface>(){
+
+      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        if(args[0] == "id") return new ValueMetaString("id");
+        if(args[0] == "name") return new ValueMetaString("name");
+        return null;
+      }
+    });
 
     IMetaverseNode result = textFileInputStepAnalyzer.analyze( mockTextFileInputMeta );
     assertNotNull( result );

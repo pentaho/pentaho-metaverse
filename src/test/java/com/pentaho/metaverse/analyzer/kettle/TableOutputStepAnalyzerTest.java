@@ -33,10 +33,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -143,7 +148,16 @@ public class TableOutputStepAnalyzerTest {
     when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
     when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "test1", "test2" } );
+    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(new Answer<ValueMetaInterface>(){
 
-    assertNotNull( analyzer.analyze( mockTableOutputMeta ) );
+      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        if(args[0] == "test1") return new ValueMetaString("test1");
+        if(args[0] == "test2") return new ValueMetaString("test2");
+        return null;
+      }
+    });
+
+        assertNotNull( analyzer.analyze( mockTableOutputMeta ) );
   }
 }
