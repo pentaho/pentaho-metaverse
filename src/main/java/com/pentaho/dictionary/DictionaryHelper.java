@@ -31,22 +31,24 @@ public class DictionaryHelper {
 
   private static Map<Class, IIdGenerator> classIdGeneratorMap = new HashMap<Class, IIdGenerator>();
   private static List<Class> classList = new ArrayList<Class>();
+  private static Map<String, String> categoryColorMap = new HashMap<String, String>();
+  private static Map<String, String> typeCategoryMap = new HashMap<String, String>();
 
   // TODO This is temporary
   static {
-    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
       {
         add( TransMeta.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS ) );
 
-    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
       {
         add( JobMeta.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_JOB ) );
 
-    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
       {
         add( StepMeta.class );
         add( BaseStepMeta.class );
@@ -55,13 +57,13 @@ public class DictionaryHelper {
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_STEP ) );
 
-    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
       {
         add( JobEntryInterface.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_JOB_ENTRY ) );
 
-    DictionaryHelper.addIdGenerator( null, new HashSet<Class>() {
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
       {
         add( DatabaseMeta.class );
       }
@@ -199,20 +201,77 @@ public class DictionaryHelper {
 
     registerEntityType( DictionaryConst.NODE_TYPE_DATASOURCE );
     registerEntityType( DictionaryConst.NODE_TYPE_DATA_TABLE );
+    registerEntityType( DictionaryConst.NODE_TYPE_DATA_COLUMN );
     registerEntityType( DictionaryConst.NODE_TYPE_JOB );
     registerEntityType( DictionaryConst.NODE_TYPE_JOB_ENTRY );
     registerEntityType( DictionaryConst.NODE_TYPE_LOGICAL_MODEL );
     registerEntityType( DictionaryConst.NODE_TYPE_TRANS );
     registerEntityType( DictionaryConst.NODE_TYPE_TRANS_STEP );
+    registerEntityType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
     registerEntityType( DictionaryConst.NODE_TYPE_USER_CONTENT );
+
+    categoryColorMap.put( DictionaryConst.CATEGORY_ABSTRACT, DictionaryConst.COLOR_ABSTRACT );
+    categoryColorMap.put( DictionaryConst.CATEGORY_DATASOURCE, DictionaryConst.COLOR_DATASOURCE );
+    categoryColorMap.put( DictionaryConst.CATEGORY_DOCUMENT, DictionaryConst.COLOR_DOCUMENT );
+    categoryColorMap.put( DictionaryConst.CATEGORY_DOCUMENT_ELEMENT, DictionaryConst.COLOR_DOCUMENT_ELEMENT );
+    categoryColorMap.put( DictionaryConst.CATEGORY_FIELD, DictionaryConst.COLOR_FIELD );
+    categoryColorMap.put( DictionaryConst.CATEGORY_FIELD_COLLECTION, DictionaryConst.COLOR_FIELD_COLLECTION );
+    categoryColorMap.put( DictionaryConst.CATEGORY_REPOSITORY, DictionaryConst.COLOR_REPOSITORY );
+    categoryColorMap.put( DictionaryConst.CATEGORY_OTHER, DictionaryConst.COLOR_OTHER );
+
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_DATASOURCE, DictionaryConst.CATEGORY_DATASOURCE );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_DATA_TABLE, DictionaryConst.CATEGORY_FIELD_COLLECTION );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_DATA_COLUMN, DictionaryConst.CATEGORY_FIELD );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_JOB, DictionaryConst.CATEGORY_DOCUMENT );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_JOB_ENTRY, DictionaryConst.CATEGORY_DOCUMENT_ELEMENT );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_TRANS, DictionaryConst.CATEGORY_DOCUMENT );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_TRANS_STEP, DictionaryConst.CATEGORY_DOCUMENT_ELEMENT );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_TRANS_FIELD, DictionaryConst.CATEGORY_FIELD );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_ENTITY, DictionaryConst.CATEGORY_ABSTRACT );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_FILE, DictionaryConst.CATEGORY_FIELD_COLLECTION );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_FILE_FIELD, DictionaryConst.CATEGORY_FIELD );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_LOCATOR, DictionaryConst.CATEGORY_REPOSITORY );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_ROOT_ENTITY, DictionaryConst.CATEGORY_ABSTRACT );
+    typeCategoryMap.put( DictionaryConst.NODE_TYPE_WEBSERVICE, DictionaryConst.CATEGORY_DATASOURCE );
+
   }
 
   /**
-   * Adds an Id generator to the dictionary. Id generators may be looked up using a
+   * Returns the category id for a given node type. If the node type is not of a known category,
+   * a category of "other" will be returned
+   * 
+   * @param type The type for which the category is needed
+   * @return The category
+   */
+  public static String getCategoryForType( String type ) {
+    String category = typeCategoryMap.get( type );
+    if ( category == null ) {
+      category = DictionaryConst.CATEGORY_OTHER;
+    }
+    return category;
+  }
+
+  /**
+   * Returns the suggested color for a given category. If the category does not have a known color,
+   * a the color for the "other" category will be returned.
+   * 
+   * @param category The category for which the color is needed
+   * @return The color
+   */
+  public static String getColorForCategory( String category ) {
+    String color = categoryColorMap.get( category );
+    if ( color == null ) {
+      color = categoryColorMap.get( DictionaryConst.CATEGORY_OTHER );
+    }
+    return color;
+  }
+
+  /**
+   * Adds an Id generator to the dictionary. Id generators may be looked up using a 
    * string token (e.g. "ktr"), a Class (e.g. Trans) or an object (instance of a Trans).
    *
-   * @param types       The string tokens that can be used to access this id generator. Can be null.
-   * @param classes     The Classes that can be used to access this id generator. Can be null.
+   * @param types The string tokens that can be used to access this id generator. Can be null.
+   * @param classes The Classes that can be used to access this id generator. Can be null.
    * @param idGenerator The id generator
    */
   public static void addIdGenerator( Set<String> types, Set<Class> classes, IIdGenerator idGenerator ) {
@@ -233,7 +292,7 @@ public class DictionaryHelper {
   /**
    * Returns an id generator based on a string token
    *
-   * @param type   The string to use for the lookup
+   * @param type The string to use for the lookup
    * @param tokens The tokens to use in the id generation
    * @return The id. This will be null if the id generator was not found.
    */
@@ -248,7 +307,7 @@ public class DictionaryHelper {
   /**
    * Returns an id generator based on a Class
    *
-   * @param clazz  The Class to use for the lookup
+   * @param clazz The Class to use for the lookup
    * @param tokens The tokens to use in the id generation
    * @return The id. This will be null if the id generator was not found.
    */
@@ -265,7 +324,7 @@ public class DictionaryHelper {
    * that has an id generator, that id generator will be returned. The first match will be
    * returned, not necessarily the best or closest match.
    *
-   * @param obj    The Object to use for the lookup
+   * @param obj The Object to use for the lookup
    * @param tokens The tokens to use in the id generation
    * @return The id. This will be null if the id generator was not found.
    */
@@ -282,9 +341,9 @@ public class DictionaryHelper {
   /**
    * Creates an in-memory metaverse node from the provided parameters
    *
-   * @param id         The id of the node. An IIdGenerator should be used to create this.
-   * @param name       The name of the node
-   * @param type       The type of the node
+   * @param id The id of the node. An IIdGenerator should be used to create this.
+   * @param name The name of the node
+   * @param type The type of the node
    * @param properties The properties of the node
    * @return The metaverse node
    */
@@ -308,11 +367,11 @@ public class DictionaryHelper {
    * Creates a child node of a metaverse node and populates it with the provided parameters.
    * The relationship should be one of DictionaryConst.LINK_*
    *
-   * @param id           The id of the node. An IIdGenerator should be used to create this.
-   * @param name         The name of the node
-   * @param type         The type of the node
-   * @param properties   The properties of the node
-   * @param parent       The parent node
+   * @param id The id of the node. An IIdGenerator should be used to create this.
+   * @param name The name of the node
+   * @param type The type of the node
+   * @param properties The properties of the node
+   * @param parent The parent node
    * @param relationship The type of parent-child relationship
    * @return The metaverse node
    */

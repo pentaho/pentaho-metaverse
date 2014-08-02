@@ -36,6 +36,10 @@ import com.tinkerpop.blueprints.Graph;
  */
 public interface IMetaverseReader {
 
+  String FORMAT_XML = "xml";
+  String FORMAT_JSON = "json";
+  String FORMAT_CSV = "csv";
+
   /**
    * Retrieves the node having the specified ID.
    * 
@@ -72,7 +76,24 @@ public interface IMetaverseReader {
    * 
    * @return the string representation of the metaverse model
    */
-  String export();
+  String exportToXml( );
+
+  /**
+   * Export the metaverse to a String in the given format.
+   * 
+   * @param format The export format. One of "JSON", "GRAPHML", "CSV"
+   * @return the string representation of the metaverse model
+   */
+  String exportFormat( String format );
+
+  /**
+   * Export the metaverse to a String.
+   * 
+   * @param resultTypes The export format. One of "JSON", "GRAPHML", "CSV"
+   * @param out The output stream to export to
+   * @throws IOException If the output stream cannot be written to
+   * /
+  public void exportToStream( String format, OutputStream out ) throws IOException;
 
   /**
    * Searches the metaverse for nodes of the specified result types, by traversing the graph model from the specified
@@ -92,5 +113,13 @@ public interface IMetaverseReader {
    * @return A graph of the upstream and downstream nodes that are connected
    */
   Graph getGraph( String id );
+
+  /**
+   * Returns a list of nodes that match a given property value
+   * @param property The name of the property
+   * @param value The value of the property
+   * @return A list of matching nodes
+   */
+  public List<IMetaverseNode> findNodes( String property, String value );
 
 }

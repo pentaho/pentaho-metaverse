@@ -3,6 +3,7 @@ package com.pentaho.metaverse.graph;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,6 +39,10 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
   private static final long serialVersionUID = -3813738340722424284L;
   private static final Log LOGGER = LogFactory.getLog( BlueprintsGraphMetaverseReader.class );
 
+  private static final String MESSAGE_PREFIX_NODETYPE = "USER.nodetype.";
+  private static final String MESSAGE_PREFIX_LINKTYPE = "USER.linktype.";
+  private static final String MESSAGE_PREFIX_CATEGORY = "USER.category.";
+
   private Graph graph;
 
   /**
@@ -62,8 +67,24 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
     if ( vertex == null ) {
       return null;
     }
+    enhanceVertex( vertex );
     MetaverseNode node = new MetaverseNode( vertex );
     return node;
+  }
+
+  @Override
+  public List<IMetaverseNode> findNodes( String property, String value ) {
+    Iterable<Vertex> vertices = getGraph().getVertices( property, value );
+    if ( vertices == null ) {
+      return null;
+    }
+    List<IMetaverseNode> result = new ArrayList<IMetaverseNode>();
+    Iterator<Vertex> verticesIt = vertices.iterator();
+    while ( verticesIt.hasNext() ) {
+      MetaverseNode node = new MetaverseNode( verticesIt.next() );
+      result.add( node );
+    }
+    return result;
   }
 
   @Override
@@ -84,7 +105,12 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
         if ( rightNodeID.equals( (String) edge.getVertex( opDirection ).getId() ) ) {
           vertex2 = edge.getVertex( opDirection );
           IMetaverseNode node2 = new MetaverseNode( vertex2 );
-          link.setLabel( edge.getLabel() );
+          String label = edge.getLabel();
+          link.setLabel( label );
+          String localized = Messages.getString( MESSAGE_PREFIX_LINKTYPE + label );
+          if ( !localized.startsWith( "!" ) ) {
+            link.setProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localized );
+          }
           if ( direction == Direction.OUT ) {
             link.setFromNode( node1 );
             link.setToNode( node2 );
@@ -101,24 +127,51 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
 
   @Override
   public Graph getMetaverse() {
-    return getGraph();
+    Graph graph = getGraph();
+    graph = enhanceGraph( graph );
+    return graph;
   }
 
   @Override
-  public String export() {
-    Graph graph = getGraph();
-    // convert the graph to an export format, GraphML for now
+  public String exportToXml() {
+    return exportFormat( FORMAT_XML );
+  }
 
+  @Override
+  public String exportFormat( String format ) {
     OutputStream out = new ByteArrayOutputStream();
     try {
-      GraphMLWriter writer = new GraphMLWriter();
-      writer.outputGraph( graph, out );
-      out.close();
-      return out.toString();
+      exportToStream( format, out );
     } catch ( IOException e ) {
       error( Messages.getString( "ERROR.Graph.Export" ), e );
+    } finally {
+      try {
+        out.close();
+      } catch ( IOException e ) {
+        error( Messages.getString( "ERROR.Graph.Export" ), e );
+      }
     }
-    return null;
+    return out.toString();
+  }
+
+  public void exportToStream( String format, OutputStream out ) throws IOException {
+    if ( format == null ) {
+      // default to graphml
+      format = FORMAT_XML;
+    }
+    Graph graph = getGraph();
+    graph = enhanceGraph( graph );
+    // convert the graph to an export format, GraphML for now
+    if ( format.equalsIgnoreCase( FORMAT_XML ) ) {
+      GraphMLWriter writer = new GraphMLWriter();
+      writer.outputGraph( graph, out );
+    } else if ( format.equalsIgnoreCase( FORMAT_JSON ) ) {
+      GraphSONWriter writer = new GraphSONWriter();
+      writer.outputGraph( graph, out );
+    } else if ( format.equalsIgnoreCase( FORMAT_CSV ) ) {
+      GraphCsvWriter writer = new GraphCsvWriter();
+      writer.outputGraph( graph, out );
+    }
   }
 
   @Override
@@ -145,6 +198,7 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
 
       }
     }
+    g = enhanceGraph( g );
     return g;
   }
 
@@ -228,6 +282,7 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
     Vertex clone = GraphUtil.cloneVertexIntoGraph( root, g );
     traceVertices( root, clone, Direction.IN, getGraph(), g, null );
     traceVertices( root, clone, Direction.OUT, getGraph(), g, null );
+    g = enhanceGraph( g );
     return g;
   }
 
@@ -265,6 +320,57 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
       if ( direction == Direction.OUT ) {
         traceVertices( nextVertex, target, Direction.IN, graph1, graph2, DictionaryHelper.STRUCTURAL_LINK_TYPES );
       }
+    }
+  }
+
+  /**
+   * Adds localized types and categories, add node color information
+   * @param g The graph to enhance
+   */
+  protected Graph enhanceGraph( Graph g ) {
+
+    // TODO should we clone the graph?
+    Iterator<Vertex> vertices = g.getVertices().iterator();
+    // enhance the vertixes
+    while ( vertices.hasNext() ) {
+      Vertex vertex = vertices.next();
+      enhanceVertex( vertex );
+    }
+    Iterator<Edge> edges = g.getEdges().iterator();
+    // enhance the vertixes
+    while ( edges.hasNext() ) {
+      Edge edge = edges.next();
+      enhanceEdge( edge );
+    }
+    return g;
+  }
+
+  protected void enhanceEdge( Edge edge ) {
+    String type = edge.getLabel();
+    //localize the node type
+    String localizedType = Messages.getString( MESSAGE_PREFIX_LINKTYPE + type );
+    if ( !localizedType.startsWith( "!" ) ) {
+      edge.setProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localizedType );
+    }
+  }
+
+  protected void enhanceVertex( Vertex vertex ) {
+    String type = vertex.getProperty( DictionaryConst.PROPERTY_TYPE );
+    //localize the node type
+    String localizedType = Messages.getString( MESSAGE_PREFIX_NODETYPE + type );
+    if ( !localizedType.startsWith( "!" ) ) {
+      vertex.setProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localizedType );
+    }
+    // get the vertex category and set it
+    String category = DictionaryHelper.getCategoryForType( type );
+    vertex.setProperty( DictionaryConst.PROPERTY_CATEGORY, category );
+    // get the vertex category color and set it
+    String color = DictionaryHelper.getColorForCategory( category );
+    vertex.setProperty( DictionaryConst.PROPERTY_COLOR, color );
+    //localize the category 
+    String localizedCat = Messages.getString( MESSAGE_PREFIX_CATEGORY + category );
+    if ( !localizedCat.startsWith( "!" ) ) {
+      vertex.setProperty( DictionaryConst.PROPERTY_CATEGORY_LOCALIZED, localizedCat );
     }
   }
 

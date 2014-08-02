@@ -1,6 +1,9 @@
-package com.pentaho.metaverse.graph;
+package com.pentaho.metaverse.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -9,43 +12,49 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.graph.BlueprintsGraphMetaverseReader;
+import com.pentaho.metaverse.graph.GraphMLWriter;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
-public class BlueprintsGraphMetaverseReaderTest {
+public class MetaverseServiceNonMockTest {
 
   private Graph graph;
 
+  private MetaverseService metaverseService;
+
+  @Mock
+  private IDocumentLocatorProvider mockProvider;
+
   @Before
-  public void init() {
+  public void setUp() {
     graph = new TinkerGraph();
     loadGraph( graph );
+    IMetaverseReader reader = new BlueprintsGraphMetaverseReader( graph );
+    metaverseService = new MetaverseService( reader, mockProvider );
+    metaverseService.setDelay( 0 );
   }
 
   @Test
   public void testGraphMetaverseReader() throws Exception {
 
-    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
-
-    Graph graph = metaverseReader.getMetaverse();
+    Graph graph = metaverseService.getMetaverse();
     assertNotNull( "Graph is null", graph );
 
-    GraphMLWriter writerXml = new GraphMLWriter();
-    writerXml.outputGraph( graph, new FileOutputStream( "testGraphMetaverseReader.graphml" ) );
-
-    GraphSONWriter writerJson = new GraphSONWriter();
-    writerJson.outputGraph( graph, new FileOutputStream( "testGraphMetaverseReader.graphjson" ) );
+    GraphMLWriter writer = new GraphMLWriter();
+    writer.outputGraph( graph, new FileOutputStream( "testGraphMetaverseReader.graphml" ) );
 
     assertEquals( "Vertex count is wrong", 30, countVertices( graph ) );
     assertEquals( "Edge count is wrong", 42, countEdges( graph ) );
@@ -54,20 +63,7 @@ public class BlueprintsGraphMetaverseReaderTest {
   @Test
   public void testExportXml() throws Exception {
 
-    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
-
-    String export = metaverseReader.exportToXml();
-    assertNotNull( "Export is null", export );
-    assertTrue( "Export content is wrong", export.indexOf( "<?xml" ) == 0 );
-    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "color" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( DictionaryConst.COLOR_DOCUMENT ) != -1 );
-
-    export = metaverseReader.exportFormat( IMetaverseReader.FORMAT_XML );
+    String export = metaverseService.exportToXml();
     assertNotNull( "Export is null", export );
     assertTrue( "Export content is wrong", export.indexOf( "<?xml" ) == 0 );
     assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
@@ -76,14 +72,29 @@ public class BlueprintsGraphMetaverseReaderTest {
     assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
     assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
 
+    export = metaverseService.exportFormat( "XML" );
+    assertNotNull( "Export is null", export );
+    assertTrue( "Export content is wrong", export.indexOf( "<?xml" ) == 0 );
+    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
+
+    export = metaverseService.exportFormat( "xml" );
+    assertNotNull( "Export is null", export );
+    assertTrue( "Export content is wrong", export.indexOf( "<?xml" ) == 0 );
+    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
   }
 
   @Test
   public void testExportJson() throws Exception {
 
-    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
-
-    String export = metaverseReader.exportFormat( IMetaverseReader.FORMAT_JSON );
+    String export = metaverseService.exportFormat( "JSON" );
     assertNotNull( "Export is null", export );
     assertTrue( "Export content is wrong", export.indexOf( "{" ) == 0 );
     assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
@@ -91,16 +102,55 @@ public class BlueprintsGraphMetaverseReaderTest {
     assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
     assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
     assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( DictionaryConst.COLOR_DOCUMENT ) != -1 );
 
+    export = metaverseService.exportFormat( "json" );
+    assertNotNull( "Export is null", export );
+    assertTrue( "Export content is wrong", export.indexOf( "{" ) == 0 );
+    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
+  }
+
+  @Test
+  public void testExportStream() throws Exception {
+
+/*
+    OutputStream out = new ByteArrayOutputStream();
+    try {
+      metaverseService.exportToStream( "JSON", out );
+    } catch ( IOException e ) {
+    } finally {
+      try {
+        out.close();
+      } catch ( IOException e ) {
+      }
+    }
+    String export = out.toString();
+
+    assertNotNull( "Export is null", export );
+    assertTrue( "Export content is wrong", export.indexOf( "{" ) == 0 );
+    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
+*/
+    String export = metaverseService.exportFormat( "json" );
+    assertNotNull( "Export is null", export );
+    assertTrue( "Export content is wrong", export.indexOf( "{" ) == 0 );
+    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
   }
 
   @Test
   public void testExportCsv() throws Exception {
 
-    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
-
-    String export = metaverseReader.exportFormat( IMetaverseReader.FORMAT_CSV );
+    String export = metaverseService.exportFormat( "CSV" );
     assertNotNull( "Export is null", export );
     assertTrue( "Export content is wrong", export.indexOf( "\"SourceId\",\"SourceVirtual\"" ) == 0 );
     assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
@@ -109,41 +159,36 @@ public class BlueprintsGraphMetaverseReaderTest {
     assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
     assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
 
+    export = metaverseService.exportFormat( "csv" );
+    assertNotNull( "Export is null", export );
+    assertTrue( "Export content is wrong", export.indexOf( "\"SourceId\",\"SourceVirtual\"" ) == 0 );
+    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
+    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
   }
 
   @Test
   public void testFindNode() throws Exception {
 
-    IMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
-
-    IMetaverseNode node = metaverseReader.findNode( "data.txt" );
+    IMetaverseNode node = metaverseService.findNode( "data.txt" );
 
     assertNotNull( "Node is null", node );
     assertEquals( "Id is wrong", "data.txt", node.getStringID() );
     assertEquals( "Type is wrong", DictionaryConst.NODE_TYPE_FILE, node.getType() );
     assertEquals( "Name is wrong", "Text file: data.txt", node.getName() );
-    assertNull( node.getProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED ) );
 
-    node = metaverseReader.findNode( "bogus" );
+    node = metaverseService.findNode( "bogus" );
 
     assertNull( "Node is not null", node );
-
-    node = metaverseReader.findNode( "trans1.ktr" );
-
-    assertNotNull( "Node is null", node );
-    assertEquals( "Id is wrong", "trans1.ktr", node.getStringID() );
-    assertEquals( "Type is wrong", DictionaryConst.NODE_TYPE_TRANS, node.getType() );
-    assertEquals( "Localized type is wrong", "Transformation", node.getProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED ) );
-    assertEquals( "Localized type is wrong", "Document", node.getProperty( DictionaryConst.PROPERTY_CATEGORY_LOCALIZED ) );
 
   }
 
   @Test
   public void testFindNodes() throws Exception {
 
-    IMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
-
-    List<IMetaverseNode> nodes = metaverseReader.findNodes( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_DATA_COLUMN );
+    List<IMetaverseNode> nodes = metaverseService.findNodes( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_DATA_COLUMN );
     assertNotNull( "Node is null", nodes );
     assertEquals( "Node count is wrong", 7, nodes.size() );
     Set<String> ids = new HashSet<String>();
@@ -158,7 +203,7 @@ public class BlueprintsGraphMetaverseReaderTest {
     assertTrue( "Id is missing", ids.contains( "datasource1.table2.field3" ) );
     assertTrue( "Id is missing", ids.contains( "datasource1.table2.field4" ) );
 
-    nodes = metaverseReader.findNodes( DictionaryConst.PROPERTY_NAME, "Transformation: trans1.ktr" );
+    nodes = metaverseService.findNodes( DictionaryConst.PROPERTY_NAME, "Transformation: trans1.ktr" );
     assertNotNull( "Node is null", nodes );
     assertEquals( "Node count is wrong", 1, nodes.size() );
     assertEquals( "Id is missing", "Transformation: trans1.ktr", nodes.get( 0 ).getProperty( DictionaryConst.PROPERTY_NAME ) );
@@ -167,69 +212,63 @@ public class BlueprintsGraphMetaverseReaderTest {
 
   @Test
   public void testGetGraph() throws Exception {
-    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
-    Graph g = metaverseReader.getGraph( "datasource1.table1.field1" );
+
+    Graph g = metaverseService.getGraph( "datasource1.table1.field1" );
     assertNotNull( "Graph is null", g );
 
     GraphMLWriter writer = new GraphMLWriter();
     writer.outputGraph( graph, new FileOutputStream( "testGetGraph.graphml" ) );
 
-    g = metaverseReader.getGraph( "bogus" );
+    g = metaverseService.getGraph( "bogus" );
     assertNull( "Node is not null", g );
 
   }
 
   @Test
   public void testFindLink() throws Exception {
-    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
 
-    IMetaverseLink link = metaverseReader.findLink( "datasource1.table1.field1", "populates", "trans2.ktr;field1", Direction.OUT );
+    IMetaverseLink link = metaverseService.findLink( "datasource1.table1.field1", "populates", "trans2.ktr;field1", Direction.OUT );
     assertNotNull( "Link is null", link );
     assertEquals( "Label is wrong", "populates", link.getLabel() );
     assertEquals( "Id is wrong", "datasource1.table1.field1", link.getFromNode().getStringID() );
     assertEquals( "Id is wrong", "trans2.ktr;field1", link.getToNode().getStringID() );
 
-    link = metaverseReader.findLink( "bogus", "populates", "trans2.ktr;field1", Direction.OUT );
+    link = metaverseService.findLink( "bogus", "populates", "trans2.ktr;field1", Direction.OUT );
     assertNull( "Link is not null", link );
 
-    link = metaverseReader.findLink( "datasource1.table1.field1", "bogus", "trans2.ktr;field1", Direction.OUT );
+    link = metaverseService.findLink( "datasource1.table1.field1", "bogus", "trans2.ktr;field1", Direction.OUT );
     assertNull( "Link is not null", link );
 
-    link = metaverseReader.findLink( "datasource1.table1.field1", "populates", "bogus", Direction.OUT );
+    link = metaverseService.findLink( "datasource1.table1.field1", "populates", "bogus", Direction.OUT );
     assertNull( "Link is not null", link );
 
-    link = metaverseReader.findLink( "datasource1.table1.field1", "populates", "trans2.ktr;field1", Direction.IN );
+    link = metaverseService.findLink( "datasource1.table1.field1", "populates", "trans2.ktr;field1", Direction.IN );
     assertNull( "Link is not null", link );
 
-    link = metaverseReader.findLink( "job2.kjb", "populates", "trans2.ktr;field1", Direction.OUT );
+    link = metaverseService.findLink( "job2.kjb", "populates", "trans2.ktr;field1", Direction.OUT );
     assertNull( "Link is not null", link );
 
-    link = metaverseReader.findLink( "trans2.ktr;field1", "populates", "datasource1.table1.field1", Direction.IN );
+    link = metaverseService.findLink( "trans2.ktr;field1", "populates", "datasource1.table1.field1", Direction.IN );
     assertNotNull( "Link is null", link );
     assertEquals( "Label is wrong", "populates", link.getLabel() );
     assertEquals( "Id is wrong", "datasource1.table1.field1", link.getFromNode().getStringID() );
-    assertEquals( "Type is wrong", "trans2.ktr;field1", link.getToNode().getStringID() );
-    assertEquals( "Localized type", "Populates", link.getProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED ) );
+    assertEquals( "Id is wrong", "trans2.ktr;field1", link.getToNode().getStringID() );
 
   }
 
   @Test
   public void testSearch() throws Exception {
-    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
 
     // search for transformations connected to datasource1.table1.field1
     List<String> types = new ArrayList<String>();
     types.add( DictionaryConst.NODE_TYPE_TRANS );
     List<String> ids = new ArrayList<String>();
     ids.add( "datasource1.table1.field1" );
-    Graph graph = metaverseReader.search( types, ids, true );
+    Graph graph = metaverseService.search( types, ids, true );
     assertNotNull( "Node is null", graph );
 
     GraphMLWriter writer = new GraphMLWriter();
     writer.outputGraph( graph, new FileOutputStream( "testSearch1.graphml" ) );
-
-    GraphSONWriter writerJson = new GraphSONWriter();
-    writerJson.outputGraph( graph, new FileOutputStream( "testSearch1.json" ) );
 
     assertEquals( "Vertex count is wrong", 7, countVertices( graph ) );
     assertEquals( "Edge count is wrong", 6, countEdges( graph ) );
@@ -240,11 +279,10 @@ public class BlueprintsGraphMetaverseReaderTest {
     types.add( DictionaryConst.NODE_TYPE_DATA_TABLE );
     ids = new ArrayList<String>();
     ids.add( "datasource1.table1.field1" );
-    graph = metaverseReader.search( types, ids, true );
+    graph = metaverseService.search( types, ids, true );
     assertNotNull( "Node is null", graph );
 
     writer.outputGraph( graph, new FileOutputStream( "testSearch2.graphml" ) );
-    writerJson.outputGraph( graph, new FileOutputStream( "testSearch2.json" ) );
 
     assertEquals( "Vertex count is wrong", 8, countVertices( graph ) );
     assertEquals( "Edge count is wrong", 7, countEdges( graph ) );
@@ -253,11 +291,10 @@ public class BlueprintsGraphMetaverseReaderTest {
     types = new ArrayList<String>();
     ids = new ArrayList<String>();
     ids.add( "datasource1.table2.field1" );
-    graph = metaverseReader.search( types, ids, false );
+    graph = metaverseService.search( types, ids, false );
     assertNotNull( "Node is null", graph );
 
     writer.outputGraph( graph, new FileOutputStream( "testSearch3.graphml" ) );
-    writerJson.outputGraph( graph, new FileOutputStream( "testSearch3.json" ) );
 
     assertEquals( "Vertex count is wrong", 16, countVertices( graph ) );
     assertEquals( "Edge count is wrong", 21, countEdges( graph ) );

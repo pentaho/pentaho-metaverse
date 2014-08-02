@@ -22,23 +22,9 @@
 
 package com.pentaho.metaverse.testutils;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.impl.MetaverseNode;
-import com.pentaho.metaverse.impl.MetaverseObjectFactory;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
-import com.pentaho.dictionary.MetaverseLink;
-import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.impl.MetaverseDocument;
+import com.pentaho.metaverse.impl.MetaverseObjectFactory;
 
 /**
  * @author mburgess

@@ -1,6 +1,7 @@
 package com.pentaho.dictionary;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -108,6 +109,18 @@ public class DictionaryHelperTest {
 
     node1.removeLink( node1.getLinks().get( 0 ) );
     assertEquals( "Links count is wrong", 0, node1.getLinks().size() );
+  }
+
+  @Test
+  public void testLinkTypes() {
+    assertTrue( "Link type is wrong", DictionaryHelper.isStructuralLinkType( DictionaryConst.LINK_CONTAINS ) );
+    assertFalse( "Link type is wrong", DictionaryHelper.isDataFlowLinkType( DictionaryConst.LINK_CONTAINS ) );
+  }
+
+  @Test
+  public void testCategoryColors() {
+    assertEquals( "Color is wrong", DictionaryConst.COLOR_DATASOURCE, DictionaryHelper.getColorForCategory( DictionaryConst.CATEGORY_DATASOURCE ) );
+    assertEquals( "Color is wrong", DictionaryConst.COLOR_OTHER, DictionaryHelper.getColorForCategory( "bogus" ) );
   }
 
   @Test

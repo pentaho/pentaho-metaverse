@@ -3,7 +3,7 @@ package com.pentaho.dictionary;
 /**
  * Constants used in the graph building and reading.
  * All data flow links must be left to right (source to destination).
- * All structural links must be high to low (container to containee).
+ * All structural links must be high to low (container to containee). 
  *
  * @author jdixon
  */
@@ -15,10 +15,20 @@ public class DictionaryConst {
   public static final String PROPERTY_TYPE = "type";
 
   /**
+   * Localized type
+   */
+  public static final String PROPERTY_TYPE_LOCALIZED = "typeLocale";
+
+  /**
    * Property key for "category". If the type is NODE_TYPE_TRANS, the category could be
-   * "ETL" etc
+   * "Document" etc
    */
   public static final String PROPERTY_CATEGORY = "category";
+
+  /**
+   * Localized category
+   */
+  public static final String PROPERTY_CATEGORY_LOCALIZED = "categoryLocale";
 
   /**
    * Property key for "id"
@@ -34,6 +44,11 @@ public class DictionaryConst {
    * Property key for "author"
    */
   public static final String PROPERTY_AUTHOR = "author";
+
+  /**
+   * Property key for suggested "color" for a node when a graph is visualized
+   */
+  public static final String PROPERTY_COLOR = "color";
 
   /**
    * Property key for "last modified"
@@ -108,5 +123,23 @@ public class DictionaryConst {
   public static final String NODE_TYPE_ROOT_ENTITY = "Root_Entity";
 
   public static final String NODE_VIRTUAL = "virtual";
+
+  public static final String CATEGORY_ABSTRACT = "abstract";
+  public static final String CATEGORY_DATASOURCE = "datasource";
+  public static final String CATEGORY_DOCUMENT = "document";
+  public static final String CATEGORY_DOCUMENT_ELEMENT = "documentelement";
+  public static final String CATEGORY_FIELD = "field";
+  public static final String CATEGORY_FIELD_COLLECTION = "collection";
+  public static final String CATEGORY_REPOSITORY = "repository";
+  public static final String CATEGORY_OTHER = "other";
+
+  public static final String COLOR_ABSTRACT = "#dddddd";
+  public static final String COLOR_DATASOURCE = "#ff6600";
+  public static final String COLOR_DOCUMENT = "#ccffcc";
+  public static final String COLOR_DOCUMENT_ELEMENT = "#ccffff";
+  public static final String COLOR_FIELD = "#ffcc99";
+  public static final String COLOR_FIELD_COLLECTION = "#ff9900";
+  public static final String COLOR_REPOSITORY = "#66aa44";
+  public static final String COLOR_OTHER = "#ffcccc";
 
 }
