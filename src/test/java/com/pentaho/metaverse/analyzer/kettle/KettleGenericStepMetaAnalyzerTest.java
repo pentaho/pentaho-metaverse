@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import org.junit.After;
@@ -181,6 +182,10 @@ public class KettleGenericStepMetaAnalyzerTest {
     } );
     IMetaverseNode node = analyzer.analyze( mockBaseStepMeta );
     assertNotNull( node );
+  }
 
+  @Test
+  public void testGetSupportedSteps() {
+    assertNull( analyzer.getSupportedSteps() );
   }
 }

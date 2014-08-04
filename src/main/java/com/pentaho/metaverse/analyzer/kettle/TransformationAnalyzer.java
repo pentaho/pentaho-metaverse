@@ -189,6 +189,11 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
     this.stepAnalyzerProvider = stepAnalyzerProvider;
   }
 
+  /**
+   * Retrieves the step analyzer provider. This is used to find step-specific analyzers
+   *
+   * @return the IKettleStepAnalyzer provider instance that provides step-specific analyzers
+   */
   protected IKettleStepAnalyzerProvider getStepAnalyzerProvider() {
     if ( stepAnalyzerProvider != null ) {
       return stepAnalyzerProvider;

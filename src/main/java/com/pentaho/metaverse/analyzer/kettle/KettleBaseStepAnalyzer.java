@@ -144,10 +144,10 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMetaInterface.IsNull" ) );
     }
 
+    // Analyze the database connections
     DatabaseMeta[] dbs = baseStepMeta.getUsedDatabaseConnections();
-
-    if ( dbs != null ) {
-      DatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
+    DatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
+    if ( dbs != null && dbAnalyzer != null ) {
       for ( DatabaseMeta db : dbs ) {
         IMetaverseNode dbNode = dbAnalyzer.analyze( db );
         metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );

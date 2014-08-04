@@ -36,17 +36,20 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.Set;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
@@ -157,6 +160,15 @@ public class TextFileInputStepAnalyzerTest {
     verify( mockBuilder, times( inputFields.length ) )
       .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
 
+  }
+
+  @Test
+  public void testGetSupportedSteps() {
+    TextFileInputStepAnalyzer analyzer = new TextFileInputStepAnalyzer();
+    Set<Class<? extends BaseStepMeta>> types = analyzer.getSupportedSteps();
+    assertNotNull( types );
+    assertEquals( types.size(), 1 );
+    assertTrue( types.contains( TextFileInputMeta.class ) );
   }
 
 }
