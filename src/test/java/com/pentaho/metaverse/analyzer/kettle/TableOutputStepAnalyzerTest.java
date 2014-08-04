@@ -43,6 +43,7 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
@@ -50,6 +51,8 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+
+import java.util.Set;
 
 /**
  * @author mburgess
@@ -148,16 +151,27 @@ public class TableOutputStepAnalyzerTest {
     when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
     when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "test1", "test2" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(new Answer<ValueMetaInterface>(){
+    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
       @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
-        if(args[0] == "test1") return new ValueMetaString("test1");
-        if(args[0] == "test2") return new ValueMetaString("test2");
+        if ( args[0] == "test1" )
+          return new ValueMetaString( "test1" );
+        if ( args[0] == "test2" )
+          return new ValueMetaString( "test2" );
         return null;
       }
-    });
+    } );
 
-        assertNotNull( analyzer.analyze( mockTableOutputMeta ) );
+    assertNotNull( analyzer.analyze( mockTableOutputMeta ) );
+  }
+
+  @Test
+  public void testGetSupportedSteps() {
+    TableOutputStepAnalyzer analyzer = new TableOutputStepAnalyzer();
+    Set<Class<? extends BaseStepMeta>> types = analyzer.getSupportedSteps();
+    assertNotNull( types );
+    assertEquals( types.size(), 1 );
+    assertTrue( types.contains( TableOutputMeta.class ) );
   }
 }
