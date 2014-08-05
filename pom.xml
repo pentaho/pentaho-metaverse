@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <groupId>com.pentaho</groupId>
   <artifactId>pentaho-metaverse-ee</artifactId>
   <packaging>jar</packaging>
@@ -14,7 +14,7 @@
     <!-- recommend only setting this to a specific version upon migration to maintenance -->
     <version>RELEASE</version>
   </parent>
-  
+
   <name>Pentaho Enterprise Edition Project: ${project.artifactId}</name>
   <description>a Pentaho closed source project</description>
   <url>http://www.pentaho.com</url>
@@ -27,7 +27,7 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-  
+
   <developers>
     <developer>
       <name>Rob Fellows</name>
@@ -37,7 +37,7 @@
       </roles>
     </developer>
   </developers>
-  
+
   <properties>
     <platform.plugin.name>metaverse</platform.plugin.name>
     <blueprints-core.version>2.5.0</blueprints-core.version>
@@ -48,11 +48,12 @@
     <spring.version>2.5.6</spring.version>
     <mockito-all.version>1.9.5</mockito-all.version>
     <pentaho-pur-repository.version>
-<!-- 5.1.0.0-752 -->
-TRUNK-SNAPSHOT
-</pentaho-pur-repository.version>
+      <!-- 5.1.0.0-752 -->
+      TRUNK-SNAPSHOT
+    </pentaho-pur-repository.version>
     <jersey.version>1.16</jersey.version>
     <slf4j.version>1.7.7</slf4j.version>
+    <proguard.version>4.9</proguard.version>
   </properties>
 
   <scm>
@@ -63,9 +64,9 @@ TRUNK-SNAPSHOT
   </scm>
 
   <dependencies>
-  
+
     <!-- 'COMPILE' SCOPED DEPS -->
-     <dependency>
+    <dependency>
       <groupId>com.tinkerpop.blueprints</groupId>
       <artifactId>blueprints-core</artifactId>
       <version>${blueprints-core.version}</version>
@@ -85,28 +86,28 @@ TRUNK-SNAPSHOT
       <version>${pentaho-platform-core.version}</version>
       <scope>compile</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>javax.jcr</groupId>
       <artifactId>jcr</artifactId>
       <version>${jcr.version}</version>
       <scope>compile</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring</artifactId>
       <version>${spring.version}</version>
       <scope>compile</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
       <version>${pentaho-platform-repository.version}</version>
       <scope>compile</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pur-repository-plugin</artifactId>
@@ -127,10 +128,11 @@ TRUNK-SNAPSHOT
       <version>${slf4j.version}</version>
     </dependency>
 
+
     <!-- 'RUNTIME' SCOPED DEPS -->
-    
+
     <!-- 'PROVIDED' SCOPED DEPS -->
-    
+
     <!-- 'TEST' SCOPED DEPS -->
     <dependency>
       <groupId>org.mockito</groupId>
@@ -192,7 +194,7 @@ TRUNK-SNAPSHOT
         <executions>
           <execution>
             <id>make-platform-plugin</id>
-            <phase>package</phase>
+            <phase>install</phase>
             <goals>
               <goal>single</goal>
             </goals>
@@ -220,7 +222,15 @@ TRUNK-SNAPSHOT
             <format>html</format>
             <format>xml</format>
           </formats>
-          <check></check>
+          <check>
+            <branchRate>80</branchRate>
+            <lineRate>90</lineRate>
+            <haltOnFailure>false</haltOnFailure>
+            <totalBranchRate>80</totalBranchRate>
+            <totalLineRate>90</totalLineRate>
+            <packageLineRate>90</packageLineRate>
+            <packageBranchRate>80</packageBranchRate>
+          </check>
         </configuration>
       </plugin>
 
@@ -312,5 +322,117 @@ TRUNK-SNAPSHOT
       </snapshots>
     </repository>
   </repositories>
+
+  <profiles>
+    <profile>
+      <id>development</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env</name>
+          <value>dev</value>
+        </property>
+      </activation>
+    </profile>
+    <profile>
+      <id>production</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>env</name>
+          <value>prod</value>
+        </property>
+      </activation>
+      <properties>
+        <!-- set this flag to determine if the proguard obfuscation should run -->
+        <obfuscate>true</obfuscate>
+      </properties>
+
+      <build>
+        <plugins>
+          <!-- Obfuscation -->
+          <plugin>
+            <groupId>com.github.wvengen</groupId>
+            <artifactId>proguard-maven-plugin</artifactId>
+            <version>2.0.5</version>
+            <dependencies>
+              <dependency>
+                <groupId>net.sf.proguard</groupId>
+                <artifactId>proguard-base</artifactId>
+                <version>${proguard.version}</version>
+                <scope>runtime</scope>
+              </dependency>
+            </dependencies>
+            <executions>
+              <execution>
+                <id>obfuscation</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>proguard</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <proguardVersion>${proguard.version}</proguardVersion>
+              <libs>
+                <lib>${java.home}/lib/rt.jar</lib>
+                <lib>${java.home}/lib/jsse.jar</lib>
+                <lib>${java.home}/lib/jce.jar</lib>
+              </libs>
+              <obfuscate>${obfuscate}</obfuscate>
+              <!-- replace the non-obfuscated jar with the obfuscated one -->
+              <injar>${project.build.finalName}.jar</injar>
+              <outjar>${project.build.finalName}.jar</outjar>
+              <includeDependency>true</includeDependency>
+              <exclusions>
+                <exclusion>
+                  <groupId>com.ibm.icu</groupId>
+                  <artifactId>icu4j</artifactId>
+                </exclusion>
+              </exclusions>
+              <addMavenDescriptor>true</addMavenDescriptor>
+              <options>
+                <!-- Standard configuration -->
+                <option>
+                  <![CDATA[
+                    -dontoptimize
+                    -dontshrink
+                    -dontnote
+                    -renamesourcefileattribute SourceFile
+                    -ignorewarnings
+                    -dontskipnonpubliclibraryclassmembers
+                    -keepattributes Exceptions, InnerClasses, *Annotation*, Signature, EnclosingMethod, SourceFile, LineNumberTable
+                    -printseeds
+
+                    -printmapping ${project.build.directory}/${project.artifactId}-${project.version}.map
+
+                    -keepclassmembers enum * {
+                      public static **[] values();
+                      public static ** valueOf(java.lang.String);
+                    }
+
+                    -keepclassmembers class * implements java.io.Serializable {
+                       static final long serialVersionUID;
+                       private void writeObject(java.io.ObjectOutputStream);
+                       private void readObject(java.io.ObjectInputStream);
+                       java.lang.Object writeReplace();
+                       java.lang.Object readResolve();
+                    }
+
+                    -keep !abstract class * implements org.pentaho.platform.api.** { }
+                  ]]>
+                </option>
+
+                <!-- Include any customizations to the obfuscation process -->
+                <option>@src/assembly/proguard.pro</option>
+
+              </options>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+
+    </profile>
+  </profiles>
 
 </project>
