@@ -33,6 +33,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.util.List;
 
@@ -72,6 +73,11 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
    * A reference to the root node created by the analyzer (usually corresponds to the step under analysis)
    */
   protected IMetaverseNode rootNode = null;
+
+  /**
+   * A reference to the database connection analyzer
+   */
+  protected IDatabaseConnectionAnalyzer dbConnectionAnalyzer = null;
 
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
@@ -146,7 +152,7 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
 
     // Analyze the database connections
     DatabaseMeta[] dbs = baseStepMeta.getUsedDatabaseConnections();
-    DatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
+    IDatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
     if ( dbs != null && dbAnalyzer != null ) {
       for ( DatabaseMeta db : dbs ) {
         IMetaverseNode dbNode = dbAnalyzer.analyze( db );
@@ -174,7 +180,6 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
               newFieldNode.setName( outRowMeta.getName() );
               newFieldNode.setType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
               newFieldNode.setProperty( "kettleType", outRowMeta.getTypeDesc() );
-
               metaverseBuilder.addNode( newFieldNode );
 
               // Add link to show that this step created the field
@@ -213,11 +218,18 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
    *
    * @return a database connection Analyzer
    */
-  protected DatabaseConnectionAnalyzer getDatabaseConnectionAnalyzer() {
+  protected IDatabaseConnectionAnalyzer getDatabaseConnectionAnalyzer() {
+    if ( dbConnectionAnalyzer == null ) {
+      dbConnectionAnalyzer = PentahoSystem.get( IDatabaseConnectionAnalyzer.class );
+    }
+    return dbConnectionAnalyzer;
+  }
 
-    DatabaseConnectionAnalyzer analyzer = new DatabaseConnectionAnalyzer();
-    analyzer.setMetaverseBuilder( metaverseBuilder );
-    return analyzer;
+  protected void setDatabaseConnectionAnalyzer( DatabaseConnectionAnalyzer analyzer ) {
+    dbConnectionAnalyzer = analyzer;
+    if ( dbConnectionAnalyzer != null && metaverseBuilder != null ) {
+      dbConnectionAnalyzer.setMetaverseBuilder( metaverseBuilder );
+    }
   }
 
 }
