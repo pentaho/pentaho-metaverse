@@ -54,6 +54,7 @@
     <jersey.version>1.16</jersey.version>
     <slf4j.version>1.7.7</slf4j.version>
     <proguard.version>4.9</proguard.version>
+    <pentaho-jmeter.version>TRUNK-SNAPSHOT</pentaho-jmeter.version>
   </properties>
 
   <scm>
@@ -128,6 +129,18 @@
       <version>${slf4j.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-jmeter</artifactId>
+      <version>${pentaho-jmeter.version}</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.jmeter</groupId>
+          <artifactId>ApacheJMeter_parent</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
     <!-- 'RUNTIME' SCOPED DEPS -->
 
