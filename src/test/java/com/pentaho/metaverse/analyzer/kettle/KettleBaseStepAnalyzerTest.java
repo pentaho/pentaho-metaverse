@@ -120,6 +120,9 @@ public class KettleBaseStepAnalyzerTest {
 
     analyzer.parentStepMeta = parentStepMeta;
     analyzer.parentTransMeta = mockTransMeta;
+
+    when( analyzer.parentTransMeta.getPrevStepFields( analyzer.parentStepMeta ) ).thenReturn( mockPrevFields );
+    when( analyzer.parentTransMeta.getStepFields( analyzer.parentStepMeta ) ).thenReturn( mockStepFields );
   }
 
   /**
@@ -152,6 +155,13 @@ public class KettleBaseStepAnalyzerTest {
 
   @Test
   public void testGetDatabaseConnectionAnalyzer() {
+    // Should be null by default in unit test (i.e. not using PentahoSystem)
+    assertNull( analyzer.getDatabaseConnectionAnalyzer() );
+  }
+
+  @Test
+  public void testGetDatabaseConnectionAnalyzerNotNull() {
+    analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
     assertNotNull( analyzer.getDatabaseConnectionAnalyzer() );
   }
 
@@ -159,13 +169,11 @@ public class KettleBaseStepAnalyzerTest {
   public void testAddDatabaseConnectionNodesNullDatabaseConnectionAnalyzer() {
     KettleBaseStepAnalyzer spyAnalyzer = spy( analyzer );
     when( spyAnalyzer.getDatabaseConnectionAnalyzer() ).thenReturn( null );
-    assertNotNull( analyzer.getDatabaseConnectionAnalyzer() );
+    assertNull( spyAnalyzer.getDatabaseConnectionAnalyzer() );
   }
 
   @Test
   public void testLoadInputAndOutputStreamFields() throws KettleStepException {
-    when( analyzer.parentTransMeta.getPrevStepFields( analyzer.parentStepMeta ) ).thenReturn( mockPrevFields );
-    when( analyzer.parentTransMeta.getStepFields( analyzer.parentStepMeta ) ).thenReturn( mockStepFields );
     analyzer.loadInputAndOutputStreamFields();
     assertNotNull( analyzer.prevFields );
     assertNotNull( analyzer.stepFields );
@@ -221,12 +229,10 @@ public class KettleBaseStepAnalyzerTest {
     } );
     IMetaverseNode node = analyzer.analyze( mockStepMeta );
     assertNotNull( node );
-
   }
 
   @Test
   public void testAddCreatedFieldNodesWithNoFields() throws KettleStepException {
-    when( mockTransMeta.getStepFields( parentStepMeta ) ).thenReturn( mockStepFields );
     when( mockStepFields.getValueMetaList() ).thenReturn( null );
     analyzer.addCreatedFieldNodes();
   }
@@ -242,6 +248,37 @@ public class KettleBaseStepAnalyzerTest {
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( null );
     analyzer.setMetaverseBuilder( mockBuilder );
     analyzer.analyze( mockStepMeta );
+  }
+
+  @Test
+  public void testAnalyzeWithNullParentTransMeta() throws MetaverseAnalyzerException {
+    when( parentStepMeta.getParentTransMeta() ).thenReturn( null );
+    analyzer.analyze( mockStepMeta );
+  }
+
+  @Test
+  public void testAddDatabaseConnectionNodes() throws MetaverseAnalyzerException {
+    DatabaseMeta[] dbs = new DatabaseMeta[] { mockDatabaseMeta };
+    when( mockStepMetaInterface.getUsedDatabaseConnections() ).thenReturn( dbs );
+    when( mockStepMeta.getUsedDatabaseConnections() ).thenReturn( dbs );
+    analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
+    analyzer.baseStepMeta = mockStepMeta;
+    analyzer.addDatabaseConnectionNodes();
+  }
+
+  @Test( expected = MetaverseAnalyzerException.class )
+  public void testAddDatabaseConnectionNodesNullStepMeta() throws MetaverseAnalyzerException {
+    analyzer.addDatabaseConnectionNodes();
+  }
+
+  @Test
+  public void testSetDatabaseConnectionAnalyzer() {
+    analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
+    assertNotNull( analyzer.getDatabaseConnectionAnalyzer() );
+    assertNotNull( analyzer.metaverseBuilder );
+    analyzer.metaverseBuilder = null;
+    analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
+    assertNull( analyzer.metaverseBuilder );
   }
 
   @Test

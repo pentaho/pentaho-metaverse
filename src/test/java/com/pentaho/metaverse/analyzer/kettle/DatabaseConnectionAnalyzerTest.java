@@ -95,16 +95,12 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Test
   public void testSetMetaverseBuilder() {
-
     assertNotNull( dbConnectionAnalyzer.metaverseBuilder );
-
   }
 
   @Test
   public void testSetMetaverseObjectFactory() {
-
     assertNotNull( dbConnectionAnalyzer.metaverseObjectFactory );
-
   }
 
   @Test(expected = MetaverseAnalyzerException.class)
@@ -112,7 +108,12 @@ public class DatabaseConnectionAnalyzerTest {
 
     dbConnectionAnalyzer.setMetaverseBuilder( null );
     dbConnectionAnalyzer.analyze( databaseMeta );
+  }
 
+  @Test(expected = MetaverseAnalyzerException.class)
+  public void testSetMetaverseBuilderNullMetaverseObjectFactory() throws MetaverseAnalyzerException {
+    dbConnectionAnalyzer.metaverseObjectFactory = null;
+    dbConnectionAnalyzer.analyze( databaseMeta );
   }
 
   @Test
