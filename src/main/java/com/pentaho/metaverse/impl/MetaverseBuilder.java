@@ -46,6 +46,8 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
   private static final String ENTITY_NODE_ID = "entity";
 
+  private static final String SEPERATOR = "~";
+
   /**
    * The id for this metaverse instance
    */
@@ -84,6 +86,17 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     // make sure the from and to nodes exist in the graph
     Vertex fromVertex = getVertexForNode( link.getFromNode() );
     Vertex toVertex = getVertexForNode( link.getToNode() );
+    String edgeId;
+
+    // let's see if this link already exists
+    if ( fromVertex != null && toVertex != null ) {
+      edgeId = getEdgeId( fromVertex, link.getLabel(), toVertex );
+      Edge existingEdge = graph.getEdge( edgeId );
+      if ( existingEdge != null ) {
+        // we already have this edge, no need to add it again
+        return this;
+      }
+    }
 
     // add the "from" vertex to the graph if it wasn't found
     if ( fromVertex == null ) {
@@ -103,10 +116,16 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     // update the to vertex properties from the toNode
     copyNodePropertiesToVertex( link.getToNode(), toVertex );
 
-    Edge e = graph.addEdge( null, fromVertex, toVertex, link.getLabel() );
+    edgeId = getEdgeId( fromVertex, link.getLabel(), toVertex );
+
+    Edge e = graph.addEdge( edgeId, fromVertex, toVertex, link.getLabel() );
     e.setProperty( "text", link.getLabel() );
 
     return this;
+  }
+
+  protected String getEdgeId( Vertex fromVertex, String label, Vertex toVertex ) {
+    return fromVertex.getId() + SEPERATOR + label + SEPERATOR + toVertex.getId();
   }
 
   /**
