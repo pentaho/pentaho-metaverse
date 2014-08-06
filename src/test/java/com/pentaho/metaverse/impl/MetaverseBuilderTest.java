@@ -169,6 +169,41 @@ public class MetaverseBuilderTest {
   }
 
   @Test
+  public void testAddLink_existingLink() throws Exception {
+    MetaverseTransientNode node2 = new MetaverseTransientNode();
+    node2.setStringID( "nodeToId" );
+    node2.setName( "to name" );
+    MetaverseLink link = new MetaverseLink( node, "uses", node2 );
+
+    builder.addLink( link );
+
+    Vertex fromResult = graph.getVertex( node.getStringID() );
+    Vertex toResult = graph.getVertex( node2.getStringID() );
+
+    // make sure the edge exits before we try to add it again
+    assertNotNull( graph.getEdge( builder.getEdgeId( fromResult, link.getLabel(), toResult ) ) );
+
+    // make sure we only have 1
+    int count = 0;
+    for ( Edge e : graph.getEdges() ) {
+      count++;
+    }
+    assertEquals( 1, count );
+
+
+    // now lets add it again
+    builder.addLink( link );
+
+    // make sure we still only have one edge
+    count = 0;
+    for ( Edge e : graph.getEdges() ) {
+      count++;
+    }
+    assertEquals( 1, count );
+
+  }
+
+  @Test
   public void testDeleteNode() {
     builder.addNode( node );
 
