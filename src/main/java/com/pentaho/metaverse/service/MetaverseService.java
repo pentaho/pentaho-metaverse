@@ -24,6 +24,7 @@ package com.pentaho.metaverse.service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -31,6 +32,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.pentaho.metaverse.impl.MetaverseCompletionService;
+import org.pentaho.jmeter.annotation.JMeterTest;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -74,18 +77,20 @@ public class MetaverseService implements IMetaverseService {
     this.delay = delay;
   }
 
+  /**
+   * Export the entire metaverse as <a href="http://graphml.graphdrawing.org/">graphml</a>
+   *
+   * @return Response XML (graphml) representing the entire metaverse if successful,
+   * otherwise a Response with an error status
+   */
   @GET
   @Path( "/export" )
   @Produces( { MediaType.APPLICATION_XML } )
+  @JMeterTest( url = "/metaverse/api/service/export", requestType = "GET", statusCode = "200" )
   public Response export() {
     // TODO: figure out how to have the metaverse ready before our first call to the service
     if ( count++ == 0 ) {
       prepareMetaverse();
-      try {
-        Thread.sleep( getDelay() );
-      } catch ( InterruptedException e ) {
-        e.printStackTrace();
-      }
     }
 
     if ( metaverseReader == null ) {
@@ -102,6 +107,13 @@ public class MetaverseService implements IMetaverseService {
           locator.startScan();
         }
       }
+    }
+    try {
+      MetaverseCompletionService.getInstance().waitTillEmpty();
+    } catch ( InterruptedException e ) {
+      e.printStackTrace();
+    } catch ( ExecutionException e ) {
+      e.printStackTrace();
     }
   }
 
