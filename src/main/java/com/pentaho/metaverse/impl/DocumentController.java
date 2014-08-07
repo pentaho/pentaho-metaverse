@@ -24,6 +24,7 @@ package com.pentaho.metaverse.impl;
 
 import com.pentaho.metaverse.api.IDocumentAnalyzerProvider;
 
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
@@ -32,13 +33,13 @@ import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -66,7 +67,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
    */
   private Map<String, HashSet<IDocumentAnalyzer>> analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>();
 
-  private final ExecutorService pool = Executors.newFixedThreadPool( 5 );
+  private static final Logger log = LoggerFactory.getLogger( DocumentController.class );
 
   /**
    * Empty constructor
@@ -182,6 +183,8 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
       for ( IDocumentAnalyzer analyzer : matchingAnalyzers ) {
         fireDocumentEvent( event, analyzer );
       }
+    } else {
+      log.warn( Messages.getString( "WARNING.NoMatchingDocumentAnalyzerFound", event.getDocument().getType() ) );
     }
   }
 
@@ -225,8 +228,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
         try {
           analyzer.analyze( event.getDocument() );
         } catch ( MetaverseAnalyzerException mae ) {
-          // TODO
-          mae.printStackTrace( System.err );
+          log.error( Messages.getString( "ERROR.AnalyzingDocument", event.getDocument().getStringID() ), mae );
         }
       }
     };

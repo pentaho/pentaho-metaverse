@@ -2,8 +2,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"
        default-lazy-init="true">
 
-  <!-- Configure our graph using the GraphFactory and a configuration file -->
-  <bean id="MetaverseGraphImpl" class="com.tinkerpop.blueprints.GraphFactory" factory-method="open">
+  <!-- Configure our graph using the SynchronizedGraphFactory and a configuration file -->
+  <bean id="MetaverseGraphImpl" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open">
     <constructor-arg value="src/it/resources/graph.properties" />
   </bean>
 

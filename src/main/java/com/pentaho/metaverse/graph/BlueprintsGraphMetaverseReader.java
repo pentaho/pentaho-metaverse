@@ -12,11 +12,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.pentaho.metaverse.messages.Messages;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.engine.core.system.PentahoBase;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
@@ -34,10 +33,10 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
  * @author jdixon
  *
  */
-public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMetaverseReader {
+public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   private static final long serialVersionUID = -3813738340722424284L;
-  private static final Log LOGGER = LogFactory.getLog( BlueprintsGraphMetaverseReader.class );
+  private static final Logger LOGGER = LoggerFactory.getLogger( BlueprintsGraphMetaverseReader.class );
 
   private static final String MESSAGE_PREFIX_NODETYPE = "USER.nodetype.";
   private static final String MESSAGE_PREFIX_LINKTYPE = "USER.linktype.";
@@ -143,12 +142,12 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
     try {
       exportToStream( format, out );
     } catch ( IOException e ) {
-      error( Messages.getString( "ERROR.Graph.Export" ), e );
+      LOGGER.error( Messages.getString( "ERROR.Graph.Export" ), e );
     } finally {
       try {
         out.close();
       } catch ( IOException e ) {
-        error( Messages.getString( "ERROR.Graph.Export" ), e );
+        LOGGER.error( Messages.getString( "ERROR.Graph.Export" ), e );
       }
     }
     return out.toString();
@@ -372,9 +371,5 @@ public class BlueprintsGraphMetaverseReader extends PentahoBase implements IMeta
     if ( !localizedCat.startsWith( "!" ) ) {
       vertex.setProperty( DictionaryConst.PROPERTY_CATEGORY_LOCALIZED, localizedCat );
     }
-  }
-
-  @Override public Log getLogger() {
-    return LOGGER;
   }
 }
