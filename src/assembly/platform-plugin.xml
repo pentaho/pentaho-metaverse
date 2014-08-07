@@ -16,6 +16,13 @@
         <include>*.xml</include>
       </includes>
     </fileSet>
+
+    <!-- sample repository files to include for testing... these are temporary -->
+    <fileSet>
+      <outputDirectory>/samples</outputDirectory>
+      <directory>src/it/resources/repo</directory>
+    </fileSet>
+
   </fileSets>
   <dependencySets>
     <dependencySet>

@@ -93,13 +93,13 @@ public class FileSystemLocator extends BaseLocator<File> {
 
     File root = new File( rootFolder );
     if ( !root.exists() ) {
-      log.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.DoesNotExist", rootFolder ) );
+      log.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.DoesNotExist", root.getAbsolutePath() ) );
       //TODO      throw new IndexException(  );
       return;
     }
 
     if ( !root.isDirectory() ) {
-      log.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.NotAFolder", rootFolder ) );
+      log.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.NotAFolder", root.getAbsolutePath() ) );
       //TODO      throw new IndexException(  );
       return;
     }
