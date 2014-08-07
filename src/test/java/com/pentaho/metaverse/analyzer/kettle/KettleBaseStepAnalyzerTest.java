@@ -46,15 +46,15 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Set;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 /**
  * @author mburgess
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith(MockitoJUnitRunner.class)
 public class KettleBaseStepAnalyzerTest {
 
   KettleBaseStepAnalyzer analyzer;
@@ -142,34 +142,38 @@ public class KettleBaseStepAnalyzerTest {
     assertNotNull( analyzer.addSelfNode() );
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testAddSelfNodeWithException() throws MetaverseAnalyzerException {
     analyzer.parentStepMeta = null;
     assertNotNull( analyzer.addSelfNode() );
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void addDatabaseConnectionNodesWithNullStep() throws MetaverseAnalyzerException {
     analyzer.addDatabaseConnectionNodes();
   }
 
   @Test
   public void testGetDatabaseConnectionAnalyzer() {
-    // Should be null by default in unit test (i.e. not using PentahoSystem)
-    assertNull( analyzer.getDatabaseConnectionAnalyzer() );
+    // Should be a default DatabaseConnectionAnalyzer (as we are not using PentahoSystem in unit tests)
+    IDatabaseConnectionAnalyzer dba = analyzer.getDatabaseConnectionAnalyzer();
+    assertNotNull( dba );
+    assertTrue( dba instanceof DatabaseConnectionAnalyzer );
   }
 
   @Test
   public void testGetDatabaseConnectionAnalyzerNotNull() {
-    analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
+    IDatabaseConnectionAnalyzer dba = new DatabaseConnectionAnalyzer();
+    analyzer.setDatabaseConnectionAnalyzer( dba );
     assertNotNull( analyzer.getDatabaseConnectionAnalyzer() );
+    assertEquals( dba, analyzer.getDatabaseConnectionAnalyzer() );
   }
 
   @Test
   public void testAddDatabaseConnectionNodesNullDatabaseConnectionAnalyzer() {
-    KettleBaseStepAnalyzer spyAnalyzer = spy( analyzer );
-    when( spyAnalyzer.getDatabaseConnectionAnalyzer() ).thenReturn( null );
-    assertNull( spyAnalyzer.getDatabaseConnectionAnalyzer() );
+    KettleBaseStepAnalyzer mockAnalyzer = mock( analyzer.getClass() );
+    when( mockAnalyzer.getDatabaseConnectionAnalyzer() ).thenReturn( null );
+    assertNull( mockAnalyzer.getDatabaseConnectionAnalyzer() );
   }
 
   @Test
@@ -189,7 +193,7 @@ public class KettleBaseStepAnalyzerTest {
     assertNull( analyzer.stepFields );
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
     analyzer.analyze( null );
   }
@@ -207,7 +211,7 @@ public class KettleBaseStepAnalyzerTest {
     assertNotNull( analyzer.analyze( mockStepMeta ) );
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
     analyzer.setMetaverseBuilder( null );
     analyzer.analyze( mockStepMeta );
@@ -237,13 +241,13 @@ public class KettleBaseStepAnalyzerTest {
     analyzer.addCreatedFieldNodes();
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testAnalyzeWithNullParentStepMeta() throws MetaverseAnalyzerException {
     when( mockStepMeta.getParentStepMeta() ).thenReturn( null );
     analyzer.analyze( mockStepMeta );
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testAnalyzeWithNullMetaverseObjectFactory() throws MetaverseAnalyzerException {
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( null );
     analyzer.setMetaverseBuilder( mockBuilder );
@@ -266,7 +270,7 @@ public class KettleBaseStepAnalyzerTest {
     analyzer.addDatabaseConnectionNodes();
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testAddDatabaseConnectionNodesNullStepMeta() throws MetaverseAnalyzerException {
     analyzer.addDatabaseConnectionNodes();
   }

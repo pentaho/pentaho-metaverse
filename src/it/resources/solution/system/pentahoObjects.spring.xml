@@ -18,6 +18,7 @@
 
   <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TableOutputStepAnalyzer"/>
   <bean id="TextFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TextFileInputStepAnalyzer"/>
+  <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
 
   <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>

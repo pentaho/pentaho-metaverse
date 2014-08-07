@@ -60,13 +60,14 @@ public class MetaverseBuilderIT {
   private IMetaverseReader reader;
   private IDocumentLocatorProvider documentLocatorProvider;
 
+  private long freeMemAtInit = 0L;
+
   public static String getSolutionPath() {
     return "src/it/resources/solution";
   }
 
   @BeforeClass
   public static void init() {
-
     StandaloneApplicationContext appContext = new StandaloneApplicationContext( getSolutionPath(), "" );
     PentahoSystem.setSystemSettingsService( new PathBasedSystemSettings() );
     ApplicationContext springApplicationContext = getSpringApplicationContext();
@@ -108,7 +109,6 @@ public class MetaverseBuilderIT {
 
   @Before
   public void setup() {
-
     builder = (MetaverseBuilder) PentahoSystem.get( IMetaverseBuilder.class );
     documentLocatorProvider = PentahoSystem.get( IDocumentLocatorProvider.class );
     graph = builder.getGraph();
@@ -118,18 +118,22 @@ public class MetaverseBuilderIT {
 
   @Test
   public void testBuildingAndReading() throws Exception {
+
     locators = documentLocatorProvider.getDocumentLocators();
 
     MetaverseCompletionService mcs = MetaverseCompletionService.getInstance();
-
+    freeMemAtInit = Runtime.getRuntime().freeMemory();
+    System.out.println("freeMemAtInit = "+freeMemAtInit);
     // build it
     for ( IDocumentLocator locator : locators ) {
       locator.startScan();
     }
-
     mcs.waitTillEmpty();
+    long freeMemAtEnd = Runtime.getRuntime().freeMemory();
+    System.out.println("MetaverseIT mem usage after waitTillEmpty() = "+(freeMemAtInit - freeMemAtEnd));
 
     Graph readerGraph = reader.getMetaverse();
+
     assertTrue( readerGraph.getVertices().iterator().hasNext() );
     assertTrue( readerGraph.getEdges().iterator().hasNext() );
 

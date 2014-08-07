@@ -155,8 +155,13 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
     IDatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
     if ( dbs != null && dbAnalyzer != null ) {
       for ( DatabaseMeta db : dbs ) {
-        IMetaverseNode dbNode = dbAnalyzer.analyze( db );
-        metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
+        try {
+          IMetaverseNode dbNode = dbAnalyzer.analyze( db );
+          metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
+        } catch ( Throwable t ) {
+          // Don't throw the exception if a DB connection couldn't be analyzed, just log it and move on
+          t.printStackTrace( System.err );
+        }
       }
     }
   }
@@ -220,12 +225,22 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
    */
   protected IDatabaseConnectionAnalyzer getDatabaseConnectionAnalyzer() {
     if ( dbConnectionAnalyzer == null ) {
-      dbConnectionAnalyzer = PentahoSystem.get( IDatabaseConnectionAnalyzer.class );
+      try {
+        dbConnectionAnalyzer = PentahoSystem.get( IDatabaseConnectionAnalyzer.class );
+      } catch ( Throwable t ) {
+        // Don't fail because of PentahoSystem, instead let the caller handle null
+        dbConnectionAnalyzer = null;
+      }
     }
+    // Default to the built-in database connection analyzer
+    if ( dbConnectionAnalyzer == null ) {
+      dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
+    }
+    dbConnectionAnalyzer.setMetaverseBuilder( metaverseBuilder );
     return dbConnectionAnalyzer;
   }
 
-  protected void setDatabaseConnectionAnalyzer( DatabaseConnectionAnalyzer analyzer ) {
+  protected void setDatabaseConnectionAnalyzer( IDatabaseConnectionAnalyzer analyzer ) {
     dbConnectionAnalyzer = analyzer;
     if ( dbConnectionAnalyzer != null && metaverseBuilder != null ) {
       dbConnectionAnalyzer.setMetaverseBuilder( metaverseBuilder );

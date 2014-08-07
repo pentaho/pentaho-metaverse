@@ -30,6 +30,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleMissingPluginsException;
+import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.xml.XMLInterface;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
@@ -47,9 +49,9 @@ import static org.mockito.Mockito.when;
 public class MetaverseDocumentAnalyzerTest {
 
   @Parameterized.Parameters
-  public static Collection services() {
+  public static Collection services() throws KettleXMLException, KettleMissingPluginsException {
     return Arrays.asList( new Object[][] {
-        { new TransformationAnalyzer(), DictionaryConst.NODE_TYPE_TRANS, new TransMeta(  ) },
+        { new TransformationAnalyzer(), DictionaryConst.NODE_TYPE_TRANS, new TransMeta( "dummy" ) },
         { new JobAnalyzer(), DictionaryConst.NODE_TYPE_JOB, new JobMeta(  ) }
     } );
   }
@@ -72,12 +74,7 @@ public class MetaverseDocumentAnalyzerTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
 
-    try {
-      KettleEnvironment.init();
-    } catch ( KettleException e ) {
-      e.printStackTrace();
-    }
-
+    KettleEnvironment.init();
   }
 
   /**
