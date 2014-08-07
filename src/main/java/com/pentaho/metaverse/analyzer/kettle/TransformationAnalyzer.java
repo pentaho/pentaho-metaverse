@@ -41,6 +41,8 @@ import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The TransformationAnalyzer class is responsible for gathering transformation metadata, creating links
@@ -64,6 +66,8 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
   };
 
   private IKettleStepAnalyzerProvider stepAnalyzerProvider;
+
+  private Logger log = LoggerFactory.getLogger( TransformationAnalyzer.class );
 
   @Override
   public IMetaverseNode analyze( IMetaverseDocument document ) throws MetaverseAnalyzerException {
@@ -123,26 +127,31 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
     // handle the steps
     for ( int stepNr = 0; stepNr < transMeta.nrSteps(); stepNr++ ) {
       StepMeta stepMeta = transMeta.getStep( stepNr );
-      if ( stepMeta != null ) {
-        if ( stepMeta.getParentTransMeta() == null ) {
-          stepMeta.setParentTransMeta( transMeta );
-        }
-
-        IMetaverseNode stepNode = null;
-        Set<IStepAnalyzer> stepAnalyzers = getStepAnalyzers( stepMeta );
-        if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
-          for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
-            stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-            stepNode = stepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
+      try {
+        if ( stepMeta != null ) {
+          if ( stepMeta.getParentTransMeta() == null ) {
+            stepMeta.setParentTransMeta( transMeta );
           }
-        } else {
-          IAnalyzer<BaseStepMeta> defaultStepAnalyzer = new KettleGenericStepMetaAnalyzer();
-          defaultStepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-          stepNode = defaultStepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
+
+          IMetaverseNode stepNode = null;
+          Set<IStepAnalyzer> stepAnalyzers = getStepAnalyzers( stepMeta );
+          if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
+            for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
+              stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
+              stepNode = stepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
+            }
+          } else {
+            IAnalyzer<BaseStepMeta> defaultStepAnalyzer = new KettleGenericStepMetaAnalyzer();
+            defaultStepAnalyzer.setMetaverseBuilder( metaverseBuilder );
+            stepNode = defaultStepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
+          }
+          if ( stepNode != null ) {
+            metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, stepNode );
+          }
         }
-        if ( stepNode != null ) {
-          metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, stepNode );
-        }
+      } catch ( MetaverseAnalyzerException mae ) {
+        //Don't throw an exception, just log and carry on
+        log.error( "Error processing " + stepMeta.getName(), mae );
       }
     }
 
