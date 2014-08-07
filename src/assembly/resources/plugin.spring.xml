@@ -22,8 +22,8 @@
     <constructor-arg ref="IDocumentLocatorProvider"/>
   </bean>
 
-  <!-- Configure our graph using the GraphFactory and a configuration file -->
-  <bean id="MetaverseGraphImpl" class="com.tinkerpop.blueprints.GraphFactory" factory-method="open">
+  <!-- Configure our graph using the SynchronizedGraphFactory and a config Map -->
+  <bean id="MetaverseGraphImpl" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open">
     <constructor-arg>
       <map>
         <entry key="blueprints.graph" value="com.tinkerpop.blueprints.impls.tg.TinkerGraph"/>

@@ -44,6 +44,8 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.FileSystemResource;
+
+import java.io.FilenameFilter;
 import java.util.concurrent.Future;
 import java.io.File;
 import java.util.Set;
@@ -68,6 +70,9 @@ public class MetaverseBuilderIT {
 
   @BeforeClass
   public static void init() {
+
+    cleanUpSampleData();
+
     StandaloneApplicationContext appContext = new StandaloneApplicationContext( getSolutionPath(), "" );
     PentahoSystem.setSystemSettingsService( new PathBasedSystemSettings() );
     ApplicationContext springApplicationContext = getSpringApplicationContext();
@@ -83,6 +88,25 @@ public class MetaverseBuilderIT {
     } catch ( KettleException e ) {
       e.printStackTrace();
     }
+  }
+
+  /**
+   * clean up any lingering SampleData instances on disk
+   */
+  private static void cleanUpSampleData() {
+    File dir = new File( "." );
+    File[] sampleDataFiles = dir.listFiles( new FilenameFilter() {
+      @Override public boolean accept( File dir, String name ) {
+        return name.startsWith( "SampleData" );
+      }
+    } );
+
+    if ( sampleDataFiles != null ) {
+      for ( File f : sampleDataFiles ) {
+        f.delete();
+      }
+    }
+
   }
 
   private static ApplicationContext getSpringApplicationContext() {
@@ -121,8 +145,8 @@ public class MetaverseBuilderIT {
 
     locators = documentLocatorProvider.getDocumentLocators();
 
-    MetaverseCompletionService mcs = MetaverseCompletionService.getInstance();
     freeMemAtInit = Runtime.getRuntime().freeMemory();
+    MetaverseCompletionService mcs = MetaverseCompletionService.getInstance();
     System.out.println("freeMemAtInit = "+freeMemAtInit);
     // build it
     for ( IDocumentLocator locator : locators ) {
