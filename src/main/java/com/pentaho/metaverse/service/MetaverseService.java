@@ -33,7 +33,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
-import org.pentaho.jmeter.annotation.JMeterTest;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -86,7 +85,6 @@ public class MetaverseService implements IMetaverseService {
   @GET
   @Path( "/export" )
   @Produces( { MediaType.APPLICATION_XML } )
-  @JMeterTest( url = "/metaverse/api/service/export", requestType = "GET", statusCode = "200" )
   public Response export() {
     // TODO: figure out how to have the metaverse ready before our first call to the service
     if ( count++ == 0 ) {
