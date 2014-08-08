@@ -64,7 +64,7 @@ public class JobEntryAnalyzer<T extends JobEntryInterface> extends BaseKettleMet
 
     // Add yourself
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( entry, entry.getName() ) );
+        DictionaryHelper.getId( entry, getNamespace().getNamespaceId(), entry.getName() ) );
 
     node.setName( entry.getName() );
     node.setType( DictionaryConst.NODE_TYPE_JOB_ENTRY );

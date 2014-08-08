@@ -25,6 +25,7 @@ import java.io.Serializable;
 
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 
 public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverseBuilder, Serializable {
@@ -32,6 +33,8 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
   private static final long serialVersionUID = 8122643311387257050L;
 
   protected IMetaverseBuilder metaverseBuilder;
+
+  protected INamespace namespace;
 
   /**
    * The metaverse object factory.
@@ -50,6 +53,14 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     if ( metaverseBuilder != null ) {
       this.metaverseObjectFactory = metaverseBuilder.getMetaverseObjectFactory();
     }
+  }
+
+  public void setNamespace( INamespace ns ) {
+    namespace = ns;
+  }
+
+  public INamespace getNamespace( ) {
+    return namespace;
   }
 
 }

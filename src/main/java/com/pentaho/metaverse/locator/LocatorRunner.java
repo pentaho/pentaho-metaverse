@@ -1,13 +1,15 @@
 package com.pentaho.metaverse.locator;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.io.FilenameUtils;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +77,7 @@ public abstract class LocatorRunner<T> implements Runnable {
     /**
      * Gets the content of a document and notifies the repository document locator listeners of it
      */
-  public void processFile( String name, String id, Object contents ) {
+  public void processFile( INamespace namespace, String name, String id, Object contents ) {
 
     if ( stopping ) {
       return;
@@ -93,14 +95,19 @@ public abstract class LocatorRunner<T> implements Runnable {
       IMetaverseObjectFactory objectFactory = metaverseBuilder.getMetaverseObjectFactory();
 
       IMetaverseDocument metaverseDocument = objectFactory.createDocumentObject();
+      String documentId = DictionaryHelper.getId( metaverseDocument, namespace.getNamespaceId(), id );
+
+      INamespace documentNamespace = locator.getNamespaceFactory().createNameSpace( namespace, id );
+
+      metaverseDocument.setNamespace( documentNamespace );
       metaverseDocument.setContent( contents );
-      metaverseDocument.setStringID( id );
+      metaverseDocument.setStringID( documentId );
       metaverseDocument.setName( name );
       metaverseDocument.setType( extension );
 
       IMetaverseNode locatorNode = locator.getLocatorNode();
 
-      IMetaverseNode documentNode = objectFactory.createNodeObject( id, name, extension );
+      IMetaverseNode documentNode = objectFactory.createNodeObject( documentId, name, extension );
       // This is a placeholder; we intentionally do not add this node
       // The node could end up dangling if added now
       // We may not have an analyzer for a particular document coming in;

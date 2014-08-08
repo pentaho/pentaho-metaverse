@@ -53,7 +53,8 @@ public class TextFileInputStepAnalyzer extends KettleBaseStepAnalyzer<TextFileIn
     for ( String fileName : fileNames ) {
       // first add the node for the file
       IMetaverseNode textFileNode = metaverseObjectFactory.createNodeObject(
-          DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE, fileName ), fileName,
+          DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE,
+              getNamespace().getNamespaceId(), fileName ), fileName,
           DictionaryConst.NODE_TYPE_FILE );
 
       metaverseBuilder.addNode( textFileNode );
@@ -66,7 +67,8 @@ public class TextFileInputStepAnalyzer extends KettleBaseStepAnalyzer<TextFileIn
       for ( TextFileInputField field : fields ) {
         String fieldName = field.getName();
         IMetaverseNode fieldNode = metaverseObjectFactory.createNodeObject(
-            DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldName ),
+            DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE_FIELD,
+                getNamespace().getNamespaceId(), fieldName ),
             fieldName,
             DictionaryConst.NODE_TYPE_FILE_FIELD );
 
@@ -76,6 +78,7 @@ public class TextFileInputStepAnalyzer extends KettleBaseStepAnalyzer<TextFileIn
         IMetaverseNode outNode = metaverseObjectFactory.createNodeObject(
             DictionaryHelper.getId(
                 DictionaryConst.NODE_TYPE_TRANS_FIELD,
+                getNamespace().getNamespaceId(),
                 stepFields.searchValueMeta( fieldName ).getOrigin(),
                 fieldName ) );
 
