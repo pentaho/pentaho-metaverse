@@ -45,7 +45,7 @@ public class FileSystemLocatorRunner extends LocatorRunner<File> {
       if ( !file.isDirectory() ) {
         try {
           if ( !file.isHidden( ) ) {
-            processFile( file.getName(), locator.getId( file.getPath() ), locator.getContents( file ) );
+            processFile( locator.getNamespace(), file.getName(), file.getAbsolutePath(), locator.getContents( file ) );
           }
         } catch ( Exception e ) {
           // TODO handle exception

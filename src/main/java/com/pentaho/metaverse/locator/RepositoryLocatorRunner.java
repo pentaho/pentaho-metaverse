@@ -52,7 +52,7 @@ public class RepositoryLocatorRunner extends LocatorRunner<List<RepositoryFileTr
           if ( !file.isHidden() ) {
             // don't index hidden fields
             try {
-              processFile( file.getName(), locator.getId( file.getPath() ), locator.getContents( file ) );
+              processFile( locator.getNamespace(), file.getName(), file.getPath(), locator.getContents( file ) );
             } catch ( Exception e ) {
              // TODO log exception here
               e.printStackTrace( );

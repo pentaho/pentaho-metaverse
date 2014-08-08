@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.impl;
 
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
  * Implementation of an @see org.pentaho.platform.api.metaverse.IMetaverseDocument
@@ -43,6 +44,9 @@ public class MetaverseDocument implements IMetaverseDocument {
 
   /** The content of this document. */
   private Object content;
+
+  /** The namespace which declares the domain for this document */
+  private INamespace namespace;
 
   /* (non-Javadoc)
    * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getContent()
@@ -113,4 +117,13 @@ public class MetaverseDocument implements IMetaverseDocument {
     this.id = id;
   }
 
+  @Override
+  public void setNamespace( INamespace namespace ) {
+    this.namespace = namespace;
+  }
+
+  @Override
+  public INamespace getNamespace() {
+    return namespace;
+  }
 }

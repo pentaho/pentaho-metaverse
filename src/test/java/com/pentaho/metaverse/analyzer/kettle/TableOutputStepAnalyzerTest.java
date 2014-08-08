@@ -48,6 +48,7 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -77,6 +78,9 @@ public class TableOutputStepAnalyzerTest {
   @Mock
   DatabaseMeta mockDatabaseMeta;
 
+  @Mock
+  INamespace namespace;
+
   /**
    * @throws java.lang.Exception
    */
@@ -101,6 +105,7 @@ public class TableOutputStepAnalyzerTest {
 
     analyzer = new TableOutputStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
+    analyzer.setNamespace( namespace );
   }
 
   /**

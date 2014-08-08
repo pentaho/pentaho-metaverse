@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
+import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -32,6 +33,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
@@ -78,6 +80,12 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
    * A reference to the database connection analyzer
    */
   protected IDatabaseConnectionAnalyzer dbConnectionAnalyzer = null;
+
+
+  /**
+   * A namespace to hold the fields derived in the step
+   */
+  private INamespace stepNamespace = null;
 
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
@@ -128,10 +136,13 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
   protected IMetaverseNode addSelfNode() throws MetaverseAnalyzerException {
     try {
       IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-          DictionaryHelper.getId( BaseStepMeta.class, parentStepMeta.getName() ),
+          DictionaryHelper.getId( BaseStepMeta.class,
+              getNamespace().getNamespaceId(),
+              parentStepMeta.getName() ),
           parentStepMeta.getName(),
           DictionaryConst.NODE_TYPE_TRANS_STEP );
 
+      stepNamespace = new MetaverseNamespace( getNamespace(), parentStepMeta.getName() );
       metaverseBuilder.addNode( node );
       return node;
     } catch ( Throwable t ) {
@@ -180,7 +191,7 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
               // This field didn't come into the step, so assume it has been created here
               IMetaverseNode newFieldNode = metaverseObjectFactory.createNodeObject(
                   DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD,
-                      parentStepMeta.getName(),
+                      stepNamespace.getNamespaceId(),
                       outRowMeta.getName() ) );
               newFieldNode.setName( outRowMeta.getName() );
               newFieldNode.setType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
@@ -244,6 +255,7 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
     dbConnectionAnalyzer = analyzer;
     if ( dbConnectionAnalyzer != null && metaverseBuilder != null ) {
       dbConnectionAnalyzer.setMetaverseBuilder( metaverseBuilder );
+      dbConnectionAnalyzer.setNamespace( getNamespace() );
     }
   }
 

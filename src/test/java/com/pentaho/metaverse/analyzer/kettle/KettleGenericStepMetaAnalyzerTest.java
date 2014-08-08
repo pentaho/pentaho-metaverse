@@ -46,12 +46,13 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
  * @author mburgess
@@ -81,6 +82,9 @@ public class KettleGenericStepMetaAnalyzerTest {
   @Mock
   StepMetaInterface mockStepMetaInterface;
 
+  @Mock
+  INamespace namespace;
+
   /**
    * @throws java.lang.Exception
    */
@@ -106,6 +110,7 @@ public class KettleGenericStepMetaAnalyzerTest {
 
     analyzer = new KettleGenericStepMetaAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
+    analyzer.setNamespace( namespace );
 
     // set random StepMetaInterface
     when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockStepMetaInterface );

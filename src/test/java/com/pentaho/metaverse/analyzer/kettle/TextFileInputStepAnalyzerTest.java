@@ -43,6 +43,7 @@ import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Set;
@@ -50,7 +51,12 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
 
 @RunWith( MockitoJUnitRunner.class )
 public class TextFileInputStepAnalyzerTest {
@@ -71,6 +77,9 @@ public class TextFileInputStepAnalyzerTest {
 
   private IMetaverseObjectFactory mockFactory;
 
+  @Mock
+  private INamespace namespace;
+
   @Before
   public void setUp() throws Exception {
 
@@ -79,7 +88,10 @@ public class TextFileInputStepAnalyzerTest {
 
     textFileInputStepAnalyzer = new TextFileInputStepAnalyzer();
     textFileInputStepAnalyzer.setMetaverseBuilder( mockBuilder );
+    textFileInputStepAnalyzer.setNamespace( namespace );
   }
+
+
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyze_nullInput() throws Exception {
