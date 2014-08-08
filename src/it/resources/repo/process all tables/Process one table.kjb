@@ -4,6 +4,7 @@
     <description/>
     <extended_description/>
     <job_version/>
+    <job_status>0</job_status>
   <directory>&#x2f;</directory>
   <created_user/>
   <created_date>2014&#x2f;03&#x2f;26 14&#x3a;02&#x3a;57.837</created_date>
@@ -94,8 +95,7 @@
       <specification_method>filename</specification_method>
       <trans_object_id/>
       <filename>&#x24;&#x7b;Internal.Job.Filename.Directory&#x7d;&#x2f;set variables.ktr</filename>
-      <transname>Define TABLE variable</transname>
-      <directory>&#x2f;</directory>
+      <transname/>
       <arg_from_previous>N</arg_from_previous>
       <params_from_previous>N</params_from_previous>
       <exec_per_row>N</exec_per_row>
@@ -128,8 +128,7 @@
       <specification_method>filename</specification_method>
       <trans_object_id/>
       <filename>&#x24;&#x7b;Internal.Job.Filename.Directory&#x7d;&#x2f;Process one table.ktr</filename>
-      <transname>Get amount of rows from table</transname>
-      <directory>&#x2f;</directory>
+      <transname/>
       <arg_from_previous>N</arg_from_previous>
       <params_from_previous>N</params_from_previous>
       <exec_per_row>N</exec_per_row>
@@ -152,8 +151,8 @@
       </parameters>      <parallel>N</parallel>
       <draw>Y</draw>
       <nr>0</nr>
-      <xloc>409</xloc>
-      <yloc>76</yloc>
+      <xloc>411</xloc>
+      <yloc>75</yloc>
       </entry>
   </entries>
   <hops>
@@ -178,5 +177,9 @@
   </hops>
   <notepads>
   </notepads>
+<attributes><group><name>JobRestart</name>
+<attribute><key>UniqueConnections</key>
+<value>N</value>
+</attribute></group></attributes>
 
 </job>

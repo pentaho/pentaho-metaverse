@@ -25,7 +25,9 @@ package com.pentaho.metaverse.analyzer.kettle;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
@@ -109,6 +111,7 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
     // handle the entries
     for ( int i = 0; i < job.nrJobEntries(); i++ ) {
       JobEntryCopy entry = job.getJobEntry( i );
+      entry.getEntry().setParentJob( new Job( null, job ) );
 
       if ( entry != null ) {
         IAnalyzer<JobEntryInterface> analyzer = getJobEntryAnalyzer( entry.getEntry() );
@@ -124,9 +127,23 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
 
   protected IAnalyzer<JobEntryInterface> getJobEntryAnalyzer( JobEntryInterface jobEntry ) {
 
+    IJobEntryAnalyzer entryAnalyzer;
+
+    if ( jobEntry instanceof JobEntryTrans ) {
+
+      entryAnalyzer = new TransJobEntryAnalyzer();
+      entryAnalyzer.setMetaverseBuilder( metaverseBuilder );
+      entryAnalyzer.setNamespace( this.getNamespace() );
+
+    } else {
+
+      entryAnalyzer = new JobEntryAnalyzer();
+      entryAnalyzer.setMetaverseBuilder( metaverseBuilder );
+      entryAnalyzer.setNamespace( this.getNamespace() );
+
+    }
+
     // TODO Look for implementing analyzers for this step.
-    IAnalyzer<JobEntryInterface> entryAnalyzer = new JobEntryAnalyzer();
-    entryAnalyzer.setMetaverseBuilder( metaverseBuilder );
 
     return entryAnalyzer;
   }

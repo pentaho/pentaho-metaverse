@@ -17,6 +17,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
+import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 /**
@@ -33,6 +34,8 @@ public class DictionaryHelper {
   private static List<Class> classList = new ArrayList<Class>();
   private static Map<String, String> categoryColorMap = new HashMap<String, String>();
   private static Map<String, String> typeCategoryMap = new HashMap<String, String>();
+
+  public static final String SEPARATOR = "~";
 
   // TODO This is temporary
   static {
@@ -56,6 +59,13 @@ public class DictionaryHelper {
         add( TextFileOutputMeta.class );
       }
     }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_STEP ) );
+
+    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
+      {
+        add( IMetaverseDocument.class );
+      }
+    }, new GenericIdGenerator( "IMetaverseDocument" ) );
+
 
     DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
       {

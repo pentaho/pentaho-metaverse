@@ -60,7 +60,8 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
     String type = DictionaryConst.NODE_TYPE_DATASOURCE;
 
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( object.getClass(), object.getName() ),
+        DictionaryHelper.getId( object.getClass(),
+            getNamespace().getNamespaceId(), object.getName() ),
         object.getName(),
         type );
 
