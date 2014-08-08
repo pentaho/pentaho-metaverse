@@ -15,3 +15,11 @@
 -keep public class com.pentaho.metaverse.graph.SynchronizedGraphFactory {
   public <methods>;
 }
+
+-keep abstract class com.pentaho.metaverse.locator.** {
+  public <methods>;
+}
+
+-keep public class com.pentaho.metaverse.locator.** extends com.pentaho.metaverse.locator.** {
+  public <methods>;
+}

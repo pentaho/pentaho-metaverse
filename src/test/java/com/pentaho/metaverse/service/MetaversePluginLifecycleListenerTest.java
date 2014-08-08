@@ -20,51 +20,52 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.graph;
+package com.pentaho.metaverse.service;
 
 import com.tinkerpop.blueprints.Graph;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+@RunWith( MockitoJUnitRunner.class )
+public class MetaversePluginLifecycleListenerTest {
 
-public class SynchronizedGraphFactoryTest {
+  @Mock private Graph mockGraph;
 
-  @Test
-  public void testOpen_Configuration() throws Exception {
-    Configuration config = new PropertiesConfiguration();
-    config.addProperty( "blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph" );
-    Graph g = SynchronizedGraphFactory.open( config );
+  private MetaversePluginLifecycleListener metaversePluginLifecycleListener;
 
-    assertTrue( g instanceof SynchronizedGraph );
+  @Before
+  public void setUp() throws Exception {
+    metaversePluginLifecycleListener = new MetaversePluginLifecycleListener();
   }
 
   @Test
-  public void testOpen_Map() throws Exception {
-    Map<String, String> config = new HashMap<String, String>();
-    config.put( "blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph" );
-    Graph g = SynchronizedGraphFactory.open( config );
+  public void testUnload() throws Exception {
+    metaversePluginLifecycleListener.setGraph( mockGraph );
+    metaversePluginLifecycleListener.unLoaded();
 
-    assertTrue( g instanceof SynchronizedGraph );
+    verify( mockGraph, times ( 1 ) ).shutdown();
   }
 
   @Test
-  public void testOpen_File() throws Exception {
-    String config = "src/test/resources/graph.properties";
-    Graph g = SynchronizedGraphFactory.open( config );
+  public void testUnload_NullGraph() throws Exception {
+    metaversePluginLifecycleListener.unLoaded();
 
-    assertTrue( g instanceof SynchronizedGraph );
+    verify( mockGraph, times ( 0 ) ).shutdown();
   }
 
   @Test
-  public void testConstructor() throws Exception {
-    // only here for code coverage
-    SynchronizedGraphFactory factory = new SynchronizedGraphFactory();
-    assertNotNull( factory );
+  public void testLoaded() throws Exception {
+    metaversePluginLifecycleListener.loaded();
+  }
+
+  @Test
+  public void testInit() throws Exception {
+    metaversePluginLifecycleListener.init();
   }
 }
