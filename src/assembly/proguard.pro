@@ -23,3 +23,9 @@
 -keep public class com.pentaho.metaverse.locator.** extends com.pentaho.metaverse.locator.** {
   public <methods>;
 }
+
+-keep public class com.pentaho.metaverse.** implements org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder {
+  public <methods>;
+}
+
+-keep public class com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider {}
