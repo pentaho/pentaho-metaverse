@@ -22,8 +22,6 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryHelper;
-import org.omg.CORBA.INV_IDENT;
-import org.pentaho.platform.api.metaverse.IIdentifiable;
 import org.pentaho.platform.api.metaverse.IIdentifierModifiable;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
@@ -111,7 +109,7 @@ public abstract class BaseKettleMetaverseComponent
    * @return the String ID of the entity.
    */
   @Override public String getStringID() {
-    if(id == null && name != null && namespace != null) {
+    if ( id == null && name != null && namespace != null ) {
       id = namespace.getNamespaceId() + DictionaryHelper.SEPARATOR + name;
     }
     return id;

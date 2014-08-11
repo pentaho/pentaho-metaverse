@@ -132,7 +132,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   protected IMetaverseNode addSelfNode() throws MetaverseAnalyzerException {
     try {
       setName( parentStepMeta.getName() );
-      setType(DictionaryConst.NODE_TYPE_TRANS_STEP);
+      setType( DictionaryConst.NODE_TYPE_TRANS_STEP );
       IMetaverseNode node = metaverseObjectFactory.createNodeObject(
           DictionaryHelper.getId( BaseStepMeta.class, getStringID() ),
           getName(),
@@ -230,6 +230,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
    * @return a database connection Analyzer
    */
   protected IDatabaseConnectionAnalyzer getDatabaseConnectionAnalyzer() {
+
     if ( dbConnectionAnalyzer == null ) {
       try {
         dbConnectionAnalyzer = PentahoSystem.get( IDatabaseConnectionAnalyzer.class );
@@ -242,7 +243,8 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     if ( dbConnectionAnalyzer == null ) {
       dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
     }
-    dbConnectionAnalyzer.setMetaverseBuilder( metaverseBuilder );
+
+    setDatabaseConnectionAnalyzer( dbConnectionAnalyzer );
     return dbConnectionAnalyzer;
   }
 
