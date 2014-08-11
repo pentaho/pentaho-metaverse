@@ -117,8 +117,8 @@
       </parameters>      <parallel>N</parallel>
       <draw>Y</draw>
       <nr>0</nr>
-      <xloc>267</xloc>
-      <yloc>87</yloc>
+      <xloc>271</xloc>
+      <yloc>85</yloc>
       </entry>
     <entry>
       <name>Process a table</name>
@@ -160,7 +160,6 @@
       <trans_object_id/>
       <filename>&#x24;&#x7b;Internal.Job.Filename.Directory&#x7d;&#x2f;save list of all result files.ktr</filename>
       <transname/>
-      <directory>&#x2f;</directory>
       <arg_from_previous>N</arg_from_previous>
       <params_from_previous>N</params_from_previous>
       <exec_per_row>N</exec_per_row>
@@ -183,7 +182,7 @@
       </parameters>      <parallel>N</parallel>
       <draw>Y</draw>
       <nr>0</nr>
-      <xloc>634</xloc>
+      <xloc>633</xloc>
       <yloc>85</yloc>
       </entry>
   </entries>

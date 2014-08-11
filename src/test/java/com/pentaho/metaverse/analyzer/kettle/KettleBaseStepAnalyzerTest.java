@@ -83,6 +83,9 @@ public class KettleBaseStepAnalyzerTest {
   @Mock
   RowMetaInterface mockStepFields;
 
+  @Mock
+  INamespace namespace;
+
   /**
    * @throws Exception
    */
@@ -113,10 +116,13 @@ public class KettleBaseStepAnalyzerTest {
       }
     };
     analyzer.setMetaverseBuilder( mockBuilder );
+    analyzer.setNamespace( namespace );
 
+    when(namespace.getNamespaceId()).thenReturn( "namespace" );
     // set random StepMetaInterface
     when( mockStepMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
     when( parentStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( parentStepMeta.getName() ).thenReturn( "parentStepMeta" );
 
     analyzer.parentStepMeta = parentStepMeta;
     analyzer.parentTransMeta = mockTransMeta;

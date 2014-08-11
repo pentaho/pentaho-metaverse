@@ -138,11 +138,13 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
           if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
             for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
               stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
+              stepAnalyzer.setNamespace( getNamespace() );
               stepNode = stepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
             }
           } else {
             IAnalyzer<BaseStepMeta> defaultStepAnalyzer = new KettleGenericStepMetaAnalyzer();
             defaultStepAnalyzer.setMetaverseBuilder( metaverseBuilder );
+            defaultStepAnalyzer.setNamespace( getNamespace() );
             stepNode = defaultStepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
           }
           if ( stepNode != null ) {
@@ -189,6 +191,7 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
 
     for ( IStepAnalyzer analyzer : stepAnalyzers ) {
       analyzer.setMetaverseBuilder( metaverseBuilder );
+      analyzer.setNamespace( getNamespace() );
     }
 
     return stepAnalyzers;

@@ -5,15 +5,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.internal.util.collections.Sets;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.tableoutput.TableOutput;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;

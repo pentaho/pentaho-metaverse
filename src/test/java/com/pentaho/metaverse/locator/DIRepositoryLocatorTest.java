@@ -25,12 +25,21 @@ package com.pentaho.metaverse.locator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pentaho.metaverse.api.INamespaceFactory;
+import com.pentaho.metaverse.impl.MetaverseNamespace;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.JobMeta;
@@ -42,6 +51,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseDocument;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
  * Test class for the DIRepositoryLocator
@@ -49,15 +59,27 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
  *
  */
 @SuppressWarnings( { "all" } )
+@RunWith( MockitoJUnitRunner.class )
 public class DIRepositoryLocatorTest implements IDocumentListener {
 
   private List<IDocumentEvent> events;
+
+  @Mock
+  INamespaceFactory namespaceFactory;
+
+  DIRepositoryLocator spyLocator;
+
 
   /**
    * Initializes the kettle system
    */
   @Before
   public void init() {
+    DIRepositoryLocator locator = new DIRepositoryLocator();
+    spyLocator = spy(locator);
+    when(spyLocator.getNamespaceFactory()).thenReturn( namespaceFactory );
+    when(namespaceFactory.createNameSpace(
+        any(INamespace.class), anyString() )).thenReturn( new MetaverseNamespace( null, "" ) );
     try {
       KettleEnvironment.init();
     } catch ( KettleException e ) {
@@ -68,7 +90,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
   }
 
   /**
-   * Runs the locator and checks the results
+   * Runs the spyLocator and checks the results
    * @throws Exception When bad things happen
    */
   @Test
@@ -77,21 +99,20 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     TinkerGraph graph = new TinkerGraph();
     IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
 
-    DIRepositoryLocator locator = new DIRepositoryLocator();
-    locator.setMetaverseBuilder( metaverseBuilder );
-    locator.addDocumentListener( this );
-    locator.setRepository( LocatorTestUtils.getMockDiRepository() );
-//    locator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
+    spyLocator.setMetaverseBuilder( metaverseBuilder );
+    spyLocator.addDocumentListener( this );
+    spyLocator.setRepository( LocatorTestUtils.getMockDiRepository() );
+//    spyLocator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
     LocatorTestUtils.delay = 0;
 
-    locator.setRepositoryId( "testrepo" );
-    assertEquals( "Repo id is wrong", "testrepo", locator.getRepositoryId() );
+    spyLocator.setRepositoryId( "testrepo" );
+    assertEquals( "Repo id is wrong", "testrepo", spyLocator.getRepositoryId() );
 
-    assertNotNull("Indexer type is null", locator.getLocatorType() );
+    assertNotNull("Indexer type is null", spyLocator.getLocatorType() );
     events = new ArrayList<IDocumentEvent>();
-    locator.startScan();
+    spyLocator.startScan();
 
-    locator.futureTask.get();
+    spyLocator.futureTask.get();
 
     assertEquals( "Event count is wrong", 7, events.size() );
 
@@ -106,17 +127,17 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
       }
     }
 
-    locator.removeDocumentListener( this );
+    spyLocator.removeDocumentListener( this );
     events = new ArrayList<IDocumentEvent>();
-    locator.startScan();
-    locator.futureTask.get();
+    spyLocator.startScan();
+    spyLocator.futureTask.get();
 
     assertEquals( "Event count is wrong", 0, events.size() );
 
   }
 
   /**
-   * Runs the locator and checks the results
+   * Runs the spyLocator and checks the results
    * @throws Exception When bad things happen
    */
   @Test
@@ -125,20 +146,19 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     TinkerGraph graph = new TinkerGraph();
     IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
 
-    DIRepositoryLocator locator = new DIRepositoryLocator();
-    locator.setMetaverseBuilder( metaverseBuilder );
-    locator.addDocumentListener( this );
-    locator.setRepository( LocatorTestUtils.getMockDiRepository() );
-    locator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
+    spyLocator.setMetaverseBuilder( metaverseBuilder );
+    spyLocator.addDocumentListener( this );
+    spyLocator.setRepository( LocatorTestUtils.getMockDiRepository() );
+    spyLocator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
     LocatorTestUtils.delay = 300;
 
-    assertNotNull("Indexer type is null", locator.getLocatorType() );
+    assertNotNull( "Indexer type is null", spyLocator.getLocatorType() );
     events = new ArrayList<IDocumentEvent>();
     System.out.println( "call startScan" );
-    locator.startScan();
+    spyLocator.startScan();
     Thread.sleep( 1000 );
     System.out.println( "call stopScan" );
-    locator.stopScan();
+    spyLocator.stopScan();
 
     assertTrue( "Event count is wrong", events.size() < 5 );
 

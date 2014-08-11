@@ -40,8 +40,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
@@ -57,6 +58,9 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Mock
   private IMetaverseBuilder builder;
+
+  @Mock
+  private INamespace namespace;
 
   /**
    * @throws java.lang.Exception
@@ -83,6 +87,7 @@ public class DatabaseConnectionAnalyzerTest {
 
     dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
     dbConnectionAnalyzer.setMetaverseBuilder( builder );
+    dbConnectionAnalyzer.setNamespace( namespace );
 
   }
 

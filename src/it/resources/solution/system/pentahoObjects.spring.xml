@@ -12,6 +12,7 @@
   </bean>
 
   <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.impl.MetaverseObjectFactory" scope="singleton"/>
+  <bean id="INamespaceFactory" class="com.pentaho.metaverse.impl.NamespaceFactory" scope="singleton"/>
 
   <bean id="TransformationAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer"/>
   <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer"/>

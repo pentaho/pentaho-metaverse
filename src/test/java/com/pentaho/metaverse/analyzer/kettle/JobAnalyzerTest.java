@@ -64,6 +64,10 @@ public class JobAnalyzerTest {
   @Mock
   private IMetaverseDocument mockJobDoc;
 
+  @Mock
+  private INamespace namespace;
+
+
   /**
    * @throws Exception
    */
@@ -96,6 +100,7 @@ public class JobAnalyzerTest {
 
     analyzer = new JobAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
+    analyzer.setNamespace( namespace );
 
     when( mockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );
     when( mockJobDoc.getContent() ).thenReturn( mockContent );

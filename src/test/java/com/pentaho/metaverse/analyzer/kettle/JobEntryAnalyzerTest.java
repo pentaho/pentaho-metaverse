@@ -23,7 +23,11 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
