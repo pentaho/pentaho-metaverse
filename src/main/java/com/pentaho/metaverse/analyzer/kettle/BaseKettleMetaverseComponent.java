@@ -21,25 +21,43 @@
  */
 package com.pentaho.metaverse.analyzer.kettle;
 
-import java.io.Serializable;
-
+import com.pentaho.dictionary.DictionaryHelper;
+import org.omg.CORBA.INV_IDENT;
+import org.pentaho.platform.api.metaverse.IIdentifiable;
+import org.pentaho.platform.api.metaverse.IIdentifierModifiable;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IRequiresNamespace;
 
-public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverseBuilder, Serializable {
+import java.io.Serializable;
+
+public abstract class BaseKettleMetaverseComponent
+    implements IRequiresMetaverseBuilder, IRequiresNamespace, IIdentifierModifiable, Serializable {
 
   private static final long serialVersionUID = 8122643311387257050L;
 
+  /**
+   * A reference to the metaverse builder.
+   */
   protected IMetaverseBuilder metaverseBuilder;
 
-  protected INamespace namespace;
-
   /**
-   * The metaverse object factory.
+   * A reference to the metaverse object factory.
    */
   protected IMetaverseObjectFactory metaverseObjectFactory;
+
+  /**
+   * A reference to this component's namespace
+   */
+  protected INamespace namespace = null;
+
+  protected String id;
+
+  protected String name;
+
+  protected String type;
 
   /*
    * (non-Javadoc)
@@ -55,12 +73,83 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     }
   }
 
+  protected IMetaverseBuilder getMetaverseBuilder() {
+    return metaverseBuilder;
+  }
+
+  /**
+   * Sets the namespace for this component
+   *
+   * @param ns the namespace to set
+   */
+  @Override
   public void setNamespace( INamespace ns ) {
     namespace = ns;
   }
 
-  public INamespace getNamespace( ) {
+  /**
+   * Gets the namespace for this component
+   *
+   * @return the namespace for this component
+   */
+  public INamespace getNamespace() {
     return namespace;
   }
 
+  /**
+   * Gets the name of this entity.
+   *
+   * @return the String name of the entity
+   */
+  @Override public String getName() {
+    return name;
+  }
+
+  /**
+   * Gets the metaverse-unique identifier for this entity.
+   *
+   * @return the String ID of the entity.
+   */
+  @Override public String getStringID() {
+    if(id == null && name != null && namespace != null) {
+      id = namespace.getNamespaceId() + DictionaryHelper.SEPARATOR + name;
+    }
+    return id;
+  }
+
+  /**
+   * Gets the type of this entity.
+   *
+   * @return the String type of the entity
+   */
+  @Override public String getType() {
+    return type;
+  }
+
+  /**
+   * Sets the name.
+   *
+   * @param name the new name
+   */
+  @Override public void setName( String name ) {
+    this.name = name;
+  }
+
+  /**
+   * Sets the type.
+   *
+   * @param type the new type
+   */
+  @Override public void setType( String type ) {
+    this.type = type;
+  }
+
+  /**
+   * Sets the string id.
+   *
+   * @param id the new string id
+   */
+  @Override public void setStringID( String id ) {
+    this.id = id;
+  }
 }

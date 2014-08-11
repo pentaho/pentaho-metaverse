@@ -20,12 +20,12 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import com.pentaho.metaverse.api.IAnalyzerProvider;
 
 /**
  * Created by mburgess on 7/29/14.
  */
-public interface IKettleStepAnalyzerProvider extends IAnalyzerProvider<IStepAnalyzer> {
+public interface IJobEntryAnalyzerProvider extends IAnalyzerProvider<IJobEntryAnalyzer> {
 }

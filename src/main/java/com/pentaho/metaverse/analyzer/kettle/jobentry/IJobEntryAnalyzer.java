@@ -1,4 +1,4 @@
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
@@ -16,5 +16,5 @@ public interface IJobEntryAnalyzer<T extends JobEntryInterface> extends IAnalyze
    *
    * @return a Set of JobEntryCopy classes that this analyzer supports
    */
-  Set<Class<? super JobEntryCopy>> getSupportedEntries();
+  Set<Class<? extends JobEntryInterface>> getSupportedEntries();
 }

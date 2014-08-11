@@ -1,5 +1,6 @@
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
+import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
 import java.util.HashMap;
@@ -8,9 +9,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The KettleStepAnalyzerProvider maintains a collection of analyzer objects capable of analyzing various PDI steps
+ * The KettleStepAnalyzerProvider maintains a collection of analyzer objects capable of analyzing various PDI step
  */
-public class KettleStepAnalyzerProvider extends BaseKettleMetaverseComponent implements IKettleStepAnalyzerProvider {
+public class StepAnalyzerProvider extends BaseKettleMetaverseComponent implements IStepAnalyzerProvider {
 
   /**
    * The set of step analyzers.
@@ -33,10 +34,10 @@ public class KettleStepAnalyzerProvider extends BaseKettleMetaverseComponent imp
   }
 
   /**
-   * Returns the set of analyzers for steps with the specified classes
+   * Returns the set of analyzers for step with the specified classes
    *
-   * @param types a set of classes corresponding to steps for which to retrieve the analyzers
-   * @return a set of analyzers that can process the specified steps
+   * @param types a set of classes corresponding to step for which to retrieve the analyzers
+   * @return a set of analyzers that can process the specified step
    */
   @Override public Set<IStepAnalyzer> getAnalyzers( Set<Class<?>> types ) {
     Set<IStepAnalyzer> stepAnalyzers = getAnalyzers();
@@ -53,7 +54,7 @@ public class KettleStepAnalyzerProvider extends BaseKettleMetaverseComponent imp
   }
 
   /**
-   * Sets the collection of step analyzers used to analyze PDI steps
+   * Sets the collection of step analyzers used to analyze PDI step
    * @param analyzers
    */
   public void setStepAnalyzers( Set<IStepAnalyzer> analyzers ) {

@@ -20,7 +20,7 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
@@ -37,7 +37,7 @@ import java.util.Set;
  * The TableOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
  * other metaverse entities (such as physical fields and tables)
  */
-public class TableOutputStepAnalyzer extends KettleBaseStepAnalyzer<TableOutputMeta> {
+public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
 
   /*
    * (non-Javadoc)
@@ -51,7 +51,7 @@ public class TableOutputStepAnalyzer extends KettleBaseStepAnalyzer<TableOutputM
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.TableOutputMeta.IsNull" ) );
     }
 
-    // Do common analysis for all steps
+    // Do common analysis for all step
     IMetaverseNode node = super.analyze( tableOutputMeta );
 
     String tableName = tableOutputMeta.getTableName();

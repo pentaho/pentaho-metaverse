@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.MetaverseDocument;
+import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -105,6 +106,7 @@ public class MetaverseDocumentAnalyzerTest {
     when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
 
     analyzer.setMetaverseBuilder( builder );
+    analyzer.setNamespace( new MetaverseNamespace( null, "docName" ) );
 
     when( transDoc.getType() ).thenReturn( type );
     when( transDoc.getContent() ).thenReturn( content );

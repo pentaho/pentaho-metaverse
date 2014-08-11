@@ -38,14 +38,14 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
   /**
    * Analyzes a database connection for metadata.
    * 
-   * @param object
+   * @param dbMeta
    *          the object
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
    */
   @Override
-  public IMetaverseNode analyze( DatabaseMeta object ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( DatabaseMeta dbMeta ) throws MetaverseAnalyzerException {
 
-    if ( object == null ) {
+    if ( dbMeta == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.DatabaseMeta.IsNull" ) );
     }
 
@@ -60,33 +60,33 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
     String type = DictionaryConst.NODE_TYPE_DATASOURCE;
 
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( object.getClass(),
-            getNamespace().getNamespaceId(), object.getName() ),
-        object.getName(),
+        DictionaryHelper.getId( dbMeta.getClass(),
+            getNamespace().getNamespaceId(), dbMeta.getName() ),
+        dbMeta.getName(),
         type );
 
-    int accessType = object.getAccessType();
+    int accessType = dbMeta.getAccessType();
     node.setProperty( "accessType", accessType );
 
-    String accessTypeDesc = object.getAccessTypeDesc();
+    String accessTypeDesc = dbMeta.getAccessTypeDesc();
     node.setProperty( "accessTypeDesc", accessTypeDesc );
 
-    String databaseName = object.getDatabaseName();
+    String databaseName = dbMeta.getDatabaseName();
     node.setProperty( "databaseName", databaseName );
 
-    String port = object.getDatabasePortNumberString();
+    String port = dbMeta.getDatabasePortNumberString();
     node.setProperty( "port", port );
 
-    String host = object.getHostname();
+    String host = dbMeta.getHostname();
     node.setProperty( "hostName", host );
 
-    String user = object.getUsername();
+    String user = dbMeta.getUsername();
     node.setProperty( "userName", user );
 
-    String pass = object.getPassword();
+    String pass = dbMeta.getPassword();
     node.setProperty( "password", pass );
 
-    boolean shared = object.isShared();
+    boolean shared = dbMeta.isShared();
     node.setProperty( "shared", shared );
 
     // TODO If these attributes are important, we will need to

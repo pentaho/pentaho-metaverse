@@ -28,6 +28,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
+import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
@@ -46,7 +50,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The TransformationAnalyzer class is responsible for gathering transformation metadata, creating links
- * to form relationships between the transformation and its child collaborators (ie, steps, dbMetas), and
+ * to form relationships between the transformation and its child collaborators (ie, step, dbMetas), and
  * calling the analyzers responsible for providing the metadata for the child collaborators.
  */
 public class TransformationAnalyzer extends BaseKettleMetaverseComponent implements IDocumentAnalyzer {
@@ -65,7 +69,7 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
     }
   };
 
-  private IKettleStepAnalyzerProvider stepAnalyzerProvider;
+  private IStepAnalyzerProvider stepAnalyzerProvider;
 
   private Logger log = LoggerFactory.getLogger( TransformationAnalyzer.class );
 
@@ -107,7 +111,8 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
     }
 
     // Create a metaverse node and start filling in details
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( document.getStringID() );
+    setName( transMeta.getName() );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject( getStringID() );
 
     node.setName( transMeta.getName() );
     node.setType( DictionaryConst.NODE_TYPE_TRANS );
@@ -124,7 +129,7 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
 
     metaverseBuilder.addNode( node );
 
-    // handle the steps
+    // handle the step
     for ( int stepNr = 0; stepNr < transMeta.nrSteps(); stepNr++ ) {
       StepMeta stepMeta = transMeta.getStep( stepNr );
       try {
@@ -138,13 +143,13 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
           if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
             for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
               stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-              stepAnalyzer.setNamespace( getNamespace() );
+              stepAnalyzer.setNamespace( new MetaverseNamespace( getNamespace(), getStringID() ) );
               stepNode = stepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
             }
           } else {
-            IAnalyzer<BaseStepMeta> defaultStepAnalyzer = new KettleGenericStepMetaAnalyzer();
+            IAnalyzer<BaseStepMeta> defaultStepAnalyzer = new GenericStepMetaAnalyzer();
             defaultStepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-            defaultStepAnalyzer.setNamespace( getNamespace() );
+            defaultStepAnalyzer.setNamespace( new MetaverseNamespace( getNamespace(), getStringID() ) );
             stepNode = defaultStepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
           }
           if ( stepNode != null ) {
@@ -186,18 +191,18 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
         stepAnalyzers.addAll( stepAnalyzerProvider.getAnalyzers( analyzerClassSet ) );
       }
     } else {
-      stepAnalyzers.add( new KettleGenericStepMetaAnalyzer() );
+      stepAnalyzers.add( new GenericStepMetaAnalyzer() );
     }
 
     for ( IStepAnalyzer analyzer : stepAnalyzers ) {
       analyzer.setMetaverseBuilder( metaverseBuilder );
-      analyzer.setNamespace( getNamespace() );
+      analyzer.setNamespace( new MetaverseNamespace( getNamespace(), getStringID() ) );
     }
 
     return stepAnalyzers;
   }
 
-  protected void setStepAnalyzerProvider( IKettleStepAnalyzerProvider stepAnalyzerProvider ) {
+  protected void setStepAnalyzerProvider( IStepAnalyzerProvider stepAnalyzerProvider ) {
     this.stepAnalyzerProvider = stepAnalyzerProvider;
   }
 
@@ -206,11 +211,11 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
    *
    * @return the IKettleStepAnalyzer provider instance that provides step-specific analyzers
    */
-  protected IKettleStepAnalyzerProvider getStepAnalyzerProvider() {
+  protected IStepAnalyzerProvider getStepAnalyzerProvider() {
     if ( stepAnalyzerProvider != null ) {
       return stepAnalyzerProvider;
     }
-    stepAnalyzerProvider = (IKettleStepAnalyzerProvider) PentahoSystem.get( IKettleStepAnalyzerProvider.class );
+    stepAnalyzerProvider = (IStepAnalyzerProvider) PentahoSystem.get( IStepAnalyzerProvider.class );
     return stepAnalyzerProvider;
   }
 

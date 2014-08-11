@@ -20,9 +20,10 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,6 @@ import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Set;
@@ -58,7 +58,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.spy;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith(MockitoJUnitRunner.class)
 public class TextFileInputStepAnalyzerTest {
 
   private TextFileInputStepAnalyzer textFileInputStepAnalyzer;
@@ -77,9 +77,6 @@ public class TextFileInputStepAnalyzerTest {
 
   private IMetaverseObjectFactory mockFactory;
 
-  @Mock
-  private INamespace namespace;
-
   @Before
   public void setUp() throws Exception {
 
@@ -88,12 +85,10 @@ public class TextFileInputStepAnalyzerTest {
 
     textFileInputStepAnalyzer = new TextFileInputStepAnalyzer();
     textFileInputStepAnalyzer.setMetaverseBuilder( mockBuilder );
-    textFileInputStepAnalyzer.setNamespace( namespace );
+    textFileInputStepAnalyzer.setNamespace( new MetaverseNamespace( null, "Text File Input Step" ) );
   }
 
-
-
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testAnalyze_nullInput() throws Exception {
     textFileInputStepAnalyzer.analyze( null );
   }
@@ -121,7 +116,7 @@ public class TextFileInputStepAnalyzerTest {
 
     // make sure there is a "readby" link added
     verify( mockBuilder, times( 1 ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
+        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
 
   }
 
@@ -140,20 +135,22 @@ public class TextFileInputStepAnalyzerTest {
     // set up the input fields
     TextFileInputField field1 = new TextFileInputField( "id", 0, 4 );
     TextFileInputField field2 = new TextFileInputField( "name", 1, 30 );
-    TextFileInputField[] inputFields = new TextFileInputField[]{ field1, field2 };
+    TextFileInputField[] inputFields = new TextFileInputField[] { field1, field2 };
 
     when( mockTextFileInputMeta.getInputFields() ).thenReturn( inputFields );
     when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "id", "name" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(new Answer<ValueMetaInterface>(){
+    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
       @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
-        if(args[0] == "id") return new ValueMetaString("id");
-        if(args[0] == "name") return new ValueMetaString("name");
+        if ( args[0] == "id" )
+          return new ValueMetaString( "id" );
+        if ( args[0] == "name" )
+          return new ValueMetaString( "name" );
         return null;
       }
-    });
+    } );
 
     IMetaverseNode result = textFileInputStepAnalyzer.analyze( mockTextFileInputMeta );
     assertNotNull( result );
@@ -166,11 +163,11 @@ public class TextFileInputStepAnalyzerTest {
 
     // make sure there are "readby" links added (file, and each field)
     verify( mockBuilder, times( 1 + inputFields.length ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
+        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
 
     // we should have "populates" links from input nodes to output nodes
     verify( mockBuilder, times( inputFields.length ) )
-      .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
+        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
 
   }
 

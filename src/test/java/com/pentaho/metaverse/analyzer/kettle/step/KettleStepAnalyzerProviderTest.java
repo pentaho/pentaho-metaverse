@@ -1,4 +1,4 @@
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
 import org.junit.After;
 import org.junit.Before;
@@ -20,14 +20,14 @@ import static org.mockito.Mockito.when;
 @RunWith( MockitoJUnitRunner.class )
 public class KettleStepAnalyzerProviderTest {
 
-  KettleStepAnalyzerProvider provider;
+  StepAnalyzerProvider provider;
 
   @Mock
   IStepAnalyzer mockStepAnalyzer;
 
   @Before
   public void setUp() throws Exception {
-    provider = new KettleStepAnalyzerProvider();
+    provider = new StepAnalyzerProvider();
   }
 
   @After

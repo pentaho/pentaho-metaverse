@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
 import org.junit.Test;
@@ -78,7 +79,7 @@ public class TransformationAnalyzerTest {
   private IMetaverseDocument mockTransDoc;
 
   @Mock
-  private IKettleStepAnalyzerProvider stepAnalyzerProvider;
+  private IStepAnalyzerProvider stepAnalyzerProvider;
 
   @Mock
   INamespace namespace;
@@ -139,7 +140,7 @@ public class TransformationAnalyzerTest {
   @Test
   public void testAnalyzerTransformWithSteps() throws MetaverseAnalyzerException {
 
-    // increases line code coverage by adding steps to transformation
+    // increases line code coverage by adding step to transformation
     IMetaverseNode node = analyzer.analyze( mockTransDoc );
     assertNotNull( node );
   }

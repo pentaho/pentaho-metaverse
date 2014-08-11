@@ -20,7 +20,7 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
@@ -38,14 +38,14 @@ import java.util.Set;
  * The TextFileInputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
  * other metaverse entities
  */
-public class TextFileInputStepAnalyzer extends KettleBaseStepAnalyzer<TextFileInputMeta> {
+public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMeta> {
 
   @Override
   public IMetaverseNode analyze( TextFileInputMeta textFileInputMeta ) throws MetaverseAnalyzerException {
     if ( textFileInputMeta == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.TextFileInputMeta.IsNull" ) );
     }
-    // do the common analysis for all steps
+    // do the common analysis for all step
     IMetaverseNode node = super.analyze( textFileInputMeta );
     String[] fileNames = textFileInputMeta.getFileName();
 

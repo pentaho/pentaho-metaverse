@@ -20,11 +20,13 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
-import com.pentaho.metaverse.impl.MetaverseNamespace;
+import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
+import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -33,17 +35,16 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.util.List;
 
 /**
- * KettleBaseStepAnalyzer provides a default implementation (and generic helper methods) for analyzing PDI steps
+ * KettleBaseStepAnalyzer provides a default implementation (and generic helper methods) for analyzing PDI step
  * to gather metadata for the metaverse.
  */
-public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
+public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     extends BaseKettleMetaverseComponent implements IStepAnalyzer<T> {
 
   /**
@@ -81,11 +82,6 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
    */
   protected IDatabaseConnectionAnalyzer dbConnectionAnalyzer = null;
 
-
-  /**
-   * A namespace to hold the fields derived in the step
-   */
-  private INamespace stepNamespace = null;
 
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
@@ -135,14 +131,13 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
    */
   protected IMetaverseNode addSelfNode() throws MetaverseAnalyzerException {
     try {
+      setName( parentStepMeta.getName() );
+      setType(DictionaryConst.NODE_TYPE_TRANS_STEP);
       IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-          DictionaryHelper.getId( BaseStepMeta.class,
-              getNamespace().getNamespaceId(),
-              parentStepMeta.getName() ),
-          parentStepMeta.getName(),
-          DictionaryConst.NODE_TYPE_TRANS_STEP );
+          DictionaryHelper.getId( BaseStepMeta.class, getStringID() ),
+          getName(),
+          getType() );
 
-      stepNamespace = new MetaverseNamespace( getNamespace(), parentStepMeta.getName() );
       metaverseBuilder.addNode( node );
       return node;
     } catch ( Throwable t ) {
@@ -191,7 +186,7 @@ public abstract class KettleBaseStepAnalyzer<T extends BaseStepMeta>
               // This field didn't come into the step, so assume it has been created here
               IMetaverseNode newFieldNode = metaverseObjectFactory.createNodeObject(
                   DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD,
-                      stepNamespace.getNamespaceId(),
+                      namespace.getNamespaceId(),
                       outRowMeta.getName() ) );
               newFieldNode.setName( outRowMeta.getName() );
               newFieldNode.setType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
