@@ -25,16 +25,19 @@ package com.pentaho.metaverse.locator;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pentaho.metaverse.api.INamespaceFactory;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
+import org.pentaho.platform.api.metaverse.IDocumentListener;
+import org.pentaho.platform.api.metaverse.IDocumentEvent;
+import org.pentaho.platform.api.metaverse.IDocumentLocator;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.INamespace;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.api.metaverse.IDocumentEvent;
-import org.pentaho.platform.api.metaverse.IDocumentListener;
-import org.pentaho.platform.api.metaverse.IDocumentLocator;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
@@ -49,10 +52,6 @@ import java.util.concurrent.Future;
 public abstract class BaseLocator<T> implements IDocumentLocator {
 
   private static final long serialVersionUID = 693428630030858039L;
-
-  private static final String LOCATOR_ID_PREFIX = "locator_";
-
-  private static final int POLLING_INTERVAL = 100;
 
   private static final Logger log = LoggerFactory.getLogger( BaseLocator.class );
 
@@ -159,8 +158,8 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
     if ( locatorNode == null ) {
 
       locatorNode = metaverseBuilder.getMetaverseObjectFactory().createNodeObject(
-          LOCATOR_ID_PREFIX + id,
-          id,
+          getNamespace().getNamespaceId(),
+          getRepositoryId(),
           DictionaryConst.NODE_TYPE_LOCATOR );
 
     }
@@ -175,8 +174,13 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
   /**
    * TODO Change this once ID generation is refactored
    */
-  protected String getId( String... tokens ) {
-    return getLocatorType() + "." + getRepositoryId() + "." + tokens[0];
+  //protected String getId( String... tokens ) {
+  //  return getLocatorType() + "." + getRepositoryId() + "." + tokens[0];
+  //}
+
+  protected INamespace getNamespace() {
+    return getNamespaceFactory().createNameSpace( null,
+        getLocatorType().concat( ".".concat( getRepositoryId() ) ) );
   }
 
   @Override
@@ -209,6 +213,10 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
     runner.setLocator(  this );
 
     futureTask = completionService.submit( runner, node.getStringID() );
+  }
+
+  public INamespaceFactory getNamespaceFactory() {
+    return PentahoSystem.get( INamespaceFactory.class );
   }
 
 }

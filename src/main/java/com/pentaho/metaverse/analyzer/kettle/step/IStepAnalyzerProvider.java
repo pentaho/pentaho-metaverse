@@ -20,41 +20,12 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.locator;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
-import java.io.File;
+import com.pentaho.metaverse.api.IAnalyzerProvider;
 
 /**
- * A runnable (and stoppable) class for crawling a Pentaho repository for documents
- * @author jdixon
- *
+ * Created by mburgess on 7/29/14.
  */
-public class FileSystemLocatorRunner extends LocatorRunner<File> {
-
-  /**
-   * Indexes a set of files/folders. Folders are recursed into and files are passed to indexFile.
-   * @param folder The files/folders to examine
-   */
-  public void locate( File folder ) {
-
-    File[] files = folder.listFiles();
-    for ( File file : files ) {
-      if ( stopping ) {
-        return;
-      }
-      if ( !file.isDirectory() ) {
-        try {
-          if ( !file.isHidden( ) ) {
-            processFile( locator.getNamespace(), file.getName(), file.getAbsolutePath(), locator.getContents( file ) );
-          }
-        } catch ( Exception e ) {
-          // TODO handle exception
-          e.printStackTrace();
-        }
-      } else {
-        locate( file );
-      }
-    }
-  }
-
+public interface IStepAnalyzerProvider extends IAnalyzerProvider<IStepAnalyzer> {
 }

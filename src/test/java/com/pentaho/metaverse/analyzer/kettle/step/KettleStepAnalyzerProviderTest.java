@@ -1,19 +1,16 @@
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.internal.util.collections.Sets;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.tableoutput.TableOutput;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -23,14 +20,14 @@ import static org.mockito.Mockito.when;
 @RunWith( MockitoJUnitRunner.class )
 public class KettleStepAnalyzerProviderTest {
 
-  KettleStepAnalyzerProvider provider;
+  StepAnalyzerProvider provider;
 
   @Mock
   IStepAnalyzer mockStepAnalyzer;
 
   @Before
   public void setUp() throws Exception {
-    provider = new KettleStepAnalyzerProvider();
+    provider = new StepAnalyzerProvider();
   }
 
   @After

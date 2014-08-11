@@ -23,16 +23,22 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;
@@ -46,11 +52,21 @@ import java.util.Set;
  */
 public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocumentAnalyzer {
 
+  /**
+   * A set of types supported by this analyzer
+   */
   private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
     {
       add( "kjb" );
     }
   };
+
+  /**
+   * A reference to the job entry analyzer provider
+   */
+  private IJobEntryAnalyzerProvider jobEntryAnalyzerProvider;
+
+  private Logger log = LoggerFactory.getLogger( JobAnalyzer.class );
 
   @Override
   public IMetaverseNode analyze( IMetaverseDocument document ) throws MetaverseAnalyzerException {
@@ -80,7 +96,7 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
       try {
         String content = (String) repoObject;
         ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
-        job = new JobMeta( xmlStream, null,  null );
+        job = new JobMeta( xmlStream, null, null );
       } catch ( KettleXMLException e ) {
         throw new MetaverseAnalyzerException( e );
       }
@@ -93,7 +109,7 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
     // TODO get unique ID and set it on the node
     IMetaverseNode node = metaverseObjectFactory.createNodeObject( document.getStringID() );
 
-    node.setType(  DictionaryConst.NODE_TYPE_JOB );
+    node.setType( DictionaryConst.NODE_TYPE_JOB );
     node.setName( job.getName() );
 
     // pull out the standard fields
@@ -109,34 +125,43 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
     // handle the entries
     for ( int i = 0; i < job.nrJobEntries(); i++ ) {
       JobEntryCopy entry = job.getJobEntry( i );
+      try {
+        entry.getEntry().setParentJob( new Job( null, job ) );
 
-      if ( entry != null ) {
-        IAnalyzer<JobEntryInterface> analyzer = getJobEntryAnalyzer( entry.getEntry() );
-        IMetaverseNode entryNode = analyzer.analyze( entry.getEntry() );
-        metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, entryNode );
+        if ( entry != null ) {
+          IMetaverseNode jobEntryNode = null;
+          JobEntryInterface jobEntryInterface = entry.getEntry();
+          Set<IJobEntryAnalyzer> jobEntryAnalyzers = getJobEntryAnalyzers( jobEntryInterface );
+          if ( jobEntryAnalyzers != null && !jobEntryAnalyzers.isEmpty() ) {
+            for ( IJobEntryAnalyzer jobEntryAnalyzer : jobEntryAnalyzers ) {
+              jobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
+              jobEntryAnalyzer.setNamespace( getNamespace() );
+              jobEntryNode = jobEntryAnalyzer.analyze( entry.getEntry() );
+            }
+          } else {
+            IJobEntryAnalyzer<JobEntryInterface> defaultJobEntryAnalyzer = new GenericJobEntryMetaAnalyzer();
+            defaultJobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
+            defaultJobEntryAnalyzer.setNamespace( getNamespace() );
+            jobEntryNode = defaultJobEntryAnalyzer.analyze( jobEntryInterface );
+          }
+          if ( jobEntryNode != null ) {
+            metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, jobEntryNode );
+          }
+        }
+      } catch ( MetaverseAnalyzerException mae ) {
+        //Don't throw an exception, just log and carry on
+        log.error( "Error processing " + entry.getName(), mae );
       }
-
     }
 
     metaverseBuilder.addNode( node );
     return node;
   }
 
-  protected IAnalyzer<JobEntryInterface> getJobEntryAnalyzer( JobEntryInterface jobEntry ) {
-
-    // TODO Look for implementing analyzers for this step.
-    IAnalyzer<JobEntryInterface> entryAnalyzer = new JobEntryAnalyzer();
-    entryAnalyzer.setMetaverseBuilder( metaverseBuilder );
-
-    return entryAnalyzer;
-  }
-
-
   /**
    * Returns a set of strings corresponding to which types of content are supported by this analyzer
    *
    * @return the supported types (as a set of Strings)
-   *
    * @see org.pentaho.platform.api.metaverse.IDocumentAnalyzer#getSupportedTypes()
    */
   @Override
@@ -144,4 +169,46 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
     return defaultSupportedTypes;
   }
 
+  protected Set<IJobEntryAnalyzer> getJobEntryAnalyzers( final JobEntryInterface jobEntryInterface ) {
+
+    Set<IJobEntryAnalyzer> jobEntryAnalyzers = new HashSet<IJobEntryAnalyzer>();
+
+    // Attempt to discover a BaseStepMeta from the given StepMeta
+    jobEntryAnalyzerProvider = getJobEntryAnalyzerProvider();
+    if ( jobEntryAnalyzerProvider != null ) {
+      if ( jobEntryInterface == null ) {
+        jobEntryAnalyzers.addAll( jobEntryAnalyzerProvider.getAnalyzers() );
+      } else {
+        Set<Class<?>> analyzerClassSet = new HashSet<Class<?>>( 1 );
+        analyzerClassSet.add( jobEntryInterface.getClass() );
+        jobEntryAnalyzers.addAll( jobEntryAnalyzerProvider.getAnalyzers( analyzerClassSet ) );
+      }
+    } else {
+      jobEntryAnalyzers.add( new GenericJobEntryMetaAnalyzer() );
+    }
+
+    for ( IJobEntryAnalyzer analyzer : jobEntryAnalyzers ) {
+      analyzer.setMetaverseBuilder( metaverseBuilder );
+      analyzer.setNamespace( getNamespace() );
+    }
+
+    return jobEntryAnalyzers;
+  }
+
+  protected void setJobEntryAnalyzerProvider( IJobEntryAnalyzerProvider jobEntryAnalyzerProvider ) {
+    this.jobEntryAnalyzerProvider = jobEntryAnalyzerProvider;
+  }
+
+  /**
+   * Retrieves the step analyzer provider. This is used to find step-specific analyzers
+   *
+   * @return the IKettleStepAnalyzer provider instance that provides step-specific analyzers
+   */
+  protected IJobEntryAnalyzerProvider getJobEntryAnalyzerProvider() {
+    if ( jobEntryAnalyzerProvider != null ) {
+      return jobEntryAnalyzerProvider;
+    }
+    jobEntryAnalyzerProvider = (IJobEntryAnalyzerProvider) PentahoSystem.get( IJobEntryAnalyzerProvider.class );
+    return jobEntryAnalyzerProvider;
+  }
 }

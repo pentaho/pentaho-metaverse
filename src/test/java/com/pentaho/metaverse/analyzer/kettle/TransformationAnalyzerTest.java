@@ -23,8 +23,13 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -35,7 +40,12 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.rowgenerator.RowGeneratorMeta;
-import org.pentaho.platform.api.metaverse.*;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -69,7 +79,10 @@ public class TransformationAnalyzerTest {
   private IMetaverseDocument mockTransDoc;
 
   @Mock
-  private IKettleStepAnalyzerProvider stepAnalyzerProvider;
+  private IStepAnalyzerProvider stepAnalyzerProvider;
+
+  @Mock
+  INamespace namespace;
 
   /**
    * @throws Exception
@@ -102,6 +115,7 @@ public class TransformationAnalyzerTest {
 
     analyzer = new TransformationAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
+    analyzer.setNamespace( namespace );
 
     when( mockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( mockTransDoc.getContent() ).thenReturn( mockContent );
@@ -126,7 +140,7 @@ public class TransformationAnalyzerTest {
   @Test
   public void testAnalyzerTransformWithSteps() throws MetaverseAnalyzerException {
 
-    // increases line code coverage by adding steps to transformation
+    // increases line code coverage by adding step to transformation
     IMetaverseNode node = analyzer.analyze( mockTransDoc );
     assertNotNull( node );
   }

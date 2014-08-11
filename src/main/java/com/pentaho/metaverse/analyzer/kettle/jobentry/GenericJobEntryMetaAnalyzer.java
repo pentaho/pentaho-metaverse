@@ -20,12 +20,8 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
-import com.pentaho.metaverse.messages.Messages;
-import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -33,51 +29,24 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import java.util.Set;
 
 /**
- * The JobEntryAnalyzer provides JobEntryCopy metadata to the metaverse.
- *
- * Created by gmoran on 7/16/14.
+ * KettleGenericStepMetaAnalyzer provides a default implementation for analyzing PDI step
+ * to gather metadata for the metaverse.
  */
-public class JobEntryAnalyzer<T extends JobEntryInterface> extends BaseKettleMetaverseComponent
-    implements IJobEntryAnalyzer<T> {
+public class GenericJobEntryMetaAnalyzer extends BaseJobEntryAnalyzer<JobEntryInterface> {
 
   /**
-   * Analyzes job entries
+   * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
    *
-   * @param entry
-   * @return
-   * @throws MetaverseAnalyzerException
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(Object)
    */
   @Override
-  public IMetaverseNode analyze( T entry ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( JobEntryInterface jobEntryInterface ) throws MetaverseAnalyzerException {
 
-    if ( entry == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );
-    }
-
-    if ( metaverseBuilder == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseBuilder.IsNull" ) );
-    }
-
-    if ( metaverseObjectFactory == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
-    }
-
-    // Add yourself
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( entry, entry.getName() ) );
-
-    node.setName( entry.getName() );
-    node.setType( DictionaryConst.NODE_TYPE_JOB_ENTRY );
-
-    metaverseBuilder.addNode( node );
-
-
-    return node;
-
+    return super.analyze( jobEntryInterface );
   }
 
   @Override
-  public Set<Class<? super JobEntryCopy>> getSupportedEntries() {
+  public Set<Class<? extends JobEntryInterface>> getSupportedEntries() {
     return null;
   }
 

@@ -20,10 +20,15 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
+import com.pentaho.metaverse.analyzer.kettle.jobentry.BaseJobEntryAnalyzer;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -34,13 +39,15 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.Set;
+
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JobEntryAnalyzerTest {
+public class BaseJobEntryAnalyzerTest {
 
-  JobEntryAnalyzer analyzer;
+  BaseJobEntryAnalyzer analyzer;
 
   @Mock
   private IMetaverseBuilder mockBuilder;
@@ -74,7 +81,16 @@ public class JobEntryAnalyzerTest {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
 
-    analyzer = new JobEntryAnalyzer();
+    analyzer = new BaseJobEntryAnalyzer(){
+
+      @Override public Set<Class<? super JobEntryCopy>> getSupportedEntries() {
+        return null;
+      }
+
+      @Override public IMetaverseNode analyze( Object object ) throws MetaverseAnalyzerException {
+        return null;
+      }
+    };
 
     analyzer.setMetaverseBuilder( mockBuilder );
     when( mockEntry.getEntry() ).thenReturn( mockJobEntryInterface );
@@ -85,13 +101,6 @@ public class JobEntryAnalyzerTest {
    */
   @After
   public void tearDown() throws Exception {
-
-  }
-
-  @Test
-  public void testSetMetaverseBuilder() {
-
-    assertNotNull( analyzer.metaverseBuilder );
 
   }
 

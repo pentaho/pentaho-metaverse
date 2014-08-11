@@ -221,11 +221,14 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
    * @return Future object
    */
   protected Future<?> fireDocumentEvent( final IDocumentEvent event, final IDocumentAnalyzer analyzer ) {
-    final String id = event.getDocument().getStringID();
     Runnable analyzerRunner = new Runnable() {
       @Override
       public void run() {
         try {
+
+          // TODO can document ever be null?
+          analyzer.setNamespace( event.getDocument().getNamespace() );
+
           analyzer.analyze( event.getDocument() );
         } catch ( MetaverseAnalyzerException mae ) {
           log.error( Messages.getString( "ERROR.AnalyzingDocument", event.getDocument().getStringID() ), mae );

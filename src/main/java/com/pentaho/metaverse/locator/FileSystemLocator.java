@@ -84,11 +84,6 @@ public class FileSystemLocator extends BaseLocator<File> {
   }
 
   @Override
-  protected String getId( String... tokens ) {
-    return getLocatorType() + "." + getRepositoryId() + "." + tokens[0];
-  }
-
-  @Override
   public void startScan() {
 
     File root = new File( rootFolder );

@@ -20,8 +20,10 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
+import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -39,25 +41,21 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.platform.api.metaverse.*;
 
 import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 /**
  * @author mburgess
  */
 @RunWith(MockitoJUnitRunner.class)
-public class KettleBaseStepAnalyzerTest {
+public class BaseStepAnalyzerTest {
 
-  KettleBaseStepAnalyzer analyzer;
+  BaseStepAnalyzer analyzer;
 
   @Mock
   private IMetaverseBuilder mockBuilder;
@@ -83,6 +81,9 @@ public class KettleBaseStepAnalyzerTest {
   @Mock
   RowMetaInterface mockStepFields;
 
+  @Mock
+  INamespace namespace;
+
   /**
    * @throws Exception
    */
@@ -106,17 +107,20 @@ public class KettleBaseStepAnalyzerTest {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
 
-    analyzer = new KettleBaseStepAnalyzer() {
+    analyzer = new BaseStepAnalyzer() {
       @Override
       public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
         return null;
       }
     };
     analyzer.setMetaverseBuilder( mockBuilder );
+    analyzer.setNamespace( namespace );
 
+    when(namespace.getNamespaceId()).thenReturn( "namespace" );
     // set random StepMetaInterface
     when( mockStepMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
     when( parentStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( parentStepMeta.getName() ).thenReturn( "parentStepMeta" );
 
     analyzer.parentStepMeta = parentStepMeta;
     analyzer.parentTransMeta = mockTransMeta;
@@ -130,11 +134,6 @@ public class KettleBaseStepAnalyzerTest {
    */
   @After
   public void tearDown() throws Exception {
-  }
-
-  @Test
-  public void testSetMetaverseBuilder() {
-    assertNotNull( analyzer.metaverseBuilder );
   }
 
   @Test
@@ -171,7 +170,7 @@ public class KettleBaseStepAnalyzerTest {
 
   @Test
   public void testAddDatabaseConnectionNodesNullDatabaseConnectionAnalyzer() {
-    KettleBaseStepAnalyzer mockAnalyzer = mock( analyzer.getClass() );
+    BaseStepAnalyzer mockAnalyzer = mock( analyzer.getClass() );
     when( mockAnalyzer.getDatabaseConnectionAnalyzer() ).thenReturn( null );
     assertNull( mockAnalyzer.getDatabaseConnectionAnalyzer() );
   }
@@ -279,10 +278,6 @@ public class KettleBaseStepAnalyzerTest {
   public void testSetDatabaseConnectionAnalyzer() {
     analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
     assertNotNull( analyzer.getDatabaseConnectionAnalyzer() );
-    assertNotNull( analyzer.metaverseBuilder );
-    analyzer.metaverseBuilder = null;
-    analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
-    assertNull( analyzer.metaverseBuilder );
   }
 
   @Test

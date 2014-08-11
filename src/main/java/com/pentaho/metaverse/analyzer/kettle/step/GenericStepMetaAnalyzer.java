@@ -20,7 +20,7 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -29,10 +29,10 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import java.util.Set;
 
 /**
- * KettleGenericStepMetaAnalyzer provides a default implementation for analyzing PDI steps
+ * KettleGenericStepMetaAnalyzer provides a default implementation for analyzing PDI step
  * to gather metadata for the metaverse.
  */
-public class KettleGenericStepMetaAnalyzer extends KettleBaseStepAnalyzer<BaseStepMeta> {
+public class GenericStepMetaAnalyzer extends BaseStepAnalyzer<BaseStepMeta> {
 
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
