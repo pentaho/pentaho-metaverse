@@ -9,6 +9,7 @@ import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -49,6 +50,8 @@ public class DocumentControllerTest {
   private IDocumentEvent mockEvent;
   @Mock
   private IMetaverseDocument mockDoc;
+  @Mock
+  private IMetaverseComponentDescriptor mockDescriptor;
 
   @Before
   public void setup() {
@@ -142,12 +145,13 @@ public class DocumentControllerTest {
   public void testOnEvent() throws MetaverseAnalyzerException {
     when( mockEvent.getDocument() ).thenReturn( mockDoc );
     when( mockDoc.getType() ).thenReturn( "dummy" );
+    when( mockDescriptor.getType()).thenReturn( "dummy" );
 
     docController.onEvent( mockEvent );
 
     // timeout to give our asynchronous analyzers a chance to be called
-    verify( dummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDoc );
-    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDoc );
+    verify( dummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDescriptor, mockDoc );
+    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDescriptor, mockDoc );
   }
 
   @Test
@@ -158,8 +162,8 @@ public class DocumentControllerTest {
     docController.onEvent( mockEvent );
 
     // timeout to give our asynchronous analyzers a chance to be called
-    verify( dummyAnalyzer, timeout( 100 ).never() ).analyze( mockDoc );
-    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDoc );
+    verify( dummyAnalyzer, timeout( 100 ).never() ).analyze( mockDescriptor, mockDoc );
+    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDescriptor, mockDoc );
   }
 
   @Test
@@ -170,9 +174,9 @@ public class DocumentControllerTest {
     docController.onEvent( mockEvent );
 
     // make sure noe of the analyzers are fired for this un supported type
-    verify( dummyAnalyzer, timeout( 100 ).never() ).analyze( mockDoc );
-    verify( anotherAnalyzer, timeout( 100 ).never() ).analyze( mockDoc );
-    verify( testAndDummyAnalyzer, timeout( 100 ).never() ).analyze( mockDoc );
+    verify( dummyAnalyzer, timeout( 100 ).never() ).analyze( mockDescriptor, mockDoc );
+    verify( anotherAnalyzer, timeout( 100 ).never() ).analyze( mockDescriptor, mockDoc );
+    verify( testAndDummyAnalyzer, timeout( 100 ).never() ).analyze( mockDescriptor, mockDoc );
   }
 
   @Test

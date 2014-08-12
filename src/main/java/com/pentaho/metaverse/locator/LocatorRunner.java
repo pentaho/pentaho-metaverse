@@ -1,12 +1,10 @@
 package com.pentaho.metaverse.locator;
 
-import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.io.FilenameUtils;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
@@ -15,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Created by gmoran on 7/31/14.
+ * The LocatorRunner is a execution construct for concurrently running document locator logic.
  */
 public abstract class LocatorRunner<T> implements Runnable {
 
@@ -97,7 +95,7 @@ public abstract class LocatorRunner<T> implements Runnable {
       IMetaverseDocument metaverseDocument = objectFactory.createDocumentObject();
       String documentId = DictionaryHelper.getId( metaverseDocument, namespace.getNamespaceId(), id );
 
-      INamespace documentNamespace = locator.getNamespaceFactory().createNameSpace( namespace, id );
+      INamespace documentNamespace = locator.getNamespaceFactory().createNameSpace( namespace, id, extension );
 
       metaverseDocument.setNamespace( documentNamespace );
       metaverseDocument.setContent( contents );

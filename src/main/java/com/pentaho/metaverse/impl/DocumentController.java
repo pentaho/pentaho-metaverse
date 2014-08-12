@@ -226,10 +226,13 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
       public void run() {
         try {
 
-          // TODO can document ever be null?
-          analyzer.setNamespace( event.getDocument().getNamespace() );
-
-          analyzer.analyze( event.getDocument() );
+          analyzer.analyze(
+              new MetaverseComponentDescriptor(
+                event.getDocument().getName(),
+                event.getDocument().getType(),
+                event.getDocument() ),
+                event.getDocument()
+          );
         } catch ( MetaverseAnalyzerException mae ) {
           log.error( Messages.getString( "ERROR.AnalyzingDocument", event.getDocument().getStringID() ), mae );
         }

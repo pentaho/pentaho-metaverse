@@ -26,14 +26,12 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
-import com.pentaho.metaverse.impl.MetaverseNamespace;
-import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -70,7 +68,8 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
   private Logger log = LoggerFactory.getLogger( JobAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IMetaverseDocument document ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, IMetaverseDocument document )
+    throws MetaverseAnalyzerException {
 
     validateState( document );
 
@@ -92,16 +91,10 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
       job = (JobMeta) repoObject;
     }
 
-    // TODO: All of this should go away once we solve threading issues
-    setStringID( null );
-    setName( job.getName() );
-    setNamespace( document.getNamespace() );
-    // TODO: All of this should go away once we solve threading issues
-
     // Create a metaverse node and start filling in details
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( getStringID() );
-    node.setType( DictionaryConst.NODE_TYPE_JOB );
-    node.setName( job.getName() );
+    descriptor.setName( job.getName() );
+    descriptor.setType( DictionaryConst.NODE_TYPE_JOB );
+    IMetaverseNode node = createNodeFromDescriptor( descriptor );
 
     // pull out the standard fields
     String description = job.getDescription();
@@ -122,22 +115,18 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
         if ( entry != null ) {
           IMetaverseNode jobEntryNode = null;
           JobEntryInterface jobEntryInterface = entry.getEntry();
+          IMetaverseComponentDescriptor entryDescriptor =
+              getChildComponentDescriptor( descriptor, entry.getName(), DictionaryConst.NODE_TYPE_JOB_ENTRY );
           Set<IJobEntryAnalyzer> jobEntryAnalyzers = getJobEntryAnalyzers( jobEntryInterface );
           if ( jobEntryAnalyzers != null && !jobEntryAnalyzers.isEmpty() ) {
             for ( IJobEntryAnalyzer jobEntryAnalyzer : jobEntryAnalyzers ) {
               jobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
-              //TODO: remove once platform API has this method
-              MetaverseNamespace ns = (MetaverseNamespace) document.getNamespace();
-              jobEntryAnalyzer.setNamespace( ns.getChildNamespace( job.getName() ));
-              jobEntryNode = jobEntryAnalyzer.analyze( entry.getEntry() );
+              jobEntryNode = jobEntryAnalyzer.analyze( entryDescriptor, entry.getEntry() );
             }
           } else {
             IJobEntryAnalyzer<JobEntryInterface> defaultJobEntryAnalyzer = new GenericJobEntryMetaAnalyzer();
             defaultJobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
-            //TODO: remove once platform API has this method
-            MetaverseNamespace ns = (MetaverseNamespace) document.getNamespace();
-            defaultJobEntryAnalyzer.setNamespace( ns.getChildNamespace( job.getName() ));
-            jobEntryNode = defaultJobEntryAnalyzer.analyze( jobEntryInterface );
+            jobEntryNode = defaultJobEntryAnalyzer.analyze( entryDescriptor, jobEntryInterface );
           }
           if ( jobEntryNode != null ) {
             metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, jobEntryNode );
@@ -153,7 +142,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     }
 
     metaverseBuilder.addNode( node );
-    addParentLink( node );
+    addParentLink( descriptor, node );
     return node;
   }
 
@@ -184,14 +173,6 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
       }
     } else {
       jobEntryAnalyzers.add( new GenericJobEntryMetaAnalyzer() );
-    }
-
-    for ( IJobEntryAnalyzer analyzer : jobEntryAnalyzers ) {
-      analyzer.setMetaverseBuilder( metaverseBuilder );
-      //TODO: remove once platform API has this method
-      MetaverseNamespace ns = (MetaverseNamespace)getNamespace();
-      analyzer.setNamespace( ns.getChildNamespace( getName() ) );
-
     }
 
     return jobEntryAnalyzers;

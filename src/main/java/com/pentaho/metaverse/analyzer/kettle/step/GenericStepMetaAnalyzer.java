@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -37,12 +38,13 @@ public class GenericStepMetaAnalyzer extends BaseStepAnalyzer<BaseStepMeta> {
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
    *
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor,java.lang.Object)
    */
   @Override
-  public IMetaverseNode analyze( BaseStepMeta baseStepMeta ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, BaseStepMeta baseStepMeta )
+    throws MetaverseAnalyzerException {
 
-    return super.analyze( baseStepMeta );
+    return super.analyze( descriptor, baseStepMeta );
   }
 
   @Override

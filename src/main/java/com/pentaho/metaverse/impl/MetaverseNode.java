@@ -41,7 +41,9 @@ import com.tinkerpop.blueprints.VertexQuery;
  */
 public class MetaverseNode implements IMetaverseNode {
 
-  /** The Blueprints-backed Vertex for this metaverse node */
+  /**
+   * The Blueprints-backed Vertex for this metaverse node
+   */
   protected Vertex v;
 
   /**
@@ -53,6 +55,7 @@ public class MetaverseNode implements IMetaverseNode {
 
   /**
    * Constructor that builds a MetaverseNode from a Vertex.
+   *
    * @param v Vertex
    */
   public MetaverseNode( Vertex v ) {
@@ -154,11 +157,9 @@ public class MetaverseNode implements IMetaverseNode {
 
   /**
    * Adds the edge.
-   * 
-   * @param arg0
-   *          the arg0
-   * @param arg1
-   *          the arg1
+   *
+   * @param arg0 the arg0
+   * @param arg1 the arg1
    * @return the edge
    */
   public Edge addEdge( String arg0, Vertex arg1 ) {
@@ -167,11 +168,9 @@ public class MetaverseNode implements IMetaverseNode {
 
   /**
    * Gets the edges.
-   * 
-   * @param arg0
-   *          the arg0
-   * @param arg1
-   *          the arg1
+   *
+   * @param arg0 the arg0
+   * @param arg1 the arg1
    * @return the edges
    */
   public Iterable<Edge> getEdges( Direction arg0, String... arg1 ) {
@@ -180,7 +179,7 @@ public class MetaverseNode implements IMetaverseNode {
 
   /**
    * Gets the id.
-   * 
+   *
    * @return the id
    */
   public Object getId() {
@@ -189,11 +188,9 @@ public class MetaverseNode implements IMetaverseNode {
 
   /**
    * Gets the vertices.
-   * 
-   * @param arg0
-   *          the arg0
-   * @param arg1
-   *          the arg1
+   *
+   * @param arg0 the arg0
+   * @param arg1 the arg1
    * @return the vertices
    */
   public Iterable<Vertex> getVertices( Direction arg0, String... arg1 ) {
@@ -202,7 +199,7 @@ public class MetaverseNode implements IMetaverseNode {
 
   /**
    * Query.
-   * 
+   *
    * @return the vertex query
    */
   public VertexQuery query() {

@@ -31,8 +31,6 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
-import com.pentaho.metaverse.impl.MetaverseNamespace;
-import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.trans.TransMeta;
@@ -40,7 +38,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IAnalyzer;
-import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -74,7 +72,8 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
   private Logger log = LoggerFactory.getLogger( TransformationAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IMetaverseDocument document ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, IMetaverseDocument document )
+    throws MetaverseAnalyzerException {
 
     validateState( document );
 
@@ -97,16 +96,10 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     }
 
     // Create a metaverse node and start filling in details
-
-    // TODO: All of this should go away once we solve threading issues
-    setStringID( null );
-    setName( transMeta.getName() );
-    setNamespace( document.getNamespace() );
-    // TODO: All of this should go away once we solve threading issues
-
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( getStringID() );
-    node.setType( DictionaryConst.NODE_TYPE_TRANS );
-    node.setName( transMeta.getName() );
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
+        descriptor.getStringID(),
+        transMeta.getName(),
+        DictionaryConst.NODE_TYPE_TRANS );
 
     // pull out the standard fields
     String description = transMeta.getDescription();
@@ -128,22 +121,18 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
           }
 
           IMetaverseNode stepNode = null;
+          IMetaverseComponentDescriptor stepDescriptor =
+              getChildComponentDescriptor( descriptor, stepMeta.getName(), DictionaryConst.NODE_TYPE_TRANS_STEP );
           Set<IStepAnalyzer> stepAnalyzers = getStepAnalyzers( stepMeta );
           if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
             for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
               stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-              //TODO: remove once platform API has this method
-              MetaverseNamespace ns = (MetaverseNamespace)getNamespace();
-              stepAnalyzer.setNamespace( ns.getChildNamespace( transMeta.getName() ) );
-              stepNode = stepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
+              stepNode = stepAnalyzer.analyze( stepDescriptor, getBaseStepMetaFromStepMeta( stepMeta ) );
             }
           } else {
             IAnalyzer<BaseStepMeta> defaultStepAnalyzer = new GenericStepMetaAnalyzer();
             defaultStepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-            //TODO: remove once platform API has this method
-            MetaverseNamespace ns = (MetaverseNamespace)getNamespace();
-            defaultStepAnalyzer.setNamespace( ns.getChildNamespace( transMeta.getName() ) );
-            stepNode = defaultStepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
+            stepNode = defaultStepAnalyzer.analyze( stepDescriptor, getBaseStepMetaFromStepMeta( stepMeta ) );
           }
           if ( stepNode != null ) {
             metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, stepNode );
@@ -156,7 +145,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     }
 
     metaverseBuilder.addNode( node );
-    addParentLink( node );
+    addParentLink( descriptor, node );
     return node;
   }
 
@@ -187,13 +176,6 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       }
     } else {
       stepAnalyzers.add( new GenericStepMetaAnalyzer() );
-    }
-
-    for ( IStepAnalyzer analyzer : stepAnalyzers ) {
-      analyzer.setMetaverseBuilder( metaverseBuilder );
-      //TODO: remove once platform API has this method
-      MetaverseNamespace ns = (MetaverseNamespace)getNamespace();
-      analyzer.setNamespace( ns.getChildNamespace( getName() ) );
     }
 
     return stepAnalyzers;

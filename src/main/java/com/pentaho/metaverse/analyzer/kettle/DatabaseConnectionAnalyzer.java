@@ -22,13 +22,11 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
-
 
 /**
  * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
@@ -37,13 +35,13 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
 
   /**
    * Analyzes a database connection for metadata.
-   * 
-   * @param dbMeta
-   *          the object
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(java.lang.Object)
+   *
+   * @param dbMeta the object
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor, java.lang.Object)
    */
   @Override
-  public IMetaverseNode analyze( DatabaseMeta dbMeta ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, DatabaseMeta dbMeta )
+    throws MetaverseAnalyzerException {
 
     if ( dbMeta == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.DatabaseMeta.IsNull" ) );
@@ -57,13 +55,7 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseBuilder.IsNull" ) );
     }
 
-    String type = DictionaryConst.NODE_TYPE_DATASOURCE;
-
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( dbMeta.getClass(),
-            getNamespace().getNamespaceId(), dbMeta.getName() ),
-        dbMeta.getName(),
-        type );
+    IMetaverseNode node = createNodeFromDescriptor( descriptor );
 
     int accessType = dbMeta.getAccessType();
     node.setProperty( "accessType", accessType );
@@ -88,9 +80,6 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
 
     boolean shared = dbMeta.isShared();
     node.setProperty( "shared", shared );
-
-    // TODO If these attributes are important, we will need to
-    // TODO account for the same attributes in partitions in clusters
 
     metaverseBuilder.addNode( node );
 

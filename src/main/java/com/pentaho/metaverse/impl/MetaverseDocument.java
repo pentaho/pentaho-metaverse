@@ -27,25 +27,34 @@ import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
  * Implementation of an @see org.pentaho.platform.api.metaverse.IMetaverseDocument
- * 
+ *
  * @author jdixon
- * 
  */
 public class MetaverseDocument implements IMetaverseDocument {
 
-  /** The name of the document. */
+  /**
+   * The name of the document.
+   */
   private String name;
 
-  /** The identifier for this document. */
+  /**
+   * The identifier for this document.
+   */
   private String id;
 
-  /** The type of this document. */
+  /**
+   * The type of this document.
+   */
   private String type;
 
-  /** The content of this document. */
+  /**
+   * The content of this document.
+   */
   private Object content;
 
-  /** The namespace which declares the domain for this document */
+  /**
+   * The namespace which declares the domain for this document
+   */
   private INamespace namespace;
 
   /* (non-Javadoc)
@@ -109,7 +118,7 @@ public class MetaverseDocument implements IMetaverseDocument {
   /**
    * Sets the string ID for this document.
    *
-   * @param id          the ID to set
+   * @param id the ID to set
    * @see org.pentaho.platform.api.metaverse.IIdentifierModifiable#setStringID(java.lang.String)
    */
   @Override
@@ -125,5 +134,33 @@ public class MetaverseDocument implements IMetaverseDocument {
   @Override
   public INamespace getNamespace() {
     return namespace;
+  }
+
+  /**
+   * The entity namespace
+   *
+   * @return the namespace id, represents the container for this element
+   */
+  @Override public String getNamespaceId() {
+    return namespace.getNamespaceId();
+  }
+
+  /**
+   * Get the namespace one level above the current entity namespace
+   *
+   * @return the INamespace of the entity one level above the current
+   */
+  @Override public INamespace getParentNamespace() {
+    return namespace.getParentNamespace();
+  }
+
+  /**
+   * get the name space for the current level entity
+   *
+   * @param child the string representation of hte current entity's contribution to the namespace path
+   * @return the namespace object for the entity represented by child
+   */
+  @Override public INamespace getChildNamespace( String child, String type ) {
+    return namespace.getChildNamespace( child, type );
   }
 }

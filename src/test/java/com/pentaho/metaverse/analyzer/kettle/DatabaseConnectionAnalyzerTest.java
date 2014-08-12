@@ -40,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -61,6 +62,9 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Mock
   private INamespace namespace;
+
+  @Mock
+  private IMetaverseComponentDescriptor mockDescriptor;
 
   /**
    * @throws java.lang.Exception
@@ -87,8 +91,6 @@ public class DatabaseConnectionAnalyzerTest {
 
     dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
     dbConnectionAnalyzer.setMetaverseBuilder( builder );
-    dbConnectionAnalyzer.setNamespace( namespace );
-
   }
 
   /**
@@ -112,20 +114,20 @@ public class DatabaseConnectionAnalyzerTest {
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
 
     dbConnectionAnalyzer.setMetaverseBuilder( null );
-    dbConnectionAnalyzer.analyze( databaseMeta );
+    dbConnectionAnalyzer.analyze( mockDescriptor, databaseMeta );
   }
 
   @Test(expected = MetaverseAnalyzerException.class)
   public void testSetMetaverseBuilderNullMetaverseObjectFactory() throws MetaverseAnalyzerException {
     dbConnectionAnalyzer.metaverseObjectFactory = null;
-    dbConnectionAnalyzer.analyze( databaseMeta );
+    dbConnectionAnalyzer.analyze( mockDescriptor, databaseMeta );
   }
 
   @Test
   public void testAnalyze() {
 
     try {
-      IMetaverseNode node = dbConnectionAnalyzer.analyze( databaseMeta );
+      IMetaverseNode node = dbConnectionAnalyzer.analyze( mockDescriptor, databaseMeta );
       assertNotNull( node );
       assertEquals( 13, node.getPropertyKeys().size() );
     } catch ( MetaverseAnalyzerException e ) {
@@ -137,7 +139,7 @@ public class DatabaseConnectionAnalyzerTest {
   @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
-    dbConnectionAnalyzer.analyze( null );
+    dbConnectionAnalyzer.analyze( null, null );
 
   }
 
