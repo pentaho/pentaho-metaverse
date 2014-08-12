@@ -20,11 +20,11 @@ public class MetaverseNamespaceFactoryTest {
   @Before
   public void before( ) {
 
-    INamespace root = new MetaverseNamespace( null, "level 1" );
-    INamespace level2 = new MetaverseNamespace( root, "level 2" );
-    INamespace level3 = new MetaverseNamespace( level2, "level 3" );
+    INamespace root = new MetaverseNamespace( null, "level 1", null );
+    INamespace level2 = new MetaverseNamespace( root, "level 2", null );
+    INamespace level3 = new MetaverseNamespace( level2, "level 3", null );
 
-    namespace = new MetaverseNamespace( level3, "level 4" );
+    namespace = new MetaverseNamespace( level3, "level 4", null );
 
     factory = new NamespaceFactory();
 

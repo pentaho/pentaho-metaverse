@@ -24,6 +24,8 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
+import com.pentaho.metaverse.api.INamespaceFactory;
+import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
 import org.junit.Test;
@@ -50,6 +52,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -82,7 +85,7 @@ public class TransformationAnalyzerTest {
   private IStepAnalyzerProvider stepAnalyzerProvider;
 
   @Mock
-  INamespace namespace;
+  MetaverseNamespace namespace;
 
   /**
    * @throws Exception
@@ -116,9 +119,12 @@ public class TransformationAnalyzerTest {
     analyzer = new TransformationAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
     analyzer.setNamespace( namespace );
+    when(namespace.getChildNamespace( anyString() )).thenReturn( namespace );
+    when(namespace.getParentNamespace() ).thenReturn( namespace );
 
     when( mockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( mockTransDoc.getContent() ).thenReturn( mockContent );
+    when( mockTransDoc.getNamespace() ).thenReturn( namespace );
 
     when( mockGenRowsStepMeta.getParentStepMeta() ).thenReturn( mockStepMeta );
 

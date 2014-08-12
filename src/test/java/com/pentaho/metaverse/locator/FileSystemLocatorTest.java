@@ -82,7 +82,7 @@ public class FileSystemLocatorTest implements IDocumentListener {
     spyLocator = spy(locator);
     when(spyLocator.getNamespaceFactory()).thenReturn( namespaceFactory );
     when(namespaceFactory.createNameSpace(
-        any(INamespace.class), anyString() )).thenReturn( new MetaverseNamespace( null, "" ) );
+        any(INamespace.class), anyString())).thenReturn( new MetaverseNamespace( null, "", namespaceFactory ) );
     try {
       KettleEnvironment.init();
     } catch ( KettleException e ) {

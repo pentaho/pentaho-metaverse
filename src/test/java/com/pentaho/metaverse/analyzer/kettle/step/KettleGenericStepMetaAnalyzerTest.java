@@ -24,8 +24,10 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.pentaho.metaverse.impl.MetaverseNamespace;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -83,7 +85,7 @@ public class KettleGenericStepMetaAnalyzerTest {
   StepMetaInterface mockStepMetaInterface;
 
   @Mock
-  INamespace namespace;
+  MetaverseNamespace namespace;
 
   /**
    * @throws java.lang.Exception
@@ -111,6 +113,8 @@ public class KettleGenericStepMetaAnalyzerTest {
     analyzer = new GenericStepMetaAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
     analyzer.setNamespace( namespace );
+    when(namespace.getChildNamespace( anyString() )).thenReturn( namespace );
+    when(namespace.getParentNamespace() ).thenReturn( namespace );
 
     // set random StepMetaInterface
     when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockStepMetaInterface );
