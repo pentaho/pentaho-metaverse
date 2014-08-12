@@ -96,7 +96,7 @@ public class TextFileInputStepAnalyzerTest {
 
     textFileInputStepAnalyzer = new TextFileInputStepAnalyzer();
     textFileInputStepAnalyzer.setMetaverseBuilder( mockBuilder );
-    descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
+    descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
   }
 
   @Test(expected = MetaverseAnalyzerException.class)

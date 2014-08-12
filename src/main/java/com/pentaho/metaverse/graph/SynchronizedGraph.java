@@ -27,15 +27,16 @@ import com.tinkerpop.blueprints.Features;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.GraphQuery;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
 
 /**
  * A Graph that provides thread-safe modification
  */
 public class SynchronizedGraph implements Graph {
 
-  private final Graph graph;
+  protected final IdGraph graph;
 
-  public SynchronizedGraph( Graph graph ) {
+  public SynchronizedGraph( IdGraph graph ) {
     this.graph = graph;
   }
 

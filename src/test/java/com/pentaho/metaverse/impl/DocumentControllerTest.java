@@ -22,6 +22,8 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -150,8 +152,8 @@ public class DocumentControllerTest {
     docController.onEvent( mockEvent );
 
     // timeout to give our asynchronous analyzers a chance to be called
-    verify( dummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDescriptor, mockDoc );
-    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDescriptor, mockDoc );
+    verify( dummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( any(IMetaverseComponentDescriptor.class), eq(mockDoc) );
+    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( any(IMetaverseComponentDescriptor.class), eq(mockDoc) );
   }
 
   @Test
@@ -162,8 +164,8 @@ public class DocumentControllerTest {
     docController.onEvent( mockEvent );
 
     // timeout to give our asynchronous analyzers a chance to be called
-    verify( dummyAnalyzer, timeout( 100 ).never() ).analyze( mockDescriptor, mockDoc );
-    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( mockDescriptor, mockDoc );
+    verify( dummyAnalyzer, timeout( 100 ).never() ).analyze( any(IMetaverseComponentDescriptor.class), eq(mockDoc) );
+    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( any(IMetaverseComponentDescriptor.class), eq(mockDoc) );
   }
 
   @Test

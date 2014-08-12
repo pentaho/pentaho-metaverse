@@ -23,6 +23,9 @@
 package com.pentaho.metaverse.graph;
 
 import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.KeyIndexableGraph;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.Test;
@@ -32,6 +35,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public class SynchronizedGraphFactoryTest {
 
@@ -67,4 +71,23 @@ public class SynchronizedGraphFactoryTest {
     SynchronizedGraphFactory factory = new SynchronizedGraphFactory();
     assertNotNull( factory );
   }
+
+  @Test( expected = IllegalArgumentException.class )
+  public void testWrapGraph_NotAKeyIndexableGraph() throws Exception {
+    Graph g = mock( Graph.class );
+    SynchronizedGraphFactory.wrapGraph( g );
+  }
+
+  @Test
+  public void testWrapGraph() throws Exception {
+    Graph g = new TinkerGraph();
+    SynchronizedGraph wrapped = (SynchronizedGraph) SynchronizedGraphFactory.wrapGraph( g );
+
+    assertTrue( wrapped instanceof SynchronizedGraph );
+    assertTrue( wrapped.graph instanceof IdGraph );
+    assertTrue( wrapped.graph instanceof KeyIndexableGraph );
+
+  }
+
+
 }
