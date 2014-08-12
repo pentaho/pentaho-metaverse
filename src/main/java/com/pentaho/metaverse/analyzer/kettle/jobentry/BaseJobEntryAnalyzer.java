@@ -22,12 +22,11 @@
 
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.job.entry.JobEntryInterface;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -65,7 +64,7 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface> extends 
    * @throws MetaverseAnalyzerException
    */
   @Override
-  public IMetaverseNode analyze( T entry ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, T entry ) throws MetaverseAnalyzerException {
 
     if ( entry == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );
@@ -80,12 +79,7 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface> extends 
     }
 
     // Add yourself
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        DictionaryHelper.getId( entry, getNamespace().getNamespaceId(), entry.getName() ) );
-
-    node.setName( entry.getName() );
-    node.setType( DictionaryConst.NODE_TYPE_JOB_ENTRY );
-
+    IMetaverseNode node = createNodeFromDescriptor( descriptor );
     metaverseBuilder.addNode( node );
 
     return node;

@@ -86,6 +86,9 @@ public class BaseStepAnalyzerTest {
   @Mock
   MetaverseNamespace namespace;
 
+  @Mock
+  IMetaverseComponentDescriptor mockDescriptor;
+
   /**
    * @throws Exception
    */
@@ -116,11 +119,10 @@ public class BaseStepAnalyzerTest {
       }
     };
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.setNamespace( namespace );
-    when(namespace.getChildNamespace( anyString() )).thenReturn( namespace );
-    when(namespace.getParentNamespace() ).thenReturn( namespace );
+    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+    when( namespace.getParentNamespace() ).thenReturn( namespace );
 
-    when(namespace.getNamespaceId()).thenReturn( "namespace" );
+    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
     // set random StepMetaInterface
     when( mockStepMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
     when( parentStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
@@ -140,20 +142,9 @@ public class BaseStepAnalyzerTest {
   public void tearDown() throws Exception {
   }
 
-  @Test
-  public void testAddSelfNode() throws MetaverseAnalyzerException {
-    assertNotNull( analyzer.addSelfNode() );
-  }
-
-  @Test(expected = MetaverseAnalyzerException.class)
-  public void testAddSelfNodeWithException() throws MetaverseAnalyzerException {
-    analyzer.parentStepMeta = null;
-    assertNotNull( analyzer.addSelfNode() );
-  }
-
   @Test(expected = MetaverseAnalyzerException.class)
   public void addDatabaseConnectionNodesWithNullStep() throws MetaverseAnalyzerException {
-    analyzer.addDatabaseConnectionNodes();
+    analyzer.addDatabaseConnectionNodes( mockDescriptor );
   }
 
   @Test
@@ -198,12 +189,12 @@ public class BaseStepAnalyzerTest {
 
   @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
-    analyzer.analyze( null );
+    analyzer.analyze( mockDescriptor, null );
   }
 
   @Test
   public void testAnalyze() throws MetaverseAnalyzerException {
-    assertNotNull( analyzer.analyze( mockStepMeta ) );
+    assertNotNull( analyzer.analyze( mockDescriptor, mockStepMeta ) );
   }
 
   @Test
@@ -211,13 +202,13 @@ public class BaseStepAnalyzerTest {
     DatabaseMeta[] dbs = new DatabaseMeta[] { mockDatabaseMeta };
     when( mockStepMetaInterface.getUsedDatabaseConnections() ).thenReturn( dbs );
     when( mockStepMeta.getUsedDatabaseConnections() ).thenReturn( dbs );
-    assertNotNull( analyzer.analyze( mockStepMeta ) );
+    assertNotNull( analyzer.analyze( mockDescriptor, mockStepMeta ) );
   }
 
   @Test(expected = MetaverseAnalyzerException.class)
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
     analyzer.setMetaverseBuilder( null );
-    analyzer.analyze( mockStepMeta );
+    analyzer.analyze( mockDescriptor, mockStepMeta );
   }
 
   @Test
@@ -234,33 +225,33 @@ public class BaseStepAnalyzerTest {
         return rowMeta;
       }
     } );
-    IMetaverseNode node = analyzer.analyze( mockStepMeta );
+    IMetaverseNode node = analyzer.analyze( mockDescriptor, mockStepMeta );
     assertNotNull( node );
   }
 
   @Test
   public void testAddCreatedFieldNodesWithNoFields() throws KettleStepException {
     when( mockStepFields.getValueMetaList() ).thenReturn( null );
-    analyzer.addCreatedFieldNodes();
+    analyzer.addCreatedFieldNodes( mockDescriptor );
   }
 
   @Test(expected = MetaverseAnalyzerException.class)
   public void testAnalyzeWithNullParentStepMeta() throws MetaverseAnalyzerException {
     when( mockStepMeta.getParentStepMeta() ).thenReturn( null );
-    analyzer.analyze( mockStepMeta );
+    analyzer.analyze( mockDescriptor, mockStepMeta );
   }
 
   @Test(expected = MetaverseAnalyzerException.class)
   public void testAnalyzeWithNullMetaverseObjectFactory() throws MetaverseAnalyzerException {
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( null );
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.analyze( mockStepMeta );
+    analyzer.analyze( mockDescriptor, mockStepMeta );
   }
 
   @Test
   public void testAnalyzeWithNullParentTransMeta() throws MetaverseAnalyzerException {
     when( parentStepMeta.getParentTransMeta() ).thenReturn( null );
-    analyzer.analyze( mockStepMeta );
+    analyzer.analyze( mockDescriptor, mockStepMeta );
   }
 
   @Test
@@ -270,12 +261,12 @@ public class BaseStepAnalyzerTest {
     when( mockStepMeta.getUsedDatabaseConnections() ).thenReturn( dbs );
     analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
     analyzer.baseStepMeta = mockStepMeta;
-    analyzer.addDatabaseConnectionNodes();
+    analyzer.addDatabaseConnectionNodes( mockDescriptor );
   }
 
   @Test(expected = MetaverseAnalyzerException.class)
   public void testAddDatabaseConnectionNodesNullStepMeta() throws MetaverseAnalyzerException {
-    analyzer.addDatabaseConnectionNodes();
+    analyzer.addDatabaseConnectionNodes( mockDescriptor );
   }
 
   @Test

@@ -46,15 +46,14 @@ import java.util.concurrent.Future;
 
 /**
  * Base implementation for all @see org.pentaho.platform.api.metaverse.IDocumentLocator implementations
- * @author jdixon
  *
+ * @author jdixon
  */
 public abstract class BaseLocator<T> implements IDocumentLocator {
 
   private static final long serialVersionUID = 693428630030858039L;
 
   private static final Logger log = LoggerFactory.getLogger( BaseLocator.class );
-
 
   /**
    * The node in the metaverse that represents the root of this located domain/namespace
@@ -98,6 +97,7 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
 
   /**
    * A method that returns the payload (object or XML) for a document
+   *
    * @param locatedItem item to harvest; ie., a file
    * @return The object or XML payload
    * @throws Exception When the document contents cannot be retrieved
@@ -106,6 +106,7 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
 
   /**
    * Constructor that takes in a List of IDocumentListeners
+   *
    * @param documentListeners the List of listeners
    */
   public BaseLocator( List<IDocumentListener> documentListeners ) {
@@ -173,7 +174,8 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
 
   protected INamespace getNamespace() {
     return getNamespaceFactory().createNameSpace( null,
-        getLocatorType().concat( DictionaryHelper.SEPARATOR.concat( getRepositoryId() ) ) );
+        getLocatorType().concat( DictionaryHelper.SEPARATOR.concat( getRepositoryId() ) ),
+        DictionaryConst.NODE_TYPE_LOCATOR );
   }
 
   @Override
@@ -191,7 +193,6 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
     runner = null;
   }
 
-
   protected void startScan( LocatorRunner locatorRunner ) {
 
     if ( futureTask != null && !futureTask.isDone() ) {
@@ -203,7 +204,7 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
     metaverseBuilder.addNode( node );
 
     runner = locatorRunner;
-    runner.setLocator(  this );
+    runner.setLocator( this );
 
     futureTask = completionService.submit( runner, node.getStringID() );
   }

@@ -19,11 +19,19 @@ public class MetaverseNamespace implements INamespace {
 
   private INamespaceFactory factory;
 
-  public MetaverseNamespace( INamespace parent, String namespace, INamespaceFactory factory) {
+  private String type;
+
+  public MetaverseNamespace( INamespace parent, String namespace, String type, INamespaceFactory factory ) {
 
     this.parent = parent;
     this.namespace = namespace;
+    this.type = type;
     this.factory = factory;
+  }
+
+  public MetaverseNamespace( INamespace parent, String type, String namespace ) {
+
+    this( parent, namespace, type, new NamespaceFactory() );
 
   }
 
@@ -35,9 +43,14 @@ public class MetaverseNamespace implements INamespace {
     }
 
     if ( parent != null ) {
-      fullyQualifiedNamespace = parent.getNamespaceId().concat( concatenationCharacter ).concat( namespace );
+      fullyQualifiedNamespace = parent.getNamespaceId()
+          .concat( concatenationCharacter )
+          .concat( namespace );
     } else {
       fullyQualifiedNamespace = namespace;
+    }
+    if ( type != null ) {
+      fullyQualifiedNamespace = fullyQualifiedNamespace.concat( concatenationCharacter ).concat( type );
     }
 
     return fullyQualifiedNamespace;
@@ -49,12 +62,11 @@ public class MetaverseNamespace implements INamespace {
   }
 
   /**
-   * TODO: Need to add this to the platform API
    * @param child the name of the new descendant namespace, relative to the parent (this)
    * @return a new namespace
    */
-  public INamespace getChildNamespace( String child ){
-    return factory.createNameSpace( this, child );
+  public INamespace getChildNamespace( String child, String type ) {
+    return factory.createNameSpace( this, child, type );
   }
 
 }

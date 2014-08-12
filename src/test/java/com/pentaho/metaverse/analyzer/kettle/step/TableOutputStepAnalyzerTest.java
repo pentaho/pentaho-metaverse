@@ -23,11 +23,13 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.INamespaceFactory;
-import com.pentaho.metaverse.impl.MetaverseNamespace;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -49,7 +51,9 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -80,7 +84,9 @@ public class TableOutputStepAnalyzerTest {
   DatabaseMeta mockDatabaseMeta;
 
   @Mock
-  INamespaceFactory nsFactory;
+  private INamespace mockNamespace;
+
+  IMetaverseComponentDescriptor descriptor;
 
   /**
    * @throws java.lang.Exception
@@ -103,10 +109,12 @@ public class TableOutputStepAnalyzerTest {
   public void setUp() throws Exception {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
+    when( mockNamespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( mockNamespace );
+    when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
 
     analyzer = new TableOutputStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.setNamespace( new MetaverseNamespace( null, "Table Output Step", nsFactory ) );
+    descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
   }
 
   /**
@@ -119,7 +127,7 @@ public class TableOutputStepAnalyzerTest {
   @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
-    analyzer.analyze( null );
+    analyzer.analyze( descriptor, null );
   }
 
   @Test
@@ -132,7 +140,7 @@ public class TableOutputStepAnalyzerTest {
     when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
 
-    assertNotNull( analyzer.analyze( mockTableOutputMeta ) );
+    assertNotNull( analyzer.analyze( descriptor, mockTableOutputMeta ) );
   }
 
   @Test
@@ -162,7 +170,7 @@ public class TableOutputStepAnalyzerTest {
       }
     } );
 
-    assertNotNull( analyzer.analyze( mockTableOutputMeta ) );
+    assertNotNull( analyzer.analyze( descriptor, mockTableOutputMeta ) );
   }
 
   @Test

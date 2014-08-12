@@ -15,5 +15,5 @@ public interface INamespaceFactory {
    * @param name the additional container identifier for this namespace
    * @return INamespace object to manage namespace hierarchy
    */
-  public INamespace createNameSpace( INamespace parent, String name );
+  public INamespace createNameSpace( INamespace parent, String name, String type );
 }

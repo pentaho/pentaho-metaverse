@@ -35,6 +35,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -57,6 +58,8 @@ public class BaseJobEntryAnalyzerTest {
 
   @Mock
   private JobEntryInterface mockJobEntryInterface;
+
+  @Mock IMetaverseComponentDescriptor mockDescriptor;
 
   /**
    * @throws Exception
@@ -81,13 +84,16 @@ public class BaseJobEntryAnalyzerTest {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
 
-    analyzer = new BaseJobEntryAnalyzer(){
+    analyzer = new BaseJobEntryAnalyzer() {
 
       @Override public Set<Class<? super JobEntryCopy>> getSupportedEntries() {
         return null;
       }
 
-      @Override public IMetaverseNode analyze( Object object ) throws MetaverseAnalyzerException {
+      @Override
+      public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, Object object )
+          throws MetaverseAnalyzerException {
+
         return null;
       }
     };
@@ -107,13 +113,13 @@ public class BaseJobEntryAnalyzerTest {
   @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
-    analyzer.analyze( null );
+    analyzer.analyze( mockDescriptor, null );
 
   }
 
   public void testAnalyze() throws MetaverseAnalyzerException {
 
-    IMetaverseNode node = analyzer.analyze( mockJobEntryInterface );
+    IMetaverseNode node = analyzer.analyze( mockDescriptor, mockJobEntryInterface );
     assertNotNull( node );
   }
 
@@ -121,7 +127,7 @@ public class BaseJobEntryAnalyzerTest {
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
 
     analyzer.setMetaverseBuilder( null );
-    analyzer.analyze( mockJobEntryInterface );
+    analyzer.analyze( mockDescriptor, mockJobEntryInterface );
 
   }
 

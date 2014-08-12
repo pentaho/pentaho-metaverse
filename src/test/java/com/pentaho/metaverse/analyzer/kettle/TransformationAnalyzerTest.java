@@ -24,7 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
-import com.pentaho.metaverse.api.INamespaceFactory;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
@@ -43,9 +43,9 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.rowgenerator.RowGeneratorMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
@@ -85,7 +85,9 @@ public class TransformationAnalyzerTest {
   private IStepAnalyzerProvider stepAnalyzerProvider;
 
   @Mock
-  MetaverseNamespace namespace;
+  private MetaverseNamespace namespace;
+
+  private IMetaverseComponentDescriptor descriptor;
 
   /**
    * @throws Exception
@@ -118,9 +120,8 @@ public class TransformationAnalyzerTest {
 
     analyzer = new TransformationAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.setNamespace( namespace );
-    when(namespace.getChildNamespace( anyString() )).thenReturn( namespace );
-    when(namespace.getParentNamespace() ).thenReturn( namespace );
+    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+    when( namespace.getParentNamespace() ).thenReturn( namespace );
 
     when( mockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( mockTransDoc.getContent() ).thenReturn( mockContent );
@@ -133,6 +134,8 @@ public class TransformationAnalyzerTest {
 
     when( mockContent.nrSteps() ).thenReturn( 1 );
     when( mockContent.getStep( 0 ) ).thenReturn( mockStepMeta );
+
+    descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, namespace );
 
   }
 
@@ -147,7 +150,7 @@ public class TransformationAnalyzerTest {
   public void testAnalyzerTransformWithSteps() throws MetaverseAnalyzerException {
 
     // increases line code coverage by adding step to transformation
-    IMetaverseNode node = analyzer.analyze( mockTransDoc );
+    IMetaverseNode node = analyzer.analyze( descriptor, mockTransDoc );
     assertNotNull( node );
   }
 
@@ -155,7 +158,7 @@ public class TransformationAnalyzerTest {
   public void testAnalyzeWithNullMetaverseObjectFactory() throws MetaverseAnalyzerException {
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( null );
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.analyze( mockTransDoc );
+    analyzer.analyze( descriptor, mockTransDoc );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
@@ -165,7 +168,7 @@ public class TransformationAnalyzerTest {
     when( newMockTransDoc.getContent() ).thenReturn(
         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
             "<transformation>This is not a valid TransMeta doc!" );
-    analyzer.analyze( newMockTransDoc );
+    analyzer.analyze( descriptor, newMockTransDoc );
   }
 
   @Test
@@ -179,25 +182,25 @@ public class TransformationAnalyzerTest {
   @Test
   public void testGetBaseStepMetaFromStepMetaInterfaceNotABaseStepMeta() throws MetaverseAnalyzerException {
     when( mockStepMeta.getStepMetaInterface() ).thenReturn( mock( StepMetaInterface.class ) );
-    analyzer.analyze( mockTransDoc );
+    analyzer.analyze( descriptor, mockTransDoc );
   }
 
   @Test
   public void testAnalyzeStepWithNullParentTransMeta() throws MetaverseAnalyzerException {
     when( mockStepMeta.getParentTransMeta() ).thenReturn( null );
-    analyzer.analyze( mockTransDoc );
+    analyzer.analyze( descriptor, mockTransDoc );
   }
 
   @Test
   public void testAnalyzeStepsWithNullStepMeta() throws MetaverseAnalyzerException {
     when( mockContent.getStep( 0 ) ).thenReturn( null );
-    analyzer.analyze( mockTransDoc );
+    analyzer.analyze( descriptor, mockTransDoc );
   }
 
   @Test
   public void testAnalyzeStepsWithAnalyzerProvider() throws MetaverseAnalyzerException {
     analyzer.setStepAnalyzerProvider( stepAnalyzerProvider );
-    analyzer.analyze( mockTransDoc );
+    analyzer.analyze( descriptor, mockTransDoc );
   }
 
   @Test
@@ -210,8 +213,8 @@ public class TransformationAnalyzerTest {
 
   @Test
   public void testGetStepAnalyzersWithNullBaseStepMeta() {
-    TransformationAnalyzer spyAnalyzer = spy(analyzer);
-    when(spyAnalyzer.getBaseStepMetaFromStepMeta( mockStepMeta )).thenReturn(null);
+    TransformationAnalyzer spyAnalyzer = spy( analyzer );
+    when( spyAnalyzer.getBaseStepMetaFromStepMeta( mockStepMeta ) ).thenReturn( null );
     spyAnalyzer.setStepAnalyzerProvider( stepAnalyzerProvider );
     spyAnalyzer.getStepAnalyzers( mockStepMeta );
   }

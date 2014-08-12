@@ -20,26 +20,24 @@ public class MetaverseNamespaceFactoryTest {
   @Before
   public void before( ) {
 
-    INamespace root = new MetaverseNamespace( null, "level 1", null );
-    INamespace level2 = new MetaverseNamespace( root, "level 2", null );
-    INamespace level3 = new MetaverseNamespace( level2, "level 3", null );
+    INamespace root = new MetaverseNamespace( null, "level 1", "type", null );
+    INamespace level2 = new MetaverseNamespace( root, "level 2", "type", null );
+    INamespace level3 = new MetaverseNamespace( level2, "level 3", "type", null );
 
-    namespace = new MetaverseNamespace( level3, "level 4", null );
+    namespace = new MetaverseNamespace( level3, "level 4", "type", null );
 
     factory = new NamespaceFactory();
-
-
   }
 
   @Test
   public void testCreateNamespace( ) {
-    INamespace ns = factory.createNameSpace( namespace, "level 5" );
-    assertEquals( "level 1~level 2~level 3~level 4~level 5", ns.getNamespaceId() );
+    INamespace ns = factory.createNameSpace( namespace, "level 5", "type" );
+    assertEquals( "level 1~type~level 2~type~level 3~type~level 4~type~level 5~type", ns.getNamespaceId() );
   }
 
   @Test
   public void testNamespaceNull( ) {
-    INamespace ns = factory.createNameSpace( null, null );
+    INamespace ns = factory.createNameSpace( null, null, null );
     assertNull( ns.getNamespaceId() );
   }
 

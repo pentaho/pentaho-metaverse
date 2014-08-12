@@ -23,7 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.INamespaceFactory;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.MetaverseDocument;
 import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -50,7 +50,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith( Parameterized.class )
+@RunWith(Parameterized.class)
 public class MetaverseDocumentAnalyzerTest {
 
   static {
@@ -84,6 +84,8 @@ public class MetaverseDocumentAnalyzerTest {
 
   private MetaverseNamespace namespace;
 
+  private IMetaverseComponentDescriptor descriptor;
+
   /**
    * @throws Exception
    */
@@ -105,15 +107,15 @@ public class MetaverseDocumentAnalyzerTest {
   public void setUp() throws Exception {
     builder = mock( IMetaverseBuilder.class );
     transDoc = mock( IMetaverseDocument.class );
-    namespace = mock(MetaverseNamespace.class );
+    namespace = mock( MetaverseNamespace.class );
+    descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, namespace );
 
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
 
     analyzer.setMetaverseBuilder( builder );
-    analyzer.setNamespace( namespace );
-    when(namespace.getChildNamespace( anyString() )).thenReturn( namespace );
-    when(namespace.getParentNamespace() ).thenReturn( namespace );
+    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+    when( namespace.getParentNamespace() ).thenReturn( namespace );
 
     when( transDoc.getType() ).thenReturn( type );
     when( transDoc.getContent() ).thenReturn( content );
@@ -134,32 +136,32 @@ public class MetaverseDocumentAnalyzerTest {
   public void tearDown() throws Exception {
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
-    analyzer.analyze( null );
+    analyzer.analyze( null, null );
 
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testNullDocumentContent() throws MetaverseAnalyzerException {
 
     when( transDoc.getContent() ).thenReturn( null );
-    analyzer.analyze( transDoc );
+    analyzer.analyze( descriptor, transDoc );
 
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testAnalyzeNonTransDocument() throws MetaverseAnalyzerException {
 
-    analyzer.analyze( new MetaverseDocument() );
+    analyzer.analyze( descriptor, new MetaverseDocument() );
 
   }
 
   @Test
   public void testAnalyzeTransDocument() throws MetaverseAnalyzerException {
 
-    IMetaverseNode node = analyzer.analyze( transDoc );
+    IMetaverseNode node = analyzer.analyze( descriptor, transDoc );
     assertNotNull( node );
 
   }
@@ -172,11 +174,11 @@ public class MetaverseDocumentAnalyzerTest {
 
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
 
     analyzer.setMetaverseBuilder( null );
-    analyzer.analyze( transDoc );
+    analyzer.analyze( descriptor, transDoc );
 
   }
 
@@ -185,7 +187,7 @@ public class MetaverseDocumentAnalyzerTest {
 
     when( transDoc.getContent() ).thenReturn( content.getXML() );
 
-    IMetaverseNode node = analyzer.analyze( transDoc );
+    IMetaverseNode node = analyzer.analyze( descriptor, transDoc );
     assertNotNull( node );
 
   }

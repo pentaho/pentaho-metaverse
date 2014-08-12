@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.INamespaceFactory;
 import com.pentaho.metaverse.impl.MetaverseNamespace;
 import org.junit.Before;
@@ -55,8 +56,8 @@ import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
  * Test class for the DIRepositoryLocator
- * @author jdixon
  *
+ * @author jdixon
  */
 @SuppressWarnings( { "all" } )
 @RunWith( MockitoJUnitRunner.class )
@@ -69,17 +70,17 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
 
   DIRepositoryLocator spyLocator;
 
-
   /**
    * Initializes the kettle system
    */
   @Before
   public void init() {
     DIRepositoryLocator locator = new DIRepositoryLocator();
-    spyLocator = spy(locator);
-    when(spyLocator.getNamespaceFactory()).thenReturn( namespaceFactory );
-    when(namespaceFactory.createNameSpace(
-        any(INamespace.class), anyString() )).thenReturn( new MetaverseNamespace( null, "", namespaceFactory ) );
+    spyLocator = spy( locator );
+    when( spyLocator.getNamespaceFactory() ).thenReturn( namespaceFactory );
+    when( namespaceFactory.createNameSpace(
+        any( INamespace.class ), anyString(), anyString() ) ).thenReturn( new MetaverseNamespace( null, "",
+        DictionaryConst.NODE_TYPE_LOCATOR, namespaceFactory ) );
     try {
       KettleEnvironment.init();
     } catch ( KettleException e ) {
@@ -91,6 +92,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
 
   /**
    * Runs the spyLocator and checks the results
+   *
    * @throws Exception When bad things happen
    */
   @Test
@@ -102,13 +104,12 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     spyLocator.setMetaverseBuilder( metaverseBuilder );
     spyLocator.addDocumentListener( this );
     spyLocator.setRepository( LocatorTestUtils.getMockDiRepository() );
-//    spyLocator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
     LocatorTestUtils.delay = 0;
 
     spyLocator.setRepositoryId( "testrepo" );
     assertEquals( "Repo id is wrong", "testrepo", spyLocator.getRepositoryId() );
 
-    assertNotNull("Indexer type is null", spyLocator.getLocatorType() );
+    assertNotNull( "Indexer type is null", spyLocator.getLocatorType() );
     events = new ArrayList<IDocumentEvent>();
     spyLocator.startScan();
 
@@ -138,6 +139,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
 
   /**
    * Runs the spyLocator and checks the results
+   *
    * @throws Exception When bad things happen
    */
   @Test

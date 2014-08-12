@@ -23,11 +23,11 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -41,23 +41,23 @@ import java.util.Set;
 public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMeta> {
 
   @Override
-  public IMetaverseNode analyze( TextFileInputMeta textFileInputMeta ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, TextFileInputMeta textFileInputMeta )
+    throws MetaverseAnalyzerException {
     if ( textFileInputMeta == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.TextFileInputMeta.IsNull" ) );
     }
     // do the common analysis for all step
-    IMetaverseNode node = super.analyze( textFileInputMeta );
+    IMetaverseNode node = super.analyze( descriptor, textFileInputMeta );
     String[] fileNames = textFileInputMeta.getFileName();
 
     // add a link from the file(s) being read to the step
     for ( String fileName : fileNames ) {
       // first add the node for the file
-      IMetaverseNode textFileNode = metaverseObjectFactory.createNodeObject(
-          DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE,
-              getNamespace().getNamespaceId(), fileName ), fileName,
-          DictionaryConst.NODE_TYPE_FILE );
-
+      IMetaverseComponentDescriptor fileDescriptor =
+          getChildComponentDescriptor( descriptor, fileName, DictionaryConst.NODE_TYPE_FILE );
+      IMetaverseNode textFileNode = createNodeFromDescriptor( fileDescriptor );
       metaverseBuilder.addNode( textFileNode );
+
       metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
     }
 
@@ -66,21 +66,14 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
     if ( fields != null ) {
       for ( TextFileInputField field : fields ) {
         String fieldName = field.getName();
-        IMetaverseNode fieldNode = metaverseObjectFactory.createNodeObject(
-            DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE_FIELD,
-                getNamespace().getNamespaceId(), fieldName ),
-            fieldName,
-            DictionaryConst.NODE_TYPE_FILE_FIELD );
-
+        IMetaverseComponentDescriptor fileFieldDescriptor =
+            getChildComponentDescriptor( descriptor, fieldName, DictionaryConst.NODE_TYPE_FILE_FIELD );
+        IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
         metaverseBuilder.addNode( fieldNode );
 
         // Get the stream field output from this step. It should've already been created when we called super.analyze()
-        IMetaverseNode outNode = metaverseObjectFactory.createNodeObject(
-            DictionaryHelper.getId(
-                DictionaryConst.NODE_TYPE_TRANS_FIELD,
-                getNamespace().getNamespaceId(),
-                stepFields.searchValueMeta( fieldName ).getOrigin(),
-                fieldName ) );
+        IMetaverseComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
+        IMetaverseNode outNode = createNodeFromDescriptor( transFieldDescriptor );
 
         metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outNode );
 

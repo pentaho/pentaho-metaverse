@@ -17,28 +17,28 @@ public class MetaverseNamespaceTest {
   @Before
   public void before( ) {
 
-    INamespace root = new MetaverseNamespace( null, "level 1", null );
-    INamespace level2 = new MetaverseNamespace( root, "level 2", null );
-    INamespace level3 = new MetaverseNamespace( level2, "level 3", null );
+    INamespace root = new MetaverseNamespace( null, "level 1", "type", null );
+    INamespace level2 = new MetaverseNamespace( root, "level 2", "type", null );
+    INamespace level3 = new MetaverseNamespace( level2, "level 3", "type", null );
 
-    namespace = new MetaverseNamespace( level3, "level 4", null );
+    namespace = new MetaverseNamespace( level3, "level 4", "type", null );
 
   }
 
   @Test
   public void testGetNamespaceId( ) {
-    assertEquals( "level 1~level 2~level 3~level 4", namespace.getNamespaceId() );
+    assertEquals( "level 1~type~level 2~type~level 3~type~level 4~type", namespace.getNamespaceId() );
   }
 
   @Test
   public void testNamespaceNull( ) {
-    INamespace ns = new MetaverseNamespace( null, null, null );
+    INamespace ns = new MetaverseNamespace( null, null, null, null );
     assertNull( ns.getNamespaceId() );
   }
 
   @Test
   public void testParentNamespace( ) {
-    assertEquals( "level 1", namespace.getParentNamespace().getParentNamespace().getParentNamespace().getNamespaceId() );
+    assertEquals( "level 1~type", namespace.getParentNamespace().getParentNamespace().getParentNamespace().getNamespaceId() );
   }
 
 }

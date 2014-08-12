@@ -23,14 +23,13 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.INamespaceFactory;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.OngoingStubbing;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.JobMeta;
@@ -40,7 +39,6 @@ import org.pentaho.platform.api.metaverse.*;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -69,6 +67,8 @@ public class JobAnalyzerTest {
 
   @Mock
   private MetaverseNamespace namespace;
+
+  private MetaverseComponentDescriptor descriptor;
 
 
   /**
@@ -103,8 +103,7 @@ public class JobAnalyzerTest {
 
     analyzer = new JobAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.setNamespace( namespace );
-    when(namespace.getChildNamespace( anyString() )).thenReturn( namespace );
+    when(namespace.getChildNamespace( anyString(), anyString() )).thenReturn( namespace );
     when(namespace.getParentNamespace() ).thenReturn( namespace );
 
     when( mockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );
@@ -116,6 +115,7 @@ public class JobAnalyzerTest {
 
     when( mockJobEntry.getEntry()).thenReturn( mockJobEntryInterface );
 
+    descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_JOB, namespace );
   }
 
   /**
@@ -129,7 +129,7 @@ public class JobAnalyzerTest {
   public void testAnalyzerJobWithEntries() throws MetaverseAnalyzerException {
 
     // increases line code coverage by adding entries to the job
-    IMetaverseNode node = analyzer.analyze( mockJobDoc );
+    IMetaverseNode node = analyzer.analyze( descriptor, mockJobDoc );
     assertNotNull( node );
 
   }

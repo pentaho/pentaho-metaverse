@@ -9,7 +9,7 @@ import org.pentaho.platform.api.metaverse.INamespace;
 public class NamespaceFactory implements INamespaceFactory {
 
   @Override
-  public INamespace createNameSpace( INamespace parent, String name ) {
-    return new MetaverseNamespace( parent, name, this );
+  public INamespace createNameSpace( INamespace parent, String name, String type ) {
+    return new MetaverseNamespace( parent, name, type, this );
   }
 }

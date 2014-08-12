@@ -21,18 +21,17 @@
  */
 package com.pentaho.metaverse.analyzer.kettle;
 
-import com.pentaho.dictionary.DictionaryHelper;
-import org.pentaho.platform.api.metaverse.IIdentifierModifiable;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IRequiresNamespace;
 
 import java.io.Serializable;
 
-public abstract class BaseKettleMetaverseComponent
-    implements IRequiresMetaverseBuilder, IRequiresNamespace, IIdentifierModifiable, Serializable {
+public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverseBuilder, Serializable {
 
   private static final long serialVersionUID = 8122643311387257050L;
 
@@ -45,17 +44,6 @@ public abstract class BaseKettleMetaverseComponent
    * A reference to the metaverse object factory.
    */
   protected IMetaverseObjectFactory metaverseObjectFactory;
-
-  /**
-   * A reference to this component's namespace
-   */
-  protected INamespace namespace = null;
-
-  protected String id;
-
-  protected String name;
-
-  protected String type;
 
   /*
    * (non-Javadoc)
@@ -75,79 +63,28 @@ public abstract class BaseKettleMetaverseComponent
     return metaverseBuilder;
   }
 
-  /**
-   * Sets the namespace for this component
-   *
-   * @param ns the namespace to set
-   */
-  @Override
-  public void setNamespace( INamespace ns ) {
-    namespace = ns;
+  protected IMetaverseComponentDescriptor getChildComponentDescriptor(
+      IMetaverseComponentDescriptor parentDescriptor, String name, String type ) {
+    return new MetaverseComponentDescriptor( name, type, parentDescriptor.getChildNamespace( name, type ) );
   }
 
-  /**
-   * Gets the namespace for this component
-   *
-   * @return the namespace for this component
-   */
-  public INamespace getNamespace() {
-    return namespace;
+  protected IMetaverseComponentDescriptor getChildComponentDescriptor(
+      INamespace namespace, String name, String type ) {
+    IMetaverseComponentDescriptor mcd = new MetaverseComponentDescriptor( name, type, namespace );
+    return getChildComponentDescriptor( mcd, name, type );
   }
 
-  /**
-   * Gets the name of this entity.
-   *
-   * @return the String name of the entity
-   */
-  @Override public String getName() {
-    return name;
-  }
-
-  /**
-   * Gets the metaverse-unique identifier for this entity.
-   *
-   * @return the String ID of the entity.
-   */
-  @Override public String getStringID() {
-    if ( id == null && name != null && namespace != null ) {
-      id = namespace.getNamespaceId() + DictionaryHelper.SEPARATOR + name;
+  protected INamespace getSiblingNamespace( INamespace namespace, String siblingName, String siblingType ) {
+    if ( namespace == null ) {
+      return null;
     }
-    return id;
+    return namespace.getParentNamespace().getChildNamespace( siblingName, siblingType );
   }
 
-  /**
-   * Gets the type of this entity.
-   *
-   * @return the String type of the entity
-   */
-  @Override public String getType() {
-    return type;
-  }
-
-  /**
-   * Sets the name.
-   *
-   * @param name the new name
-   */
-  @Override public void setName( String name ) {
-    this.name = name;
-  }
-
-  /**
-   * Sets the type.
-   *
-   * @param type the new type
-   */
-  @Override public void setType( String type ) {
-    this.type = type;
-  }
-
-  /**
-   * Sets the string id.
-   *
-   * @param id the new string id
-   */
-  @Override public void setStringID( String id ) {
-    this.id = id;
+  protected IMetaverseNode createNodeFromDescriptor( IMetaverseComponentDescriptor descriptor ) {
+    return metaverseObjectFactory.createNodeObject(
+        descriptor.getNamespaceId(),
+        descriptor.getName(),
+        descriptor.getType() );
   }
 }

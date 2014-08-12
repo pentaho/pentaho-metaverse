@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import org.pentaho.di.job.entry.JobEntryInterface;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -37,12 +38,13 @@ public class GenericJobEntryMetaAnalyzer extends BaseJobEntryAnalyzer<JobEntryIn
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
    *
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(Object)
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor, Object)
    */
   @Override
-  public IMetaverseNode analyze( JobEntryInterface jobEntryInterface ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, JobEntryInterface jobEntryInterface )
+    throws MetaverseAnalyzerException {
 
-    return super.analyze( jobEntryInterface );
+    return super.analyze( descriptor, jobEntryInterface );
   }
 
   @Override

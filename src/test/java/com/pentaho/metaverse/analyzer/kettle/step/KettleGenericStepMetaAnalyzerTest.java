@@ -51,6 +51,7 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -87,6 +88,9 @@ public class KettleGenericStepMetaAnalyzerTest {
   @Mock
   MetaverseNamespace namespace;
 
+  @Mock
+  IMetaverseComponentDescriptor mockDescriptor;
+
   /**
    * @throws java.lang.Exception
    */
@@ -112,8 +116,7 @@ public class KettleGenericStepMetaAnalyzerTest {
 
     analyzer = new GenericStepMetaAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.setNamespace( namespace );
-    when(namespace.getChildNamespace( anyString() )).thenReturn( namespace );
+    when(namespace.getChildNamespace( anyString(), anyString() )).thenReturn( namespace );
     when(namespace.getParentNamespace() ).thenReturn( namespace );
 
     // set random StepMetaInterface
@@ -132,13 +135,13 @@ public class KettleGenericStepMetaAnalyzerTest {
   @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
-    analyzer.analyze( null );
+    analyzer.analyze( null, null );
   }
 
   @Test
   public void testAnalyze() throws MetaverseAnalyzerException {
 
-    IMetaverseNode node = analyzer.analyze( mockBaseStepMeta );
+    IMetaverseNode node = analyzer.analyze( mockDescriptor, mockBaseStepMeta );
     assertNotNull( node );
 
   }
@@ -148,7 +151,7 @@ public class KettleGenericStepMetaAnalyzerTest {
 
     when( mockStepMetaInterface.getUsedDatabaseConnections() ).thenReturn( new DatabaseMeta[] { mockDatabaseMeta } );
 
-    IMetaverseNode node = analyzer.analyze( mockBaseStepMeta );
+    IMetaverseNode node = analyzer.analyze( mockDescriptor, mockBaseStepMeta );
     assertNotNull( node );
 
   }
@@ -157,7 +160,7 @@ public class KettleGenericStepMetaAnalyzerTest {
   public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
 
     analyzer.setMetaverseBuilder( null );
-    analyzer.analyze( mockBaseStepMeta );
+    analyzer.analyze( mockDescriptor, mockBaseStepMeta );
 
   }
 
@@ -175,7 +178,7 @@ public class KettleGenericStepMetaAnalyzerTest {
         return rowMeta;
       }
     } );
-    IMetaverseNode node = analyzer.analyze( mockBaseStepMeta );
+    IMetaverseNode node = analyzer.analyze( mockDescriptor, mockBaseStepMeta );
     assertNotNull( node );
   }
 

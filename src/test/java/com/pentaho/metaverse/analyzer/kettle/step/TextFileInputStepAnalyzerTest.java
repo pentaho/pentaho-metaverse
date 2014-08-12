@@ -23,8 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.INamespaceFactory;
-import com.pentaho.metaverse.impl.MetaverseNamespace;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,8 +42,10 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Set;
@@ -53,6 +54,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -76,24 +78,30 @@ public class TextFileInputStepAnalyzerTest {
   @Mock
   private IMetaverseBuilder mockBuilder;
 
+  @Mock
+  private INamespace mockNamespace;
+
   private IMetaverseObjectFactory mockFactory;
 
-  @Mock
-  private INamespaceFactory nsFactory;
+  private IMetaverseComponentDescriptor descriptor;
+
+
   @Before
   public void setUp() throws Exception {
 
     mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
+    when( mockNamespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( mockNamespace );
+    when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
 
     textFileInputStepAnalyzer = new TextFileInputStepAnalyzer();
     textFileInputStepAnalyzer.setMetaverseBuilder( mockBuilder );
-    textFileInputStepAnalyzer.setNamespace( new MetaverseNamespace( null, "Text File Input Step", nsFactory ) );
+    descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
   }
 
   @Test(expected = MetaverseAnalyzerException.class)
   public void testAnalyze_nullInput() throws Exception {
-    textFileInputStepAnalyzer.analyze( null );
+    textFileInputStepAnalyzer.analyze( null, null );
   }
 
   @Test
@@ -108,7 +116,7 @@ public class TextFileInputStepAnalyzerTest {
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
     when( mockTextFileInputMeta.getFileName() ).thenReturn( fileNames );
 
-    IMetaverseNode result = textFileInputStepAnalyzer.analyze( mockTextFileInputMeta );
+    IMetaverseNode result = textFileInputStepAnalyzer.analyze( descriptor, mockTextFileInputMeta );
     assertNotNull( result );
     assertEquals( meta.getName(), result.getName() );
 
@@ -155,7 +163,7 @@ public class TextFileInputStepAnalyzerTest {
       }
     } );
 
-    IMetaverseNode result = textFileInputStepAnalyzer.analyze( mockTextFileInputMeta );
+    IMetaverseNode result = textFileInputStepAnalyzer.analyze( descriptor, mockTextFileInputMeta );
     assertNotNull( result );
     assertEquals( meta.getName(), result.getName() );
 
