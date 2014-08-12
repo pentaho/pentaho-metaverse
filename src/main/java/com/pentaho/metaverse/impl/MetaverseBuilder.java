@@ -53,7 +53,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    */
   private String id;
 
-  private Graph graph;
+  private final Graph graph;
 
   /**
    * This is a possible delegate reference to a metaverse object factory. This builder is itself a
