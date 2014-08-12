@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.INamespaceFactory;
 import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
@@ -77,6 +78,8 @@ public class TextFileInputStepAnalyzerTest {
 
   private IMetaverseObjectFactory mockFactory;
 
+  @Mock
+  private INamespaceFactory nsFactory;
   @Before
   public void setUp() throws Exception {
 
@@ -85,7 +88,7 @@ public class TextFileInputStepAnalyzerTest {
 
     textFileInputStepAnalyzer = new TextFileInputStepAnalyzer();
     textFileInputStepAnalyzer.setMetaverseBuilder( mockBuilder );
-    textFileInputStepAnalyzer.setNamespace( new MetaverseNamespace( null, "Text File Input Step" ) );
+    textFileInputStepAnalyzer.setNamespace( new MetaverseNamespace( null, "Text File Input Step", nsFactory ) );
   }
 
   @Test(expected = MetaverseAnalyzerException.class)

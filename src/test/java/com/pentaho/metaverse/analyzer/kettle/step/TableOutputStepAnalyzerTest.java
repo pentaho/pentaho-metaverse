@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import com.pentaho.metaverse.api.INamespaceFactory;
 import com.pentaho.metaverse.impl.MetaverseNamespace;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -78,6 +79,9 @@ public class TableOutputStepAnalyzerTest {
   @Mock
   DatabaseMeta mockDatabaseMeta;
 
+  @Mock
+  INamespaceFactory nsFactory;
+
   /**
    * @throws java.lang.Exception
    */
@@ -102,7 +106,7 @@ public class TableOutputStepAnalyzerTest {
 
     analyzer = new TableOutputStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    analyzer.setNamespace( new MetaverseNamespace( null, "Table Output Step" ) );
+    analyzer.setNamespace( new MetaverseNamespace( null, "Table Output Step", nsFactory ) );
   }
 
   /**

@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.INamespaceFactory;
 import com.pentaho.metaverse.impl.MetaverseDocument;
 import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -45,6 +46,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -80,6 +82,8 @@ public class MetaverseDocumentAnalyzerTest {
 
   private IMetaverseObjectFactory factory;
 
+  private MetaverseNamespace namespace;
+
   /**
    * @throws Exception
    */
@@ -101,15 +105,19 @@ public class MetaverseDocumentAnalyzerTest {
   public void setUp() throws Exception {
     builder = mock( IMetaverseBuilder.class );
     transDoc = mock( IMetaverseDocument.class );
+    namespace = mock(MetaverseNamespace.class );
 
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
 
     analyzer.setMetaverseBuilder( builder );
-    analyzer.setNamespace( new MetaverseNamespace( null, "docName" ) );
+    analyzer.setNamespace( namespace );
+    when(namespace.getChildNamespace( anyString() )).thenReturn( namespace );
+    when(namespace.getParentNamespace() ).thenReturn( namespace );
 
     when( transDoc.getType() ).thenReturn( type );
     when( transDoc.getContent() ).thenReturn( content );
+    when( transDoc.getNamespace() ).thenReturn( namespace );
 
   }
 

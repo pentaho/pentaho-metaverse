@@ -171,16 +171,9 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
     this.locatorNode = locatorNode;
   }
 
-  /**
-   * TODO Change this once ID generation is refactored
-   */
-  //protected String getId( String... tokens ) {
-  //  return getLocatorType() + "." + getRepositoryId() + "." + tokens[0];
-  //}
-
   protected INamespace getNamespace() {
     return getNamespaceFactory().createNameSpace( null,
-        getLocatorType().concat( ".".concat( getRepositoryId() ) ) );
+        getLocatorType().concat( DictionaryHelper.SEPARATOR.concat( getRepositoryId() ) ) );
   }
 
   @Override

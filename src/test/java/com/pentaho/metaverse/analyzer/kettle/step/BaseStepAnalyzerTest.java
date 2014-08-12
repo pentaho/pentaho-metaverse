@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
+import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -46,6 +47,7 @@ import org.pentaho.platform.api.metaverse.*;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -82,7 +84,7 @@ public class BaseStepAnalyzerTest {
   RowMetaInterface mockStepFields;
 
   @Mock
-  INamespace namespace;
+  MetaverseNamespace namespace;
 
   /**
    * @throws Exception
@@ -115,6 +117,8 @@ public class BaseStepAnalyzerTest {
     };
     analyzer.setMetaverseBuilder( mockBuilder );
     analyzer.setNamespace( namespace );
+    when(namespace.getChildNamespace( anyString() )).thenReturn( namespace );
+    when(namespace.getParentNamespace() ).thenReturn( namespace );
 
     when(namespace.getNamespaceId()).thenReturn( "namespace" );
     // set random StepMetaInterface

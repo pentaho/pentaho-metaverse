@@ -10,6 +10,6 @@ public class NamespaceFactory implements INamespaceFactory {
 
   @Override
   public INamespace createNameSpace( INamespace parent, String name ) {
-    return new MetaverseNamespace( parent, name );
+    return new MetaverseNamespace( parent, name, this );
   }
 }

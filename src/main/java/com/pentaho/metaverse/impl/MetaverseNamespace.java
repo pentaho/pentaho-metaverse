@@ -1,6 +1,7 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryHelper;
+import com.pentaho.metaverse.api.INamespaceFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
@@ -16,10 +17,13 @@ public class MetaverseNamespace implements INamespace {
 
   private String concatenationCharacter = DictionaryHelper.SEPARATOR;
 
-  public MetaverseNamespace( INamespace parent, String namespace ) {
+  private INamespaceFactory factory;
+
+  public MetaverseNamespace( INamespace parent, String namespace, INamespaceFactory factory) {
 
     this.parent = parent;
     this.namespace = namespace;
+    this.factory = factory;
 
   }
 
@@ -43,4 +47,14 @@ public class MetaverseNamespace implements INamespace {
   public INamespace getParentNamespace() {
     return parent;
   }
+
+  /**
+   * TODO: Need to add this to the platform API
+   * @param child the name of the new descendant namespace, relative to the parent (this)
+   * @return a new namespace
+   */
+  public INamespace getChildNamespace( String child ){
+    return factory.createNameSpace( this, child );
+  }
+
 }

@@ -23,6 +23,8 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.INamespaceFactory;
+import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -37,6 +39,7 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.*;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -65,7 +68,7 @@ public class JobAnalyzerTest {
   private IMetaverseDocument mockJobDoc;
 
   @Mock
-  private INamespace namespace;
+  private MetaverseNamespace namespace;
 
 
   /**
@@ -101,9 +104,12 @@ public class JobAnalyzerTest {
     analyzer = new JobAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
     analyzer.setNamespace( namespace );
+    when(namespace.getChildNamespace( anyString() )).thenReturn( namespace );
+    when(namespace.getParentNamespace() ).thenReturn( namespace );
 
     when( mockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );
     when( mockJobDoc.getContent() ).thenReturn( mockContent );
+    when( mockJobDoc.getNamespace() ).thenReturn( namespace );
 
     when( mockContent.nrJobEntries() ).thenReturn( 1 );
     when( mockContent.getJobEntry( 0 ) ).thenReturn( mockJobEntry );
