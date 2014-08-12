@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * to form relationships between the transformation and its child collaborators (ie, step, dbMetas), and
  * calling the analyzers responsible for providing the metadata for the child collaborators.
  */
-public class TransformationAnalyzer extends BaseKettleMetaverseComponent implements IDocumentAnalyzer {
+public class TransformationAnalyzer extends BaseDocumentAnalyzer {
 
   private static final long serialVersionUID = 3147152759123052372L;
 
@@ -76,23 +76,9 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
   @Override
   public IMetaverseNode analyze( IMetaverseDocument document ) throws MetaverseAnalyzerException {
 
-    if ( document == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.Document.IsNull" ) );
-    }
+    validateState( document );
 
     Object repoObject = document.getContent();
-
-    if ( repoObject == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.Document.HasNoContent" ) );
-    }
-
-    if ( metaverseBuilder == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseBuilder.IsNull" ) );
-    }
-
-    if ( metaverseObjectFactory == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
-    }
 
     TransMeta transMeta = null;
     if ( repoObject instanceof String ) {
@@ -111,11 +97,16 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
     }
 
     // Create a metaverse node and start filling in details
-    setName( transMeta.getName() );
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( getStringID() );
 
-    node.setName( transMeta.getName() );
+    // TODO: All of this should go away once we solve threading issues
+    setStringID( null );
+    setName( transMeta.getName() );
+    setNamespace( document.getNamespace() );
+    // TODO: All of this should go away once we solve threading issues
+
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject( getStringID() );
     node.setType( DictionaryConst.NODE_TYPE_TRANS );
+    node.setName( transMeta.getName() );
 
     // pull out the standard fields
     String description = transMeta.getDescription();
@@ -126,8 +117,6 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
 
     Date lastModifiedDate = transMeta.getModifiedDate();
     node.setProperty( "lastModifiedDate", lastModifiedDate );
-
-    metaverseBuilder.addNode( node );
 
     // handle the step
     for ( int stepNr = 0; stepNr < transMeta.nrSteps(); stepNr++ ) {
@@ -143,13 +132,17 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
           if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
             for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
               stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-              stepAnalyzer.setNamespace( new MetaverseNamespace( getNamespace(), getStringID() ) );
+              //TODO: remove once platform API has this method
+              MetaverseNamespace ns = (MetaverseNamespace)getNamespace();
+              stepAnalyzer.setNamespace( ns.getChildNamespace( transMeta.getName() ) );
               stepNode = stepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
             }
           } else {
             IAnalyzer<BaseStepMeta> defaultStepAnalyzer = new GenericStepMetaAnalyzer();
             defaultStepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-            defaultStepAnalyzer.setNamespace( new MetaverseNamespace( getNamespace(), getStringID() ) );
+            //TODO: remove once platform API has this method
+            MetaverseNamespace ns = (MetaverseNamespace)getNamespace();
+            defaultStepAnalyzer.setNamespace( ns.getChildNamespace( transMeta.getName() ) );
             stepNode = defaultStepAnalyzer.analyze( getBaseStepMetaFromStepMeta( stepMeta ) );
           }
           if ( stepNode != null ) {
@@ -162,6 +155,8 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
       }
     }
 
+    metaverseBuilder.addNode( node );
+    addParentLink( node );
     return node;
   }
 
@@ -196,7 +191,9 @@ public class TransformationAnalyzer extends BaseKettleMetaverseComponent impleme
 
     for ( IStepAnalyzer analyzer : stepAnalyzers ) {
       analyzer.setMetaverseBuilder( metaverseBuilder );
-      analyzer.setNamespace( new MetaverseNamespace( getNamespace(), getStringID() ) );
+      //TODO: remove once platform API has this method
+      MetaverseNamespace ns = (MetaverseNamespace)getNamespace();
+      analyzer.setNamespace( ns.getChildNamespace( getName() ) );
     }
 
     return stepAnalyzers;

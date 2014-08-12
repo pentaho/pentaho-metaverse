@@ -105,17 +105,6 @@ public abstract class LocatorRunner<T> implements Runnable {
       metaverseDocument.setName( name );
       metaverseDocument.setType( extension );
 
-      IMetaverseNode locatorNode = locator.getLocatorNode();
-
-      IMetaverseNode documentNode = objectFactory.createNodeObject( documentId, name, extension );
-      // This is a placeholder; we intentionally do not add this node
-      // The node could end up dangling if added now
-      // We may not have an analyzer for a particular document coming in;
-      // we also intentionally (at this time) don't prevent these documents
-      // from coming into the graph
-
-      metaverseBuilder.addLink( locatorNode, DictionaryConst.LINK_CONTAINS, documentNode );
-
       DocumentEvent event = new DocumentEvent();
       event.setEventType( "add" );
       event.setDocument( metaverseDocument );

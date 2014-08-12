@@ -26,6 +26,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
+import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.job.Job;
@@ -50,7 +51,7 @@ import java.util.Set;
  * to form relationships between the job and its child collaborators (ie, entries, dbMetas), and
  * calling the analyzers responsible for providing the metadata for the child collaborators.
  */
-public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocumentAnalyzer {
+public class JobAnalyzer extends BaseDocumentAnalyzer {
 
   /**
    * A set of types supported by this analyzer
@@ -71,23 +72,9 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
   @Override
   public IMetaverseNode analyze( IMetaverseDocument document ) throws MetaverseAnalyzerException {
 
-    if ( document == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.Document.IsNull" ) );
-    }
+    validateState( document );
 
     Object repoObject = document.getContent();
-
-    if ( repoObject == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.Document.HasNoContent" ) );
-    }
-
-    if ( metaverseObjectFactory == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
-    }
-
-    if ( metaverseBuilder == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseBuilder.IsNull" ) );
-    }
 
     JobMeta job = null;
     if ( repoObject instanceof String ) {
@@ -105,10 +92,14 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
       job = (JobMeta) repoObject;
     }
 
-    // Create a metaverse node and start filling in details
-    // TODO get unique ID and set it on the node
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject( document.getStringID() );
+    // TODO: All of this should go away once we solve threading issues
+    setStringID( null );
+    setName( job.getName() );
+    setNamespace( document.getNamespace() );
+    // TODO: All of this should go away once we solve threading issues
 
+    // Create a metaverse node and start filling in details
+    IMetaverseNode node = metaverseObjectFactory.createNodeObject( getStringID() );
     node.setType( DictionaryConst.NODE_TYPE_JOB );
     node.setName( job.getName() );
 
@@ -135,13 +126,17 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
           if ( jobEntryAnalyzers != null && !jobEntryAnalyzers.isEmpty() ) {
             for ( IJobEntryAnalyzer jobEntryAnalyzer : jobEntryAnalyzers ) {
               jobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
-              jobEntryAnalyzer.setNamespace( getNamespace() );
+              //TODO: remove once platform API has this method
+              MetaverseNamespace ns = (MetaverseNamespace) document.getNamespace();
+              jobEntryAnalyzer.setNamespace( ns.getChildNamespace( job.getName() ));
               jobEntryNode = jobEntryAnalyzer.analyze( entry.getEntry() );
             }
           } else {
             IJobEntryAnalyzer<JobEntryInterface> defaultJobEntryAnalyzer = new GenericJobEntryMetaAnalyzer();
             defaultJobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
-            defaultJobEntryAnalyzer.setNamespace( getNamespace() );
+            //TODO: remove once platform API has this method
+            MetaverseNamespace ns = (MetaverseNamespace) document.getNamespace();
+            defaultJobEntryAnalyzer.setNamespace( ns.getChildNamespace( job.getName() ));
             jobEntryNode = defaultJobEntryAnalyzer.analyze( jobEntryInterface );
           }
           if ( jobEntryNode != null ) {
@@ -151,10 +146,14 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
       } catch ( MetaverseAnalyzerException mae ) {
         //Don't throw an exception, just log and carry on
         log.error( "Error processing " + entry.getName(), mae );
+      } catch ( Exception e ) {
+        //Don't throw an exception, just log and carry on
+        log.error( "Error processing " + entry.getName(), e );
       }
     }
 
     metaverseBuilder.addNode( node );
+    addParentLink( node );
     return node;
   }
 
@@ -189,7 +188,10 @@ public class JobAnalyzer extends BaseKettleMetaverseComponent implements IDocume
 
     for ( IJobEntryAnalyzer analyzer : jobEntryAnalyzers ) {
       analyzer.setMetaverseBuilder( metaverseBuilder );
-      analyzer.setNamespace( getNamespace() );
+      //TODO: remove once platform API has this method
+      MetaverseNamespace ns = (MetaverseNamespace)getNamespace();
+      analyzer.setNamespace( ns.getChildNamespace( getName() ) );
+
     }
 
     return jobEntryAnalyzers;
