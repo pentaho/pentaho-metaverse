@@ -33,7 +33,7 @@ import com.tinkerpop.blueprints.Vertex;
  */
 public class SynchronizedGraph implements Graph {
 
-  private Graph graph;
+  private final Graph graph;
 
   public SynchronizedGraph( Graph graph ) {
     this.graph = graph;
@@ -46,8 +46,17 @@ public class SynchronizedGraph implements Graph {
 
   @Override
   public Vertex addVertex( Object id ) {
+    Vertex vertex;
     synchronized ( graph ) {
-      return graph.addVertex( id );
+      if ( id == null ) {
+        vertex = graph.addVertex( id );
+      } else {
+        vertex = getVertex( id );
+        if ( vertex == null ) {
+          vertex = graph.addVertex( id );
+        }
+      }
+      return vertex;
     }
   }
 
@@ -75,8 +84,17 @@ public class SynchronizedGraph implements Graph {
 
   @Override
   public Edge addEdge( Object id, Vertex outVertex, Vertex inVertex, String label ) {
+    Edge edge;
     synchronized ( graph ) {
-      return graph.addEdge( id, outVertex, inVertex, label );
+      if ( id == null ) {
+        edge = graph.addEdge( id, outVertex, inVertex, label );
+      } else {
+        edge = getEdge( id );
+        if ( edge == null ) {
+          edge = graph.addEdge( id, outVertex, inVertex, label );
+        }
+      }
+      return edge;
     }
   }
 
