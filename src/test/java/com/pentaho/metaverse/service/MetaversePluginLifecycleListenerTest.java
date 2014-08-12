@@ -29,8 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
 public class MetaversePluginLifecycleListenerTest {
@@ -54,6 +53,8 @@ public class MetaversePluginLifecycleListenerTest {
 
   @Test
   public void testUnload_NullGraph() throws Exception {
+    MetaversePluginLifecycleListener spyListener = spy( metaversePluginLifecycleListener );
+    when( spyListener.getGraph() ).thenReturn( null );
     metaversePluginLifecycleListener.unLoaded();
 
     verify( mockGraph, times ( 0 ) ).shutdown();

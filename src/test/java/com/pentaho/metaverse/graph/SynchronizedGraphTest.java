@@ -26,21 +26,21 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
 public class SynchronizedGraphTest {
 
   private SynchronizedGraph synchronizedGraph;
 
-  @Mock Graph mockGraph;
+  @Mock IdGraph mockGraph;
   @Mock Vertex mockVertex;
   @Mock Edge mockEdge;
 
@@ -50,15 +50,53 @@ public class SynchronizedGraphTest {
   }
 
   @Test
-  public void testDelegateMethodsAreCalled() throws Exception {
-    synchronizedGraph.addVertex( "id" );
-    verify( mockGraph, times( 1 ) ).addVertex( "id" );
+  public void testAddVertex_nullId() throws Exception {
+    synchronizedGraph.addVertex( null );
+    verify( mockGraph, times( 1 ) ).addVertex( null );
+  }
 
+  @Test
+  public void testAddVertex_withExistingId() throws Exception {
+    when( mockGraph.getVertex( "id" ) ).thenReturn( mockVertex );
+    synchronizedGraph.addVertex( "id" );
+    verify( mockGraph, times( 1 ) ).getVertex( "id" );
+    verify( mockGraph, never() ).addVertex( anyString() );
+  }
+
+  @Test
+  public void testAddVertex_withNewId() throws Exception {
+    when( mockGraph.getVertex( "id" ) ).thenReturn( null );
+    synchronizedGraph.addVertex( "id" );
+    verify( mockGraph, times( 1 ) ).getVertex( "id" );
+    verify( mockGraph, times( 1 ) ).addVertex( "id" );
+  }
+
+  @Test
+  public void testAddEdge_nullId() throws Exception {
+    synchronizedGraph.addEdge( null, mockVertex, mockVertex, "self link" );
+    verify( mockGraph, times( 1 ) ).addEdge( null, mockVertex, mockVertex, "self link" );
+  }
+
+  @Test
+  public void testAddEdge_withExistingId() throws Exception {
+    when( mockGraph.getEdge( "id" ) ).thenReturn( mockEdge );
+    synchronizedGraph.addEdge( "id", mockVertex, mockVertex, "self link" );
+    verify( mockGraph, times( 1 ) ).getEdge( "id" );
+    verify( mockGraph, never() ).addEdge( anyString(), eq(mockVertex), eq(mockVertex), anyString() );
+  }
+
+  @Test
+  public void testAddEdge_withNewId() throws Exception {
+    when( mockGraph.getEdge( "id" ) ).thenReturn( null );
+    synchronizedGraph.addEdge( "id", mockVertex, mockVertex, "self link" );
+    verify( mockGraph, times( 1 ) ).getEdge( "id" );
+    verify( mockGraph, times( 1 ) ).addEdge( "id", mockVertex, mockVertex, "self link" );
+  }
+
+  @Test
+  public void testDelegateMethodsAreCalled() throws Exception {
     synchronizedGraph.removeVertex( mockVertex );
     verify( mockGraph, times( 1 ) ).removeVertex( mockVertex );
-
-    synchronizedGraph.addEdge( "id", mockVertex, mockVertex, "self link" );
-    verify( mockGraph, times( 1 ) ).addEdge( "id", mockVertex, mockVertex, "self link" );
 
     synchronizedGraph.removeEdge( mockEdge );
     verify( mockGraph, times( 1 ) ).removeEdge( mockEdge );

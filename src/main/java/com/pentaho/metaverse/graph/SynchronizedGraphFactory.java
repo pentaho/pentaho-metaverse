@@ -22,13 +22,21 @@
 
 package com.pentaho.metaverse.graph;
 
+import com.pentaho.metaverse.messages.Messages;
 import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.KeyIndexableGraph;
+import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
 import org.apache.commons.configuration.Configuration;
 import java.util.Map;
 
 /**
+ * <p>
  * Thin wrapper around {@link com.tinkerpop.blueprints.GraphFactory}
- * that constructs {@link com.pentaho.metaverse.graph.SynchronizedGraph} objects
+ * that constructs {@link com.pentaho.metaverse.graph.SynchronizedGraph} objects.
+ * </p>
+ * <p>
+ * <strong>NOTE:</strong> The backing graph configured <em>must</em> implement {@link com.tinkerpop.blueprints.KeyIndexableGraph}
+ * </p>
  */
 public class SynchronizedGraphFactory {
 
@@ -37,10 +45,11 @@ public class SynchronizedGraphFactory {
    * @see com.tinkerpop.blueprints.GraphFactory#open(org.apache.commons.configuration.Configuration)
    * @param configuration
    * @return {@link SynchronizedGraph} instance
+   * @throws java.lang.IllegalArgumentException when the backing graph does not implement {@link com.tinkerpop.blueprints.KeyIndexableGraph}
    */
   public static Graph open( final Configuration configuration ) {
     Graph graph = com.tinkerpop.blueprints.GraphFactory.open( configuration );
-    return new SynchronizedGraph( graph );
+    return wrapGraph( graph );
   }
 
   /**
@@ -48,10 +57,11 @@ public class SynchronizedGraphFactory {
    * @see com.tinkerpop.blueprints.GraphFactory#open(java.util.Map)
    * @param configuration
    * @return {@link SynchronizedGraph} instance
+   * @throws java.lang.IllegalArgumentException when the backing graph does not implement {@link com.tinkerpop.blueprints.KeyIndexableGraph}
    */
   public static Graph open( final Map configuration ) {
     Graph graph = com.tinkerpop.blueprints.GraphFactory.open( configuration );
-    return new SynchronizedGraph( graph );
+    return wrapGraph( graph );
   }
 
   /**
@@ -59,10 +69,21 @@ public class SynchronizedGraphFactory {
    * @see com.tinkerpop.blueprints.GraphFactory#open(String)
    * @param configurationFile
    * @return {@link SynchronizedGraph} instance
+   * @throws java.lang.IllegalArgumentException when the backing graph does not implement {@link com.tinkerpop.blueprints.KeyIndexableGraph}
    */
   public static Graph open( final String configurationFile ) {
     Graph graph = com.tinkerpop.blueprints.GraphFactory.open( configurationFile );
-    return new SynchronizedGraph( graph );
+    return wrapGraph( graph );
+  }
+
+  protected static Graph wrapGraph( Graph graph ) {
+    if ( graph instanceof KeyIndexableGraph ) {
+      KeyIndexableGraph keyIndexableGraph = (KeyIndexableGraph) graph;
+      IdGraph idGraph = new IdGraph( keyIndexableGraph );
+      return new SynchronizedGraph( idGraph );
+    } else {
+      throw new IllegalArgumentException( Messages.getString( "ERROR.BackingGraph.MustImplement.KeyIndexableGraph" ) );
+    }
   }
 
 }

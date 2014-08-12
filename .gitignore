@@ -7,3 +7,7 @@
 *test*.graphml
 *.log
 *.graphml
+tinkergraph-metadata.dat
+SampleData*.db
+*test*.json
+*test*.graphjson

@@ -21,10 +21,11 @@
  */
 package com.pentaho.metaverse.impl;
 
+import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
-import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -33,7 +34,6 @@ import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.platform.api.engine.IPentahoObjectFactory;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.engine.core.system.PathBasedSystemSettings;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
@@ -45,31 +45,28 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 
-import java.io.FilenameFilter;
-import java.util.concurrent.Future;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class MetaverseBuilderIT {
 
-  private MetaverseBuilder builder;
-  private Graph graph;
-  private Set<IDocumentLocator> locators;
-  private IMetaverseReader reader;
-  private IDocumentLocatorProvider documentLocatorProvider;
+  private static Set<IDocumentLocator> locators;
+  private static IMetaverseReader reader;
+  private static IDocumentLocatorProvider documentLocatorProvider;
+  private static Graph readerGraph;
 
-  private long freeMemAtInit = 0L;
+  private static long freeMemAtInit = 0L;
 
   public static String getSolutionPath() {
     return "src/it/resources/solution";
   }
 
   @BeforeClass
-  public static void init() {
+  public static void init() throws Exception {
 
     cleanUpSampleData();
 
@@ -88,6 +85,11 @@ public class MetaverseBuilderIT {
     } catch ( KettleException e ) {
       e.printStackTrace();
     }
+
+    documentLocatorProvider = PentahoSystem.get( IDocumentLocatorProvider.class );
+    reader = PentahoSystem.get( IMetaverseReader.class );
+    readerGraph = buildMetaverseGraph();
+
   }
 
   /**
@@ -133,16 +135,9 @@ public class MetaverseBuilderIT {
 
   @Before
   public void setup() {
-    builder = (MetaverseBuilder) PentahoSystem.get( IMetaverseBuilder.class );
-    documentLocatorProvider = PentahoSystem.get( IDocumentLocatorProvider.class );
-    graph = builder.getGraph();
-    reader = PentahoSystem.get( IMetaverseReader.class );
-
   }
 
-  @Test
-  public void testBuildingAndReading() throws Exception {
-
+  private static Graph buildMetaverseGraph() throws Exception {
     locators = documentLocatorProvider.getDocumentLocators();
 
     freeMemAtInit = Runtime.getRuntime().freeMemory();
@@ -156,7 +151,11 @@ public class MetaverseBuilderIT {
     long freeMemAtEnd = Runtime.getRuntime().freeMemory();
     System.out.println("MetaverseIT mem usage after waitTillEmpty() = "+(freeMemAtInit - freeMemAtEnd));
 
-    Graph readerGraph = reader.getMetaverse();
+    return reader.getMetaverse();
+  }
+
+  @Test
+  public void testExport() throws Exception {
 
     assertTrue( readerGraph.getVertices().iterator().hasNext() );
     assertTrue( readerGraph.getEdges().iterator().hasNext() );
@@ -166,4 +165,23 @@ public class MetaverseBuilderIT {
     FileUtils.writeStringToFile( exportFile, reader.exportToXml(), "UTF-8" );
   }
 
+  private void testAndCountNodesByType(String type) {
+    int count = 0;
+    for ( Vertex v : readerGraph.getVertices( "type", type ) ) {
+      count++;
+      assertNotNull( v.getId() );
+      assertNotNull( v.getProperty( "type" ) );
+      assertNotNull( v.getProperty( "name" ) );
+    }
+
+    System.out.println( "Found " + count + " " + type + " nodes" );
+  }
+
+  @Test
+  public void testTransformationProperties() throws Exception {
+    Set<String> nodeTypes = DictionaryHelper.ENTITY_NODE_TYPES;
+    for ( String nodeType : nodeTypes ) {
+      testAndCountNodesByType( nodeType );
+    }
+  }
 }
