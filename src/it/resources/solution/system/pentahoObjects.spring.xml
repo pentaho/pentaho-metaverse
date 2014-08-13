@@ -21,7 +21,10 @@
   <bean id="TextFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TextFileInputStepAnalyzer"/>
   <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
 
-  <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
+  <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.TransJobEntryAnalyzer" />
+
+
+    <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="documentAnalyzers">
       <set>
@@ -42,7 +45,18 @@
     </property>
   </bean>
 
-  <bean id="IMetaverseReader" class="com.pentaho.metaverse.graph.BlueprintsGraphMetaverseReader" scope="singleton">
+  <bean id="IJobEntryAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider"
+      scope="singleton">
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    <property name="jobEntryAnalyzers">
+        <set>
+            <ref bean="TransJobEntryAnalyzer"/>
+        </set>
+    </property>
+  </bean>
+
+
+    <bean id="IMetaverseReader" class="com.pentaho.metaverse.graph.BlueprintsGraphMetaverseReader" scope="singleton">
     <constructor-arg ref="MetaverseGraphImpl"/>
   </bean>
 
