@@ -27,7 +27,7 @@ public class TransJobEntryAnalyzer extends BaseJobEntryAnalyzer<JobEntryTrans> {
       String filename = entry.getParentJob().getJobMeta().environmentSubstitute( entryFilename );
 
       IMetaverseComponentDescriptor ds = new MetaverseComponentDescriptor(
-          filename,
+          null,
           DictionaryConst.NODE_TYPE_TRANS,
           descriptor.getNamespace().getParentNamespace().getParentNamespace()
               .getChildNamespace( filename, DictionaryConst.NODE_TYPE_TRANS ) );

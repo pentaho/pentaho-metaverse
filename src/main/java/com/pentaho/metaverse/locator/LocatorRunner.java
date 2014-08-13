@@ -106,13 +106,10 @@ public abstract class LocatorRunner<T> implements Runnable {
       IMetaverseObjectFactory objectFactory = metaverseBuilder.getMetaverseObjectFactory();
 
       IMetaverseDocument metaverseDocument = objectFactory.createDocumentObject();
-      String documentId = DictionaryHelper.getId( metaverseDocument, namespace.getNamespaceId(), id );
 
-      INamespace documentNamespace = locator.getNamespaceFactory().createNameSpace( namespace, id, null );
-
-      metaverseDocument.setNamespace( documentNamespace );
+      metaverseDocument.setNamespace( namespace );
       metaverseDocument.setContent( contents );
-      metaverseDocument.setStringID( documentId );
+      metaverseDocument.setStringID( id );
       metaverseDocument.setName( name );
       metaverseDocument.setExtension( extension );
       metaverseDocument.setMimeType( mimeType );
