@@ -104,8 +104,9 @@ public class DictionaryConst {
    * This is a set of known content types
    */
   public static final String NODE_TYPE_LOCATOR = "Locator";
-  public static final String NODE_TYPE_JOB = "Job";
-  public static final String NODE_TYPE_TRANS = "Transformation";
+  // TODO temporary; need to get the demo working; permanent fix in progress
+  public static final String NODE_TYPE_JOB = "kjb";
+  public static final String NODE_TYPE_TRANS = "ktr";
   public static final String NODE_TYPE_TRANS_STEP = "Transformation Step";
   public static final String NODE_TYPE_JOB_ENTRY = "Job Entry";
   public static final String NODE_TYPE_DATASOURCE = "Database Connection";
