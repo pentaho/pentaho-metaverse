@@ -60,8 +60,10 @@
   <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableOutputStepAnalyzer"/>
   <bean id="TextFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TextFileInputStepAnalyzer"/>
   <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
+  <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.TransJobEntryAnalyzer" />
 
-  <bean id="IStepAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
+
+    <bean id="IStepAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
         scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="stepAnalyzers">
@@ -69,6 +71,16 @@
         <ref bean="TableOutputStepAnalyzer"/>
         <ref bean="TextFileInputStepAnalyzer"/>
       </set>
+    </property>
+  </bean>
+
+  <bean id="IJobEntryAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider"
+      scope="singleton">
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    <property name="jobEntryAnalyzers">
+        <set>
+            <ref bean="TransJobEntryAnalyzer"/>
+        </set>
     </property>
   </bean>
 
