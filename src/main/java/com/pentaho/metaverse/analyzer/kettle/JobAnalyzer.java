@@ -31,7 +31,10 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.platform.api.metaverse.*;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +92,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     }
 
     IMetaverseComponentDescriptor documentDescriptor =
-        getChildComponentDescriptor(descriptor, document.getStringID(), DictionaryConst.NODE_TYPE_JOB);
+        getChildComponentDescriptor( descriptor, document.getStringID(), DictionaryConst.NODE_TYPE_JOB );
 
     // Create a metaverse node and start filling in details
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(

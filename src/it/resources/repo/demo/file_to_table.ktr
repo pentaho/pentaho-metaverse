@@ -160,7 +160,7 @@
     <encoding/>
     <add_to_result_filenames>Y</add_to_result_filenames>
     <file>
-      <name></name>
+      <name>&#x24;&#x7b;Internal.Transformation.Filename.Directory&#x7d;&#x2f;SacramentocrimeJanuary2006.csv</name>
       <filemask/>
       <exclude_filemask/>
       <file_required>N</file_required>
@@ -335,7 +335,7 @@
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>231</xloc>
-      <yloc>105</yloc>
+      <yloc>104</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -408,7 +408,7 @@
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>612</xloc>
+      <xloc>613</xloc>
       <yloc>105</yloc>
       <draw>Y</draw>
       </GUI>
