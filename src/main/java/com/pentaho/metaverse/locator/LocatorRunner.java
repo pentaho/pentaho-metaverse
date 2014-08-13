@@ -1,6 +1,5 @@
 package com.pentaho.metaverse.locator;
 
-import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.io.FilenameUtils;
