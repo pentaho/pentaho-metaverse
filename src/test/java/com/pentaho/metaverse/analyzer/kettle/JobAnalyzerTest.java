@@ -32,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
@@ -69,6 +70,9 @@ public class JobAnalyzerTest {
   private MetaverseNamespace namespace;
 
   private MetaverseComponentDescriptor descriptor;
+
+  @Mock
+  private Job mockJob;
 
 
   /**
@@ -114,6 +118,9 @@ public class JobAnalyzerTest {
     when( mockContent.getJobEntry( 0 ) ).thenReturn( mockJobEntry );
 
     when( mockJobEntry.getEntry()).thenReturn( mockJobEntryInterface );
+    when (mockJobEntryInterface.getParentJob()).thenReturn( mockJob );
+
+    when (mockJob.getJobMeta()).thenReturn( mockContent );
 
     descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_JOB, namespace );
   }
