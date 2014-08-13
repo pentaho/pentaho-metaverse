@@ -92,25 +92,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, T object )
     throws MetaverseAnalyzerException {
 
-    baseStepMeta = object;
-    if ( baseStepMeta == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMetaInterface.IsNull" ) );
-    }
-
-    parentStepMeta = baseStepMeta.getParentStepMeta();
-    if ( parentStepMeta == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMeta.IsNull" ) );
-    }
-
-    parentTransMeta = parentStepMeta.getParentTransMeta();
-
-    if ( metaverseBuilder == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseBuilder.IsNull" ) );
-    }
-
-    if ( metaverseObjectFactory == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
-    }
+    validateState( descriptor, object );
 
     // Add yourself
     rootNode = createNodeFromDescriptor( descriptor );
@@ -263,5 +245,31 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
         descriptor, stepFields.searchValueMeta( fieldName ).getOrigin(), DictionaryConst.NODE_TYPE_TRANS_FIELD );
 
     return getChildComponentDescriptor( stepFieldNamespace, fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD );
+  }
+
+  protected void validateState( IMetaverseComponentDescriptor descriptor, T object ) throws MetaverseAnalyzerException {
+    baseStepMeta = object;
+    if ( baseStepMeta == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMetaInterface.IsNull" ) );
+    }
+
+    parentStepMeta = baseStepMeta.getParentStepMeta();
+    if ( parentStepMeta == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMeta.IsNull" ) );
+    }
+
+    parentTransMeta = parentStepMeta.getParentTransMeta();
+
+    if ( parentTransMeta == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.ParentTransMeta.IsNull" ) );
+    }
+
+    if ( metaverseBuilder == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseBuilder.IsNull" ) );
+    }
+
+    if ( metaverseObjectFactory == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
+    }
   }
 }

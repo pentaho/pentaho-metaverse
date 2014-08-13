@@ -21,25 +21,25 @@ public class TransJobEntryAnalyzer extends BaseJobEntryAnalyzer<JobEntryTrans> {
 
     IMetaverseNode node = super.analyze( descriptor, entry );
 
-    String filename = entry.getParentJob().getJobMeta().environmentSubstitute( entry.getFilename() );
+    String entryFilename = entry.getFilename();
+    if ( entryFilename != null ) {
+      String filename = entry.getParentJob().getJobMeta().environmentSubstitute( entryFilename );
 
-    IMetaverseNode transformationNode = createNodeFromDescriptor(
-        getChildComponentDescriptor(
-            getSiblingNamespace( descriptor, filename, DictionaryConst.NODE_TYPE_TRANS ),
-            filename,
-            DictionaryConst.NODE_TYPE_TRANS ) );
+      IMetaverseNode transformationNode = createNodeFromDescriptor(
+          getChildComponentDescriptor(
+              getSiblingNamespace( descriptor, filename, DictionaryConst.NODE_TYPE_TRANS ),
+              filename,
+              DictionaryConst.NODE_TYPE_TRANS ) );
 
-
-    metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, transformationNode );
+      metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, transformationNode );
+    }
 
     return node;
   }
 
   @Override public Set<Class<? extends JobEntryInterface>> getSupportedEntries() {
-    return new HashSet<Class<? extends JobEntryInterface>>() {
-      {
-        add( JobEntryTrans.class );
-      }
-    };
+    Set<Class<? extends JobEntryInterface>> supportedEntries = new HashSet<Class<? extends JobEntryInterface>>();
+    supportedEntries.add( JobEntryTrans.class );
+    return supportedEntries;
   }
 }

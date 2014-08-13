@@ -25,6 +25,8 @@ package com.pentaho.metaverse.analyzer.kettle.jobentry;
 import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.messages.Messages;
+import org.pentaho.di.job.Job;
+import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -49,12 +51,10 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface> extends 
    */
   protected IDatabaseConnectionAnalyzer dbConnectionAnalyzer = null;
 
-
   /**
    * A namespace to hold the fields derived in the step
    */
   private INamespace stepNamespace = null;
-
 
   /**
    * Analyzes job entries
@@ -66,8 +66,31 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface> extends 
   @Override
   public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, T entry ) throws MetaverseAnalyzerException {
 
+    validateState( descriptor, entry );
+
+    // Add yourself
+    IMetaverseNode node = createNodeFromDescriptor( descriptor );
+    metaverseBuilder.addNode( node );
+
+    return node;
+
+  }
+
+  protected void validateState( IMetaverseComponentDescriptor descriptor, T entry ) throws MetaverseAnalyzerException {
+
     if ( entry == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );
+    }
+
+    Job parentJob = entry.getParentJob();
+
+    if ( parentJob == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.ParentJob.IsNull" ) );
+    }
+
+    JobMeta parentJobMeta = parentJob.getJobMeta();
+    if ( parentJobMeta == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.ParentJobMeta.IsNull" ) );
     }
 
     if ( metaverseBuilder == null ) {
@@ -77,12 +100,5 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface> extends 
     if ( metaverseObjectFactory == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
     }
-
-    // Add yourself
-    IMetaverseNode node = createNodeFromDescriptor( descriptor );
-    metaverseBuilder.addNode( node );
-
-    return node;
-
   }
 }

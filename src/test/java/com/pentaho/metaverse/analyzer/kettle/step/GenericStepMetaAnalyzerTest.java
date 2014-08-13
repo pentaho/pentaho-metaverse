@@ -61,7 +61,7 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
  * @author mburgess
  */
 @RunWith(MockitoJUnitRunner.class)
-public class KettleGenericStepMetaAnalyzerTest {
+public class GenericStepMetaAnalyzerTest {
 
   GenericStepMetaAnalyzer analyzer;
 

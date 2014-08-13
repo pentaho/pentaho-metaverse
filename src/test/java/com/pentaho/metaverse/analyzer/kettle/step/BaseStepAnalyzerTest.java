@@ -248,7 +248,7 @@ public class BaseStepAnalyzerTest {
     analyzer.analyze( mockDescriptor, mockStepMeta );
   }
 
-  @Test
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testAnalyzeWithNullParentTransMeta() throws MetaverseAnalyzerException {
     when( parentStepMeta.getParentTransMeta() ).thenReturn( null );
     analyzer.analyze( mockDescriptor, mockStepMeta );
