@@ -35,7 +35,8 @@ import java.util.Map;
  * that constructs {@link com.pentaho.metaverse.graph.SynchronizedGraph} objects.
  * </p>
  * <p>
- * <strong>NOTE:</strong> The backing graph configured <em>must</em> implement {@link com.tinkerpop.blueprints.KeyIndexableGraph}
+ * <strong>NOTE:</strong> The backing graph configured <em>must</em> implement
+ * {@link com.tinkerpop.blueprints.KeyIndexableGraph}
  * </p>
  */
 public class SynchronizedGraphFactory {
@@ -45,7 +46,8 @@ public class SynchronizedGraphFactory {
    * @see com.tinkerpop.blueprints.GraphFactory#open(org.apache.commons.configuration.Configuration)
    * @param configuration
    * @return {@link SynchronizedGraph} instance
-   * @throws java.lang.IllegalArgumentException when the backing graph does not implement {@link com.tinkerpop.blueprints.KeyIndexableGraph}
+   * @throws java.lang.IllegalArgumentException when the backing graph does not implement
+   * {@link com.tinkerpop.blueprints.KeyIndexableGraph}
    */
   public static Graph open( final Configuration configuration ) {
     Graph graph = com.tinkerpop.blueprints.GraphFactory.open( configuration );
@@ -57,7 +59,8 @@ public class SynchronizedGraphFactory {
    * @see com.tinkerpop.blueprints.GraphFactory#open(java.util.Map)
    * @param configuration
    * @return {@link SynchronizedGraph} instance
-   * @throws java.lang.IllegalArgumentException when the backing graph does not implement {@link com.tinkerpop.blueprints.KeyIndexableGraph}
+   * @throws java.lang.IllegalArgumentException when the backing graph does not implement
+   * {@link com.tinkerpop.blueprints.KeyIndexableGraph}
    */
   public static Graph open( final Map configuration ) {
     Graph graph = com.tinkerpop.blueprints.GraphFactory.open( configuration );
@@ -69,7 +72,8 @@ public class SynchronizedGraphFactory {
    * @see com.tinkerpop.blueprints.GraphFactory#open(String)
    * @param configurationFile
    * @return {@link SynchronizedGraph} instance
-   * @throws java.lang.IllegalArgumentException when the backing graph does not implement {@link com.tinkerpop.blueprints.KeyIndexableGraph}
+   * @throws java.lang.IllegalArgumentException when the backing graph does not implement
+   * {@link com.tinkerpop.blueprints.KeyIndexableGraph}
    */
   public static Graph open( final String configurationFile ) {
     Graph graph = com.tinkerpop.blueprints.GraphFactory.open( configurationFile );

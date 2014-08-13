@@ -78,7 +78,12 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     if ( namespace == null ) {
       return null;
     }
-    return namespace.getParentNamespace().getChildNamespace( siblingName, siblingType );
+    INamespace parentNamespace = namespace.getParentNamespace();
+    if ( parentNamespace == null ) {
+      return null;
+    } else {
+      return parentNamespace.getChildNamespace( siblingName, siblingType );
+    }
   }
 
   protected IMetaverseNode createNodeFromDescriptor( IMetaverseComponentDescriptor descriptor ) {

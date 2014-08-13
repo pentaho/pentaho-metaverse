@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
@@ -48,10 +47,6 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
   @Override
   public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, TableOutputMeta tableOutputMeta )
     throws MetaverseAnalyzerException {
-
-    if ( tableOutputMeta == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.TableOutputMeta.IsNull" ) );
-    }
 
     // Do common analysis for all step
     IMetaverseNode node = super.analyze( descriptor, tableOutputMeta );

@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
@@ -43,9 +42,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
   @Override
   public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, TextFileInputMeta textFileInputMeta )
     throws MetaverseAnalyzerException {
-    if ( textFileInputMeta == null ) {
-      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.TextFileInputMeta.IsNull" ) );
-    }
+
     // do the common analysis for all step
     IMetaverseNode node = super.analyze( descriptor, textFileInputMeta );
     String[] fileNames = textFileInputMeta.getFileName();
