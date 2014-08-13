@@ -72,6 +72,8 @@ public class MetaverseDocumentTest {
     assertNull( document.getStringID() );
     assertNull( document.getType() );
     assertNull( document.getContent() );
+    assertNull( document.getExtension() );
+    assertNull( document.getMimeType() );
   }
 
   @Test

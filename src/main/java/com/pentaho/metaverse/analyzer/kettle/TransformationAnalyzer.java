@@ -37,11 +37,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.platform.api.metaverse.*;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,9 +91,12 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       transMeta = (TransMeta) repoObject;
     }
 
+    IMetaverseComponentDescriptor documentDescriptor =
+        getChildComponentDescriptor(descriptor, document.getStringID(), DictionaryConst.NODE_TYPE_TRANS);
+
     // Create a metaverse node and start filling in details
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        descriptor.getStringID(),
+        documentDescriptor.getStringID(),
         transMeta.getName(),
         DictionaryConst.NODE_TYPE_TRANS );
 
@@ -122,7 +121,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
 
           IMetaverseNode stepNode = null;
           IMetaverseComponentDescriptor stepDescriptor =
-              getChildComponentDescriptor( descriptor, stepMeta.getName(), DictionaryConst.NODE_TYPE_TRANS_STEP );
+              getChildComponentDescriptor( documentDescriptor, stepMeta.getName(), DictionaryConst.NODE_TYPE_TRANS_STEP );
           Set<IStepAnalyzer> stepAnalyzers = getStepAnalyzers( stepMeta );
           if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
             for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
@@ -145,7 +144,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     }
 
     metaverseBuilder.addNode( node );
-    addParentLink( descriptor, node );
+    addParentLink( documentDescriptor, node );
     return node;
   }
 
