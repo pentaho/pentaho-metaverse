@@ -1,6 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
@@ -25,11 +26,13 @@ public class TransJobEntryAnalyzer extends BaseJobEntryAnalyzer<JobEntryTrans> {
     if ( entryFilename != null ) {
       String filename = entry.getParentJob().getJobMeta().environmentSubstitute( entryFilename );
 
-      IMetaverseNode transformationNode = createNodeFromDescriptor(
-          getChildComponentDescriptor(
-              getSiblingNamespace( descriptor, filename, DictionaryConst.NODE_TYPE_TRANS ),
-              filename,
-              DictionaryConst.NODE_TYPE_TRANS ) );
+      IMetaverseComponentDescriptor ds = new MetaverseComponentDescriptor(
+          null,
+          DictionaryConst.NODE_TYPE_TRANS,
+          descriptor.getNamespace().getParentNamespace().getParentNamespace()
+              .getChildNamespace( filename, DictionaryConst.NODE_TYPE_TRANS ));
+
+      IMetaverseNode transformationNode = createNodeFromDescriptor(ds) ;
 
       metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, transformationNode );
     }
