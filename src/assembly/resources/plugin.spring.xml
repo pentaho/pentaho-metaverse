@@ -62,8 +62,7 @@
   <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
   <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.TransJobEntryAnalyzer" />
 
-
-    <bean id="IStepAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
+  <bean id="IStepAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
         scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="stepAnalyzers">
@@ -92,7 +91,10 @@
     </constructor-arg>
     <property name="repositoryId" value="FILE_SYSTEM_REPO"/>
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+
+    <!-- set this path to the ABSOLUTE path of <your server>/pentaho-solutions/system/metaverse/samples -->
     <property name="rootFolder" value="../../pentaho-solutions/system/metaverse/samples"/>
+    
   </bean>
 
   <bean id="IDocumentLocatorProvider" class="com.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider" scope="singleton">
