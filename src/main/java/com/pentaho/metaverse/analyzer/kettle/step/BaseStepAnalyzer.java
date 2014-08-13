@@ -229,8 +229,11 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
       return null;
     }
 
+    ValueMetaInterface vmi = prevFields.searchValueMeta( fieldName );
+    String origin = ( vmi == null ) ? fieldName : vmi.getOrigin();
+
     INamespace stepFieldNamespace = getSiblingNamespace(
-        descriptor, prevFields.searchValueMeta( fieldName ).getOrigin(), DictionaryConst.NODE_TYPE_TRANS_FIELD );
+        descriptor, origin, DictionaryConst.NODE_TYPE_TRANS_FIELD );
 
     return getChildComponentDescriptor( stepFieldNamespace, fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD );
   }
@@ -240,9 +243,11 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     if ( descriptor == null ) {
       return null;
     }
+    ValueMetaInterface vmi = stepFields.searchValueMeta( fieldName );
+    String origin = ( vmi == null ) ? fieldName : vmi.getOrigin();
 
     INamespace stepFieldNamespace = getSiblingNamespace(
-        descriptor, stepFields.searchValueMeta( fieldName ).getOrigin(), DictionaryConst.NODE_TYPE_TRANS_FIELD );
+        descriptor, origin, DictionaryConst.NODE_TYPE_TRANS_FIELD );
 
     return getChildComponentDescriptor( stepFieldNamespace, fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD );
   }

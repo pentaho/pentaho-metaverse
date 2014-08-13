@@ -11,6 +11,11 @@ import org.pentaho.platform.api.metaverse.INamespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 /**
  * The LocatorRunner is a execution construct for concurrently running document locator logic.
@@ -81,10 +86,18 @@ public abstract class LocatorRunner<T> implements Runnable {
       return;
     }
 
+    Path path = Paths.get( name );
     String extension = FilenameUtils.getExtension( name );
 
     if ( "".equals( extension ) ) {
       return;
+    }
+
+    String mimeType;
+    try {
+      mimeType = Files.probeContentType( path );
+    } catch ( IOException e ) {
+      mimeType = null;
     }
 
     try {
@@ -95,13 +108,14 @@ public abstract class LocatorRunner<T> implements Runnable {
       IMetaverseDocument metaverseDocument = objectFactory.createDocumentObject();
       String documentId = DictionaryHelper.getId( metaverseDocument, namespace.getNamespaceId(), id );
 
-      INamespace documentNamespace = locator.getNamespaceFactory().createNameSpace( namespace, id, extension );
+      INamespace documentNamespace = locator.getNamespaceFactory().createNameSpace( namespace, id, null );
 
       metaverseDocument.setNamespace( documentNamespace );
       metaverseDocument.setContent( contents );
       metaverseDocument.setStringID( documentId );
       metaverseDocument.setName( name );
-      metaverseDocument.setType( extension );
+      metaverseDocument.setExtension( extension );
+      metaverseDocument.setMimeType( mimeType );
 
       DocumentEvent event = new DocumentEvent();
       event.setEventType( "add" );

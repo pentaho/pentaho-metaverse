@@ -57,6 +57,49 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   private INamespace namespace;
 
+  /**
+   *  The extension associated with this document.
+   */
+  private String extension;
+
+  /**
+   * The mime type, if available for this document; otherwise null
+   */
+  private String mimeType = null;
+
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getExtension()
+   */
+  @Override
+  public String getExtension() {
+    return extension;
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#setExtension( String extension)
+   */
+  @Override
+  public void setExtension( String extension ) {
+    this.extension = extension;
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getMimeType()
+   */
+  @Override
+  public String getMimeType() {
+    return mimeType;
+  }
+
+  /* (non-Javadoc)
+   * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#setMimeType( String mimeType )
+   */
+  @Override
+  public void setMimeType( String mimeType ) {
+    this.mimeType = mimeType;
+  }
+
   /* (non-Javadoc)
    * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getContent()
    */

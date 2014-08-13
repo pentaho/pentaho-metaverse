@@ -136,9 +136,9 @@ public class FileSystemLocatorTest implements IDocumentListener {
       System.out.println( event.getDocument().getStringID() );
       assertNotNull( event.getDocument() );
       MetaverseDocument document = (MetaverseDocument) event.getDocument();
-      if ( document.getType().equals( "ktr" ) ) {
+      if ( document.getExtension().equals( "ktr" ) ) {
         assertTrue( document.getContent() instanceof String );
-      } else if ( document.getType().equals( "kjb" ) ) {
+      } else if ( document.getExtension().equals( "kjb" ) ) {
         assertTrue( document.getContent() instanceof String );
       }
     }
@@ -189,9 +189,9 @@ public class FileSystemLocatorTest implements IDocumentListener {
       System.out.println( event.getDocument().getStringID() );
       assertNotNull( event.getDocument() );
       MetaverseDocument document = (MetaverseDocument) event.getDocument();
-      if ( document.getType().equals( "ktr" ) ) {
+      if ( document.getExtension().equals( "ktr" ) ) {
         assertTrue( document.getContent() instanceof String );
-      } else if ( document.getType().equals( "kjb" ) ) {
+      } else if ( document.getExtension().equals( "kjb" ) ) {
         assertTrue( document.getContent() instanceof String );
       }
     }

@@ -178,13 +178,13 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
    */
   @Override
   public void onEvent( IDocumentEvent event ) {
-    Set<IDocumentAnalyzer> matchingAnalyzers = getDocumentAnalyzers( event.getDocument().getType() );
+    Set<IDocumentAnalyzer> matchingAnalyzers = getDocumentAnalyzers( event.getDocument().getExtension() );
     if ( matchingAnalyzers != null ) {
       for ( IDocumentAnalyzer analyzer : matchingAnalyzers ) {
         fireDocumentEvent( event, analyzer );
       }
     } else {
-      log.warn( Messages.getString( "WARNING.NoMatchingDocumentAnalyzerFound", event.getDocument().getType() ) );
+      log.warn( Messages.getString( "WARNING.NoMatchingDocumentAnalyzerFound", event.getDocument().getExtension() ) );
     }
   }
 
