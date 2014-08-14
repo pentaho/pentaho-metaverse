@@ -22,9 +22,7 @@
 
 package com.pentaho.metaverse.locator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.spy;
@@ -46,15 +44,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.ChannelLogTable;
-import org.pentaho.platform.api.metaverse.IDocumentEvent;
-import org.pentaho.platform.api.metaverse.IDocumentListener;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.*;
 
 import com.pentaho.metaverse.graph.GraphMLWriter;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseDocument;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
  * Test class for the FileSystemLocator
@@ -86,7 +81,6 @@ public class FileSystemLocatorTest implements IDocumentListener {
     try {
       KettleEnvironment.init();
     } catch ( KettleException e ) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 
@@ -112,15 +106,24 @@ public class FileSystemLocatorTest implements IDocumentListener {
 
     spyLocator.setRootFolder( "bogus" );
     events = new ArrayList<IDocumentEvent>();
-    spyLocator.startScan();
-    MetaverseCompletionService.getInstance().waitTillEmpty();
-    assertEquals( "Event count is wrong", 0, events.size() );
+    try{
+      spyLocator.startScan();
+      MetaverseCompletionService.getInstance().waitTillEmpty();
+      fail();
+    }catch(MetaverseLocatorException e){
+      assertEquals( "Event count is wrong", 0, events.size() );
+    }
 
     spyLocator.setRootFolder( "src/test/resources/solution/folder 2/parse.ktr" );
     events = new ArrayList<IDocumentEvent>();
-    spyLocator.startScan();
-    MetaverseCompletionService.getInstance().waitTillEmpty();
-    assertEquals( "Event count is wrong", 0, events.size() );
+
+    try{
+      spyLocator.startScan();
+      MetaverseCompletionService.getInstance().waitTillEmpty();
+      fail();
+    }catch(MetaverseLocatorException e){
+      assertEquals( "Event count is wrong", 0, events.size() );
+    }
 
     spyLocator.setRootFolder( "src/test/resources/solution" );
     assertEquals( "Repo id is wrong", "testrepo", spyLocator.getRepositoryId() );

@@ -26,6 +26,7 @@ import com.pentaho.metaverse.messages.Messages;
 
 import org.apache.commons.io.FileUtils;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
+import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +83,7 @@ public class FileSystemLocator extends BaseLocator<File> {
       content = FileUtils.readFileToString( file );
     } catch ( Throwable e ) {
       LOG.error( Messages.getString( "ERROR.IndexingDocument", file.getPath() ), e );
+      // not fatal, continue
     }
     return content;
   }
@@ -95,19 +97,19 @@ public class FileSystemLocator extends BaseLocator<File> {
   }
 
   @Override
-  public void startScan() {
+  public void startScan() throws MetaverseLocatorException {
 
     File root = new File( rootFolder );
     if ( !root.exists() ) {
       LOG.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.DoesNotExist", root.getAbsolutePath() ) );
-      //TODO      throw new IndexException(  );
-      return;
+      throw new MetaverseLocatorException(
+          Messages.getString("ERROR.FileSystemLocator.RootFolder.DoesNotExist", root.getAbsolutePath() ) );
     }
 
     if ( !root.isDirectory() ) {
       LOG.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.NotAFolder", root.getAbsolutePath() ) );
-      //TODO      throw new IndexException(  );
-      return;
+      throw new MetaverseLocatorException(
+          Messages.getString("ERROR.FileSystemLocator.RootFolder.NotAFolder", root.getAbsolutePath() ) );
     }
 
     LocatorRunner<File> lr = new FileSystemLocatorRunner();

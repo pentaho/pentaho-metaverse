@@ -22,6 +22,10 @@
 
 package com.pentaho.metaverse.locator;
 
+import com.pentaho.metaverse.messages.Messages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 
 /**
@@ -31,6 +35,7 @@ import java.io.File;
  */
 public class FileSystemLocatorRunner extends LocatorRunner<File> {
 
+  private static final Logger LOG = LoggerFactory.getLogger( LocatorRunner.class );
   /**
    * Indexes a set of files/folders. Folders are recursed into and files are passed to indexFile.
    * @param folder The files/folders to examine
@@ -48,8 +53,8 @@ public class FileSystemLocatorRunner extends LocatorRunner<File> {
             processFile( locator.getNamespace(), file.getName(), file.getCanonicalPath(), locator.getContents( file ) );
           }
         } catch ( Exception e ) {
-          // TODO handle exception
-          e.printStackTrace();
+          // something truly unexpected would have to have happened ... NPE or similar ugliness
+          LOG.error( Messages.getString( "ERROR.ProcessFileFailed", file.getName() ), e );
         }
       } else {
         locate( file );

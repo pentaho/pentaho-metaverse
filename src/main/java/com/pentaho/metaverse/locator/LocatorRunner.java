@@ -100,9 +100,10 @@ public abstract class LocatorRunner<T> implements Runnable {
 
     String mimeType;
     try {
-      mimeType = fileNameMap.getContentTypeFor(name);
+      mimeType = fileNameMap.getContentTypeFor( name );
     } catch ( Exception e ) {
       mimeType = null;
+      // optional attribute, continue...
     }
 
     try {
@@ -122,9 +123,12 @@ public abstract class LocatorRunner<T> implements Runnable {
       DocumentEvent event = new DocumentEvent();
       event.setEventType( "add" );
       event.setDocument( metaverseDocument );
+
       locator.notifyListeners( event );
     } catch ( Exception e ) {
-      LOG.error( Messages.getString( "ERROR.NoContentForFile", name ) );
+
+      LOG.error( Messages.getString( "ERROR.NoContentForFile", name ), e );
+
     }
 
   }
