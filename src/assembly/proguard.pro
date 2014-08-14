@@ -29,3 +29,4 @@
 }
 
 -keep public class com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider {}
+-keep public class com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider {}
