@@ -1,9 +1,0 @@
-Data lineage for the demo solution: 
-
-Requirements: 
-
-Due to limitations of the current system you must add absolute paths to the solution files to connect them. 
-
-1. Open launch_transformation.kjb. Add the path to the file_to_table.ktr in the transformation job entry. 
-2. Open file_to_table.ktr. Add the path to the .csv (lives in the same directory as the .ktr) in the text file input step.
-3. The table output step requires an H2 database embedded with sampledata database available. You can start one of these by running any BA Server's start_hypersonic script.  

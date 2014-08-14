@@ -8,6 +8,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,12 +26,13 @@ public class TransJobEntryAnalyzer extends BaseJobEntryAnalyzer<JobEntryTrans> {
     String entryFilename = entry.getFilename();
     if ( entryFilename != null ) {
       String filename = entry.getParentJob().getJobMeta().environmentSubstitute( entryFilename );
+      URI uri = URI.create( filename );
 
       IMetaverseComponentDescriptor ds = new MetaverseComponentDescriptor(
           filename,
           DictionaryConst.NODE_TYPE_TRANS,
           descriptor.getNamespace().getParentNamespace().getParentNamespace()
-              .getChildNamespace( filename, DictionaryConst.NODE_TYPE_TRANS ) );
+              .getChildNamespace( uri.getPath(), DictionaryConst.NODE_TYPE_TRANS ) );
 
       IMetaverseNode transformationNode = createNodeFromDescriptor( ds );
 

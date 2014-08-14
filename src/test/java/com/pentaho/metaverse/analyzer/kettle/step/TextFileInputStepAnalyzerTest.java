@@ -112,6 +112,7 @@ public class TextFileInputStepAnalyzerTest {
 
     String[] fileNames = new String[] { "MyTextInput.txt" };
 
+    when( mockTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( fileNames );
     when( mockTextFileInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
     when( mockTextFileInputMeta.getFileName() ).thenReturn( fileNames );
@@ -139,6 +140,7 @@ public class TextFileInputStepAnalyzerTest {
 
     String[] fileNames = new String[] { "MyTextInput.txt" };
 
+    when( mockTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( fileNames );
     when( mockTextFileInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
     when( mockTextFileInputMeta.getFileName() ).thenReturn( fileNames );

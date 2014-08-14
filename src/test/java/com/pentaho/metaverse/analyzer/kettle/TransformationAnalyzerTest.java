@@ -127,6 +127,9 @@ public class TransformationAnalyzerTest {
     when( mockTransDoc.getContent() ).thenReturn( mockContent );
     when( mockTransDoc.getNamespace() ).thenReturn( namespace );
 
+    when( mockContent.listVariables() ).thenReturn( new String[]{} );
+    when( mockContent.listParameters() ).thenReturn( new String[]{} );
+
     when( mockGenRowsStepMeta.getParentStepMeta() ).thenReturn( mockStepMeta );
 
     when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockGenRowsStepMeta );

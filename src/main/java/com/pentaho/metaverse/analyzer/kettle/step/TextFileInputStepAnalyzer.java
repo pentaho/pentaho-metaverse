@@ -30,6 +30,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,13 +46,14 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
 
     // do the common analysis for all step
     IMetaverseNode node = super.analyze( descriptor, textFileInputMeta );
-    String[] fileNames = textFileInputMeta.getFileName();
+    String[] fileNames =  parentTransMeta.environmentSubstitute( textFileInputMeta.getFileName() );
 
     // add a link from the file(s) being read to the step
     for ( String fileName : fileNames ) {
+      URI uri = URI.create( fileName );
       // first add the node for the file
       IMetaverseComponentDescriptor fileDescriptor =
-          getChildComponentDescriptor( descriptor, fileName, DictionaryConst.NODE_TYPE_FILE );
+          getChildComponentDescriptor( descriptor, uri.getPath(), DictionaryConst.NODE_TYPE_FILE );
       IMetaverseNode textFileNode = createNodeFromDescriptor( fileDescriptor );
       metaverseBuilder.addNode( textFileNode );
 
