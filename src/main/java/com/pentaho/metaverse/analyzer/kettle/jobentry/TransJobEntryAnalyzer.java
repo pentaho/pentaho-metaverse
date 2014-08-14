@@ -1,14 +1,17 @@
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.platform.api.metaverse.MetaverseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,6 +19,8 @@ import java.util.Set;
  * Created by gmoran on 7/30/14.
  */
 public class TransJobEntryAnalyzer extends BaseJobEntryAnalyzer<JobEntryTrans> {
+
+  private Logger log = LoggerFactory.getLogger( TransJobEntryAnalyzer.class );
 
   @Override
   public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, JobEntryTrans entry )
@@ -26,13 +31,19 @@ public class TransJobEntryAnalyzer extends BaseJobEntryAnalyzer<JobEntryTrans> {
     String entryFilename = entry.getFilename();
     if ( entryFilename != null ) {
       String filename = entry.getParentJob().getJobMeta().environmentSubstitute( entryFilename );
-      URI uri = URI.create( filename );
+
+      String normalized = null;
+      try {
+        normalized = KettleAnalyzerUtil.normalizeFilePath( filename );
+      } catch ( MetaverseException e ) {
+        log.error( e.getMessage(), e );
+      }
 
       IMetaverseComponentDescriptor ds = new MetaverseComponentDescriptor(
           filename,
           DictionaryConst.NODE_TYPE_TRANS,
           descriptor.getNamespace().getParentNamespace().getParentNamespace()
-              .getChildNamespace( uri.getPath(), DictionaryConst.NODE_TYPE_TRANS ) );
+              .getChildNamespace( normalized, DictionaryConst.NODE_TYPE_TRANS ) );
 
       IMetaverseNode transformationNode = createNodeFromDescriptor( ds );
 
