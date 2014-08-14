@@ -10,10 +10,8 @@ import org.pentaho.platform.api.metaverse.INamespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.FileNameMap;
+import java.net.URLConnection;
 
 /**
  * The LocatorRunner is a execution construct for concurrently running document locator logic.
@@ -26,6 +24,7 @@ public abstract class LocatorRunner<T> implements Runnable {
 
   private static final Logger LOG = LoggerFactory.getLogger( LocatorRunner.class );
 
+  private static FileNameMap fileNameMap = URLConnection.getFileNameMap();
   /**
    * The top-level repository files and folders to search into
    */
@@ -93,7 +92,6 @@ public abstract class LocatorRunner<T> implements Runnable {
       return;
     }
 
-    Path path = Paths.get( name );
     String extension = FilenameUtils.getExtension( name );
 
     if ( "".equals( extension ) ) {
@@ -102,8 +100,8 @@ public abstract class LocatorRunner<T> implements Runnable {
 
     String mimeType;
     try {
-      mimeType = Files.probeContentType( path );
-    } catch ( IOException e ) {
+      mimeType = fileNameMap.getContentTypeFor(name);
+    } catch ( Exception e ) {
       mimeType = null;
     }
 
