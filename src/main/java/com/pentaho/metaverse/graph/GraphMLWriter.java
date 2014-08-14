@@ -34,11 +34,6 @@ import com.tinkerpop.blueprints.Graph;
  */
 public class GraphMLWriter implements IGraphWriter {
 
-  /**
-   * Writes the specified graph to the specified output stream
-   * 
-   * @see com.pentaho.metaverse.api.IGraphWriter#outputGraph(com.tinkerpop.blueprints.Graph, java.io.OutputStream)
-   */
   @Override
   public void outputGraph( Graph graph, OutputStream graphMLOutputStream ) throws IOException {
     com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter.outputGraph( graph, graphMLOutputStream );

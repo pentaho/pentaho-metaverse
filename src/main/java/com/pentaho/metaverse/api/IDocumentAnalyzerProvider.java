@@ -34,7 +34,7 @@ public interface IDocumentAnalyzerProvider extends IAnalyzerProvider<IDocumentAn
   /**
    * Gets the IDocumentAnalyzer(s) that support a specific type
    * @param type Specific type of analyzers interested in
-   * @return
+   * @return The document analyzers
    */
   Set<IDocumentAnalyzer> getDocumentAnalyzers( String type );
 

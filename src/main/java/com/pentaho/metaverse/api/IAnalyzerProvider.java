@@ -25,13 +25,26 @@ package com.pentaho.metaverse.api;
 import java.util.Set;
 
 /**
- * @author mburgess
  * 
+ * @author mburgess
+ *
+ * @param <T>
  */
 public interface IAnalyzerProvider<T> {
 
-  public Set<T> getAnalyzers();
+  /**
+   * Return the set of analyzers for this type
+   * 
+   * @return The analyzers
+   */
+  Set<T> getAnalyzers();
 
-  public Set<T> getAnalyzers( Set<Class<?>> types );
+  /**
+   * Return the set of analyzers for this type for a given set of classes
+   * 
+   * @param types The set of classes to filter by
+   * @return The analyzers
+   */
+  Set<T> getAnalyzers( Set<Class<?>> types );
 
 }

@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.locator;
 
 import com.pentaho.metaverse.messages.Messages;
+
 import org.apache.commons.io.FileUtils;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.slf4j.Logger;
@@ -37,22 +38,32 @@ import java.util.List;
  *
  */
 public class FileSystemLocator extends BaseLocator<File> {
-  private static final long serialVersionUID = 3308953622126327699L;
 
   /**
    * The type for this locator
    */
   public static final String LOCATOR_TYPE = "FileSystem";
 
-  private static final Logger log = LoggerFactory.getLogger( FileSystemLocator.class );
+  private static final long serialVersionUID = 3308953622126327699L;
+
+  private static final Logger LOG = LoggerFactory.getLogger( FileSystemLocator.class );
 
   private String rootFolder;
 
+  /**
+   * Creates a filessytem locator
+   */
   public FileSystemLocator() {
     super();
     setLocatorType( LOCATOR_TYPE );
   }
 
+  /**
+   * Creates a file system locator with a list of document listeners that will be informed
+   * as documents are found by this locator.
+   * 
+   * @param documentListeners The document listeners
+   */
   public FileSystemLocator( List<IDocumentListener> documentListeners ) {
     super( documentListeners );
     setLocatorType( LOCATOR_TYPE );
@@ -70,7 +81,7 @@ public class FileSystemLocator extends BaseLocator<File> {
     try {
       content = FileUtils.readFileToString( file );
     } catch ( Throwable e ) {
-      log.error( Messages.getString( "ERROR.IndexingDocument", file.getPath() ), e );
+      LOG.error( Messages.getString( "ERROR.IndexingDocument", file.getPath() ), e );
     }
     return content;
   }
@@ -88,18 +99,18 @@ public class FileSystemLocator extends BaseLocator<File> {
 
     File root = new File( rootFolder );
     if ( !root.exists() ) {
-      log.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.DoesNotExist", root.getAbsolutePath() ) );
+      LOG.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.DoesNotExist", root.getAbsolutePath() ) );
       //TODO      throw new IndexException(  );
       return;
     }
 
     if ( !root.isDirectory() ) {
-      log.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.NotAFolder", root.getAbsolutePath() ) );
+      LOG.error( Messages.getString("ERROR.FileSystemLocator.RootFolder.NotAFolder", root.getAbsolutePath() ) );
       //TODO      throw new IndexException(  );
       return;
     }
 
-    LocatorRunner lr = new FileSystemLocatorRunner();
+    LocatorRunner<File> lr = new FileSystemLocatorRunner();
     lr.setRoot( root );
     startScan( lr );
   }

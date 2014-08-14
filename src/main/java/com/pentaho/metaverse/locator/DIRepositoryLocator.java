@@ -52,7 +52,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
    */
   public static final String LOCATOR_TYPE = "DIRepo";
 
-  private static final Logger log = LoggerFactory.getLogger( DIRepositoryLocator.class );
+  private static final Logger LOG = LoggerFactory.getLogger( DIRepositoryLocator.class );
 
 
   private static final long serialVersionUID = 1324202912891938340L;

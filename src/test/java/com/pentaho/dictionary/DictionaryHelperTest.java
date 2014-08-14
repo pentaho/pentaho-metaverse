@@ -123,10 +123,4 @@ public class DictionaryHelperTest {
     assertEquals( "Color is wrong", DictionaryConst.COLOR_OTHER, DictionaryHelper.getColorForCategory( "bogus" ) );
   }
 
-  @Test
-  public void testDictionaryConstConstructorToSatisfyCodeCoverage() {
-    DictionaryConst dc = new DictionaryConst();
-    assertNotNull( dc );
-  }
-
 }

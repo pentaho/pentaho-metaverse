@@ -28,14 +28,38 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 @SuppressWarnings( "rawtypes" )
 public class DictionaryHelper {
 
-  private static Map<String, IIdGenerator> keyIdGeneratorMap = new HashMap<String, IIdGenerator>();
+  /**
+   * The separator to use in id generation.
+   */
+  public static final String SEPARATOR = "~";
 
+  /**
+   * The set of structural link types
+   */
+  public static final Set<String> STRUCTURAL_LINK_TYPES = new HashSet<String>();
+
+  /**
+   * The set of entity node types
+   */
+  public static final Set<String> ENTITY_NODE_TYPES = new HashSet<String>();
+
+  /**
+   * The set of data flow link types
+   */
+  public static final Set<String> DATAFLOW_LINK_TYPES = new HashSet<String>();
+
+  private static Map<String, IIdGenerator> keyIdGeneratorMap = new HashMap<String, IIdGenerator>();
   private static Map<Class, IIdGenerator> classIdGeneratorMap = new HashMap<Class, IIdGenerator>();
   private static List<Class> classList = new ArrayList<Class>();
   private static Map<String, String> categoryColorMap = new HashMap<String, String>();
   private static Map<String, String> typeCategoryMap = new HashMap<String, String>();
 
-  public static final String SEPARATOR = "~";
+  /**
+   * Hides the constructor so that this class cannot be instanced
+   */
+  protected DictionaryHelper() {
+    throw new UnsupportedOperationException();
+  }
 
   // TODO This is temporary
   static {
@@ -127,24 +151,9 @@ public class DictionaryHelper {
   }
 
   /**
-   * The set of structural link types
-   */
-  public static final Set<String> STRUCTURAL_LINK_TYPES = new HashSet<String>();
-
-  /**
-   * The set of entity node types
-   */
-  public static final Set<String> ENTITY_NODE_TYPES = new HashSet<String>();
-
-  /**
-   * The set of data flow link types
-   */
-  public static final Set<String> DATAFLOW_LINK_TYPES = new HashSet<String>();
-
-  /**
    * Registers a new entity type, e.g. "ktr", or "logicalmodel"
    *
-   * @param entityType
+   * @param entityType The entity type
    */
   public static void registerEntityType( String entityType ) {
     ENTITY_NODE_TYPES.add( entityType );
@@ -153,7 +162,7 @@ public class DictionaryHelper {
   /**
    * Registers a new structural link, e.g. "defines", or "contains"
    *
-   * @param linkType
+   * @param linkType The link type
    */
   public static void registerStructuralLinkType( String linkType ) {
     STRUCTURAL_LINK_TYPES.add( linkType );
@@ -162,7 +171,7 @@ public class DictionaryHelper {
   /**
    * Registers a new data flow link, e.g. "populates"
    *
-   * @param linkType
+   * @param linkType The link type
    */
   public static void registerDataFlowLinkType( String linkType ) {
     DATAFLOW_LINK_TYPES.add( linkType );

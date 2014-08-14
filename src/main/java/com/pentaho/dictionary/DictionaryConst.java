@@ -100,47 +100,188 @@ public class DictionaryConst {
    */
   public static final String LINK_CREATES = "creates";
 
-  /*
-   * This is a set of known content types
+  /**
+   * The node type for document locator objects
    */
   public static final String NODE_TYPE_LOCATOR = "Locator";
   // TODO temporary; need to get the demo working; permanent fix in progress
+
+  /**
+   * The node type for PDI jobs
+   */
   public static final String NODE_TYPE_JOB = "Job";
+
+  /**
+   * The node type for PDI transformations
+   */
   public static final String NODE_TYPE_TRANS = "Transformation";
+
+  /**
+   * The node type for PDI transformation steps
+   */
   public static final String NODE_TYPE_TRANS_STEP = "Transformation Step";
+
+  /**
+   * The node type for PDI job entries
+   */
   public static final String NODE_TYPE_JOB_ENTRY = "Job Entry";
+
+  /**
+   * The node type for data sources, e.g. a database
+   */
   public static final String NODE_TYPE_DATASOURCE = "Database Connection";
+
+  /**
+   * The node type for data tables
+   */
   public static final String NODE_TYPE_DATA_TABLE = "Database Table";
+
+  /**
+   * The node type for PDI transformation fields
+   */
   public static final String NODE_TYPE_TRANS_FIELD = "Transformation Stream field";
+
+  /**
+   * The node type for a data column in a data table
+   */
   public static final String NODE_TYPE_DATA_COLUMN = "Database Column";
+
+  /**
+   * The node type for a physical file
+   */
   public static final String NODE_TYPE_FILE = "File";
+
+  /**
+   * The node type for a field in a physical file
+   */
   public static final String NODE_TYPE_FILE_FIELD = "File Field";
+
+  /**
+   * The node type for a web service, e.g. SalesForce.com or a HTTP call
+   */
   public static final String NODE_TYPE_WEBSERVICE = "Web Service";
+
+  /**
+   * The node type for a logical model, e.g. a Mondrian schema
+   */
   public static final String NODE_TYPE_LOGICAL_MODEL = "Logical Model";
+
+  /**
+   * The node type for a logical hierarchy, e.g. a Mondrian hierarchy
+   */
   public static final String NODE_TYPE_LOGICAL_HIERARCHY = "Logical Hierarchy";
+
+  /**
+   * The node type for a field in a model, e.g. a Mondrian level
+   */
   public static final String NODE_TYPE_LOGICAL_FIELD = "Model Field";
+
+  /**
+   * The entity node type for user content, e.g. transformations and jobs
+   */
   public static final String NODE_TYPE_USER_CONTENT = "User Content";
+
+  /**
+   * The entity node type
+   */
   public static final String NODE_TYPE_ENTITY = "Entity";
+
+  /**
+   * The root node type
+   */
   public static final String NODE_TYPE_ROOT_ENTITY = "Root_Entity";
 
+  /**
+   * The entity node type for virtual nodes
+   */
   public static final String NODE_VIRTUAL = "virtual";
 
+  /**
+   * The category for abstract nodes, e.g. entity nodes
+   */
   public static final String CATEGORY_ABSTRACT = "abstract";
+
+  /**
+   * The category for abstract nodes, e.g. entity nodes
+   */
   public static final String CATEGORY_DATASOURCE = "datasource";
+
+  /**
+   * The category for document nodes, e.g. transformations and jobs
+   */
   public static final String CATEGORY_DOCUMENT = "document";
+
+  /**
+   * The category for document elements, e.g. transformation steps within a transformation
+   */
   public static final String CATEGORY_DOCUMENT_ELEMENT = "documentelement";
+
+  /**
+   * The category for fields, e.g. transformation fields or table columns
+   */
   public static final String CATEGORY_FIELD = "field";
+
+  /**
+   * The category for field collections, e.g. physical files, database tables
+   */
   public static final String CATEGORY_FIELD_COLLECTION = "collection";
+
+  /**
+   * The category for repositories
+   */
   public static final String CATEGORY_REPOSITORY = "repository";
+
+  /**
+   * The category for other node types
+   */
   public static final String CATEGORY_OTHER = "other";
 
+  /**
+   * The suggested color for abstract nodes
+   */
   public static final String COLOR_ABSTRACT = "#dddddd";
+
+  /**
+   * The suggested color for datasource nodes
+   */
   public static final String COLOR_DATASOURCE = "#ff6600";
+
+  /**
+   * The suggested color for abstract nodes
+   */
   public static final String COLOR_DOCUMENT = "#ccffcc";
+
+  /**
+   * The suggested color for document nodes
+   */
   public static final String COLOR_DOCUMENT_ELEMENT = "#ccffff";
+
+  /**
+   * The suggested color for field nodes
+   */
   public static final String COLOR_FIELD = "#ffcc99";
+
+  /**
+   * The suggested color for field collection nodes
+   */
   public static final String COLOR_FIELD_COLLECTION = "#ff9900";
+
+  /**
+   * The suggested color for repositories
+   */
   public static final String COLOR_REPOSITORY = "#66aa44";
+
+  /**
+   * The suggested color for nodes of unknown or "other" types
+   */
   public static final String COLOR_OTHER = "#ffcccc";
+
+
+  /**
+   * Hides the constructor so that this class cannot be instanced
+   */
+  protected DictionaryConst() {
+    throw new UnsupportedOperationException();
+  }
 
 }

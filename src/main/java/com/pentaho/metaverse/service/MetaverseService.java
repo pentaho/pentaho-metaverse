@@ -50,11 +50,18 @@ import com.tinkerpop.blueprints.Graph;
 @Path( "/metaverse/api/service" )
 public class MetaverseService implements IMetaverseService {
 
+  private static final int DEFAULT_DELAY = 1000;
   private IMetaverseReader metaverseReader;
   private IDocumentLocatorProvider documentLocatorProvider;
   private int count;
-  private int delay = 1000;
+  private int delay = DEFAULT_DELAY;
 
+  /**
+   * Creates a new metaverse service using a provided metaverse reader (to pass calls to), 
+   * and locator provider (to rebuild the metaverse).
+   * @param metaverseReader The metaverse reader to use
+   * @param documentLocatorProvider The document locator provider to use
+   */
   public MetaverseService( IMetaverseReader metaverseReader, IDocumentLocatorProvider documentLocatorProvider ) {
     setMetaverseReader( metaverseReader );
     setDocumentLocatorProvider( documentLocatorProvider );
@@ -86,7 +93,7 @@ public class MetaverseService implements IMetaverseService {
   @Path( "/export" )
   @Produces( { MediaType.APPLICATION_XML } )
   public Response export() {
-    // TODO: figure out how to have the metaverse ready before our first call to the service
+    // TODO figure out how to have the metaverse ready before our first call to the service
     if ( count++ == 0 ) {
       prepareMetaverse();
     }
@@ -97,6 +104,9 @@ public class MetaverseService implements IMetaverseService {
     return Response.ok( metaverseReader.exportToXml(), MediaType.APPLICATION_XML ).build();
   }
 
+  /**
+   * Makes sure that the metaverse is fully populated.
+   */
   protected void prepareMetaverse() {
     if ( documentLocatorProvider != null ) {
       Set<IDocumentLocator> locators = documentLocatorProvider.getDocumentLocators();
