@@ -6,7 +6,7 @@
     <extended_description/>
     <trans_version/>
     <trans_type>Normal</trans_type>
-    <trans_status>0</trans_status>
+    <trans_status>2</trans_status>
     <directory>&#x2f;</directory>
     <parameters>
     </parameters>
@@ -66,9 +66,9 @@
     </slaveservers>
     <clusterschemas>
     </clusterschemas>
-  <created_user>-</created_user>
+  <created_user>gmoran</created_user>
   <created_date>2014&#x2f;08&#x2f;12 14&#x3a;30&#x3a;43.221</created_date>
-  <modified_user>-</modified_user>
+  <modified_user>rfellows</modified_user>
   <modified_date>2014&#x2f;08&#x2f;12 14&#x3a;30&#x3a;43.221</modified_date>
   </info>
   <notepads>

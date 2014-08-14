@@ -31,7 +31,7 @@ import java.util.Set;
 /**
  * BasePropertiesHolder provides methods for getting and setting key/value pairs (i.e. properties)
  */
-public abstract class BasePropertiesHolder implements IHasProperties {
+public class BasePropertiesHolder implements IHasProperties {
 
   private Map<String, Object> properties;
 

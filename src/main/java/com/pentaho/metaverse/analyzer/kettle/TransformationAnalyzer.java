@@ -23,20 +23,15 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
-import com.google.common.base.Joiner;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
+import com.pentaho.metaverse.impl.BasePropertiesHolder;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
@@ -133,9 +128,19 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       node.setProperty( DictionaryConst.PROPERTY_CREATED, Long.toString( createdDate.getTime() ) );
     }
 
+    String createdUser = transMeta.getCreatedUser();
+    if ( createdUser != null ) {
+      node.setProperty( DictionaryConst.PROPERTY_CREATED_BY, createdUser );
+    }
+
     Date lastModifiedDate = transMeta.getModifiedDate();
     if ( lastModifiedDate != null ) {
       node.setProperty( DictionaryConst.PROPERTY_LAST_MODIFIED, Long.toString( lastModifiedDate.getTime() ) );
+    }
+
+    String lastModifiedUser = transMeta.getModifiedUser();
+    if ( lastModifiedUser != null ) {
+      node.setProperty( DictionaryConst.PROPERTY_LAST_MODIFIED_BY, lastModifiedUser );
     }
 
     String status = Messages.getString( "INFO.JobOrTrans.Status_" + Integer.toString( transMeta.getTransstatus() ) );
@@ -143,32 +148,26 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       node.setProperty( DictionaryConst.PROPERTY_STATUS, status );
     }
 
-    // TODO where do we get this value?
-    node.setProperty( "status", "PRODUCTION" );
+    node.setProperty( "path", document.getProperty( "path" ) );
 
     String[] parameters = transMeta.listParameters();
     if ( parameters != null ) {
-      List<Map<String, Properties>> parameterMapList = new ArrayList<Map<String, Properties>>( parameters.length );
       for ( String parameter : parameters ) {
         try {
           // Determine parameter properties and add them to a map, then the map to the list
           String defaultParameterValue = transMeta.getParameterDefault( parameter );
           String parameterValue = transMeta.getParameterValue( parameter );
           String parameterDescription = transMeta.getParameterDescription( parameter );
-          Map<String, Properties> paramPropertyMap = new HashMap<String, Properties>();
-          Properties paramProperties = new Properties();
+          BasePropertiesHolder paramProperties = new BasePropertiesHolder();
           paramProperties.setProperty( "defaultValue", defaultParameterValue );
           paramProperties.setProperty( "value", parameterValue );
           paramProperties.setProperty( "description", parameterDescription );
-          paramPropertyMap.put( parameter, paramProperties );
-          parameterMapList.add( paramPropertyMap );
-
+          node.setProperty( "parameter_" + parameter, paramProperties.toString() );
         } catch ( UnknownParamException upe ) {
           // This shouldn't happen as we're using the list provided by the meta
           throw new MetaverseAnalyzerException( upe );
         }
       }
-      node.setProperty( "parameters", Joiner.on( ',' ).join( parameterMapList ) );
     }
     // handle the step
     for ( int stepNr = 0; stepNr < transMeta.nrSteps(); stepNr++ ) {

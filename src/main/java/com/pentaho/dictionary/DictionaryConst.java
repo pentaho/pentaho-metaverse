@@ -56,9 +56,19 @@ public class DictionaryConst {
   public static final String PROPERTY_LAST_MODIFIED = "lastmodified";
 
   /**
+   * Property key for "last modified"
+   */
+  public static final String PROPERTY_LAST_MODIFIED_BY = "lastmodifiedby";
+
+  /**
    * Property key for "created"
    */
   public static final String PROPERTY_CREATED = "created";
+
+  /**
+   * Property key for "created"
+   */
+  public static final String PROPERTY_CREATED_BY = "createdby";
 
   /**
    * Property key for "description"

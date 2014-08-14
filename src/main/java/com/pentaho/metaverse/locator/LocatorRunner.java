@@ -15,10 +15,9 @@ import java.net.URLConnection;
 
 /**
  * The LocatorRunner is a execution construct for concurrently running document locator logic.
- * 
- * @author jdixon
  *
  * @param <T> The type of the locator for this runner
+ * @author jdixon
  */
 public abstract class LocatorRunner<T> implements Runnable {
 
@@ -73,18 +72,19 @@ public abstract class LocatorRunner<T> implements Runnable {
 
   /**
    * Indexes a set of files/folders. Folders are recursed into and files are passed to indexFile.
-   * @param root  The files/folders to examine
+   *
+   * @param root The files/folders to examine
    */
   protected abstract void locate( T root );
 
   /**
    * Processes the contents of a file. Creates a metaverse document, sets the main properties,
    * and calls the document listeners to parse/process the file.
-   * 
-   * @param namespace The namespace to use for creating ids 
-   * @param name The name of the file
-   * @param id The id of the file
-   * @param contents The contents of the file
+   *
+   * @param namespace The namespace to use for creating ids
+   * @param name      The name of the file
+   * @param id        The id of the file
+   * @param contents  The contents of the file
    */
   public void processFile( INamespace namespace, String name, String id, Object contents ) {
 
@@ -119,6 +119,7 @@ public abstract class LocatorRunner<T> implements Runnable {
       metaverseDocument.setName( name );
       metaverseDocument.setExtension( extension );
       metaverseDocument.setMimeType( mimeType );
+      metaverseDocument.setProperty( "path", id );
 
       DocumentEvent event = new DocumentEvent();
       event.setEventType( "add" );
