@@ -23,14 +23,17 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.platform.api.metaverse.MetaverseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,6 +42,7 @@ import java.util.Set;
  * other metaverse entities
  */
 public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMeta> {
+  private Logger log = LoggerFactory.getLogger( TextFileInputStepAnalyzer.class );
 
   @Override
   public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, TextFileInputMeta textFileInputMeta )
@@ -50,10 +54,17 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
 
     // add a link from the file(s) being read to the step
     for ( String fileName : fileNames ) {
-      URI uri = URI.create( fileName );
+
+      String normalized = null;
+      try {
+        normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
+      } catch ( MetaverseException e ) {
+        log.error( e.getMessage(), e );
+      }
+
       // first add the node for the file
       IMetaverseComponentDescriptor fileDescriptor =
-          getChildComponentDescriptor( descriptor, uri.getPath(), DictionaryConst.NODE_TYPE_FILE );
+          getChildComponentDescriptor( descriptor, normalized, DictionaryConst.NODE_TYPE_FILE );
       IMetaverseNode textFileNode = createNodeFromDescriptor( fileDescriptor );
       metaverseBuilder.addNode( textFileNode );
 
