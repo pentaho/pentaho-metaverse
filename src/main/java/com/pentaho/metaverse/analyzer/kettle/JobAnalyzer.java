@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -90,6 +91,11 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     } else if ( repoObject instanceof JobMeta ) {
       job = (JobMeta) repoObject;
     }
+
+    // construct a dummy job based on our JobMeta so we get out VariableSpace set properly
+    job.setFilename( document.getStringID() );
+    Job j = new Job( null, job );
+    j.setInternalKettleVariables( job );
 
     IMetaverseComponentDescriptor documentDescriptor =
         getChildComponentDescriptor( descriptor, document.getStringID(), DictionaryConst.NODE_TYPE_JOB );

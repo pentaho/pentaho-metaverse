@@ -33,6 +33,7 @@ import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -94,6 +95,10 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     } else if ( repoObject instanceof TransMeta ) {
       transMeta = (TransMeta) repoObject;
     }
+
+    transMeta.setFilename( document.getStringID() );
+    Trans t = new Trans( transMeta );
+    t.setInternalKettleVariables( transMeta );
 
     IMetaverseComponentDescriptor documentDescriptor =
         getChildComponentDescriptor( descriptor, document.getStringID(), DictionaryConst.NODE_TYPE_TRANS );

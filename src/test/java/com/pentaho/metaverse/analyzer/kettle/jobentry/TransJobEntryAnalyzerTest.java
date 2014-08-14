@@ -7,7 +7,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.OngoingStubbing;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
@@ -61,6 +64,12 @@ public class TransJobEntryAnalyzerTest {
     when( mockParentJob.getJobMeta() ).thenReturn( mockParentJobMeta );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
     when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+
+    when( mockParentJobMeta.environmentSubstitute( anyString() ) ).thenAnswer( new Answer<String>() {
+      @Override public String answer( InvocationOnMock invocation ) throws Throwable {
+        return (String)invocation.getArguments()[0];
+      }
+    });
 
     descriptor = new MetaverseComponentDescriptor( "job entry", DictionaryConst.NODE_TYPE_JOB_ENTRY, namespace );
     analyzer.setMetaverseBuilder( metaverseBuilder );
