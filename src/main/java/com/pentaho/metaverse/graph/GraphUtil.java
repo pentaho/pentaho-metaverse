@@ -13,6 +13,13 @@ import com.tinkerpop.blueprints.Vertex;
 public class GraphUtil {
 
   /**
+   * Hides the constructor so that this class cannot be instanced
+   */
+  protected GraphUtil() {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
    * Clones a provided vertex into a new graph. The graph should not be the graph that the
    * provided vertex belongs to.
    * @param vertex The vertex to clone

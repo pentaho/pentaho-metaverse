@@ -10,10 +10,11 @@ import org.pentaho.platform.api.metaverse.INamespace;
 public interface INamespaceFactory {
 
   /**
-   * method to create new namespace objects
+   * Creates a new namespace object
    * @param parent The namespace container one level above current
    * @param name the additional container identifier for this namespace
+   * @param type the type of the object
    * @return INamespace object to manage namespace hierarchy
    */
-  public INamespace createNameSpace( INamespace parent, String name, String type );
+  INamespace createNameSpace( INamespace parent, String name, String type );
 }

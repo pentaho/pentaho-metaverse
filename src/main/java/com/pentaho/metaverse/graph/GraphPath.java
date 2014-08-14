@@ -8,18 +8,38 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
+/**
+ * A path of vertex of edges. This is used by the MetaverseReader to answer searches by external callers.
+ * @author jdixon
+ *
+ */
 public class GraphPath {
 
   private List<Object> path = new ArrayList<Object>();
 
+  /**
+   * Adds a vertex to the path.
+   * 
+   * @param vertex The vertex to add
+   */
   public void addVertex( Vertex vertex ) {
     path.add( vertex );
   }
 
+  /**
+   * Adds a edge to the path.
+   * 
+   * @param edge The edge to add.
+   */
   public void addEdge( Edge edge ) {
     path.add( edge );
   }
 
+  /**
+   * Removes a vertex or an edge from the end of the path.
+   * 
+   * @return The vertex or edge removed
+   */
   public Object pop() {
     Object obj = path.remove( path.size() - 1 );
     return obj;
@@ -29,6 +49,11 @@ public class GraphPath {
     return path.size();
   }
 
+  /**
+   * Returns a clone of this GraphPath
+   * 
+   * @return The cloned path.
+   */
   public GraphPath clone() {
     GraphPath clone = new GraphPath();
     for ( Object o : path ) {
@@ -38,13 +63,19 @@ public class GraphPath {
   }
 
   /**
-   * A protected method using in shallow cloning
-   * @param o
+   * A protected method using in shallow cloning.
+   * 
+   * @param o The object to add
    */
   protected void add( Object o ) {
     path.add( o );
   }
 
+  /**
+   * Adds this path to a graph.
+   * 
+   * @param g The graph to add this path to.
+   */
   public void addToGraph( Graph g ) {
 
     for ( Object item : path ) {

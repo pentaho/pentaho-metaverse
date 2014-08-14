@@ -65,13 +65,6 @@ public class SynchronizedGraphFactoryTest {
     assertTrue( g instanceof SynchronizedGraph );
   }
 
-  @Test
-  public void testConstructor() throws Exception {
-    // only here for code coverage
-    SynchronizedGraphFactory factory = new SynchronizedGraphFactory();
-    assertNotNull( factory );
-  }
-
   @Test( expected = IllegalArgumentException.class )
   public void testWrapGraph_NotAKeyIndexableGraph() throws Exception {
     Graph g = mock( Graph.class );

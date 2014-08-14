@@ -39,11 +39,8 @@ import com.tinkerpop.blueprints.Vertex;
  */
 public class GraphCsvWriter implements IGraphWriter {
 
-  /**
-   * Writes the specified graph to the specified output stream
-   * 
-   * @see com.pentaho.metaverse.api.IGraphWriter#outputGraph(com.tinkerpop.blueprints.Graph, java.io.OutputStream)
-   */
+  private static final String CSV_ENCLOSURE = "\"";
+
   @Override
   public void outputGraph( Graph graph, OutputStream out ) throws IOException {
 
@@ -97,9 +94,9 @@ public class GraphCsvWriter implements IGraphWriter {
     }
     if ( obj != null ) {
       if ( obj instanceof String ) {
-        out.write( "\"".getBytes() );
-        out.write( obj.toString().replace( "\"", "\\\"" ).getBytes() );
-        out.write( "\"".getBytes() );
+        out.write( CSV_ENCLOSURE.getBytes() );
+        out.write( obj.toString().replace( CSV_ENCLOSURE, "\\\"" ).getBytes() );
+        out.write( CSV_ENCLOSURE.getBytes() );
       } else {
         out.write( obj.toString().getBytes() );
       }

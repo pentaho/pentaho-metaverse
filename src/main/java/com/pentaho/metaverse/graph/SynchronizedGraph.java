@@ -26,6 +26,7 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Features;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.GraphQuery;
+import com.tinkerpop.blueprints.KeyIndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
 
@@ -34,9 +35,16 @@ import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
  */
 public class SynchronizedGraph implements Graph {
 
-  protected final IdGraph graph;
+  /**
+   * The underlying graph
+   */
+  protected final IdGraph<KeyIndexableGraph> graph;
 
-  public SynchronizedGraph( IdGraph graph ) {
+  /**
+   * Creates a new synchronized graph
+   * @param graph The underlying graph
+   */
+  public SynchronizedGraph( IdGraph<KeyIndexableGraph> graph ) {
     this.graph = graph;
   }
 

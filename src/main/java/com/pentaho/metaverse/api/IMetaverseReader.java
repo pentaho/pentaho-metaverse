@@ -36,8 +36,19 @@ import com.tinkerpop.blueprints.Graph;
  */
 public interface IMetaverseReader {
 
+  /**
+   * The token to use for XML format exports
+   */
   String FORMAT_XML = "xml";
+
+  /**
+   * The token to use for GraphJSON format exports
+   */
   String FORMAT_JSON = "json";
+
+  /**
+   * The token to use for CSV format exports
+   */
   String FORMAT_CSV = "csv";
 
   /**
@@ -99,10 +110,9 @@ public interface IMetaverseReader {
    * Searches the metaverse for nodes of the specified result types, by traversing the graph model from the specified
    * starting node(s).
    * 
-   * @param resultTypes
-   *          the result types
-   * @param startNodeIDs
-   *          the start node i ds
+   * @param resultTypes the result types
+   * @param startNodeIDs the start node ids
+   * @param shortestOnly only return the shortest paths
    * @return the graph
    */
   Graph search( List<String> resultTypes, List<String> startNodeIDs, boolean shortestOnly );
@@ -120,6 +130,6 @@ public interface IMetaverseReader {
    * @param value The value of the property
    * @return A list of matching nodes
    */
-  public List<IMetaverseNode> findNodes( String property, String value );
+  List<IMetaverseNode> findNodes( String property, String value );
 
 }

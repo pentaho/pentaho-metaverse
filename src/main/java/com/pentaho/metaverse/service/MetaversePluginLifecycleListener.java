@@ -30,11 +30,21 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A plugin lifecycle listener for the metaverse plugin. On platfomr shutdown this
+ * lifecycle listener calls shutdown on the metaverse graph.
+ * @author jdixon
+ *
+ */
 public class MetaversePluginLifecycleListener implements IPluginLifecycleListener {
 
+  private static final Logger LOG = LoggerFactory.getLogger( MetaversePluginLifecycleListener.class );
   private Graph graph;
-  private static final Logger log = LoggerFactory.getLogger( MetaversePluginLifecycleListener.class );
 
+  /**
+   * Returns the metaverse graph
+   * @return The graph
+   */
   public Graph getGraph() {
     if ( this.graph == null ) {
       // try to get it from PentahoSystem
@@ -57,7 +67,7 @@ public class MetaversePluginLifecycleListener implements IPluginLifecycleListene
   public void unLoaded() throws PluginLifecycleException {
     Graph graph = getGraph();
     if ( graph != null ) {
-      log.info( Messages.getString( "INFO.PluginUnload.ShutdownGraph" ) );
+      LOG.info( Messages.getString( "INFO.PluginUnload.ShutdownGraph" ) );
       graph.shutdown();
     }
   }

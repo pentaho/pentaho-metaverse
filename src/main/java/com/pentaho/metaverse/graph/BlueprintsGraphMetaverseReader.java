@@ -41,6 +41,7 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
   private static final String MESSAGE_PREFIX_NODETYPE = "USER.nodetype.";
   private static final String MESSAGE_PREFIX_LINKTYPE = "USER.linktype.";
   private static final String MESSAGE_PREFIX_CATEGORY = "USER.category.";
+  private static final String MESSAGE_FAILED_PREFIX = "!";
 
   private Graph graph;
 
@@ -153,21 +154,29 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
     return out.toString();
   }
 
+  /**
+   * Exports the metaverse graph by writing it to an output stream
+   * 
+   * @param format The format for the export: XML, JSON, or CSV
+   * @param out The output stream to write to
+   * @throws IOException Thrown if there is an I/O issue
+   */
   public void exportToStream( String format, OutputStream out ) throws IOException {
-    if ( format == null ) {
+    String fmt = format;
+    if ( fmt == null ) {
       // default to graphml
-      format = FORMAT_XML;
+      fmt = FORMAT_XML;
     }
     Graph graph = getGraph();
     graph = enhanceGraph( graph );
     // convert the graph to an export format, GraphML for now
-    if ( format.equalsIgnoreCase( FORMAT_XML ) ) {
+    if ( fmt.equalsIgnoreCase( FORMAT_XML ) ) {
       GraphMLWriter writer = new GraphMLWriter();
       writer.outputGraph( graph, out );
-    } else if ( format.equalsIgnoreCase( FORMAT_JSON ) ) {
+    } else if ( fmt.equalsIgnoreCase( FORMAT_JSON ) ) {
       GraphSONWriter writer = new GraphSONWriter();
       writer.outputGraph( graph, out );
-    } else if ( format.equalsIgnoreCase( FORMAT_CSV ) ) {
+    } else if ( fmt.equalsIgnoreCase( FORMAT_CSV ) ) {
       GraphCsvWriter writer = new GraphCsvWriter();
       writer.outputGraph( graph, out );
     }
@@ -324,7 +333,9 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   /**
    * Adds localized types and categories, add node color information
+   * 
    * @param g The graph to enhance
+   * @return The enhanced graph
    */
   protected Graph enhanceGraph( Graph g ) {
 
@@ -344,20 +355,29 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
     return g;
   }
 
+  /**
+   * Enhances an edge by adding a localized type
+   * 
+   * @param edge The edge to enhance
+   */
   protected void enhanceEdge( Edge edge ) {
     String type = edge.getLabel();
     //localize the node type
     String localizedType = Messages.getString( MESSAGE_PREFIX_LINKTYPE + type );
-    if ( !localizedType.startsWith( "!" ) ) {
+    if ( !localizedType.startsWith( MESSAGE_FAILED_PREFIX ) ) {
       edge.setProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localizedType );
     }
   }
 
+  /**
+   * Enhances a vertex by adding localized type and category, and a suggested color
+   * @param vertex The vertex to enhance
+   */
   protected void enhanceVertex( Vertex vertex ) {
     String type = vertex.getProperty( DictionaryConst.PROPERTY_TYPE );
     //localize the node type
     String localizedType = Messages.getString( MESSAGE_PREFIX_NODETYPE + type );
-    if ( !localizedType.startsWith( "!" ) ) {
+    if ( !localizedType.startsWith( MESSAGE_FAILED_PREFIX ) ) {
       vertex.setProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localizedType );
     }
     // get the vertex category and set it
@@ -368,7 +388,7 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
     vertex.setProperty( DictionaryConst.PROPERTY_COLOR, color );
     //localize the category 
     String localizedCat = Messages.getString( MESSAGE_PREFIX_CATEGORY + category );
-    if ( !localizedCat.startsWith( "!" ) ) {
+    if ( !localizedCat.startsWith( MESSAGE_FAILED_PREFIX ) ) {
       vertex.setProperty( DictionaryConst.PROPERTY_CATEGORY_LOCALIZED, localizedCat );
     }
   }

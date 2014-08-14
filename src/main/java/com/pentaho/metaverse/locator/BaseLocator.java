@@ -48,12 +48,14 @@ import java.util.concurrent.Future;
  * Base implementation for all @see org.pentaho.platform.api.metaverse.IDocumentLocator implementations
  *
  * @author jdixon
+ *
+ * @param <T> The type of this locator
  */
 public abstract class BaseLocator<T> implements IDocumentLocator {
 
   private static final long serialVersionUID = 693428630030858039L;
 
-  private static final Logger log = LoggerFactory.getLogger( BaseLocator.class );
+  private static final Logger LOG = LoggerFactory.getLogger( BaseLocator.class );
 
   /**
    * The node in the metaverse that represents the root of this located domain/namespace
@@ -80,19 +82,37 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
    */
   protected String locatorType;
 
-  private List<IDocumentListener> listeners = new ArrayList<IDocumentListener>();
+  /**
+   * The runner for this locator so that the document location is asynchronous
+   */
+  protected LocatorRunner<T> runner;
 
-  protected LocatorRunner runner;
-
+  /**
+   * The completion service to use. This tracks the execution of a locator scan.
+   */
   protected MetaverseCompletionService completionService = MetaverseCompletionService.getInstance();
 
+  /**
+   * The result of the scan of this locator
+   */
   protected Future<String> futureTask;
+
+  private List<IDocumentListener> listeners = new ArrayList<IDocumentListener>();
 
   /**
    * Constructor for the abstract super class
    */
   public BaseLocator() {
     DictionaryHelper.registerEntityType( DictionaryConst.NODE_TYPE_LOCATOR );
+  }
+
+  /**
+   * Constructor that takes in a List of IDocumentListeners
+   *
+   * @param documentListeners the List of listeners
+   */
+  public BaseLocator( List<IDocumentListener> documentListeners ) {
+    this.listeners = documentListeners;
   }
 
   /**
@@ -103,15 +123,6 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
    * @throws Exception When the document contents cannot be retrieved
    */
   protected abstract Object getContents( T locatedItem ) throws Exception;
-
-  /**
-   * Constructor that takes in a List of IDocumentListeners
-   *
-   * @param documentListeners the List of listeners
-   */
-  public BaseLocator( List<IDocumentListener> documentListeners ) {
-    this.listeners = documentListeners;
-  }
 
   @Override
   public void addDocumentListener( IDocumentListener listener ) {
@@ -154,6 +165,13 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
     this.metaverseBuilder = metaverseBuilder;
   }
 
+  /**
+   * Returns the locator node for this locator. The locator node is the node in the metaverse
+   * that represents this locator. It is used to create a link from this locator to the documents
+   * that are found by/within it.
+   * 
+   * @return The locator node in the metaverse
+   */
   public IMetaverseNode getLocatorNode() {
 
     if ( locatorNode == null ) {
@@ -193,7 +211,12 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
     runner = null;
   }
 
-  protected void startScan( LocatorRunner locatorRunner ) {
+  /**
+   * Starts a full scan by this locator.
+   * 
+   * @param locatorRunner The locator runner to use
+   */
+  protected void startScan( LocatorRunner<T> locatorRunner ) {
 
     if ( futureTask != null && !futureTask.isDone() ) {
       //TODO      throw new Exception("Locator is already scanning");

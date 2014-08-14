@@ -1,5 +1,6 @@
 package com.pentaho.metaverse.locator;
 
+import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.io.FilenameUtils;
@@ -10,18 +11,16 @@ import org.pentaho.platform.api.metaverse.INamespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-
 /**
  * The LocatorRunner is a execution construct for concurrently running document locator logic.
+ * 
+ * @author jdixon
+ *
+ * @param <T> The type of the locator for this runner
  */
 public abstract class LocatorRunner<T> implements Runnable {
 
-  private static final Logger log = LoggerFactory.getLogger( LocatorRunner.class );
+  private static final Logger LOG = LoggerFactory.getLogger( LocatorRunner.class );
 
   /**
    * The top-level repository files and folders to search into
@@ -75,10 +74,15 @@ public abstract class LocatorRunner<T> implements Runnable {
    */
   protected abstract void locate( T root );
 
-
-    /**
-     * Gets the content of a document and notifies the repository document locator listeners of it
-     */
+  /**
+   * Processes the contents of a file. Creates a metaverse document, sets the main properties,
+   * and calls the document listeners to parse/process the file.
+   * 
+   * @param namespace The namespace to use for creating ids 
+   * @param name The name of the file
+   * @param id The id of the file
+   * @param contents The contents of the file
+   */
   public void processFile( INamespace namespace, String name, String id, Object contents ) {
 
     if ( stopping ) {
@@ -118,7 +122,7 @@ public abstract class LocatorRunner<T> implements Runnable {
       event.setDocument( metaverseDocument );
       locator.notifyListeners( event );
     } catch ( Exception e ) {
-      log.error( Messages.getString( "ERROR.NoContentForFile", name ) );
+      LOG.error( Messages.getString( "ERROR.NoContentForFile", name ) );
     }
 
   }

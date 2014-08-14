@@ -34,11 +34,6 @@ import com.tinkerpop.blueprints.Graph;
  */
 public class GraphSONWriter implements IGraphWriter {
 
-  /**
-   * Writes the specified graph to the specified output stream in GraphSON format
-   * 
-   * @see com.pentaho.metaverse.api.IGraphWriter#outputGraph(com.tinkerpop.blueprints.Graph, java.io.OutputStream)
-   */
   @Override
   public void outputGraph( Graph graph, OutputStream graphSONOutputStream ) throws IOException {
     com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter.outputGraph( graph, graphSONOutputStream );
