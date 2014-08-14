@@ -27,11 +27,13 @@ import java.util.List;
 
 import com.pentaho.metaverse.api.INamespaceFactory;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
@@ -191,6 +193,7 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
   }
 
   protected INamespace getNamespace() {
+
     return getNamespaceFactory().createNameSpace( null,
         getLocatorType().concat( DictionaryHelper.SEPARATOR.concat( getRepositoryId() ) ),
         DictionaryConst.NODE_TYPE_LOCATOR );
@@ -203,7 +206,7 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
       return;
     }
 
-    System.out.println( "RepositoryLocator stopScan" );
+    LOG.debug( "Locator type {}: stopScan()", getLocatorType() );
 
     runner.stop();
     futureTask.cancel( false );
@@ -213,14 +216,14 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
 
   /**
    * Starts a full scan by this locator.
-   * 
+   *
+   * @exception org.pentaho.platform.api.metaverse.MetaverseLocatorException
    * @param locatorRunner The locator runner to use
    */
-  protected void startScan( LocatorRunner<T> locatorRunner ) {
+  protected void startScan( LocatorRunner<T> locatorRunner ) throws MetaverseLocatorException {
 
     if ( futureTask != null && !futureTask.isDone() ) {
-      //TODO      throw new Exception("Locator is already scanning");
-      return;
+      throw new MetaverseLocatorException( Messages.getString( "ERROR.BaseLocator.ScanAlreadyExecuting" ) );
     }
 
     IMetaverseNode node = getLocatorNode();
@@ -228,6 +231,8 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
 
     runner = locatorRunner;
     runner.setLocator( this );
+
+    LOG.debug( "Locator type {}: startScan()", getLocatorType() );
 
     futureTask = completionService.submit( runner, node.getStringID() );
   }

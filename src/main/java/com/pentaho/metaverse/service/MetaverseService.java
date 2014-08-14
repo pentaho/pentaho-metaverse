@@ -43,6 +43,7 @@ import com.pentaho.metaverse.api.IMetaverseService;
 import com.pentaho.metaverse.messages.Messages;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Graph;
+import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
 
 /**
  * REST endpoint for the metaverse. Includes Impact Analysis and Lineage
@@ -108,16 +109,19 @@ public class MetaverseService implements IMetaverseService {
    * Makes sure that the metaverse is fully populated.
    */
   protected void prepareMetaverse() {
-    if ( documentLocatorProvider != null ) {
-      Set<IDocumentLocator> locators = documentLocatorProvider.getDocumentLocators();
-      if ( locators != null ) {
-        for ( IDocumentLocator locator : locators ) {
-          locator.startScan();
+    try {
+      if ( documentLocatorProvider != null ) {
+        Set<IDocumentLocator> locators = documentLocatorProvider.getDocumentLocators();
+        if ( locators != null ) {
+          for ( IDocumentLocator locator : locators ) {
+            locator.startScan();
+          }
         }
       }
-    }
-    try {
-      MetaverseCompletionService.getInstance().waitTillEmpty();
+
+        MetaverseCompletionService.getInstance().waitTillEmpty();
+    } catch ( MetaverseLocatorException e ) {
+      e.printStackTrace();
     } catch ( InterruptedException e ) {
       e.printStackTrace();
     } catch ( ExecutionException e ) {

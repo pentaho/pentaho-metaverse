@@ -84,7 +84,6 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     try {
       KettleEnvironment.init();
     } catch ( KettleException e ) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 

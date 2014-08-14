@@ -24,8 +24,10 @@ package com.pentaho.metaverse.locator;
 
 import java.util.List;
 
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
+import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
@@ -41,8 +43,6 @@ public abstract class RepositoryLocator extends BaseLocator<RepositoryFile> {
   private static final long serialVersionUID = 3308953622126327699L;
 
   private IUnifiedRepository unifiedRepository;
-
-
 
   /**
    * Default Constructor
@@ -68,14 +68,13 @@ public abstract class RepositoryLocator extends BaseLocator<RepositoryFile> {
   protected abstract IUnifiedRepository getUnifiedRepository( IPentahoSession session ) throws Exception;
 
   @Override
-  public void startScan() {
+  public void startScan() throws MetaverseLocatorException {
 
     if ( unifiedRepository == null ) {
       try {
         unifiedRepository = getUnifiedRepository( session );
       } catch ( Exception e ) {
-        //        throw new Exception( "Could not create metaverse index for repository", e );
-        return;
+        throw new MetaverseLocatorException( Messages.getString( "ERROR.RepositoryLocator.ScanAbortedNoRepo" ), e );
       }
     }
 

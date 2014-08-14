@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
+import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
 
 import javax.ws.rs.core.Response;
 
@@ -69,7 +70,7 @@ public class MetaverseServiceTest {
   }
 
   @Test
-  public void testExport() {
+  public void testExport() throws MetaverseLocatorException {
     when( mockReader.exportToXml() ).thenReturn( TEST_XML );
     when( mockProvider.getDocumentLocators() ).thenReturn( locators );
 
@@ -82,7 +83,7 @@ public class MetaverseServiceTest {
   }
 
   @Test
-  public void testExport_MultipleCalls() {
+  public void testExport_MultipleCalls()throws MetaverseLocatorException {
     when( mockReader.exportToXml() ).thenReturn( TEST_XML );
     when( mockProvider.getDocumentLocators() ).thenReturn( locators );
 
@@ -106,7 +107,7 @@ public class MetaverseServiceTest {
 
 
   @Test
-  public void testExport_NoLocators() {
+  public void testExport_NoLocators() throws MetaverseLocatorException {
     when( mockReader.exportToXml() ).thenReturn( "" );
     when( mockProvider.getDocumentLocators() ).thenReturn( null );
 

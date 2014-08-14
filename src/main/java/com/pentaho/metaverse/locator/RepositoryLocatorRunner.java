@@ -24,8 +24,11 @@ package com.pentaho.metaverse.locator;
 
 import java.util.List;
 
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A runnable (and stoppable) class for crawling a Pentaho repository for documents
@@ -33,6 +36,8 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
  *
  */
 public class RepositoryLocatorRunner extends LocatorRunner<List<RepositoryFileTree>> {
+
+  private static final Logger LOG = LoggerFactory.getLogger( LocatorRunner.class );
 
   /**
    * Indexes a set of files/folders. Folders are recursed into and files are passed to indexFile.
@@ -54,8 +59,8 @@ public class RepositoryLocatorRunner extends LocatorRunner<List<RepositoryFileTr
             try {
               processFile( locator.getNamespace(), file.getName(), file.getPath(), locator.getContents( file ) );
             } catch ( Exception e ) {
-             // TODO log exception here
-              e.printStackTrace( );
+              // something truly unexpected would have to have happened ... NPE or similar ugliness
+              LOG.error( Messages.getString( "ERROR.ProcessFileFailed", file.getName() ), e );
             }
           }
         } else {
