@@ -68,14 +68,14 @@ public class GraphCsvWriter implements IGraphWriter {
       writeCSVField( fromV.getProperty( DictionaryConst.PROPERTY_TYPE ), out, false, false );
       writeCSVField( fromV.getProperty( DictionaryConst.PROPERTY_NAME ), out, false, false );
       writeCSVField( fromV.getProperty( DictionaryConst.PROPERTY_AUTHOR ), out, false, false );
-      writeCSVField( fromV.getProperty( DictionaryConst.PROPERTY_LAST_MODIFED ), out, false, false );
+      writeCSVField( fromV.getProperty( DictionaryConst.PROPERTY_LAST_MODIFIED ), out, false, false );
       writeCSVField( edge.getLabel(), out, false, false );
       writeCSVField( toV.getId(), out, false, false );
       writeCSVField( toV.getProperty( DictionaryConst.NODE_VIRTUAL ), out, false, false );
       writeCSVField( toV.getProperty( DictionaryConst.PROPERTY_TYPE ), out, false, false );
       writeCSVField( toV.getProperty( DictionaryConst.PROPERTY_NAME ), out, false, false );
       writeCSVField( toV.getProperty( DictionaryConst.PROPERTY_AUTHOR ), out, false, false );
-      writeCSVField( toV.getProperty( DictionaryConst.PROPERTY_LAST_MODIFED ), out, false, false );
+      writeCSVField( toV.getProperty( DictionaryConst.PROPERTY_LAST_MODIFIED ), out, false, false );
     }
 
   }

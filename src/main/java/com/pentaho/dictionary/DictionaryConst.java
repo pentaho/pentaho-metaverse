@@ -53,7 +53,23 @@ public class DictionaryConst {
   /**
    * Property key for "last modified"
    */
-  public static final String PROPERTY_LAST_MODIFED = "lastmodified";
+  public static final String PROPERTY_LAST_MODIFIED = "lastmodified";
+
+  /**
+   * Property key for "created"
+   */
+  public static final String PROPERTY_CREATED = "created";
+
+  /**
+   * Property key for "description"
+   */
+  public static final String PROPERTY_DESCRIPTION = "description";
+
+  /**
+   * Property key for "status"
+   */
+  public static final String PROPERTY_STATUS = "status";
+
 
   /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation

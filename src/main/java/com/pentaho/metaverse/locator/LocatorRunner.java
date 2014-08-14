@@ -1,6 +1,5 @@
 package com.pentaho.metaverse.locator;
 
-import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.io.FilenameUtils;
@@ -10,6 +9,11 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * The LocatorRunner is a execution construct for concurrently running document locator logic.

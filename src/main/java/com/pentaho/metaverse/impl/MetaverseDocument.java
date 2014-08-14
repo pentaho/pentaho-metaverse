@@ -30,22 +30,7 @@ import org.pentaho.platform.api.metaverse.INamespace;
  *
  * @author jdixon
  */
-public class MetaverseDocument implements IMetaverseDocument {
-
-  /**
-   * The name of the document.
-   */
-  private String name;
-
-  /**
-   * The identifier for this document.
-   */
-  private String id;
-
-  /**
-   * The type of this document.
-   */
-  private String type;
+public class MetaverseDocument extends BasePropertiesHolder implements IMetaverseDocument {
 
   /**
    * The content of this document.
@@ -57,23 +42,12 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   private INamespace namespace;
 
-  /**
-   *  The extension associated with this document.
-   */
-  private String extension;
-
-  /**
-   * The mime type, if available for this document; otherwise null
-   */
-  private String mimeType = null;
-
-
   /* (non-Javadoc)
    * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getExtension()
    */
   @Override
   public String getExtension() {
-    return extension;
+    return getPropertyAsString( "extension" );
   }
 
   /* (non-Javadoc)
@@ -81,7 +55,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   @Override
   public void setExtension( String extension ) {
-    this.extension = extension;
+    setProperty( "extension", extension );
   }
 
   /* (non-Javadoc)
@@ -89,7 +63,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   @Override
   public String getMimeType() {
-    return mimeType;
+    return getPropertyAsString( "mimeType" );
   }
 
   /* (non-Javadoc)
@@ -97,7 +71,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   @Override
   public void setMimeType( String mimeType ) {
-    this.mimeType = mimeType;
+    setProperty( "mimeType", mimeType );
   }
 
   /* (non-Javadoc)
@@ -123,7 +97,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   @Override
   public void setName( String name ) {
-    this.name = name;
+    setProperty( "name", name );
   }
 
   /* (non-Javadoc)
@@ -131,7 +105,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   @Override
   public void setType( String type ) {
-    this.type = type;
+    setProperty( "type", type );
   }
 
   /* (non-Javadoc)
@@ -139,7 +113,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   @Override
   public String getName() {
-    return name;
+    return getPropertyAsString( "name" );
   }
 
   /* (non-Javadoc)
@@ -147,7 +121,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   @Override
   public String getStringID() {
-    return id;
+    return getPropertyAsString( "id" );
   }
 
   /* (non-Javadoc)
@@ -155,7 +129,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   @Override
   public String getType() {
-    return type;
+    return getPropertyAsString( "type" );
   }
 
   /**
@@ -166,7 +140,7 @@ public class MetaverseDocument implements IMetaverseDocument {
    */
   @Override
   public void setStringID( String id ) {
-    this.id = id;
+    setProperty( "id", id );
   }
 
   @Override

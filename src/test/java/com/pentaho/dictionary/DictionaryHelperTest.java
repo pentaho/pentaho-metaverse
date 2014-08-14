@@ -80,7 +80,7 @@ public class DictionaryHelperTest {
 
     Properties props = new Properties();
     props.put( DictionaryConst.PROPERTY_AUTHOR, "fred" );
-    props.put( DictionaryConst.PROPERTY_LAST_MODIFED, "2014-07-10 17:34:45" );
+    props.put( DictionaryConst.PROPERTY_LAST_MODIFIED, "2014-07-10 17:34:45" );
     IMetaverseNode transNode = DictionaryHelper.createMetaverseNode(
         DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS, "my transform.ktr" ),
         "my transform", DictionaryConst.NODE_TYPE_TRANS, props );
