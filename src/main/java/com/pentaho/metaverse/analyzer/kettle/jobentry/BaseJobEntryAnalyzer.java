@@ -23,14 +23,12 @@
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
-import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
@@ -40,21 +38,6 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
  */
 public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface> extends BaseKettleMetaverseComponent
     implements IJobEntryAnalyzer<T> {
-
-  /**
-   * A reference to the root node created by the analyzer (usually corresponds to the step under analysis)
-   */
-  protected IMetaverseNode rootNode = null;
-
-  /**
-   * A reference to the database connection analyzer
-   */
-  protected IDatabaseConnectionAnalyzer dbConnectionAnalyzer = null;
-
-  /**
-   * A namespace to hold the fields derived in the step
-   */
-  private INamespace stepNamespace = null;
 
   /**
    * Analyzes job entries

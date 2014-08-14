@@ -75,9 +75,6 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
     String user = dbMeta.getUsername();
     node.setProperty( "userName", user );
 
-    String pass = dbMeta.getPassword();
-    node.setProperty( "password", pass );
-
     boolean shared = dbMeta.isShared();
     node.setProperty( "shared", shared );
 

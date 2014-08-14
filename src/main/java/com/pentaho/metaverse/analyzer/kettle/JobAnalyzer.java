@@ -26,6 +26,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
@@ -106,20 +107,44 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
         DictionaryConst.NODE_TYPE_JOB );
 
 
-    // Create a metaverse node and start filling in details
-    //documentDescriptor.setName( job.getName() );
-    //documentDescriptor.setType( DictionaryConst.NODE_TYPE_JOB );
-    //IMetaverseNode node = createNodeFromDescriptor( documentDescriptor );
-
     // pull out the standard fields
     String description = job.getDescription();
-    node.setProperty( "description", description );
+    if ( description != null ) {
+      node.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, description );
+    }
+
+    String extendedDescription = job.getExtendedDescription();
+    if ( extendedDescription != null ) {
+      node.setProperty( "extendedDescription", extendedDescription );
+    }
 
     Date createdDate = job.getCreatedDate();
-    node.setProperty( "createdDate", createdDate );
+    if ( createdDate != null ) {
+      node.setProperty( DictionaryConst.PROPERTY_CREATED, Long.toString( createdDate.getTime() ) );
+    }
+
+    String createdUser = job.getCreatedUser();
+    if ( createdUser != null ) {
+      node.setProperty( DictionaryConst.PROPERTY_CREATED_BY, createdUser );
+    }
 
     Date lastModifiedDate = job.getModifiedDate();
-    node.setProperty( "lastModifiedDate", lastModifiedDate );
+    if ( lastModifiedDate != null ) {
+      node.setProperty( DictionaryConst.PROPERTY_LAST_MODIFIED, Long.toString( lastModifiedDate.getTime() ) );
+    }
+
+    String lastModifiedUser = job.getModifiedUser();
+    if ( lastModifiedUser != null ) {
+      node.setProperty( DictionaryConst.PROPERTY_LAST_MODIFIED_BY, lastModifiedUser );
+    }
+
+    String status = Messages.getString( "INFO.JobOrTrans.Status_" + Integer.toString( job.getJobstatus() ) );
+    if ( status != null && !status.startsWith( "!" ) ) {
+      node.setProperty( DictionaryConst.PROPERTY_STATUS, status );
+    }
+
+    node.setProperty( "path", document.getProperty( "path" ) );
+
 
     // handle the entries
     for ( int i = 0; i < job.nrJobEntries(); i++ ) {
