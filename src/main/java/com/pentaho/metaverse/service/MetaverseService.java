@@ -22,40 +22,34 @@
 
 package com.pentaho.metaverse.service;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
+import com.pentaho.metaverse.api.IDocumentLocatorProvider;
+import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.impl.MetaverseCompletionService;
+import com.pentaho.metaverse.messages.Messages;
+import org.pentaho.platform.api.metaverse.IDocumentLocator;
+import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import com.pentaho.metaverse.impl.MetaverseCompletionService;
-import org.pentaho.platform.api.metaverse.IDocumentLocator;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-
-import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.IMetaverseReader;
-import com.pentaho.metaverse.api.IMetaverseService;
-import com.pentaho.metaverse.messages.Messages;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Graph;
-import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 /**
  * REST endpoint for the metaverse. Includes Impact Analysis and Lineage
  */
 @Path( "/metaverse/api/service" )
-public class MetaverseService implements IMetaverseService {
+public class MetaverseService {
 
-  private static final int DEFAULT_DELAY = 1000;
   private IMetaverseReader metaverseReader;
   private IDocumentLocatorProvider documentLocatorProvider;
   private int count;
-  private int delay = DEFAULT_DELAY;
 
   /**
    * Creates a new metaverse service using a provided metaverse reader (to pass calls to), 
@@ -76,97 +70,78 @@ public class MetaverseService implements IMetaverseService {
     this.documentLocatorProvider = documentLocatorProvider;
   }
 
-  protected int getDelay() {
-    return delay;
-  }
-
-  protected void setDelay( int delay ) {
-    this.delay = delay;
-  }
-
   /**
-   * Export the entire metaverse as <a href="http://graphml.graphdrawing.org/">graphml</a>
+   * Export the entire metaverse.
    *
-   * @return Response XML (graphml) representing the entire metaverse if successful,
-   * otherwise a Response with an error status
+   * @param headers HttpHeaders associated with this service call. Used to determine request "Accepts" type
+   *                that drives generation of the export format
+   *
+   * @return Response
+   * <ul>
+   *   <li>
+   *     If the Accept header is application/json, the response is
+   *     <a href="https://github.com/tinkerpop/blueprints/wiki/GraphSON-Reader-and-Writer-Library">graphson</a>
+   *     formatted
+   *   </li>
+   *   <li>If the Accept header is text/plain, the response is a CSV</li>
+   *   <li>
+   *     Otherwise, the response is application/xml and formatted as
+   *     <a href="http://graphml.graphdrawing.org/">graphml</a>
+   *   </li>
+   * </ul>
+   * If there is an error encountered, an Error status is returned
    */
   @GET
   @Path( "/export" )
-  @Produces( { MediaType.APPLICATION_XML } )
-  public Response export() {
-    // TODO figure out how to have the metaverse ready before our first call to the service
-    if ( count++ == 0 ) {
-      prepareMetaverse();
+  @Consumes( { MediaType.WILDCARD } )
+  @Produces( { MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN } )
+  public Response export( @Context HttpHeaders headers ) {
+    List<MediaType> acceptTypes = headers.getAcceptableMediaTypes();
+    String mediaType = acceptTypes.get( 0 ).toString();
+    String format;
+
+    if ( MediaType.APPLICATION_JSON.toString().equals( mediaType.toString() ) ) {
+      format = IMetaverseReader.FORMAT_JSON;
+    } else if ( MediaType.TEXT_PLAIN.toString().equals( mediaType.toString() ) ) {
+      format = IMetaverseReader.FORMAT_CSV;
+    } else {
+      format = IMetaverseReader.FORMAT_XML;
+      mediaType = MediaType.APPLICATION_XML;
     }
+
+    // TODO figure out how to have the metaverse ready before our first call to the service
+    prepareMetaverse();
 
     if ( metaverseReader == null ) {
       return Response.serverError().entity( Messages.getString( "ERROR.MetaverseReader.IsNull" ) ).build();
     }
-    return Response.ok( metaverseReader.exportToXml(), MediaType.APPLICATION_XML ).build();
+    return Response.ok( metaverseReader.exportFormat( format ), mediaType ).build();
   }
 
   /**
    * Makes sure that the metaverse is fully populated.
    */
   protected void prepareMetaverse() {
-    try {
-      if ( documentLocatorProvider != null ) {
-        Set<IDocumentLocator> locators = documentLocatorProvider.getDocumentLocators();
-        if ( locators != null ) {
-          for ( IDocumentLocator locator : locators ) {
-            locator.startScan();
+    if ( count++ == 0 ) {
+      try {
+        if ( documentLocatorProvider != null ) {
+          Set<IDocumentLocator> locators = documentLocatorProvider.getDocumentLocators();
+          if ( locators != null ) {
+            for ( IDocumentLocator locator : locators ) {
+              locator.startScan();
+            }
           }
         }
+
+        MetaverseCompletionService.getInstance().waitTillEmpty();
+      } catch ( MetaverseLocatorException e ) {
+        e.printStackTrace();
+      } catch ( InterruptedException e ) {
+        e.printStackTrace();
+      } catch ( ExecutionException e ) {
+        e.printStackTrace();
       }
-
-      MetaverseCompletionService.getInstance().waitTillEmpty();
-    } catch ( MetaverseLocatorException e ) {
-      e.printStackTrace();
-    } catch ( InterruptedException e ) {
-      e.printStackTrace();
-    } catch ( ExecutionException e ) {
-      e.printStackTrace();
     }
-  }
-
-  @Override
-  public IMetaverseNode findNode( String id ) {
-    return metaverseReader.findNode( id );
-  }
-
-  @Override
-  public IMetaverseLink findLink( String leftNodeID, String linkType, String rightNodeID, Direction direction ) {
-    return metaverseReader.findLink( leftNodeID, linkType, rightNodeID, direction );
-  }
-
-  @Override
-  public Graph getMetaverse() {
-    return metaverseReader.getMetaverse();
-  }
-
-  @Override
-  public String exportFormat( String format ) {
-    return metaverseReader.exportFormat( format );
-  }
-
-  @Override
-  public String exportToXml() {
-    return metaverseReader.exportToXml();
-  }
-
-  @Override
-  public Graph search( List<String> resultTypes, List<String> startNodeIDs, boolean shortestOnly ) {
-    return metaverseReader.search( resultTypes, startNodeIDs, shortestOnly );
-  }
-
-  @Override
-  public Graph getGraph( String id ) {
-    return metaverseReader.getGraph( id );
-  }
-
-  @Override
-  public List<IMetaverseNode> findNodes( String property, String value ) {
-    return metaverseReader.findNodes( property, value );
   }
 
 }
