@@ -46,6 +46,12 @@ public class DictionaryConst {
   public static final String PROPERTY_AUTHOR = "author";
 
   /**
+   * Property key for the path to a document, instance, etc.
+   */
+  public static final String PROPERTY_PATH = "path";
+
+
+  /**
    * Property key for suggested "color" for a node when a graph is visualized
    */
   public static final String PROPERTY_COLOR = "color";

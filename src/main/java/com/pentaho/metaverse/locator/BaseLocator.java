@@ -189,6 +189,9 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
       if ( uri != null ) {
         locatorNode.setProperty( "url", uri.normalize().toString() );
       }
+
+      // TODO get the description from somewhere else (each locator, e.g.)
+      locatorNode.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, "This is a locator of documents to be analyzed" );
     }
 
     return locatorNode;

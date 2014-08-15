@@ -153,7 +153,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       node.setProperty( DictionaryConst.PROPERTY_STATUS, status );
     }
 
-    node.setProperty( "path", document.getProperty( "path" ) );
+    node.setProperty( DictionaryConst.PROPERTY_PATH, document.getProperty( DictionaryConst.PROPERTY_PATH ) );
 
     String[] parameters = transMeta.listParameters();
     if ( parameters != null ) {

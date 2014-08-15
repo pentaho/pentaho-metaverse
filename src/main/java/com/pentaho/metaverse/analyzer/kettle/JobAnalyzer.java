@@ -149,7 +149,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
       node.setProperty( DictionaryConst.PROPERTY_STATUS, status );
     }
 
-    node.setProperty( "path", document.getProperty( "path" ) );
+    node.setProperty( DictionaryConst.PROPERTY_PATH, document.getProperty( DictionaryConst.PROPERTY_PATH ) );
 
     // Process job parameters
     String[] parameters = job.listParameters();

@@ -1,5 +1,6 @@
 package com.pentaho.metaverse.locator;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.io.FilenameUtils;
@@ -119,7 +120,7 @@ public abstract class LocatorRunner<T> implements Runnable {
       metaverseDocument.setName( name );
       metaverseDocument.setExtension( extension );
       metaverseDocument.setMimeType( mimeType );
-      metaverseDocument.setProperty( "path", id );
+      metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, id );
 
       DocumentEvent event = new DocumentEvent();
       event.setEventType( "add" );
