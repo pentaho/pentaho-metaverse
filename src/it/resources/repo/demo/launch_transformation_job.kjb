@@ -1,18 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <job>
   <name>Call Transformation</name>
-    <description/>
-    <extended_description/>
-    <job_version/>
-    <job_status>0</job_status>
+    <description>Call a trans</description>
+    <extended_description>This job executes a transformation.</extended_description>
+    <job_version>2.4</job_version>
+    <job_status>1</job_status>
   <directory>&#x2f;</directory>
-  <created_user>-</created_user>
+  <created_user>jdixon</created_user>
   <created_date>2014&#x2f;08&#x2f;12 14&#x3a;28&#x3a;46.125</created_date>
-  <modified_user>-</modified_user>
+  <modified_user>mburgess</modified_user>
   <modified_date>2014&#x2f;08&#x2f;12 14&#x3a;28&#x3a;46.125</modified_date>
     <parameters>
+        <parameter>
+            <name>testJobParam1</name>
+            <default_value>Hello</default_value>
+            <description>This is a test for job parameters</description>
+        </parameter>
+        <parameter>
+            <name>testJobParam2</name>
+            <default_value>World&#x21;</default_value>
+            <description>This is also a test</description>
+        </parameter>
     </parameters>
     <slaveservers>
+         <slaveserver><name>carte8082</name><hostname>127.0.0.1</hostname><port>8082</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>N</master></slaveserver>
+         <slaveserver><name>carte8081</name><hostname>127.0.0.1</hostname><port>8081</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>N</master></slaveserver>
+         <slaveserver><name>carte8083</name><hostname>127.0.0.1</hostname><port>8083</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>N</master></slaveserver>
+         <slaveserver><name>bryan_carte</name><hostname>10.100.22.188</hostname><port>8081</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>N</master></slaveserver>
+         <slaveserver><name>di-server</name><hostname>localhost</hostname><port>9080</port><webAppName>pentaho-di</webAppName><username>admin</username><password>Encrypted 2be98afc86aa7f2e4bb18bd63c99dbdde</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>Y</master></slaveserver>
     </slaveservers>
 <job-log-table><connection/>
 <schema/>

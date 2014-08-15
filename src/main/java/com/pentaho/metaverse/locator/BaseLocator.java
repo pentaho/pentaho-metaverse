@@ -49,9 +49,8 @@ import java.util.concurrent.Future;
 /**
  * Base implementation for all @see org.pentaho.platform.api.metaverse.IDocumentLocator implementations
  *
- * @author jdixon
- *
  * @param <T> The type of this locator
+ * @author jdixon
  */
 public abstract class BaseLocator<T> implements IDocumentLocator {
 
@@ -171,7 +170,7 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
    * Returns the locator node for this locator. The locator node is the node in the metaverse
    * that represents this locator. It is used to create a link from this locator to the documents
    * that are found by/within it.
-   * 
+   *
    * @return The locator node in the metaverse
    */
   public IMetaverseNode getLocatorNode() {
@@ -182,7 +181,6 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
           getNamespace().getNamespaceId(),
           getRepositoryId(),
           DictionaryConst.NODE_TYPE_LOCATOR );
-
     }
 
     return locatorNode;
@@ -217,8 +215,8 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
   /**
    * Starts a full scan by this locator.
    *
-   * @exception org.pentaho.platform.api.metaverse.MetaverseLocatorException
    * @param locatorRunner The locator runner to use
+   * @throws org.pentaho.platform.api.metaverse.MetaverseLocatorException
    */
   protected void startScan( LocatorRunner<T> locatorRunner ) throws MetaverseLocatorException {
 
