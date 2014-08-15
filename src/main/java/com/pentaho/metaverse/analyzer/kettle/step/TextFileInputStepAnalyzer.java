@@ -66,6 +66,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
       IMetaverseComponentDescriptor fileDescriptor =
           getChildComponentDescriptor( descriptor, normalized, DictionaryConst.NODE_TYPE_FILE );
       IMetaverseNode textFileNode = createNodeFromDescriptor( fileDescriptor );
+      textFileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
       metaverseBuilder.addNode( textFileNode );
 
       metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
