@@ -22,7 +22,9 @@
 
 package com.pentaho.metaverse.locator;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.pentaho.metaverse.api.INamespaceFactory;
@@ -181,6 +183,12 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
           getNamespace().getNamespaceId(),
           getRepositoryId(),
           DictionaryConst.NODE_TYPE_LOCATOR );
+
+      URI uri = getRootUri();
+
+      if ( uri != null ) {
+        locatorNode.setProperty( "url", uri.normalize().toString() );
+      }
     }
 
     return locatorNode;
@@ -225,6 +233,9 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
     }
 
     IMetaverseNode node = getLocatorNode();
+    Date lastRun = new Date();
+    locatorNode.setProperty( "lastScan", Long.toString( lastRun.getTime() ) );
+
     metaverseBuilder.addNode( node );
 
     runner = locatorRunner;
