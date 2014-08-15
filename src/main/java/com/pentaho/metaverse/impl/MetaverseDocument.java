@@ -30,7 +30,7 @@ import org.pentaho.platform.api.metaverse.INamespace;
  *
  * @author jdixon
  */
-public class MetaverseDocument extends BasePropertiesHolder implements IMetaverseDocument {
+public class MetaverseDocument extends PropertiesHolder implements IMetaverseDocument {
 
   /**
    * The content of this document.

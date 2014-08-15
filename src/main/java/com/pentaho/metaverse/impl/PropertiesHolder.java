@@ -31,11 +31,11 @@ import java.util.Set;
 /**
  * BasePropertiesHolder provides methods for getting and setting key/value pairs (i.e. properties)
  */
-public class BasePropertiesHolder implements IHasProperties {
+public class PropertiesHolder implements IHasProperties {
 
-  private Map<String, Object> properties;
+  protected Map<String, Object> properties;
 
-  public BasePropertiesHolder() {
+  public PropertiesHolder() {
     properties = new HashMap<String, Object>();
   }
 
@@ -103,7 +103,7 @@ public class BasePropertiesHolder implements IHasProperties {
    * @return the property key/value assignments
    */
   @Override public Map<String, Object> getProperties() {
-    return null;
+    return properties;
   }
 
   /**
@@ -135,5 +135,20 @@ public class BasePropertiesHolder implements IHasProperties {
    */
   @Override public void clearProperties() {
     properties.clear();
+  }
+
+  /**
+   * Checks to see if the key has been assigned.
+   *
+   * @param key the String key to check
+   * @return true if the key has been assigned a value, false otherwise
+   */
+  @Override
+  public boolean containsKey( String key ) {
+    if ( properties == null ) {
+      return false;
+    } else {
+      return properties.containsKey( key );
+    }
   }
 }

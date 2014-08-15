@@ -23,11 +23,9 @@
 package com.pentaho.dictionary;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
+import com.pentaho.metaverse.impl.PropertiesHolder;
 import org.pentaho.platform.api.metaverse.IIdentifierModifiable;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -35,14 +33,11 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 /**
  * An implementation of a metaverse node.
  */
-public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifiable {
+public class MetaverseTransientNode extends PropertiesHolder implements IMetaverseNode, IIdentifierModifiable {
 
-  private static final int INITIAL_PROPERTY_SIZE = 5;
-
-  /** The property map. */
-  protected Map<String, Object> propertyMap = new HashMap<String, Object>( INITIAL_PROPERTY_SIZE );
-
-  /** The links from this node */
+  /**
+   * The links from this node
+   */
   protected List<IMetaverseLink> links = new ArrayList<IMetaverseLink>();
 
   /**
@@ -68,11 +63,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public String getName() {
-    Object name = propertyMap.get( DictionaryConst.PROPERTY_NAME );
-    if ( name == null ) {
-      return null;
-    }
-    return (String) name;
+    return getPropertyAsString( DictionaryConst.PROPERTY_NAME );
   }
 
   /*
@@ -82,8 +73,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public String getStringID() {
-    Object id = propertyMap.get( DictionaryConst.PROPERTY_ID );
-    return (String) id;
+    return getPropertyAsString( DictionaryConst.PROPERTY_ID );
   }
 
   /*
@@ -93,11 +83,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public String getType() {
-    Object type = propertyMap.get( DictionaryConst.PROPERTY_TYPE );
-    if ( type == null ) {
-      return null;
-    }
-    return (String) type;
+    return getPropertyAsString( DictionaryConst.PROPERTY_TYPE );
   }
 
   /*
@@ -107,7 +93,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public void setName( String name ) {
-    propertyMap.put( DictionaryConst.PROPERTY_NAME, name );
+    setProperty( DictionaryConst.PROPERTY_NAME, name );
   }
 
   /*
@@ -117,7 +103,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public void setStringID( String id ) {
-    propertyMap.put( DictionaryConst.PROPERTY_ID, id );
+    setProperty( DictionaryConst.PROPERTY_ID, id );
   }
 
   /*
@@ -127,53 +113,14 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
    */
   @Override
   public void setType( String type ) {
-    propertyMap.put( "type", type );
+    setProperty( "type", type );
     String category = DictionaryHelper.getCategoryForType( type );
-    propertyMap.put( DictionaryConst.PROPERTY_CATEGORY, category );
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#getProperty(java.lang.String)
-   */
-  @Override
-  public <T> T getProperty( String key ) {
-    return (T) propertyMap.get( key );
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#getPropertyKeys()
-   */
-  @Override
-  public Set<String> getPropertyKeys() {
-    return propertyMap.keySet();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#setProperty(java.lang.String, java.lang.Object)
-   */
-  @Override
-  public void setProperty( String key, Object value ) {
-    propertyMap.put( key, value );
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#removeProperty(java.lang.String)
-   */
-  @Override
-  public <T> T removeProperty( String key ) {
-    return (T) propertyMap.remove( key );
+    setProperty( DictionaryConst.PROPERTY_CATEGORY, category );
   }
 
   /**
    * Adds a link to this node
+   *
    * @param link The link to add
    */
   public void addLink( IMetaverseLink link ) {
@@ -182,6 +129,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
 
   /**
    * Removes a link from this node
+   *
    * @param link The link to remove
    */
   public void removeLink( IMetaverseLink link ) {
@@ -190,6 +138,7 @@ public class MetaverseTransientNode implements IMetaverseNode, IIdentifierModifi
 
   /**
    * Returns the set of links for this node
+   *
    * @return The links
    */
   public List<IMetaverseLink> getLinks() {

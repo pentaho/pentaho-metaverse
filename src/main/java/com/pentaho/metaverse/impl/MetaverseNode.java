@@ -22,6 +22,8 @@
 
 package com.pentaho.metaverse.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -36,7 +38,7 @@ import com.tinkerpop.blueprints.VertexQuery;
 /**
  * The MetaverseNode class is a wrapper around a corresponding Blueprints Vertex object, and delegates all methods to
  * that vertex.
- * 
+ *
  * @author mburgess
  */
 public class MetaverseNode implements IMetaverseNode {
@@ -118,16 +120,6 @@ public class MetaverseNode implements IMetaverseNode {
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#getProperty(java.lang.String)
-   */
-  @Override
-  public <T> T getProperty( String key ) {
-    return v.getProperty( key );
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
    * @see org.pentaho.platform.api.metaverse.IMetaverseNode#getPropertyKeys()
    */
   @Override
@@ -135,23 +127,92 @@ public class MetaverseNode implements IMetaverseNode {
     return v.getPropertyKeys();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#setProperty(java.lang.String, java.lang.Object)
+  /**
+   * Returns the properties as a key/value Map.
+   *
+   * @return the property key/value assignments
    */
+  @Override public Map<String, Object> getProperties() {
+    Map<String, Object> props = new HashMap<String, Object>();
+    Set<String> keys = getPropertyKeys();
+    if ( keys != null ) {
+      for ( String key : keys ) {
+        props.put( key, v.getProperty( key ) );
+      }
+    }
+    return props;
+  }
+
+  /**
+   * Sets the given property keys to the given property values.
+   *
+   * @param properties
+   */
+  @Override public void setProperties( Map<String, Object> properties ) {
+    if ( properties != null ) {
+      for ( Map.Entry<String, Object> property : properties.entrySet() ) {
+        v.setProperty( property.getKey(), property.getValue() );
+      }
+    }
+  }
+
+  /**
+   * Removes the values assigned to the given property keys.
+   *
+   * @param keys
+   */
+  @Override public void removeProperties( Set<String> keys ) {
+    if ( keys != null ) {
+      for ( String key : keys ) {
+        v.removeProperty( key );
+      }
+    }
+  }
+
+  /**
+   * Removes all properties (key/value assignments).
+   */
+  @Override public void clearProperties() {
+    Set<String> keys = getPropertyKeys();
+    if ( keys != null ) {
+      for ( String key : keys ) {
+        removeProperty( key );
+      }
+    }
+  }
+
+  @Override public boolean containsKey( String key ) {
+    return getProperty( key ) != null;
+  }
+
+  /**
+   * Gets the property value for the specified key.
+   *
+   * @param key the lookup key
+   * @return the value object for the property, or null if none is found
+   */
+  @Override
+  public Object getProperty( String key ) {
+    return v.getProperty( key );
+  }
+
+  /*
+     * (non-Javadoc)
+     *
+     * @see org.pentaho.platform.api.metaverse.IMetaverseNode#setProperty(java.lang.String, java.lang.Object)
+     */
   @Override
   public void setProperty( String key, Object value ) {
     v.setProperty( key, value );
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#removeProperty(java.lang.String)
+  /**
+   * Removes and returns the value assigned to the property for the given key.
+   *
+   * @param key the key for which to remove the property's value
+   * @return the value that was removed, or null if the key or value could not be found
    */
-  @Override
-  public <T> T removeProperty( String key ) {
+  @Override public Object removeProperty( String key ) {
     return v.removeProperty( key );
   }
 

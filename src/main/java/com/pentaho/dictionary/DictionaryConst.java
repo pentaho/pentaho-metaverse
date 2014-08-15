@@ -56,7 +56,7 @@ public class DictionaryConst {
   public static final String PROPERTY_LAST_MODIFIED = "lastmodified";
 
   /**
-   * Property key for "last modified"
+   * Property key for "last modified by"
    */
   public static final String PROPERTY_LAST_MODIFIED_BY = "lastmodifiedby";
 
@@ -66,7 +66,7 @@ public class DictionaryConst {
   public static final String PROPERTY_CREATED = "created";
 
   /**
-   * Property key for "created"
+   * Property key for "created by"
    */
   public static final String PROPERTY_CREATED_BY = "createdby";
 

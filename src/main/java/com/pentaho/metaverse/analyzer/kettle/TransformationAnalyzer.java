@@ -31,7 +31,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
-import com.pentaho.metaverse.impl.BasePropertiesHolder;
+import com.pentaho.metaverse.impl.PropertiesHolder;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
@@ -158,7 +158,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
           String defaultParameterValue = transMeta.getParameterDefault( parameter );
           String parameterValue = transMeta.getParameterValue( parameter );
           String parameterDescription = transMeta.getParameterDescription( parameter );
-          BasePropertiesHolder paramProperties = new BasePropertiesHolder();
+          PropertiesHolder paramProperties = new PropertiesHolder();
           paramProperties.setProperty( "defaultValue", defaultParameterValue );
           paramProperties.setProperty( "value", parameterValue );
           paramProperties.setProperty( "description", parameterDescription );
