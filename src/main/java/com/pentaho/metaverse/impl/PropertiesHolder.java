@@ -151,4 +151,12 @@ public class PropertiesHolder implements IHasProperties {
       return properties.containsKey( key );
     }
   }
+
+  @Override
+  public String toString() {
+    if ( properties == null ) {
+      return super.toString();
+    }
+    return properties.toString();
+  }
 }

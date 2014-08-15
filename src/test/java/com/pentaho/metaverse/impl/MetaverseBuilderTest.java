@@ -195,7 +195,6 @@ public class MetaverseBuilderTest {
     }
     assertEquals( 1, count );
 
-
     // now lets add it again
     builder.addLink( link );
 
@@ -459,5 +458,10 @@ public class MetaverseBuilderTest {
     IMetaverseNode virtual = builder.createNodeObject( "virtual node" );
     Vertex virtualVertex = graph.addVertex( virtual.getStringID() );
     assertFalse( builder.isVirtual( virtualVertex ) );
+  }
+
+  @Test
+  public void testCreateRootEntity() {
+    assertNotNull( builder.createRootEntity() );
   }
 }

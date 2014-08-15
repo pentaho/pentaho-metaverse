@@ -143,6 +143,11 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       node.setProperty( DictionaryConst.PROPERTY_LAST_MODIFIED_BY, lastModifiedUser );
     }
 
+    String version = transMeta.getTransversion();
+    if ( version != null ) {
+      node.setProperty( DictionaryConst.PROPERTY_ARTIFACT_VERSION, version );
+    }
+
     String status = Messages.getString( "INFO.JobOrTrans.Status_" + Integer.toString( transMeta.getTransstatus() ) );
     if ( status != null && !status.startsWith( "!" ) ) {
       node.setProperty( DictionaryConst.PROPERTY_STATUS, status );

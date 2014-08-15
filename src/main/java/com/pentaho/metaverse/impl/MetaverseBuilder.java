@@ -46,11 +46,6 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
   private static final String SEPARATOR = "~";
 
-  /**
-   * The id for this metaverse instance
-   */
-  private String id;
-
   private final Graph graph;
 
   /**
@@ -68,6 +63,11 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     this.graph = graph;
   }
 
+  /**
+   * Retrieves the underlying graph object for this metaverse.
+   *
+   * @return
+   */
   protected Graph getGraph() {
     return graph;
   }
@@ -117,6 +117,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     edgeId = getEdgeId( fromVertex, link.getLabel(), toVertex );
 
     Edge e = graph.addEdge( edgeId, fromVertex, toVertex, link.getLabel() );
+    // TODO the "text" property is for third-party tools that do not parse the ID key
     e.setProperty( "text", link.getLabel() );
 
     return this;
@@ -169,21 +170,35 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     Vertex v = graph.addVertex( node.getStringID() );
 
     if ( DictionaryHelper.isEntityType( node.getType() ) ) {
-      addEntityType( node, v );
+      Vertex entityType = addEntityType( node );
+
+      // add a link from the entity type to the new node
+      graph.addEdge( null, entityType, v, DictionaryConst.LINK_PARENT_CONCEPT );
     }
 
     return v;
   }
 
-  protected void addEntityType( IMetaverseNode node, Vertex v ) {
+  /**
+   * Adds an entity type node to the metaverse.
+   *
+   * @param node the metaverse node containing the entity information
+   */
+  protected Vertex addEntityType( IMetaverseNode node ) {
 
     // the node is an entity, so link it to its entity type node
-    Vertex entityType = graph.getVertex( ENTITY_PREFIX + node.getType() );
+    String nodeType = node.getType();
+    Vertex entityType = graph.getVertex( ENTITY_PREFIX + nodeType );
     if ( entityType == null ) {
       // the entity type node does not exist, so create it
-      entityType = graph.addVertex( ENTITY_PREFIX + node.getType() );
+      entityType = graph.addVertex( ENTITY_PREFIX + nodeType );
       entityType.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ENTITY );
-      entityType.setProperty( DictionaryConst.PROPERTY_NAME, node.getType() );
+      entityType.setProperty( DictionaryConst.PROPERTY_NAME, nodeType );
+
+      // TODO move this to a map of types to strings or something
+      if ( nodeType.equals( DictionaryConst.NODE_TYPE_TRANS ) || nodeType.equals( DictionaryConst.NODE_TYPE_JOB ) ) {
+        entityType.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, "Pentaho Data Integration" );
+      }
 
       Vertex rootEntity = graph.getVertex( ENTITY_NODE_ID );
       if ( rootEntity == null ) {
@@ -193,8 +208,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
       // add the link from the root node to the entity type
       graph.addEdge( null, rootEntity, entityType, DictionaryConst.LINK_PARENT_CONCEPT );
     }
-    // add a link from the entity type to the new node
-    graph.addEdge( null, entityType, v, DictionaryConst.LINK_PARENT_CONCEPT );
+    return entityType;
   }
 
   /**
@@ -203,7 +217,15 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
   protected Vertex createRootEntity() {
     Vertex rootEntity = graph.addVertex( ENTITY_NODE_ID );
     rootEntity.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ROOT_ENTITY );
-    rootEntity.setProperty( DictionaryConst.PROPERTY_NAME, "Root entity" );
+    rootEntity.setProperty( DictionaryConst.PROPERTY_NAME, "METAVERSE" );
+
+    // TODO get these properties from somewhere else
+    rootEntity.setProperty( "division", "Engineering" );
+    rootEntity.setProperty( "project", "Pentaho Data Lineage" );
+    rootEntity.setProperty( "description",
+        "Data lineage is tracing the path that data has traveled upstream from its destination, through Pentaho "
+            + "systems and artifacts as well as external systems and artifacts." );
+
     return rootEntity;
   }
 

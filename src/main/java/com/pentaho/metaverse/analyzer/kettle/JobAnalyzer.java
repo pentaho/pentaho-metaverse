@@ -26,8 +26,10 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
+import com.pentaho.metaverse.impl.PropertiesHolder;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
@@ -106,7 +108,6 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
         job.getName(),
         DictionaryConst.NODE_TYPE_JOB );
 
-
     // pull out the standard fields
     String description = job.getDescription();
     if ( description != null ) {
@@ -138,6 +139,11 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
       node.setProperty( DictionaryConst.PROPERTY_LAST_MODIFIED_BY, lastModifiedUser );
     }
 
+    String version = job.getJobversion();
+    if ( version != null ) {
+      node.setProperty( DictionaryConst.PROPERTY_ARTIFACT_VERSION, version );
+    }
+
     String status = Messages.getString( "INFO.JobOrTrans.Status_" + Integer.toString( job.getJobstatus() ) );
     if ( status != null && !status.startsWith( "!" ) ) {
       node.setProperty( DictionaryConst.PROPERTY_STATUS, status );
@@ -145,7 +151,26 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
 
     node.setProperty( "path", document.getProperty( "path" ) );
 
-
+    // Process job parameters
+    String[] parameters = job.listParameters();
+    if ( parameters != null ) {
+      for ( String parameter : parameters ) {
+        try {
+          // Determine parameter properties and add them to a map, then the map to the list
+          String defaultParameterValue = job.getParameterDefault( parameter );
+          String parameterValue = job.getParameterValue( parameter );
+          String parameterDescription = job.getParameterDescription( parameter );
+          PropertiesHolder paramProperties = new PropertiesHolder();
+          paramProperties.setProperty( "defaultValue", defaultParameterValue );
+          paramProperties.setProperty( "value", parameterValue );
+          paramProperties.setProperty( "description", parameterDescription );
+          node.setProperty( "parameter_" + parameter, paramProperties.toString() );
+        } catch ( UnknownParamException upe ) {
+          // This shouldn't happen as we're using the list provided by the meta
+          throw new MetaverseAnalyzerException( upe );
+        }
+      }
+    }
     // handle the entries
     for ( int i = 0; i < job.nrJobEntries(); i++ ) {
       JobEntryCopy entry = job.getJobEntry( i );

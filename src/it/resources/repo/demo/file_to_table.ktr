@@ -2,13 +2,23 @@
 <transformation>
   <info>
     <name>Populate Table From File</name>
-    <description/>
-    <extended_description/>
-    <trans_version/>
+    <description>Do some table population</description>
+    <extended_description>This transformation populates a table from a file.</extended_description>
+    <trans_version>1.0</trans_version>
     <trans_type>Normal</trans_type>
     <trans_status>2</trans_status>
     <directory>&#x2f;</directory>
     <parameters>
+        <parameter>
+            <name>testTransParam1</name>
+            <default_value>myTestParam1</default_value>
+            <description>I am test for transformation parameters</description>
+        </parameter>
+        <parameter>
+            <name>testTransParam2</name>
+            <default_value>myTestParam2</default_value>
+            <description>I am also a test for transformation parameters</description>
+        </parameter>
     </parameters>
     <log>
 <trans-log-table><connection/>
@@ -63,6 +73,11 @@
     <partitionschemas>
     </partitionschemas>
     <slaveservers>
+         <slaveserver><name>carte8082</name><hostname>127.0.0.1</hostname><port>8082</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>N</master></slaveserver>
+         <slaveserver><name>carte8081</name><hostname>127.0.0.1</hostname><port>8081</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>N</master></slaveserver>
+         <slaveserver><name>carte8083</name><hostname>127.0.0.1</hostname><port>8083</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>N</master></slaveserver>
+         <slaveserver><name>bryan_carte</name><hostname>10.100.22.188</hostname><port>8081</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>N</master></slaveserver>
+         <slaveserver><name>di-server</name><hostname>localhost</hostname><port>9080</port><webAppName>pentaho-di</webAppName><username>admin</username><password>Encrypted 2be98afc86aa7f2e4bb18bd63c99dbdde</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>Y</master></slaveserver>
     </slaveservers>
     <clusterschemas>
     </clusterschemas>
@@ -79,7 +94,7 @@
     <type>H2</type>
     <access>Native</access>
     <database>sampledata</database>
-    <port/>
+    <port>-1</port>
     <username>sa</username>
     <password>Encrypted </password>
     <servername/>
@@ -397,10 +412,6 @@
 </slave-step-copy-partition-distribution>
    <slave_transformation>N</slave_transformation>
 <attributes><group><name>DataService</name>
-<attribute><key>name</key>
-<value/>
-</attribute><attribute><key>stepname</key>
-<value/>
-</attribute></group></attributes>
+</group></attributes>
 
 </transformation>

@@ -76,6 +76,11 @@ public class DictionaryConst {
   public static final String PROPERTY_DESCRIPTION = "description";
 
   /**
+   * Property key for "artifact version"
+   */
+  public static final String PROPERTY_ARTIFACT_VERSION = "version";
+
+  /**
    * Property key for "status"
    */
   public static final String PROPERTY_STATUS = "status";
