@@ -38,6 +38,7 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -136,4 +137,9 @@ public class DIRepositoryLocator extends RepositoryLocator {
     return object;
   }
 
+  @Override
+  public URI getRootUri() {
+    // TODO implement this
+    return null;
+  }
 }

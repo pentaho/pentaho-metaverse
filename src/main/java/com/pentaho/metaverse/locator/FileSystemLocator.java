@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -115,6 +116,17 @@ public class FileSystemLocator extends BaseLocator<File> {
     LocatorRunner<File> lr = new FileSystemLocatorRunner();
     lr.setRoot( root );
     startScan( lr );
+  }
+
+  @Override
+  public URI getRootUri() {
+    File root = new File( getRootFolder() );
+    if ( root.exists() ) {
+      URI rootUri = root.toURI();
+      return rootUri;
+    } else {
+      return null;
+    }
   }
 
 }
