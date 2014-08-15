@@ -40,13 +40,11 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
  */
 public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaverseBuilder {
 
-  private static final String METAVERSE_PREFIX = "metaverse_";
-
   private static final String ENTITY_PREFIX = "entity_";
 
   private static final String ENTITY_NODE_ID = "entity";
 
-  private static final String SEPERATOR = "~";
+  private static final String SEPARATOR = "~";
 
   /**
    * The id for this metaverse instance
@@ -124,8 +122,16 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     return this;
   }
 
+  /**
+   * Returns the edge id for the given vertices and edge label.
+   *
+   * @param fromVertex the source vertex
+   * @param label      the edge label
+   * @param toVertex   the target vertex
+   * @return the String edge ID
+   */
   protected String getEdgeId( Vertex fromVertex, String label, Vertex toVertex ) {
-    return fromVertex.getId() + SEPERATOR + label + SEPERATOR + toVertex.getId();
+    return fromVertex.getId() + SEPARATOR + label + SEPARATOR + toVertex.getId();
   }
 
   /**
@@ -163,28 +169,42 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     Vertex v = graph.addVertex( node.getStringID() );
 
     if ( DictionaryHelper.isEntityType( node.getType() ) ) {
-      // the node is an entity, so link it to its entity type node
-      Vertex entityType = graph.getVertex( ENTITY_PREFIX + node.getType() );
-      if ( entityType == null ) {
-        // the entity type node does not exist, so create it
-        entityType = graph.addVertex( ENTITY_PREFIX + node.getType() );
-        entityType.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ENTITY );
-        entityType.setProperty( DictionaryConst.PROPERTY_NAME, node.getType() );
-        Vertex rootEntity = graph.getVertex( ENTITY_NODE_ID );
-        if ( rootEntity == null ) {
-          // the root entity node does not exist, so create it
-          rootEntity = graph.addVertex( ENTITY_NODE_ID );
-          rootEntity.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ROOT_ENTITY );
-          rootEntity.setProperty( DictionaryConst.PROPERTY_NAME, "Root entity" );
-        }
-        // add the link from the root node to the entity type
-        graph.addEdge( null, rootEntity, entityType, DictionaryConst.LINK_PARENT_CONCEPT );
-      }
-      // add a link from the entity type to the new node
-      graph.addEdge( null, entityType, v, DictionaryConst.LINK_PARENT_CONCEPT );
+      addEntityType( node, v );
     }
 
     return v;
+  }
+
+  protected void addEntityType( IMetaverseNode node, Vertex v ) {
+
+    // the node is an entity, so link it to its entity type node
+    Vertex entityType = graph.getVertex( ENTITY_PREFIX + node.getType() );
+    if ( entityType == null ) {
+      // the entity type node does not exist, so create it
+      entityType = graph.addVertex( ENTITY_PREFIX + node.getType() );
+      entityType.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ENTITY );
+      entityType.setProperty( DictionaryConst.PROPERTY_NAME, node.getType() );
+
+      Vertex rootEntity = graph.getVertex( ENTITY_NODE_ID );
+      if ( rootEntity == null ) {
+        // the root entity node does not exist, so create it
+        rootEntity = createRootEntity();
+      }
+      // add the link from the root node to the entity type
+      graph.addEdge( null, rootEntity, entityType, DictionaryConst.LINK_PARENT_CONCEPT );
+    }
+    // add a link from the entity type to the new node
+    graph.addEdge( null, entityType, v, DictionaryConst.LINK_PARENT_CONCEPT );
+  }
+
+  /**
+   * Creates the root entity for this metaverse.
+   */
+  protected Vertex createRootEntity() {
+    Vertex rootEntity = graph.addVertex( ENTITY_NODE_ID );
+    rootEntity.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ROOT_ENTITY );
+    rootEntity.setProperty( DictionaryConst.PROPERTY_NAME, "Root entity" );
+    return rootEntity;
   }
 
   /**
@@ -194,11 +214,10 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * @param v    Vertex to set properties on
    */
   private void copyNodePropertiesToVertex( IMetaverseNode node, Vertex v ) {
+
     // set all of the properties, except the id and virtual (since that is an internally set prop)
     for ( String propertyKey : node.getPropertyKeys() ) {
-      if ( propertyKey.equals( DictionaryConst.PROPERTY_ID ) || propertyKey.equals( DictionaryConst.NODE_VIRTUAL ) ) {
-        continue;
-      } else {
+      if ( !propertyKey.equals( DictionaryConst.PROPERTY_ID ) && !propertyKey.equals( DictionaryConst.NODE_VIRTUAL ) ) {
         Object value = node.getProperty( propertyKey );
         if ( value != null ) {
           v.setProperty( propertyKey, value );

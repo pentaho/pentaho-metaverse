@@ -1,17 +1,14 @@
 package com.pentaho.dictionary;
 
+import com.pentaho.metaverse.impl.PropertiesHolder;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Metaverse Link
  */
 @SuppressWarnings( "rawtypes" )
-public class MetaverseLink implements IMetaverseLink {
+public class MetaverseLink extends PropertiesHolder implements IMetaverseLink {
 
   /**
    * Property key for Link label
@@ -20,8 +17,6 @@ public class MetaverseLink implements IMetaverseLink {
 
   private IMetaverseNode fromNode;
   private IMetaverseNode toNode;
-  private Map<String, Object> props = new HashMap<String, Object>( );
-
   /**
    * Default constructor
    */
@@ -53,8 +48,8 @@ public class MetaverseLink implements IMetaverseLink {
 
   @Override
   public String getLabel() {
-    if ( props.containsKey( LABEL ) ) {
-      return props.get( LABEL ).toString();
+    if ( containsKey( LABEL ) ) {
+      return getPropertyAsString( LABEL ).toString();
     }
     return null;
   }
@@ -71,28 +66,6 @@ public class MetaverseLink implements IMetaverseLink {
 
   @Override
   public void setLabel( String label ) {
-    props.put( LABEL, label );
-  }
-
-  @Override public <T> T getProperty( String key ) {
-    return (T) props.get( key );
-  }
-
-  @Override public Set<String> getPropertyKeys() {
-    return props.keySet();
-  }
-
-  @Override public void setProperty( String key, Object value ) {
-    props.put( key, value );
-  }
-
-  @Override public <T> T removeProperty( String key ) {
-    if ( props.containsKey( key ) ) {
-      T obj = (T) props.get( key );
-      props.remove( key );
-      return obj;
-    } else {
-      return null;
-    }
+    properties.put( LABEL, label );
   }
 }
