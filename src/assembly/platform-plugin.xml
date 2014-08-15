@@ -31,6 +31,11 @@
         <include>${project.groupId}:${project.artifactId}</include>
         <include>com.tinkerpop.blueprints:blueprints-core</include>
 
+        <include>com.fasterxml.jackson.datatype:jackson-datatype-json-org</include>
+        <include>com.fasterxml.jackson.core:jackson-core</include>
+        <include>com.fasterxml.jackson.core:jackson-databind</include>
+        <include>com.fasterxml.jackson.core:jackson-annotations</include>
+
         <!-- TEMPORARY until this is in the platform distribution -->
         <include>pentaho:pentaho-platform-api</include>
         <include>commons-configuration:commons-configuration</include>
