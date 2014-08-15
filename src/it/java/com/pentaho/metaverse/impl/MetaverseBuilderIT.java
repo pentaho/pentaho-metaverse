@@ -24,6 +24,7 @@ package com.pentaho.metaverse.impl;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import org.apache.commons.io.FileUtils;
@@ -58,7 +59,8 @@ public class MetaverseBuilderIT {
   private static IMetaverseReader reader;
   private static IDocumentLocatorProvider documentLocatorProvider;
   private static Graph readerGraph;
-
+  private int nodeCount = 0;
+  private int edgeCount = 0;
   private static long freeMemAtInit = 0L;
 
   public static String getSolutionPath() {
@@ -163,6 +165,13 @@ public class MetaverseBuilderIT {
     // write out the graph so we can look at it
     File exportFile = new File( "src/it/resources/testGraph.graphml" );
     FileUtils.writeStringToFile( exportFile, reader.exportToXml(), "UTF-8" );
+
+    File exportJson = new File( "src/it/resources/testGraph.graphjson" );
+    FileUtils.writeStringToFile( exportJson, reader.exportFormat( IMetaverseReader.FORMAT_JSON ), "UTF-8" );
+
+    File exportCsv = new File( "src/it/resources/testGraph.csv" );
+    FileUtils.writeStringToFile( exportCsv, reader.exportFormat( IMetaverseReader.FORMAT_CSV ), "UTF-8" );
+
   }
 
   private void testAndCountNodesByType(String type) {
@@ -177,11 +186,46 @@ public class MetaverseBuilderIT {
     System.out.println( "Found " + count + " " + type + " nodes" );
   }
 
+  private void countTheEdgesByType( String label ) {
+    int count = 0;
+    for ( Edge e : readerGraph.getEdges( "text", label ) ) {
+      count++;
+    }
+    if (count > 0 ) {
+      System.out.println( "Found " + count + " " + label + " links" );
+    }
+  }
+
   @Test
   public void testTransformationProperties() throws Exception {
     Set<String> nodeTypes = DictionaryHelper.ENTITY_NODE_TYPES;
+    System.out.println( "\n===== ENTITY NODES =====" );
     for ( String nodeType : nodeTypes ) {
       testAndCountNodesByType( nodeType );
     }
+
+    System.out.println( "\n===== DATAFLOW LINKS =====" );
+    Set<String> dataflowLinkTypes = DictionaryHelper.DATAFLOW_LINK_TYPES;
+    for ( String dataflowLinkType : dataflowLinkTypes ) {
+      countTheEdgesByType( dataflowLinkType );
+    }
+
+    System.out.println( "\n===== STRUCTURAL LINKS =====" );
+    Set<String> structuralLinkTypes = DictionaryHelper.STRUCTURAL_LINK_TYPES;
+    for ( String structuralLinkType : structuralLinkTypes ) {
+      countTheEdgesByType( structuralLinkType );
+    }
+
+    for ( Vertex v : readerGraph.getVertices() ) {
+      nodeCount++;
+    }
+    for ( Edge e : readerGraph.getEdges() ) {
+      edgeCount++;
+    }
+
+    System.out.println( "\n===== SUMMARY =====" );
+    System.out.println( "TOTAL NODES = " + nodeCount );
+    System.out.println( "TOTAL EDGES = " + edgeCount );
   }
+
 }

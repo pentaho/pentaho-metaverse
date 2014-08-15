@@ -76,7 +76,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
   private Logger log = LoggerFactory.getLogger( TransformationAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, IMetaverseDocument document )
+  public synchronized IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, IMetaverseDocument document )
     throws MetaverseAnalyzerException {
 
     validateState( document );

@@ -69,7 +69,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
   private Logger log = LoggerFactory.getLogger( JobAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, IMetaverseDocument document )
+  public synchronized IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, IMetaverseDocument document )
     throws MetaverseAnalyzerException {
 
     validateState( document );
