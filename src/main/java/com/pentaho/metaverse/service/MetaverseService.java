@@ -119,7 +119,7 @@ public class MetaverseService implements IMetaverseService {
         }
       }
 
-        MetaverseCompletionService.getInstance().waitTillEmpty();
+      MetaverseCompletionService.getInstance().waitTillEmpty();
     } catch ( MetaverseLocatorException e ) {
       e.printStackTrace();
     } catch ( InterruptedException e ) {
