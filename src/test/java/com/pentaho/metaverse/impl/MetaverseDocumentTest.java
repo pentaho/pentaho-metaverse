@@ -24,12 +24,18 @@ package com.pentaho.metaverse.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
  * @author mburgess
@@ -95,5 +101,28 @@ public class MetaverseDocumentTest {
     MetaverseDocument document = new MetaverseDocument();
     document.setType( "myType" );
     assertEquals( "myType", document.getType() );
+  }
+
+  @Test
+  public void testGetChildNamespace() throws Exception {
+    MetaverseDocument document = new MetaverseDocument();
+    INamespace mockNamespace = mock( INamespace.class );
+    when( mockNamespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( null );
+    document.setNamespace( mockNamespace );
+    document.getChildNamespace( "test",  "test" );
+    verify( mockNamespace ).getChildNamespace( anyString(), anyString() );
+  }
+
+  @Test
+  public void testGetNamespace() throws Exception {
+    MetaverseDocument document = new MetaverseDocument();
+    document.setStringID( "id" );
+    INamespace mockNamespace = mock( INamespace.class );
+    when( mockNamespace.getNamespaceId() ).thenReturn( "namespace-id" );
+    document.setNamespace( mockNamespace );
+    assertEquals( "namespace-id", document.getNamespaceId() );
+    assertEquals( mockNamespace, document.getNamespace() );
+    assertEquals( "id", document.getStringID() );
+    verify( mockNamespace ).getNamespaceId();
   }
 }

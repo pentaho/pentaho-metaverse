@@ -22,9 +22,8 @@
 
 package com.pentaho.metaverse.impl;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -39,6 +38,12 @@ import org.mockito.Mock;
 
 import com.tinkerpop.blueprints.Vertex;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * @author mburgess
  * 
@@ -52,6 +57,8 @@ public class MetaverseNodeTest {
 
   @Mock
   Vertex v2;
+
+  Map<String, Object> vertexProps;
 
   /**
    * @throws java.lang.Exception
@@ -222,6 +229,112 @@ public class MetaverseNodeTest {
     when( v.getProperty( anyString() ) ).thenReturn( null );
 
     node.getStringID();
+  }
+
+  @Test
+  public void testGetProperties() throws Exception {
+    Map<String, Object> props = new HashMap<String, Object>(){{
+      put( "path", "/Users/home/admin" );
+      put( "lastModified", new Date() );
+    }};
+
+    node.setProperties( props );
+    when( v.getPropertyKeys() ).thenReturn( props.keySet() );
+    Map<String, Object> resultProps = node.getProperties();
+    assertEquals( props.size(), resultProps.size() );
+
+    for( String key : props.keySet() ) {
+      assertTrue( resultProps.containsKey( key ) );
+    }
+  }
+
+  @Test
+  public void testGetProperties_noProperyKeys() throws Exception {
+    when( v.getPropertyKeys() ).thenReturn( null );
+    Map<String, Object> resultProps = node.getProperties();
+    assertEquals( 0, resultProps.size() );
+  }
+
+  @Test
+  public void testGetProperties_withBaseVertex() throws Exception {
+
+    Map<String, Object> props = new HashMap<String, Object>();
+
+    vertexProps = new HashMap<String, Object>(){{
+      put( "_NAME_", "name" );
+    }};
+
+    when( v.getPropertyKeys() ).thenReturn( vertexProps.keySet() );
+
+    Map<String, Object> resultProps = node.getProperties();
+    assertEquals( vertexProps.size(), resultProps.size() );
+
+    for( String key : props.keySet() ) {
+      assertEquals( props.get( key ), resultProps.get( key ) );
+    }
+  }
+
+  @Test
+  public void testRemoveProperties() throws Exception {
+    Set<String> remove = new HashSet<String>() {{
+      add( "name" );
+      add( "age" );
+    }};
+    node.removeProperties( remove );
+    verify( v ).removeProperty( eq( "name" ) );
+    verify( v ).removeProperty( eq( "age" ) ) ;
+  }
+
+  @Test
+  public void testremoveProperties_null() throws Exception {
+    node.removeProperties( null );
+    verify( v, never() ).removeProperty( anyString() );
+  }
+
+  @Test
+  public void testClearProperties() throws Exception {
+    Map<String, Object> props = new HashMap<String, Object>(){{
+      put( "path", "/Users/home/admin" );
+      put( "lastModified", new Date() );
+    }};
+    when( v.getPropertyKeys() ).thenReturn( props.keySet() );
+
+    node.setProperties( props );
+    node.clearProperties();
+
+    for ( String key : props.keySet() ) {
+      verify( v ).removeProperty( key );
+    }
+  }
+
+  @Test
+  public void testClearProperties_null() throws Exception {
+    node.clearProperties();
+    when( v.getPropertyKeys() ).thenReturn( null );
+    verify( v, never() ).removeProperty( anyString() );
+  }
+
+  @Test
+  public void testContainsKey() throws Exception {
+    node.containsKey( "test" );
+    verify( v ).getProperty( "test" );
+  }
+
+  @Test
+  public void testSetProperties_null() throws Exception {
+    node.setProperties( null );
+    verify( v, never() ).setProperty( anyString(), any() );
+  }
+
+  @Test
+  public void testSetProperties() throws Exception {
+    Map<String, Object> props = new HashMap<String, Object>(){{
+      put( "path", "/Users/home/admin" );
+      put( "lastModified", new Date() );
+    }};
+    node.setProperties( props );
+    verify( v, times( 1 ) ).setProperty( eq("path"), any() );
+    verify( v, times( 1 ) ).setProperty( eq("lastModified"), any() );
   }
 
 }

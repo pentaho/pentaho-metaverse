@@ -11,7 +11,10 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 public class PropertiesHolderTest {
 
@@ -98,6 +101,14 @@ public class PropertiesHolderTest {
   }
 
   @Test
+  public void testRemoveProperties_noKeys() throws Exception {
+    Map<String, Object> spyProps = spy( props.properties );
+    props.removeProperties( null );
+
+    verify( spyProps, never() ).remove( anyString() );
+  }
+
+  @Test
   public void testRemoveProperties() throws Exception {
     Map<String, Object> setProps = new HashMap<String, Object>( 3 );
     setProps.put( "a", 1 );
@@ -113,7 +124,6 @@ public class PropertiesHolderTest {
     assertEquals( getProps.size(), 1 );
     assertTrue( getProps.containsKey( "b" ) );
     assertEquals( getProps.get( "b" ), 2 );
-
   }
 
   @Test
@@ -128,5 +138,33 @@ public class PropertiesHolderTest {
     props.clearProperties();
     assertNotNull( getProps );
     assertTrue( getProps.isEmpty() );
+  }
+
+  @Test
+  public void testContainsKey_nullProperties() throws Exception {
+    props.properties = null;
+    assertFalse( props.containsKey( "nope" ) );
+  }
+
+  @Test
+  public void testToString() throws Exception {
+    PropertiesHolder props = new PropertiesHolder();
+    assertEquals( "{}", props.toString() );
+
+    Map<String, Object> setProps = new HashMap<String, Object>( 3 );
+    setProps.put( "a", 1 );
+    setProps.put( "b", 2 );
+    setProps.put( "c", 3 );
+    props.setProperties( setProps );
+    System.out.println( props.toString() );
+    assertTrue( props.toString().contains( "b=2" ) );
+    assertTrue( props.toString().contains( "c=3" ) );
+    assertTrue( props.toString().contains( "a=1" ) );
+  }
+
+  @Test
+  public void testToString_nullProperties() throws Exception {
+    props.properties = null;
+    assertNotNull( props.toString() );
   }
 }

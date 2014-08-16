@@ -1,5 +1,6 @@
 package com.pentaho.metaverse.impl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,21 +15,14 @@ import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
 public class DocumentControllerTest {
@@ -61,11 +55,15 @@ public class DocumentControllerTest {
 
     IMetaverseBuilder builder = mock( IMetaverseBuilder.class );
     docController.setMetaverseBuilder( builder );
-
     IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
     docController.setMetaverseObjectFactory( objectFactory );
 
     initAnalyzers();
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    MetaverseCompletionService.getInstance().waitTillEmpty();
   }
 
   private void initAnalyzers() {
@@ -144,41 +142,42 @@ public class DocumentControllerTest {
   }
 
   @Test
-  public void testOnEvent() throws MetaverseAnalyzerException {
+  public void testOnEvent() throws Exception {
     when( mockEvent.getDocument() ).thenReturn( mockDoc );
-    when( mockDoc.getType() ).thenReturn( "dummy" );
-    when( mockDescriptor.getType()).thenReturn( "dummy" );
+    when( mockDoc.getExtension() ).thenReturn( "dummy" );
 
     docController.onEvent( mockEvent );
+    MetaverseCompletionService.getInstance().waitTillEmpty();
 
-    // timeout to give our asynchronous analyzers a chance to be called
-    verify( dummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( any(IMetaverseComponentDescriptor.class), eq(mockDoc) );
-    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( any(IMetaverseComponentDescriptor.class), eq(mockDoc) );
+    verify( dummyAnalyzer ).analyze( any( IMetaverseComponentDescriptor.class ), eq( mockDoc ) );
+    verify( testAndDummyAnalyzer ).analyze( any( IMetaverseComponentDescriptor.class ), eq( mockDoc ) );
   }
 
   @Test
-  public void testOnEvent_notAllAnalyzersFire() throws MetaverseAnalyzerException {
+  public void testOnEvent_notAllAnalyzersFire() throws Exception {
     when( mockEvent.getDocument() ).thenReturn( mockDoc );
-    when( mockDoc.getType() ).thenReturn( "test" );
+    when( mockDoc.getExtension() ).thenReturn( "test" );
 
     docController.onEvent( mockEvent );
+    MetaverseCompletionService.getInstance().waitTillEmpty();
 
-    // timeout to give our asynchronous analyzers a chance to be called
-    verify( dummyAnalyzer, timeout( 100 ).never() ).analyze( any(IMetaverseComponentDescriptor.class), eq(mockDoc) );
-    verify( testAndDummyAnalyzer, timeout( 100 ).times( 1 ) ).analyze( any(IMetaverseComponentDescriptor.class), eq(mockDoc) );
+    verify( dummyAnalyzer, never() ).analyze( any( IMetaverseComponentDescriptor.class ), eq( mockDoc ) );
+    verify( testAndDummyAnalyzer ).analyze( any( IMetaverseComponentDescriptor.class ), eq( mockDoc ) );
+    verify( anotherAnalyzer, never() ).analyze( any( IMetaverseComponentDescriptor.class ), eq( mockDoc ) );
   }
 
   @Test
-  public void testOnEvent_noSupportingAnalyzers() throws MetaverseAnalyzerException {
+  public void testOnEvent_noSupportingAnalyzers() throws Exception {
     when( mockEvent.getDocument() ).thenReturn( mockDoc );
-    when( mockDoc.getType() ).thenReturn( "notSupported" );
+    when( mockDoc.getExtension() ).thenReturn( "notSupported" );
 
     docController.onEvent( mockEvent );
+    MetaverseCompletionService.getInstance().waitTillEmpty();
 
     // make sure noe of the analyzers are fired for this un supported type
-    verify( dummyAnalyzer, timeout( 100 ).never() ).analyze( mockDescriptor, mockDoc );
-    verify( anotherAnalyzer, timeout( 100 ).never() ).analyze( mockDescriptor, mockDoc );
-    verify( testAndDummyAnalyzer, timeout( 100 ).never() ).analyze( mockDescriptor, mockDoc );
+    verify( dummyAnalyzer, never() ).analyze( mockDescriptor, mockDoc );
+    verify( anotherAnalyzer, never() ).analyze( mockDescriptor, mockDoc );
+    verify( testAndDummyAnalyzer, never() ).analyze( mockDescriptor, mockDoc );
   }
 
   @Test
@@ -206,6 +205,32 @@ public class DocumentControllerTest {
   @Test
   public void testGetMetaverseBuilder() {
     assertNotNull( docController.getMetaverseBuilder() );
+  }
+
+  @Test
+  public void testSetMetaverseObjectFactory_nullBuilder() throws Exception {
+    DocumentController dc = new DocumentController( null );
+    IMetaverseObjectFactory factory = mock( IMetaverseObjectFactory.class );
+    dc.setMetaverseObjectFactory( factory );
+    verify( mockBuilder, never() ).setMetaverseObjectFactory( any( IMetaverseObjectFactory.class ) );
+  }
+
+  @Test
+  public void testGetMetaverseObjectFactory_nullBuilder() throws Exception {
+    DocumentController dc = new DocumentController( null );
+    IMetaverseObjectFactory factory = mock( IMetaverseObjectFactory.class );
+    assertNull( dc.getMetaverseObjectFactory() );
+    verify( mockBuilder, never() ).getMetaverseObjectFactory();
+  }
+
+  @Test
+  public void testGetMetaverseObjectFactory() throws Exception {
+    docController.setMetaverseBuilder( mockBuilder );
+    IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
+    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
+
+    assertNotNull( docController.getMetaverseObjectFactory() );
+    verify( mockBuilder ).getMetaverseObjectFactory();
   }
 
 }
