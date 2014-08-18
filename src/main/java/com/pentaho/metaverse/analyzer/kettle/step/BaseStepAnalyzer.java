@@ -152,12 +152,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
               IMetaverseComponentDescriptor fieldDescriptor =
                   getChildComponentDescriptor( descriptor, outRowMeta.getName(),
                       DictionaryConst.NODE_TYPE_TRANS_FIELD );
-              IMetaverseNode newFieldNode = metaverseObjectFactory.createNodeObject(
-                  fieldDescriptor.getStringID(),
-                  fieldDescriptor.getName(),
-                  fieldDescriptor.getType() );
-              newFieldNode.setName( outRowMeta.getName() );
-              newFieldNode.setType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
+              IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
               newFieldNode.setProperty( "kettleType", outRowMeta.getTypeDesc() );
               metaverseBuilder.addNode( newFieldNode );
 
@@ -233,7 +228,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     String origin = ( vmi == null ) ? fieldName : vmi.getOrigin();
 
     INamespace stepFieldNamespace = getSiblingNamespace(
-        descriptor, origin, DictionaryConst.NODE_TYPE_TRANS_FIELD );
+        descriptor, origin, DictionaryConst.NODE_TYPE_TRANS_STEP );
 
     return getChildComponentDescriptor( stepFieldNamespace, fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD );
   }
@@ -247,7 +242,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     String origin = ( vmi == null ) ? fieldName : vmi.getOrigin();
 
     INamespace stepFieldNamespace = getSiblingNamespace(
-        descriptor, origin, DictionaryConst.NODE_TYPE_TRANS_FIELD );
+        descriptor, origin, DictionaryConst.NODE_TYPE_TRANS_STEP );
 
     return getChildComponentDescriptor( stepFieldNamespace, fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD );
   }
