@@ -9,15 +9,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
-import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 /**
@@ -59,95 +50,6 @@ public class DictionaryHelper {
    */
   protected DictionaryHelper() {
     throw new UnsupportedOperationException();
-  }
-
-  // TODO This is temporary
-  static {
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
-      {
-        add( TransMeta.class );
-      }
-    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS ) );
-
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
-      {
-        add( JobMeta.class );
-      }
-    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_JOB ) );
-
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
-      {
-        add( StepMeta.class );
-        add( BaseStepMeta.class );
-        add( TableOutputMeta.class );
-        add( TextFileOutputMeta.class );
-      }
-    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_STEP ) );
-
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
-      {
-        add( IMetaverseDocument.class );
-      }
-    }, new GenericIdGenerator( "IMetaverseDocument" ) );
-
-
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
-      {
-        add( JobEntryInterface.class );
-      }
-    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_JOB_ENTRY ) );
-
-    DictionaryHelper.addIdGenerator(null, new HashSet<Class>() {
-      {
-        add( DatabaseMeta.class );
-      }
-    }, new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATASOURCE ) );
-
-    DictionaryHelper.addIdGenerator(
-        new HashSet<String>() {
-          {
-            add( DictionaryConst.NODE_TYPE_TRANS_FIELD );
-          }
-        },
-        null,
-        new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS_FIELD ) );
-
-    DictionaryHelper.addIdGenerator(
-        new HashSet<String>() {
-          {
-            add( DictionaryConst.NODE_TYPE_DATA_TABLE );
-          }
-        },
-        null,
-        new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATA_TABLE ) );
-
-    DictionaryHelper.addIdGenerator(
-        new HashSet<String>() {
-          {
-            add( DictionaryConst.NODE_TYPE_DATA_COLUMN );
-          }
-        },
-        null,
-        new GenericIdGenerator( DictionaryConst.NODE_TYPE_DATA_COLUMN ) );
-
-    DictionaryHelper.addIdGenerator(
-      new HashSet<String>() {
-        {
-          add( DictionaryConst.NODE_TYPE_FILE );
-        }
-      },
-      null,
-      new GenericIdGenerator( DictionaryConst.NODE_TYPE_FILE ) );
-
-    DictionaryHelper.addIdGenerator(
-      new HashSet<String>() {
-        {
-          add( DictionaryConst.NODE_TYPE_FILE_FIELD );
-        }
-      },
-      null,
-      new GenericIdGenerator( DictionaryConst.NODE_TYPE_FILE_FIELD ) );
-
   }
 
   /**
@@ -210,12 +112,15 @@ public class DictionaryHelper {
   static {
     registerStructuralLinkType( DictionaryConst.LINK_EXECUTES );
     registerStructuralLinkType( DictionaryConst.LINK_CONTAINS );
+    registerStructuralLinkType( DictionaryConst.LINK_CREATES );
+    registerStructuralLinkType( DictionaryConst.LINK_DELETES );
     registerStructuralLinkType( DictionaryConst.LINK_DEFINES );
     registerStructuralLinkType( DictionaryConst.LINK_PARENT_CONCEPT );
 
     registerDataFlowLinkType( DictionaryConst.LINK_POPULATES );
     registerDataFlowLinkType( DictionaryConst.LINK_READBY );
     registerDataFlowLinkType( DictionaryConst.LINK_WRITESTO );
+    registerDataFlowLinkType( DictionaryConst.LINK_DERIVES );
     registerDataFlowLinkType( DictionaryConst.LINK_DEPENDENCYOF );
 
     registerEntityType( DictionaryConst.NODE_TYPE_DATASOURCE );

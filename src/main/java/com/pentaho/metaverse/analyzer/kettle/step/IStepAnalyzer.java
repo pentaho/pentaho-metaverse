@@ -10,5 +10,10 @@ import java.util.Set;
  */
 public interface IStepAnalyzer<T extends BaseStepMeta> extends IAnalyzer<T> {
 
+  /**
+   * Returns a set of BaseStepMeta classes representing the steps that can be analyzed by this step analyzer.
+   *
+   * @return a Set of Classes (each of which extend BaseStepMeta)
+   */
   Set<Class<? extends BaseStepMeta>> getSupportedSteps();
 }

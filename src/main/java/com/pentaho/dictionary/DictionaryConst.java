@@ -91,6 +91,10 @@ public class DictionaryConst {
    */
   public static final String PROPERTY_STATUS = "status";
 
+  /**
+   * Property key for "operation", a string description of a performed operation (calculation, e.g.)
+   */
+  public static final String PROPERTY_OPERATION = "operation";
 
   /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
@@ -136,6 +140,17 @@ public class DictionaryConst {
    * Label for an "creates" edge in the graph, e.g. a transformation step creates a transformation field
    */
   public static final String LINK_CREATES = "creates";
+
+  /**
+   * Label for an "deletes" edge in the graph, e.g. a select values step can remove a field from the stream
+   */
+  public static final String LINK_DELETES = "deletes";
+
+  /**
+   * Label for an "derives" edge in the graph, incoming transformation field(s)
+   * can contribute to (or derive) the value in outgoing field(s)
+   */
+  public static final String LINK_DERIVES = "derives";
 
   /**
    * The node type for document locator objects
