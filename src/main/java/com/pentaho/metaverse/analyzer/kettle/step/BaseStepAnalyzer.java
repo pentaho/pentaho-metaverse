@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
+import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.messages.Messages;
@@ -39,7 +40,9 @@ import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * KettleBaseStepAnalyzer provides a default implementation (and generic helper methods) for analyzing PDI step
@@ -84,6 +87,12 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   protected IDatabaseConnectionAnalyzer dbConnectionAnalyzer = null;
 
   /**
+   * A reference to the named lists of operations performed by a step on fields. The key is the field name, the value
+   * is a change record i.e. ComponentDerivationRecord.
+   */
+  protected Map<String, ComponentDerivationRecord> changeRecords = null;
+
+  /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
    *
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor, Object)
@@ -98,12 +107,15 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     rootNode = createNodeFromDescriptor( descriptor );
     metaverseBuilder.addNode( rootNode );
 
+    changeRecords = new HashMap<String, ComponentDerivationRecord>();
+
     // Add database connection nodes
     addDatabaseConnectionNodes( descriptor );
 
     // Interrogate API to see what default field information is available
     loadInputAndOutputStreamFields();
     addCreatedFieldNodes( descriptor );
+    addDeletedFieldLinks( descriptor );
     return rootNode;
   }
 
@@ -167,6 +179,36 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
       // TODO Don't throw an exception here, just log the error and move on
       t.printStackTrace( System.err );
     }
+  }
+
+  /**
+   * Adds to the metaverse links to fields that are input to a step but not output from the step
+   */
+  protected void addDeletedFieldLinks( IMetaverseComponentDescriptor descriptor ) {
+    try {
+      if ( prevFields != null ) {
+        List<ValueMetaInterface> inRowValueMetas = prevFields.getValueMetaList();
+        if ( inRowValueMetas != null ) {
+          for ( ValueMetaInterface inRowMeta : inRowValueMetas ) {
+            // Find fields that were deleted by this step
+            if ( stepFields != null && stepFields.searchValueMeta( inRowMeta.getName() ) == null ) {
+              // This field didn't leave the step, so assume it has been deleted here
+              IMetaverseComponentDescriptor fieldDescriptor =
+                  getPrevStepFieldOriginDescriptor( descriptor, inRowMeta.getName() );
+              IMetaverseNode inFieldNode = createNodeFromDescriptor( fieldDescriptor );
+
+              // Add link to show that this step created the field
+              metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_DELETES, inFieldNode );
+            }
+            // no else clause: if we can't determine the fields, we can't do anything else
+          }
+        }
+      }
+    } catch ( Throwable t ) {
+      // TODO Don't throw an exception here, just log the error and move on
+      t.printStackTrace( System.err );
+    }
+
   }
 
   /**

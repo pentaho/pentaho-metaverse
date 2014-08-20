@@ -114,7 +114,7 @@ public class TableOutputStepAnalyzerTest {
 
     analyzer = new TableOutputStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
+    descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, mockNamespace );
   }
 
   /**
