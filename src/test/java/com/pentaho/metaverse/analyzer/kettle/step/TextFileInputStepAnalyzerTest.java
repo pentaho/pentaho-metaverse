@@ -174,9 +174,11 @@ public class TextFileInputStepAnalyzerTest {
     // make sure the step node, the file node, and the field nodes
     verify( mockBuilder, times( 2 + inputFields.length ) ).addNode( any( IMetaverseNode.class ) );
 
-    // make sure there are "readby" links added (file, and each field)
-    verify( mockBuilder, times( 1 + inputFields.length ) ).addLink(
+    // make sure there are "readby" and "uses"links added (file, and each field)
+    verify( mockBuilder, times( 1 ) ).addLink(
         any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
+    verify( mockBuilder, times( inputFields.length ) ).addLink(
+        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
 
     // we should have "populates" links from input nodes to output nodes
     verify( mockBuilder, times( inputFields.length ) )

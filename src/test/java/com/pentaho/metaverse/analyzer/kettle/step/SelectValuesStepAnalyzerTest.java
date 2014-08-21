@@ -207,12 +207,6 @@ public class SelectValuesStepAnalyzerTest {
     assertNotNull( result );
     assertEquals( meta.getName(), result.getName() );
 
-    //verify( selectValuesMeta, times( 1 ) ).getFileName();
-
-    // make sure there are "readby" links added (file, and each field)
-    /*verify( builder, times( 1 + inputFields.length ) ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );*/
-
     // we should have "derives" links from input nodes to output nodes
     verify( builder, times( 2 ) )
         .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
@@ -233,10 +227,17 @@ public class SelectValuesStepAnalyzerTest {
     SelectMetadataChange testChange1 = new SelectMetadataChange( selectValuesMeta );
     testChange1.setName( "field1" );
     testChange1.setCurrencySymbol( "~" );
+    testChange1.setStorageType( ValueMetaInterface.STORAGE_TYPE_BINARY_STRING );
+    testChange1.setDateFormatLocale( "en_UK" );
+    testChange1.setGroupingSymbol( "..." );
 
     SelectMetadataChange testChange2 = new SelectMetadataChange( selectValuesMeta );
     testChange2.setName( "field2" );
     testChange2.setRename( "field3" );
+    testChange2.setDateFormatLenient( true );
+    testChange2.setConversionMask( "##.#" );
+    testChange2.setDateFormatTimeZone( "YYYY-MM-DD" );
+    testChange2.setDecimalSymbol( "," );
 
     // set up the input fields
     when( selectValuesMeta.getMeta() ).thenReturn( new SelectMetadataChange[] { testChange1, testChange2 } );

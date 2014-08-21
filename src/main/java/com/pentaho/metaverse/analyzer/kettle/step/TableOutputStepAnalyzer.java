@@ -98,7 +98,7 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
           IMetaverseNode dbFieldNode = createNodeFromDescriptor( dbColumnDescriptor );
 
           metaverseBuilder.addNode( dbFieldNode );
-          metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_READBY, rootNode );
+          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
           metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, dbFieldNode );
           metaverseBuilder.addLink( tableNode, DictionaryConst.LINK_CONTAINS, dbFieldNode );
         }

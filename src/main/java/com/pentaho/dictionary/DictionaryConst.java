@@ -126,9 +126,16 @@ public class DictionaryConst {
   public static final String LINK_POPULATES = "populates";
 
   /**
-   * Label for an "is ready by" edge in the graph, e.g. a text file is ready by a transformation step
+   * Label for an "is read by" edge in the graph, e.g. a text file is read by a transformation step
    */
   public static final String LINK_READBY = "isreadby";
+
+  /**
+   * Label for a "uses" edge in the graph, e.g. a table output step uses an incoming transformation stream field to
+   * populate a database column.
+   */
+  public static final String LINK_USES = "uses";
+
 
   /**
    * Label for an "writes to" edge in the graph, e.g. a table output step writes to a table

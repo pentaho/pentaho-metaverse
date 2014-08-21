@@ -127,16 +127,20 @@ public class TransformationAnalyzerTest {
     when( mockTransDoc.getContent() ).thenReturn( mockContent );
     when( mockTransDoc.getNamespace() ).thenReturn( namespace );
 
-    when( mockContent.listVariables() ).thenReturn( new String[]{} );
-    when( mockContent.listParameters() ).thenReturn( new String[]{} );
 
     when( mockGenRowsStepMeta.getParentStepMeta() ).thenReturn( mockStepMeta );
 
     when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockGenRowsStepMeta );
     when( mockStepMeta.getParentTransMeta() ).thenReturn( mockContent );
 
+    when( mockContent.listVariables() ).thenReturn( new String[] { } );
+    final String PARAM = "param1";
+    when( mockContent.listParameters() ).thenReturn( new String[] { PARAM } );
     when( mockContent.nrSteps() ).thenReturn( 1 );
     when( mockContent.getStep( 0 ) ).thenReturn( mockStepMeta );
+    when( mockContent.getExtendedDescription() ).thenReturn( "I am an extended description" );
+    when( mockContent.getTransversion() ).thenReturn( "1.0" );
+    when( mockContent.getParameterDefault( PARAM ) ).thenReturn( "default" );
 
     descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, namespace );
 
