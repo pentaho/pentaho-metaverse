@@ -122,6 +122,14 @@ public class JobAnalyzerTest {
 
     when (mockJob.getJobMeta()).thenReturn( mockContent );
 
+    when( mockContent.listVariables() ).thenReturn( new String[] { } );
+    final String PARAM = "param1";
+    when( mockContent.listParameters() ).thenReturn( new String[] { PARAM } );
+    when( mockContent.getExtendedDescription() ).thenReturn( "I am an extended description" );
+    when( mockContent.getJobversion() ).thenReturn( "0.1" );
+    when( mockContent.getParameterDefault( PARAM ) ).thenReturn( "default" );
+
+
     descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_JOB, namespace );
   }
 

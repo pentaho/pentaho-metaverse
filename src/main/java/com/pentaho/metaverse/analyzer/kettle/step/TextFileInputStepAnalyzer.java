@@ -89,7 +89,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
         metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outNode );
 
         // add a link from the fileField to the text file input step node
-        metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_READBY, node );
+        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, fieldNode );
       }
     }
 

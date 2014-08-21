@@ -111,6 +111,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           metaverseBuilder.addNode( newFieldNode );
           metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
         }
+        metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
       }
     }
 
@@ -164,7 +165,8 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           }
           // Check for changes in conversion mask
           if ( ( metadataChange.getConversionMask() != null )
-              && ( !inputFieldValueMeta.getConversionMask().equals( metadataChange.getConversionMask() ) ) ) {
+              && ( inputFieldValueMeta.getConversionMask() == null
+              ||  !inputFieldValueMeta.getConversionMask().equals( metadataChange.getConversionMask() ) ) ) {
             changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "conversionmask" );
           }
           // Check for changes in date format leniency
@@ -173,12 +175,14 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           }
           // Check for changes in date format locale
           if ( ( metadataChange.getDateFormatLocale() != null )
-              && ( !inputFieldValueMeta.getDateFormatLocale().equals( metadataChange.getDateFormatLocale() ) ) ) {
+              && ( inputFieldValueMeta.getDateFormatLocale() == null
+              ||  !inputFieldValueMeta.getDateFormatLocale().equals( metadataChange.getDateFormatLocale() ) ) ) {
             changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "datelocale" );
           }
           // Check for changes in date format locale
           if ( ( metadataChange.getDateFormatTimeZone() != null )
-              && ( !inputFieldValueMeta.getDateFormatTimeZone().equals( metadataChange.getDateFormatTimeZone() ) ) ) {
+              && ( inputFieldValueMeta.getDateFormatTimeZone() == null
+              ||  !inputFieldValueMeta.getDateFormatTimeZone().equals( metadataChange.getDateFormatTimeZone() ) ) ) {
             changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "datetimezone" );
           }
           // Check for changes in date format locale
@@ -216,6 +220,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
             metaverseBuilder.addNode( newFieldNode );
             metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
           }
+          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
         }
       }
     }
