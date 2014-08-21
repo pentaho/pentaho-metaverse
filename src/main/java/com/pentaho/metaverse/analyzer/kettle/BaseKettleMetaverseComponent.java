@@ -65,7 +65,8 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
 
   protected IMetaverseComponentDescriptor getChildComponentDescriptor(
       IMetaverseComponentDescriptor parentDescriptor, String name, String type ) {
-    return new MetaverseComponentDescriptor( name, type, parentDescriptor.getChildNamespace( name, type ) );
+    return new MetaverseComponentDescriptor( name, type,
+        parentDescriptor == null ? null : parentDescriptor.getChildNamespace( name, type ) );
   }
 
   protected IMetaverseComponentDescriptor getChildComponentDescriptor(
@@ -87,9 +88,11 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
   }
 
   protected IMetaverseNode createNodeFromDescriptor( IMetaverseComponentDescriptor descriptor ) {
-    return metaverseObjectFactory.createNodeObject(
-        descriptor.getNamespaceId(),
-        descriptor.getName(),
-        descriptor.getType() );
+    return descriptor == null
+        ? null
+        : metaverseObjectFactory.createNodeObject(
+          descriptor.getNamespaceId(),
+          descriptor.getName(),
+          descriptor.getType() );
   }
 }

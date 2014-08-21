@@ -1,6 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
@@ -11,13 +12,13 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.mockito.stubbing.OngoingStubbing;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.selectvalues.SelectMetadataChange;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
@@ -35,13 +36,13 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith(MockitoJUnitRunner.class)
 public class SelectValuesStepAnalyzerTest {
 
   private static final String DEFAULT_STEP_NAME = "testStep";
@@ -73,7 +74,6 @@ public class SelectValuesStepAnalyzerTest {
   public void setUp() throws Exception {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
-    INamespace childNamespace = mock( INamespace.class );
     when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
     when( namespace.getNamespaceId() ).thenReturn( "namespace" );
@@ -87,7 +87,7 @@ public class SelectValuesStepAnalyzerTest {
     descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
+  @Test(expected = MetaverseAnalyzerException.class)
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
     analyzer.analyze( descriptor, null );
@@ -130,7 +130,18 @@ public class SelectValuesStepAnalyzerTest {
     when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
     when( transMeta.getPrevStepFields( spyMeta ) ).thenReturn( prevRowMeta );
     when( transMeta.getStepFields( spyMeta ) ).thenReturn( stepRowMeta );
-    when( stepRowMeta.searchValueMeta( anyString() ) ).thenReturn( null );
+    when( stepRowMeta.getFieldNames() ).thenReturn( fieldNames );
+    when( stepRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+
+      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        if ( args[0] == "field1" )
+          return new ValueMetaString( "field1" );
+        if ( args[0] == "field2" )
+          return new ValueMetaString( "field2" );
+        return null;
+      }
+    } );
     when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
     when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
@@ -148,16 +159,13 @@ public class SelectValuesStepAnalyzerTest {
     assertNotNull( result );
     assertEquals( meta.getName(), result.getName() );
 
-    //verify( selectValuesMeta, times( 1 ) ).getFileName();
-
-    // make sure there are "readby" links added (file, and each field)
-    /*verify( builder, times( 1 + inputFields.length ) ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );*/
-
     // we should have "derives" links from input nodes to output nodes
     verify( builder, times( 1 ) )
         .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
 
+    // we should have no "deletes" links from input nodes to output nodes
+    verify( builder, never() )
+        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DELETES ), any( IMetaverseNode.class ) );
   }
 
   @Test
@@ -209,6 +217,60 @@ public class SelectValuesStepAnalyzerTest {
     verify( builder, times( 2 ) )
         .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
 
+  }
+
+  @Test
+  public void testAnalyze_MetadataChange() throws Exception {
+
+    StepMeta meta = new StepMeta( DEFAULT_STEP_NAME, selectValuesMeta );
+    StepMeta spyMeta = spy( meta );
+
+    when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+
+    String[] fieldNames = { "field1", "field2" };
+
+    SelectMetadataChange testChange1 = new SelectMetadataChange( selectValuesMeta );
+    testChange1.setName( "field1" );
+    testChange1.setCurrencySymbol( "~" );
+
+    SelectMetadataChange testChange2 = new SelectMetadataChange( selectValuesMeta );
+    testChange2.setName( "field2" );
+    testChange2.setRename( "field3" );
+
+    // set up the input fields
+    when( selectValuesMeta.getMeta() ).thenReturn( new SelectMetadataChange[] { testChange1, testChange2 } );
+    when( transMeta.getPrevStepFields( spyMeta ) ).thenReturn( prevRowMeta );
+    when( transMeta.getStepFields( spyMeta ) ).thenReturn( stepRowMeta );
+    when( stepRowMeta.searchValueMeta( anyString() ) ).thenReturn( null );
+    when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
+    when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+
+      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        if ( args[0] == "field1" )
+          return new ValueMetaString( "field1" );
+        if ( args[0] == "field2" )
+          return new ValueMetaString( "field2" );
+        return null;
+      }
+    } );
+
+    IMetaverseNode result = analyzer.analyze( descriptor, selectValuesMeta );
+    assertNotNull( result );
+    assertEquals( meta.getName(), result.getName() );
+
+    // we should have 2 "derives" links from input fields to output fields
+    verify( builder, times( 2 ) )
+        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+
+    // we should have 2 "creates" links for the derived fields
+    verify( builder, times( 2 ) )
+        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_CREATES ), any( IMetaverseNode.class ) );
+
+    // we should have no "deletes" links from input nodes to output nodes
+    verify( builder, never() )
+        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DELETES ), any( IMetaverseNode.class ) );
   }
 
   @Test

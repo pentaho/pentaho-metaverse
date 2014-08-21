@@ -145,7 +145,7 @@
           <stream_name>cdatetime</stream_name>
         </field>
         <field>
-          <column_name>address</column_name>
+          <column_name>addr</column_name>
           <stream_name>addr</stream_name>
         </field>
         <field>
@@ -157,10 +157,6 @@
           <stream_name>beat</stream_name>
         </field>
         <field>
-          <column_name>grid</column_name>
-          <stream_name>grid</stream_name>
-        </field>
-        <field>
           <column_name>crimedescr</column_name>
           <stream_name>crimedescr</stream_name>
         </field>
@@ -169,8 +165,8 @@
           <stream_name>ucr_ncic_code</stream_name>
         </field>
         <field>
-          <column_name>latitude</column_name>
-          <stream_name>latitude</stream_name>
+          <column_name>lat</column_name>
+          <stream_name>lat</stream_name>
         </field>
         <field>
           <column_name>longitude</column_name>
@@ -430,10 +426,6 @@
         <rename/>
         <length>-2</length>
         <precision>-2</precision>
-      </field>      <field>        <name>grid</name>
-        <rename/>
-        <length>-2</length>
-        <precision>-2</precision>
       </field>      <field>        <name>crimedescr</name>
         <rename/>
         <length>-2</length>
@@ -441,7 +433,7 @@
       </field>      <field>        <name>ucr_ncic_code</name>
         <rename/>
         <length>-2</length>
-        <precision>-2</precision>
+        <precision>0</precision>
       </field>      <field>        <name>latitude</name>
         <rename/>
         <length>-2</length>
@@ -451,7 +443,37 @@
         <length>-2</length>
         <precision>-2</precision>
       </field>        <select_unspecified>N</select_unspecified>
-    </fields>     <cluster_schema/>
+      <meta>        <name>latitude</name>
+        <rename>lat</rename>
+        <type>Number</type>
+        <length>-2</length>
+        <precision>5</precision>
+        <conversion_mask/>
+        <date_format_lenient>false</date_format_lenient>
+        <date_format_locale/>
+        <date_format_timezone/>
+        <lenient_string_to_number>true</lenient_string_to_number>
+        <encoding/>
+        <decimal_symbol/>
+        <grouping_symbol/>
+        <currency_symbol/>
+        <storage_type/>
+      </meta>      <meta>        <name>longitude</name>
+        <rename>longitude</rename>
+        <type>Number</type>
+        <length>-2</length>
+        <precision>5</precision>
+        <conversion_mask/>
+        <date_format_lenient>false</date_format_lenient>
+        <date_format_locale/>
+        <date_format_timezone/>
+        <lenient_string_to_number>false</lenient_string_to_number>
+        <encoding/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol/>
+        <currency_symbol>&#x24;</currency_symbol>
+        <storage_type/>
+      </meta>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>418</xloc>
       <yloc>105</yloc>

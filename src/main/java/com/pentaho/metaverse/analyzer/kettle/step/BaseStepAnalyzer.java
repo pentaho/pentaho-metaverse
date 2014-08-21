@@ -40,9 +40,7 @@ import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * KettleBaseStepAnalyzer provides a default implementation (and generic helper methods) for analyzing PDI step
@@ -87,12 +85,6 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   protected IDatabaseConnectionAnalyzer dbConnectionAnalyzer = null;
 
   /**
-   * A reference to the named lists of operations performed by a step on fields. The key is the field name, the value
-   * is a change record i.e. ComponentDerivationRecord.
-   */
-  protected Map<String, ComponentDerivationRecord> changeRecords = null;
-
-  /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
    *
    * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor, Object)
@@ -106,8 +98,6 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     // Add yourself
     rootNode = createNodeFromDescriptor( descriptor );
     metaverseBuilder.addNode( rootNode );
-
-    changeRecords = new HashMap<String, ComponentDerivationRecord>();
 
     // Add database connection nodes
     addDatabaseConnectionNodes( descriptor );
@@ -289,6 +279,15 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     return getChildComponentDescriptor( stepFieldNamespace, fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD );
   }
 
+  /**
+   * Checks for the validity/presence of objects used internally in step analysis, such as the reference to the
+   * metaverse builder.
+   *
+   * @param descriptor the descriptor for the object argument
+   * @param object the object being analyzed
+   *
+   * @throws MetaverseAnalyzerException if the state of the internal objects is not valid
+   */
   protected void validateState( IMetaverseComponentDescriptor descriptor, T object ) throws MetaverseAnalyzerException {
     baseStepMeta = object;
     if ( baseStepMeta == null ) {
@@ -313,5 +312,33 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     if ( metaverseObjectFactory == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
     }
+  }
+
+  /**
+   * Processes the given field changes, applying them to the metaverse. This method returns a metaverse node
+   * corresponding to the derived field, but does not add it to the metaverse.
+   *
+   * @param descriptor the descriptor for the field
+   * @param fieldNode the original field's metaverse node
+   * @param changeRecord the record of changes made to the field
+   * @return a metaverse node corresponding to the derived stream field.
+   */
+  protected IMetaverseNode processFieldChangeRecord(
+      IMetaverseComponentDescriptor descriptor,
+      IMetaverseNode fieldNode,
+      ComponentDerivationRecord changeRecord ) {
+
+    IMetaverseNode newFieldNode = null;
+
+    // There should be at least one operation in order to create a new stream field
+    if ( changeRecord != null && changeRecord.hasDelta() ) {
+      // Create a new node for the renamed field
+      IMetaverseComponentDescriptor newFieldDescriptor = getChildComponentDescriptor(
+          descriptor, changeRecord.getEntityName(), DictionaryConst.NODE_TYPE_TRANS_FIELD );
+      newFieldNode = createNodeFromDescriptor( newFieldDescriptor );
+      newFieldNode.setProperty( DictionaryConst.PROPERTY_OPERATIONS, changeRecord.toString() );
+      metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_DERIVES, newFieldNode );
+    }
+    return newFieldNode;
   }
 }
