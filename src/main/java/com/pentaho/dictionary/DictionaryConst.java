@@ -3,7 +3,7 @@ package com.pentaho.dictionary;
 /**
  * Constants used in the graph building and reading.
  * All data flow links must be left to right (source to destination).
- * All structural links must be high to low (container to containee). 
+ * All structural links must be high to low (container to containee).
  *
  * @author jdixon
  */
@@ -50,7 +50,6 @@ public class DictionaryConst {
    */
   public static final String PROPERTY_PATH = "path";
 
-
   /**
    * Property key for suggested "color" for a node when a graph is visualized
    */
@@ -92,9 +91,14 @@ public class DictionaryConst {
   public static final String PROPERTY_STATUS = "status";
 
   /**
-   * Property key for "operation", a string description of a performed operation (calculation, e.g.)
+   * Property key for "operations"
    */
-  public static final String PROPERTY_OPERATION = "operation";
+  public static final String PROPERTY_OPERATIONS = "operations";
+
+  /**
+   * Property key for "modified", the value for the property should indicate how the entity was modified
+   */
+  public static final String PROPERTY_MODIFIED = "modified";
 
   /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
@@ -327,7 +331,6 @@ public class DictionaryConst {
    * The suggested color for nodes of unknown or "other" types
    */
   public static final String COLOR_OTHER = "#ffcccc";
-
 
   /**
    * Hides the constructor so that this class cannot be instanced

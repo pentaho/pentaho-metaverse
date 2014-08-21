@@ -69,7 +69,7 @@ public class MetaverseComponentDescriptor implements IMetaverseComponentDescript
    * @return the namespace id, represents the container for this element
    */
   @Override public String getNamespaceId() {
-    return namespace.getNamespaceId();
+    return namespace == null ? null : namespace.getNamespaceId();
   }
 
   /**

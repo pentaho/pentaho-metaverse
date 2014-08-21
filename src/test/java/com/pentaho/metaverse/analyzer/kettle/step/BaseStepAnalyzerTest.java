@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.impl.MetaverseNamespace;
@@ -30,7 +31,6 @@ import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -54,6 +54,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -95,6 +96,10 @@ public class BaseStepAnalyzerTest {
 
   @Mock
   IMetaverseComponentDescriptor mockDescriptor;
+
+  @Mock
+  ComponentDerivationRecord changeRecord;
+
 
   /**
    * @throws Exception
@@ -273,6 +278,10 @@ public class BaseStepAnalyzerTest {
     // make sure there is a "deletes" link added
     verify( mockBuilder, times( 1 ) ).addLink(
         any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DELETES ), any( IMetaverseNode.class ) );
+
+    // make sure there is not a "derives" link added
+    verify( mockBuilder, never() ).addLink(
+        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
   }
 
   @Test
@@ -331,6 +340,18 @@ public class BaseStepAnalyzerTest {
   public void testSetDatabaseConnectionAnalyzer() {
     analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
     assertNotNull( analyzer.getDatabaseConnectionAnalyzer() );
+  }
+
+  @Test
+  public void testProcessChangeRecordNullDescriptor() {
+    when( changeRecord.hasDelta() ).thenReturn( true );
+    analyzer.processFieldChangeRecord( null, mock( IMetaverseNode.class ), changeRecord );
+    verify( mockDescriptor, never() ).getChildNamespace( anyString(), anyString() );
+  }
+
+  @Test
+  public void testProcessChangeRecordNullRecord() {
+    analyzer.processFieldChangeRecord( mockDescriptor, mock( IMetaverseNode.class ), null );
   }
 
   @Test
