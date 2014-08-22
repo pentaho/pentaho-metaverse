@@ -80,6 +80,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
         IMetaverseComponentDescriptor fileFieldDescriptor =
             getChildComponentDescriptor( descriptor, fieldName, DictionaryConst.NODE_TYPE_FILE_FIELD );
         IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
+        fieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, field.getTypeDesc() );
         metaverseBuilder.addNode( fieldNode );
 
         // Get the stream field output from this step. It should've already been created when we called super.analyze()

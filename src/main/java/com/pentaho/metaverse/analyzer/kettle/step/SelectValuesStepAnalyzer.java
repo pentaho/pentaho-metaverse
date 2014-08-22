@@ -107,7 +107,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
 
         IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, changeRecord );
         if ( newFieldNode != null ) {
-          newFieldNode.setProperty( "kettleType", inputFieldValueMeta.getTypeDesc() );
+          newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta.getTypeDesc() );
           metaverseBuilder.addNode( newFieldNode );
           metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
         }
@@ -216,7 +216,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
 
           IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, changeRecord );
           if ( newFieldNode != null ) {
-            newFieldNode.setProperty( "kettleType", inputFieldValueMeta.getTypeDesc() );
+            newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta.getTypeDesc() );
             metaverseBuilder.addNode( newFieldNode );
             metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
           }
