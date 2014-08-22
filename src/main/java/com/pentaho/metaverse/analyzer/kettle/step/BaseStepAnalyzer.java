@@ -97,6 +97,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
 
     // Add yourself
     rootNode = createNodeFromDescriptor( descriptor );
+    rootNode.setProperty( "kettleStepMetaType", object.getClass().getSimpleName() );
     metaverseBuilder.addNode( rootNode );
 
     // Add database connection nodes
@@ -155,7 +156,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
                   getChildComponentDescriptor( descriptor, outRowMeta.getName(),
                       DictionaryConst.NODE_TYPE_TRANS_FIELD );
               IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
-              newFieldNode.setProperty( "kettleType", outRowMeta.getTypeDesc() );
+              newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, outRowMeta.getTypeDesc() );
               metaverseBuilder.addNode( newFieldNode );
 
               // Add link to show that this step created the field

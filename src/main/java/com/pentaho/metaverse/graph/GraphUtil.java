@@ -34,7 +34,7 @@ public class GraphUtil {
     clone = g.addVertex( vertex.getId() );
     Set<String> keys = vertex.getPropertyKeys();
     for ( String key : keys ) {
-      String value = vertex.getProperty( key );
+      Object value = vertex.getProperty( key );
       clone.setProperty( key, value );
     }
     return clone;

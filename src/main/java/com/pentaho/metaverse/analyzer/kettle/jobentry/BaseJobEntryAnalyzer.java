@@ -53,6 +53,7 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface> extends 
 
     // Add yourself
     IMetaverseNode node = createNodeFromDescriptor( descriptor );
+    node.setProperty( "kettleJobEntryInterfaceType", entry.getClass().getSimpleName() );
     metaverseBuilder.addNode( node );
 
     return node;

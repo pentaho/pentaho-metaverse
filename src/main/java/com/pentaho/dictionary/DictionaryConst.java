@@ -101,6 +101,12 @@ public class DictionaryConst {
   public static final String PROPERTY_MODIFIED = "modified";
 
   /**
+   * Property key for "kettleType", the value for the property should indicate the
+   * textual representation of the data type used in kettle
+   */
+  public static final String PROPERTY_KETTLE_TYPE = "kettleType";
+
+  /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
    */
   public static final String LINK_EXECUTES = "executes";

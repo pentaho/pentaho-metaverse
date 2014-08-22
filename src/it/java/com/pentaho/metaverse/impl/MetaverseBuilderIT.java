@@ -22,8 +22,10 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryHelper;
+import com.pentaho.metaverse.IntegrationTestUtil;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
@@ -55,13 +57,10 @@ import static org.junit.Assert.assertTrue;
 
 public class MetaverseBuilderIT {
 
-  private static Set<IDocumentLocator> locators;
   private static IMetaverseReader reader;
-  private static IDocumentLocatorProvider documentLocatorProvider;
   private static Graph readerGraph;
   private int nodeCount = 0;
   private int edgeCount = 0;
-  private static long freeMemAtInit = 0L;
 
   public static String getSolutionPath() {
     return "src/it/resources/solution";
@@ -72,26 +71,14 @@ public class MetaverseBuilderIT {
 
     cleanUpSampleData();
 
-    StandaloneApplicationContext appContext = new StandaloneApplicationContext( getSolutionPath(), "" );
-    PentahoSystem.setSystemSettingsService( new PathBasedSystemSettings() );
-    ApplicationContext springApplicationContext = getSpringApplicationContext();
+    IntegrationTestUtil.initializePentahoSystem( getSolutionPath() );
 
-    IPentahoObjectFactory pentahoObjectFactory = new StandaloneSpringPentahoObjectFactory();
-    pentahoObjectFactory.init( null, springApplicationContext );
-    PentahoSystem.registerObjectFactory( pentahoObjectFactory );
-    PentahoSystem.init( appContext );
-    PentahoSessionHolder.setSession( new StandaloneSession() );
+//    Uncomment below to run integration test against only the "demo" folder
+//    FileSystemLocator dl = PentahoSystem.get( FileSystemLocator.class );
+//    dl.setRootFolder( "src/it/resources/repo/demo" );
 
-    try {
-      KettleEnvironment.init();
-    } catch ( KettleException e ) {
-      e.printStackTrace();
-    }
-
-    documentLocatorProvider = PentahoSystem.get( IDocumentLocatorProvider.class );
     reader = PentahoSystem.get( IMetaverseReader.class );
-    readerGraph = buildMetaverseGraph();
-
+    readerGraph = IntegrationTestUtil.buildMetaverseGraph();
   }
 
   /**
@@ -113,47 +100,8 @@ public class MetaverseBuilderIT {
 
   }
 
-  private static ApplicationContext getSpringApplicationContext() {
-    GenericApplicationContext ctx = new GenericApplicationContext();
-    XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader( ctx );
-    File f = new File( getSolutionPath() + "/system/pentahoObjects.spring.xml" );
-    if ( f.exists() ) {
-      try {
-        reader.loadBeanDefinitions( new FileSystemResource( f ) );
-      } catch ( Exception e ) {
-        System.err.println( e.getMessage() );
-        e.printStackTrace();
-      }
-    }
-
-    String[] beanNames = ctx.getBeanDefinitionNames();
-    System.out.println( "Loaded Beans: " ); //$NON-NLS-1$
-    for ( String n : beanNames ) {
-      System.out.println( "bean: " + n ); //$NON-NLS-1$
-    }
-
-    return ctx;
-  }
-
   @Before
   public void setup() {
-  }
-
-  private static Graph buildMetaverseGraph() throws Exception {
-    locators = documentLocatorProvider.getDocumentLocators();
-
-    freeMemAtInit = Runtime.getRuntime().freeMemory();
-    MetaverseCompletionService mcs = MetaverseCompletionService.getInstance();
-    System.out.println("freeMemAtInit = "+freeMemAtInit);
-    // build it
-    for ( IDocumentLocator locator : locators ) {
-      locator.startScan();
-    }
-    mcs.waitTillEmpty();
-    long freeMemAtEnd = Runtime.getRuntime().freeMemory();
-    System.out.println("MetaverseIT mem usage after waitTillEmpty() = "+(freeMemAtInit - freeMemAtEnd));
-
-    return reader.getMetaverse();
   }
 
   @Test
