@@ -39,11 +39,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.trans.step.errorhandling.Stream;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
@@ -51,7 +51,6 @@ import java.io.FileInputStream;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * User: RFellows Date: 8/20/14
@@ -177,12 +176,31 @@ public class MetaverseValidationIT {
   }
 
   @Test
+  public void testJobEntryNodes() throws Exception {
+    for ( JobNode jobNode : root.getJobs() ) {
+      JobMeta jobMeta = new JobMeta( new FileInputStream( jobNode.getPath() ), null, null );
+
+      int numJobEntries = jobMeta.nrJobEntries();
+      for ( int i = 0; i < numJobEntries; i++ ) {
+        JobEntryCopy jobEntry = jobMeta.getJobEntry( i );
+        JobEntryNode jobEntryNode = jobNode.getJobEntryNode( jobEntry.getName() );
+        assertNotNull( jobEntryNode );
+        assertEquals( jobEntry.getName(), jobEntryNode.getName() );
+        assertEquals( jobEntry.getDescription(), jobEntryNode.getDescription() );
+        assertEquals( "Incorrect type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getType() );
+        assertEquals( "Incorrect entity type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getEntity().getName() );
+      }
+    }
+
+  }
+
+  @Test
   public void testTransformationStepNodes() throws Exception {
     for ( TransformationNode transNode : root.getTransformations() ) {
       TransMeta tm = new TransMeta( new FileInputStream( transNode.getPath() ), null, true, null, null );
 
       List<StepMeta> transMetaSteps = tm.getSteps();
-      int stepCount = 0;
+      int stepCount = getIterableSize( transNode.getStepNodes() );
       int matchCount = 0;
 
       for ( StepMeta transMetaStep : transMetaSteps ) {
@@ -197,9 +215,6 @@ public class MetaverseValidationIT {
       assertEquals( "Not all transformation steps are modeled in the graph for [" + tm.getName() + "]",
         transMetaSteps.size(), matchCount );
 
-      for ( TransformationStepNode tsn : transNode.getStepNodes() ) {
-        stepCount++;
-      }
       assertEquals( "Incorrect number of Steps in the graph for transformation [" + tm.getName() + "]",
         transMetaSteps.size(), stepCount );
 
@@ -210,52 +225,57 @@ public class MetaverseValidationIT {
   public void testSelectValuesStep() throws Exception {
     SelectValuesTransStepNode selectValues = root.getSelectValuesStepNode();
     assertNotNull( selectValues );
-    assertNotNull( selectValues.getStreamFieldNodesUses() );
-    assertTrue( selectValues.getStreamFieldNodesCreates() != null || selectValues.getStreamFieldNodesDeletes() != null );
+    int countUses = getIterableSize( selectValues.getStreamFieldNodesUses() );
+    int countCreates = getIterableSize( selectValues.getStreamFieldNodesCreates() );
+    int countDeletes = getIterableSize( selectValues.getStreamFieldNodesDeletes() );
+    assertTrue( countUses > 0 );
+    assertTrue(  countCreates > 0 );
+    assertTrue(  countDeletes > 0 );
     assertEquals( "SelectValuesMeta", selectValues.getMetaType() );
-
   }
 
   @Test
   public void testTextFileInputStep() throws Exception {
+    // this is testing a specific TextFileInputStep instance
     TextFileInputStepNode textFileInputStepNode = root.getTextFileInputStepNode();
     assertNotNull( textFileInputStepNode );
 
-    assertNotNull( textFileInputStepNode.getInputFiles() );
-    assertEquals( "TextFileInputMeta", textFileInputStepNode.getMetaType() );
-
-    Iterable<FileFieldNode> fileFieldNodes = textFileInputStepNode.getFileFieldNodesUses();
-    assertNotNull( fileFieldNodes );
-    int countFileFieldNode = 0;
-    for ( FileFieldNode fileFieldNode : fileFieldNodes ) {
-      countFileFieldNode++;
-      assertNotNull( fileFieldNode.getKettleType() );
+    Iterable<MetNode> inputFiles = textFileInputStepNode.getInputFiles();
+    int countInputFiles = getIterableSize( inputFiles );
+    assertTrue( countInputFiles > 0 );
+    for ( MetNode inputFile : inputFiles ) {
+      assertNotNull( inputFile );
     }
 
+    assertEquals( "TextFileInputMeta", textFileInputStepNode.getMetaType() );
+
+    int countFileFieldNode = getIterableSize( textFileInputStepNode.getFileFieldNodesUses() );
+
     Iterable<StreamFieldNode> streamFieldNodes = textFileInputStepNode.getStreamFieldNodesCreates();
-    assertNotNull( streamFieldNodes );
-    int countStreamFieldNode = 0;
+    int countStreamFieldNode = getIterableSize( textFileInputStepNode.getStreamFieldNodesCreates() );
     for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
-      countStreamFieldNode++;
       assertNotNull( streamFieldNode.getKettleType() );
     }
 
     // we should create as many fields as we read in
     assertEquals( countFileFieldNode, countStreamFieldNode );
 
-    // TODO - go get the actual StepMeta and compare it
   }
 
   @Test
   public void testDatasources() throws Exception {
+    int countDatasources = getIterableSize( root.getDatasourceNodes() );
     for ( DatasourceNode ds : root.getDatasourceNodes() ) {
       // make sure at least one step uses the connection
-      assertNotNull( ds.getTransformationStepNodes() );
+      int countUsedSteps = getIterableSize( ds.getTransformationStepNodes() );
+      assertTrue( countUsedSteps > 0 );
+
       assertEquals( DictionaryConst.NODE_TYPE_DATASOURCE, ds.getEntity().getName() );
       assertNotNull( ds.getName() );
       assertNotNull( ds.getPort() );
       assertNotNull( ds.getUserName() );
     }
+    assertTrue( countDatasources > 0 );
   }
 
   @Test
@@ -266,14 +286,22 @@ public class MetaverseValidationIT {
     // check the table that it writes to
     for ( StepMeta step : tm.getSteps() ) {
       if ( tableOutputStepNode.getName().equals( step.getName() ) ) {
-        String tableName = ( (TableOutputMeta)getBaseStepMetaFromStepMeta( step ) ).getTableName();
+        TableOutputMeta meta = (TableOutputMeta)getBaseStepMetaFromStepMeta( step );
+        String tableName = meta.getTableName();
         assertEquals( tableName, tableOutputStepNode.getDatabaseTable().getName() );
+
+        int dbColCount = getIterableSize( tableOutputStepNode.getDatabaseColumns() );
+        assertEquals( meta.getFieldStream().length, dbColCount );
+
+        int countDbConnections = getIterableSize( tableOutputStepNode.getDatasources() );
+        for( DatabaseMeta dbMeta : meta.getUsedDatabaseConnections() ) {
+          assertNotNull( tableOutputStepNode.getDatasource( dbMeta.getName() ) );
+        }
+        assertEquals( meta.getUsedDatabaseConnections().length, countDbConnections );
+
         break;
       }
     }
-
-    // TODO - check the fields that it uses
-    // TODO - check the database connection that is used
 
   }
 
@@ -289,6 +317,16 @@ public class MetaverseValidationIT {
       }
     }
     return baseStepMeta;
+  }
+
+  private int getIterableSize( Iterable<?> iterable ) {
+    int count = 0;
+    for ( Object o : iterable ) {
+      if ( o != null ) {
+        count++;
+      }
+    }
+    return count;
   }
 
   private String convertNumericStatusToString( int transactionStatus ) {
@@ -451,7 +489,10 @@ public class MetaverseValidationIT {
 
   public interface TableOutputStepNode extends TransformationStepNode {
     @Adjacency( label = "dependencyof", direction = Direction.IN )
-    public Iterable<DatasourceNode> getDatasource();
+    public Iterable<DatasourceNode> getDatasources();
+
+    @GremlinGroovy( "it.in('dependencyof').filter{it.name == name}" )
+    public Iterable<DatasourceNode> getDatasource( @GremlinParam( "name") String name );
 
     @Adjacency( label = "uses", direction = Direction.OUT )
     public Iterable<DatabaseColumnNode> getDatabaseColumns();
