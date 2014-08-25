@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
@@ -50,27 +51,6 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
 
     // do the common analysis for all step
     IMetaverseNode node = super.analyze( descriptor, textFileInputMeta );
-    String[] fileNames =  parentTransMeta.environmentSubstitute( textFileInputMeta.getFileName() );
-
-    // add a link from the file(s) being read to the step
-    for ( String fileName : fileNames ) {
-
-      String normalized = null;
-      try {
-        normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
-      } catch ( MetaverseException e ) {
-        log.error( e.getMessage(), e );
-      }
-
-      // first add the node for the file
-      IMetaverseComponentDescriptor fileDescriptor =
-          getChildComponentDescriptor( descriptor, normalized, DictionaryConst.NODE_TYPE_FILE );
-      IMetaverseNode textFileNode = createNodeFromDescriptor( fileDescriptor );
-      textFileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
-      metaverseBuilder.addNode( textFileNode );
-
-      metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
-    }
 
     // add the fields as nodes, add the links too
     TextFileInputField[] fields = textFileInputMeta.getInputFields();
@@ -80,7 +60,6 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
         IMetaverseComponentDescriptor fileFieldDescriptor =
             getChildComponentDescriptor( descriptor, fieldName, DictionaryConst.NODE_TYPE_FILE_FIELD );
         IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
-        fieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, field.getTypeDesc() );
         metaverseBuilder.addNode( fieldNode );
 
         // Get the stream field output from this step. It should've already been created when we called super.analyze()
@@ -91,6 +70,40 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
 
         // add a link from the fileField to the text file input step node
         metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, fieldNode );
+      }
+    }
+
+    if ( textFileInputMeta.isAcceptingFilenames() ) {
+      String acceptingFieldName = textFileInputMeta.getAcceptingField();
+      IMetaverseComponentDescriptor transFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor,
+          acceptingFieldName );
+      IMetaverseNode acceptingFieldNode = createNodeFromDescriptor( transFieldDescriptor );
+
+      // add a link from the fileField to the text file input step node
+      metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, acceptingFieldNode );
+    } else {
+      String[] fileNames = parentTransMeta.environmentSubstitute( textFileInputMeta.getFileName() );
+
+      // add a link from the file(s) being read to the step
+      for ( String fileName : fileNames ) {
+        if ( !Const.isEmpty( fileName ) ) {
+
+          String normalized = null;
+          try {
+            normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
+          } catch ( MetaverseException e ) {
+            log.error( e.getMessage(), e );
+          }
+
+          // first add the node for the file
+          IMetaverseComponentDescriptor fileDescriptor =
+              getChildComponentDescriptor( descriptor, normalized, DictionaryConst.NODE_TYPE_FILE );
+          IMetaverseNode textFileNode = createNodeFromDescriptor( fileDescriptor );
+          textFileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
+          metaverseBuilder.addNode( textFileNode );
+
+          metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
+        }
       }
     }
 
