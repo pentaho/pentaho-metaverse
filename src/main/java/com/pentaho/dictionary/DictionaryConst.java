@@ -142,7 +142,6 @@ public class DictionaryConst {
    */
   public static final String LINK_USES = "uses";
 
-
   /**
    * Label for an "writes to" edge in the graph, e.g. a table output step writes to a table
    */
@@ -344,6 +343,21 @@ public class DictionaryConst {
    * The suggested color for nodes of unknown or "other" types
    */
   public static final String COLOR_OTHER = "#ffcccc";
+
+  /**
+   * The static context refers to analysis of documents that does not produce runtime information
+   */
+  public static final String CONTEXT_STATIC = "static";
+
+  /**
+   * A runtime context refers to analyis of documents that produces runtime information (parameter values, e.g.)
+   */
+  public static final String CONTEXT_RUNTIME = "runtime";
+
+  /**
+   * The default context for metaverse descriptors
+   */
+  public static final String CONTEXT_DEFAULT = CONTEXT_STATIC;
 
   /**
    * Hides the constructor so that this class cannot be instanced

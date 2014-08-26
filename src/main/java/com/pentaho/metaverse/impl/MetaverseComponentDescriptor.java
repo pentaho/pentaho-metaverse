@@ -1,5 +1,6 @@
 package com.pentaho.metaverse.impl;
 
+import com.pentaho.dictionary.DictionaryConst;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.INamespace;
 
@@ -11,11 +12,20 @@ public class MetaverseComponentDescriptor implements IMetaverseComponentDescript
   private String name;
   private String type;
   private INamespace namespace;
+  private String context;
 
   public MetaverseComponentDescriptor( String name, String type, INamespace namespace ) {
     this.name = name;
     this.type = type;
     this.namespace = namespace;
+    this.context = DictionaryConst.CONTEXT_DEFAULT;
+  }
+
+  public MetaverseComponentDescriptor( String name, String type, INamespace namespace, String context ) {
+    this.name = name;
+    this.type = type;
+    this.namespace = namespace;
+    this.context = context;
   }
 
   /**
@@ -95,5 +105,25 @@ public class MetaverseComponentDescriptor implements IMetaverseComponentDescript
 
   @Override public INamespace getNamespace() {
     return namespace;
+  }
+
+  /**
+   * Gets the context ("static", "runtime", e.g.) associated with the component described by this descriptor.
+   *
+   * @return A string containing a description of the context associated with the described component
+   */
+  @Override
+  public String getContext() {
+    return context;
+  }
+
+  /**
+   * Sets the context ("static", "runtime", e.g.) associated with the component described by this descriptor.
+   *
+   * @param context the context for the described component
+   */
+  @Override
+  public void setContext( String context ) {
+    this.context = context;
   }
 }
