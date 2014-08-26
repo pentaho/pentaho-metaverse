@@ -42,6 +42,11 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
    */
   private INamespace namespace;
 
+  /**
+   * The context (static, runtime, e.g.) associated with this metaverse document.
+   */
+  private String context;
+
   /* (non-Javadoc)
    * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getExtension()
    */
@@ -179,5 +184,25 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
    */
   @Override public INamespace getChildNamespace( String child, String type ) {
     return namespace.getChildNamespace( child, type );
+  }
+
+  /**
+   * Gets the context ("static", "runtime", e.g.) associated with the component described by this descriptor.
+   *
+   * @return A string containing a description of the context associated with the described component
+   */
+  @Override
+  public String getContext() {
+    return context;
+  }
+
+  /**
+   * Sets the context ("static", "runtime", e.g.) associated with the component described by this descriptor.
+   *
+   * @param context the context for the described component
+   */
+  @Override
+  public void setContext( String context ) {
+    this.context = context;
   }
 }
