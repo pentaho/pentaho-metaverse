@@ -53,7 +53,6 @@ public class IntegrationTestUtil {
     StandaloneApplicationContext appContext = new StandaloneApplicationContext( solutionPath, "" );
     PentahoSystem.setSystemSettingsService( new PathBasedSystemSettings() );
     ApplicationContext springApplicationContext = getSpringApplicationContext( solutionPath );
-
     IPentahoObjectFactory pentahoObjectFactory = new StandaloneSpringPentahoObjectFactory();
     pentahoObjectFactory.init( null, springApplicationContext );
     PentahoSystem.registerObjectFactory( pentahoObjectFactory );
@@ -88,8 +87,8 @@ public class IntegrationTestUtil {
     return ctx;
   }
 
-  public static Graph buildMetaverseGraph() throws Exception {
-    IDocumentLocatorProvider documentLocatorProvider = PentahoSystem.get( IDocumentLocatorProvider.class );
+  public static Graph buildMetaverseGraph( IDocumentLocatorProvider provider) throws Exception {
+    IDocumentLocatorProvider documentLocatorProvider = provider;
     IMetaverseReader reader = PentahoSystem.get( IMetaverseReader.class );
     Set<IDocumentLocator> locators = documentLocatorProvider.getDocumentLocators();
 
@@ -105,6 +104,10 @@ public class IntegrationTestUtil {
     System.out.println("MetaverseIT mem usage after waitTillEmpty() = "+(freeMemAtInit - freeMemAtEnd));
 
     return reader.getMetaverse();
+  }
+
+  public static Graph buildMetaverseGraph() throws Exception {
+    return buildMetaverseGraph( PentahoSystem.get( IDocumentLocatorProvider.class ) );
   }
 
 }

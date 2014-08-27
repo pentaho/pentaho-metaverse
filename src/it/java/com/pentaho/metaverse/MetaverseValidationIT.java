@@ -23,6 +23,7 @@
 package com.pentaho.metaverse;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.tinkerpop.blueprints.Direction;
@@ -34,6 +35,7 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
+import flexjson.JSONDeserializer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,6 +51,7 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.FileInputStream;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -59,27 +62,33 @@ public class MetaverseValidationIT {
 
   private static IMetaverseReader reader;
   private static Graph graph;
-  FramedGraphFactory framedGraphFactory;
-  FramedGraph framedGraph;
-  RootNode root;
+  private static FramedGraphFactory framedGraphFactory;
+  private static FramedGraph framedGraph;
+  private static RootNode root;
 
   @BeforeClass
   public static void init() throws Exception {
     IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution" );
 
     // we only care about the demo folder
-    FileSystemLocator dl = PentahoSystem.get( FileSystemLocator.class );
-    dl.setRootFolder( "src/it/resources/repo/demo" );
+    FileSystemLocator fileSystemLocator = PentahoSystem.get( FileSystemLocator.class );
+    IDocumentLocatorProvider provider = PentahoSystem.get( IDocumentLocatorProvider.class );
+    // remove the original locator so we can set the modified one back on it
+    provider.removeDocumentLocator( fileSystemLocator );
+    fileSystemLocator.setRootFolder( "src/it/resources/repo/demo" );
+    provider.addDocumentLocator( fileSystemLocator );
 
-    graph = IntegrationTestUtil.buildMetaverseGraph();
+    // build the graph using our updated locator/provider
+    graph = IntegrationTestUtil.buildMetaverseGraph( provider );
     reader = PentahoSystem.get( IMetaverseReader.class );
+
+    framedGraphFactory = new FramedGraphFactory( new GremlinGroovyModule() );
+    framedGraph = framedGraphFactory.create( graph );
+    root = (RootNode) framedGraph.getVertex( "entity", RootNode.class );
   }
 
   @Before
   public void setUp() throws Exception {
-    framedGraphFactory = new FramedGraphFactory( new GremlinGroovyModule() );
-    framedGraph = framedGraphFactory.create( graph );
-    root = (RootNode) framedGraph.getVertex( "entity", RootNode.class );
   }
 
   @Test
@@ -108,6 +117,18 @@ public class MetaverseValidationIT {
   }
 
   @Test
+  public void testEntity_FileSystemLocator() throws Exception {
+    LocatorNode node = (LocatorNode) framedGraph.getVertex( "FileSystem~FILE_SYSTEM_REPO~Locator", LocatorNode.class );
+    assertEquals( DictionaryConst.NODE_TYPE_LOCATOR, node.getType() );
+    assertEquals( "FILE_SYSTEM_REPO", node.getName() );
+    assertNotNull( node.getDescription() );
+    assertNotNull( node.getUrl() );
+    assertNotNull( node.getLastScan() );
+    int countDocuments = getIterableSize( node.getDocuments() );
+    assertEquals( 2, countDocuments );
+  }
+
+  @Test
   public void testTransformations() throws Exception {
     for ( TransformationNode node : root.getTransformations() ) {
       assertEquals( "Incorrect entity type", DictionaryConst.NODE_TYPE_TRANS, node.getEntity().getName() );
@@ -130,14 +151,9 @@ public class MetaverseValidationIT {
       // params?
       String[] params = tm.listParameters();
       for ( String param : params ) {
-
+        assertNotNull( "Parameter is missing [" + param + "]", node.getParameter( "parameter_" + param ) );
       }
 
-      // variables?
-      String[] variables = tm.listVariables();
-      for ( String variable : variables ) {
-
-      }
     }
   }
 
@@ -164,14 +180,9 @@ public class MetaverseValidationIT {
       // params?
       String[] params = jm.listParameters();
       for ( String param : params ) {
-
+        assertNotNull( "Parameter is missing [" + param + "]", node.getParameter( "parameter_" + param ) );
       }
 
-      // variables?
-      String[] variables = jm.listVariables();
-      for ( String variable : variables ) {
-
-      }
     }
   }
 
@@ -181,6 +192,7 @@ public class MetaverseValidationIT {
       JobMeta jobMeta = new JobMeta( new FileInputStream( jobNode.getPath() ), null, null );
 
       int numJobEntries = jobMeta.nrJobEntries();
+      int matchCount = 0;
       for ( int i = 0; i < numJobEntries; i++ ) {
         JobEntryCopy jobEntry = jobMeta.getJobEntry( i );
         JobEntryNode jobEntryNode = jobNode.getJobEntryNode( jobEntry.getName() );
@@ -189,9 +201,19 @@ public class MetaverseValidationIT {
         assertEquals( jobEntry.getDescription(), jobEntryNode.getDescription() );
         assertEquals( "Incorrect type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getType() );
         assertEquals( "Incorrect entity type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getEntity().getName() );
+        matchCount++;
       }
-    }
 
+      assertEquals( "Not all job entries are accounted for in the graph for Job [" + jobMeta.getName() + "]",
+        numJobEntries, matchCount );
+
+      assertEquals( "Incorrect number of job entries for in the graph for Job [" + jobMeta.getName() + "]",
+        numJobEntries, getIterableSize( jobNode.getJobEntryNodes() ) );
+
+      // it should be contained in a "Locator" node
+      jobNode.getLocator();
+
+    }
   }
 
   @Test
@@ -223,15 +245,38 @@ public class MetaverseValidationIT {
 
   @Test
   public void testSelectValuesStep() throws Exception {
+    // this tests a specific select values step. the one in trans "Populate Table From File"
     SelectValuesTransStepNode selectValues = root.getSelectValuesStepNode();
     assertNotNull( selectValues );
     int countUses = getIterableSize( selectValues.getStreamFieldNodesUses() );
     int countCreates = getIterableSize( selectValues.getStreamFieldNodesCreates() );
     int countDeletes = getIterableSize( selectValues.getStreamFieldNodesDeletes() );
-    assertTrue( countUses > 0 );
-    assertTrue(  countCreates > 0 );
-    assertTrue(  countDeletes > 0 );
+    assertEquals( 8, countUses );
+    assertEquals( 4, countCreates );
+    assertEquals( 3, countDeletes );
     assertEquals( "SelectValuesMeta", selectValues.getMetaType() );
+
+
+    // verify the nodes created by the step
+    for ( StreamFieldNode node : selectValues.getStreamFieldNodesCreates() ) {
+      // check for operations
+      Map<String, List<String>> ops = convertOperationsStringToMap( node.getOperations() );
+      assertNotNull( ops );
+      assertTrue( ops.size() > 0 );
+
+      // check the created node is derived from something
+      Iterable<StreamFieldNode> deriveNodes = node.getFieldNodesThatDeriveMe();
+      for ( StreamFieldNode deriveNode : deriveNodes ) {
+        assertNotNull( deriveNode );
+      }
+    }
+
+    // verify fields deleted
+    for ( StreamFieldNode node : selectValues.getStreamFieldNodesDeletes() ) {
+      // check the created node is never used to "populate" anything
+      FieldNode populatedNode = node.getFieldPopulatedByMe();
+      assertNull( populatedNode );
+    }
   }
 
   @Test
@@ -242,9 +287,9 @@ public class MetaverseValidationIT {
 
     Iterable<MetNode> inputFiles = textFileInputStepNode.getInputFiles();
     int countInputFiles = getIterableSize( inputFiles );
-    assertTrue( countInputFiles > 0 );
+    assertEquals( 1, countInputFiles );
     for ( MetNode inputFile : inputFiles ) {
-      assertNotNull( inputFile );
+      assertTrue( inputFile.getName().endsWith( "SacramentocrimeJanuary2006.csv" ) );
     }
 
     assertEquals( "TextFileInputMeta", textFileInputStepNode.getMetaType() );
@@ -252,7 +297,7 @@ public class MetaverseValidationIT {
     int countFileFieldNode = getIterableSize( textFileInputStepNode.getFileFieldNodesUses() );
 
     Iterable<StreamFieldNode> streamFieldNodes = textFileInputStepNode.getStreamFieldNodesCreates();
-    int countStreamFieldNode = getIterableSize( textFileInputStepNode.getStreamFieldNodesCreates() );
+    int countStreamFieldNode = getIterableSize( streamFieldNodes );
     for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
       assertNotNull( streamFieldNode.getKettleType() );
     }
@@ -272,14 +317,28 @@ public class MetaverseValidationIT {
 
       assertEquals( DictionaryConst.NODE_TYPE_DATASOURCE, ds.getEntity().getName() );
       assertNotNull( ds.getName() );
+      assertNotNull( ds.getDatabaseName() );
       assertNotNull( ds.getPort() );
       assertNotNull( ds.getUserName() );
+      assertNotNull( ds.getAccessType() );
+      assertNotNull( ds.getAccessTypeDesc() );
     }
     assertTrue( countDatasources > 0 );
   }
 
   @Test
+  public void testSampleDataConnection() throws Exception {
+    DatasourceNode sampleData = root.getDatasourceNode( "Sampledata" );
+    assertEquals( "Sampledata", sampleData.getName() );
+    assertEquals( "-1", sampleData.getPort() );
+    assertEquals( "Native", sampleData.getAccessTypeDesc() );
+    assertEquals( "sampledata", sampleData.getDatabaseName() );
+    assertEquals( "sa", sampleData.getUserName() );
+  }
+
+  @Test
   public void testTableOutputStepNode() throws Exception {
+    // this tests a specific step in a specific transform
     TableOutputStepNode tableOutputStepNode = root.getTableOutputStepNode();
     TransMeta tm = new TransMeta( tableOutputStepNode.getTransNode().getPath(), null, true, null, null);
 
@@ -290,12 +349,22 @@ public class MetaverseValidationIT {
         String tableName = meta.getTableName();
         assertEquals( tableName, tableOutputStepNode.getDatabaseTable().getName() );
 
-        int dbColCount = getIterableSize( tableOutputStepNode.getDatabaseColumns() );
-        assertEquals( meta.getFieldStream().length, dbColCount );
+        // check the fields used
+        Iterable<StreamFieldNode> uses = tableOutputStepNode.getStreamFieldNodesUses();
+        int fieldsUsedCount = getIterableSize( uses );
+        assertEquals( meta.getFieldStream().length, fieldsUsedCount );
+        // they should all populate a db column
+        for ( StreamFieldNode fieldNode : uses ) {
+          assertNotNull( "Used field does not populate anything [" + fieldNode.getName() + "]",
+            fieldNode.getFieldPopulatedByMe() );
+          assertEquals( "Stream Field [" + fieldNode.getName() + "] populates the wrong kind of node",
+            DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
+        }
 
         int countDbConnections = getIterableSize( tableOutputStepNode.getDatasources() );
         for( DatabaseMeta dbMeta : meta.getUsedDatabaseConnections() ) {
-          assertNotNull( tableOutputStepNode.getDatasource( dbMeta.getName() ) );
+          assertNotNull( "Datasource is not used but should be [" + dbMeta.getName() + "]",
+            tableOutputStepNode.getDatasource( dbMeta.getName() ) );
         }
         assertEquals( meta.getUsedDatabaseConnections().length, countDbConnections );
 
@@ -384,16 +453,19 @@ public class MetaverseValidationIT {
     @GremlinGroovy( "it.out.filter{ it.name == name }" )
     public MetNode getEntity( @GremlinParam( "name" ) String name );
 
-    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Select values'}" )
+    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Select values'}.as('step').in('contains').filter{it.name == 'Populate Table From File'}.back('step')" )
     public SelectValuesTransStepNode getSelectValuesStepNode();
 
-    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Sacramento crime stats 2006 file '}" )
+    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Sacramento crime stats 2006 file '}.as('step').in('contains').filter{it.name == 'Populate Table From File'}.back('step')" )
     public TextFileInputStepNode getTextFileInputStepNode();
 
     @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Database Connection' }" )
     public Iterable<DatasourceNode> getDatasourceNodes();
 
-    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Demo table crime stats output'}" )
+    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Database Connection' && it.object.name == name }" )
+    public DatasourceNode getDatasourceNode( @GremlinParam( "name" ) String name );
+
+    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Demo table crime stats output'}.as('step').in('contains').filter{it.name == 'Populate Table From File'}.back('step')" )
     public TableOutputStepNode getTableOutputStepNode();
   }
 
@@ -426,6 +498,13 @@ public class MetaverseValidationIT {
 
     @Property( DictionaryConst.PROPERTY_CREATED_BY )
     public String getCreatedBy();
+
+    @GremlinGroovy( "it.in('contains').filter{it.type == 'Locator'}" )
+    public LocatorNode getLocator();
+
+    @GremlinGroovy( value="it.property(paramKey).collect()[0]", frame=false )
+    public String getParameter( @GremlinParam( "paramKey" ) String paramKey );
+
   }
 
   public interface JobNode extends KettleNode {
@@ -434,6 +513,7 @@ public class MetaverseValidationIT {
 
     @GremlinGroovy( "it.out('contains').filter{it.name == name}" )
     public JobEntryNode getJobEntryNode( @GremlinParam( "name" ) String name );
+
   }
 
   public interface TransformationNode extends KettleNode {
@@ -442,6 +522,9 @@ public class MetaverseValidationIT {
 
     @GremlinGroovy( "it.out('contains').filter{it.name == name}" )
     public TransformationStepNode getStepNode( @GremlinParam( "name" ) String name );
+
+    @GremlinGroovy( "it.in('contains').filter{it.type == 'JobEntry'}" )
+    public Iterable<JobEntryNode> getJobEntriesThatExecuteMe();
   }
 
   public interface TransformationStepNode extends IsAEntity {
@@ -456,6 +539,10 @@ public class MetaverseValidationIT {
 
     @Adjacency( label = "creates", direction = Direction.OUT )
     public Iterable<StreamFieldNode> getStreamFieldNodesCreates();
+
+    @Adjacency( label = "uses", direction = Direction.OUT )
+    public Iterable<StreamFieldNode> getStreamFieldNodesUses();
+
   }
 
   public interface JobEntryNode extends IsAEntity {
@@ -463,20 +550,52 @@ public class MetaverseValidationIT {
     public TransformationNode getTransNode();
   }
 
+  public interface LocatorNode extends MetNode {
+    @Property( "lastScan" )
+    public String getLastScan();
+
+    @Property( "url" )
+    public String getUrl();
+
+    @Adjacency( label = "contains", direction = Direction.OUT )
+    public Iterable<KettleNode> getDocuments();
+  }
+
   public interface FieldNode extends IsAEntity {
     @Property( DictionaryConst.PROPERTY_KETTLE_TYPE )
     public String getKettleType();
+
+    @Property( DictionaryConst.PROPERTY_OPERATIONS )
+    public String getOperations();
+
+    @Adjacency( label = "uses", direction = Direction.IN )
+    public Iterable<TransformationStepNode> getStepsThatUseMe();
+
+    @Adjacency( label = "deletes", direction = Direction.IN )
+    public TransformationStepNode getStepThatDeletesMe();
+
+    @Adjacency( label = "creates", direction = Direction.IN )
+    public TransformationStepNode getStepThatCreatesMe();
+
+    @Adjacency( label = "populates", direction = Direction.IN )
+    public TransformationStepNode getStepThatPopulatesMe();
+
+    @Adjacency( label = "populates", direction = Direction.OUT )
+    public FieldNode getFieldPopulatedByMe();
   }
 
   public interface StreamFieldNode extends FieldNode {
+    @Adjacency( label = "derives", direction = Direction.OUT )
+    public Iterable<StreamFieldNode> getFieldNodesDerivedFromMe();
+
+    @Adjacency( label = "derives", direction = Direction.IN )
+    public Iterable<StreamFieldNode> getFieldNodesThatDeriveMe();
   }
 
   public interface FileFieldNode extends FieldNode {
   }
 
   public interface SelectValuesTransStepNode extends TransformationStepNode {
-    @Adjacency( label = "uses", direction = Direction.OUT )
-    public Iterable<StreamFieldNode> getStreamFieldNodesUses();
   }
 
   public interface TextFileInputStepNode extends TransformationStepNode {
@@ -492,14 +611,10 @@ public class MetaverseValidationIT {
     public Iterable<DatasourceNode> getDatasources();
 
     @GremlinGroovy( "it.in('dependencyof').filter{it.name == name}" )
-    public Iterable<DatasourceNode> getDatasource( @GremlinParam( "name") String name );
-
-    @Adjacency( label = "uses", direction = Direction.OUT )
-    public Iterable<DatabaseColumnNode> getDatabaseColumns();
+    public DatasourceNode getDatasource( @GremlinParam( "name") String name );
 
     @Adjacency( label = "writesto", direction = Direction.OUT )
     public DatabaseTableNode getDatabaseTable();
-
   }
 
   public interface DatasourceNode extends IsAEntity {
@@ -511,8 +626,16 @@ public class MetaverseValidationIT {
     public String getUserName();
     @Property( "password" )
     public String getPassword();
+    @Property( "accessType" )
+    public Integer getAccessType();
+    @Property( "accessTypeDesc" )
+    public String getAccessTypeDesc();
+    @Property( "databaseName" )
+    public String getDatabaseName();
+
     @Adjacency( label = "dependencyof", direction = Direction.OUT )
     public Iterable<TransformationStepNode> getTransformationStepNodes();
+
   }
 
   public interface DatabaseTableNode extends MetNode {
@@ -531,4 +654,9 @@ public class MetaverseValidationIT {
     public TransformationStepNode getTable();
 
   }
+
+  private Map<String, List<String>> convertOperationsStringToMap( String operations ) {
+    return (Map<String, List<String>>) new JSONDeserializer().deserialize( operations );
+  }
+
 }
