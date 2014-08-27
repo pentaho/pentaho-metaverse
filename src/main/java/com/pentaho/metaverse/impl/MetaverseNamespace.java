@@ -42,7 +42,7 @@ public class MetaverseNamespace implements INamespace {
       return fullyQualifiedNamespace;
     }
 
-    if ( parent != null ) {
+    if ( ( parent != null ) && ( parent.getNamespaceId() != null ) ) {
       fullyQualifiedNamespace = parent.getNamespaceId()
           .concat( concatenationCharacter )
           .concat( namespace );
