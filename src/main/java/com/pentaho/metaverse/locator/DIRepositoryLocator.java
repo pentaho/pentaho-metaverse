@@ -22,12 +22,12 @@
 
 package com.pentaho.metaverse.locator;
 
+import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.io.FilenameUtils;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.repository.filerep.KettleFileRepository;
-import org.pentaho.di.repository.pur.PurRepository;
 import org.pentaho.di.www.CarteSingleton;
 import org.pentaho.di.www.SlaveServerConfig;
 import org.pentaho.di.www.TransformationMap;
@@ -38,6 +38,7 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 
@@ -97,6 +98,11 @@ public class DIRepositoryLocator extends RepositoryLocator {
       SlaveServerConfig slaveServerConfig = transformationMap.getSlaveServerConfig();
       repository = slaveServerConfig.getRepository();
     }
+
+    if ( repository == null ) {
+      LOG.error( Messages.getErrorString( "ERROR.RepositoryNotFoundInConfiguration" ) );
+    }
+
     return repository;
   }
 
@@ -104,12 +110,38 @@ public class DIRepositoryLocator extends RepositoryLocator {
   protected IUnifiedRepository getUnifiedRepository( IPentahoSession session ) throws Exception {
 
     if ( unifiedRepository == null && !( repository instanceof KettleFileRepository ) ) {
+
       getRepository();
+
+      Object pur = null;
+
+      // Looking for the unifiedRepository within the
+      // server repository. Due to the inaccessible nature of the
+      // method calls, we use reflection to locate the unifiedRepository.
+
+      if ( repository != null ) {
+        Class repositoryClass = repository.getClass();
+        try {
+          Method m = repositoryClass.getMethod( "getPur", null );
+          pur = m.invoke( repository );
+        } catch ( Exception e ) {
+          LOG.warn( Messages.getString( "WARNING.NoUnifiedRepositoryFound", repository.getClass().getName() ) );
+        }
+      }
+
+      if ( pur != null ) {
+        unifiedRepository = (IUnifiedRepository) pur;
+      }
+
+      /**
+       * If we had access to the Pur* classes, we could do this ...
+       *
       if ( repository instanceof PurRepository ) {
         PurRepository purRepository = (PurRepository) repository;
         IUnifiedRepository repo = purRepository.getPur();
         return repo;
       }
+      */
     }
     return unifiedRepository;
   }
@@ -139,7 +171,61 @@ public class DIRepositoryLocator extends RepositoryLocator {
 
   @Override
   public URI getRootUri() {
-    // TODO implement this
-    return null;
+
+    // Looking for the web service location of the data integration
+    // server repository. Due to the inaccessible nature of the
+    // method calls, we use reflection to drill to the location URI.
+
+    Repository repo = null;
+    URI uri = null;
+
+    try {
+      repo = getRepository();
+    } catch ( Exception e ) {
+      LOG.warn( Messages.getString( "WARNING.RepositoryNotFoundNoRootURI" ) );
+    }
+
+    if ( repo != null ) {
+
+      Object repositoryMeta = repository.getRepositoryMeta();
+      Object repositoryLocation = null;
+      String location = null;
+
+      if ( repositoryMeta != null ) {
+        Class repositoryMetaClass = repositoryMeta.getClass();
+        try {
+          Method m = repositoryMetaClass.getMethod( "getRepositoryLocation", null );
+          repositoryLocation = m.invoke( repositoryMeta );
+        } catch ( Exception e ) {
+          LOG.warn( Messages.getString( "WARNING.RepositoryUnknownMethodNoRootURI", repository.getClass().getName() ) );
+        }
+      }
+
+      if ( repositoryLocation != null ) {
+        Class repositoryLocationClass = repositoryLocation.getClass();
+        try {
+          Method m = repositoryLocationClass.getMethod( "getUrl", null );
+          location = (String) m.invoke( repositoryLocation );
+        } catch ( Exception e ) {
+          LOG.warn( Messages.getString( "WARNING.ExceptionFindingLocationNoRootURI" ) );
+        }
+
+      }
+      if ( location != null ) {
+        uri = URI.create( location );
+      }
+
+      /*
+      // Here's what we could do if these packages were available to our classloader ...
+      // but they are not.
+
+      if ( repository instanceof PurRepository ) {
+        PurRepository purRepository = ( PurRepository ) repository;
+        PurRepositoryMeta meta = ( PurRepositoryMeta ) purRepository.getRepositoryMeta();
+        uri = URI.create( meta.getRepositoryLocation().getUrl() );
+      }
+       */
+    }
+    return uri;
   }
 }

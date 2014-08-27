@@ -215,7 +215,7 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
       return;
     }
 
-    LOG.debug( "Locator type {}: stopScan()", getLocatorType() );
+    LOG.debug( Messages.getString( "DEBUG.Locator.StopScan", getLocatorType() ) );
 
     runner.stop();
     futureTask.cancel( false );
@@ -244,7 +244,7 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
     runner = locatorRunner;
     runner.setLocator( this );
 
-    LOG.debug( "Locator type {}: startScan()", getLocatorType() );
+    LOG.debug( Messages.getString( "DEBUG.Locator.StartScan", getLocatorType() ) );
 
     futureTask = completionService.submit( runner, node.getStringID() );
   }
