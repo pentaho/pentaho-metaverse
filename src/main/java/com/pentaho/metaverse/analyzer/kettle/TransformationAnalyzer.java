@@ -103,8 +103,11 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     Trans t = new Trans( transMeta );
     t.setInternalKettleVariables( transMeta );
 
-    IMetaverseComponentDescriptor documentDescriptor =
-        getChildComponentDescriptor( descriptor, document.getStringID(), DictionaryConst.NODE_TYPE_TRANS );
+    IMetaverseComponentDescriptor documentDescriptor = getChildComponentDescriptor(
+        descriptor,
+        document.getStringID(),
+        DictionaryConst.NODE_TYPE_TRANS,
+        descriptor.getContext() );
 
     // Create a metaverse node and start filling in details
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
@@ -184,9 +187,11 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
           }
 
           IMetaverseNode stepNode = null;
-          IMetaverseComponentDescriptor stepDescriptor =
-              getChildComponentDescriptor( documentDescriptor,
-                  stepMeta.getName(), DictionaryConst.NODE_TYPE_TRANS_STEP );
+          IMetaverseComponentDescriptor stepDescriptor = getChildComponentDescriptor(
+              documentDescriptor,
+              stepMeta.getName(),
+              DictionaryConst.NODE_TYPE_TRANS_STEP,
+              descriptor.getContext() );
           Set<IStepAnalyzer> stepAnalyzers = getStepAnalyzers( stepMeta );
           if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
             for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {

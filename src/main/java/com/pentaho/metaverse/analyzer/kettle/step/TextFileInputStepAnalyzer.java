@@ -57,8 +57,11 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
     if ( fields != null ) {
       for ( TextFileInputField field : fields ) {
         String fieldName = field.getName();
-        IMetaverseComponentDescriptor fileFieldDescriptor =
-            getChildComponentDescriptor( descriptor, fieldName, DictionaryConst.NODE_TYPE_FILE_FIELD );
+        IMetaverseComponentDescriptor fileFieldDescriptor = getChildComponentDescriptor(
+            descriptor,
+            fieldName,
+            DictionaryConst.NODE_TYPE_FILE_FIELD,
+            descriptor.getContext() );
         IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
         metaverseBuilder.addNode( fieldNode );
 
@@ -96,8 +99,11 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
           }
 
           // first add the node for the file
-          IMetaverseComponentDescriptor fileDescriptor =
-              getChildComponentDescriptor( descriptor, normalized, DictionaryConst.NODE_TYPE_FILE );
+          IMetaverseComponentDescriptor fileDescriptor = getChildComponentDescriptor(
+              descriptor,
+              normalized,
+              DictionaryConst.NODE_TYPE_FILE,
+              descriptor.getContext() );
           IMetaverseNode textFileNode = createNodeFromDescriptor( fileDescriptor );
           textFileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
           metaverseBuilder.addNode( textFileNode );
