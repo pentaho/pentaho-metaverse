@@ -100,7 +100,11 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     j.setInternalKettleVariables( job );
 
     IMetaverseComponentDescriptor documentDescriptor =
-        getChildComponentDescriptor( descriptor, document.getStringID(), DictionaryConst.NODE_TYPE_JOB );
+        getChildComponentDescriptor(
+            descriptor,
+            document.getStringID(),
+            DictionaryConst.NODE_TYPE_JOB,
+            descriptor.getContext() );
 
     // Create a metaverse node and start filling in details
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
@@ -180,8 +184,11 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
         if ( entry != null ) {
           IMetaverseNode jobEntryNode = null;
           JobEntryInterface jobEntryInterface = entry.getEntry();
-          IMetaverseComponentDescriptor entryDescriptor =
-              getChildComponentDescriptor( documentDescriptor, entry.getName(), DictionaryConst.NODE_TYPE_JOB_ENTRY );
+          IMetaverseComponentDescriptor entryDescriptor = getChildComponentDescriptor(
+              documentDescriptor,
+              entry.getName(),
+              DictionaryConst.NODE_TYPE_JOB_ENTRY,
+              descriptor.getContext() );
           Set<IJobEntryAnalyzer> jobEntryAnalyzers = getJobEntryAnalyzers( jobEntryInterface );
           if ( jobEntryAnalyzers != null && !jobEntryAnalyzers.isEmpty() ) {
             for ( IJobEntryAnalyzer jobEntryAnalyzer : jobEntryAnalyzers ) {

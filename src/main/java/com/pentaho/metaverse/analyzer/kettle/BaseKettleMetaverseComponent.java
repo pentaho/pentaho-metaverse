@@ -64,15 +64,16 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
   }
 
   protected IMetaverseComponentDescriptor getChildComponentDescriptor(
-      IMetaverseComponentDescriptor parentDescriptor, String name, String type ) {
+      IMetaverseComponentDescriptor parentDescriptor, String name, String type, String context ) {
     return new MetaverseComponentDescriptor( name, type,
-        parentDescriptor == null ? null : parentDescriptor.getChildNamespace( name, type ) );
+        parentDescriptor == null ? null : parentDescriptor.getChildNamespace( name, type ),
+        context );
   }
 
   protected IMetaverseComponentDescriptor getChildComponentDescriptor(
-      INamespace namespace, String name, String type ) {
-    IMetaverseComponentDescriptor mcd = new MetaverseComponentDescriptor( name, type, namespace );
-    return getChildComponentDescriptor( mcd, name, type );
+      INamespace namespace, String name, String type, String context ) {
+    IMetaverseComponentDescriptor mcd = new MetaverseComponentDescriptor( name, type, namespace, context );
+    return getChildComponentDescriptor( mcd, name, type, context );
   }
 
   protected INamespace getSiblingNamespace( INamespace namespace, String siblingName, String siblingType ) {

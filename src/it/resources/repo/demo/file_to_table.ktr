@@ -124,7 +124,7 @@
            </partitioning>
     <connection>Sampledata</connection>
     <schema/>
-    <table>demo</table>
+    <table>&#x24;&#x7b;testTransParam3&#x7d;</table>
     <commit>1000</commit>
     <truncate>N</truncate>
     <ignore_errors>N</ignore_errors>

@@ -128,8 +128,11 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     if ( dbs != null && dbAnalyzer != null ) {
       for ( DatabaseMeta db : dbs ) {
         try {
-          IMetaverseComponentDescriptor dbDescriptor =
-              getChildComponentDescriptor( descriptor, db.getName(), DictionaryConst.NODE_TYPE_DATASOURCE );
+          IMetaverseComponentDescriptor dbDescriptor = getChildComponentDescriptor(
+              descriptor,
+              db.getName(),
+              DictionaryConst.NODE_TYPE_DATASOURCE,
+              descriptor.getContext() );
           IMetaverseNode dbNode = dbAnalyzer.analyze( dbDescriptor, db );
           metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
         } catch ( Throwable t ) {
@@ -152,9 +155,11 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
           for ( ValueMetaInterface outRowMeta : outRowValueMetas ) {
             if ( prevFields != null && prevFields.searchValueMeta( outRowMeta.getName() ) == null ) {
               // This field didn't come into the step, so assume it has been created here
-              IMetaverseComponentDescriptor fieldDescriptor =
-                  getChildComponentDescriptor( descriptor, outRowMeta.getName(),
-                      DictionaryConst.NODE_TYPE_TRANS_FIELD );
+              IMetaverseComponentDescriptor fieldDescriptor = getChildComponentDescriptor(
+                  descriptor,
+                  outRowMeta.getName(),
+                  DictionaryConst.NODE_TYPE_TRANS_FIELD,
+                  descriptor.getContext() );
               IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
               newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, outRowMeta.getTypeDesc() );
               metaverseBuilder.addNode( newFieldNode );
@@ -263,7 +268,11 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     INamespace stepFieldNamespace = getSiblingNamespace(
         descriptor, origin, DictionaryConst.NODE_TYPE_TRANS_STEP );
 
-    return getChildComponentDescriptor( stepFieldNamespace, fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD );
+    return getChildComponentDescriptor(
+        stepFieldNamespace,
+        fieldName,
+        DictionaryConst.NODE_TYPE_TRANS_FIELD,
+        descriptor.getContext() );
   }
 
   protected IMetaverseComponentDescriptor getStepFieldOriginDescriptor(
@@ -277,7 +286,11 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     INamespace stepFieldNamespace = getSiblingNamespace(
         descriptor, origin, DictionaryConst.NODE_TYPE_TRANS_STEP );
 
-    return getChildComponentDescriptor( stepFieldNamespace, fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD );
+    return getChildComponentDescriptor(
+        stepFieldNamespace,
+        fieldName,
+        DictionaryConst.NODE_TYPE_TRANS_FIELD,
+        descriptor.getContext() );
   }
 
   /**
@@ -285,8 +298,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
    * metaverse builder.
    *
    * @param descriptor the descriptor for the object argument
-   * @param object the object being analyzed
-   *
+   * @param object     the object being analyzed
    * @throws MetaverseAnalyzerException if the state of the internal objects is not valid
    */
   protected void validateState( IMetaverseComponentDescriptor descriptor, T object ) throws MetaverseAnalyzerException {
@@ -319,8 +331,8 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
    * Processes the given field changes, applying them to the metaverse. This method returns a metaverse node
    * corresponding to the derived field, but does not add it to the metaverse.
    *
-   * @param descriptor the descriptor for the field
-   * @param fieldNode the original field's metaverse node
+   * @param descriptor   the descriptor for the field
+   * @param fieldNode    the original field's metaverse node
    * @param changeRecord the record of changes made to the field
    * @return a metaverse node corresponding to the derived stream field.
    */
@@ -332,10 +344,13 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     IMetaverseNode newFieldNode = null;
 
     // There should be at least one operation in order to create a new stream field
-    if ( changeRecord != null && changeRecord.hasDelta() ) {
+    if ( changeRecord != null && changeRecord.hasDelta() && descriptor != null ) {
       // Create a new node for the renamed field
       IMetaverseComponentDescriptor newFieldDescriptor = getChildComponentDescriptor(
-          descriptor, changeRecord.getEntityName(), DictionaryConst.NODE_TYPE_TRANS_FIELD );
+          descriptor,
+          changeRecord.getEntityName(),
+          DictionaryConst.NODE_TYPE_TRANS_FIELD,
+          descriptor.getContext() );
       newFieldNode = createNodeFromDescriptor( newFieldDescriptor );
       newFieldNode.setProperty( DictionaryConst.PROPERTY_OPERATIONS, changeRecord.toString() );
       metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_DERIVES, newFieldNode );
