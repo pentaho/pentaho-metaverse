@@ -12,7 +12,7 @@
     <!-- TODO: change this to the pentaho-ee-jar-parent-pom to add the Proguard obfuscation -->
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
     <!-- recommend only setting this to a specific version upon migration to maintenance -->
-    <version>RELEASE</version>
+    <version>1.0.1</version>
   </parent>
 
   <name>Pentaho Enterprise Edition Project: ${project.artifactId}</name>
@@ -40,6 +40,7 @@
 
   <properties>
     <platform.plugin.name>metaverse</platform.plugin.name>
+    <pdi.plugin.name>pdi-metaverse-extensions</pdi.plugin.name>
     <blueprints-core.version>2.5.0</blueprints-core.version>
     <pentaho-platform-api.version>METAVERSE-SNAPSHOT</pentaho-platform-api.version>
     <pentaho-platform-core.version>TRUNK-SNAPSHOT</pentaho-platform-core.version>
@@ -199,13 +200,15 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.4</version>
-        <configuration>
+        <!--<configuration>
           <finalName>${platform.plugin.name}-${project.version}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <descriptors>
             <descriptor>src/assembly/platform-plugin.xml</descriptor>
+            <descriptor>src/assembly/pdi-plugin.xml</descriptor>
           </descriptors>
         </configuration>
+      -->
         <executions>
           <execution>
             <id>make-platform-plugin</id>
@@ -213,6 +216,23 @@
             <goals>
               <goal>single</goal>
             </goals>
+            <configuration>
+              <finalName>${platform.plugin.name}-${project.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptor>src/assembly/platform-plugin.xml</descriptor>
+            </configuration>
+          </execution>
+          <execution>
+            <id>make-pdi-plugin</id>
+            <phase>install</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <finalName>${pdi.plugin.name}-${project.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptor>src/assembly/pdi-plugin.xml</descriptor>
+            </configuration>
           </execution>
         </executions>
       </plugin>
