@@ -74,4 +74,13 @@ public class MetaverseNamespaceTest {
   public void testConstructor() throws Exception {
     namespace = new MetaverseNamespace( null, "type", "level 1" );
   }
+
+  @Test
+  public void testNullParentNamespaceId() {
+
+    INamespace root = new MetaverseNamespace( null, null, null, null );
+    namespace = new MetaverseNamespace( root, "level 2", "type", null );
+    assertEquals( "level 2~type", namespace.getNamespaceId() );
+
+  }
 }
