@@ -36,7 +36,11 @@ public class GraphMLWriter implements IGraphWriter {
 
   @Override
   public void outputGraph( Graph graph, OutputStream graphMLOutputStream ) throws IOException {
-    com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter.outputGraph( graph, graphMLOutputStream );
+    com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter writer = new com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter( graph );
+
+    writer.setNormalize( true );
+    writer.outputGraph( graphMLOutputStream );
+//    com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter.outputGraph( graph, graphMLOutputStream );
   }
 
 }
