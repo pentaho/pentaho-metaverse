@@ -32,6 +32,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 
@@ -110,22 +111,30 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     INamespace parentNamespace =
         new NamespaceFactory().createNameSpace( null, "EXTENSION-POINT-LOCATOR", DictionaryConst.NODE_TYPE_LOCATOR );
 
-    INamespace namespace =
-        new NamespaceFactory().createNameSpace( parentNamespace, transMeta.getName(), DictionaryConst.NODE_TYPE_TRANS );
+    File f = new File( trans.getFilename() );
+//    INamespace namespace =
+//      new NamespaceFactory().createNameSpace( parentNamespace, transMeta.getName(), DictionaryConst.NODE_TYPE_TRANS );
 
-    transDoc.setNamespace( namespace );
+    String filePath = null;
+    try {
+      filePath = f.getCanonicalPath();
+    } catch ( IOException e ) {
+      e.printStackTrace();
+    }
+
+    transDoc.setNamespace( parentNamespace );
     transDoc.setContent( transMeta );
-    transDoc.setStringID( namespace.getNamespaceId() );
+    transDoc.setStringID( filePath );
     transDoc.setName( transMeta.getFilename() );
     transDoc.setExtension( "ktr" );
     transDoc.setMimeType( "text/xml" );
-    transDoc.setProperty( DictionaryConst.PROPERTY_PATH, namespace.getNamespaceId() );
+    transDoc.setProperty( DictionaryConst.PROPERTY_PATH, filePath );
     transDoc.setContext( DictionaryConst.CONTEXT_RUNTIME );
 
     IMetaverseComponentDescriptor descriptor = new MetaverseComponentDescriptor(
         transMeta.getName(),
         DictionaryConst.NODE_TYPE_TRANS,
-        namespace,
+        parentNamespace,
         DictionaryConst.CONTEXT_RUNTIME );
 
     try {
