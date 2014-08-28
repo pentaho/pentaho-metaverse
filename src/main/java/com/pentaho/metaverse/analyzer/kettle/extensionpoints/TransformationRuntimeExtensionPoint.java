@@ -16,7 +16,9 @@ import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.MetaverseObjectFactory;
 import com.pentaho.metaverse.impl.NamespaceFactory;
 import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.KeyIndexableGraph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
 import org.apache.commons.io.FileUtils;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
@@ -53,7 +55,7 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
 
   public TransformationRuntimeExtensionPoint() {
 
-    g = new TinkerGraph();
+    g = new IdGraph<KeyIndexableGraph>( new TinkerGraph() );
     dc = new DocumentController();
     metaverseBuilder = new MetaverseBuilder( g );
     metaverseBuilder.setMetaverseObjectFactory( new MetaverseObjectFactory() );
@@ -101,6 +103,7 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
 
   @Override public void callExtensionPoint( LogChannelInterface logChannelInterface, Object o ) throws KettleException {
     Trans trans = (Trans) o;
+
     TransMeta transMeta = trans.getTransMeta();
     List<String> variables = transMeta.getUsedVariables();
 

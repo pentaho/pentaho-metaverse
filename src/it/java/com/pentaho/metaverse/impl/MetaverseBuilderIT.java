@@ -25,6 +25,7 @@ import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.IntegrationTestUtil;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
@@ -33,7 +34,20 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.pentaho.di.core.KettleEnvironment;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.platform.api.engine.IPentahoObjectFactory;
+import org.pentaho.platform.api.metaverse.IDocumentLocator;
+import org.pentaho.platform.engine.core.system.PathBasedSystemSettings;
+import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.pentaho.platform.engine.core.system.StandaloneApplicationContext;
+import org.pentaho.platform.engine.core.system.StandaloneSession;
+import org.pentaho.platform.engine.core.system.objfac.StandaloneSpringPentahoObjectFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.io.FileSystemResource;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -60,18 +74,12 @@ public class MetaverseBuilderIT {
 
     IntegrationTestUtil.initializePentahoSystem( getSolutionPath() );
 
-    IDocumentLocatorProvider provider = PentahoSystem.get( IDocumentLocatorProvider.class );
-
-    // Uncomment below to run integration test against only the "demo" folder
-    /*
-    FileSystemLocator fileSystemLocator = PentahoSystem.get( FileSystemLocator.class );
-    provider.removeDocumentLocator( fileSystemLocator );
-    fileSystemLocator.setRootFolder( "src/it/resources/repo/demo" );
-    provider.addDocumentLocator( fileSystemLocator );
-    */
+//    Uncomment below to run integration test against only the "demo" folder
+    FileSystemLocator dl = PentahoSystem.get( FileSystemLocator.class );
+    dl.setRootFolder( "src/it/resources/repo/demo" );
 
     reader = PentahoSystem.get( IMetaverseReader.class );
-    readerGraph = IntegrationTestUtil.buildMetaverseGraph( provider );
+    readerGraph = IntegrationTestUtil.buildMetaverseGraph();
   }
 
   @AfterClass
