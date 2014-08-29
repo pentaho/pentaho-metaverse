@@ -35,6 +35,7 @@ import org.pentaho.platform.api.metaverse.INamespace;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -109,14 +110,17 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
 
     IMetaverseObjectFactory objectFactory = metaverseBuilder.getMetaverseObjectFactory();
 
+    IMetaverseNode runtimeInfo = addRuntimeNode( trans, objectFactory );
+    IMetaverseNode executionNode = addExecutionEngineNode( trans, objectFactory );
+
+    metaverseBuilder.addLink( runtimeInfo, "executed by", executionNode );
+
     IMetaverseDocument transDoc = objectFactory.createDocumentObject();
 
     INamespace parentNamespace =
         new NamespaceFactory().createNameSpace( null, "EXTENSION-POINT-LOCATOR", DictionaryConst.NODE_TYPE_LOCATOR );
 
     File f = new File( trans.getFilename() );
-//    INamespace namespace =
-//      new NamespaceFactory().createNameSpace( parentNamespace, transMeta.getName(), DictionaryConst.NODE_TYPE_TRANS );
 
     String filePath = null;
     try {
@@ -142,10 +146,56 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
 
     try {
       IMetaverseNode node = transAnalyzer.analyze( descriptor, transDoc );
+      metaverseBuilder.addLink( runtimeInfo, "executed", node );
       File exportFile = new File( transMeta.getName() + " - export.graphml" );
       FileUtils.writeStringToFile( exportFile, metaverseReader.exportToXml(), "UTF-8" );
     } catch ( Exception e ) {
       throw new KettleException( e );
     }
   }
+
+  private IMetaverseNode addRuntimeNode( Trans trans, IMetaverseObjectFactory objectFactory ) {
+    INamespace ns = new NamespaceFactory().createNameSpace(
+      null, DictionaryConst.NODE_TYPE_RUNTIME, DictionaryConst.NODE_TYPE_RUNTIME );
+
+    long timestamp = new Date().getTime();
+    IMetaverseComponentDescriptor runTimeDescriptor = new MetaverseComponentDescriptor(
+      trans.getName() + " - " + timestamp,
+      DictionaryConst.NODE_TYPE_RUNTIME,
+      ns,
+      DictionaryConst.CONTEXT_RUNTIME );
+
+    // add a runtime node so we can identify them
+    IMetaverseNode runtimeInfo = objectFactory.createNodeObject(
+      runTimeDescriptor.getStringID(), runTimeDescriptor.getName(), runTimeDescriptor.getType() );
+
+    runtimeInfo.setProperty( "executionDate", String.valueOf( timestamp ) );
+    runtimeInfo.setProperty( DictionaryConst.PROPERTY_PATH, trans.getFilename() );
+    runtimeInfo.setProperty( "user", trans.getExecutingUser() );
+
+    metaverseBuilder.addNode( runtimeInfo );
+
+    String[] vars = trans.listVariables();
+    for ( String var : vars ) {
+      String value = trans.getVariable( var );
+      runtimeInfo.setProperty( "parameter_" + var, value );
+    }
+
+    return runtimeInfo;
+
+  }
+
+  private IMetaverseNode addExecutionEngineNode( Trans trans, IMetaverseObjectFactory objectFactory ) {
+    INamespace ns = new NamespaceFactory().createNameSpace(
+      null, "Pentaho Data Integration", DictionaryConst.NODE_TYPE_EXECUTION_ENGINE );
+
+    IMetaverseNode node = objectFactory.createNodeObject( ns.getNamespaceId(),
+      "Pentaho Data Integration [" +  trans.getExecutingServer() + "]",
+      DictionaryConst.NODE_TYPE_EXECUTION_ENGINE );
+
+    metaverseBuilder.addNode( node );
+    return node;
+  }
+
+
 }
