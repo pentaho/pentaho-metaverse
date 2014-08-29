@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.TransformationRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.graph.GraphMLWriter;
@@ -39,6 +40,8 @@ import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.extension.ExtensionPointPluginType;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
@@ -61,9 +64,10 @@ public class StaticAndRuntimeGraphMergeIT {
   private static Graph staticGraph;
   private static Graph runtimeGraph;
   
-  private static final String RUNTIME_GRAPHML_PATH = "/Users/rfellows/Desktop/Populate Table From File - export.graphml";
   private static final String KTR = "src/it/resources/repo/demo/file_to_table.ktr";
   private static File runtimeGraphmlFile;
+
+  private TransMeta tm;
 
   @BeforeClass
   public static void init() throws Exception {
@@ -76,50 +80,47 @@ public class StaticAndRuntimeGraphMergeIT {
     reader = PentahoSystem.get( IMetaverseReader.class );
     staticGraph = IntegrationTestUtil.buildMetaverseGraph();
 
-    // get the runtime graph
-    runtimeGraphmlFile = new File( RUNTIME_GRAPHML_PATH );
-    FileInputStream fis = new FileInputStream( runtimeGraphmlFile );
-
-    runtimeGraph = new TinkerGraph();
-    GraphMLReader graphMLReader = new GraphMLReader( runtimeGraph );
-    graphMLReader.inputGraph( fis );
-
     ExtensionPointPluginType.getInstance().registerCustom( TransformationRuntimeExtensionPoint.class, "custom",
-      "transRuntimeMetaverse", "metaverse", "no description", null );
+      "transRuntimeMetaverse", "TransformationStartThreads", "no description", null );
 
     PluginRegistry.addPluginType( ExtensionPointPluginType.getInstance() );
 
     KettleEnvironment.init();
 
     List<PluginInterface> plugins = PluginRegistry.getInstance().getPlugins( ExtensionPointPluginType.class );
-    System.out.println(plugins);
+    System.out.println( plugins );
   }
 
   @Before
   public void setup() throws Exception {
 
     FileInputStream xmlStream = new FileInputStream( KTR );
-
+    Variables vars = new Variables();
+    vars.setVariable( "testTransParam3", "demo" );
     // run the trans
-    TransMeta tm = new TransMeta( xmlStream, null, true, null, null );
-    Trans trans = new Trans( tm );
-    trans.initializeVariablesFrom( null );
-    tm.setInternalKettleVariables( trans );
-
+    tm = new TransMeta( xmlStream, null, true, vars, null );
+    tm.setFilename( tm.getName() );
+    Trans trans = new Trans( tm, null, tm.getName(), null, KTR );
     trans.setVariable( "testTransParam3", "demo" );
+    tm.setVariable( "testTransParam3", "demo" );
+
     trans.execute( null );
     trans.waitUntilFinished();
+
+    // get the runtime graph
+    runtimeGraphmlFile = new File( tm.getFilename() + " - export.graphml" );
+    FileInputStream fis = new FileInputStream( runtimeGraphmlFile );
+
+    runtimeGraph = new TinkerGraph();
+    GraphMLReader graphMLReader = new GraphMLReader( runtimeGraph );
+    graphMLReader.inputGraph( fis );
 
   }
 
   @Test
   public void testMergeGraphs() throws Exception {
 
-    // add a runtime node so we can identify them
-    Vertex runtimeNode = staticGraph.addVertex( null );
-    runtimeNode.setProperty( "name", "RUNTIME" );
-    runtimeNode.setProperty( "mergeDate", String.valueOf( new Date().getTime() ) );
-    runtimeNode.setProperty( "executionDate", String.valueOf( runtimeGraphmlFile.lastModified() ) );
+    Vertex runtimeNode = addRuntimeNode();
 
     // add in any new vertices not in the static graph
     Iterable<Vertex> runtimeVertices = runtimeGraph.getVertices();
@@ -132,9 +133,23 @@ public class StaticAndRuntimeGraphMergeIT {
         System.out.println( "Adding runtime vertex - " + rv.toString() );
         Vertex added = cloneVertexWithNewId( rv, lookupId );
 
+        // is this possibly a variableized id?
+        String undoVars = undoVarsForId( lookupId );
+        if ( undoVars != lookupId ) {
+          Vertex varVertex = staticGraph.getVertex( undoVars );
+          if( varVertex != null ) {
+            // add a link
+            Edge e = staticGraph.addEdge( null, added, varVertex, "resolvesto" );
+            e.setProperty( "text", "resolvesto" );
+          }
+        }
+
         // link it to the runtime node if it's not already in the graph?
-        Edge edge = staticGraph.addEdge( null, runtimeNode, added, "created" );
-        edge.setProperty( "text", "created" );
+        if ( ! added.getProperty( DictionaryConst.PROPERTY_TYPE ).equals( DictionaryConst.NODE_TYPE_EXECUTION_ENGINE ) ) {
+
+          Edge edge = staticGraph.addEdge( null, runtimeNode, added, "defines" );
+          edge.setProperty( "text", "defines" );
+        }
 
       } else {
         // node was in the static graph already
@@ -166,6 +181,35 @@ public class StaticAndRuntimeGraphMergeIT {
     FileOutputStream fos = new FileOutputStream( "src/it/resources/mergedGraph.graphml" );
     GraphMLWriter writer = new GraphMLWriter();
     writer.outputGraph( staticGraph, fos );
+  }
+
+  private Vertex addRuntimeNode() {
+    // add a runtime node so we can identify them
+    Iterable<Vertex> runtimeNodes = runtimeGraph.getVertices( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_RUNTIME );
+    Vertex runtimeNode = null;
+
+    for ( Vertex node : runtimeNodes ) {
+      runtimeNode = cloneVertexWithNewId( node, node.getId().toString() );
+      break;
+    }
+
+    return runtimeNode;
+  }
+
+  private String undoVarsForId( String lookupId ) {
+
+    // this is a hack, not intended to be used post-poc. we need to get the real value
+    // before the variables are substituted in somehow and keep that info with the runtime graph
+
+    List<String> usedVariables = tm.getUsedVariables();
+    for ( String usedVariable : usedVariables ) {
+      String value = tm.getVariable( usedVariable );
+      if ( value != null && value.trim().length() > 0 ) {
+        // try to put the variable name in rather than the value
+        lookupId = lookupId.replace( "~" + value + "~", "~${" + usedVariable + "}~" );
+      }
+    }
+    return lookupId;
   }
 
 
