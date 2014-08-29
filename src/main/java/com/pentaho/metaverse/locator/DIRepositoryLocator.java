@@ -114,6 +114,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
       getRepository();
 
       Object pur = null;
+      Class[] parameters = {};
 
       // Looking for the unifiedRepository within the
       // server repository. Due to the inaccessible nature of the
@@ -122,7 +123,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
       if ( repository != null ) {
         Class repositoryClass = repository.getClass();
         try {
-          Method m = repositoryClass.getMethod( "getPur", null );
+          Method m = repositoryClass.getMethod( "getPur", parameters );
           pur = m.invoke( repository );
         } catch ( Exception e ) {
           LOG.warn( Messages.getString( "WARNING.NoUnifiedRepositoryFound", repository.getClass().getName() ) );
@@ -191,10 +192,12 @@ public class DIRepositoryLocator extends RepositoryLocator {
       Object repositoryLocation = null;
       String location = null;
 
+      Class[] parameters = {};
+
       if ( repositoryMeta != null ) {
         Class repositoryMetaClass = repositoryMeta.getClass();
         try {
-          Method m = repositoryMetaClass.getMethod( "getRepositoryLocation", null );
+          Method m = repositoryMetaClass.getMethod( "getRepositoryLocation", parameters );
           repositoryLocation = m.invoke( repositoryMeta );
         } catch ( Exception e ) {
           LOG.warn( Messages.getString( "WARNING.RepositoryUnknownMethodNoRootURI", repository.getClass().getName() ) );
@@ -204,7 +207,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
       if ( repositoryLocation != null ) {
         Class repositoryLocationClass = repositoryLocation.getClass();
         try {
-          Method m = repositoryLocationClass.getMethod( "getUrl", null );
+          Method m = repositoryLocationClass.getMethod( "getUrl", parameters );
           location = (String) m.invoke( repositoryLocation );
         } catch ( Exception e ) {
           LOG.warn( Messages.getString( "WARNING.ExceptionFindingLocationNoRootURI" ) );
