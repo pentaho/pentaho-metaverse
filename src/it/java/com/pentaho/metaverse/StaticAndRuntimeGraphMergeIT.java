@@ -23,6 +23,7 @@
 package com.pentaho.metaverse;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.TransformationFinishedExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.TransformationRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.graph.GraphMLWriter;
@@ -38,9 +39,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.extension.ExtensionPointPluginType;
+import org.pentaho.di.core.logging.LogLevel;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
-import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
@@ -49,7 +50,6 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -64,8 +64,12 @@ public class StaticAndRuntimeGraphMergeIT {
   private static Graph staticGraph;
   private static Graph runtimeGraph;
   
-  private static final String KTR = "src/it/resources/repo/demo/file_to_table.ktr";
+  private static final String REPO_PATH = "src/it/resources/repo/demo";
+  private static final String KTR = REPO_PATH + "/file_to_table.ktr";
+
   private static File runtimeGraphmlFile;
+
+  private String runtimeId;
 
   private TransMeta tm;
 
@@ -82,6 +86,9 @@ public class StaticAndRuntimeGraphMergeIT {
 
     ExtensionPointPluginType.getInstance().registerCustom( TransformationRuntimeExtensionPoint.class, "custom",
       "transRuntimeMetaverse", "TransformationStartThreads", "no description", null );
+
+    ExtensionPointPluginType.getInstance().registerCustom( TransformationFinishedExtensionPoint.class, "custom",
+      "transFinishedRuntimeMetaverse", "TransformationFinish", "no description", null );
 
     PluginRegistry.addPluginType( ExtensionPointPluginType.getInstance() );
 
@@ -100,12 +107,14 @@ public class StaticAndRuntimeGraphMergeIT {
     // run the trans
     tm = new TransMeta( xmlStream, null, true, vars, null );
     tm.setFilename( tm.getName() );
-    Trans trans = new Trans( tm, null, tm.getName(), null, KTR );
+    Trans trans = new Trans( tm, null, tm.getName(), REPO_PATH, KTR );
     trans.setVariable( "testTransParam3", "demo" );
+    trans.setVariable( "Internal.Transformation.Filename.Directory", REPO_PATH );
     tm.setVariable( "testTransParam3", "demo" );
-
     trans.execute( null );
     trans.waitUntilFinished();
+
+    runtimeId = trans.getLogChannelId();
 
     // get the runtime graph
     runtimeGraphmlFile = new File( tm.getFilename() + " - export.graphml" );
@@ -174,7 +183,6 @@ public class StaticAndRuntimeGraphMergeIT {
       } else {
         // edge already in the graph, don't need to add it
       }
-
     }
 
     // output the merged graph
@@ -185,14 +193,8 @@ public class StaticAndRuntimeGraphMergeIT {
 
   private Vertex addRuntimeNode() {
     // add a runtime node so we can identify them
-    Iterable<Vertex> runtimeNodes = runtimeGraph.getVertices( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_RUNTIME );
-    Vertex runtimeNode = null;
-
-    for ( Vertex node : runtimeNodes ) {
-      runtimeNode = cloneVertexWithNewId( node, node.getId().toString() );
-      break;
-    }
-
+    Vertex node = runtimeGraph.getVertex( runtimeId );
+    Vertex runtimeNode = cloneVertexWithNewId( node, node.getId().toString() );
     return runtimeNode;
   }
 
