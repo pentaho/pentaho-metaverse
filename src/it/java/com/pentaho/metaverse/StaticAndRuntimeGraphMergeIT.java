@@ -39,7 +39,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.extension.ExtensionPointPluginType;
-import org.pentaho.di.core.logging.LogLevel;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.variables.Variables;

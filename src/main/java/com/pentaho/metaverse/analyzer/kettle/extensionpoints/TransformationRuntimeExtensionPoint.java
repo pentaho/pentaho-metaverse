@@ -25,6 +25,7 @@ import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.version.BuildVersion;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
@@ -191,6 +192,8 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
       "Pentaho Data Integration [" +  trans.getExecutingServer() + "]",
       DictionaryConst.NODE_TYPE_EXECUTION_ENGINE );
 
+    String version = BuildVersion.getInstance().getVersion();
+    node.setProperty( "version", version );
     metaverseBuilder.addNode( node );
     return node;
   }
