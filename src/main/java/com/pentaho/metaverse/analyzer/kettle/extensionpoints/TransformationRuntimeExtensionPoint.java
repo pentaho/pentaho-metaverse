@@ -19,7 +19,6 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.KeyIndexableGraph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
-import org.apache.commons.io.FileUtils;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
@@ -57,6 +56,7 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
   public TransformationRuntimeExtensionPoint() {
 
     g = new IdGraph<KeyIndexableGraph>( new TinkerGraph() );
+
     dc = new DocumentController();
     metaverseBuilder = new MetaverseBuilder( g );
     metaverseBuilder.setMetaverseObjectFactory( new MetaverseObjectFactory() );
@@ -105,8 +105,9 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
   @Override public void callExtensionPoint( LogChannelInterface logChannelInterface, Object o ) throws KettleException {
     Trans trans = (Trans) o;
 
+    RuntimeGraphExtensionPointManager.getInstance().addRuntimeGraph( trans.getLogChannelId(), g );
+
     TransMeta transMeta = trans.getTransMeta();
-    List<String> variables = transMeta.getUsedVariables();
 
     IMetaverseObjectFactory objectFactory = metaverseBuilder.getMetaverseObjectFactory();
 
@@ -147,8 +148,6 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     try {
       IMetaverseNode node = transAnalyzer.analyze( descriptor, transDoc );
       metaverseBuilder.addLink( runtimeInfo, "executed", node );
-      File exportFile = new File( transMeta.getName() + " - export.graphml" );
-      FileUtils.writeStringToFile( exportFile, metaverseReader.exportToXml(), "UTF-8" );
     } catch ( Exception e ) {
       throw new KettleException( e );
     }
@@ -160,22 +159,21 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
 
     long timestamp = new Date().getTime();
     IMetaverseComponentDescriptor runTimeDescriptor = new MetaverseComponentDescriptor(
-      trans.getName() + " - " + timestamp,
+      trans.getLogChannelId(),
       DictionaryConst.NODE_TYPE_RUNTIME,
       ns,
       DictionaryConst.CONTEXT_RUNTIME );
 
     // add a runtime node so we can identify them
     IMetaverseNode runtimeInfo = objectFactory.createNodeObject(
-      runTimeDescriptor.getStringID(), runTimeDescriptor.getName(), runTimeDescriptor.getType() );
+      trans.getLogChannelId(), runTimeDescriptor.getName(), runTimeDescriptor.getType() );
 
     runtimeInfo.setProperty( "executionDate", String.valueOf( timestamp ) );
     runtimeInfo.setProperty( DictionaryConst.PROPERTY_PATH, trans.getFilename() );
     runtimeInfo.setProperty( "user", trans.getExecutingUser() );
 
     metaverseBuilder.addNode( runtimeInfo );
-
-    String[] vars = trans.listVariables();
+    List<String> vars = trans.getTransMeta().getUsedVariables();
     for ( String var : vars ) {
       String value = trans.getVariable( var );
       runtimeInfo.setProperty( "parameter_" + var, value );
