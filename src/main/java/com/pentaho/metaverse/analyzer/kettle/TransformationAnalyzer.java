@@ -84,12 +84,14 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     Object repoObject = document.getContent();
 
     TransMeta transMeta = null;
+    Trans trans = null;
     if ( repoObject instanceof String ) {
       // hydrate the transformation
       try {
         String content = (String) repoObject;
         ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
         transMeta = new TransMeta( xmlStream, null, false, null, null );
+        trans = new Trans( transMeta );
       } catch ( KettleXMLException e ) {
         throw new MetaverseAnalyzerException( e );
       } catch ( KettleMissingPluginsException e ) {
@@ -97,11 +99,14 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       }
     } else if ( repoObject instanceof TransMeta ) {
       transMeta = (TransMeta) repoObject;
+      trans = new Trans( transMeta );
+    } else if ( repoObject instanceof Trans ) {
+      trans = (Trans) repoObject;
+      transMeta = trans.getTransMeta();
     }
 
     transMeta.setFilename( document.getStringID() );
-    Trans t = new Trans( transMeta );
-    t.setInternalKettleVariables( transMeta );
+    trans.setInternalKettleVariables( transMeta );
 
     IMetaverseComponentDescriptor documentDescriptor = getChildComponentDescriptor(
         descriptor,

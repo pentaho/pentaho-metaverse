@@ -260,6 +260,16 @@ public class DictionaryConst {
   public static final String NODE_TYPE_ROOT_ENTITY = "Root_Entity";
 
   /**
+   * A node that represents an execution
+   */
+  public static final String NODE_TYPE_RUNTIME = "RUNTIME";
+
+  /**
+   * Node that represents the application that executes a runtime set of metadata
+   */
+  public static final String NODE_TYPE_EXECUTION_ENGINE = "Execution Engine";
+
+  /**
    * The entity node type for virtual nodes
    */
   public static final String NODE_VIRTUAL = "virtual";
