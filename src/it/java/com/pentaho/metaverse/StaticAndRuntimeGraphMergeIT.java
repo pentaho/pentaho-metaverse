@@ -23,7 +23,6 @@
 package com.pentaho.metaverse;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.TransformationFinishedExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.TransformationRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.graph.GraphMLWriter;
@@ -62,9 +61,9 @@ public class StaticAndRuntimeGraphMergeIT {
   private static IMetaverseReader reader;
   private static Graph staticGraph;
   private static Graph runtimeGraph;
-  
-  private static final String REPO_PATH = "src/it/resources/repo/demo";
-  private static final String KTR = REPO_PATH + "/file_to_table.ktr";
+
+  private static final String REPO_PATH = "src/it/resources/repo/runtime";
+  private static final String KTR = REPO_PATH + "/Textfile input - filename from field.ktr";//"/file_to_table.ktr";
 
   private static File runtimeGraphmlFile;
 
@@ -84,10 +83,7 @@ public class StaticAndRuntimeGraphMergeIT {
     staticGraph = IntegrationTestUtil.buildMetaverseGraph();
 
     ExtensionPointPluginType.getInstance().registerCustom( TransformationRuntimeExtensionPoint.class, "custom",
-      "transRuntimeMetaverse", "TransformationStartThreads", "no description", null );
-
-    ExtensionPointPluginType.getInstance().registerCustom( TransformationFinishedExtensionPoint.class, "custom",
-      "transFinishedRuntimeMetaverse", "TransformationFinish", "no description", null );
+        "transRuntimeMetaverse", "TransformationStartThreads", "no description", null );
 
     PluginRegistry.addPluginType( ExtensionPointPluginType.getInstance() );
 
@@ -145,7 +141,7 @@ public class StaticAndRuntimeGraphMergeIT {
         String undoVars = undoVarsForId( lookupId );
         if ( undoVars != lookupId ) {
           Vertex varVertex = staticGraph.getVertex( undoVars );
-          if( varVertex != null ) {
+          if ( varVertex != null ) {
             // add a link
             Edge e = staticGraph.addEdge( null, added, varVertex, "resolvesto" );
             e.setProperty( "text", "resolvesto" );
@@ -153,7 +149,8 @@ public class StaticAndRuntimeGraphMergeIT {
         }
 
         // link it to the runtime node if it's not already in the graph?
-        if ( ! added.getProperty( DictionaryConst.PROPERTY_TYPE ).equals( DictionaryConst.NODE_TYPE_EXECUTION_ENGINE ) ) {
+        if ( !added.getProperty( DictionaryConst.PROPERTY_TYPE )
+            .equals( DictionaryConst.NODE_TYPE_EXECUTION_ENGINE ) ) {
 
           Edge edge = staticGraph.addEdge( null, runtimeNode, added, "defines" );
           edge.setProperty( "text", "defines" );
@@ -213,7 +210,6 @@ public class StaticAndRuntimeGraphMergeIT {
     return lookupId;
   }
 
-
   private Vertex cloneVertexWithNewId( Vertex vertexToClone, String newId ) {
     Vertex v = staticGraph.addVertex( newId );
     Set<String> propertyKeys = vertexToClone.getPropertyKeys();
@@ -226,6 +222,7 @@ public class StaticAndRuntimeGraphMergeIT {
   private String resolveId( Vertex runtimeVertex ) {
     return resolveId( runtimeVertex.getId().toString() );
   }
+
   private String resolveId( String runtimeId ) {
     return runtimeId.replace( RUNTIME_LOCATOR_TOKEN, STATIC_LOCATOR_VALUE );
   }
