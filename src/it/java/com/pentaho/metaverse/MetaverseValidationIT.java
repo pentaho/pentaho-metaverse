@@ -25,15 +25,23 @@ package com.pentaho.metaverse;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.frames.DatasourceNode;
+import com.pentaho.metaverse.frames.FieldNode;
+import com.pentaho.metaverse.frames.FramedMetaverseNode;
+import com.pentaho.metaverse.frames.JobEntryNode;
+import com.pentaho.metaverse.frames.JobNode;
+import com.pentaho.metaverse.frames.LocatorNode;
+import com.pentaho.metaverse.frames.RootNode;
+import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
+import com.pentaho.metaverse.frames.StreamFieldNode;
+import com.pentaho.metaverse.frames.TableOutputStepNode;
+import com.pentaho.metaverse.frames.TextFileInputStepNode;
+import com.pentaho.metaverse.frames.TransformationNode;
+import com.pentaho.metaverse.frames.TransformationStepNode;
 import com.pentaho.metaverse.locator.FileSystemLocator;
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
 import flexjson.JSONDeserializer;
 import org.junit.Before;
@@ -102,7 +110,7 @@ public class MetaverseValidationIT {
 
   @Test
   public void testEntity_Transformation() throws Exception {
-    MetNode node = root.getEntity( DictionaryConst.NODE_TYPE_TRANS );
+    FramedMetaverseNode node = root.getEntity( DictionaryConst.NODE_TYPE_TRANS );
     assertEquals( DictionaryConst.NODE_TYPE_ENTITY, node.getType() );
     assertEquals( DictionaryConst.NODE_TYPE_TRANS, node.getName() );
     assertEquals( "Pentaho Data Integration", node.getDescription() );
@@ -110,7 +118,7 @@ public class MetaverseValidationIT {
 
   @Test
   public void testEntity_Job() throws Exception {
-    MetNode node = root.getEntity( DictionaryConst.NODE_TYPE_JOB );
+    FramedMetaverseNode node = root.getEntity( DictionaryConst.NODE_TYPE_JOB );
     assertEquals( DictionaryConst.NODE_TYPE_ENTITY, node.getType() );
     assertEquals( DictionaryConst.NODE_TYPE_JOB, node.getName() );
     assertEquals( "Pentaho Data Integration", node.getDescription() );
@@ -285,10 +293,10 @@ public class MetaverseValidationIT {
     TextFileInputStepNode textFileInputStepNode = root.getTextFileInputStepNode();
     assertNotNull( textFileInputStepNode );
 
-    Iterable<MetNode> inputFiles = textFileInputStepNode.getInputFiles();
+    Iterable<FramedMetaverseNode> inputFiles = textFileInputStepNode.getInputFiles();
     int countInputFiles = getIterableSize( inputFiles );
     assertEquals( 1, countInputFiles );
-    for ( MetNode inputFile : inputFiles ) {
+    for ( FramedMetaverseNode inputFile : inputFiles ) {
       assertTrue( inputFile.getName().endsWith( "SacramentocrimeJanuary2006.csv" ) );
     }
 
@@ -412,247 +420,6 @@ public class MetaverseValidationIT {
         break;
     }
     return status;
-  }
-
-  public interface MetNode {
-    @Property( DictionaryConst.PROPERTY_NAME )
-    public String getName();
-
-    @Property( DictionaryConst.PROPERTY_TYPE )
-    public String getType();
-
-    @Property( "virtual" )
-    public Boolean isVirtual();
-
-    @Property( DictionaryConst.PROPERTY_DESCRIPTION )
-    public String getDescription();
-  }
-
-  public interface RootNode extends MetNode {
-    @Property( "division" )
-    public String getDivision();
-
-    @Property( "project" )
-    public String getProject();
-
-    @GremlinGroovy( "it.out.loop(1){it.loops < 10}{it.object.type == 'Transformation'}.dedup" )
-    public Iterable<TransformationNode> getTransformations();
-
-    @GremlinGroovy( "it.out.loop(1){it.loops < 10}{it.object.type == 'Transformation' && it.object.name == name }.dedup" )
-    public TransformationNode getTransformation( @GremlinParam( "name" ) String name );
-
-    @GremlinGroovy( "it.out.loop(1){it.loops < 10}{it.object.type == 'Job'}.dedup" )
-    public Iterable<JobNode> getJobs();
-
-    @GremlinGroovy( "it.out.loop(1){it.loops < 10}{it.object.type == 'Job' && it.object.name == name }.dedup" )
-    public JobNode getJob( @GremlinParam( "name" ) String name );
-
-    @Adjacency( label = "", direction = Direction.IN )
-    public Iterable<MetNode> getEntities();
-
-    @GremlinGroovy( "it.out.filter{ it.name == name }" )
-    public MetNode getEntity( @GremlinParam( "name" ) String name );
-
-    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Select values'}.as('step').in('contains').filter{it.name == 'Populate Table From File'}.back('step')" )
-    public SelectValuesTransStepNode getSelectValuesStepNode();
-
-    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Sacramento crime stats 2006 file '}.as('step').in('contains').filter{it.name == 'Populate Table From File'}.back('step')" )
-    public TextFileInputStepNode getTextFileInputStepNode();
-
-    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Database Connection' }" )
-    public Iterable<DatasourceNode> getDatasourceNodes();
-
-    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Database Connection' && it.object.name == name }" )
-    public DatasourceNode getDatasourceNode( @GremlinParam( "name" ) String name );
-
-    @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Demo table crime stats output'}.as('step').in('contains').filter{it.name == 'Populate Table From File'}.back('step')" )
-    public TableOutputStepNode getTableOutputStepNode();
-  }
-
-  public interface IsAEntity extends MetNode {
-    @GremlinGroovy( "it.in.filter{ it.type == 'Entity' }" )
-    public MetNode getEntity();
-  }
-
-  public interface KettleNode extends IsAEntity {
-    @Property( DictionaryConst.PROPERTY_PATH )
-    public String getPath();
-
-    @Property( DictionaryConst.PROPERTY_ARTIFACT_VERSION )
-    public String getVersion();
-
-    @Property( "extendedDescription" )
-    public String getExtendedDescription();
-
-    @Property( DictionaryConst.PROPERTY_STATUS )
-    public String getStatus();
-
-    @Property( DictionaryConst.PROPERTY_LAST_MODIFIED )
-    public String getLastModified();
-
-    @Property( DictionaryConst.PROPERTY_LAST_MODIFIED_BY )
-    public String getLastModifiedBy();
-
-    @Property( DictionaryConst.PROPERTY_CREATED )
-    public String getCreated();
-
-    @Property( DictionaryConst.PROPERTY_CREATED_BY )
-    public String getCreatedBy();
-
-    @GremlinGroovy( "it.in('contains').filter{it.type == 'Locator'}" )
-    public LocatorNode getLocator();
-
-    @GremlinGroovy( value="it.property(paramKey).collect()[0]", frame=false )
-    public String getParameter( @GremlinParam( "paramKey" ) String paramKey );
-
-  }
-
-  public interface JobNode extends KettleNode {
-    @Adjacency( label = "contains", direction = Direction.OUT )
-    public Iterable<JobEntryNode> getJobEntryNodes();
-
-    @GremlinGroovy( "it.out('contains').filter{it.name == name}" )
-    public JobEntryNode getJobEntryNode( @GremlinParam( "name" ) String name );
-
-  }
-
-  public interface TransformationNode extends KettleNode {
-    @Adjacency( label = "contains", direction = Direction.OUT )
-    public Iterable<TransformationStepNode> getStepNodes();
-
-    @GremlinGroovy( "it.out('contains').filter{it.name == name}" )
-    public TransformationStepNode getStepNode( @GremlinParam( "name" ) String name );
-
-    @GremlinGroovy( "it.in('contains').filter{it.type == 'JobEntry'}" )
-    public Iterable<JobEntryNode> getJobEntriesThatExecuteMe();
-  }
-
-  public interface TransformationStepNode extends IsAEntity {
-    @Property( "kettleStepMetaType" )
-    public String getMetaType();
-
-    @Adjacency( label = "contains", direction = Direction.IN )
-    public TransformationNode getTransNode();
-
-    @Adjacency( label = "deletes", direction = Direction.OUT )
-    public Iterable<StreamFieldNode> getStreamFieldNodesDeletes();
-
-    @Adjacency( label = "creates", direction = Direction.OUT )
-    public Iterable<StreamFieldNode> getStreamFieldNodesCreates();
-
-    @Adjacency( label = "uses", direction = Direction.OUT )
-    public Iterable<StreamFieldNode> getStreamFieldNodesUses();
-
-  }
-
-  public interface JobEntryNode extends IsAEntity {
-    @Adjacency( label = "contains", direction = Direction.IN )
-    public TransformationNode getTransNode();
-  }
-
-  public interface LocatorNode extends MetNode {
-    @Property( "lastScan" )
-    public String getLastScan();
-
-    @Property( "url" )
-    public String getUrl();
-
-    @Adjacency( label = "contains", direction = Direction.OUT )
-    public Iterable<KettleNode> getDocuments();
-  }
-
-  public interface FieldNode extends IsAEntity {
-    @Property( DictionaryConst.PROPERTY_KETTLE_TYPE )
-    public String getKettleType();
-
-    @Property( DictionaryConst.PROPERTY_OPERATIONS )
-    public String getOperations();
-
-    @Adjacency( label = "uses", direction = Direction.IN )
-    public Iterable<TransformationStepNode> getStepsThatUseMe();
-
-    @Adjacency( label = "deletes", direction = Direction.IN )
-    public TransformationStepNode getStepThatDeletesMe();
-
-    @Adjacency( label = "creates", direction = Direction.IN )
-    public TransformationStepNode getStepThatCreatesMe();
-
-    @Adjacency( label = "populates", direction = Direction.IN )
-    public TransformationStepNode getStepThatPopulatesMe();
-
-    @Adjacency( label = "populates", direction = Direction.OUT )
-    public FieldNode getFieldPopulatedByMe();
-  }
-
-  public interface StreamFieldNode extends FieldNode {
-    @Adjacency( label = "derives", direction = Direction.OUT )
-    public Iterable<StreamFieldNode> getFieldNodesDerivedFromMe();
-
-    @Adjacency( label = "derives", direction = Direction.IN )
-    public Iterable<StreamFieldNode> getFieldNodesThatDeriveMe();
-  }
-
-  public interface FileFieldNode extends FieldNode {
-  }
-
-  public interface SelectValuesTransStepNode extends TransformationStepNode {
-  }
-
-  public interface TextFileInputStepNode extends TransformationStepNode {
-    @Adjacency( label = "isreadby", direction = Direction.IN )
-    public Iterable<MetNode> getInputFiles();
-
-    @Adjacency( label = "uses", direction = Direction.OUT )
-    public Iterable<FileFieldNode> getFileFieldNodesUses();
-  }
-
-  public interface TableOutputStepNode extends TransformationStepNode {
-    @Adjacency( label = "dependencyof", direction = Direction.IN )
-    public Iterable<DatasourceNode> getDatasources();
-
-    @GremlinGroovy( "it.in('dependencyof').filter{it.name == name}" )
-    public DatasourceNode getDatasource( @GremlinParam( "name") String name );
-
-    @Adjacency( label = "writesto", direction = Direction.OUT )
-    public DatabaseTableNode getDatabaseTable();
-  }
-
-  public interface DatasourceNode extends IsAEntity {
-    @Property( "port" )
-    public String getPort();
-    @Property( "host" )
-    public String getHost();
-    @Property( "userName" )
-    public String getUserName();
-    @Property( "password" )
-    public String getPassword();
-    @Property( "accessType" )
-    public Integer getAccessType();
-    @Property( "accessTypeDesc" )
-    public String getAccessTypeDesc();
-    @Property( "databaseName" )
-    public String getDatabaseName();
-
-    @Adjacency( label = "dependencyof", direction = Direction.OUT )
-    public Iterable<TransformationStepNode> getTransformationStepNodes();
-
-  }
-
-  public interface DatabaseTableNode extends MetNode {
-    @Adjacency( label = "writesto", direction = Direction.IN )
-    public Iterable<TransformationStepNode> getStepNodes();
-
-    @Adjacency( label = "contains", direction = Direction.OUT )
-    public Iterable<DatabaseColumnNode> getDatabaseColumns();
-  }
-
-  public interface DatabaseColumnNode extends FieldNode {
-    @Adjacency( label = "populates", direction = Direction.IN )
-    public Iterable<StreamFieldNode> getPopulators();
-
-    @Adjacency( label = "contains", direction = Direction.IN )
-    public TransformationStepNode getTable();
-
   }
 
   private Map<String, List<String>> convertOperationsStringToMap( String operations ) {
