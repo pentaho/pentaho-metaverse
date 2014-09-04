@@ -86,16 +86,6 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     Vertex toVertex = getVertexForNode( link.getToNode() );
     String edgeId;
 
-    // let's see if this link already exists
-    if ( fromVertex != null && toVertex != null ) {
-      edgeId = getEdgeId( fromVertex, link.getLabel(), toVertex );
-      Edge existingEdge = graph.getEdge( edgeId );
-      if ( existingEdge != null ) {
-        // we already have this edge, no need to add it again
-        return this;
-      }
-    }
-
     // add the "from" vertex to the graph if it wasn't found
     if ( fromVertex == null ) {
       fromVertex = addVertex( link.getFromNode() );
@@ -114,12 +104,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     // update the to vertex properties from the toNode
     copyNodePropertiesToVertex( link.getToNode(), toVertex );
 
-    edgeId = getEdgeId( fromVertex, link.getLabel(), toVertex );
-
-    Edge e = graph.addEdge( edgeId, fromVertex, toVertex, link.getLabel() );
-    // TODO the "text" property is for third-party tools that do not parse the ID key
-    e.setProperty( "text", link.getLabel() );
-
+    addLink( fromVertex, link.getLabel(), toVertex );
     return this;
   }
 
@@ -205,8 +190,10 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
         // the root entity node does not exist, so create it
         rootEntity = createRootEntity();
       }
+
       // add the link from the root node to the entity type
-      graph.addEdge( null, rootEntity, entityType, DictionaryConst.LINK_PARENT_CONCEPT );
+      addLink( rootEntity, DictionaryConst.LINK_PARENT_CONCEPT, entityType );
+
     }
     return entityType;
   }
@@ -401,6 +388,15 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     link.setLabel( label );
     link.setToNode( toNode );
     return addLink( link );
+  }
+
+  protected void addLink( Vertex fromVertex, String label, Vertex toVertex ) {
+    String edgeId = getEdgeId( fromVertex, label, toVertex );
+    // only add the link if the edge doesn't already exist
+    if ( graph.getEdge( edgeId ) == null ) {
+      Edge e = graph.addEdge( edgeId, fromVertex, toVertex, label );
+      e.setProperty( "text", label );
+    }
   }
 
   /**
