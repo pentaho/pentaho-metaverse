@@ -25,24 +25,34 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.exception.KettleValueException;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.trans.Trans;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
+import org.pentaho.platform.api.metaverse.IAnalysisContext;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.api.metaverse.MetaverseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * The TextFileInputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
  * other metaverse entities
  */
-public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMeta> {
+public class TextFileInputStepAnalyzer
+    extends BaseStepAnalyzer<TextFileInputMeta> implements IRowAnalyzer<TextFileInputMeta> {
+
   private Logger log = LoggerFactory.getLogger( TextFileInputStepAnalyzer.class );
 
   @Override
@@ -84,36 +94,63 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
 
       // add a link from the fileField to the text file input step node
       metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, acceptingFieldNode );
+
+      IAnalysisContext context = descriptor.getContext();
+
+      if ( context != null && context.getContextName().equals( DictionaryConst.CONTEXT_RUNTIME ) ) {
+        // The context object is expected to be a Trans
+        Trans trans = (Trans) context.getContextObject();
+
+        // Add a row listener to this step so we can add file nodes as they come in
+        List<StepInterface> steps = trans.findBaseSteps( parentStepMeta.getName() );
+        if ( steps != null ) {
+          for ( StepInterface stepInterface : steps ) {
+            StepAnalyzerRowListener<TextFileInputMeta> rowListener =
+                new StepAnalyzerRowListener<TextFileInputMeta>(
+                    textFileInputMeta,
+                    descriptor.getNamespace(),
+                    node,
+                    context,
+                    this );
+            stepInterface.addRowListener( rowListener );
+          }
+        }
+      }
+
     } else {
       String[] fileNames = parentTransMeta.environmentSubstitute( textFileInputMeta.getFileName() );
 
       // add a link from the file(s) being read to the step
       for ( String fileName : fileNames ) {
-        if ( !Const.isEmpty( fileName ) ) {
-
-          String normalized = null;
-          try {
-            normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
-          } catch ( MetaverseException e ) {
-            log.error( e.getMessage(), e );
-          }
-
-          // first add the node for the file
-          IMetaverseComponentDescriptor fileDescriptor = getChildComponentDescriptor(
-              descriptor,
-              normalized,
-              DictionaryConst.NODE_TYPE_FILE,
-              descriptor.getContext() );
-          IMetaverseNode textFileNode = createNodeFromDescriptor( fileDescriptor );
-          textFileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
-          metaverseBuilder.addNode( textFileNode );
-
-          metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
-        }
+        addFileNode( descriptor, node, fileName, descriptor.getContext() );
       }
     }
 
     return node;
+  }
+
+  private void addFileNode( INamespace namespace, IMetaverseNode node, String fileName, IAnalysisContext context ) {
+    if ( !Const.isEmpty( fileName ) ) {
+
+      String normalized = null;
+      try {
+        normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
+      } catch ( MetaverseException e ) {
+        log.error( e.getMessage(), e );
+      }
+
+      // first add the node for the file
+      IMetaverseComponentDescriptor fileDescriptor = getChildComponentDescriptor(
+          namespace,
+          normalized,
+          DictionaryConst.NODE_TYPE_FILE,
+          context );
+      IMetaverseNode textFileNode = createNodeFromDescriptor( fileDescriptor );
+      textFileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
+      metaverseBuilder.addNode( textFileNode );
+
+      metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
+    }
   }
 
   @Override
@@ -123,6 +160,32 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
         add( TextFileInputMeta.class );
       }
     };
+  }
+
+  @Override
+  public void analyzeRow(
+      TextFileInputMeta stepMeta,
+      INamespace stepNamespace,
+      IMetaverseNode stepNode,
+      IAnalysisContext context,
+      RowMetaInterface rowMeta,
+      Object[] rowData ) throws MetaverseAnalyzerException {
+
+    try {
+
+      if ( stepMeta != null && stepMeta.isAcceptingFilenames() ) {
+        String filenameField = stepMeta.getAcceptingField();
+        if ( filenameField != null ) {
+          TransMeta transMeta = stepMeta.getParentStepMeta().getParentTransMeta();
+          String fileName = transMeta.environmentSubstitute( rowMeta.getString( rowData, filenameField, null ) );
+          if ( fileName != null ) {
+            addFileNode( stepNamespace, stepNode, fileName, context );
+          }
+        }
+      }
+    } catch ( KettleValueException kve ) {
+      throw new MetaverseAnalyzerException( kve );
+    }
   }
 
 }
