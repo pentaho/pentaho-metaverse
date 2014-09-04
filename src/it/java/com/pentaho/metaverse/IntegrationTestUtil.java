@@ -49,7 +49,7 @@ import java.util.Set;
  */
 public class IntegrationTestUtil {
 
-  public static void initializePentahoSystem( String solutionPath ) {
+  public static synchronized void initializePentahoSystem( String solutionPath ) {
     StandaloneApplicationContext appContext = new StandaloneApplicationContext( solutionPath, "" );
     PentahoSystem.setSystemSettingsService( new PathBasedSystemSettings() );
     ApplicationContext springApplicationContext = getSpringApplicationContext( solutionPath );
@@ -65,7 +65,15 @@ public class IntegrationTestUtil {
       e.printStackTrace();
     }
   }
-  private static ApplicationContext getSpringApplicationContext( String solutionPath ) {
+
+  public static void shutdownPentahoSystem() {
+    PentahoSystem.refreshSettings();
+    PentahoSystem.clearGlobals();
+    PentahoSystem.clearObjectFactory();
+    PentahoSystem.shutdown();
+  }
+
+  private static synchronized ApplicationContext getSpringApplicationContext( String solutionPath ) {
     GenericApplicationContext ctx = new GenericApplicationContext();
     XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader( ctx );
     File f = new File( solutionPath + "/system/pentahoObjects.spring.xml" );
@@ -87,7 +95,7 @@ public class IntegrationTestUtil {
     return ctx;
   }
 
-  public static Graph buildMetaverseGraph( IDocumentLocatorProvider provider) throws Exception {
+  public static synchronized Graph buildMetaverseGraph( IDocumentLocatorProvider provider) throws Exception {
     IDocumentLocatorProvider documentLocatorProvider = provider;
     IMetaverseReader reader = PentahoSystem.get( IMetaverseReader.class );
     Set<IDocumentLocator> locators = documentLocatorProvider.getDocumentLocators();
@@ -106,7 +114,7 @@ public class IntegrationTestUtil {
     return reader.getMetaverse();
   }
 
-  public static Graph buildMetaverseGraph() throws Exception {
+  public static synchronized Graph buildMetaverseGraph() throws Exception {
     return buildMetaverseGraph( PentahoSystem.get( IDocumentLocatorProvider.class ) );
   }
 

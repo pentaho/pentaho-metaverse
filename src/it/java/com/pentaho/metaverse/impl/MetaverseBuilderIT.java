@@ -29,6 +29,7 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import org.apache.commons.io.FileUtils;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -71,6 +72,11 @@ public class MetaverseBuilderIT {
 
     reader = PentahoSystem.get( IMetaverseReader.class );
     readerGraph = IntegrationTestUtil.buildMetaverseGraph( provider );
+  }
+
+  @AfterClass
+  public static void cleanUp() throws Exception {
+    IntegrationTestUtil.shutdownPentahoSystem();
   }
 
   /**
