@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.impl;
 
+import org.pentaho.platform.api.metaverse.IAnalysisContext;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.INamespace;
 
@@ -45,7 +46,7 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
   /**
    * The context (static, runtime, e.g.) associated with this metaverse document.
    */
-  private String context;
+  private IAnalysisContext context;
 
   /* (non-Javadoc)
    * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getExtension()
@@ -192,7 +193,7 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
    * @return A string containing a description of the context associated with the described component
    */
   @Override
-  public String getContext() {
+  public IAnalysisContext getContext() {
     return context;
   }
 
@@ -202,7 +203,7 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
    * @param context the context for the described component
    */
   @Override
-  public void setContext( String context ) {
+  public void setContext( IAnalysisContext context ) {
     this.context = context;
   }
 }

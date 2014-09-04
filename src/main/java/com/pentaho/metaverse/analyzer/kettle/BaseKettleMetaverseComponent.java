@@ -19,9 +19,11 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
+
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IAnalysisContext;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -64,14 +66,14 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
   }
 
   protected IMetaverseComponentDescriptor getChildComponentDescriptor(
-      IMetaverseComponentDescriptor parentDescriptor, String name, String type, String context ) {
+      IMetaverseComponentDescriptor parentDescriptor, String name, String type, IAnalysisContext context ) {
     return new MetaverseComponentDescriptor( name, type,
         parentDescriptor == null ? null : parentDescriptor.getChildNamespace( name, type ),
         context );
   }
 
   protected IMetaverseComponentDescriptor getChildComponentDescriptor(
-      INamespace namespace, String name, String type, String context ) {
+      INamespace namespace, String name, String type, IAnalysisContext context ) {
     IMetaverseComponentDescriptor mcd = new MetaverseComponentDescriptor( name, type, namespace, context );
     return getChildComponentDescriptor( mcd, name, type, context );
   }

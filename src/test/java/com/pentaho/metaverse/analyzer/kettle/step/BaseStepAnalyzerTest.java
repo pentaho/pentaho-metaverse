@@ -26,6 +26,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
+import com.pentaho.metaverse.impl.AnalysisContext;
 import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.*;
@@ -137,7 +138,7 @@ public class BaseStepAnalyzerTest {
     when( mockDescriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( mockDescriptor.getParentNamespace() ).thenReturn( namespace );
     when( mockDescriptor.getNamespaceId() ).thenReturn( "namespace" );
-    when( mockDescriptor.getContext() ).thenReturn( DictionaryConst.CONTEXT_DEFAULT );
+    when( mockDescriptor.getContext() ).thenReturn( new AnalysisContext( DictionaryConst.CONTEXT_DEFAULT, null ) );
 
     when( mockStepMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
     when( parentStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
