@@ -25,6 +25,7 @@ package com.pentaho.metaverse.impl;
 import com.pentaho.dictionary.DictionaryConst;
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.platform.api.metaverse.IAnalysisContext;
 import org.pentaho.platform.api.metaverse.INamespace;
 
 import static org.junit.Assert.assertEquals;
@@ -66,7 +67,7 @@ public class MetaverseComponentDescriptorTest {
     assertNull( descriptor.getType() );
     assertEquals( mockEmptyNamespace, descriptor.getNamespace() );
     assertNotNull( descriptor.getContext() );
-    assertEquals( descriptor.getContext(), DictionaryConst.CONTEXT_DEFAULT );
+    assertEquals( descriptor.getContext().getContextName(), DictionaryConst.CONTEXT_DEFAULT );
 
     descriptor.setName( "test name" );
     assertEquals( "test name", descriptor.getName() );
@@ -83,7 +84,10 @@ public class MetaverseComponentDescriptorTest {
     assertNull( descriptor.getType() );
     assertEquals( mockEmptyNamespace, descriptor.getNamespace() );
     assertNull( descriptor.getContext() );
-    descriptor.setContext( "test context" );
-    assertEquals( "test context", descriptor.getContext() );
+    descriptor.setContext( new AnalysisContext( "test context", null ) );
+    IAnalysisContext context = descriptor.getContext();
+    assertNotNull( context );
+    assertEquals( "test context", context.getContextName() );
+    assertNull( context.getContextObject() );
   }
 }
