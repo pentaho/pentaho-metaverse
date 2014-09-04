@@ -44,6 +44,8 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
 import flexjson.JSONDeserializer;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -93,6 +95,11 @@ public class MetaverseValidationIT {
     framedGraphFactory = new FramedGraphFactory( new GremlinGroovyModule() );
     framedGraph = framedGraphFactory.create( graph );
     root = (RootNode) framedGraph.getVertex( "entity", RootNode.class );
+  }
+
+  @AfterClass
+  public static void cleanUp() throws Exception {
+    IntegrationTestUtil.shutdownPentahoSystem();
   }
 
   @Before

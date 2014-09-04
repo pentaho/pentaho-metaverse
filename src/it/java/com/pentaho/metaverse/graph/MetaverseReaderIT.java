@@ -26,6 +26,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.IntegrationTestUtil;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.tinkerpop.blueprints.Graph;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -52,6 +53,11 @@ public class MetaverseReaderIT {
     IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution" );
     graph = IntegrationTestUtil.buildMetaverseGraph();
     reader = PentahoSystem.get( IMetaverseReader.class );
+  }
+
+  @AfterClass
+  public static void cleanUp() throws Exception {
+    IntegrationTestUtil.shutdownPentahoSystem();
   }
 
   @Test
