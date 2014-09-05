@@ -36,6 +36,8 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLReader;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.extension.ExtensionPointPluginType;
 import org.pentaho.di.core.plugins.PluginInterface;
@@ -48,28 +50,62 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * User: RFellows Date: 8/28/14
  */
+@RunWith( Parameterized.class )
 public class StaticAndRuntimeGraphMergeIT {
 
   private static final String RUNTIME_LOCATOR_TOKEN = "EXTENSION-POINT-LOCATOR";
   private static final String STATIC_LOCATOR_VALUE = "FileSystem~FILE_SYSTEM_REPO";
   private static IMetaverseReader reader;
+  private static Graph staticGraphBase;
   private static Graph staticGraph;
   private static Graph runtimeGraph;
 
   private static final String REPO_PATH = "src/it/resources/repo/runtime";
-  private static final String KTR = REPO_PATH + "/Textfile input - filename from field.ktr";//"/file_to_table.ktr";
-
   private static File runtimeGraphmlFile;
 
   private String runtimeId;
 
   private TransMeta tm;
+
+  private String ktrPath;
+  private Map<String, String> variables;
+
+  private static File staticGraphFile;
+
+  @Parameterized.Parameters( name = "{0}" )
+  public static Collection props() {
+    Object[][] inputs = new Object[][]{
+      {
+        REPO_PATH + "/file_to_table.ktr",
+        new HashMap<String, String>(){{
+          put( "testTransParam3", "demo" );
+          put( "Internal.Transformation.Filename.Directory", REPO_PATH );
+        }}
+      },
+      {
+        REPO_PATH + "/Textfile input - filename from field.ktr",
+        new HashMap<String, String>(){{
+          put( "Internal.Transformation.Filename.Directory", REPO_PATH );
+        }}
+      }
+    };
+    return Arrays.asList( inputs );
+  }
+
+  public StaticAndRuntimeGraphMergeIT( String ktrPath, Map<String, String> variables ) {
+    this.ktrPath = ktrPath;
+    this.variables = variables;
+  }
 
   @BeforeClass
   public static void init() throws Exception {
@@ -77,10 +113,9 @@ public class StaticAndRuntimeGraphMergeIT {
     IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution" );
 
     FileSystemLocator dl = PentahoSystem.get( FileSystemLocator.class );
-    dl.setRootFolder( "src/it/resources/repo/demo" );
+    dl.setRootFolder( REPO_PATH );
 
     reader = PentahoSystem.get( IMetaverseReader.class );
-    staticGraph = IntegrationTestUtil.buildMetaverseGraph();
 
     ExtensionPointPluginType.getInstance().registerCustom( TransformationRuntimeExtensionPoint.class, "custom",
         "transRuntimeMetaverse", "TransformationStartThreads", "no description", null );
@@ -91,21 +126,35 @@ public class StaticAndRuntimeGraphMergeIT {
 
     List<PluginInterface> plugins = PluginRegistry.getInstance().getPlugins( ExtensionPointPluginType.class );
     System.out.println( plugins );
+
+    staticGraphFile = File.createTempFile( "tmp", "tmp" );
+    FileOutputStream fos = new FileOutputStream( staticGraphFile );
+    staticGraphBase = IntegrationTestUtil.buildMetaverseGraph();
+    GraphMLWriter writer = new GraphMLWriter();
+    writer.outputGraph( staticGraphBase, fos );
   }
 
   @Before
   public void setup() throws Exception {
+    staticGraph = new TinkerGraph();
+    GraphMLReader reader = new GraphMLReader( staticGraph );
+    reader.inputGraph( new FileInputStream( staticGraphFile ) );
 
-    FileInputStream xmlStream = new FileInputStream( KTR );
+    FileInputStream xmlStream = new FileInputStream( ktrPath );
     Variables vars = new Variables();
-    vars.setVariable( "testTransParam3", "demo" );
+
+    for( String key : variables.keySet() ) {
+      vars.setVariable( key, variables.get( key ) );
+    }
+
     // run the trans
     tm = new TransMeta( xmlStream, null, true, vars, null );
     tm.setFilename( tm.getName() );
-    Trans trans = new Trans( tm, null, tm.getName(), REPO_PATH, KTR );
-    trans.setVariable( "testTransParam3", "demo" );
-    trans.setVariable( "Internal.Transformation.Filename.Directory", REPO_PATH );
-    tm.setVariable( "testTransParam3", "demo" );
+    Trans trans = new Trans( tm, null, tm.getName(), REPO_PATH, ktrPath );
+    for ( String var : vars.listVariables() ) {
+      trans.setVariable( var, vars.getVariable( var ) );
+    }
+
     trans.execute( null );
     trans.waitUntilFinished();
 
@@ -118,12 +167,10 @@ public class StaticAndRuntimeGraphMergeIT {
     runtimeGraph = new TinkerGraph();
     GraphMLReader graphMLReader = new GraphMLReader( runtimeGraph );
     graphMLReader.inputGraph( fis );
-
   }
 
   @Test
   public void testMergeGraphs() throws Exception {
-
     Vertex runtimeNode = addRuntimeNode();
 
     // add in any new vertices not in the static graph
@@ -182,7 +229,7 @@ public class StaticAndRuntimeGraphMergeIT {
     }
 
     // output the merged graph
-    FileOutputStream fos = new FileOutputStream( "src/it/resources/mergedGraph.graphml" );
+    FileOutputStream fos = new FileOutputStream( "src/it/resources/mergedGraph_" + tm.getName() + ".graphml" );
     GraphMLWriter writer = new GraphMLWriter();
     writer.outputGraph( staticGraph, fos );
   }
