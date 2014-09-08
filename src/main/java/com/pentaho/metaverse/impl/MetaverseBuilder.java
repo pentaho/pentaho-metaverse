@@ -242,7 +242,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * @return a matching Vertex or null if none found
    */
   protected Vertex getVertexForNode( IMetaverseNode node ) {
-    if ( node != null ) {
+    if ( node != null && node.getStringID() != null ) {
       return graph.getVertex( node.getStringID() );
     } else {
       return null;

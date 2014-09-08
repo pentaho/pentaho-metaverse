@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by mburgess on 8/25/14.
@@ -168,15 +169,16 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
         null, DictionaryConst.NODE_TYPE_RUNTIME, DictionaryConst.NODE_TYPE_RUNTIME );
 
     long timestamp = new Date().getTime();
+    String runtimeId = trans.getLogChannelId() == null ? UUID.randomUUID().toString() : trans.getLogChannelId();
     IMetaverseComponentDescriptor runTimeDescriptor = new MetaverseComponentDescriptor(
-        trans.getLogChannelId(),
+        runtimeId,
         DictionaryConst.NODE_TYPE_RUNTIME,
         ns,
         context );
 
     // add a runtime node so we can identify them
     IMetaverseNode runtimeInfo = objectFactory.createNodeObject(
-        trans.getLogChannelId(), runTimeDescriptor.getName(), runTimeDescriptor.getType() );
+      runtimeId, runTimeDescriptor.getName(), runTimeDescriptor.getType() );
 
     runtimeInfo.setProperty( "executionDate", String.valueOf( timestamp ) );
     runtimeInfo.setProperty( DictionaryConst.PROPERTY_PATH, trans.getFilename() );
