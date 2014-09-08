@@ -57,6 +57,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.FileInputStream;
@@ -85,7 +86,7 @@ public class MetaverseValidationIT {
     IDocumentLocatorProvider provider = PentahoSystem.get( IDocumentLocatorProvider.class );
     // remove the original locator so we can set the modified one back on it
     provider.removeDocumentLocator( fileSystemLocator );
-    fileSystemLocator.setRootFolder( "src/it/resources/repo/demo" );
+    fileSystemLocator.setRootFolder( "src/it/resources/repo/validation" );
     provider.addDocumentLocator( fileSystemLocator );
 
     // build the graph using our updated locator/provider
@@ -140,7 +141,7 @@ public class MetaverseValidationIT {
     assertNotNull( node.getUrl() );
     assertNotNull( node.getLastScan() );
     int countDocuments = getIterableSize( node.getDocuments() );
-    assertEquals( 2, countDocuments );
+    assertEquals( 3, countDocuments );
   }
 
   @Test
@@ -320,6 +321,55 @@ public class MetaverseValidationIT {
     // we should create as many fields as we read in
     assertEquals( countFileFieldNode, countStreamFieldNode );
 
+  }
+
+  @Test
+  public void testTextFileInputStep_filenameFromField() throws Exception {
+    // this is testing a specific TextFileInputStep instance
+    TextFileInputStepNode textFileInputStepNode = root.getTextFileInputStepNode_filenameFromField();
+    assertNotNull( textFileInputStepNode );
+
+    // this TFI gets it's files from an incoming stream field, there should be no files modeled statically
+    Iterable<FramedMetaverseNode> inputFiles = textFileInputStepNode.getInputFiles();
+    int countInputFiles = getIterableSize( inputFiles );
+    assertEquals( 0, countInputFiles );
+
+    assertEquals( "TextFileInputMeta", textFileInputStepNode.getMetaType() );
+
+    int countUsesFieldNodes = getIterableSize( textFileInputStepNode.getFileFieldNodesUses() );
+
+    Iterable<StreamFieldNode> streamFieldNodes = textFileInputStepNode.getStreamFieldNodesCreates();
+    int countCreatesFieldNodes = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+
+    // we should create as many fields as we read in PLUS 1 for the incoming field that defines the files
+    assertEquals( countUsesFieldNodes - 1, countCreatesFieldNodes );
+
+    String filenameField = null;
+    TransMeta tm = new TransMeta( new FileInputStream( textFileInputStepNode.getTransNode().getPath() ), null, true, null, null );
+    for ( StepMeta stepMeta : tm.getSteps() ) {
+      if ( stepMeta.getName().equals( textFileInputStepNode.getName() ) ) {
+        TextFileInputMeta meta = (TextFileInputMeta)getBaseStepMetaFromStepMeta( stepMeta );
+        assertTrue( meta.isAcceptingFilenames() );
+        filenameField =  meta.getAcceptingField();
+        assertNotNull( filenameField );
+
+        // this was the one we cared about...
+        break;
+      }
+    }
+
+    // the field that defines the files should be deleted from the outgoing fields
+    Iterable<StreamFieldNode> deletedFieldNodes = textFileInputStepNode.getStreamFieldNodesDeletes();
+    int countDeletedFieldNodes = getIterableSize( deletedFieldNodes );
+    assertEquals( 1, countDeletedFieldNodes );
+
+    for ( StreamFieldNode deletedFieldNode : deletedFieldNodes ) {
+      assertEquals( "Should delete the stream field that defines the source files",
+        filenameField, deletedFieldNode.getName() );
+    }
   }
 
   @Test

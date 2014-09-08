@@ -62,6 +62,9 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Sacramento crime stats 2006 file '}.as('step').in('contains').has('name', T.eq, 'Populate Table From File').back('step')" )
   public TextFileInputStepNode getTextFileInputStepNode();
 
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Get Customers'}.as('step').in('contains').has('name', T.eq, 'Textfile input - filename from field').back('step')" )
+  public TextFileInputStepNode getTextFileInputStepNode_filenameFromField();
+
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Database Connection' }" )
   public Iterable<DatasourceNode> getDatasourceNodes();
 
