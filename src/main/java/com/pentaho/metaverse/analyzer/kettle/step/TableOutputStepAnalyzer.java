@@ -51,9 +51,9 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
     // Do common analysis for all step
     IMetaverseNode node = super.analyze( descriptor, tableOutputMeta );
 
-    String tableName = descriptor.getContext().equals( DictionaryConst.CONTEXT_RUNTIME )
-        ? parentTransMeta.environmentSubstitute( tableOutputMeta.getTableName() )
-        : tableOutputMeta.getTableName();
+    String tableName = descriptor.getContext().getContextName().equals( DictionaryConst.CONTEXT_RUNTIME )
+      ? parentTransMeta.environmentSubstitute( tableOutputMeta.getTableName() )
+      : tableOutputMeta.getTableName();
 
     String[] fieldNames = tableOutputMeta.getFieldStream();
     if ( fieldNames == null || fieldNames.length <= 0 || !tableOutputMeta.specifyFields() ) {
@@ -72,12 +72,12 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
       // TODO The table is a child of the database connection. Right now we need to count on the fact that
       // TODO the database's ID will be of the form we expect. We will likely refactor ID generation.
       INamespace dbMetaNamespace = getSiblingNamespace(
-          descriptor, tableOutputMeta.getDatabaseMeta().getName(), DictionaryConst.NODE_TYPE_DATASOURCE );
+        descriptor, tableOutputMeta.getDatabaseMeta().getName(), DictionaryConst.NODE_TYPE_DATASOURCE );
       IMetaverseComponentDescriptor dbTableDescriptor = getChildComponentDescriptor(
-          dbMetaNamespace,
-          tableName,
-          DictionaryConst.NODE_TYPE_DATA_TABLE,
-          descriptor.getContext() );
+        dbMetaNamespace,
+        tableName,
+        DictionaryConst.NODE_TYPE_DATA_TABLE,
+        descriptor.getContext() );
       IMetaverseNode tableNode = createNodeFromDescriptor( dbTableDescriptor );
       metaverseBuilder.addNode( tableNode );
 
@@ -89,20 +89,20 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
       }
 
       for ( int i = 0; i < fieldNames.length; i++ ) {
-        String fieldName = fieldNames[i];
+        String fieldName = fieldNames[ i ];
 
         // We can't use our own descriptor here, we need to get the descriptor for the origin step
         IMetaverseNode fieldNode =
-            createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, fieldName ) );
+          createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, fieldName ) );
         metaverseBuilder.addNode( fieldNode );
 
         if ( dbFieldNames != null ) {
 
           IMetaverseComponentDescriptor dbColumnDescriptor = getChildComponentDescriptor(
-              dbTableDescriptor,
-              dbFieldNames[i],
-              DictionaryConst.NODE_TYPE_DATA_COLUMN,
-              descriptor.getContext() );
+            dbTableDescriptor,
+            dbFieldNames[ i ],
+            DictionaryConst.NODE_TYPE_DATA_COLUMN,
+            descriptor.getContext() );
           IMetaverseNode dbFieldNode = createNodeFromDescriptor( dbColumnDescriptor );
 
           metaverseBuilder.addNode( dbFieldNode );

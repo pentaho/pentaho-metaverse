@@ -72,6 +72,7 @@ public class TransformationRuntimeExtensionPointTest {
 
   @Test
   public void testCallExtensionPoint() throws Exception {
+    when( mockTrans.getFilename() ).thenReturn( "src/it/resources/repo/demo/file_to_table.ktr" );
     extensionPoint.callExtensionPoint( logChannel, mockTrans );
   }
 }
