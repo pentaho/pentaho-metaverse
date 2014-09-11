@@ -57,7 +57,7 @@ public class RepositoryLocatorRunner extends LocatorRunner<List<RepositoryFileTr
           if ( !file.isHidden() ) {
             // don't index hidden fields
             try {
-              processFile( locator.getNamespace(), file.getName(), file.getPath(), locator.getContents( file ) );
+              processFile( locator.getNamespace(), file.getName(), file.getPath(),  file );
             } catch ( Exception e ) {
               // something truly unexpected would have to have happened ... NPE or similar ugliness
               LOG.error( Messages.getString( "ERROR.ProcessFileFailed", file.getName() ), e );

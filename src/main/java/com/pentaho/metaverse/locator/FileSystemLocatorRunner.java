@@ -50,7 +50,7 @@ public class FileSystemLocatorRunner extends LocatorRunner<File> {
       if ( !file.isDirectory() ) {
         try {
           if ( !file.isHidden( ) ) {
-            processFile( locator.getNamespace(), file.getName(), file.getCanonicalPath(), locator.getContents( file ) );
+            processFile( locator.getNamespace(), file.getName(), file.getCanonicalPath(), file );
           }
         } catch ( Exception e ) {
           // something truly unexpected would have to have happened ... NPE or similar ugliness

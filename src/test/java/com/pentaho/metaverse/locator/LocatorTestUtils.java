@@ -22,9 +22,6 @@
 package com.pentaho.metaverse.locator;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +41,7 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
-import org.pentaho.di.repository.pur.PurRepository;
+import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
@@ -56,56 +53,29 @@ public class LocatorTestUtils {
   private static final String SOLUTION_PATH = "src/test/resources/solution";
   public static long delay = 0;
 
-  public static Repository getMockDiRepository() {
-    PurRepository diRepo = mock( PurRepository.class );
-
-    try {
-      when( diRepo.loadJob( any( ObjectId.class ), anyString() ) ).thenAnswer( new Answer<JobMeta>() {
-        @Override
-        public JobMeta answer( InvocationOnMock invocationOnMock ) throws Throwable {
-          Object[] args = invocationOnMock.getArguments();
-          return loadJob( (ObjectId) args[0], (String) args[1] );
-        }
-      } );
-
-      when( diRepo.loadTransformation( any( ObjectId.class ), anyString() ) ).thenAnswer( new Answer<TransMeta>() {
-        @Override
-        public TransMeta answer( InvocationOnMock invocationOnMock ) throws Throwable {
-          Object[] args = invocationOnMock.getArguments();
-          return loadTransformation( (ObjectId) args[ 0 ], (String) args[ 1 ] );
-        }
-      } );
-
-      when( diRepo.getPur() ).thenAnswer( new Answer<IUnifiedRepository>() {
-        @Override
-        public IUnifiedRepository answer( InvocationOnMock invocationOnMock ) throws Throwable {
-          return getMockIUnifiedRepository();
-        }
-      } );
-
-    } catch ( KettleException e ) {
-      e.printStackTrace();
-    }
-
+  public static Repository getFakeDiRepository() {
+    Repository diRepo = new FakePurRepository( LocatorTestUtils.getMockIUnifiedRepository() );
     return diRepo;
   }
 
   public static IUnifiedRepository getMockIUnifiedRepository() {
     IUnifiedRepository repo = mock( IUnifiedRepository.class );
 
-    when( repo.getTree( any(RepositoryRequest.class) ) )
-      .thenAnswer( new Answer<RepositoryFileTree>() {
-        @Override
-        public RepositoryFileTree answer( InvocationOnMock invocationOnMock ) throws Throwable {
-          Object[] args = invocationOnMock.getArguments();
-          return getTree( (RepositoryRequest)args[0] );
-        }
-      } );
+    when( repo.getTree( any( RepositoryRequest.class ) ) )
+        .thenAnswer( new Answer<RepositoryFileTree>() {
+          @Override
+          public RepositoryFileTree answer( InvocationOnMock invocationOnMock ) throws Throwable {
+            Object[] args = invocationOnMock.getArguments();
+            return getTree( (RepositoryRequest) args[0] );
+          }
+        } );
 
     return repo;
   }
 
-  /*************** load job and trans methods for the mock diRepo *****************/
+  /**
+   * ************ load job and trans methods for the mock diRepo ****************
+   */
   private static JobMeta loadJob( ObjectId arg0, String arg1 ) throws KettleException {
     if ( delay != 0 ) {
       try {
@@ -160,12 +130,15 @@ public class LocatorTestUtils {
       return null;
     }
   }
-  /*************** end -- load job and trans methods for the mock diRepo *****************/
+
+  /**
+   * ************ end -- load job and trans methods for the mock diRepo ****************
+   */
 
   public static RepositoryFileTree getTree( RepositoryRequest req ) {
 
     File root = new File( SOLUTION_PATH );
-    RepositoryFileTree rft = createFileTree(root );
+    RepositoryFileTree rft = createFileTree( root );
 
     return rft;
   }
@@ -173,10 +146,10 @@ public class LocatorTestUtils {
   private static RepositoryFileTree createFileTree( File root ) {
 
     RepositoryFile repFile = new RepositoryFile( root.getPath(), root.getName(),
-      root.isDirectory(), false,
-      false, null, root.getAbsolutePath(), new Date( root.lastModified() ),
-      new Date( root.lastModified() ), false, null, null, null, null, root.getName(),
-      null, null, null, root.length(), "Admin", null );
+        root.isDirectory(), false,
+        false, null, root.getAbsolutePath(), new Date( root.lastModified() ),
+        new Date( root.lastModified() ), false, null, null, null, null, root.getName(),
+        null, null, null, root.length(), "Admin", null );
     List<RepositoryFileTree> children = new ArrayList<RepositoryFileTree>();
 
     File[] files = root.listFiles();
@@ -190,16 +163,40 @@ public class LocatorTestUtils {
         children.add( kid );
       } else if ( file.isFile() ) {
         RepositoryFile kid = new RepositoryFile( file.getPath(), file.getName(),
-          file.isDirectory(), false,
-          false, null, file.getPath(), new Date( file.lastModified() ),
-          new Date( file.lastModified() ), false, null, null, null, null, file.getName(),
-          null, null, null, root.length(), "Admin", null );
+            file.isDirectory(), false,
+            false, null, file.getPath(), new Date( file.lastModified() ),
+            new Date( file.lastModified() ), false, null, null, null, null, file.getName(),
+            null, null, null, root.length(), "Admin", null );
         RepositoryFileTree kidTree = new RepositoryFileTree( kid, null );
         children.add( kidTree );
       }
     }
     RepositoryFileTree fileTree = new RepositoryFileTree( repFile, children );
     return fileTree;
+  }
+
+  private static class FakePurRepository extends KettleFileRepository {
+
+    private IUnifiedRepository backingRepo;
+
+    public FakePurRepository( IUnifiedRepository backingRepo ) {
+      this.backingRepo = backingRepo;
+    }
+
+    public IUnifiedRepository getPur() {
+      return backingRepo;
+    }
+
+    @Override
+    public JobMeta loadJob( ObjectId idJob, String versionLabel ) throws KettleException {
+      return LocatorTestUtils.loadJob( idJob, versionLabel );
+    }
+
+    @Override
+    public TransMeta loadTransformation( ObjectId idTransformation, String versionLabel )
+        throws KettleException {
+      return LocatorTestUtils.loadTransformation( idTransformation, versionLabel );
+    }
   }
 
 }

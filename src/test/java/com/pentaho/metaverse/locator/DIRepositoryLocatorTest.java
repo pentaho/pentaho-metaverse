@@ -24,9 +24,11 @@ package com.pentaho.metaverse.locator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +39,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.INamespaceFactory;
 import com.pentaho.metaverse.impl.MetaverseNamespace;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -44,7 +47,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.repository.Repository;
+import org.pentaho.di.repository.RepositoryMeta;
+import org.pentaho.di.repository.filerep.KettleFileRepository;
+import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
@@ -53,14 +61,14 @@ import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseDocument;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.pentaho.platform.api.metaverse.INamespace;
+import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 
 /**
  * Test class for the DIRepositoryLocator
  *
  * @author jdixon
  */
-@SuppressWarnings( { "all" } )
-@RunWith( MockitoJUnitRunner.class )
+@RunWith(MockitoJUnitRunner.class)
 public class DIRepositoryLocatorTest implements IDocumentListener {
 
   private List<IDocumentEvent> events;
@@ -68,24 +76,51 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
   @Mock
   INamespaceFactory namespaceFactory;
 
+  @Mock
+  RepositoryFile repositoryFile;
+
   DIRepositoryLocator spyLocator;
+
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    try {
+      KettleEnvironment.init();
+    } catch ( KettleException e ) {
+      e.printStackTrace();
+    }
+  }
 
   /**
    * Initializes the kettle system
    */
   @Before
   public void init() {
-    DIRepositoryLocator locator = new DIRepositoryLocator();
-    spyLocator = spy( locator );
+    spyLocator = spy( new DIRepositoryLocator() );
     when( spyLocator.getNamespaceFactory() ).thenReturn( namespaceFactory );
     when( namespaceFactory.createNameSpace(
         any( INamespace.class ), anyString(), anyString() ) ).thenReturn( new MetaverseNamespace( null, "",
         DictionaryConst.NODE_TYPE_LOCATOR, namespaceFactory ) );
-    try {
-      KettleEnvironment.init();
-    } catch ( KettleException e ) {
-      e.printStackTrace();
-    }
+
+  }
+
+  @Test
+  public void testDefaultConstructor() {
+    DIRepositoryLocator locator = new DIRepositoryLocator();
+    assertEquals( locator.getLocatorType(), DIRepositoryLocator.LOCATOR_TYPE );
+    assertNotNull( locator.listeners );
+    assertTrue( locator.listeners.isEmpty() );
+  }
+
+  @Test
+  public void testConstructorWithListeners() {
+    assertNotNull( spyLocator.listeners );
+    assertTrue( spyLocator.listeners.isEmpty() );
+    List<IDocumentListener> listeners = new ArrayList<IDocumentListener>();
+    listeners.add( mock( IDocumentListener.class ) );
+    DIRepositoryLocator locator = new DIRepositoryLocator( listeners );
+    assertEquals( locator.getLocatorType(), DIRepositoryLocator.LOCATOR_TYPE );
+    assertNotNull( locator.listeners );
+    assertEquals( 1, locator.listeners.size() );
 
   }
 
@@ -102,7 +137,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
 
     spyLocator.setMetaverseBuilder( metaverseBuilder );
     spyLocator.addDocumentListener( this );
-    spyLocator.setRepository( LocatorTestUtils.getMockDiRepository() );
+    spyLocator.setRepository( LocatorTestUtils.getFakeDiRepository() );
     LocatorTestUtils.delay = 0;
 
     spyLocator.setRepositoryId( "testrepo" );
@@ -149,7 +184,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
 
     spyLocator.setMetaverseBuilder( metaverseBuilder );
     spyLocator.addDocumentListener( this );
-    spyLocator.setRepository( LocatorTestUtils.getMockDiRepository() );
+    spyLocator.setRepository( LocatorTestUtils.getFakeDiRepository() );
     spyLocator.setUnifiedRepository( LocatorTestUtils.getMockIUnifiedRepository() );
     LocatorTestUtils.delay = 300;
 
@@ -176,9 +211,82 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
 
   }
 
+  @Test
+  public void testGetRepositoryNullRepository() throws Exception {
+    DIRepositoryLocator locator = new DIRepositoryLocator();
+    assertNull( locator.repository );
+    locator.getRepository();
+  }
+
+  @Test
+  public void testGetContentsKettleFileRepository() throws Exception {
+    when( spyLocator.getRepository() ).thenReturn( new KettleFileRepository() );
+    spyLocator.getContents( repositoryFile );
+  }
+
+  @Test
+  public void testGetRootUriWithException() throws Exception {
+    // The exception is consumed within getRootUri
+    when( spyLocator.getRepository() ).thenThrow( Exception.class );
+    assertNull( spyLocator.getRootUri() );
+  }
+
+  @Test
+  public void testGetRootUri() throws Exception {
+    Repository mockRepo = mock( Repository.class );
+    when( spyLocator.getRepository() ).thenReturn( mockRepo );
+    when( mockRepo.getRepositoryMeta() ).thenReturn( mock( RepositoryMeta.class ) );
+
+    // This one won't get far due to no getRepositoryLocation() method
+    spyLocator.getRootUri();
+
+    GetRepositoryLocationMethodProvider getRepositoryLocationMethodProvider =
+        new GetRepositoryLocationMethodProvider( null );
+    when( mockRepo.getRepositoryMeta() ).thenReturn( getRepositoryLocationMethodProvider );
+    // This one won't get too far due to no RepositoryLocation being determined
+    spyLocator.getRootUri();
+
+    getRepositoryLocationMethodProvider = new GetRepositoryLocationMethodProvider( new Object() );
+    when( mockRepo.getRepositoryMeta() ).thenReturn( getRepositoryLocationMethodProvider );
+    // This one won't go all the way through due to no getUrl() method defined
+    spyLocator.getRootUri();
+
+    getRepositoryLocationMethodProvider = new GetRepositoryLocationMethodProvider( new RepositoryLocationTestClass() );
+    when( mockRepo.getRepositoryMeta() ).thenReturn( getRepositoryLocationMethodProvider );
+    spyLocator.getRootUri();
+  }
+
+  @Test
+  public void testGetUnifiedRepositoryWithBadRepoClass() throws Exception {
+    spyLocator.setRepository( new KettleFileRepository() );
+    spyLocator.getUnifiedRepository( mock( IPentahoSession.class) );
+  }
+
   @Override
   public void onEvent( IDocumentEvent event ) {
     events.add( event );
+  }
+
+  private class RepositoryLocationTestClass {
+
+    public String getUrl() throws Exception {
+      return "myURL";
+    }
+
+  }
+
+  private class GetRepositoryLocationMethodProvider extends KettleFileRepositoryMeta {
+
+    private Object repoLocation;
+
+    public GetRepositoryLocationMethodProvider( Object repoLocation ) {
+      super();
+      this.repoLocation = repoLocation;
+    }
+
+    public Object getRepositoryLocation() {
+      return repoLocation;
+    }
   }
 
 }

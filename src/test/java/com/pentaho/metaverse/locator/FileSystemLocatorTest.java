@@ -28,6 +28,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +87,12 @@ public class FileSystemLocatorTest implements IDocumentListener {
 
   }
 
+  @Test
+  public void testDefaultConstructor() {
+    FileSystemLocator locator = new FileSystemLocator();
+    assertEquals( locator.getLocatorType(), FileSystemLocator.LOCATOR_TYPE );
+  }
+
   /**
    * Runs the spyLocator and checks the results
    *
@@ -106,22 +113,22 @@ public class FileSystemLocatorTest implements IDocumentListener {
 
     spyLocator.setRootFolder( "bogus" );
     events = new ArrayList<IDocumentEvent>();
-    try{
+    try {
       spyLocator.startScan();
       MetaverseCompletionService.getInstance().waitTillEmpty();
       fail();
-    }catch(MetaverseLocatorException e){
+    } catch ( MetaverseLocatorException e ) {
       assertEquals( "Event count is wrong", 0, events.size() );
     }
 
     spyLocator.setRootFolder( "src/test/resources/solution/folder 2/parse.ktr" );
     events = new ArrayList<IDocumentEvent>();
 
-    try{
+    try {
       spyLocator.startScan();
       MetaverseCompletionService.getInstance().waitTillEmpty();
       fail();
-    }catch(MetaverseLocatorException e){
+    } catch ( MetaverseLocatorException e ) {
       assertEquals( "Event count is wrong", 0, events.size() );
     }
 
@@ -199,6 +206,11 @@ public class FileSystemLocatorTest implements IDocumentListener {
       }
     }
 
+  }
+
+  @Test
+  public void testGetContentsBadFile() throws Exception {
+    assertEquals( "", spyLocator.getContents( new File( "not-a-file.txt" ) ) );
   }
 
   @Override
