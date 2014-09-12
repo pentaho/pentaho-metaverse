@@ -51,6 +51,10 @@
     <slf4j.version>1.7.7</slf4j.version>
     <flexjson.version>2.1</flexjson.version>
     <proguard.version>4.9</proguard.version>
+    <pmd.version>3.2</pmd.version>
+    <target.jdk.version>1.6</target.jdk.version>
+    <jxr.version>2.3</jxr.version>
+    <pmd.rulesets.url>https://raw.githubusercontent.com/pmd/pmd/pmd_releases/5.1.2/pmd/src/main/resources/rulesets/java</pmd.rulesets.url>
   </properties>
 
   <scm>
@@ -211,8 +215,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>${target.jdk.version}</source>
+          <target>${target.jdk.version}</target>
         </configuration>
       </plugin>
 
@@ -293,9 +297,60 @@
         </configuration>
       </plugin>
 
+      <!-- override the declaration in the reporting section so we can call 'mvn pmd:pmd without building the whole site -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${pmd.version}</version>
+        <configuration>
+          <linkXref>true</linkXref>
+          <targetJdk>${target.jdk.version}</targetJdk>
+          <rulesets>
+            <ruleset>${pmd.rulesets.url}/basic.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/optimizations.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/codesize.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/design.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/coupling.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/strings.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/unnecessary.xml</ruleset>
+          </rulesets>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>${jxr.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${pmd.version}</version>
+        <configuration>
+          <linkXref>true</linkXref>
+          <targetJdk>${target.jdk.version}</targetJdk>
+          <rulesets>
+            <ruleset>${pmd.rulesets.url}/basic.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/optimizations.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/codesize.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/design.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/coupling.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/strings.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/unnecessary.xml</ruleset>
+          </rulesets>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <!-- this is for bootstrapping only; you should really just add this to your settings.xml -->
   <repositories>
