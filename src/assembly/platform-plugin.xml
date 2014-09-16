@@ -20,7 +20,7 @@
     <!-- sample repository files to include for testing... these are temporary -->
     <fileSet>
       <outputDirectory>/samples</outputDirectory>
-      <directory>src/it/resources/repo/demo</directory>
+      <directory>src/it/resources/repo/samples</directory>
     </fileSet>
 
   </fileSets>
