@@ -23,12 +23,13 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
+import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponentWithDatabases;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -38,16 +39,16 @@ import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * KettleBaseStepAnalyzer provides a default implementation (and generic helper methods) for analyzing PDI step
  * to gather metadata for the metaverse.
  */
 public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
-    extends BaseKettleMetaverseComponent implements IStepAnalyzer<T> {
+    extends BaseKettleMetaverseComponentWithDatabases implements IStepAnalyzer<T> {
 
   /**
    * The stream fields coming into the step
@@ -97,7 +98,15 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
 
     // Add yourself
     rootNode = createNodeFromDescriptor( descriptor );
-    rootNode.setProperty( "kettleStepMetaType", object.getClass().getSimpleName() );
+    String stepType = null;
+    try {
+      stepType = PluginRegistry.getInstance().findPluginWithId(
+          StepPluginType.class, parentStepMeta.getStepID() ).getName();
+    } catch ( Throwable t ) {
+      stepType = parentStepMeta.getStepID();
+    }
+    rootNode.setProperty( "stepType", stepType );
+    rootNode.setProperty( "copies", object.getParentStepMeta().getCopies() );
     metaverseBuilder.addNode( rootNode );
 
     // Add database connection nodes
@@ -124,20 +133,27 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
 
     // Analyze the database connections
     DatabaseMeta[] dbs = baseStepMeta.getUsedDatabaseConnections();
-    IDatabaseConnectionAnalyzer dbAnalyzer = getDatabaseConnectionAnalyzer();
-    if ( dbs != null && dbAnalyzer != null ) {
-      for ( DatabaseMeta db : dbs ) {
-        try {
-          IMetaverseComponentDescriptor dbDescriptor = getChildComponentDescriptor(
-              descriptor,
-              db.getName(),
-              DictionaryConst.NODE_TYPE_DATASOURCE,
-              descriptor.getContext() );
-          IMetaverseNode dbNode = dbAnalyzer.analyze( dbDescriptor, db );
-          metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
-        } catch ( Throwable t ) {
-          // Don't throw the exception if a DB connection couldn't be analyzed, just log it and move on
-          t.printStackTrace( System.err );
+    if ( dbs != null ) {
+      Set<IDatabaseConnectionAnalyzer> dbAnalyzers = getDatabaseConnectionAnalyzers();
+      if ( dbAnalyzers != null ) {
+        for ( IDatabaseConnectionAnalyzer dbAnalyzer : dbAnalyzers ) {
+          if ( dbAnalyzer != null ) {
+            dbAnalyzer.setMetaverseBuilder( metaverseBuilder );
+            for ( DatabaseMeta db : dbs ) {
+              try {
+                IMetaverseComponentDescriptor dbDescriptor = getChildComponentDescriptor(
+                    descriptor,
+                    db.getName(),
+                    DictionaryConst.NODE_TYPE_DATASOURCE,
+                    descriptor.getContext() );
+                IMetaverseNode dbNode = dbAnalyzer.analyze( dbDescriptor, db );
+                metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
+              } catch ( Throwable t ) {
+                // Don't throw the exception if a DB connection couldn't be analyzed, just log it and move on
+                t.printStackTrace( System.err );
+              }
+            }
+          }
         }
       }
     }
@@ -222,37 +238,6 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
       } catch ( Throwable t ) {
         stepFields = null;
       }
-    }
-  }
-
-  /**
-   * Returns an object capable of analyzing database connections (DatabaseMetas)
-   *
-   * @return a database connection Analyzer
-   */
-  protected IDatabaseConnectionAnalyzer getDatabaseConnectionAnalyzer() {
-
-    if ( dbConnectionAnalyzer == null ) {
-      try {
-        dbConnectionAnalyzer = PentahoSystem.get( IDatabaseConnectionAnalyzer.class );
-      } catch ( Throwable t ) {
-        // Don't fail because of PentahoSystem, instead let the caller handle null
-        dbConnectionAnalyzer = null;
-      }
-    }
-    // Default to the built-in database connection analyzer
-    if ( dbConnectionAnalyzer == null ) {
-      dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
-    }
-
-    setDatabaseConnectionAnalyzer( dbConnectionAnalyzer );
-    return dbConnectionAnalyzer;
-  }
-
-  protected void setDatabaseConnectionAnalyzer( IDatabaseConnectionAnalyzer analyzer ) {
-    dbConnectionAnalyzer = analyzer;
-    if ( dbConnectionAnalyzer != null && metaverseBuilder != null ) {
-      dbConnectionAnalyzer.setMetaverseBuilder( metaverseBuilder );
     }
   }
 

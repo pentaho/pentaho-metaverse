@@ -20,12 +20,21 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.jobentry;
+package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.metaverse.api.IAnalyzerProvider;
 
+import java.util.Set;
+
 /**
- * IJobEntryAnalyzerProvider is a marker interface for providers of IJobEntryAnalyzer instances.
+ * IDatabaseConnectionAnalyzerProvider is a marker interface for providers of IDatabaseConnectionAnalyzer instances.
  */
-public interface IJobEntryAnalyzerProvider extends IAnalyzerProvider<IJobEntryAnalyzer> {
+public interface IDatabaseConnectionAnalyzerProvider extends IAnalyzerProvider<IDatabaseConnectionAnalyzer> {
+
+  /**
+   * Sets the database connection analyzers for this provider
+   *
+   * @param analyzers the available database connection analyzers
+   */
+  void setDatabaseConnectionAnalyzers( Set<IDatabaseConnectionAnalyzer> analyzers );
 }

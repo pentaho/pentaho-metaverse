@@ -62,6 +62,15 @@
   <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
   <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.TransJobEntryAnalyzer" />
 
+  <bean id="IDatabaseConnectionAnalyzerProvider"
+        class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzerProvider" scope="singleton">
+    <property name="databaseConnectionAnalyzers">
+      <set>
+        <ref bean="IDatabaseConnectionAnalyzer"/>
+      </set>
+    </property>
+  </bean>
+
   <bean id="IStepAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
         scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
@@ -92,7 +101,7 @@
     <property name="repositoryId" value="FILE_SYSTEM_REPO"/>
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="rootFolder" value="../../pentaho-solutions/system/metaverse/samples"/>
-    
+
   </bean>
 
   <bean id="IDocumentLocatorProvider" class="com.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider" scope="singleton">

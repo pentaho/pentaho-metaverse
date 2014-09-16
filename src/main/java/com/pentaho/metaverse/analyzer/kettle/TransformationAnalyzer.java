@@ -37,6 +37,7 @@ import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.core.parameters.UnknownParamException;
+import org.pentaho.di.trans.TransHopMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -59,7 +60,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
 
   private static final long serialVersionUID = 3147152759123052372L;
 
-  private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
+  protected static final Set<String> defaultSupportedTypes = new HashSet<String>() {
     /**
      * Default serial ID for serialization
      */
@@ -210,6 +211,38 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       } catch ( MetaverseAnalyzerException mae ) {
         //Don't throw an exception, just log and carry on
         log.error( "Error processing " + stepMeta.getName(), mae );
+      }
+    }
+
+    // Model the hops between steps
+    int numHops = transMeta.nrTransHops();
+    for ( int i = 0; i < numHops; i++ ) {
+      TransHopMeta hop = transMeta.getTransHop( i );
+      StepMeta fromStep = hop.getFromStep();
+      StepMeta toStep = hop.getToStep();
+      // process legitimate hops
+      if ( fromStep != null && toStep != null ) {
+        IMetaverseComponentDescriptor fromStepDescriptor = getChildComponentDescriptor(
+            documentDescriptor,
+            fromStep.getName(),
+            DictionaryConst.NODE_TYPE_TRANS_STEP,
+            descriptor.getContext() );
+        IMetaverseNode fromStepNode = metaverseObjectFactory.createNodeObject(
+            fromStepDescriptor.getStringID(),
+            fromStepDescriptor.getName(),
+            DictionaryConst.NODE_TYPE_TRANS_STEP );
+
+        IMetaverseComponentDescriptor toStepDescriptor = getChildComponentDescriptor(
+            documentDescriptor,
+            toStep.getName(),
+            DictionaryConst.NODE_TYPE_TRANS_STEP,
+            descriptor.getContext() );
+        IMetaverseNode toStepNode = metaverseObjectFactory.createNodeObject(
+            toStepDescriptor.getStringID(),
+            toStepDescriptor.getName(),
+            DictionaryConst.NODE_TYPE_TRANS_STEP );
+
+        metaverseBuilder.addLink( fromStepNode, DictionaryConst.LINK_HOPSTO, toStepNode );
       }
     }
 

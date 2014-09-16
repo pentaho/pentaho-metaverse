@@ -31,6 +31,7 @@ import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
+import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
@@ -57,7 +58,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
   /**
    * A set of types supported by this analyzer
    */
-  private static final Set<String> defaultSupportedTypes = new HashSet<String>() {
+  protected static final Set<String> defaultSupportedTypes = new HashSet<String>() {
     {
       add( "kjb" );
     }
@@ -78,26 +79,26 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
 
     Object repoObject = document.getContent();
 
-    JobMeta job = null;
+    JobMeta jobMeta = null;
     if ( repoObject instanceof String ) {
 
       // hydrate the job
       try {
         String content = (String) repoObject;
         ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
-        job = new JobMeta( xmlStream, null, null );
+        jobMeta = new JobMeta( xmlStream, null, null );
       } catch ( KettleXMLException e ) {
         throw new MetaverseAnalyzerException( e );
       }
 
     } else if ( repoObject instanceof JobMeta ) {
-      job = (JobMeta) repoObject;
+      jobMeta = (JobMeta) repoObject;
     }
 
     // construct a dummy job based on our JobMeta so we get out VariableSpace set properly
-    job.setFilename( document.getStringID() );
-    Job j = new Job( null, job );
-    j.setInternalKettleVariables( job );
+    jobMeta.setFilename( document.getStringID() );
+    Job j = new Job( null, jobMeta );
+    j.setInternalKettleVariables( jobMeta );
 
     IMetaverseComponentDescriptor documentDescriptor =
         getChildComponentDescriptor(
@@ -109,46 +110,46 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     // Create a metaverse node and start filling in details
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
         documentDescriptor.getStringID(),
-        job.getName(),
+        jobMeta.getName(),
         DictionaryConst.NODE_TYPE_JOB );
 
     // pull out the standard fields
-    String description = job.getDescription();
+    String description = jobMeta.getDescription();
     if ( description != null ) {
       node.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, description );
     }
 
-    String extendedDescription = job.getExtendedDescription();
+    String extendedDescription = jobMeta.getExtendedDescription();
     if ( extendedDescription != null ) {
       node.setProperty( "extendedDescription", extendedDescription );
     }
 
-    Date createdDate = job.getCreatedDate();
+    Date createdDate = jobMeta.getCreatedDate();
     if ( createdDate != null ) {
       node.setProperty( DictionaryConst.PROPERTY_CREATED, Long.toString( createdDate.getTime() ) );
     }
 
-    String createdUser = job.getCreatedUser();
+    String createdUser = jobMeta.getCreatedUser();
     if ( createdUser != null ) {
       node.setProperty( DictionaryConst.PROPERTY_CREATED_BY, createdUser );
     }
 
-    Date lastModifiedDate = job.getModifiedDate();
+    Date lastModifiedDate = jobMeta.getModifiedDate();
     if ( lastModifiedDate != null ) {
       node.setProperty( DictionaryConst.PROPERTY_LAST_MODIFIED, Long.toString( lastModifiedDate.getTime() ) );
     }
 
-    String lastModifiedUser = job.getModifiedUser();
+    String lastModifiedUser = jobMeta.getModifiedUser();
     if ( lastModifiedUser != null ) {
       node.setProperty( DictionaryConst.PROPERTY_LAST_MODIFIED_BY, lastModifiedUser );
     }
 
-    String version = job.getJobversion();
+    String version = jobMeta.getJobversion();
     if ( version != null ) {
       node.setProperty( DictionaryConst.PROPERTY_ARTIFACT_VERSION, version );
     }
 
-    String status = Messages.getString( "INFO.JobOrTrans.Status_" + Integer.toString( job.getJobstatus() ) );
+    String status = Messages.getString( "INFO.JobOrTrans.Status_" + Integer.toString( jobMeta.getJobstatus() ) );
     if ( status != null && !status.startsWith( "!" ) ) {
       node.setProperty( DictionaryConst.PROPERTY_STATUS, status );
     }
@@ -156,14 +157,14 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     node.setProperty( DictionaryConst.PROPERTY_PATH, document.getProperty( DictionaryConst.PROPERTY_PATH ) );
 
     // Process job parameters
-    String[] parameters = job.listParameters();
+    String[] parameters = jobMeta.listParameters();
     if ( parameters != null ) {
       for ( String parameter : parameters ) {
         try {
           // Determine parameter properties and add them to a map, then the map to the list
-          String defaultParameterValue = job.getParameterDefault( parameter );
-          String parameterValue = job.getParameterValue( parameter );
-          String parameterDescription = job.getParameterDescription( parameter );
+          String defaultParameterValue = jobMeta.getParameterDefault( parameter );
+          String parameterValue = jobMeta.getParameterValue( parameter );
+          String parameterDescription = jobMeta.getParameterDescription( parameter );
           PropertiesHolder paramProperties = new PropertiesHolder();
           paramProperties.setProperty( "defaultValue", defaultParameterValue );
           paramProperties.setProperty( "value", parameterValue );
@@ -176,10 +177,10 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
       }
     }
     // handle the entries
-    for ( int i = 0; i < job.nrJobEntries(); i++ ) {
-      JobEntryCopy entry = job.getJobEntry( i );
+    for ( int i = 0; i < jobMeta.nrJobEntries(); i++ ) {
+      JobEntryCopy entry = jobMeta.getJobEntry( i );
       try {
-        entry.getEntry().setParentJob( new Job( null, job ) );
+        entry.getEntry().setParentJob( new Job( null, jobMeta ) );
 
         if ( entry != null ) {
           IMetaverseNode jobEntryNode = null;
@@ -210,6 +211,38 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
       } catch ( Exception e ) {
         //Don't throw an exception, just log and carry on
         log.error( "Error processing " + entry.getName(), e );
+      }
+    }
+
+    // Model the hops between steps
+    int numHops = jobMeta.nrJobHops();
+    for ( int i = 0; i < numHops; i++ ) {
+      JobHopMeta hop = jobMeta.getJobHop( i );
+      JobEntryCopy fromEntry = hop.getFromEntry();
+      JobEntryCopy toEntry = hop.getToEntry();
+      // process legitimate hops
+      if ( fromEntry != null && toEntry != null ) {
+        IMetaverseComponentDescriptor fromEntryDescriptor = getChildComponentDescriptor(
+            documentDescriptor,
+            fromEntry.getName(),
+            DictionaryConst.NODE_TYPE_JOB_ENTRY,
+            descriptor.getContext() );
+        IMetaverseNode fromEntryNode = metaverseObjectFactory.createNodeObject(
+            fromEntryDescriptor.getStringID(),
+            fromEntryDescriptor.getName(),
+            DictionaryConst.NODE_TYPE_JOB_ENTRY );
+
+        IMetaverseComponentDescriptor toEntryDescriptor = getChildComponentDescriptor(
+            documentDescriptor,
+            toEntry.getName(),
+            DictionaryConst.NODE_TYPE_JOB_ENTRY,
+            descriptor.getContext() );
+        IMetaverseNode toEntryNode = metaverseObjectFactory.createNodeObject(
+            toEntryDescriptor.getStringID(),
+            toEntryDescriptor.getName(),
+            DictionaryConst.NODE_TYPE_JOB_ENTRY );
+
+        metaverseBuilder.addLink( fromEntryNode, DictionaryConst.LINK_HOPSTO, toEntryNode );
       }
     }
 
