@@ -25,7 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.jobentry;
 import com.pentaho.metaverse.api.IAnalyzerProvider;
 
 /**
- * Created by mburgess on 7/29/14.
+ * IJobEntryAnalyzerProvider is a marker interface for providers of IJobEntryAnalyzer instances.
  */
 public interface IJobEntryAnalyzerProvider extends IAnalyzerProvider<IJobEntryAnalyzer> {
 }

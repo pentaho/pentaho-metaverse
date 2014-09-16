@@ -1,4 +1,4 @@
-/*
+/*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
@@ -20,29 +20,21 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.frames;
+package com.pentaho.metaverse.analyzer.kettle;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
+import com.pentaho.metaverse.api.IAnalyzerProvider;
+
+import java.util.Set;
 
 /**
- * User: RFellows Date: 9/4/14
+ * IDatabaseConnectionAnalyzerProvider is a marker interface for providers of IDatabaseConnectionAnalyzer instances.
  */
-public interface TransformationStepNode extends Concept {
-  @Property( "stepType" )
-  public String getStepType();
+public interface IDatabaseConnectionAnalyzerProvider extends IAnalyzerProvider<IDatabaseConnectionAnalyzer> {
 
-  @Adjacency( label = "contains", direction = Direction.IN )
-  public TransformationNode getTransNode();
-
-  @Adjacency( label = "deletes", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesDeletes();
-
-  @Adjacency( label = "creates", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesCreates();
-
-  @Adjacency( label = "uses", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesUses();
-
+  /**
+   * Sets the database connection analyzers for this provider
+   *
+   * @param analyzers the available database connection analyzers
+   */
+  void setDatabaseConnectionAnalyzers( Set<IDatabaseConnectionAnalyzer> analyzers );
 }

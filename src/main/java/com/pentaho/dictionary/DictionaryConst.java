@@ -163,6 +163,11 @@ public class DictionaryConst {
   public static final String LINK_DELETES = "deletes";
 
   /**
+   * Label for an "hops" edge in the graph, e.g. a step sends data to another step via a "hop"
+   */
+  public static final String LINK_HOPSTO = "hops_to";
+
+  /**
    * Label for an "derives" edge in the graph, incoming transformation field(s)
    * can contribute to (or derive) the value in outgoing field(s)
    */
