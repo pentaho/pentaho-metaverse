@@ -44,7 +44,6 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
 import flexjson.JSONDeserializer;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -270,7 +269,7 @@ public class MetaverseValidationIT {
     assertEquals( 8, countUses );
     assertEquals( 4, countCreates );
     assertEquals( 3, countDeletes );
-    assertEquals( "SelectValuesMeta", selectValues.getMetaType() );
+    assertEquals( "Select values", selectValues.getStepType() );
 
 
     // verify the nodes created by the step
@@ -308,7 +307,7 @@ public class MetaverseValidationIT {
       assertTrue( inputFile.getName().endsWith( "SacramentocrimeJanuary2006.csv" ) );
     }
 
-    assertEquals( "TextFileInputMeta", textFileInputStepNode.getMetaType() );
+    assertEquals( "Text file input", textFileInputStepNode.getStepType() );
 
     int countFileFieldNode = getIterableSize( textFileInputStepNode.getFileFieldNodesUses() );
 
@@ -334,7 +333,7 @@ public class MetaverseValidationIT {
     int countInputFiles = getIterableSize( inputFiles );
     assertEquals( 0, countInputFiles );
 
-    assertEquals( "TextFileInputMeta", textFileInputStepNode.getMetaType() );
+    assertEquals( "Text file input", textFileInputStepNode.getStepType() );
 
     int countUsesFieldNodes = getIterableSize( textFileInputStepNode.getFileFieldNodesUses() );
 

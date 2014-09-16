@@ -106,10 +106,8 @@ public class SelectValuesStepAnalyzerTest {
     assertNotNull( result );
     assertEquals( meta.getName(), result.getName() );
 
-    // TODO verify( selectValuesMeta, times( 1 ) ).getFileName();
-
-    // make sure the step node is added as well as the file node
-    verify( builder, atLeastOnce() ).addNode( any( IMetaverseNode.class ) );
+    // make sure the step node is added
+    verify( builder, times(1) ).addNode( any( IMetaverseNode.class ) );
 
   }
 
@@ -121,6 +119,7 @@ public class SelectValuesStepAnalyzerTest {
 
     when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when(spyMeta.getStepID()).thenReturn( "Select values" );
 
     String[] fieldNames = { "field1", "field2" };
     String[] fieldRenames = { null, "field3" };
@@ -158,6 +157,7 @@ public class SelectValuesStepAnalyzerTest {
     IMetaverseNode result = analyzer.analyze( descriptor, selectValuesMeta );
     assertNotNull( result );
     assertEquals( meta.getName(), result.getName() );
+    assertEquals("Select values", result.getProperty( "stepType" ));
 
     // we should have "derives" links from input nodes to output nodes
     verify( builder, times( 1 ) )

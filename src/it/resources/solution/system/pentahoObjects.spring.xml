@@ -22,6 +22,15 @@
   <bean id="SelectValuesStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.SelectValuesStepAnalyzer"/>
   <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
 
+  <bean id="IDatabaseConnectionAnalyzerProvider"
+        class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzerProvider" scope="singleton">
+    <property name="databaseConnectionAnalyzers">
+      <set>
+        <ref bean="IDatabaseConnectionAnalyzer"/>
+      </set>
+    </property>
+  </bean>
+
   <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.TransJobEntryAnalyzer" />
 
 
