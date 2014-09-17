@@ -96,6 +96,11 @@ public class DictionaryConst {
   public static final String PROPERTY_OPERATIONS = "operations";
 
   /**
+   * Property key for "transforms"
+   */
+  public static final String PROPERTY_TRANSFORMS = "transforms";
+
+  /**
    * Property key for "modified", the value for the property should indicate how the entity was modified
    */
   public static final String PROPERTY_MODIFIED = "modified";
