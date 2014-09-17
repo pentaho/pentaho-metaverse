@@ -59,6 +59,8 @@
 
   <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableOutputStepAnalyzer"/>
   <bean id="TextFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TextFileInputStepAnalyzer"/>
+  <bean id="SelectValuesStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.SelectValuesStepAnalyzer"/>
+  <bean id="NumberRangeStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.NumberRangeStepAnalyzer"/>
   <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
   <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.TransJobEntryAnalyzer" />
 
@@ -78,6 +80,8 @@
       <set>
         <ref bean="TableOutputStepAnalyzer"/>
         <ref bean="TextFileInputStepAnalyzer"/>
+        <ref bean="SelectValuesStepAnalyzer"/>
+        <ref bean="NumberRangeStepAnalyzer"/>
       </set>
     </property>
   </bean>
