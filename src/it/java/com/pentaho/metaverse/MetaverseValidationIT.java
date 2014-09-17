@@ -38,6 +38,7 @@ import com.pentaho.metaverse.frames.TableOutputStepNode;
 import com.pentaho.metaverse.frames.TextFileInputStepNode;
 import com.pentaho.metaverse.frames.TransformationNode;
 import com.pentaho.metaverse.frames.TransformationStepNode;
+import com.pentaho.metaverse.frames.ValueMapperStepNode;
 import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.frames.FramedGraph;
@@ -57,9 +58,12 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
+import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +74,7 @@ import static org.junit.Assert.*;
  */
 public class MetaverseValidationIT {
 
+  private static final String ROOT_FOLDER = "src/it/resources/repo/validation";
   private static IMetaverseReader reader;
   private static Graph graph;
   private static FramedGraphFactory framedGraphFactory;
@@ -85,7 +90,7 @@ public class MetaverseValidationIT {
     IDocumentLocatorProvider provider = PentahoSystem.get( IDocumentLocatorProvider.class );
     // remove the original locator so we can set the modified one back on it
     provider.removeDocumentLocator( fileSystemLocator );
-    fileSystemLocator.setRootFolder( "src/it/resources/repo/validation" );
+    fileSystemLocator.setRootFolder( ROOT_FOLDER );
     provider.addDocumentLocator( fileSystemLocator );
 
     // build the graph using our updated locator/provider
@@ -140,7 +145,15 @@ public class MetaverseValidationIT {
     assertNotNull( node.getUrl() );
     assertNotNull( node.getLastScan() );
     int countDocuments = getIterableSize( node.getDocuments() );
-    assertEquals( 3, countDocuments );
+
+    File folder = new File( ROOT_FOLDER );
+    int fileCount = folder.listFiles( new FilenameFilter() {
+      @Override public boolean accept( File dir, String name ) {
+        return ( name.endsWith( ".ktr" ) || name.endsWith( ".kjb" ) );
+      }
+    } ).length;
+
+    assertEquals( fileCount, countDocuments );
   }
 
   @Test
@@ -436,6 +449,77 @@ public class MetaverseValidationIT {
       }
     }
 
+  }
+
+  @Test
+  public void testValueMapperStepNode_overwrite() throws Exception {
+    ValueMapperStepNode valueMapperStepNode = root.getValueMapperStepNode( "Value Mapper - overwrite" );
+    TransMeta tm = new TransMeta( valueMapperStepNode.getTransNode().getPath(), null, true, null, null );
+
+    assertEquals( 1, getIterableSize( valueMapperStepNode.getStreamFieldNodesUses() ) );
+    assertEquals( 0, getIterableSize( valueMapperStepNode.getStreamFieldNodesCreates() ) );
+    assertEquals( 0, getIterableSize( valueMapperStepNode.getStreamFieldNodesDeletes() ) );
+    StreamFieldNode usesNode = null;
+    for ( StreamFieldNode node : valueMapperStepNode.getStreamFieldNodesUses() ) {
+      usesNode = node;
+      break;
+    }
+
+    for ( StepMeta stepMeta : tm.getSteps() ) {
+      if ( valueMapperStepNode.getName().equals( stepMeta.getName() ) ) {
+        ValueMapperMeta meta = (ValueMapperMeta) getBaseStepMetaFromStepMeta( stepMeta );
+        assertEquals( meta.getFieldToUse(), usesNode.getName() );
+        Map<String, List<String>> ops = convertOperationsStringToMap( usesNode.getOperations() );
+        assertEquals( meta.getSourceValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
+        assertEquals( meta.getTargetValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
+
+        int derivedCount = getIterableSize( usesNode.getFieldNodesDerivedFromMe() );
+        assertEquals( 0, derivedCount );
+      }
+    }
+  }
+
+  @Test
+  public void testValueMapperStepNode_newField() throws Exception {
+    ValueMapperStepNode valueMapperStepNode = root.getValueMapperStepNode( "Value Mapper - new field" );
+    TransMeta tm = new TransMeta( valueMapperStepNode.getTransNode().getPath(), null, true, null, null );
+
+    assertEquals( 1, getIterableSize( valueMapperStepNode.getStreamFieldNodesUses() ) );
+    assertEquals( 1, getIterableSize( valueMapperStepNode.getStreamFieldNodesCreates() ) );
+    assertEquals( 0, getIterableSize( valueMapperStepNode.getStreamFieldNodesDeletes() ) );
+
+    StreamFieldNode usesNode = null;
+    for ( StreamFieldNode node : valueMapperStepNode.getStreamFieldNodesUses() ) {
+      usesNode = node;
+      break;
+    }
+
+    StreamFieldNode createsNode = null;
+    for ( StreamFieldNode node : valueMapperStepNode.getStreamFieldNodesCreates() ) {
+      createsNode = node;
+      break;
+    }
+
+    for ( StepMeta stepMeta : tm.getSteps() ) {
+      if ( valueMapperStepNode.getName().equals( stepMeta.getName() ) ) {
+        ValueMapperMeta meta = (ValueMapperMeta) getBaseStepMetaFromStepMeta( stepMeta );
+        assertEquals( meta.getFieldToUse(), usesNode.getName() );
+        assertEquals( meta.getTargetField(), createsNode.getName() );
+        assertNull( usesNode.getOperations() );
+
+        int derivesCount = getIterableSize( createsNode.getFieldNodesThatDeriveMe() );
+        assertEquals( 1, derivesCount );
+
+        for ( FieldNode derives : createsNode.getFieldNodesThatDeriveMe() ) {
+          assertEquals( usesNode.getName(), derives.getName() );
+          assertEquals( usesNode.getType(), derives.getType() );
+        }
+
+        Map<String, List<String>> ops = convertOperationsStringToMap( createsNode.getOperations() );
+        assertEquals( meta.getSourceValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
+        assertEquals( meta.getTargetValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
+      }
+    }
   }
 
   protected BaseStepMeta getBaseStepMetaFromStepMeta( StepMeta stepMeta ) {
