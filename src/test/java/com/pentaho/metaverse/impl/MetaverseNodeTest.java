@@ -337,4 +337,35 @@ public class MetaverseNodeTest {
     verify( v, times( 1 ) ).setProperty( eq("lastModified"), any() );
   }
 
+  @Test
+  public void testSetLogicalIdPropertyKeys() throws Exception {
+    MetaverseNode node = new MetaverseNode( v );
+    when( v.getProperty( "name" ) ).thenReturn( "testName" );
+    when( v.getProperty( "zzz" ) ).thenReturn( "last" );
+    when( v.getProperty( "type" ) ).thenReturn( "testType" );
+
+    MetaverseNode spyNode = spy( node );
+
+    assertNull( spyNode.logicalIdPropertyKeys );
+    spyNode.setLogicalIdPropertyKeys(  "type", "zzz", "name" );
+
+    verify( spyNode ).generateLogicalId();
+    verify( spyNode ).setProperty( eq( "logicalId" ), anyString() );
+
+    // logical id should be sorted based on key
+    assertEquals( "[name=testName][type=testType][zzz=last]", spyNode.getLogicalId() );
+    assertNotNull( spyNode.logicalIdPropertyKeys );
+    assertEquals( 3, spyNode.logicalIdPropertyKeys.size() );
+  }
+
+  @Test
+  public void testGetLogicalId_noLogicalId() throws Exception {
+    MetaverseNode node = new MetaverseNode( v );
+    when( v.getProperty( "name" ) ).thenReturn( "testName" );
+    when( v.getProperty( "type" ) ).thenReturn( "testType" );
+    when( v.getId() ).thenReturn( "myId" );
+
+    assertNull( node.logicalIdPropertyKeys );
+    assertEquals( "myId", node.getLogicalId() );
+  }
 }

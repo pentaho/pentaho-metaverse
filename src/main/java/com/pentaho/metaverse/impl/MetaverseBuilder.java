@@ -243,7 +243,19 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    */
   protected Vertex getVertexForNode( IMetaverseNode node ) {
     if ( node != null ) {
-      return graph.getVertex( node.getStringID() );
+      Vertex vertex = graph.getVertex( node.getStringID() );
+
+      if ( vertex == null && !node.getLogicalId().equals( node.getStringID() ) ) {
+        // check for matching logicalIds
+        Iterable<Vertex> logicalMatches = graph.getVertices( "logicalId", node.getLogicalId() );
+        for ( Vertex match : logicalMatches ) {
+          // just return the first match for now
+          vertex = match;
+          break;
+        }
+      }
+
+      return vertex;
     } else {
       return null;
     }
