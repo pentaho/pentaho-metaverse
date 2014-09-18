@@ -22,18 +22,19 @@
 
 package com.pentaho.metaverse.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.VertexQuery;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The MetaverseNode class is a wrapper around a corresponding Blueprints Vertex object, and delegates all methods to
@@ -47,6 +48,9 @@ public class MetaverseNode implements IMetaverseNode {
    * The Blueprints-backed Vertex for this metaverse node
    */
   protected Vertex v;
+
+  protected Set<String> logicalIdPropertyKeys;
+  private String logicalId;
 
   /**
    * Private constructor to prevent instantiation without an ID or backing Vertex
@@ -274,4 +278,46 @@ public class MetaverseNode implements IMetaverseNode {
     v.remove();
   }
 
+  /**
+   * Gets a string representation of what makes this node logically unique. If no logicalId is present, then
+   * getStringId() is returned instead
+   * @return
+   */
+  @Override
+  public String getLogicalId() {
+    return logicalId == null ? getStringID() : logicalId;
+  }
+
+  /**
+   * Sets the property names that should be used in generating a logical id. Setting this should result in a logicalId
+   * being generated based on the keys passed in and the properties on the node. That id should be returned when
+   * getLogicalId is called.
+   * @param keys property keys that indicate what makes this node logically unique
+   */
+  @Override
+  public void setLogicalIdPropertyKeys( String... keys ) {
+
+    if ( logicalIdPropertyKeys == null ) {
+      logicalIdPropertyKeys = new TreeSet<String>();
+    }
+
+    logicalIdPropertyKeys.addAll( Arrays.asList( keys ) );
+    generateLogicalId();
+  }
+
+  protected void generateLogicalId() {
+    if ( logicalIdPropertyKeys != null && logicalIdPropertyKeys.size() > 0 ) {
+      StringBuilder sb = new StringBuilder();
+      for ( String key : logicalIdPropertyKeys ) {
+        sb.append( "[" ).append( key ).append( "=" );
+        Object prop = getProperty( key );
+        if ( prop != null ) {
+          sb.append( prop.toString() );
+        }
+        sb.append( "]" );
+      }
+      logicalId = sb.toString();
+      setProperty( "logicalId", logicalId );
+    }
+  }
 }

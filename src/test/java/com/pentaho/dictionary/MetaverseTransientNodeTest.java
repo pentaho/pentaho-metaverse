@@ -20,9 +20,10 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl;
+package com.pentaho.dictionary;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import org.junit.After;
@@ -93,4 +94,34 @@ public class MetaverseTransientNodeTest {
     assertEquals( myNode.getType(), "myType" );
   }
 
+  @Test
+  public void testSetLogicalIdPropertyKeys() throws Exception {
+    MetaverseTransientNode myNode = new MetaverseTransientNode();
+    myNode.setName( "testName" );
+    myNode.setType( "testType" );
+    myNode.setProperty( "zzz", "last" );
+    assertNull( myNode.logicalIdPropertyKeys );
+
+    myNode.setLogicalIdPropertyKeys( "zzz", "name", "type" );
+
+    // logical id should be sorted based on key
+    assertEquals( "[name=testName][type=testType][zzz=last]", myNode.getLogicalId() );
+    assertNotNull( myNode.logicalIdPropertyKeys );
+    assertEquals( 3, myNode.logicalIdPropertyKeys.size() );
+
+  }
+
+  @Test
+  public void testGetLogicalId_noLogicalId() throws Exception {
+    MetaverseTransientNode myNode = new MetaverseTransientNode();
+    myNode.setName( "testName" );
+    myNode.setType( "testType" );
+    myNode.setProperty( "zzz", "last" );
+    myNode.setStringID( "myId" );
+
+    assertNull( myNode.logicalIdPropertyKeys );
+
+    // if we never setLogicalIdPropertyKeys then getLogicalId should return the id
+    assertEquals( "myId", myNode.getLogicalId() );
+  }
 }

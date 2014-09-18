@@ -78,6 +78,12 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
     boolean shared = dbMeta.isShared();
     node.setProperty( "shared", shared );
 
+    if ( accessTypeDesc != null && accessTypeDesc.equals( "JNDI" ) ) {
+      node.setLogicalIdPropertyKeys( "name" );
+    } else {
+      node.setLogicalIdPropertyKeys( "hostName", "port", "user" );
+    }
+
     metaverseBuilder.addNode( node );
 
     return node;

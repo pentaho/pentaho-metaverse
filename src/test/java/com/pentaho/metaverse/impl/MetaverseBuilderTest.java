@@ -297,6 +297,8 @@ public class MetaverseBuilderTest {
     link.setFromNode( mockFrom );
 
     when( mockFrom.getStringID() ).thenReturn( "not in graph" );
+    when( mockFrom.getLogicalId() ).thenReturn( "not in graph" );
+    
     // now lets try to delete the link
     builder.deleteLink( link );
 
