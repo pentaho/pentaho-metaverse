@@ -228,15 +228,16 @@ public class MetaverseValidationIT {
         assertEquals( jobEntry.getName(), jobEntryNode.getName() );
         assertEquals( jobEntry.getDescription(), jobEntryNode.getDescription() );
         assertEquals( "Incorrect type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getType() );
-        assertEquals( "Incorrect entity type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getEntity().getName() );
+        assertEquals( "Incorrect entity type", DictionaryConst.NODE_TYPE_JOB_ENTRY,
+            jobEntryNode.getEntity().getName() );
         matchCount++;
       }
 
       assertEquals( "Not all job entries are accounted for in the graph for Job [" + jobMeta.getName() + "]",
-        numJobEntries, matchCount );
+          numJobEntries, matchCount );
 
       assertEquals( "Incorrect number of job entries for in the graph for Job [" + jobMeta.getName() + "]",
-        numJobEntries, getIterableSize( jobNode.getJobEntryNodes() ) );
+          numJobEntries, getIterableSize( jobNode.getJobEntryNodes() ) );
 
       // it should be contained in a "Locator" node
       jobNode.getLocator();
@@ -263,10 +264,10 @@ public class MetaverseValidationIT {
       }
 
       assertEquals( "Not all transformation steps are modeled in the graph for [" + tm.getName() + "]",
-        transMetaSteps.size(), matchCount );
+          transMetaSteps.size(), matchCount );
 
       assertEquals( "Incorrect number of Steps in the graph for transformation [" + tm.getName() + "]",
-        transMetaSteps.size(), stepCount );
+          transMetaSteps.size(), stepCount );
 
     }
   }
@@ -283,7 +284,6 @@ public class MetaverseValidationIT {
     assertEquals( 4, countCreates );
     assertEquals( 3, countDeletes );
     assertEquals( "Select values", selectValues.getStepType() );
-
 
     // verify the nodes created by the step
     for ( StreamFieldNode node : selectValues.getStreamFieldNodesCreates() ) {
@@ -360,12 +360,13 @@ public class MetaverseValidationIT {
     assertEquals( countUsesFieldNodes - 1, countCreatesFieldNodes );
 
     String filenameField = null;
-    TransMeta tm = new TransMeta( new FileInputStream( textFileInputStepNode.getTransNode().getPath() ), null, true, null, null );
+    TransMeta tm =
+        new TransMeta( new FileInputStream( textFileInputStepNode.getTransNode().getPath() ), null, true, null, null );
     for ( StepMeta stepMeta : tm.getSteps() ) {
       if ( stepMeta.getName().equals( textFileInputStepNode.getName() ) ) {
-        TextFileInputMeta meta = (TextFileInputMeta)getBaseStepMetaFromStepMeta( stepMeta );
+        TextFileInputMeta meta = (TextFileInputMeta) getBaseStepMetaFromStepMeta( stepMeta );
         assertTrue( meta.isAcceptingFilenames() );
-        filenameField =  meta.getAcceptingField();
+        filenameField = meta.getAcceptingField();
         assertNotNull( filenameField );
 
         // this was the one we cared about...
@@ -380,7 +381,7 @@ public class MetaverseValidationIT {
 
     for ( StreamFieldNode deletedFieldNode : deletedFieldNodes ) {
       assertEquals( "Should delete the stream field that defines the source files",
-        filenameField, deletedFieldNode.getName() );
+          filenameField, deletedFieldNode.getName() );
     }
   }
 
@@ -417,12 +418,12 @@ public class MetaverseValidationIT {
   public void testTableOutputStepNode() throws Exception {
     // this tests a specific step in a specific transform
     TableOutputStepNode tableOutputStepNode = root.getTableOutputStepNode();
-    TransMeta tm = new TransMeta( tableOutputStepNode.getTransNode().getPath(), null, true, null, null);
+    TransMeta tm = new TransMeta( tableOutputStepNode.getTransNode().getPath(), null, true, null, null );
 
     // check the table that it writes to
     for ( StepMeta step : tm.getSteps() ) {
       if ( tableOutputStepNode.getName().equals( step.getName() ) ) {
-        TableOutputMeta meta = (TableOutputMeta)getBaseStepMetaFromStepMeta( step );
+        TableOutputMeta meta = (TableOutputMeta) getBaseStepMetaFromStepMeta( step );
         String tableName = meta.getTableName();
         assertEquals( tableName, tableOutputStepNode.getDatabaseTable().getName() );
 
@@ -433,15 +434,15 @@ public class MetaverseValidationIT {
         // they should all populate a db column
         for ( StreamFieldNode fieldNode : uses ) {
           assertNotNull( "Used field does not populate anything [" + fieldNode.getName() + "]",
-            fieldNode.getFieldPopulatedByMe() );
+              fieldNode.getFieldPopulatedByMe() );
           assertEquals( "Stream Field [" + fieldNode.getName() + "] populates the wrong kind of node",
-            DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
+              DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
         }
 
         int countDbConnections = getIterableSize( tableOutputStepNode.getDatasources() );
-        for( DatabaseMeta dbMeta : meta.getUsedDatabaseConnections() ) {
+        for ( DatabaseMeta dbMeta : meta.getUsedDatabaseConnections() ) {
           assertNotNull( "Datasource is not used but should be [" + dbMeta.getName() + "]",
-            tableOutputStepNode.getDatasource( dbMeta.getName() ) );
+              tableOutputStepNode.getDatasource( dbMeta.getName() ) );
         }
         assertEquals( meta.getUsedDatabaseConnections().length, countDbConnections );
 
@@ -548,7 +549,7 @@ public class MetaverseValidationIT {
 
   private String convertNumericStatusToString( int transactionStatus ) {
     String status = null;
-    switch( transactionStatus ) {
+    switch ( transactionStatus ) {
       case 1:
         status = "DRAFT";
         break;
