@@ -40,7 +40,7 @@
 
   <properties>
     <platform.plugin.name>metaverse</platform.plugin.name>
-    <blueprints-core.version>2.5.0</blueprints-core.version>
+    <blueprints-core.version>2.6.0</blueprints-core.version>
     <pentaho-platform-api.version>METAVERSE-SNAPSHOT</pentaho-platform-api.version>
     <pentaho-platform-core.version>TRUNK-SNAPSHOT</pentaho-platform-core.version>
     <pentaho-platform-repository.version>TRUNK-SNAPSHOT</pentaho-platform-repository.version>
