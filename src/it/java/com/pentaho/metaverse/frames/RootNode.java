@@ -76,4 +76,9 @@ public interface RootNode extends FramedMetaverseNode {
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == name}.as('step').in('contains').has('name', T.eq, 'value_mapper').back('step')" )
   public ValueMapperStepNode getValueMapperStepNode( @GremlinParam( "name" ) String name );
+
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == stepName}.as('step').in('contains').has('name', T.eq, transformationName).back('step')" )
+  public TextFileOutputStepNode getTextFileOutputStepNode(
+    @GremlinParam( "transformationName" ) String transformationName,
+    @GremlinParam( "stepName" ) String stepName );
 }

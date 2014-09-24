@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
@@ -90,25 +89,15 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
       // add a link from the file(s) being read to the step
       for ( String fileName : fileNames ) {
         if ( !Const.isEmpty( fileName ) ) {
-
-          String normalized = null;
           try {
-            normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
+            // first add the node for the file
+            IMetaverseNode textFileNode = createFileNode( fileName, descriptor );
+            metaverseBuilder.addNode( textFileNode );
+
+            metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
           } catch ( MetaverseException e ) {
             log.error( e.getMessage(), e );
           }
-
-          // first add the node for the file
-          IMetaverseComponentDescriptor fileDescriptor = getChildComponentDescriptor(
-              descriptor,
-              normalized,
-              DictionaryConst.NODE_TYPE_FILE,
-              descriptor.getContext() );
-          IMetaverseNode textFileNode = createNodeFromDescriptor( fileDescriptor );
-          textFileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
-          metaverseBuilder.addNode( textFileNode );
-
-          metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
         }
       }
     }

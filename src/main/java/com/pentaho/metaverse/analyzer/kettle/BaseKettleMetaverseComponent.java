@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IAnalysisContext;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
@@ -30,6 +31,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.MetaverseException;
 
 import java.io.Serializable;
 
@@ -97,5 +99,17 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
           descriptor.getNamespaceId(),
           descriptor.getName(),
           descriptor.getType() );
+  }
+
+  protected IMetaverseNode createFileNode( String fileName, IMetaverseComponentDescriptor descriptor ) throws MetaverseException {
+    String normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
+
+    IMetaverseNode fileNode = createNodeFromDescriptor(
+      getChildComponentDescriptor( descriptor, normalized, DictionaryConst.NODE_TYPE_FILE, descriptor.getContext() ) );
+
+    fileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
+    fileNode.setLogicalIdPropertyKeys( DictionaryConst.PROPERTY_PATH );
+
+    return fileNode;
   }
 }
