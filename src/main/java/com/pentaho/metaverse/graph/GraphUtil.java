@@ -1,9 +1,9 @@
 package com.pentaho.metaverse.graph;
 
-import java.util.Set;
-
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+
+import java.util.Set;
 
 /**
  * A utility class for graphs

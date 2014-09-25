@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.metaverse.api.IDocumentAnalyzerProvider;
-
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;

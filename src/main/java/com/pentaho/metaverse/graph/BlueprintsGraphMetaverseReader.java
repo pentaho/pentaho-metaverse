@@ -1,5 +1,21 @@
 package com.pentaho.metaverse.graph;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
+import com.pentaho.dictionary.MetaverseLink;
+import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.impl.MetaverseNode;
+import com.pentaho.metaverse.messages.Messages;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.pentaho.platform.api.metaverse.IMetaverseLink;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,23 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.pentaho.metaverse.messages.Messages;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
-import com.pentaho.dictionary.MetaverseLink;
-import com.pentaho.metaverse.api.IMetaverseReader;
-import com.pentaho.metaverse.impl.MetaverseNode;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 /**
  * An implementation of an IMetaverseReader that uses a Blueprints graph as the underlying storage

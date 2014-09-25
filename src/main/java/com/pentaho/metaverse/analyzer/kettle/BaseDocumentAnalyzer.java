@@ -57,7 +57,7 @@ public abstract class BaseDocumentAnalyzer extends BaseKettleMetaverseComponent 
     // This will create a virtual node that will line up with the correct
     // locator node for this document in the graph.
     IMetaverseNode locatorNode =
-        metaverseObjectFactory.createNodeObject( descriptor.getParentNamespace().getNamespaceId() );
+        metaverseObjectFactory.createNodeObject( descriptor.getStringID() );
 
     metaverseBuilder.addLink( locatorNode, DictionaryConst.LINK_CONTAINS, child );
 

@@ -22,7 +22,9 @@
 
 package com.pentaho.metaverse.impl;
 
+import com.pentaho.dictionary.DictionaryConst;
 import org.pentaho.platform.api.metaverse.IAnalysisContext;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.INamespace;
 
@@ -32,6 +34,9 @@ import org.pentaho.platform.api.metaverse.INamespace;
  * @author jdixon
  */
 public class MetaverseDocument extends PropertiesHolder implements IMetaverseDocument {
+
+  protected ILogicalIdGenerator logicalIdGenerator = DictionaryConst.LOGICAL_ID_GENERATOR_DEFAULT;
+  private String logicalId;
 
   /**
    * The content of this document.
@@ -177,14 +182,8 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
     return namespace.getParentNamespace();
   }
 
-  /**
-   * get the name space for the current level entity
-   *
-   * @param child the string representation of hte current entity's contribution to the namespace path
-   * @return the namespace object for the entity represented by child
-   */
-  @Override public INamespace getChildNamespace( String child, String type ) {
-    return namespace.getChildNamespace( child, type );
+  @Override public INamespace getSiblingNamespace( String name, String type ) {
+    return namespace.getSiblingNamespace( name, type );
   }
 
   /**
@@ -205,5 +204,27 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
   @Override
   public void setContext( IAnalysisContext context ) {
     this.context = context;
+  }
+  /**
+   * Gets a string representation of what makes this node logically unique. If no logicalId is present, then
+   * getStringId() is returned instead
+   * @return
+   */
+  @Override
+  public String getLogicalId() {
+    if ( logicalIdGenerator == null ) {
+      return getStringID();
+    } else if ( logicalId == null || isDirty() ) {
+      logicalId = logicalIdGenerator.generateId( this );
+    }
+
+    return logicalId == null ? getStringID() : logicalId;
+  }
+
+  @Override
+  public void setLogicalIdGenerator( ILogicalIdGenerator idGenerator ) {
+    // clear out the logicalId so it will be re-generated on the next call to getLogicalId
+    logicalId = null;
+    logicalIdGenerator = idGenerator;
   }
 }

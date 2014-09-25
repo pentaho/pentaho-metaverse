@@ -1,7 +1,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
@@ -29,18 +28,11 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SelectValuesStepAnalyzerTest {
@@ -74,11 +66,11 @@ public class SelectValuesStepAnalyzerTest {
   public void setUp() throws Exception {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
-    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+//    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
     when( namespace.getNamespaceId() ).thenReturn( "namespace" );
     when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+//    when( descriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( descriptor.getParentNamespace() ).thenReturn( namespace );
     when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
 

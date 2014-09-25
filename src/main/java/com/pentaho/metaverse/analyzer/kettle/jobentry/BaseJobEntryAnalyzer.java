@@ -25,6 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.jobentry;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponentWithDatabases;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
@@ -120,10 +121,10 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
           if ( dbAnalyzer != null ) {
             for ( DatabaseMeta db : dbs ) {
               try {
-                IMetaverseComponentDescriptor dbDescriptor = getChildComponentDescriptor(
-                    descriptor,
+                IMetaverseComponentDescriptor dbDescriptor = new MetaverseComponentDescriptor(
                     db.getName(),
                     DictionaryConst.NODE_TYPE_DATASOURCE,
+                    descriptor.getNamespace(),
                     descriptor.getContext() );
                 IMetaverseNode dbNode = dbAnalyzer.analyze( dbDescriptor, db );
                 metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );

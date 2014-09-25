@@ -22,13 +22,12 @@
 
 package com.pentaho.metaverse.api;
 
-import java.util.List;
-
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Graph;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Graph;
+import java.util.List;
 
 /**
  * The IMetaverseReader provides low-level methods for retrieving entities from the metaverse, such as nodes, links, and

@@ -22,7 +22,6 @@
 
 package com.pentaho.metaverse.locator;
 
-import com.pentaho.metaverse.api.INamespaceFactory;
 import com.pentaho.metaverse.impl.MetaverseDocument;
 import com.pentaho.metaverse.impl.MetaverseNode;
 import com.tinkerpop.blueprints.Vertex;
@@ -46,11 +45,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
 
@@ -60,9 +57,6 @@ public class RepositoryLocatorTest {
 
   @Mock
   Future<String> futureTask;
-
-  @Mock
-  INamespaceFactory namespaceFactory;
 
   @Mock
   IMetaverseBuilder metaverseBuilder;

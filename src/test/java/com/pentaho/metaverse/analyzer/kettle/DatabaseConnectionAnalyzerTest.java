@@ -22,14 +22,8 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -37,14 +31,20 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * This class tests the DatabaseConnectionAnalyzer methods.
@@ -125,7 +125,15 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Test
   public void testAnalyze() {
-
+    when( builder.addNode( any( IMetaverseNode.class ) ) ).thenAnswer( new Answer<Object>() {
+      @Override public Object answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        // add the logicalId to the node like it does in the real builder
+        IMetaverseNode node = (IMetaverseNode)args[0];
+        node.setProperty( DictionaryConst.PROPERTY_LOGICAL_ID, node.getLogicalId() );
+        return builder;
+      }
+    } );
     try {
       IMetaverseNode node = dbConnectionAnalyzer.analyze( mockDescriptor, databaseMeta );
       assertNotNull( node );

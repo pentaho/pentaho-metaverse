@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
@@ -56,10 +57,10 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
     if ( fields != null ) {
       for ( TextFileInputField field : fields ) {
         String fieldName = field.getName();
-        IMetaverseComponentDescriptor fileFieldDescriptor = getChildComponentDescriptor(
-            descriptor,
+        IMetaverseComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
             fieldName,
             DictionaryConst.NODE_TYPE_FILE_FIELD,
+            descriptor.getNamespace(),
             descriptor.getContext() );
         IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
         metaverseBuilder.addNode( fieldNode );
@@ -113,5 +114,4 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
       }
     };
   }
-
 }

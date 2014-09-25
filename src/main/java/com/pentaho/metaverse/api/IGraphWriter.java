@@ -22,10 +22,10 @@
 
 package com.pentaho.metaverse.api;
 
+import com.tinkerpop.blueprints.Graph;
+
 import java.io.IOException;
 import java.io.OutputStream;
-
-import com.tinkerpop.blueprints.Graph;
 
 /**
  * The IGraphWriter interface allows for a Graph object to be written to an output stream.

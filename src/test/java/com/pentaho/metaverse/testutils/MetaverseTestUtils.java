@@ -22,9 +22,8 @@
 
 package com.pentaho.metaverse.testutils;
 
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-
 import com.pentaho.metaverse.impl.MetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
 /**
  * @author mburgess

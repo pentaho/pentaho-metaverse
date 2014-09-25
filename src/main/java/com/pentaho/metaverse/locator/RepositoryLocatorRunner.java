@@ -22,13 +22,13 @@
 
 package com.pentaho.metaverse.locator;
 
-import java.util.List;
-
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * A runnable (and stoppable) class for crawling a Pentaho repository for documents

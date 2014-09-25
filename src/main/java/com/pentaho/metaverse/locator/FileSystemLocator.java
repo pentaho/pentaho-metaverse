@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.locator;
 
 import com.pentaho.metaverse.messages.Messages;
-
 import org.apache.commons.io.FileUtils;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.MetaverseLocatorException;

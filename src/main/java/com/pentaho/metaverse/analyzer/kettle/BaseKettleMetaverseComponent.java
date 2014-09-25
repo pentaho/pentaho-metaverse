@@ -23,17 +23,17 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IAnalysisContext;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
 import org.pentaho.platform.api.metaverse.MetaverseException;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverseBuilder, Serializable {
 
@@ -67,49 +67,60 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     return metaverseBuilder;
   }
 
-  protected IMetaverseComponentDescriptor getChildComponentDescriptor(
-      IMetaverseComponentDescriptor parentDescriptor, String name, String type, IAnalysisContext context ) {
-    return new MetaverseComponentDescriptor( name, type,
-        parentDescriptor == null ? null : parentDescriptor.getChildNamespace( name, type ),
-        context );
-  }
-
-  protected IMetaverseComponentDescriptor getChildComponentDescriptor(
-      INamespace namespace, String name, String type, IAnalysisContext context ) {
-    IMetaverseComponentDescriptor mcd = new MetaverseComponentDescriptor( name, type, namespace, context );
-    return getChildComponentDescriptor( mcd, name, type, context );
-  }
-
   protected INamespace getSiblingNamespace( INamespace namespace, String siblingName, String siblingType ) {
     if ( namespace == null ) {
       return null;
     }
-    INamespace parentNamespace = namespace.getParentNamespace();
-    if ( parentNamespace == null ) {
-      return null;
-    } else {
-      return parentNamespace.getChildNamespace( siblingName, siblingType );
-    }
+    return namespace.getSiblingNamespace( siblingName, siblingType );
   }
 
   protected IMetaverseNode createNodeFromDescriptor( IMetaverseComponentDescriptor descriptor ) {
-    return descriptor == null
-        ? null
-        : metaverseObjectFactory.createNodeObject(
-          descriptor.getNamespaceId(),
-          descriptor.getName(),
-          descriptor.getType() );
+    return createNodeFromDescriptor( descriptor, getLogicalIdGenerator() );
+  }
+
+  protected IMetaverseNode createNodeFromDescriptor(
+    IMetaverseComponentDescriptor descriptor, ILogicalIdGenerator idGenerator ) {
+
+    String uuid = UUID.randomUUID().toString();
+
+    IMetaverseNode node = null;
+    if ( descriptor != null ) {
+      node = metaverseObjectFactory.createNodeObject(
+        uuid,
+        descriptor.getName(),
+        descriptor.getType() );
+
+      if ( idGenerator.getLogicalIdPropertyKeys().contains( DictionaryConst.PROPERTY_NAMESPACE )
+        && descriptor.getParentNamespace() != null ) {
+        node.setProperty( DictionaryConst.PROPERTY_NAMESPACE, descriptor.getNamespace().getNamespaceId() );
+      }
+      node.setLogicalIdGenerator( idGenerator );
+    }
+    return node;
   }
 
   protected IMetaverseNode createFileNode( String fileName, IMetaverseComponentDescriptor descriptor ) throws MetaverseException {
     String normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
+    IMetaverseNode fileNode = null;
 
-    IMetaverseNode fileNode = createNodeFromDescriptor(
-      getChildComponentDescriptor( descriptor, normalized, DictionaryConst.NODE_TYPE_FILE, descriptor.getContext() ) );
+    INamespace ns = descriptor.getNamespace();
+    INamespace parentNs = ns.getParentNamespace();
+
+    if ( descriptor != null ) {
+
+      fileNode = metaverseObjectFactory.createNodeObject(
+        parentNs == null ? ns : parentNs,
+        normalized,
+        DictionaryConst.NODE_TYPE_FILE );
+    }
 
     fileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
-    fileNode.setLogicalIdPropertyKeys( DictionaryConst.PROPERTY_PATH );
+    fileNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_FILE );
 
     return fileNode;
+  }
+
+  protected ILogicalIdGenerator getLogicalIdGenerator() {
+    return DictionaryConst.LOGICAL_ID_GENERATOR_DEFAULT;
   }
 }

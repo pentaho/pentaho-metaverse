@@ -22,27 +22,26 @@
 
 package com.pentaho.metaverse.impl;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
-
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Vertex;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
-
-import com.tinkerpop.blueprints.Vertex;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * @author mburgess
@@ -338,34 +337,27 @@ public class MetaverseNodeTest {
   }
 
   @Test
-  public void testSetLogicalIdPropertyKeys() throws Exception {
+  public void testGetLogicalId() throws Exception {
     MetaverseNode node = new MetaverseNode( v );
     when( v.getProperty( "name" ) ).thenReturn( "testName" );
     when( v.getProperty( "zzz" ) ).thenReturn( "last" );
     when( v.getProperty( "type" ) ).thenReturn( "testType" );
 
     MetaverseNode spyNode = spy( node );
+    when( spyNode.getPropertyKeys() ).thenReturn( new HashSet<String>() {{
+      add( "name" );
+      add( "type" );
+      add( "zzz" );
+    }} );
+    // should be using the default logical id generator initially
+    assertEquals( "{\"name\":\"testName\",\"namespace\":\"\",\"type\":\"testType\"}", spyNode.getLogicalId() );
 
-    assertNull( spyNode.logicalIdPropertyKeys );
-    spyNode.setLogicalIdPropertyKeys(  "type", "zzz", "name" );
-
-    verify( spyNode ).generateLogicalId();
-    verify( spyNode ).setProperty( eq( "logicalId" ), anyString() );
+    ILogicalIdGenerator idGenerator = new MetaverseLogicalIdGenerator( "type", "zzz", "name" );
+    spyNode.setLogicalIdGenerator( idGenerator );
+    assertNotNull( spyNode.logicalIdGenerator );
 
     // logical id should be sorted based on key
-    assertEquals( "[name=testName][type=testType][zzz=last]", spyNode.getLogicalId() );
-    assertNotNull( spyNode.logicalIdPropertyKeys );
-    assertEquals( 3, spyNode.logicalIdPropertyKeys.size() );
+    assertEquals( "{\"name\":\"testName\",\"type\":\"testType\",\"zzz\":\"last\"}", spyNode.getLogicalId() );
   }
 
-  @Test
-  public void testGetLogicalId_noLogicalId() throws Exception {
-    MetaverseNode node = new MetaverseNode( v );
-    when( v.getProperty( "name" ) ).thenReturn( "testName" );
-    when( v.getProperty( "type" ) ).thenReturn( "testType" );
-    when( v.getId() ).thenReturn( "myId" );
-
-    assertNull( node.logicalIdPropertyKeys );
-    assertEquals( "myId", node.getLogicalId() );
-  }
 }

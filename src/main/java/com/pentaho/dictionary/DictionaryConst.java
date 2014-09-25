@@ -1,5 +1,8 @@
 package com.pentaho.dictionary;
 
+import com.pentaho.metaverse.impl.MetaverseLogicalIdGenerator;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
+
 /**
  * Constants used in the graph building and reading.
  * All data flow links must be left to right (source to destination).
@@ -110,6 +113,32 @@ public class DictionaryConst {
    * textual representation of the data type used in kettle
    */
   public static final String PROPERTY_KETTLE_TYPE = "kettleType";
+
+  /**
+   * Property key for the "logicalId", the value for the property should represent what logically identifies this node
+   * as unique
+   */
+  public static final String PROPERTY_LOGICAL_ID = "logicalId";
+
+  /**
+   * Property key for the "hostName"
+   */
+  public static final String PROPERTY_HOST_NAME = "hostName";
+
+  /**
+   * Property key for the "hostName"
+   */
+  public static final String PROPERTY_USER_NAME = "userName";
+
+  /**
+   * Property key for the "hostName"
+   */
+  public static final String PROPERTY_PORT = "port";
+
+  /**
+   * Property key for namespace, the value for the property should represent the namespace that isolates this node
+   */
+  public static final String PROPERTY_NAMESPACE = "namespace";
 
   /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
@@ -368,6 +397,42 @@ public class DictionaryConst {
    * The default context for metaverse descriptors
    */
   public static final String CONTEXT_DEFAULT = CONTEXT_STATIC;
+
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DEFAULT = new MetaverseLogicalIdGenerator( new String[] {
+    PROPERTY_NAMESPACE,
+    PROPERTY_TYPE,
+    PROPERTY_NAME,
+  } );
+
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_FILE = new MetaverseLogicalIdGenerator( new String[] {
+    PROPERTY_PATH,
+    PROPERTY_NAMESPACE
+  } );
+
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_JDBC = new MetaverseLogicalIdGenerator( new String[] {
+    PROPERTY_TYPE,
+    PROPERTY_HOST_NAME,
+    PROPERTY_USER_NAME,
+    PROPERTY_PORT,
+    "accessTypeDesc"
+  } );
+
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_JNDI = new MetaverseLogicalIdGenerator( new String[] {
+    PROPERTY_TYPE,
+    PROPERTY_NAME,
+    "accessTypeDesc"
+  } );
+
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_LOCATOR = new MetaverseLogicalIdGenerator( new String[] {
+    PROPERTY_TYPE,
+    PROPERTY_NAME
+  } );
+
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DOCUMENT = new MetaverseLogicalIdGenerator( new String[] {
+    PROPERTY_TYPE,
+    PROPERTY_PATH,
+    PROPERTY_NAMESPACE
+  } );
 
   /**
    * Hides the constructor so that this class cannot be instanced

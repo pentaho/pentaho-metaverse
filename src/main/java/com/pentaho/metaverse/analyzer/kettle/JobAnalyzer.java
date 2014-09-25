@@ -26,6 +26,8 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.impl.Namespace;
 import com.pentaho.metaverse.impl.PropertiesHolder;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
@@ -38,6 +40,7 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
@@ -100,18 +103,15 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     Job j = new Job( null, jobMeta );
     j.setInternalKettleVariables( jobMeta );
 
-    IMetaverseComponentDescriptor documentDescriptor =
-        getChildComponentDescriptor(
-            descriptor,
-            document.getStringID(),
-            DictionaryConst.NODE_TYPE_JOB,
-            descriptor.getContext() );
+    IMetaverseComponentDescriptor documentDescriptor = new MetaverseComponentDescriptor( document.getStringID(),
+      DictionaryConst.NODE_TYPE_JOB, new Namespace( descriptor.getLogicalId() ), descriptor.getContext() );
 
     // Create a metaverse node and start filling in details
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        documentDescriptor.getStringID(),
-        jobMeta.getName(),
-        DictionaryConst.NODE_TYPE_JOB );
+      document.getNamespace(),
+      jobMeta.getName(),
+      DictionaryConst.NODE_TYPE_JOB );
+    node.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
 
     // pull out the standard fields
     String description = jobMeta.getDescription();
@@ -185,11 +185,10 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
         if ( entry != null ) {
           IMetaverseNode jobEntryNode = null;
           JobEntryInterface jobEntryInterface = entry.getEntry();
-          IMetaverseComponentDescriptor entryDescriptor = getChildComponentDescriptor(
-              documentDescriptor,
-              entry.getName(),
-              DictionaryConst.NODE_TYPE_JOB_ENTRY,
-              descriptor.getContext() );
+
+          IMetaverseComponentDescriptor entryDescriptor = new MetaverseComponentDescriptor( entry.getName(),
+            DictionaryConst.NODE_TYPE_JOB_ENTRY, node, descriptor.getContext() );
+
           Set<IJobEntryAnalyzer> jobEntryAnalyzers = getJobEntryAnalyzers( jobEntryInterface );
           if ( jobEntryAnalyzers != null && !jobEntryAnalyzers.isEmpty() ) {
             for ( IJobEntryAnalyzer jobEntryAnalyzer : jobEntryAnalyzers ) {
@@ -220,27 +219,19 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
       JobHopMeta hop = jobMeta.getJobHop( i );
       JobEntryCopy fromEntry = hop.getFromEntry();
       JobEntryCopy toEntry = hop.getToEntry();
+      INamespace childNs = new Namespace( node.getLogicalId() );
+
       // process legitimate hops
       if ( fromEntry != null && toEntry != null ) {
-        IMetaverseComponentDescriptor fromEntryDescriptor = getChildComponentDescriptor(
-            documentDescriptor,
-            fromEntry.getName(),
-            DictionaryConst.NODE_TYPE_JOB_ENTRY,
-            descriptor.getContext() );
         IMetaverseNode fromEntryNode = metaverseObjectFactory.createNodeObject(
-            fromEntryDescriptor.getStringID(),
-            fromEntryDescriptor.getName(),
-            DictionaryConst.NODE_TYPE_JOB_ENTRY );
+          childNs,
+          fromEntry.getName(),
+          DictionaryConst.NODE_TYPE_JOB_ENTRY );
 
-        IMetaverseComponentDescriptor toEntryDescriptor = getChildComponentDescriptor(
-            documentDescriptor,
-            toEntry.getName(),
-            DictionaryConst.NODE_TYPE_JOB_ENTRY,
-            descriptor.getContext() );
         IMetaverseNode toEntryNode = metaverseObjectFactory.createNodeObject(
-            toEntryDescriptor.getStringID(),
-            toEntryDescriptor.getName(),
-            DictionaryConst.NODE_TYPE_JOB_ENTRY );
+          childNs,
+          toEntry.getName(),
+          DictionaryConst.NODE_TYPE_JOB_ENTRY );
 
         metaverseBuilder.addLink( fromEntryNode, DictionaryConst.LINK_HOPSTO, toEntryNode );
       }

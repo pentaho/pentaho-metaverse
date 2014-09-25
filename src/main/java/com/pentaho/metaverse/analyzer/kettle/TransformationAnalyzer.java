@@ -22,34 +22,37 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import java.io.ByteArrayInputStream;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.impl.Namespace;
 import com.pentaho.metaverse.impl.PropertiesHolder;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
-import org.pentaho.di.trans.Trans;
 import org.pentaho.di.core.parameters.UnknownParamException;
+import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransHopMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
+import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The TransformationAnalyzer class is responsible for gathering transformation metadata, creating links
@@ -104,17 +107,15 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     Trans t = new Trans( transMeta );
     t.setInternalKettleVariables( transMeta );
 
-    IMetaverseComponentDescriptor documentDescriptor = getChildComponentDescriptor(
-        descriptor,
-        document.getStringID(),
-        DictionaryConst.NODE_TYPE_TRANS,
-        descriptor.getContext() );
+    IMetaverseComponentDescriptor documentDescriptor = new MetaverseComponentDescriptor( document.getStringID(),
+      DictionaryConst.NODE_TYPE_TRANS, new Namespace( descriptor.getLogicalId() ), descriptor.getContext() );
 
     // Create a metaverse node and start filling in details
     IMetaverseNode node = metaverseObjectFactory.createNodeObject(
-        documentDescriptor.getStringID(),
-        transMeta.getName(),
-        DictionaryConst.NODE_TYPE_TRANS );
+      document.getNamespace(),
+      transMeta.getName(),
+      DictionaryConst.NODE_TYPE_TRANS );
+    node.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
 
     // pull out the standard fields
     String description = transMeta.getDescription();
@@ -188,11 +189,8 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
           }
 
           IMetaverseNode stepNode = null;
-          IMetaverseComponentDescriptor stepDescriptor = getChildComponentDescriptor(
-              documentDescriptor,
-              stepMeta.getName(),
-              DictionaryConst.NODE_TYPE_TRANS_STEP,
-              descriptor.getContext() );
+          IMetaverseComponentDescriptor stepDescriptor = new MetaverseComponentDescriptor( stepMeta.getName(),
+            DictionaryConst.NODE_TYPE_TRANS_STEP, node, documentDescriptor.getContext() );
           Set<IStepAnalyzer> stepAnalyzers = getStepAnalyzers( stepMeta );
           if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
             for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
@@ -220,27 +218,19 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       TransHopMeta hop = transMeta.getTransHop( i );
       StepMeta fromStep = hop.getFromStep();
       StepMeta toStep = hop.getToStep();
+      INamespace childNs = new Namespace( node.getLogicalId() );
+
       // process legitimate hops
       if ( fromStep != null && toStep != null ) {
-        IMetaverseComponentDescriptor fromStepDescriptor = getChildComponentDescriptor(
-            documentDescriptor,
-            fromStep.getName(),
-            DictionaryConst.NODE_TYPE_TRANS_STEP,
-            descriptor.getContext() );
         IMetaverseNode fromStepNode = metaverseObjectFactory.createNodeObject(
-            fromStepDescriptor.getStringID(),
-            fromStepDescriptor.getName(),
-            DictionaryConst.NODE_TYPE_TRANS_STEP );
+          childNs,
+          fromStep.getName(),
+          DictionaryConst.NODE_TYPE_TRANS_STEP );
 
-        IMetaverseComponentDescriptor toStepDescriptor = getChildComponentDescriptor(
-            documentDescriptor,
-            toStep.getName(),
-            DictionaryConst.NODE_TYPE_TRANS_STEP,
-            descriptor.getContext() );
         IMetaverseNode toStepNode = metaverseObjectFactory.createNodeObject(
-            toStepDescriptor.getStringID(),
-            toStepDescriptor.getName(),
-            DictionaryConst.NODE_TYPE_TRANS_STEP );
+          childNs,
+          toStep.getName(),
+          DictionaryConst.NODE_TYPE_TRANS_STEP );
 
         metaverseBuilder.addLink( fromStepNode, DictionaryConst.LINK_HOPSTO, toStepNode );
       }
