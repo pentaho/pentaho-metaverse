@@ -39,6 +39,8 @@
   </developers>
 
   <properties>
+    <pentaho.public.release.repo>http://nexus.pentaho.org/content/repositories/private-release/</pentaho.public.release.repo>
+    <pentaho.public.snapshot.repo>http://nexus.pentaho.org/content/repositories/private-snapshot/</pentaho.public.snapshot.repo>
     <platform.plugin.name>metaverse</platform.plugin.name>
     <blueprints-core.version>2.6.0</blueprints-core.version>
     <pentaho-platform-api.version>METAVERSE-SNAPSHOT</pentaho-platform-api.version>
