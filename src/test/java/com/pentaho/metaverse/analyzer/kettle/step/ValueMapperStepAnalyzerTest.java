@@ -46,9 +46,7 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -84,11 +82,11 @@ public class ValueMapperStepAnalyzerTest {
   public void setUp() throws Exception {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
-    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+//    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
     when( namespace.getNamespaceId() ).thenReturn( "namespace" );
     when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+//    when( descriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( descriptor.getParentNamespace() ).thenReturn( namespace );
     when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
 

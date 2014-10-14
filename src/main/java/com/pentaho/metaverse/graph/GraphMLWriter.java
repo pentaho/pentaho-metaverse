@@ -22,11 +22,11 @@
 
 package com.pentaho.metaverse.graph;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import com.pentaho.metaverse.api.IGraphWriter;
 import com.tinkerpop.blueprints.Graph;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * The GraphMLWriter class contains methods for writing a metaverse graph model in GraphML format
@@ -36,7 +36,12 @@ public class GraphMLWriter implements IGraphWriter {
 
   @Override
   public void outputGraph( Graph graph, OutputStream graphMLOutputStream ) throws IOException {
-    com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter.outputGraph( graph, graphMLOutputStream );
+    com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter writer =
+        new com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter( graph );
+
+    writer.setNormalize( true );
+    writer.outputGraph( graphMLOutputStream );
+    //    com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter.outputGraph( graph, graphMLOutputStream );
   }
 
 }

@@ -22,7 +22,6 @@
 
 package com.pentaho.metaverse.locator;
 
-import com.pentaho.metaverse.api.INamespaceFactory;
 import com.pentaho.metaverse.impl.MetaverseDocument;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,21 +40,13 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.api.metaverse.MetaverseException;
 
 import java.io.File;
-import java.util.concurrent.Future;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
 public class LocatorRunnerTest {
-
-  @Mock
-  INamespaceFactory namespaceFactory;
 
   @Mock
   IMetaverseBuilder metaverseBuilder;

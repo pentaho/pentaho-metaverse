@@ -22,30 +22,29 @@
 
 package com.pentaho.metaverse.locator;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import com.pentaho.metaverse.api.INamespaceFactory;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
+import com.pentaho.metaverse.impl.Namespace;
 import com.pentaho.metaverse.messages.Messages;
-import org.pentaho.platform.api.metaverse.IDocumentListener;
+import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
+import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
 import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.pentaho.platform.api.engine.IPentahoSession;
-
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
-
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Future;
 
 /**
@@ -182,19 +181,27 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
 
     if ( locatorNode == null ) {
 
-      locatorNode = metaverseBuilder.getMetaverseObjectFactory().createNodeObject(
-          getNamespace().getNamespaceId(),
-          getRepositoryId(),
-          DictionaryConst.NODE_TYPE_LOCATOR );
+//      locatorNode = metaverseBuilder.getMetaverseObjectFactory().createNodeObject(
+//          getNamespace().getNamespaceId(),
+//          getRepositoryId(),
+//          DictionaryConst.NODE_TYPE_LOCATOR );
 
-      URI uri = getRootUri();
+      final URI uri = getRootUri();
+      Map<String, Object> props = new HashMap<String, Object>() {
+        {
+          put( DictionaryConst.PROPERTY_NAME, getRepositoryId() );
+          put( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_LOCATOR );
+          if ( uri != null ) {
+            put( "url", uri.normalize().toString() );
+          }
+          // TODO get the description from somewhere else (each locator, e.g.)
+          put( DictionaryConst.PROPERTY_DESCRIPTION, "This is a locator of documents to be analyzed" );
+        }
+      };
 
-      if ( uri != null ) {
-        locatorNode.setProperty( "url", uri.normalize().toString() );
-      }
+      locatorNode = metaverseBuilder.getMetaverseObjectFactory().createNodeObject( getNamespace(),
+        DictionaryConst.LOGICAL_ID_GENERATOR_LOCATOR, props );
 
-      // TODO get the description from somewhere else (each locator, e.g.)
-      locatorNode.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, "This is a locator of documents to be analyzed" );
     }
 
     return locatorNode;
@@ -206,9 +213,13 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
 
   protected INamespace getNamespace() {
 
-    return getNamespaceFactory().createNameSpace( null,
-        getLocatorType().concat( DictionaryHelper.SEPARATOR.concat( getRepositoryId() ) ),
-        DictionaryConst.NODE_TYPE_LOCATOR );
+    IMetaverseNode locatorNode = metaverseBuilder.getMetaverseObjectFactory().createNodeObject(
+      UUID.randomUUID().toString(),
+      getRepositoryId(),
+      DictionaryConst.NODE_TYPE_LOCATOR );
+    locatorNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_LOCATOR );
+
+    return new Namespace( locatorNode.getLogicalId() );
   }
 
   @Override
@@ -250,10 +261,6 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
     LOG.debug( Messages.getString( "DEBUG.Locator.StartScan", getLocatorType() ) );
 
     futureTask = completionService.submit( runner, node.getStringID() );
-  }
-
-  public INamespaceFactory getNamespaceFactory() {
-    return PentahoSystem.get( INamespaceFactory.class );
   }
 
 }

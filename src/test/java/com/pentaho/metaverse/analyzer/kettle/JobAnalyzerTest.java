@@ -26,9 +26,12 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -40,17 +43,19 @@ import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.platform.api.metaverse.*;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -81,7 +86,7 @@ public class JobAnalyzerTest {
   private IMetaverseDocument mockJobDoc;
 
   @Mock
-  private MetaverseNamespace namespace;
+  private INamespace namespace;
 
   private MetaverseComponentDescriptor descriptor;
 
@@ -123,7 +128,6 @@ public class JobAnalyzerTest {
 
     analyzer = new JobAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
 
     when( mockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );

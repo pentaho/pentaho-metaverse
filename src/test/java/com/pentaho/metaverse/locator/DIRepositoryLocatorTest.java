@@ -22,22 +22,9 @@
 
 package com.pentaho.metaverse.locator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.INamespaceFactory;
-import com.pentaho.metaverse.impl.MetaverseNamespace;
+import com.pentaho.metaverse.impl.MetaverseBuilder;
+import com.pentaho.metaverse.impl.MetaverseDocument;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,12 +43,13 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-
-import com.pentaho.metaverse.impl.MetaverseBuilder;
-import com.pentaho.metaverse.impl.MetaverseDocument;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test class for the DIRepositoryLocator
@@ -72,9 +60,6 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 public class DIRepositoryLocatorTest implements IDocumentListener {
 
   private List<IDocumentEvent> events;
-
-  @Mock
-  INamespaceFactory namespaceFactory;
 
   @Mock
   RepositoryFile repositoryFile;
@@ -96,11 +81,6 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
   @Before
   public void init() {
     spyLocator = spy( new DIRepositoryLocator() );
-    when( spyLocator.getNamespaceFactory() ).thenReturn( namespaceFactory );
-    when( namespaceFactory.createNameSpace(
-        any( INamespace.class ), anyString(), anyString() ) ).thenReturn( new MetaverseNamespace( null, "",
-        DictionaryConst.NODE_TYPE_LOCATOR, namespaceFactory ) );
-
   }
 
   @Test

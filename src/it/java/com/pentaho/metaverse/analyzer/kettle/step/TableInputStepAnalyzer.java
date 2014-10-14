@@ -24,7 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.impl.NamespaceFactory;
+import com.pentaho.metaverse.impl.Namespace;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
@@ -61,8 +61,7 @@ public class TableInputStepAnalyzer extends BaseStepAnalyzer<TableInputMeta> {
         IMetaverseComponentDescriptor dbColumnDescriptor = new MetaverseComponentDescriptor(
             fieldName,
             DictionaryConst.NODE_TYPE_DATA_COLUMN,
-            new NamespaceFactory().createNameSpace(
-                null, fieldName, DictionaryConst.NODE_TYPE_DATA_COLUMN ),
+            new Namespace( fieldName ),
             descriptor.getContext() );
         IMetaverseNode dbColumnNode = createNodeFromDescriptor( dbColumnDescriptor );
         metaverseBuilder.addNode( dbColumnNode );

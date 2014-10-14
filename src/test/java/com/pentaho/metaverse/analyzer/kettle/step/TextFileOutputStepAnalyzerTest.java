@@ -53,7 +53,6 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -94,7 +93,7 @@ public class TextFileOutputStepAnalyzerTest {
   public void setUp() throws Exception {
     mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
-    when( mockNamespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( mockNamespace );
+//    when( mockNamespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( mockNamespace );
     when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
 
     when( mockField1.getName() ).thenReturn( "Field 1" );

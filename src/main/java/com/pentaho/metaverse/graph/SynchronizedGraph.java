@@ -88,7 +88,9 @@ public class SynchronizedGraph implements Graph {
 
   @Override
   public Iterable<Vertex> getVertices( String key, Object value ) {
-    return graph.getVertices( key, value );
+    synchronized ( graph ) {
+      return graph.getVertices( key, value );
+    }
   }
 
   @Override

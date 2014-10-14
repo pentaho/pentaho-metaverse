@@ -23,9 +23,7 @@
 package com.pentaho.metaverse.graph;
 
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
 import org.junit.Before;
 import org.junit.Test;

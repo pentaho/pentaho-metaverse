@@ -1,6 +1,16 @@
 package com.pentaho.metaverse.graph;
 
-import static org.junit.Assert.*;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IMetaverseReader;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.junit.Before;
+import org.junit.Test;
+import org.pentaho.platform.api.metaverse.IMetaverseLink;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -9,19 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-
-import com.pentaho.metaverse.api.IMetaverseReader;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
+import static org.junit.Assert.*;
 
 public class BlueprintsGraphMetaverseReaderTest {
 

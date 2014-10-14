@@ -22,17 +22,19 @@
 
 package com.pentaho.dictionary;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
+import com.pentaho.metaverse.impl.MetaverseLogicalIdGenerator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.pentaho.platform.api.metaverse.IHasProperties;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
 
-import com.pentaho.dictionary.MetaverseTransientNode;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author mburgess
@@ -95,33 +97,46 @@ public class MetaverseTransientNodeTest {
   }
 
   @Test
-  public void testSetLogicalIdPropertyKeys() throws Exception {
+  public void testGetLogicalId() throws Exception {
     MetaverseTransientNode myNode = new MetaverseTransientNode();
+
     myNode.setName( "testName" );
     myNode.setType( "testType" );
     myNode.setProperty( "zzz", "last" );
-    assertNull( myNode.logicalIdPropertyKeys );
+    myNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, "" );
+    myNode.setStringID( "myId" );
 
-    myNode.setLogicalIdPropertyKeys( "zzz", "name", "type" );
+    // should be using the default logical id generator initially
+    assertEquals( "{\"name\":\"testName\",\"namespace\":\"\",\"type\":\"testType\"}", myNode.getLogicalId() );
+
+    ILogicalIdGenerator idGenerator = new MetaverseLogicalIdGenerator( "type", "zzz", "name" );
+    myNode.setLogicalIdGenerator( idGenerator );
+    assertNotNull( myNode.logicalIdGenerator );
 
     // logical id should be sorted based on key
-    assertEquals( "[name=testName][type=testType][zzz=last]", myNode.getLogicalId() );
-    assertNotNull( myNode.logicalIdPropertyKeys );
-    assertEquals( 3, myNode.logicalIdPropertyKeys.size() );
-
+    assertEquals( "{\"name\":\"testName\",\"type\":\"testType\",\"zzz\":\"last\"}", myNode.getLogicalId() );
   }
 
   @Test
-  public void testGetLogicalId_noLogicalId() throws Exception {
-    MetaverseTransientNode myNode = new MetaverseTransientNode();
+  public void testGetLogicalId_nullIdGenerator() throws Exception {
+    MetaverseTransientNode myNode = new MetaverseTransientNode( "myId" );
     myNode.setName( "testName" );
     myNode.setType( "testType" );
-    myNode.setProperty( "zzz", "last" );
-    myNode.setStringID( "myId" );
+    myNode.setLogicalIdGenerator( null );
 
-    assertNull( myNode.logicalIdPropertyKeys );
+    assertEquals( "myId", myNode.getLogicalId() );
+  }
 
-    // if we never setLogicalIdPropertyKeys then getLogicalId should return the id
+  @Test
+  public void testGetLogicalId_nullLogicalIdGeneration() throws Exception {
+    MetaverseTransientNode myNode = new MetaverseTransientNode( "myId" );
+    ILogicalIdGenerator generator = mock( ILogicalIdGenerator.class );
+    when( generator.generateId( any( IHasProperties.class ) ) ).thenReturn( null );
+
+    myNode.setName( "testName" );
+    myNode.setType( "testType" );
+    myNode.setLogicalIdGenerator( generator );
+
     assertEquals( "myId", myNode.getLogicalId() );
   }
 }

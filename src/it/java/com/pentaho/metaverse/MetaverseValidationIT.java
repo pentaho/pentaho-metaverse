@@ -147,7 +147,7 @@ public class MetaverseValidationIT {
 
   @Test
   public void testEntity_FileSystemLocator() throws Exception {
-    LocatorNode node = (LocatorNode) framedGraph.getVertex( "FileSystem~FILE_SYSTEM_REPO~Locator", LocatorNode.class );
+    LocatorNode node = (LocatorNode) framedGraph.getVertex( "{\"name\":\"FILE_SYSTEM_REPO\",\"type\":\"Locator\"}", LocatorNode.class );
     assertEquals( DictionaryConst.NODE_TYPE_LOCATOR, node.getType() );
     assertEquals( "FILE_SYSTEM_REPO", node.getName() );
     assertNotNull( node.getDescription() );

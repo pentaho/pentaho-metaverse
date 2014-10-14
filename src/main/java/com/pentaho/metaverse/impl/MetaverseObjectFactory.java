@@ -25,13 +25,17 @@ package com.pentaho.metaverse.impl;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.MetaverseLink;
 import com.pentaho.dictionary.MetaverseTransientNode;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
+
+import java.util.Map;
+import java.util.UUID;
 
 public class MetaverseObjectFactory implements IMetaverseObjectFactory {
-
 
   @Override
   public IMetaverseDocument createDocumentObject() {
@@ -47,6 +51,7 @@ public class MetaverseObjectFactory implements IMetaverseObjectFactory {
   public IMetaverseNode createNodeObject( String id ) {
     MetaverseTransientNode node = new MetaverseTransientNode();
     node.setStringID( id );
+    node.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DEFAULT );
     node.setProperty( DictionaryConst.NODE_VIRTUAL, true );
     return node;
   }
@@ -57,5 +62,29 @@ public class MetaverseObjectFactory implements IMetaverseObjectFactory {
     node.setName( name );
     node.setType( type );
     return node;
+  }
+
+  @Override
+  public IMetaverseNode createNodeObject( INamespace namespace, String name, String type ) {
+    IMetaverseNode node = createNodeObject( UUID.randomUUID().toString(), name, type );
+    node.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
+    return node;
+  }
+
+  @Override
+  public IMetaverseNode createNodeObject( INamespace namespace,
+                                          ILogicalIdGenerator idGenerator,
+                                          Map<String, Object> properties ) {
+
+    MetaverseTransientNode node = new MetaverseTransientNode();
+    node.setProperties( properties );
+    node.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
+    node.setLogicalIdGenerator( idGenerator );
+    node.setProperty( DictionaryConst.NODE_VIRTUAL, true );
+    String id = node.getLogicalId();
+    node.setStringID( id );
+
+    return node;
+
   }
 }

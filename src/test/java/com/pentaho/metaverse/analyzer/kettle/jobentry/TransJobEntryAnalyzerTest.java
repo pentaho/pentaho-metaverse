@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.mockito.stubbing.OngoingStubbing;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
@@ -25,7 +24,6 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @RunWith( MockitoJUnitRunner.class )
@@ -63,7 +61,7 @@ public class TransJobEntryAnalyzerTest {
     when( jobEntryTrans.getParentJob() ).thenReturn( mockParentJob );
     when( mockParentJob.getJobMeta() ).thenReturn( mockParentJobMeta );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+//    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
 
     when( mockParentJobMeta.environmentSubstitute( anyString() ) ).thenAnswer( new Answer<String>() {
       @Override public String answer( InvocationOnMock invocation ) throws Throwable {

@@ -22,34 +22,25 @@
 
 package com.pentaho.dictionary;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+
 public class DictionaryHelperTest {
 
   @Before
   public void init() {
-    IIdGenerator idGenerator = new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS );
     Set<Class> classes = new HashSet<Class>();
     classes.add( Trans.class );
     Set<String> types = new HashSet<String>();
     types.add( DictionaryConst.NODE_TYPE_TRANS );
-    DictionaryHelper.addIdGenerator( types, classes, idGenerator );
-    idGenerator = new GenericIdGenerator( "default" );
     classes = new HashSet<Class>();
     classes.add( Object.class );
     types = new HashSet<String>();
@@ -62,43 +53,11 @@ public class DictionaryHelperTest {
     types.add( DictionaryConst.NODE_TYPE_DATA_COLUMN );
     types.add( DictionaryConst.NODE_TYPE_FILE );
     types.add( DictionaryConst.NODE_TYPE_FILE_FIELD );
-    DictionaryHelper.addIdGenerator( types, classes, idGenerator );
   }
 
   @Test( expected = UnsupportedOperationException.class )
   public void testEnsureNonPublicConstructor() {
     DictionaryHelper dc = new DictionaryHelper();
-  }
-
-  @Test
-  public void testGetIdGenerator() throws Exception {
-
-    String id = DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS, "my transform.ktr" );
-    assertNotNull( "Id is null", id );
-    assertTrue( id.startsWith( DictionaryConst.NODE_TYPE_TRANS ) );
-
-    id = DictionaryHelper.getId( "bogus", "bogus" );
-    assertNull( "Id is not null", id );
-
-    id = DictionaryHelper.getId( Trans.class, "my transform.ktr" );
-    assertNotNull( "Id is null", id );
-    assertTrue( id.startsWith( DictionaryConst.NODE_TYPE_TRANS ) );
-
-    id = DictionaryHelper.getId( List.class, "my transform.ktr" );
-    assertNull( "Id is not null", id );
-
-    id = DictionaryHelper.getId( new Trans(), "my transform.ktr" );
-    assertNotNull( "Id is null", id );
-    assertTrue( id.startsWith( DictionaryConst.NODE_TYPE_TRANS ) );
-
-    id = DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE, "my file.txt" );
-    assertNotNull( "Id is null", id );
-    assertTrue( id.startsWith( "default" ) );
-
-    id = DictionaryHelper.getId( new File( "my file.txt" ), "my file.txt" );
-    assertNotNull( "Id is null", id );
-    assertTrue( id.startsWith( "default" ) );
-
   }
 
   @Test
@@ -108,15 +67,15 @@ public class DictionaryHelperTest {
     props.put( DictionaryConst.PROPERTY_AUTHOR, "fred" );
     props.put( DictionaryConst.PROPERTY_LAST_MODIFIED, "2014-07-10 17:34:45" );
     IMetaverseNode transNode = DictionaryHelper.createMetaverseNode(
-        DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS, "my transform.ktr" ),
+        DictionaryConst.NODE_TYPE_TRANS + "~my transform.ktr",
         "my transform", DictionaryConst.NODE_TYPE_TRANS, props );
 
     IMetaverseNode stepNode = DictionaryHelper.addChildNode(
-        DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_STEP, "my transform.ktr", "Table Input" ),
+        DictionaryConst.NODE_TYPE_TRANS_STEP + "~my transform.ktr~Table Input",
         "Table Input", DictionaryConst.NODE_TYPE_TRANS_STEP, null, transNode, DictionaryConst.LINK_CONTAINS );
 
     IMetaverseNode fieldNode = DictionaryHelper.addChildNode(
-        DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD, "my transform.ktr", "Table Input", "Country" ),
+        DictionaryConst.NODE_TYPE_TRANS_FIELD + "~my transform.ktr~Table Input~Country",
         "Country", DictionaryConst.NODE_TYPE_TRANS_FIELD, null, stepNode, DictionaryConst.LINK_CREATES );
 
     MetaverseTransientNode node1 = (MetaverseTransientNode) transNode;
@@ -148,45 +107,6 @@ public class DictionaryHelperTest {
     assertEquals( "Color is wrong", DictionaryConst.COLOR_DATASOURCE,
         DictionaryHelper.getColorForCategory( DictionaryConst.CATEGORY_DATASOURCE ) );
     assertEquals( "Color is wrong", DictionaryConst.COLOR_OTHER, DictionaryHelper.getColorForCategory( "bogus" ) );
-  }
-
-  /**
-   * This is a temporary/test class for generating ids
-   *
-   * @author jdixon
-   */
-  private class GenericIdGenerator implements IIdGenerator {
-
-    private static final String SEPARATOR = "~";
-
-    private String type;
-
-    /**
-     * Creates a generic id generator of a given type
-     *
-     * @param type The type of the id, this will be prepended to every id created
-     */
-    public GenericIdGenerator( String type ) {
-      this.type = type;
-    }
-
-    @Override
-    public String[] getTypes() {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override
-    public String getId( String... tokens ) {
-      StringBuilder id = new StringBuilder();
-      id.append( type );
-      for ( String token : tokens ) {
-        id.append( SEPARATOR );
-        id.append( token );
-      }
-      return id.toString();
-    }
-
   }
 
 }

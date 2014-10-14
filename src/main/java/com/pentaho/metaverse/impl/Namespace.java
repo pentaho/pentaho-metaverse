@@ -22,73 +22,56 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.dictionary.DictionaryHelper;
-import com.pentaho.metaverse.api.INamespaceFactory;
+
+import com.pentaho.dictionary.DictionaryConst;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
- * Created by gmoran on 8/7/14.
+ * User: RFellows Date: 10/8/14
  */
-public class MetaverseNamespace implements INamespace {
-
-  private INamespace parent;
+public class Namespace implements INamespace {
 
   private String namespace;
 
-  private String fullyQualifiedNamespace;
-
-  private String concatenationCharacter = DictionaryHelper.SEPARATOR;
-
-  private INamespaceFactory factory;
-
-  private String type;
-
-  public MetaverseNamespace( INamespace parent, String namespace, String type, INamespaceFactory factory ) {
-
-    this.parent = parent;
+  public Namespace( String namespace ) {
     this.namespace = namespace;
-    this.type = type;
-    this.factory = factory;
-  }
-
-  public MetaverseNamespace( INamespace parent, String type, String namespace ) {
-
-    this( parent, namespace, type, new NamespaceFactory() );
-
   }
 
   @Override
   public String getNamespaceId() {
-
-    if ( fullyQualifiedNamespace != null ) {
-      return fullyQualifiedNamespace;
-    }
-
-    if ( ( parent != null ) && ( parent.getNamespaceId() != null ) ) {
-      fullyQualifiedNamespace = parent.getNamespaceId()
-          .concat( concatenationCharacter )
-          .concat( namespace );
-    } else {
-      fullyQualifiedNamespace = namespace;
-    }
-    if ( type != null ) {
-      fullyQualifiedNamespace = fullyQualifiedNamespace.concat( concatenationCharacter ).concat( type );
-    }
-
-    return fullyQualifiedNamespace;
+    return namespace;
   }
 
   @Override
   public INamespace getParentNamespace() {
-    return parent;
+    if ( namespace != null ) {
+      try {
+        JSONObject jsonObject = new JSONObject( namespace );
+        String parent = jsonObject.getString( DictionaryConst.PROPERTY_NAMESPACE );
+        return new Namespace( parent );
+      } catch ( JSONException e ) {
+        return null;
+      }
+    }
+    return null;
   }
 
-  /**
-   * @param child the name of the new descendant namespace, relative to the parent (this)
-   * @return a new namespace
-   */
-  public INamespace getChildNamespace( String child, String type ) {
-    return factory.createNameSpace( this, child, type );
-  }
+  @Override
+  public INamespace getSiblingNamespace( String name, String type ) {
+    if ( namespace != null ) {
+      try {
+        JSONObject jsonObject = new JSONObject( namespace );
 
+        jsonObject.put( DictionaryConst.PROPERTY_NAME, name );
+        jsonObject.put( DictionaryConst.PROPERTY_TYPE, type );
+
+        return new Namespace( jsonObject.toString() );
+      } catch ( JSONException e ) {
+        return null;
+      }
+    }
+    return null;
+  }
 }
