@@ -354,20 +354,7 @@
     <repository>
       <id>pentaho.resolve.repo</id>
       <name>Pentaho Group Resolve Repository</name>
-      <url>http://nexus.pentaho.org/content/groups/omni/</url>
-      <releases>
-        <updatePolicy>always</updatePolicy>
-        <checksumPolicy>fail</checksumPolicy>
-      </releases>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-        <checksumPolicy>fail</checksumPolicy>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>old.pentaho.resolve.repo</id>
-      <name>Old (Artifactory) Pentaho Group Resolve Repository</name>
-      <url>http://repo.pentaho.org/artifactory/repo/</url>
+      <url>http://ivy-nexus.pentaho.org/content/groups/omni</url>
       <releases>
         <updatePolicy>always</updatePolicy>
         <checksumPolicy>fail</checksumPolicy>
