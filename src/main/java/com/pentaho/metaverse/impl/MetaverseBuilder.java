@@ -120,13 +120,13 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     String toLogicalId = toVertex.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID );
 
     StringBuilder sb = new StringBuilder();
-    if( fromLogicalId != null ) {
+    if ( fromLogicalId != null ) {
       sb.append( fromLogicalId );
     } else {
       sb.append( fromVertex.getId() );
     }
     sb.append( SEPARATOR );
-    if( toLogicalId != null ) {
+    if ( toLogicalId != null ) {
       sb.append( toLogicalId );
     } else {
       sb.append( toVertex.getId() );

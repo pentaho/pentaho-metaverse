@@ -53,8 +53,8 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
     IMetaverseNode node = super.analyze( descriptor, tableOutputMeta );
 
     String tableName = descriptor.getContext().getContextName().equals( DictionaryConst.CONTEXT_RUNTIME )
-        ? parentTransMeta.environmentSubstitute( tableOutputMeta.getTableName() )
-        : tableOutputMeta.getTableName();
+      ? parentTransMeta.environmentSubstitute( tableOutputMeta.getTableName() )
+      : tableOutputMeta.getTableName();
 
     String[] fieldNames = tableOutputMeta.getFieldStream();
     if ( fieldNames == null || fieldNames.length <= 0 || !tableOutputMeta.specifyFields() ) {
@@ -85,17 +85,17 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
 
           metaverseBuilder.addNode( tableNode );
 
-      metaverseBuilder.addLink( node, DictionaryConst.LINK_WRITESTO, tableNode );
+          metaverseBuilder.addLink( node, DictionaryConst.LINK_WRITESTO, tableNode );
 
-      if ( dbFieldNames == null || dbFieldNames.length == 0 || !tableOutputMeta.specifyFields() ) {
-        // If no field names are specified, then all the incoming fields are written out by name verbatim
-        dbFieldNames = fieldNames;
-      }
+          if ( dbFieldNames == null || dbFieldNames.length == 0 || !tableOutputMeta.specifyFields() ) {
+            // If no field names are specified, then all the incoming fields are written out by name verbatim
+            dbFieldNames = fieldNames;
+          }
 
           String tableLogicalId = tableNode.getLogicalId();
 
           for ( int i = 0; i < fieldNames.length; i++ ) {
-            String fieldName = fieldNames[i];
+            String fieldName = fieldNames[ i ];
 
             // We can't use our own descriptor here, we need to get the descriptor for the origin step
             IMetaverseComponentDescriptor origin = getPrevStepFieldOriginDescriptor( descriptor, fieldName );
@@ -107,10 +107,10 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
 
             metaverseBuilder.addNode( fieldNode );
 
-        if ( dbFieldNames != null ) {
+            if ( dbFieldNames != null ) {
 
               IMetaverseComponentDescriptor dbColumnDescriptor = new MetaverseComponentDescriptor(
-                dbFieldNames[i],
+                dbFieldNames[ i ],
                 DictionaryConst.NODE_TYPE_DATA_COLUMN,
                 new Namespace( tableLogicalId ),
                 descriptor.getContext() );
