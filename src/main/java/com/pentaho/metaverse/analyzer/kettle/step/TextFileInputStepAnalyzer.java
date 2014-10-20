@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleValueException;
@@ -135,11 +136,11 @@ public class TextFileInputStepAnalyzer
       String normalized = null;
       try {
         normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
-      // first add the node for the file
-            IMetaverseNode textFileNode = createFileNode( normalized, descriptor );
-      metaverseBuilder.addNode( textFileNode );
+        // first add the node for the file
+        IMetaverseNode textFileNode = createFileNode( normalized, descriptor );
 
-          metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
+        metaverseBuilder.addNode( textFileNode );
+        metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
       } catch ( MetaverseException e ) {
         log.error( e.getMessage(), e );
       }
@@ -173,7 +174,11 @@ public class TextFileInputStepAnalyzer
           TransMeta transMeta = stepMeta.getParentStepMeta().getParentTransMeta();
           String fileName = transMeta.environmentSubstitute( rowMeta.getString( rowData, filenameField, null ) );
           if ( fileName != null ) {
-            addFileNode( stepNamespace, stepNode, fileName, context );
+            IMetaverseComponentDescriptor descriptor = new MetaverseComponentDescriptor(
+              stepMeta.getName(),
+              DictionaryConst.NODE_TYPE_TRANS_STEP,
+              stepNamespace );
+            addFileNode( descriptor, stepNode, fileName );
           }
         }
       }

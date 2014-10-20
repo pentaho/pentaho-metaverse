@@ -116,7 +116,22 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * @return the String edge ID
    */
   protected String getEdgeId( Vertex fromVertex, String label, Vertex toVertex ) {
-    return fromVertex.getId() + SEPARATOR + label + SEPARATOR + toVertex.getId();
+    String fromLogicalId = fromVertex.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID );
+    String toLogicalId = toVertex.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID );
+
+    StringBuilder sb = new StringBuilder();
+    if( fromLogicalId != null ) {
+      sb.append( fromLogicalId );
+    } else {
+      sb.append( fromVertex.getId() );
+    }
+    sb.append( SEPARATOR );
+    if( toLogicalId != null ) {
+      sb.append( toLogicalId );
+    } else {
+      sb.append( toVertex.getId() );
+    }
+    return sb.toString();
   }
 
   /**
@@ -257,7 +272,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * @return a matching Vertex or null if none found
    */
   protected Vertex getVertexForNode( IMetaverseNode node ) {
-    if ( node != null && node.getStringID() ) {
+    if ( node != null && node.getStringID() != null ) {
       String logicalId = node.getLogicalId();
       Vertex vertex = graph.getVertex( node.getStringID() );
 

@@ -52,7 +52,7 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
     // Do common analysis for all step
     IMetaverseNode node = super.analyze( descriptor, tableOutputMeta );
 
-    String tableName = descriptor.getContext().equals( DictionaryConst.CONTEXT_RUNTIME )
+    String tableName = descriptor.getContext().getContextName().equals( DictionaryConst.CONTEXT_RUNTIME )
         ? parentTransMeta.environmentSubstitute( tableOutputMeta.getTableName() )
         : tableOutputMeta.getTableName();
 

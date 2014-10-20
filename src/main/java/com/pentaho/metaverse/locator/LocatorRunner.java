@@ -144,6 +144,7 @@ public abstract class LocatorRunner<T> implements Runnable {
       metaverseDocument.setMimeType( mimeType );
       metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, id );
       metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
+      metaverseDocument.setProperty( "locator", locator.getLocatorNode().getName() );
 
       DocumentEvent event = new DocumentEvent();
       event.setEventType( "add" );

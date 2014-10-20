@@ -242,7 +242,16 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     }
 
     metaverseBuilder.addNode( node );
-    addParentLink( documentDescriptor, node );
+
+    IMetaverseComponentDescriptor locatorDescriptor = document;
+    Object locatorName = document.getProperty( "locator" );
+    if ( locatorName != null ) {
+      INamespace ns = document.getNamespace();
+      locatorDescriptor = new MetaverseComponentDescriptor(
+        locatorName.toString(), DictionaryConst.NODE_TYPE_LOCATOR, ns );
+    }
+
+    addParentLink(locatorDescriptor, node );
     return node;
   }
 

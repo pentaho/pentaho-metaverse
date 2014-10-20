@@ -31,6 +31,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.VertexQuery;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLReader;
 import org.junit.Before;
@@ -64,7 +65,7 @@ import java.util.Set;
 public class StaticAndRuntimeGraphMergeIT {
 
   private static final String RUNTIME_LOCATOR_TOKEN = "EXTENSION-POINT-LOCATOR";
-  private static final String STATIC_LOCATOR_VALUE = "FileSystem~FILE_SYSTEM_REPO";
+  private static final String STATIC_LOCATOR_VALUE = "FILE_SYSTEM_REPO";
   private static IMetaverseReader reader;
   private static Graph staticGraphBase;
   private static Graph staticGraph;
@@ -178,16 +179,17 @@ public class StaticAndRuntimeGraphMergeIT {
     for ( Vertex rv : runtimeVertices ) {
       // look it up in the static graph
       String lookupId = resolveId( rv );
-      Vertex sv = staticGraph.getVertex( lookupId );
+      Vertex sv = findStaticVertex( rv );
 
-      if ( sv == null ) {
-        System.out.println( "Adding runtime vertex - " + rv.toString() );
-        Vertex added = cloneVertexWithNewId( rv, lookupId );
+      if ( sv == null && lookupId != null ) {
+        String id = rv.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID);
+        Vertex added = cloneVertexWithNewId( rv, id == null ? rv.getId().toString() : id.toString() );
+        System.out.println( "Adding runtime vertex - " + id == null ? rv.getId().toString() : id.toString() );
 
         // is this possibly a variableized id?
         String undoVars = undoVarsForId( lookupId );
         if ( undoVars != lookupId ) {
-          Vertex varVertex = staticGraph.getVertex( undoVars );
+          Vertex varVertex = findStaticVertex( undoVars );
           if ( varVertex != null ) {
             // add a link
             Edge e = staticGraph.addEdge( null, added, varVertex, "resolvesto" );
@@ -196,7 +198,8 @@ public class StaticAndRuntimeGraphMergeIT {
         }
 
         // link it to the runtime node if it's not already in the graph?
-        if ( !added.getProperty( DictionaryConst.PROPERTY_TYPE )
+        if ( added.getProperty( DictionaryConst.PROPERTY_TYPE ) != null
+          && !added.getProperty( DictionaryConst.PROPERTY_TYPE )
             .equals( DictionaryConst.NODE_TYPE_EXECUTION_ENGINE ) ) {
 
           Edge edge = staticGraph.addEdge( null, runtimeNode, added, "defines" );
@@ -213,16 +216,17 @@ public class StaticAndRuntimeGraphMergeIT {
     Iterable<Edge> runtimeEdges = runtimeGraph.getEdges();
     for ( Edge re : runtimeEdges ) {
       String lookupId = re.getId().toString().replace( RUNTIME_LOCATOR_TOKEN, STATIC_LOCATOR_VALUE );
-      Edge se = staticGraph.getEdge( lookupId );
+      Edge se = findStaticEdge( re );
 
       if ( se == null ) {
         System.out.println( "Adding runtime edge - " + re.toString() );
         // both vertices should already be in the graph, go get them
-        Vertex outV = staticGraph.getVertex( resolveId( re.getVertex( Direction.OUT ) ) );
-        Vertex inV = staticGraph.getVertex( resolveId( re.getVertex( Direction.IN ) ) );
-
-        Edge added = staticGraph.addEdge( lookupId, outV, inV, re.getLabel() );
-        added.setProperty( "text", re.getLabel() );
+        Vertex outV = findStaticVertex( re.getVertex( Direction.OUT ) );
+        Vertex inV = findStaticVertex( re.getVertex( Direction.IN ) );
+        if( outV != null && inV != null ) {
+          Edge added = staticGraph.addEdge( lookupId, outV, inV, re.getLabel() );
+          added.setProperty( "text", re.getLabel() );
+        }
       } else {
         // edge already in the graph, don't need to add it
       }
@@ -237,7 +241,7 @@ public class StaticAndRuntimeGraphMergeIT {
   private Vertex addRuntimeNode() {
     // add a runtime node so we can identify them
     Vertex node = runtimeGraph.getVertex( runtimeId );
-    Vertex runtimeNode = cloneVertexWithNewId( node, node.getId().toString() );
+    Vertex runtimeNode = cloneVertexWithNewId( node, node.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID ).toString() );
     return runtimeNode;
   }
 
@@ -251,7 +255,7 @@ public class StaticAndRuntimeGraphMergeIT {
       String value = tm.getVariable( usedVariable );
       if ( value != null && value.trim().length() > 0 ) {
         // try to put the variable name in rather than the value
-        lookupId = lookupId.replace( "~" + value + "~", "~${" + usedVariable + "}~" );
+        lookupId = lookupId.replace( ":\"" + value + "\"", ":\"${" + usedVariable + "}\"" );
       }
     }
     return lookupId;
@@ -263,15 +267,70 @@ public class StaticAndRuntimeGraphMergeIT {
     for ( String propertyKey : propertyKeys ) {
       v.setProperty( propertyKey, vertexToClone.getProperty( propertyKey ) );
     }
+    if( newId != null ) {
+      v.setProperty( DictionaryConst.PROPERTY_LOGICAL_ID, newId );
+    }
     return v;
   }
 
   private String resolveId( Vertex runtimeVertex ) {
-    return resolveId( runtimeVertex.getId().toString() );
+    String logicalId = runtimeVertex.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID );
+    return logicalId == null ? null : resolveId( logicalId.toString() );
   }
 
   private String resolveId( String runtimeId ) {
     return runtimeId.replace( RUNTIME_LOCATOR_TOKEN, STATIC_LOCATOR_VALUE );
   }
 
+  private Vertex findStaticVertex( Vertex runtimeVertex ) {
+    Vertex staticVertex = null;
+    String logicalId = runtimeVertex.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID );
+    if( logicalId != null ) {
+      staticVertex = findStaticVertex( logicalId );
+    } else {
+      staticVertex = staticGraph.getVertex( runtimeVertex.getId() );
+    }
+    return staticVertex;
+  }
+
+  private Vertex findStaticVertex( String logicalId ) {
+    Vertex staticVertex = null;
+    if( logicalId != null ) {
+      String resolvedId = resolveId( logicalId );
+      Iterable<Vertex> logicalMatches = staticGraph.getVertices( DictionaryConst.PROPERTY_LOGICAL_ID, resolvedId );
+      for ( Vertex match : logicalMatches ) {
+        // just return the first match for now
+        staticVertex = match;
+        break;
+      }
+    }
+    return staticVertex;
+  }
+
+  private Edge findStaticEdge( Edge runtimeEdge ) {
+    String resolvedId = resolveId( runtimeEdge.getId().toString() );
+    Edge staticEdge = staticGraph.getEdge( resolvedId );
+    if( staticEdge == null ) {
+      Vertex sfv = findStaticVertex( runtimeEdge.getVertex( Direction.OUT ) );
+      Vertex stv = findStaticVertex( runtimeEdge.getVertex( Direction.IN ) );
+      if ( sfv != null && stv != null ) {
+        VertexQuery q = sfv.query().direction( Direction.OUT ).labels( runtimeEdge.getLabel() );
+
+        if ( q.count() > 0 ) {
+          Iterable<Vertex> possibleMatches = q.vertices();
+          for ( Vertex possibleMatch : possibleMatches ) {
+            if ( possibleMatch.equals( stv ) ) {
+              Iterable<Edge> edges = possibleMatch.getEdges( Direction.IN, runtimeEdge.getLabel() );
+              for ( Edge edge : edges ) {
+                staticEdge = edge;
+                break;
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+    return staticEdge;
+  }
 }

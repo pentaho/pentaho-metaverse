@@ -357,4 +357,10 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     }
     return newFieldNode;
   }
+
+  protected void setDatabaseConnectionAnalyzer( IDatabaseConnectionAnalyzer dbConnectionAnalyzer ) {
+    this.dbConnectionAnalyzer = dbConnectionAnalyzer;
+  }
+
 }
+

@@ -22,7 +22,6 @@
 
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +33,7 @@ import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -57,7 +57,7 @@ public class TransformationRuntimeExtensionPointTest {
   private TransMeta mockTransMeta;
 
   @Mock
-  MetaverseNamespace namespace;
+  INamespace namespace;
 
   @Before
   public void setUp() throws Exception {
@@ -65,9 +65,7 @@ public class TransformationRuntimeExtensionPointTest {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
     when( mockTrans.getTransMeta() ).thenReturn( mockTransMeta );
-    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
   }
 
   @Test
