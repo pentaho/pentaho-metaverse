@@ -22,19 +22,18 @@
 
 package com.pentaho.metaverse.graph;
 
-import static org.junit.Assert.assertNotNull;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraphFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraphFactory;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author mburgess

@@ -22,14 +22,9 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.INamespaceFactory;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -56,9 +51,11 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-
 import java.util.Set;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * @author mburgess
@@ -109,7 +106,6 @@ public class TableOutputStepAnalyzerTest {
   public void setUp() throws Exception {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
-    when( mockNamespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( mockNamespace );
     when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
 
     analyzer = new TableOutputStepAnalyzer();

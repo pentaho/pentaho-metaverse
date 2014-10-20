@@ -22,13 +22,14 @@
 
 package com.pentaho.dictionary;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.pentaho.metaverse.impl.PropertiesHolder;
 import org.pentaho.platform.api.metaverse.IIdentifierModifiable;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An implementation of a metaverse node.
@@ -39,6 +40,8 @@ public class MetaverseTransientNode extends PropertiesHolder implements IMetaver
    * The links from this node
    */
   protected List<IMetaverseLink> links = new ArrayList<IMetaverseLink>();
+  protected ILogicalIdGenerator logicalIdGenerator = DictionaryConst.LOGICAL_ID_GENERATOR_DEFAULT;
+  private String logicalId;
 
   /**
    * Instantiates a new (empty) metaverse transient node.
@@ -145,4 +148,26 @@ public class MetaverseTransientNode extends PropertiesHolder implements IMetaver
     return links;
   }
 
+  /**
+   * Gets a string representation of what makes this node logically unique. If no logicalId is present, then
+   * getStringId() is returned instead
+   * @return
+   */
+  @Override
+  public String getLogicalId() {
+    if ( logicalIdGenerator == null ) {
+      return getStringID();
+    } else if ( logicalId == null || isDirty() ) {
+      logicalId = logicalIdGenerator.generateId( this );
+    }
+
+    return logicalId == null ? getStringID() : logicalId;
+  }
+
+  @Override
+  public void setLogicalIdGenerator( ILogicalIdGenerator idGenerator ) {
+    // clear out the logicalId so it will be re-generated on the next call to getLogicalId
+    logicalId = null;
+    logicalIdGenerator = idGenerator;
+  }
 }

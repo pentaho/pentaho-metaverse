@@ -1,6 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.MetaverseTransientNode;
 import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.JobAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer;
@@ -15,7 +16,7 @@ import com.pentaho.metaverse.impl.DocumentController;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.MetaverseObjectFactory;
-import com.pentaho.metaverse.impl.NamespaceFactory;
+import com.pentaho.metaverse.impl.Namespace;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.KeyIndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
@@ -125,9 +126,11 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     metaverseBuilder.addLink( runtimeInfo, "executed by", executionNode );
 
     IMetaverseDocument transDoc = objectFactory.createDocumentObject();
-
-    INamespace parentNamespace =
-        new NamespaceFactory().createNameSpace( null, "EXTENSION-POINT-LOCATOR", DictionaryConst.NODE_TYPE_LOCATOR );
+    IMetaverseNode locatorNode = new MetaverseTransientNode();
+    locatorNode.setProperty( DictionaryConst.PROPERTY_NAME, "EXTENSION-POINT-LOCATOR" );
+    locatorNode.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_LOCATOR );
+    locatorNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_LOCATOR );
+    INamespace parentNamespace = new Namespace( locatorNode.getLogicalId() );
 
     File f = new File( trans.getFilename() );
 
@@ -141,10 +144,15 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     transDoc.setNamespace( parentNamespace );
     transDoc.setContent( trans );
     transDoc.setStringID( filePath );
-    transDoc.setName( transMeta.getFilename() );
+//    transDoc.setName( transMeta.getFilename() );
+    transDoc.setName( transMeta.getName() );
     transDoc.setExtension( "ktr" );
     transDoc.setMimeType( "text/xml" );
+    transDoc.setType( DictionaryConst.NODE_TYPE_TRANS );
     transDoc.setProperty( DictionaryConst.PROPERTY_PATH, filePath );
+    transDoc.setProperty( DictionaryConst.PROPERTY_NAMESPACE, locatorNode.getLogicalId() );
+    transDoc.setProperty( "locator", locatorNode.getName() );
+    transDoc.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
     transDoc.setContext( context );
 
     IMetaverseComponentDescriptor descriptor = new MetaverseComponentDescriptor(
@@ -165,15 +173,17 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
 
   private IMetaverseNode addRuntimeNode( Trans trans, IAnalysisContext context,
       IMetaverseObjectFactory objectFactory ) {
-    INamespace ns = new NamespaceFactory().createNameSpace(
-        null, DictionaryConst.NODE_TYPE_RUNTIME, DictionaryConst.NODE_TYPE_RUNTIME );
+    IMetaverseNode runtimeNode = new MetaverseTransientNode();
+    runtimeNode.setProperty( DictionaryConst.PROPERTY_NAME, DictionaryConst.NODE_TYPE_RUNTIME );
+    runtimeNode.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_RUNTIME );
+    runtimeNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_LOCATOR );
 
     long timestamp = new Date().getTime();
     String runtimeId = trans.getLogChannelId() == null ? UUID.randomUUID().toString() : trans.getLogChannelId();
     IMetaverseComponentDescriptor runTimeDescriptor = new MetaverseComponentDescriptor(
         runtimeId,
         DictionaryConst.NODE_TYPE_RUNTIME,
-        ns,
+        new Namespace( runtimeNode.getLogicalId() ),
         context );
 
     // add a runtime node so we can identify them
@@ -182,6 +192,7 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
 
     runtimeInfo.setProperty( "executionDate", String.valueOf( timestamp ) );
     runtimeInfo.setProperty( DictionaryConst.PROPERTY_PATH, trans.getFilename() );
+    runtimeInfo.setProperty( DictionaryConst.PROPERTY_LOGICAL_ID, runtimeNode.getLogicalId() );
     runtimeInfo.setProperty( "user", trans.getExecutingUser() );
 
     metaverseBuilder.addNode( runtimeInfo );
@@ -196,12 +207,14 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
   }
 
   private IMetaverseNode addExecutionEngineNode( Trans trans, IMetaverseObjectFactory objectFactory ) {
-    INamespace ns = new NamespaceFactory().createNameSpace(
-        null, "Pentaho Data Integration", DictionaryConst.NODE_TYPE_EXECUTION_ENGINE );
+    IMetaverseNode pdi = new MetaverseTransientNode();
+    pdi.setProperty( DictionaryConst.PROPERTY_NAME, "Pentaho Data Integration" );
+    pdi.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_EXECUTION_ENGINE );
 
-    IMetaverseNode node = objectFactory.createNodeObject( ns.getNamespaceId(),
-        "Pentaho Data Integration [" + trans.getExecutingServer() + "]",
-        DictionaryConst.NODE_TYPE_EXECUTION_ENGINE );
+    IMetaverseNode node = objectFactory.createNodeObject(
+      new Namespace( pdi.getLogicalId() ),
+      "Pentaho Data Integration [" + trans.getExecutingServer() + "]",
+      DictionaryConst.NODE_TYPE_EXECUTION_ENGINE );
 
     String version = BuildVersion.getInstance().getVersion();
     node.setProperty( "version", version );

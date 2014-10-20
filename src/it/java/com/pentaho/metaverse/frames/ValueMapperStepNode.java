@@ -1,4 +1,4 @@
-/*!
+/*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
@@ -20,29 +20,11 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.dictionary;
+package com.pentaho.metaverse.frames;
 
 /**
- * An IIdGenerator generates unique ids for a given type of artifact. Artifact types include
- * transformations, jobs, database tables and columns, file system text files etc. Every metaverse 
- * @author jdixon
- *
+ * User: RFellows Date: 9/17/14
  */
-public interface IIdGenerator {
-
-  /**
-   * Returns the types of artifacts that this id generator supports
-   * @return An array of supported types
-   */
-  String[] getTypes();
-
-  /**
-   * Returns an id given a collection of tokens that represent an artifact. The number of tokens
-   * is variable because some artifacts only need one e.g. a file system path where as others
-   * such as a database column need more.
-   * @param tokens A list of tokens that can be used to create an id
-   * @return The unique id for the artifact
-   */
-  String getId( String... tokens );
+public interface ValueMapperStepNode extends TransformationStepNode {
 
 }

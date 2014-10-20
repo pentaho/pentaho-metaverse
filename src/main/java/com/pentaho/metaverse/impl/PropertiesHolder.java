@@ -34,6 +34,7 @@ import java.util.Set;
 public class PropertiesHolder implements IHasProperties {
 
   protected Map<String, Object> properties;
+  private boolean dirty = false;
 
   public PropertiesHolder() {
     properties = new HashMap<String, Object>();
@@ -73,6 +74,7 @@ public class PropertiesHolder implements IHasProperties {
    */
   @Override
   public void setProperty( String key, Object value ) {
+    dirty = true;
     properties.put( key, value );
   }
 
@@ -84,6 +86,7 @@ public class PropertiesHolder implements IHasProperties {
    */
   @Override
   public Object removeProperty( String key ) {
+    dirty = true;
     return properties.remove( key );
   }
 
@@ -113,6 +116,7 @@ public class PropertiesHolder implements IHasProperties {
    */
   @Override
   public void setProperties( Map<String, Object> props ) {
+    dirty = true;
     properties.putAll( props );
   }
 
@@ -124,6 +128,7 @@ public class PropertiesHolder implements IHasProperties {
   @Override
   public void removeProperties( Set<String> keys ) {
     if ( keys != null ) {
+      dirty = true;
       for ( String key : keys ) {
         properties.remove( key );
       }
@@ -134,6 +139,7 @@ public class PropertiesHolder implements IHasProperties {
    * Removes all properties (key/value assignments).
    */
   @Override public void clearProperties() {
+    dirty = true;
     properties.clear();
   }
 
@@ -153,10 +159,22 @@ public class PropertiesHolder implements IHasProperties {
   }
 
   @Override
+  public boolean isDirty() {
+    return dirty;
+  }
+
+  @Override
+  public void setDirty( boolean dirty ) {
+    this.dirty = dirty;
+  }
+
+  @Override
   public String toString() {
     if ( properties == null ) {
       return super.toString();
     }
+
     return properties.toString();
   }
+
 }

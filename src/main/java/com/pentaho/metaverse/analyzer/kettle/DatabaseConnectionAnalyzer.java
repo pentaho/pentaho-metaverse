@@ -22,10 +22,12 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
@@ -67,16 +69,22 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
     node.setProperty( "databaseName", databaseName );
 
     String port = dbMeta.getDatabasePortNumberString();
-    node.setProperty( "port", port );
+    node.setProperty( DictionaryConst.PROPERTY_PORT, port );
 
     String host = dbMeta.getHostname();
-    node.setProperty( "hostName", host );
+    node.setProperty( DictionaryConst.PROPERTY_HOST_NAME, host );
 
     String user = dbMeta.getUsername();
-    node.setProperty( "userName", user );
+    node.setProperty( DictionaryConst.PROPERTY_USER_NAME, user );
 
     boolean shared = dbMeta.isShared();
     node.setProperty( "shared", shared );
+
+    if ( accessTypeDesc != null && accessTypeDesc.equals( "JNDI" ) ) {
+      node.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DB_JNDI );
+    } else {
+      node.setLogicalIdGenerator( getLogicalIdGenerator() );
+    }
 
     metaverseBuilder.addNode( node );
 
@@ -84,4 +92,8 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
 
   }
 
+  @Override
+  protected ILogicalIdGenerator getLogicalIdGenerator() {
+    return DictionaryConst.LOGICAL_ID_GENERATOR_DB_JDBC;
+  }
 }

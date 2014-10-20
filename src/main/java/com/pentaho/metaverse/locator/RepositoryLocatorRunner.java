@@ -22,13 +22,13 @@
 
 package com.pentaho.metaverse.locator;
 
-import java.util.List;
-
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * A runnable (and stoppable) class for crawling a Pentaho repository for documents
@@ -57,7 +57,7 @@ public class RepositoryLocatorRunner extends LocatorRunner<List<RepositoryFileTr
           if ( !file.isHidden() ) {
             // don't index hidden fields
             try {
-              processFile( locator.getNamespace(), file.getName(), file.getPath(), locator.getContents( file ) );
+              processFile( locator.getNamespace(), file.getName(), file.getPath(),  file );
             } catch ( Exception e ) {
               // something truly unexpected would have to have happened ... NPE or similar ugliness
               LOG.error( Messages.getString( "ERROR.ProcessFileFailed", file.getName() ), e );

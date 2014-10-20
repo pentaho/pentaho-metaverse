@@ -8,19 +8,13 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -297,6 +291,8 @@ public class MetaverseBuilderTest {
     link.setFromNode( mockFrom );
 
     when( mockFrom.getStringID() ).thenReturn( "not in graph" );
+    when( mockFrom.getLogicalId() ).thenReturn( "not in graph" );
+    
     // now lets try to delete the link
     builder.deleteLink( link );
 
@@ -320,7 +316,7 @@ public class MetaverseBuilderTest {
 
     // add another link using the same test node
     IMetaverseNode node3 = builder.createNodeObject( "another" );
-    node3.setName( "to name" );
+    node3.setName( "to another" );
 
     // add another link
     builder.addLink( node, "uses", node3 );

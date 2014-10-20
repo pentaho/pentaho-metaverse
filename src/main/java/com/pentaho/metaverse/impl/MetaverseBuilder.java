@@ -22,16 +22,15 @@
 
 package com.pentaho.metaverse.impl;
 
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseLink;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
@@ -117,7 +116,22 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * @return the String edge ID
    */
   protected String getEdgeId( Vertex fromVertex, String label, Vertex toVertex ) {
-    return fromVertex.getId() + SEPARATOR + label + SEPARATOR + toVertex.getId();
+    String fromLogicalId = fromVertex.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID );
+    String toLogicalId = toVertex.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID );
+
+    StringBuilder sb = new StringBuilder();
+    if ( fromLogicalId != null ) {
+      sb.append( fromLogicalId );
+    } else {
+      sb.append( fromVertex.getId() );
+    }
+    sb.append( SEPARATOR );
+    if ( toLogicalId != null ) {
+      sb.append( toLogicalId );
+    } else {
+      sb.append( toVertex.getId() );
+    }
+    return sb.toString();
   }
 
   /**
@@ -224,15 +238,31 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    */
   private void copyNodePropertiesToVertex( IMetaverseNode node, Vertex v ) {
 
+    // don't copy the node logicalId to a vertex if the node is virtual and the vertex is not
+    Boolean nodeIsVirtual = (Boolean) node.getProperty( DictionaryConst.NODE_VIRTUAL );
+    nodeIsVirtual = nodeIsVirtual == null ? true : nodeIsVirtual;
+
+    Boolean vertexIsVirtual = v.getProperty( DictionaryConst.NODE_VIRTUAL );
+    vertexIsVirtual = vertexIsVirtual == null ? false : vertexIsVirtual;
+
+    String vertexLogicalId = v.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID );
+    boolean skipLogicalId = false;
+    if ( vertexLogicalId != null && nodeIsVirtual && !vertexIsVirtual ) {
+      skipLogicalId = true;
+    }
+
     // set all of the properties, except the id and virtual (since that is an internally set prop)
     for ( String propertyKey : node.getPropertyKeys() ) {
-      if ( !propertyKey.equals( DictionaryConst.PROPERTY_ID ) && !propertyKey.equals( DictionaryConst.NODE_VIRTUAL ) ) {
+      if ( !propertyKey.equals( DictionaryConst.PROPERTY_ID )
+        && !propertyKey.equals( DictionaryConst.NODE_VIRTUAL )
+        && !( skipLogicalId && propertyKey.equals( DictionaryConst.PROPERTY_LOGICAL_ID ) ) ) {
         Object value = node.getProperty( propertyKey );
         if ( value != null ) {
           v.setProperty( propertyKey, value );
         }
       }
     }
+    node.setDirty( false );
   }
 
   /**
@@ -243,7 +273,20 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    */
   protected Vertex getVertexForNode( IMetaverseNode node ) {
     if ( node != null && node.getStringID() != null ) {
-      return graph.getVertex( node.getStringID() );
+      String logicalId = node.getLogicalId();
+      Vertex vertex = graph.getVertex( node.getStringID() );
+
+      if ( vertex == null && !logicalId.equals( node.getStringID() ) ) {
+        // check for matching logicalIds
+        Iterable<Vertex> logicalMatches = graph.getVertices( DictionaryConst.PROPERTY_LOGICAL_ID, logicalId );
+        for ( Vertex match : logicalMatches ) {
+          // just return the first match for now
+          vertex = match;
+          break;
+        }
+      }
+
+      return vertex;
     } else {
       return null;
     }

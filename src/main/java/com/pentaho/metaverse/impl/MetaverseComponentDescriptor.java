@@ -2,7 +2,9 @@ package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryConst;
 import org.pentaho.platform.api.metaverse.IAnalysisContext;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
@@ -26,6 +28,19 @@ public class MetaverseComponentDescriptor implements IMetaverseComponentDescript
     this.name = name;
     this.type = type;
     this.namespace = namespace;
+    this.context = context;
+  }
+
+  public MetaverseComponentDescriptor( String name, String type, IMetaverseNode parentNode ) {
+    this( name, type, parentNode, new AnalysisContext( DictionaryConst.CONTEXT_DEFAULT ) );
+  }
+
+  public MetaverseComponentDescriptor( String name, String type, IMetaverseNode parentNode, IAnalysisContext context ) {
+    this.name = name;
+    this.type = type;
+    if ( parentNode != null ) {
+      namespace = new Namespace( parentNode.getLogicalId() );
+    }
     this.context = context;
   }
 
@@ -74,6 +89,14 @@ public class MetaverseComponentDescriptor implements IMetaverseComponentDescript
     this.type = type;
   }
 
+  @Override public String getLogicalId() {
+    return getNamespaceId();
+  }
+
+  @Override public void setLogicalIdGenerator( ILogicalIdGenerator idGenerator ) {
+    // ignore this for now
+  }
+
   /**
    * The entity namespace
    *
@@ -90,14 +113,8 @@ public class MetaverseComponentDescriptor implements IMetaverseComponentDescript
     return namespace.getParentNamespace();
   }
 
-  /**
-   * get the name space for the current level entity
-   *
-   * @param child the string representation of hte current entity's contribution to the namespace path
-   * @return the namespace object for the entity represented by child
-   */
-  @Override public INamespace getChildNamespace( String child, String type ) {
-    return namespace.getChildNamespace( child, type );
+  @Override public INamespace getSiblingNamespace( String name, String type ) {
+    return namespace.getSiblingNamespace( name, type );
   }
 
   @Override public void setNamespace( INamespace namespace ) {

@@ -1,34 +1,46 @@
+/*
+ * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
+ *
+ * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ *
+ * NOTICE: All information including source code contained herein is, and
+ * remains the sole property of Pentaho and its licensors. The intellectual
+ * and technical concepts contained herein are proprietary and confidential
+ * to, and are trade secrets of Pentaho and may be covered by U.S. and foreign
+ * patents, or patents in process, and are protected by trade secret and
+ * copyright laws. The receipt or possession of this source code and/or related
+ * information does not convey or imply any rights to reproduce, disclose or
+ * distribute its contents, or to manufacture, use, or sell anything that it
+ * may describe, in whole or in part. Any reproduction, modification, distribution,
+ * or public display of this information without the express written authorization
+ * from Pentaho is strictly prohibited and in violation of applicable laws and
+ * international treaties. Access to the source code contained herein is strictly
+ * prohibited to anyone except those individuals and entities who have executed
+ * confidentiality and non-disclosure agreements or other agreements with Pentaho,
+ * explicitly covering such access.
+ */
+
 package com.pentaho.dictionary;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
-@SuppressWarnings( "all" )
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+
 public class DictionaryHelperTest {
 
   @Before
   public void init() {
-    IIdGenerator idGenerator = new GenericIdGenerator( DictionaryConst.NODE_TYPE_TRANS );
     Set<Class> classes = new HashSet<Class>();
     classes.add( Trans.class );
     Set<String> types = new HashSet<String>();
     types.add( DictionaryConst.NODE_TYPE_TRANS );
-    DictionaryHelper.addIdGenerator( types, classes, idGenerator );
-    idGenerator = new GenericIdGenerator( "default" );
     classes = new HashSet<Class>();
     classes.add( Object.class );
     types = new HashSet<String>();
@@ -41,38 +53,11 @@ public class DictionaryHelperTest {
     types.add( DictionaryConst.NODE_TYPE_DATA_COLUMN );
     types.add( DictionaryConst.NODE_TYPE_FILE );
     types.add( DictionaryConst.NODE_TYPE_FILE_FIELD );
-    DictionaryHelper.addIdGenerator( types, classes, idGenerator );
   }
 
-  @Test
-  public void testGetIdGenerator() throws Exception {
-
-    String id = DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS, "my transform.ktr" );
-    assertNotNull( "Id is null", id );
-    assertTrue( id.startsWith( DictionaryConst.NODE_TYPE_TRANS ) );
-
-    id = DictionaryHelper.getId( "bogus", "bogus" );
-    assertNull( "Id is not null", id );
-
-    id = DictionaryHelper.getId( Trans.class, "my transform.ktr" );
-    assertNotNull( "Id is null", id );
-    assertTrue( id.startsWith( DictionaryConst.NODE_TYPE_TRANS ) );
-
-    id = DictionaryHelper.getId( List.class, "my transform.ktr" );
-    assertNull( "Id is not null", id );
-
-    id = DictionaryHelper.getId( new Trans(), "my transform.ktr" );
-    assertNotNull( "Id is null", id );
-    assertTrue( id.startsWith( DictionaryConst.NODE_TYPE_TRANS ) );
-
-    id = DictionaryHelper.getId( DictionaryConst.NODE_TYPE_FILE, "my file.txt" );
-    assertNotNull( "Id is null", id );
-    assertTrue( id.startsWith( "default" ) );
-
-    id = DictionaryHelper.getId( new File( "my file.txt" ), "my file.txt" );
-    assertNotNull( "Id is null", id );
-    assertTrue( id.startsWith( "default" ) );
-
+  @Test( expected = UnsupportedOperationException.class )
+  public void testEnsureNonPublicConstructor() {
+    DictionaryHelper dc = new DictionaryHelper();
   }
 
   @Test
@@ -82,15 +67,15 @@ public class DictionaryHelperTest {
     props.put( DictionaryConst.PROPERTY_AUTHOR, "fred" );
     props.put( DictionaryConst.PROPERTY_LAST_MODIFIED, "2014-07-10 17:34:45" );
     IMetaverseNode transNode = DictionaryHelper.createMetaverseNode(
-        DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS, "my transform.ktr" ),
+        DictionaryConst.NODE_TYPE_TRANS + "~my transform.ktr",
         "my transform", DictionaryConst.NODE_TYPE_TRANS, props );
 
     IMetaverseNode stepNode = DictionaryHelper.addChildNode(
-        DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_STEP, "my transform.ktr", "Table Input" ),
+        DictionaryConst.NODE_TYPE_TRANS_STEP + "~my transform.ktr~Table Input",
         "Table Input", DictionaryConst.NODE_TYPE_TRANS_STEP, null, transNode, DictionaryConst.LINK_CONTAINS );
 
     IMetaverseNode fieldNode = DictionaryHelper.addChildNode(
-        DictionaryHelper.getId( DictionaryConst.NODE_TYPE_TRANS_FIELD, "my transform.ktr", "Table Input", "Country" ),
+        DictionaryConst.NODE_TYPE_TRANS_FIELD + "~my transform.ktr~Table Input~Country",
         "Country", DictionaryConst.NODE_TYPE_TRANS_FIELD, null, stepNode, DictionaryConst.LINK_CREATES );
 
     MetaverseTransientNode node1 = (MetaverseTransientNode) transNode;
@@ -119,7 +104,8 @@ public class DictionaryHelperTest {
 
   @Test
   public void testCategoryColors() {
-    assertEquals( "Color is wrong", DictionaryConst.COLOR_DATASOURCE, DictionaryHelper.getColorForCategory( DictionaryConst.CATEGORY_DATASOURCE ) );
+    assertEquals( "Color is wrong", DictionaryConst.COLOR_DATASOURCE,
+        DictionaryHelper.getColorForCategory( DictionaryConst.CATEGORY_DATASOURCE ) );
     assertEquals( "Color is wrong", DictionaryConst.COLOR_OTHER, DictionaryHelper.getColorForCategory( "bogus" ) );
   }
 

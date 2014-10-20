@@ -21,12 +21,11 @@
  */
 package com.pentaho.metaverse.impl;
 
+import com.pentaho.dictionary.MetaverseLink;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
-
-import com.pentaho.dictionary.MetaverseLink;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

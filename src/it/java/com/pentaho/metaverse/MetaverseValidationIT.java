@@ -36,20 +36,24 @@ import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import com.pentaho.metaverse.frames.StreamFieldNode;
 import com.pentaho.metaverse.frames.TableOutputStepNode;
 import com.pentaho.metaverse.frames.TextFileInputStepNode;
+import com.pentaho.metaverse.frames.TextFileOutputStepNode;
 import com.pentaho.metaverse.frames.TransformationNode;
 import com.pentaho.metaverse.frames.TransformationStepNode;
+import com.pentaho.metaverse.frames.ValueMapperStepNode;
 import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
 import flexjson.JSONDeserializer;
-import org.junit.After;
+import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.trans.TransMeta;
@@ -57,9 +61,15 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
+import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +80,7 @@ import static org.junit.Assert.*;
  */
 public class MetaverseValidationIT {
 
+  private static final String ROOT_FOLDER = "src/it/resources/repo/validation";
   private static IMetaverseReader reader;
   private static Graph graph;
   private static FramedGraphFactory framedGraphFactory;
@@ -85,7 +96,7 @@ public class MetaverseValidationIT {
     IDocumentLocatorProvider provider = PentahoSystem.get( IDocumentLocatorProvider.class );
     // remove the original locator so we can set the modified one back on it
     provider.removeDocumentLocator( fileSystemLocator );
-    fileSystemLocator.setRootFolder( "src/it/resources/repo/demo" );
+    fileSystemLocator.setRootFolder( ROOT_FOLDER );
     provider.addDocumentLocator( fileSystemLocator );
 
     // build the graph using our updated locator/provider
@@ -100,6 +111,9 @@ public class MetaverseValidationIT {
   @AfterClass
   public static void cleanUp() throws Exception {
     IntegrationTestUtil.shutdownPentahoSystem();
+
+    File exportFile = new File( "src/it/resources/validationGraph.graphml" );
+    FileUtils.writeStringToFile( exportFile, reader.exportToXml(), "UTF-8" );
   }
 
   @Before
@@ -133,14 +147,22 @@ public class MetaverseValidationIT {
 
   @Test
   public void testEntity_FileSystemLocator() throws Exception {
-    LocatorNode node = (LocatorNode) framedGraph.getVertex( "FileSystem~FILE_SYSTEM_REPO~Locator", LocatorNode.class );
+    LocatorNode node = (LocatorNode) framedGraph.getVertex( "{\"name\":\"FILE_SYSTEM_REPO\",\"type\":\"Locator\"}", LocatorNode.class );
     assertEquals( DictionaryConst.NODE_TYPE_LOCATOR, node.getType() );
     assertEquals( "FILE_SYSTEM_REPO", node.getName() );
     assertNotNull( node.getDescription() );
     assertNotNull( node.getUrl() );
     assertNotNull( node.getLastScan() );
     int countDocuments = getIterableSize( node.getDocuments() );
-    assertEquals( 2, countDocuments );
+
+    File folder = new File( ROOT_FOLDER );
+    int fileCount = folder.listFiles( new FilenameFilter() {
+      @Override public boolean accept( File dir, String name ) {
+        return ( name.endsWith( ".ktr" ) || name.endsWith( ".kjb" ) );
+      }
+    } ).length;
+
+    assertEquals( fileCount, countDocuments );
   }
 
   @Test
@@ -215,15 +237,16 @@ public class MetaverseValidationIT {
         assertEquals( jobEntry.getName(), jobEntryNode.getName() );
         assertEquals( jobEntry.getDescription(), jobEntryNode.getDescription() );
         assertEquals( "Incorrect type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getType() );
-        assertEquals( "Incorrect entity type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getEntity().getName() );
+        assertEquals( "Incorrect entity type", DictionaryConst.NODE_TYPE_JOB_ENTRY,
+            jobEntryNode.getEntity().getName() );
         matchCount++;
       }
 
       assertEquals( "Not all job entries are accounted for in the graph for Job [" + jobMeta.getName() + "]",
-        numJobEntries, matchCount );
+          numJobEntries, matchCount );
 
       assertEquals( "Incorrect number of job entries for in the graph for Job [" + jobMeta.getName() + "]",
-        numJobEntries, getIterableSize( jobNode.getJobEntryNodes() ) );
+          numJobEntries, getIterableSize( jobNode.getJobEntryNodes() ) );
 
       // it should be contained in a "Locator" node
       jobNode.getLocator();
@@ -250,10 +273,10 @@ public class MetaverseValidationIT {
       }
 
       assertEquals( "Not all transformation steps are modeled in the graph for [" + tm.getName() + "]",
-        transMetaSteps.size(), matchCount );
+          transMetaSteps.size(), matchCount );
 
       assertEquals( "Incorrect number of Steps in the graph for transformation [" + tm.getName() + "]",
-        transMetaSteps.size(), stepCount );
+          transMetaSteps.size(), stepCount );
 
     }
   }
@@ -269,8 +292,7 @@ public class MetaverseValidationIT {
     assertEquals( 8, countUses );
     assertEquals( 4, countCreates );
     assertEquals( 3, countDeletes );
-    assertEquals( "SelectValuesMeta", selectValues.getMetaType() );
-
+    assertEquals( "Select values", selectValues.getStepType() );
 
     // verify the nodes created by the step
     for ( StreamFieldNode node : selectValues.getStreamFieldNodesCreates() ) {
@@ -307,7 +329,7 @@ public class MetaverseValidationIT {
       assertTrue( inputFile.getName().endsWith( "SacramentocrimeJanuary2006.csv" ) );
     }
 
-    assertEquals( "TextFileInputMeta", textFileInputStepNode.getMetaType() );
+    assertEquals( "Text file input", textFileInputStepNode.getStepType() );
 
     int countFileFieldNode = getIterableSize( textFileInputStepNode.getFileFieldNodesUses() );
 
@@ -320,6 +342,56 @@ public class MetaverseValidationIT {
     // we should create as many fields as we read in
     assertEquals( countFileFieldNode, countStreamFieldNode );
 
+  }
+
+  @Test
+  public void testTextFileInputStep_filenameFromField() throws Exception {
+    // this is testing a specific TextFileInputStep instance
+    TextFileInputStepNode textFileInputStepNode = root.getTextFileInputStepNode_filenameFromField();
+    assertNotNull( textFileInputStepNode );
+
+    // this TFI gets it's files from an incoming stream field, there should be no files modeled statically
+    Iterable<FramedMetaverseNode> inputFiles = textFileInputStepNode.getInputFiles();
+    int countInputFiles = getIterableSize( inputFiles );
+    assertEquals( 0, countInputFiles );
+
+    assertEquals( "Text file input", textFileInputStepNode.getStepType() );
+
+    int countUsesFieldNodes = getIterableSize( textFileInputStepNode.getFileFieldNodesUses() );
+
+    Iterable<StreamFieldNode> streamFieldNodes = textFileInputStepNode.getStreamFieldNodesCreates();
+    int countCreatesFieldNodes = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+
+    // we should create as many fields as we read in PLUS 1 for the incoming field that defines the files
+    assertEquals( countUsesFieldNodes - 1, countCreatesFieldNodes );
+
+    String filenameField = null;
+    TransMeta tm =
+        new TransMeta( new FileInputStream( textFileInputStepNode.getTransNode().getPath() ), null, true, null, null );
+    for ( StepMeta stepMeta : tm.getSteps() ) {
+      if ( stepMeta.getName().equals( textFileInputStepNode.getName() ) ) {
+        TextFileInputMeta meta = (TextFileInputMeta) getBaseStepMetaFromStepMeta( stepMeta );
+        assertTrue( meta.isAcceptingFilenames() );
+        filenameField = meta.getAcceptingField();
+        assertNotNull( filenameField );
+
+        // this was the one we cared about...
+        break;
+      }
+    }
+
+    // the field that defines the files should be deleted from the outgoing fields
+    Iterable<StreamFieldNode> deletedFieldNodes = textFileInputStepNode.getStreamFieldNodesDeletes();
+    int countDeletedFieldNodes = getIterableSize( deletedFieldNodes );
+    assertEquals( 1, countDeletedFieldNodes );
+
+    for ( StreamFieldNode deletedFieldNode : deletedFieldNodes ) {
+      assertEquals( "Should delete the stream field that defines the source files",
+          filenameField, deletedFieldNode.getName() );
+    }
   }
 
   @Test
@@ -355,38 +427,170 @@ public class MetaverseValidationIT {
   public void testTableOutputStepNode() throws Exception {
     // this tests a specific step in a specific transform
     TableOutputStepNode tableOutputStepNode = root.getTableOutputStepNode();
-    TransMeta tm = new TransMeta( tableOutputStepNode.getTransNode().getPath(), null, true, null, null);
 
     // check the table that it writes to
-    for ( StepMeta step : tm.getSteps() ) {
-      if ( tableOutputStepNode.getName().equals( step.getName() ) ) {
-        TableOutputMeta meta = (TableOutputMeta)getBaseStepMetaFromStepMeta( step );
-        String tableName = meta.getTableName();
-        assertEquals( tableName, tableOutputStepNode.getDatabaseTable().getName() );
+    TableOutputMeta meta = (TableOutputMeta) getStepMeta( tableOutputStepNode );
+    String tableName = meta.getTableName();
+    assertEquals( tableName, tableOutputStepNode.getDatabaseTable().getName() );
 
-        // check the fields used
-        Iterable<StreamFieldNode> uses = tableOutputStepNode.getStreamFieldNodesUses();
-        int fieldsUsedCount = getIterableSize( uses );
-        assertEquals( meta.getFieldStream().length, fieldsUsedCount );
-        // they should all populate a db column
-        for ( StreamFieldNode fieldNode : uses ) {
-          assertNotNull( "Used field does not populate anything [" + fieldNode.getName() + "]",
-            fieldNode.getFieldPopulatedByMe() );
-          assertEquals( "Stream Field [" + fieldNode.getName() + "] populates the wrong kind of node",
-            DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
-        }
+    // check the fields used
+    Iterable<StreamFieldNode> uses = tableOutputStepNode.getStreamFieldNodesUses();
+    int fieldsUsedCount = getIterableSize( uses );
+    assertEquals( meta.getFieldStream().length, fieldsUsedCount );
+    // they should all populate a db column
+    for ( StreamFieldNode fieldNode : uses ) {
+      assertNotNull( "Used field does not populate anything [" + fieldNode.getName() + "]",
+          fieldNode.getFieldPopulatedByMe() );
+      assertEquals( "Stream Field [" + fieldNode.getName() + "] populates the wrong kind of node",
+          DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
+    }
 
-        int countDbConnections = getIterableSize( tableOutputStepNode.getDatasources() );
-        for( DatabaseMeta dbMeta : meta.getUsedDatabaseConnections() ) {
-          assertNotNull( "Datasource is not used but should be [" + dbMeta.getName() + "]",
-            tableOutputStepNode.getDatasource( dbMeta.getName() ) );
-        }
-        assertEquals( meta.getUsedDatabaseConnections().length, countDbConnections );
+    int countDbConnections = getIterableSize( tableOutputStepNode.getDatasources() );
+    for ( DatabaseMeta dbMeta : meta.getUsedDatabaseConnections() ) {
+      assertNotNull( "Datasource is not used but should be [" + dbMeta.getName() + "]",
+          tableOutputStepNode.getDatasource( dbMeta.getName() ) );
+    }
+    assertEquals( meta.getUsedDatabaseConnections().length, countDbConnections );
 
-        break;
+
+  }
+
+  @Test
+  public void testValueMapperStepNode_overwrite() throws Exception {
+    ValueMapperStepNode valueMapperStepNode = root.getValueMapperStepNode( "Value Mapper - overwrite" );
+
+    assertEquals( 1, getIterableSize( valueMapperStepNode.getStreamFieldNodesUses() ) );
+    assertEquals( 0, getIterableSize( valueMapperStepNode.getStreamFieldNodesCreates() ) );
+    assertEquals( 0, getIterableSize( valueMapperStepNode.getStreamFieldNodesDeletes() ) );
+    StreamFieldNode usesNode = null;
+    for ( StreamFieldNode node : valueMapperStepNode.getStreamFieldNodesUses() ) {
+      usesNode = node;
+      break;
+    }
+
+    ValueMapperMeta meta = (ValueMapperMeta) getStepMeta( valueMapperStepNode );
+    assertEquals( meta.getFieldToUse(), usesNode.getName() );
+    Map<String, List<String>> ops = convertOperationsStringToMap( usesNode.getOperations() );
+    assertEquals( meta.getSourceValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
+    assertEquals( meta.getTargetValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
+
+    int derivedCount = getIterableSize( usesNode.getFieldNodesDerivedFromMe() );
+    assertEquals( 0, derivedCount );
+  }
+
+  @Test
+  public void testValueMapperStepNode_newField() throws Exception {
+    ValueMapperStepNode valueMapperStepNode = root.getValueMapperStepNode( "Value Mapper - new field" );
+
+    assertEquals( 1, getIterableSize( valueMapperStepNode.getStreamFieldNodesUses() ) );
+    assertEquals( 1, getIterableSize( valueMapperStepNode.getStreamFieldNodesCreates() ) );
+    assertEquals( 0, getIterableSize( valueMapperStepNode.getStreamFieldNodesDeletes() ) );
+
+    StreamFieldNode usesNode = null;
+    for ( StreamFieldNode node : valueMapperStepNode.getStreamFieldNodesUses() ) {
+      usesNode = node;
+      break;
+    }
+
+    StreamFieldNode createsNode = null;
+    for ( StreamFieldNode node : valueMapperStepNode.getStreamFieldNodesCreates() ) {
+      createsNode = node;
+      break;
+    }
+
+    ValueMapperMeta meta = (ValueMapperMeta) getStepMeta( valueMapperStepNode );
+    assertEquals( meta.getFieldToUse(), usesNode.getName() );
+    assertEquals( meta.getTargetField(), createsNode.getName() );
+    assertNull( usesNode.getOperations() );
+
+    int derivesCount = getIterableSize( createsNode.getFieldNodesThatDeriveMe() );
+    assertEquals( 1, derivesCount );
+
+    for ( FieldNode derives : createsNode.getFieldNodesThatDeriveMe() ) {
+      assertEquals( usesNode.getName(), derives.getName() );
+      assertEquals( usesNode.getType(), derives.getType() );
+    }
+
+    Map<String, List<String>> ops = convertOperationsStringToMap( createsNode.getOperations() );
+    assertEquals( meta.getSourceValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
+    assertEquals( meta.getTargetValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
+
+  }
+
+  @Test
+  public void testTextFileOutputStepNode() throws Exception {
+    TextFileOutputStepNode textFileOutputStepNode = root.getTextFileOutputStepNode( "textFileOutput", "Text file output" );
+    TextFileOutputMeta meta = (TextFileOutputMeta) getStepMeta( textFileOutputStepNode );
+    TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
+    String[] fileNames = meta.getFiles( tm );
+
+    RowMetaInterface incomingFields = tm.getStepFields( meta.getParentStepMeta() );
+    TextFileField[] outputFields = meta.getOutputFields();
+
+    assertNotNull( textFileOutputStepNode );
+    // should write to one file
+    Iterable<FramedMetaverseNode> outputFiles = textFileOutputStepNode.getOutputFiles();
+    assertEquals( fileNames.length, getIterableSize( outputFiles ) );
+    int i = 0;
+    for ( FramedMetaverseNode node : outputFiles ) {
+      assertEquals( fileNames[i++].replace( "file://", "" ), node.getName() );
+    }
+
+    Iterable<StreamFieldNode> usedFields = textFileOutputStepNode.getStreamFieldNodesUses();
+    int usedFieldCount = getIterableSize( usedFields );
+    assertEquals( outputFields.length, usedFieldCount );
+    assertEquals( incomingFields.size(), usedFieldCount );
+
+    for ( StreamFieldNode usedField : usedFields ) {
+      ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
+      assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
+    }
+
+  }
+
+  @Test
+  public void testTextFileOutputStepNode_FileFromSteamField() throws Exception {
+    TextFileOutputStepNode textFileOutputStepNode = root.getTextFileOutputStepNode(
+      "textFileOutput", "Text file output - file from field" );
+
+    TextFileOutputMeta meta = (TextFileOutputMeta) getStepMeta( textFileOutputStepNode );
+    TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
+
+    RowMetaInterface incomingFields = tm.getStepFields( meta.getParentStepMeta() );
+    TextFileField[] outputFields = meta.getOutputFields();
+
+    assertNotNull( textFileOutputStepNode );
+    // should write to one file
+    Iterable<FramedMetaverseNode> outputFiles = textFileOutputStepNode.getOutputFiles();
+    assertEquals( 0, getIterableSize( outputFiles ) );
+
+    Iterable<StreamFieldNode> usedFields = textFileOutputStepNode.getStreamFieldNodesUses();
+    int usedFieldCount = getIterableSize( usedFields );
+    assertEquals( outputFields.length, usedFieldCount - 1 );
+    assertEquals( incomingFields.size(), usedFieldCount );
+
+    for ( StreamFieldNode usedField : usedFields ) {
+      ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
+      if ( usedField.getName().equals( meta.getFileNameField() ) ) {
+        // make sure he doesn't populate anything since we aren't writing it to the file
+        assertNull( usedField.getFieldPopulatedByMe() );
+      } else {
+        assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
       }
     }
 
+  }
+
+  protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {
+    TransMeta tm = new TransMeta( transformationStepNode.getTransNode().getPath(), null, true, null, null );
+    BaseStepMeta meta = null;
+    for ( StepMeta stepMeta : tm.getSteps() ) {
+      if ( transformationStepNode.getName().equals( stepMeta.getName() ) ) {
+        meta = getBaseStepMetaFromStepMeta( stepMeta );
+        break;
+      }
+    }
+    return meta;
   }
 
   protected BaseStepMeta getBaseStepMetaFromStepMeta( StepMeta stepMeta ) {
@@ -415,7 +619,7 @@ public class MetaverseValidationIT {
 
   private String convertNumericStatusToString( int transactionStatus ) {
     String status = null;
-    switch( transactionStatus ) {
+    switch ( transactionStatus ) {
       case 1:
         status = "DRAFT";
         break;
