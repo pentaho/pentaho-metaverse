@@ -39,23 +39,24 @@
   </developers>
 
   <properties>
+    <pentaho.public.release.repo>http://nexus.pentaho.org/content/repositories/private-release/</pentaho.public.release.repo>
+    <pentaho.public.snapshot.repo>http://nexus.pentaho.org/content/repositories/private-snapshot/</pentaho.public.snapshot.repo>
     <platform.plugin.name>metaverse</platform.plugin.name>
-    <pdi.plugin.name>pdi-metaverse-extensions</pdi.plugin.name>
-    <blueprints-core.version>2.5.0</blueprints-core.version>
+    <blueprints-core.version>2.6.0</blueprints-core.version>
     <pentaho-platform-api.version>METAVERSE-SNAPSHOT</pentaho-platform-api.version>
     <pentaho-platform-core.version>TRUNK-SNAPSHOT</pentaho-platform-core.version>
     <pentaho-platform-repository.version>TRUNK-SNAPSHOT</pentaho-platform-repository.version>
     <jcr.version>2.0</jcr.version>
     <spring.version>2.5.6</spring.version>
     <mockito-all.version>1.9.5</mockito-all.version>
-    <pentaho-pur-repository.version>
-      <!-- 5.1.0.0-752 -->
-      TRUNK-SNAPSHOT
-    </pentaho-pur-repository.version>
     <jersey.version>1.16</jersey.version>
     <slf4j.version>1.7.7</slf4j.version>
     <flexjson.version>2.1</flexjson.version>
     <proguard.version>4.9</proguard.version>
+    <pmd.version>3.2</pmd.version>
+    <target.jdk.version>1.6</target.jdk.version>
+    <jxr.version>2.3</jxr.version>
+    <pmd.rulesets.url>https://raw.githubusercontent.com/pmd/pmd/pmd_releases/5.1.2/pmd/src/main/resources/rulesets/java</pmd.rulesets.url>
   </properties>
 
   <scm>
@@ -107,13 +108,6 @@
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
       <version>${pentaho-platform-repository.version}</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>pur-repository-plugin</artifactId>
-      <version>${pentaho-pur-repository.version}</version>
       <scope>compile</scope>
     </dependency>
 
@@ -205,10 +199,8 @@
           <appendAssemblyId>false</appendAssemblyId>
           <descriptors>
             <descriptor>src/assembly/platform-plugin.xml</descriptor>
-            <descriptor>src/assembly/pdi-plugin.xml</descriptor>
           </descriptors>
         </configuration>
-      -->
         <executions>
           <execution>
             <id>make-platform-plugin</id>
@@ -242,8 +234,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>${target.jdk.version}</source>
+          <target>${target.jdk.version}</target>
         </configuration>
       </plugin>
 
@@ -324,29 +316,62 @@
         </configuration>
       </plugin>
 
+      <!-- override the declaration in the reporting section so we can call 'mvn pmd:pmd without building the whole site -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${pmd.version}</version>
+        <configuration>
+          <linkXref>true</linkXref>
+          <targetJdk>${target.jdk.version}</targetJdk>
+          <rulesets>
+            <ruleset>${pmd.rulesets.url}/basic.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/optimizations.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/codesize.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/design.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/coupling.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/strings.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/unnecessary.xml</ruleset>
+          </rulesets>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>${jxr.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${pmd.version}</version>
+        <configuration>
+          <linkXref>true</linkXref>
+          <targetJdk>${target.jdk.version}</targetJdk>
+          <rulesets>
+            <ruleset>${pmd.rulesets.url}/basic.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/optimizations.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/codesize.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/design.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/coupling.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/strings.xml</ruleset>
+            <ruleset>${pmd.rulesets.url}/unnecessary.xml</ruleset>
+          </rulesets>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <!-- this is for bootstrapping only; you should really just add this to your settings.xml -->
   <repositories>
     <repository>
       <id>pentaho.resolve.repo</id>
       <name>Pentaho Group Resolve Repository</name>
-      <url>http://nexus.pentaho.org/content/groups/omni/</url>
-      <releases>
-        <updatePolicy>always</updatePolicy>
-        <checksumPolicy>fail</checksumPolicy>
-      </releases>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-        <checksumPolicy>fail</checksumPolicy>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>old.pentaho.resolve.repo</id>
-      <name>Old (Artifactory) Pentaho Group Resolve Repository</name>
-      <url>http://repo.pentaho.org/artifactory/repo/</url>
+      <url>http://ivy-nexus.pentaho.org/content/groups/omni</url>
       <releases>
         <updatePolicy>always</updatePolicy>
         <checksumPolicy>fail</checksumPolicy>

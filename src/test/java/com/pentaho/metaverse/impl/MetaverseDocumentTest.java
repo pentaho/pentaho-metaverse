@@ -22,20 +22,19 @@
 
 package com.pentaho.metaverse.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import com.pentaho.dictionary.DictionaryConst;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.pentaho.platform.api.metaverse.IHasProperties;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
 import org.pentaho.platform.api.metaverse.INamespace;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * @author mburgess
@@ -104,16 +103,6 @@ public class MetaverseDocumentTest {
   }
 
   @Test
-  public void testGetChildNamespace() throws Exception {
-    MetaverseDocument document = new MetaverseDocument();
-    INamespace mockNamespace = mock( INamespace.class );
-    when( mockNamespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( null );
-    document.setNamespace( mockNamespace );
-    document.getChildNamespace( "test",  "test" );
-    verify( mockNamespace ).getChildNamespace( anyString(), anyString() );
-  }
-
-  @Test
   public void testGetNamespace() throws Exception {
     MetaverseDocument document = new MetaverseDocument();
     document.setStringID( "id" );
@@ -124,5 +113,84 @@ public class MetaverseDocumentTest {
     assertEquals( mockNamespace, document.getNamespace() );
     assertEquals( "id", document.getStringID() );
     verify( mockNamespace ).getNamespaceId();
+  }
+
+  @Test
+  public void testGetLogicalId() throws Exception {
+    MetaverseDocument myNode = new MetaverseDocument();
+
+    myNode.setName( "testName" );
+    myNode.setType( "testType" );
+    myNode.setProperty( "zzz", "last" );
+    myNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, "" );
+    myNode.setStringID( "myId" );
+
+    // should be using the default logical id generator initially
+    assertEquals( "{\"name\":\"testName\",\"namespace\":\"\",\"type\":\"testType\"}", myNode.getLogicalId() );
+
+    ILogicalIdGenerator idGenerator = new MetaverseLogicalIdGenerator( "type", "zzz", "name" );
+    myNode.setLogicalIdGenerator( idGenerator );
+    assertNotNull( myNode.logicalIdGenerator );
+
+    // logical id should be sorted based on key
+    assertEquals( "{\"name\":\"testName\",\"type\":\"testType\",\"zzz\":\"last\"}", myNode.getLogicalId() );
+  }
+
+  @Test
+  public void testGetLogicalId_nullIdGenerator() throws Exception {
+    MetaverseDocument myNode = new MetaverseDocument();
+    myNode.setStringID( "myId" );
+    myNode.setName( "testName" );
+    myNode.setType( "testType" );
+    myNode.setLogicalIdGenerator( null );
+
+    assertEquals( "myId", myNode.getLogicalId() );
+  }
+
+  @Test
+  public void testGetLogicalId_nullLogicalIdGeneration() throws Exception {
+    MetaverseDocument myNode = new MetaverseDocument();
+    myNode.setStringID( "myId" );
+    ILogicalIdGenerator generator = mock( ILogicalIdGenerator.class );
+    when( generator.generateId( any( IHasProperties.class ) ) ).thenReturn( null );
+
+    myNode.setName( "testName" );
+    myNode.setType( "testType" );
+    myNode.setLogicalIdGenerator( generator );
+
+    assertEquals( "myId", myNode.getLogicalId() );
+  }
+
+  @Test
+  public void testGetLogicalId_isNotDirty() throws Exception {
+    MetaverseDocument myNode = new MetaverseDocument();
+    myNode.setStringID( "myId" );
+    myNode.setName( "testName" );
+    myNode.setType( "testType" );
+    assertEquals( "{\"name\":\"testName\",\"namespace\":\"\",\"type\":\"testType\"}", myNode.getLogicalId() );
+    myNode.setDirty( true );
+    assertEquals( "{\"name\":\"testName\",\"namespace\":\"\",\"type\":\"testType\"}", myNode.getLogicalId() );
+  }
+
+  @Test
+  public void testDelegateNamespaceCalls() throws Exception {
+    MetaverseDocument doc = new MetaverseDocument();
+    doc.setStringID( "id" );
+    INamespace mockNs = mock( INamespace.class );
+
+    doc.setNamespace( mockNs );
+
+    doc.getParentNamespace();
+    verify( mockNs, times( 1 ) ).getParentNamespace();
+
+    doc.getSiblingNamespace( "Brother", "A" );
+    verify( mockNs, times( 1 ) ).getSiblingNamespace( eq( "Brother" ), eq( "A" ) );
+  }
+
+  @Test
+  public void testContext() throws Exception {
+    MetaverseDocument doc = new MetaverseDocument();
+    doc.setContext( new AnalysisContext( DictionaryConst.CONTEXT_DEFAULT ) );
+    assertEquals( DictionaryConst.CONTEXT_DEFAULT, doc.getContext().getContextName() );
   }
 }

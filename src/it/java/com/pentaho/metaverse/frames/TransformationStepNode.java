@@ -30,8 +30,8 @@ import com.tinkerpop.frames.Property;
  * User: RFellows Date: 9/4/14
  */
 public interface TransformationStepNode extends Concept {
-  @Property( "kettleStepMetaType" )
-  public String getMetaType();
+  @Property( "stepType" )
+  public String getStepType();
 
   @Adjacency( label = "contains", direction = Direction.IN )
   public TransformationNode getTransNode();

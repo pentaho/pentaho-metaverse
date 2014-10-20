@@ -59,8 +59,15 @@ public class DIRepositoryLocator extends RepositoryLocator {
 
   private static final long serialVersionUID = 1324202912891938340L;
 
-  private Repository repository;
-  private IUnifiedRepository unifiedRepository;
+  /**
+   * A reference to the PDI repository associated with this locator
+   */
+  protected Repository repository;
+
+  /**
+   * A reference to the IUnifiedRepository backing the repo associated with this locator
+   */
+  protected IUnifiedRepository unifiedRepository;
 
   /**
    * The constructor for the DIRepositoryLocator
@@ -109,7 +116,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
   @Override
   protected IUnifiedRepository getUnifiedRepository( IPentahoSession session ) throws Exception {
 
-    if ( unifiedRepository == null && !( repository instanceof KettleFileRepository ) ) {
+    if ( unifiedRepository == null ) {
 
       getRepository();
 
@@ -188,7 +195,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
 
     if ( repo != null ) {
 
-      Object repositoryMeta = repository.getRepositoryMeta();
+      Object repositoryMeta = repo.getRepositoryMeta();
       Object repositoryLocation = null;
       String location = null;
 
@@ -200,7 +207,7 @@ public class DIRepositoryLocator extends RepositoryLocator {
           Method m = repositoryMetaClass.getMethod( "getRepositoryLocation", parameters );
           repositoryLocation = m.invoke( repositoryMeta );
         } catch ( Exception e ) {
-          LOG.warn( Messages.getString( "WARNING.RepositoryUnknownMethodNoRootURI", repository.getClass().getName() ) );
+          LOG.warn( Messages.getString( "WARNING.RepositoryUnknownMethodNoRootURI", repo.getClass().getName() ) );
         }
       }
 

@@ -22,8 +22,14 @@
 
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
-import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponentWithDatabases;
+import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.messages.Messages;
+import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.plugins.JobEntryPluginType;
+import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
@@ -31,13 +37,40 @@ import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.Set;
+
 /**
  * The JobEntryAnalyzer provides JobEntryCopy metadata to the metaverse.
  * <p/>
  * Created by gmoran on 7/16/14.
  */
-public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface> extends BaseKettleMetaverseComponent
-    implements IJobEntryAnalyzer<T> {
+public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
+    extends BaseKettleMetaverseComponentWithDatabases implements IJobEntryAnalyzer<T> {
+
+  /**
+   * A reference to the JobEntryInterface under analysis
+   */
+  protected JobEntryInterface jobEntryInterface = null;
+
+  /**
+   * A reference to the entry's parent Job
+   */
+  protected Job parentJob = null;
+
+  /**
+   * A reference to the entry's parent JobMeta
+   */
+  JobMeta parentJobMeta = null;
+
+  /**
+   * A reference to the root node created by the analyzer (usually corresponds to the job entry under analysis)
+   */
+  protected IMetaverseNode rootNode = null;
+
+  /**
+   * A reference to the database connection analyzer
+   */
+  protected IDatabaseConnectionAnalyzer dbConnectionAnalyzer = null;
 
   /**
    * Analyzes job entries
@@ -52,12 +85,58 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface> extends 
     validateState( descriptor, entry );
 
     // Add yourself
-    IMetaverseNode node = createNodeFromDescriptor( descriptor );
-    node.setProperty( "kettleJobEntryInterfaceType", entry.getClass().getSimpleName() );
-    metaverseBuilder.addNode( node );
+    rootNode = createNodeFromDescriptor( descriptor );
+    String stepType = null;
+    try {
+      stepType = PluginRegistry.getInstance().findPluginWithId(
+          JobEntryPluginType.class, entry.getPluginId() ).getName();
+    } catch ( Throwable t ) {
+      stepType = entry.getClass().getSimpleName();
+    }
+    rootNode.setProperty( "jobEntryType", stepType );
+    rootNode.setProperty( "copies", entry.getParentJob().getJobMeta().getJobCopies().size() );
+    metaverseBuilder.addNode( rootNode );
 
-    return node;
+    return rootNode;
+  }
 
+  /**
+   * Adds any used database connections to the metaverse using the appropriate analyzer
+   *
+   * @throws MetaverseAnalyzerException
+   */
+  protected void addDatabaseConnectionNodes( IMetaverseComponentDescriptor descriptor )
+    throws MetaverseAnalyzerException {
+
+    if ( jobEntryInterface == null ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );
+    }
+
+    // Analyze the database connections
+    DatabaseMeta[] dbs = jobEntryInterface.getUsedDatabaseConnections();
+    if ( dbs != null ) {
+      Set<IDatabaseConnectionAnalyzer> dbAnalyzers = getDatabaseConnectionAnalyzers();
+      if ( dbAnalyzers != null ) {
+        for ( IDatabaseConnectionAnalyzer dbAnalyzer : dbAnalyzers ) {
+          if ( dbAnalyzer != null ) {
+            for ( DatabaseMeta db : dbs ) {
+              try {
+                IMetaverseComponentDescriptor dbDescriptor = new MetaverseComponentDescriptor(
+                    db.getName(),
+                    DictionaryConst.NODE_TYPE_DATASOURCE,
+                    descriptor.getNamespace(),
+                    descriptor.getContext() );
+                IMetaverseNode dbNode = dbAnalyzer.analyze( dbDescriptor, db );
+                metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
+              } catch ( Throwable t ) {
+                // Don't throw the exception if a DB connection couldn't be analyzed, just log it and move on
+                t.printStackTrace( System.err );
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   protected void validateState( IMetaverseComponentDescriptor descriptor, T entry ) throws MetaverseAnalyzerException {
@@ -65,14 +144,15 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface> extends 
     if ( entry == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );
     }
+    jobEntryInterface = entry;
 
-    Job parentJob = entry.getParentJob();
+    parentJob = entry.getParentJob();
 
     if ( parentJob == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.ParentJob.IsNull" ) );
     }
 
-    JobMeta parentJobMeta = parentJob.getJobMeta();
+    parentJobMeta = parentJob.getJobMeta();
     if ( parentJobMeta == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.ParentJobMeta.IsNull" ) );
     }

@@ -26,13 +26,12 @@ import com.pentaho.dictionary.DictionaryConst;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.platform.api.metaverse.IAnalysisContext;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.INamespace;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * User: RFellows Date: 8/15/14
@@ -47,7 +46,17 @@ public class MetaverseComponentDescriptorTest {
 
   @Test
   public void testConstructor() throws Exception {
-    descriptor = new MetaverseComponentDescriptor( null, null, null );
+    INamespace ns = null;
+    descriptor = new MetaverseComponentDescriptor( null, null, ns );
+    assertNull( descriptor.getType() );
+    assertNull( descriptor.getName() );
+    assertNull( descriptor.getNamespace() );
+  }
+
+  @Test
+  public void testConstructor2() throws Exception {
+    IMetaverseNode node = null;
+    descriptor = new MetaverseComponentDescriptor( null, null, node );
     assertNull( descriptor.getType() );
     assertNull( descriptor.getName() );
     assertNull( descriptor.getNamespace() );
@@ -60,6 +69,7 @@ public class MetaverseComponentDescriptorTest {
 
     INamespace mockNamespace = mock( INamespace.class );
     when( mockNamespace.getNamespaceId() ).thenReturn( "namespace-id" );
+    when( mockNamespace.getSiblingNamespace( "any", "any" ) ).thenReturn( new Namespace( "my brother's namespace" ) );
 
     descriptor = new MetaverseComponentDescriptor( null, null, mockEmptyNamespace );
     assertNull( descriptor.getStringID() );
@@ -77,6 +87,8 @@ public class MetaverseComponentDescriptorTest {
 
     descriptor.setNamespace( mockNamespace );
     assertEquals( "namespace-id", descriptor.getStringID() );
+    descriptor.getSiblingNamespace( "any", "any" );
+    verify( mockNamespace ).getSiblingNamespace( eq( "any" ), eq( "any" ) );
 
     descriptor = new MetaverseComponentDescriptor( null, null, mockEmptyNamespace, null );
     assertNull( descriptor.getStringID() );
@@ -89,5 +101,15 @@ public class MetaverseComponentDescriptorTest {
     assertNotNull( context );
     assertEquals( "test context", context.getContextName() );
     assertNull( context.getContextObject() );
+
   }
+
+  @Test
+  public void testGetNullNamespace() throws Exception {
+    INamespace mockEmptyNamespace = null;
+
+    descriptor = new MetaverseComponentDescriptor( null, null, mockEmptyNamespace );
+    assertNull( descriptor.getNamespaceId() );
+  }
+
 }

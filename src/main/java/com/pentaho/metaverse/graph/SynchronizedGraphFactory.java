@@ -26,7 +26,6 @@ import com.pentaho.metaverse.messages.Messages;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.KeyIndexableGraph;
 import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
-
 import org.apache.commons.configuration.Configuration;
 
 import java.util.Map;

@@ -1,7 +1,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
@@ -29,18 +28,11 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SelectValuesStepAnalyzerTest {
@@ -74,11 +66,11 @@ public class SelectValuesStepAnalyzerTest {
   public void setUp() throws Exception {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
-    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+//    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
     when( namespace.getNamespaceId() ).thenReturn( "namespace" );
     when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
+//    when( descriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( descriptor.getParentNamespace() ).thenReturn( namespace );
     when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
 
@@ -106,10 +98,8 @@ public class SelectValuesStepAnalyzerTest {
     assertNotNull( result );
     assertEquals( meta.getName(), result.getName() );
 
-    // TODO verify( selectValuesMeta, times( 1 ) ).getFileName();
-
-    // make sure the step node is added as well as the file node
-    verify( builder, atLeastOnce() ).addNode( any( IMetaverseNode.class ) );
+    // make sure the step node is added
+    verify( builder, times(1) ).addNode( any( IMetaverseNode.class ) );
 
   }
 
@@ -121,6 +111,7 @@ public class SelectValuesStepAnalyzerTest {
 
     when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when(spyMeta.getStepID()).thenReturn( "Select values" );
 
     String[] fieldNames = { "field1", "field2" };
     String[] fieldRenames = { null, "field3" };
@@ -158,6 +149,7 @@ public class SelectValuesStepAnalyzerTest {
     IMetaverseNode result = analyzer.analyze( descriptor, selectValuesMeta );
     assertNotNull( result );
     assertEquals( meta.getName(), result.getName() );
+    assertEquals("Select values", result.getProperty( "stepType" ));
 
     // we should have "derives" links from input nodes to output nodes
     verify( builder, times( 1 ) )

@@ -20,77 +20,41 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl;
+package com.pentaho.metaverse.analyzer.kettle;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.pentaho.dictionary.MetaverseTransientNode;
+import java.util.Iterator;
+import java.util.Set;
 
-/**
- * @author mburgess
- * 
- */
-public class MetaverseTransientNodeTest {
+import static org.junit.Assert.*;
 
-  MetaverseTransientNode node;
+public class BaseKettleMetaverseComponentWithDatabasesTest {
 
-  /**
-   * @throws java.lang.Exception
-   */
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
+  BaseKettleMetaverseComponentWithDatabases componentWithDatabases = null;
 
-  /**
-   * @throws java.lang.Exception
-   */
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
-
-  /**
-   * @throws java.lang.Exception
-   */
   @Before
   public void setUp() throws Exception {
-    node = new MetaverseTransientNode();
-  }
-
-  /**
-   * @throws java.lang.Exception
-   */
-  @After
-  public void tearDown() throws Exception {
+    componentWithDatabases = new BaseKettleMetaverseComponentWithDatabases();
   }
 
   @Test
-  public void testGetName() {
-    assertNull( node.getName() );
+  public void testGetDatabaseConnectionAnalyzers() {
+    // Should be a default DatabaseConnectionAnalyzer (as we are not using PentahoSystem in unit tests)
+    componentWithDatabases.setDatabaseConnectionAnalyzerProvider( new DatabaseConnectionAnalyzerProvider() );
+    Set<IDatabaseConnectionAnalyzer> dbas = componentWithDatabases.getDatabaseConnectionAnalyzers();
+    assertNotNull( dbas );
+    assertEquals( 1, dbas.size() );
+    Iterator<IDatabaseConnectionAnalyzer> dbasIterator = dbas.iterator();
+    assertNotNull( dbasIterator );
+    while ( dbasIterator.hasNext() ) {
+      IDatabaseConnectionAnalyzer dba = dbasIterator.next();
+      assertTrue( dba instanceof DatabaseConnectionAnalyzer );
+    }
   }
-
-  public void testSetName() {
-    MetaverseTransientNode myNode = new MetaverseTransientNode();
-    myNode.setName( "myName" );
-    assertEquals( myNode.getName(), "myName" );
-  }
-
   @Test
-  public void testGetType() {
-    assertNull( node.getType() );
+  public void testGetDatabaseConnectionAnalyzersNullProvider() {
+    componentWithDatabases.getDatabaseConnectionAnalyzers();
   }
-
-  @Test
-  public void testSetType() {
-    MetaverseTransientNode myNode = new MetaverseTransientNode();
-    myNode.setType( "myType" );
-    assertEquals( myNode.getType(), "myType" );
-  }
-
 }

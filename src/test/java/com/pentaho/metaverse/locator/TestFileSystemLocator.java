@@ -3,7 +3,6 @@ package com.pentaho.metaverse.locator;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TestFileSystemLocator extends FileSystemLocator {

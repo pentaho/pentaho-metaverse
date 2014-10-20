@@ -22,11 +22,11 @@
 
 package com.pentaho.metaverse.graph;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import com.pentaho.metaverse.api.IGraphWriter;
 import com.tinkerpop.blueprints.Graph;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * The GraphSONWriter class contains methods for writing a metaverse graph model in GraphSON format

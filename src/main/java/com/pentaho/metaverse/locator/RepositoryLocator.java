@@ -22,8 +22,6 @@
 
 package com.pentaho.metaverse.locator;
 
-import java.util.List;
-
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.metaverse.IDocumentListener;
@@ -33,6 +31,8 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.pentaho.platform.api.repository2.unified.RepositoryRequest;
 import org.pentaho.platform.repository2.ClientRepositoryPaths;
+
+import java.util.List;
 
 /**
  * An abstract implementation of a document locator for Pentaho repositories

@@ -22,16 +22,16 @@
 
 package com.pentaho.metaverse.graph;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Iterator;
-
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.IGraphWriter;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Iterator;
 
 /**
  * The GraphMLWriter class contains methods for writing a metaverse graph model in GraphML format

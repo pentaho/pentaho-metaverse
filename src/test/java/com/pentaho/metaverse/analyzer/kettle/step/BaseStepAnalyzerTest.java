@@ -24,12 +24,14 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
-import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzerProvider;
 import com.pentaho.metaverse.impl.AnalysisContext;
-import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -46,19 +48,21 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.platform.api.metaverse.*;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author mburgess
@@ -93,7 +97,7 @@ public class BaseStepAnalyzerTest {
   RowMetaInterface mockStepFields;
 
   @Mock
-  MetaverseNamespace namespace;
+  INamespace namespace;
 
   @Mock
   IMetaverseComponentDescriptor mockDescriptor;
@@ -131,11 +135,9 @@ public class BaseStepAnalyzerTest {
       }
     };
     analyzer.setMetaverseBuilder( mockBuilder );
-    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
     when( namespace.getNamespaceId() ).thenReturn( "namespace" );
     when( mockDescriptor.getNamespace() ).thenReturn( namespace );
-    when( mockDescriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( mockDescriptor.getParentNamespace() ).thenReturn( namespace );
     when( mockDescriptor.getNamespaceId() ).thenReturn( "namespace" );
     when( mockDescriptor.getContext() ).thenReturn( new AnalysisContext( DictionaryConst.CONTEXT_DEFAULT, null ) );
@@ -164,26 +166,11 @@ public class BaseStepAnalyzerTest {
   }
 
   @Test
-  public void testGetDatabaseConnectionAnalyzer() {
-    // Should be a default DatabaseConnectionAnalyzer (as we are not using PentahoSystem in unit tests)
-    IDatabaseConnectionAnalyzer dba = analyzer.getDatabaseConnectionAnalyzer();
-    assertNotNull( dba );
-    assertTrue( dba instanceof DatabaseConnectionAnalyzer );
-  }
-
-  @Test
-  public void testGetDatabaseConnectionAnalyzerNotNull() {
-    IDatabaseConnectionAnalyzer dba = new DatabaseConnectionAnalyzer();
-    analyzer.setDatabaseConnectionAnalyzer( dba );
-    assertNotNull( analyzer.getDatabaseConnectionAnalyzer() );
-    assertEquals( dba, analyzer.getDatabaseConnectionAnalyzer() );
-  }
-
-  @Test
-  public void testAddDatabaseConnectionNodesNullDatabaseConnectionAnalyzer() {
-    BaseStepAnalyzer mockAnalyzer = mock( analyzer.getClass() );
-    when( mockAnalyzer.getDatabaseConnectionAnalyzer() ).thenReturn( null );
-    assertNull( mockAnalyzer.getDatabaseConnectionAnalyzer() );
+  public void testAddDatabaseConnectionNodesException() throws MetaverseAnalyzerException {
+    analyzer.baseStepMeta = mock( BaseStepMeta.class );
+    BaseStepAnalyzer mockAnalyzer = spy( analyzer );
+    when( mockDescriptor.getContext() ).thenThrow( Exception.class );
+    mockAnalyzer.addDatabaseConnectionNodes( mockDescriptor );
   }
 
   @Test
@@ -327,7 +314,7 @@ public class BaseStepAnalyzerTest {
     DatabaseMeta[] dbs = new DatabaseMeta[] { mockDatabaseMeta };
     when( mockStepMetaInterface.getUsedDatabaseConnections() ).thenReturn( dbs );
     when( mockStepMeta.getUsedDatabaseConnections() ).thenReturn( dbs );
-    analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
+    analyzer.setDatabaseConnectionAnalyzerProvider( new DatabaseConnectionAnalyzerProvider() );
     analyzer.baseStepMeta = mockStepMeta;
     analyzer.addDatabaseConnectionNodes( mockDescriptor );
   }
@@ -338,21 +325,31 @@ public class BaseStepAnalyzerTest {
   }
 
   @Test
-  public void testSetDatabaseConnectionAnalyzer() {
-    analyzer.setDatabaseConnectionAnalyzer( new DatabaseConnectionAnalyzer() );
-    assertNotNull( analyzer.getDatabaseConnectionAnalyzer() );
+  public void testSetDatabaseConnectionAnalyzerProvider() {
+    analyzer.setDatabaseConnectionAnalyzerProvider( new DatabaseConnectionAnalyzerProvider() );
+    assertNotNull( analyzer.getDatabaseConnectionAnalyzers() );
   }
 
   @Test
   public void testProcessChangeRecordNullDescriptor() {
     when( changeRecord.hasDelta() ).thenReturn( true );
     analyzer.processFieldChangeRecord( null, mock( IMetaverseNode.class ), changeRecord );
-    verify( mockDescriptor, never() ).getChildNamespace( anyString(), anyString() );
+//    verify( mockDescriptor, never() ).getChildNamespace( anyString(), anyString() );
   }
 
   @Test
   public void testProcessChangeRecordNullRecord() {
     analyzer.processFieldChangeRecord( mockDescriptor, mock( IMetaverseNode.class ), null );
+  }
+
+  @Test
+  public void testGetPrevStepFieldOriginDescriptorNullDescriptor() {
+    assertNull( analyzer.getPrevStepFieldOriginDescriptor( null, "Name" ) );
+  }
+
+  @Test
+  public void testGetStepFieldOriginDescriptorNullDescriptor() {
+    assertNull( analyzer.getStepFieldOriginDescriptor( null, "Name" ) );
   }
 
   @Test

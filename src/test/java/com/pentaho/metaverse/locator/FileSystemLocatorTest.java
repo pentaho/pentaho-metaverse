@@ -22,34 +22,29 @@
 
 package com.pentaho.metaverse.locator;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import com.pentaho.metaverse.graph.GraphMLWriter;
+import com.pentaho.metaverse.impl.MetaverseBuilder;
+import com.pentaho.metaverse.impl.MetaverseCompletionService;
+import com.pentaho.metaverse.impl.MetaverseDocument;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.KettleEnvironment;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.platform.api.metaverse.IDocumentEvent;
+import org.pentaho.platform.api.metaverse.IDocumentListener;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.INamespaceFactory;
-import com.pentaho.metaverse.impl.MetaverseCompletionService;
-import com.pentaho.metaverse.impl.MetaverseNamespace;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.KettleEnvironment;
-import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.logging.ChannelLogTable;
-import org.pentaho.platform.api.metaverse.*;
-
-import com.pentaho.metaverse.graph.GraphMLWriter;
-import com.pentaho.metaverse.impl.MetaverseBuilder;
-import com.pentaho.metaverse.impl.MetaverseDocument;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
 
 /**
  * Test class for the FileSystemLocator
@@ -62,9 +57,6 @@ public class FileSystemLocatorTest implements IDocumentListener {
 
   private List<IDocumentEvent> events;
 
-  @Mock
-  INamespaceFactory namespaceFactory;
-
   TestFileSystemLocator spyLocator;
 
   /**
@@ -74,16 +66,18 @@ public class FileSystemLocatorTest implements IDocumentListener {
   public void init() {
     TestFileSystemLocator locator = new TestFileSystemLocator( new ArrayList<IDocumentListener>() );
     spyLocator = spy( locator );
-    when( spyLocator.getNamespaceFactory() ).thenReturn( namespaceFactory );
-    when( namespaceFactory.createNameSpace(
-        any( INamespace.class ), anyString(), anyString() ) ).thenReturn( new MetaverseNamespace( null, "",
-        DictionaryConst.NODE_TYPE_LOCATOR, namespaceFactory ) );
     try {
       KettleEnvironment.init();
     } catch ( KettleException e ) {
       e.printStackTrace();
     }
 
+  }
+
+  @Test
+  public void testDefaultConstructor() {
+    FileSystemLocator locator = new FileSystemLocator();
+    assertEquals( locator.getLocatorType(), FileSystemLocator.LOCATOR_TYPE );
   }
 
   /**
@@ -106,22 +100,22 @@ public class FileSystemLocatorTest implements IDocumentListener {
 
     spyLocator.setRootFolder( "bogus" );
     events = new ArrayList<IDocumentEvent>();
-    try{
+    try {
       spyLocator.startScan();
       MetaverseCompletionService.getInstance().waitTillEmpty();
       fail();
-    }catch(MetaverseLocatorException e){
+    } catch ( MetaverseLocatorException e ) {
       assertEquals( "Event count is wrong", 0, events.size() );
     }
 
     spyLocator.setRootFolder( "src/test/resources/solution/folder 2/parse.ktr" );
     events = new ArrayList<IDocumentEvent>();
 
-    try{
+    try {
       spyLocator.startScan();
       MetaverseCompletionService.getInstance().waitTillEmpty();
       fail();
-    }catch(MetaverseLocatorException e){
+    } catch ( MetaverseLocatorException e ) {
       assertEquals( "Event count is wrong", 0, events.size() );
     }
 
@@ -199,6 +193,11 @@ public class FileSystemLocatorTest implements IDocumentListener {
       }
     }
 
+  }
+
+  @Test
+  public void testGetContentsBadFile() throws Exception {
+    assertEquals( "", spyLocator.getContents( new File( "not-a-file.txt" ) ) );
   }
 
   @Override

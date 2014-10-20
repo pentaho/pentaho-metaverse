@@ -25,13 +25,12 @@ package com.pentaho.metaverse.analyzer.kettle;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.MetaverseDocument;
-import com.pentaho.metaverse.impl.MetaverseNamespace;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.After;
-import org.junit.Test;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.pentaho.di.core.KettleEnvironment;
@@ -39,14 +38,20 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.xml.XMLInterface;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.platform.api.metaverse.*;
+import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.INamespace;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -82,7 +87,7 @@ public class MetaverseDocumentAnalyzerTest {
 
   private IMetaverseObjectFactory factory;
 
-  private MetaverseNamespace namespace;
+  private INamespace namespace;
 
   private IMetaverseComponentDescriptor descriptor;
 
@@ -107,14 +112,13 @@ public class MetaverseDocumentAnalyzerTest {
   public void setUp() throws Exception {
     builder = mock( IMetaverseBuilder.class );
     transDoc = mock( IMetaverseDocument.class );
-    namespace = mock( MetaverseNamespace.class );
+    namespace = mock( INamespace.class );
     descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, namespace );
 
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
 
     analyzer.setMetaverseBuilder( builder );
-    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
 
     when( transDoc.getType() ).thenReturn( type );

@@ -1,12 +1,12 @@
 package com.pentaho.metaverse.graph;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A path of vertex of edges. This is used by the MetaverseReader to answer searches by external callers.

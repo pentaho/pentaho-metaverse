@@ -22,12 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-
-import com.pentaho.metaverse.impl.MetaverseNamespace;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -48,14 +43,16 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
 /**
  * @author mburgess
@@ -86,7 +83,7 @@ public class GenericStepMetaAnalyzerTest {
   StepMetaInterface mockStepMetaInterface;
 
   @Mock
-  MetaverseNamespace namespace;
+  INamespace namespace;
 
   @Mock
   IMetaverseComponentDescriptor mockDescriptor;
@@ -116,7 +113,6 @@ public class GenericStepMetaAnalyzerTest {
 
     analyzer = new GenericStepMetaAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    when(namespace.getChildNamespace( anyString(), anyString() )).thenReturn( namespace );
     when(namespace.getParentNamespace() ).thenReturn( namespace );
 
     // set random StepMetaInterface

@@ -22,18 +22,18 @@
 
 package com.pentaho.metaverse.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.VertexQuery;
+import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The MetaverseNode class is a wrapper around a corresponding Blueprints Vertex object, and delegates all methods to
@@ -47,6 +47,10 @@ public class MetaverseNode implements IMetaverseNode {
    * The Blueprints-backed Vertex for this metaverse node
    */
   protected Vertex v;
+
+  private String logicalId;
+  protected ILogicalIdGenerator logicalIdGenerator = DictionaryConst.LOGICAL_ID_GENERATOR_DEFAULT;
+  private boolean dirty = false;
 
   /**
    * Private constructor to prevent instantiation without an ID or backing Vertex
@@ -101,8 +105,8 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public void setName( String name ) {
+    dirty = true;
     v.setProperty( DictionaryConst.PROPERTY_NAME, name );
-
   }
 
   /*
@@ -112,6 +116,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public void setType( String type ) {
+    dirty = true;
     v.setProperty( DictionaryConst.PROPERTY_TYPE, type );
     String category = DictionaryHelper.getCategoryForType( type );
     v.setProperty( DictionaryConst.PROPERTY_CATEGORY, category );
@@ -150,6 +155,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override public void setProperties( Map<String, Object> properties ) {
     if ( properties != null ) {
+      dirty = true;
       for ( Map.Entry<String, Object> property : properties.entrySet() ) {
         v.setProperty( property.getKey(), property.getValue() );
       }
@@ -163,6 +169,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override public void removeProperties( Set<String> keys ) {
     if ( keys != null ) {
+      dirty = true;
       for ( String key : keys ) {
         v.removeProperty( key );
       }
@@ -175,6 +182,7 @@ public class MetaverseNode implements IMetaverseNode {
   @Override public void clearProperties() {
     Set<String> keys = getPropertyKeys();
     if ( keys != null ) {
+      dirty = true;
       for ( String key : keys ) {
         removeProperty( key );
       }
@@ -203,6 +211,7 @@ public class MetaverseNode implements IMetaverseNode {
      */
   @Override
   public void setProperty( String key, Object value ) {
+    dirty = true;
     v.setProperty( key, value );
   }
 
@@ -213,6 +222,7 @@ public class MetaverseNode implements IMetaverseNode {
    * @return the value that was removed, or null if the key or value could not be found
    */
   @Override public Object removeProperty( String key ) {
+    dirty = true;
     return v.removeProperty( key );
   }
 
@@ -274,4 +284,36 @@ public class MetaverseNode implements IMetaverseNode {
     v.remove();
   }
 
+  /**
+   * Gets a string representation of what makes this node logically unique. If no logicalId is present, then
+   * getStringId() is returned instead
+   * @return the string representation of the logical id
+   */
+  @Override
+  public String getLogicalId() {
+    if ( logicalIdGenerator == null ) {
+      return getStringID();
+    } else if ( logicalId == null || isDirty() ) {
+      logicalId = logicalIdGenerator.generateId( this );
+    }
+
+    return logicalId == null ? getStringID() : logicalId;
+  }
+
+  @Override
+  public void setLogicalIdGenerator( ILogicalIdGenerator idGenerator ) {
+    // clear out the logicalId so it will be re-generated on the next call to getLogicalId
+    logicalId = null;
+    logicalIdGenerator = idGenerator;
+  }
+
+  @Override
+  public boolean isDirty() {
+    return dirty;
+  }
+
+  @Override
+  public void setDirty( boolean dirty ) {
+    this.dirty = dirty;
+  }
 }
