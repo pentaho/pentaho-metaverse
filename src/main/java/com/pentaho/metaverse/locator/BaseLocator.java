@@ -214,9 +214,9 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
   protected INamespace getNamespace() {
 
     IMetaverseNode locatorNode = metaverseBuilder.getMetaverseObjectFactory().createNodeObject(
-      UUID.randomUUID().toString(),
-      getRepositoryId(),
-      DictionaryConst.NODE_TYPE_LOCATOR );
+        UUID.randomUUID().toString(),
+        getRepositoryId(),
+        DictionaryConst.NODE_TYPE_LOCATOR );
     locatorNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_LOCATOR );
 
     return new Namespace( locatorNode.getLogicalId() );

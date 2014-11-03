@@ -1,0 +1,177 @@
+/*
+ * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
+ *
+ * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ *
+ * NOTICE: All information including source code contained herein is, and
+ * remains the sole property of Pentaho and its licensors. The intellectual
+ * and technical concepts contained herein are proprietary and confidential
+ * to, and are trade secrets of Pentaho and may be covered by U.S. and foreign
+ * patents, or patents in process, and are protected by trade secret and
+ * copyright laws. The receipt or possession of this source code and/or related
+ * information does not convey or imply any rights to reproduce, disclose or
+ * distribute its contents, or to manufacture, use, or sell anything that it
+ * may describe, in whole or in part. Any reproduction, modification, distribution,
+ * or public display of this information without the express written authorization
+ * from Pentaho is strictly prohibited and in violation of applicable laws and
+ * international treaties. Access to the source code contained herein is strictly
+ * prohibited to anyone except those individuals and entities who have executed
+ * confidentiality and non-disclosure agreements or other agreements with Pentaho,
+ * explicitly covering such access.
+ */
+
+package com.pentaho.metaverse.impl.model.kettle.json;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.pentaho.metaverse.impl.model.ParamInfo;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.parameters.DuplicateParamException;
+import org.pentaho.di.repository.ObjectId;
+import org.pentaho.di.repository.Repository;
+import org.pentaho.di.repository.StringObjectId;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.step.StepMetaInterface;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * User: RFellows Date: 11/19/14
+ */
+public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
+
+  private Repository repository;
+
+  public TransMetaJsonDeserializer( Class<?> aClass ) {
+    super( aClass );
+  }
+  public TransMetaJsonDeserializer( Class<?> aClass, Repository repository ) {
+    super( aClass );
+    setRepository( repository );
+  }
+
+  public Repository getRepository() {
+    return repository;
+  }
+
+  public void setRepository( Repository repository ) {
+    this.repository = repository;
+  }
+
+  @Override public TransMeta deserialize( JsonParser parser, DeserializationContext context )
+    throws IOException, JsonProcessingException {
+
+    TransMeta transMeta = null;
+    JsonNode node = parser.getCodec().readTree( parser );
+
+    ObjectMapper mapper = (ObjectMapper) parser.getCodec();
+
+    String name = node.get( "name" ).textValue();
+    String desc = node.get( "description" ).textValue();
+    transMeta = new TransMeta( null, name );
+    transMeta.setDescription( desc );
+    ArrayNode paramsArrayNode = (ArrayNode) node.get( "parameters" );
+
+    for ( int i = 0; i < paramsArrayNode.size(); i++ ) {
+      JsonNode paramNode = paramsArrayNode.get( i );
+      ParamInfo param = mapper.readValue( paramNode.toString(), ParamInfo.class );
+      try {
+        transMeta.addParameterDefinition( param.getName(), param.getDefaultValue(), param.getDescription() );
+      } catch ( DuplicateParamException e ) {
+        e.printStackTrace();
+      }
+    }
+
+    ArrayNode stepsArrayNode = (ArrayNode) node.get( "steps" );
+    for ( int i = 0; i < stepsArrayNode.size(); i++ ) {
+      JsonNode stepNode = stepsArrayNode.get( i );
+      String className = stepNode.get( "@class" ).asText();
+      String stepName = stepNode.get( "name" ).asText();
+      ObjectId stepId = new StringObjectId( stepName );
+
+      // add the step attributes to the repo so they can be found when they are looked up by the readRep impl
+      JsonNode attributes = stepNode.get( "attributes" );
+      writeJsonAttributes( attributes, mapper, stepId );
+      JsonNode fields = stepNode.get( "fields" );
+      writeJsonFields( fields, mapper, stepId );
+
+      try {
+        Class clazz = this.getClass().getClassLoader().loadClass( className );
+        BaseStepMeta meta = (BaseStepMeta) clazz.newInstance();
+        meta.readRep( getRepository(), null, stepId, null );
+        StepMetaInterface smi = (StepMetaInterface) meta;
+        StepMeta step = new StepMeta( stepName, smi );
+        transMeta.addStep( step );
+
+      } catch ( Exception e ) {
+        e.printStackTrace();
+      }
+    }
+
+    return transMeta;
+
+  }
+
+  protected void writeJsonFields( JsonNode fields, ObjectMapper mapper, ObjectId stepId ) throws IOException {
+    List<Map<String, Object>> fieldLists = new ArrayList<Map<String, Object>>();
+    fieldLists = mapper.readValue( fields.toString(), fieldLists.getClass() );
+    int idx = 0;
+    for ( Map<String, Object> fieldAttrs : fieldLists ) {
+      for ( String s : fieldAttrs.keySet() ) {
+        Object val = fieldAttrs.get( s );
+        try {
+          if ( val instanceof Integer ) {
+            repository.saveStepAttribute( null, stepId, idx, s, (Integer) val );
+          } else if ( val instanceof Long ) {
+            repository.saveStepAttribute( null, stepId, idx, s, (Long) val );
+          } else if ( val instanceof Double ) {
+            repository.saveStepAttribute( null, stepId, idx, s, (Double) val );
+          } else if ( val instanceof Boolean ) {
+            repository.saveStepAttribute( null, stepId, idx, s, (Boolean) val );
+          } else {
+            repository.saveStepAttribute( null, stepId, idx, s, val == null ? null : (String) val );
+          }
+        } catch ( KettleException e ) {
+          e.printStackTrace();
+        }
+      }
+      idx++;
+    }
+  }
+
+  protected void writeJsonAttributes( JsonNode attributes, ObjectMapper mapper, ObjectId stepId ) throws IOException {
+    Map<String, Object> attrs = new HashMap<String, Object>();
+    attrs = mapper.readValue( attributes.toString(), attrs.getClass() );
+
+    for ( String s : attrs.keySet() ) {
+      Object val = attrs.get( s );
+      try {
+        if ( val instanceof Integer ) {
+          repository.saveStepAttribute( null, stepId, s, (Integer) val );
+        } else if ( val instanceof Long ) {
+          repository.saveStepAttribute( null, stepId, s, (Long) val );
+        } else if ( val instanceof Double ) {
+          repository.saveStepAttribute( null, stepId, s, (Double) val );
+        } else if ( val instanceof Boolean ) {
+          repository.saveStepAttribute( null, stepId, s, (Boolean) val );
+        } else {
+          repository.saveStepAttribute( null, stepId, s, val == null ? null : (String) val );
+        }
+      } catch ( KettleException e ) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+}

@@ -1,0 +1,131 @@
+/*
+ * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
+ *
+ * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ *
+ * NOTICE: All information including source code contained herein is, and
+ * remains the sole property of Pentaho and its licensors. The intellectual
+ * and technical concepts contained herein are proprietary and confidential
+ * to, and are trade secrets of Pentaho and may be covered by U.S. and foreign
+ * patents, or patents in process, and are protected by trade secret and
+ * copyright laws. The receipt or possession of this source code and/or related
+ * information does not convey or imply any rights to reproduce, disclose or
+ * distribute its contents, or to manufacture, use, or sell anything that it
+ * may describe, in whole or in part. Any reproduction, modification, distribution,
+ * or public display of this information without the express written authorization
+ * from Pentaho is strictly prohibited and in violation of applicable laws and
+ * international treaties. Access to the source code contained herein is strictly
+ * prohibited to anyone except those individuals and entities who have executed
+ * confidentiality and non-disclosure agreements or other agreements with Pentaho,
+ * explicitly covering such access.
+ */
+
+package com.pentaho.metaverse.impl.model.kettle.json;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.pentaho.metaverse.impl.model.BaseResourceInfo;
+import com.pentaho.metaverse.impl.model.JdbcResourceInfo;
+import com.pentaho.metaverse.impl.model.JndiResourceInfo;
+import com.pentaho.metaverse.impl.model.ParamInfo;
+import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
+import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.parameters.UnknownParamException;
+import org.pentaho.di.repository.ObjectId;
+import org.pentaho.di.repository.StringObjectId;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.step.StepMetaInterface;
+
+import java.io.IOException;
+
+/**
+ * User: RFellows Date: 11/17/14
+ */
+public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
+  public TransMetaJsonSerializer( Class<TransMeta> aClass ) {
+    super( aClass );
+  }
+
+  private LineageRepository lineageRepository;
+
+  public LineageRepository getLineageRepository() {
+    return lineageRepository;
+  }
+
+  public void setLineageRepository( LineageRepository repo ) {
+    this.lineageRepository = repo;
+  }
+
+  @Override public void serialize( TransMeta meta, JsonGenerator json,
+                                   SerializerProvider serializerProvider ) throws IOException, JsonGenerationException {
+
+    json.writeStartObject();
+    json.writeStringField( "@class", meta.getClass().getName() );
+    json.writeStringField( "name", meta.getName() );
+    json.writeStringField( "description", meta.getDescription() );
+
+    json.writeArrayFieldStart( "parameters" );
+    for ( String param : meta.listParameters() ) {
+      try {
+        ParamInfo paramInfo = new ParamInfo( param, meta.getParameterDescription( param ),
+            meta.getParameterDefault( param ) );
+        json.writeObject( paramInfo );
+      } catch ( UnknownParamException e ) {
+        e.printStackTrace();
+      }
+    }
+    json.writeEndArray();
+
+    json.writeArrayFieldStart( "steps" );
+    for ( StepMeta stepMeta : meta.getSteps() ) {
+      BaseStepMeta step = getBaseStepMetaFromStepMeta( stepMeta );
+      LineageRepository repo = getLineageRepository();
+      String id = stepMeta.getObjectId() == null ? stepMeta.getName() : stepMeta.getObjectId().toString();
+      ObjectId stepId = new StringObjectId( id );
+      try {
+        step.saveRep( repo, null, null, stepId );
+      } catch ( KettleException e ) {
+        e.printStackTrace();
+      }
+      json.writeObject( step );
+    }
+    json.writeEndArray();
+
+    json.writeArrayFieldStart( "connections" );
+    for ( DatabaseMeta dbmeta : meta.getDatabases() ) {
+      BaseResourceInfo resourceInfo;
+      if ( "Native".equals( dbmeta.getAccessTypeDesc() ) ) {
+        resourceInfo = new JdbcResourceInfo( dbmeta );
+      } else {
+        resourceInfo = new JndiResourceInfo( dbmeta );
+      }
+      resourceInfo.setInput( true );
+
+      json.writeObject( resourceInfo );
+    }
+    json.writeEndArray();
+
+    json.writeEndObject();
+
+  }
+
+  protected BaseStepMeta getBaseStepMetaFromStepMeta( StepMeta stepMeta ) {
+
+    // Attempt to discover a BaseStepMeta from the given StepMeta
+    BaseStepMeta baseStepMeta = new BaseStepMeta();
+    baseStepMeta.setParentStepMeta( stepMeta );
+
+    if ( stepMeta != null ) {
+      StepMetaInterface smi = stepMeta.getStepMetaInterface();
+      if ( smi instanceof BaseStepMeta ) {
+        baseStepMeta = (BaseStepMeta) smi;
+      }
+    }
+    return baseStepMeta;
+  }
+}

@@ -150,6 +150,7 @@ public class TableOutputStepAnalyzerTest {
 
     // additional hydration needed to get test lines code coverage
     when( mockDatabaseMeta.getDatabaseName() ).thenReturn( "testDatabase" );
+    when( mockDatabaseMeta.getAccessTypeDesc() ).thenReturn( "Native" );
     when( mockTableOutputMeta.getDatabaseMeta() ).thenReturn( mockDatabaseMeta );
     when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
     when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
