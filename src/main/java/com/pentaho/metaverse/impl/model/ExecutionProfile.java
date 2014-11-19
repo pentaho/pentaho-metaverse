@@ -22,20 +22,35 @@
 
 package com.pentaho.metaverse.impl.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.pentaho.metaverse.api.model.IExecutionProfile;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-
-public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo {
-
-  protected String type;
-  protected Boolean isInput = false;
+public class ExecutionProfile extends BaseInfo implements IExecutionProfile  {
   
-  protected Map<Object, Object> attributes = new HashMap<Object, Object>();
+  private String path;
+  private String type;
+  private ExecutionData executionData = new ExecutionData();
   
-  @Override public String getType() {
+  public ExecutionProfile() {
+    super();
+  }
+  
+  public ExecutionProfile(String name, String path, String type, String description) {
+    this();
+    this.setName( name );
+    this.setDescription( description );
+    this.path = path;
+    this.type = type;
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  public void setPath( String path ) {
+    this.path = path;
+  }
+
+  public String getType() {
     return type;
   }
 
@@ -43,25 +58,12 @@ public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo 
     this.type = type;
   }
 
-  @Override public boolean isInput() {
-    return isInput;
-  }
-  
-  @JsonIgnore
-  @Override public boolean isOutput() {
-    return !isInput;
+  public ExecutionData getExecutionData() {
+    return executionData;
   }
 
-  public void setInput( boolean isInput ) {
-    this.isInput = isInput;
-  }
-  
-  @Override public Map<Object, Object> getAttibutes() {
-    return attributes;
-  }
-  
-  public void putAttribute(Object key, Object value) {
-    attributes.put( key, value );
+  protected void setExecutionData( ExecutionData executionData ) {
+    this.executionData = executionData;
   }
 
 }

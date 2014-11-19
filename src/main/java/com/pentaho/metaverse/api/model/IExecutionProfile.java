@@ -20,48 +20,19 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model;
+package com.pentaho.metaverse.api.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pentaho.metaverse.impl.model.ExecutionData;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+public interface IExecutionProfile extends IInfo {
 
-public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo {
-
-  protected String type;
-  protected Boolean isInput = false;
+  @JsonProperty( "path" )
+  public String getPath();
   
-  protected Map<Object, Object> attributes = new HashMap<Object, Object>();
+  @JsonProperty( "type" )
+  public String getType();
   
-  @Override public String getType() {
-    return type;
-  }
-
-  public void setType( String type ) {
-    this.type = type;
-  }
-
-  @Override public boolean isInput() {
-    return isInput;
-  }
-  
-  @JsonIgnore
-  @Override public boolean isOutput() {
-    return !isInput;
-  }
-
-  public void setInput( boolean isInput ) {
-    this.isInput = isInput;
-  }
-  
-  @Override public Map<Object, Object> getAttibutes() {
-    return attributes;
-  }
-  
-  public void putAttribute(Object key, Object value) {
-    attributes.put( key, value );
-  }
-
+  @JsonProperty( "executionData" )
+  public ExecutionData getExecutionData();
 }

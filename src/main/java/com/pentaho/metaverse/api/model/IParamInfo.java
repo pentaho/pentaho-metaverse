@@ -22,6 +22,12 @@
 
 package com.pentaho.metaverse.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public interface IParamInfo<T> extends IInfo {
+  @JsonProperty( "defaultValue" )
   public T getDefaultValue();
+  
+  @JsonProperty( "value")
+  public T getValue();
 }

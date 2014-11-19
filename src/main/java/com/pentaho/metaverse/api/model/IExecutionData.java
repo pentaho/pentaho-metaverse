@@ -20,48 +20,42 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model;
+package com.pentaho.metaverse.api.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo {
 
-  protected String type;
-  protected Boolean isInput = false;
+@JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class" )
+public interface IExecutionData {
   
-  protected Map<Object, Object> attributes = new HashMap<Object, Object>();
+  @JsonProperty( "startTime" )
+  public Timestamp getStartTime();
   
-  @Override public String getType() {
-    return type;
-  }
-
-  public void setType( String type ) {
-    this.type = type;
-  }
-
-  @Override public boolean isInput() {
-    return isInput;
-  }
+  @JsonProperty( "endTime" )
+  public Timestamp getEndTime();
   
-  @JsonIgnore
-  @Override public boolean isOutput() {
-    return !isInput;
-  }
-
-  public void setInput( boolean isInput ) {
-    this.isInput = isInput;
-  }
+  @JsonProperty( "failureCount" )
+  public long getFailureCount();
   
-  @Override public Map<Object, Object> getAttibutes() {
-    return attributes;
-  }
+  @JsonProperty( "executingServer" )
+  public String getExecutingServer();
   
-  public void putAttribute(Object key, Object value) {
-    attributes.put( key, value );
-  }
-
+  @JsonProperty( "executingUser" )
+  public String getExecutingUser();
+  
+  @JsonProperty( "clientExecuter" )
+  public String getClientExecuter();
+  
+  @JsonProperty( "loggingChannelId" )
+  public String getLoggingChannelId();
+  
+  @JsonProperty( "parameters" )
+  public List<IParamInfo<String>> getParameters();
+  
+  @JsonProperty( "externalResources" )
+  public List<IExternalResourceInfo> getExternalResources();
 }
