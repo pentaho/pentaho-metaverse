@@ -22,8 +22,18 @@
 
 package com.pentaho.metaverse.api.model;
 
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public interface IExternalResourceInfo extends IInfo {
+  
   public String getType();
+  
   public boolean isInput();
+  
   public boolean isOutput();
+  
+  public Map<Object, Object> getAttibutes();
+  
 }

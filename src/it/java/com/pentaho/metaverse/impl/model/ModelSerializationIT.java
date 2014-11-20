@@ -24,6 +24,7 @@ package com.pentaho.metaverse.impl.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import java.sql.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,6 +65,45 @@ public class ModelSerializationIT {
     assertEquals( jdbcResource.getPassword(), rehydrated.getPassword() );
     assertEquals( jdbcResource.getPort(), rehydrated.getPort() );
     assertEquals( jdbcResource.isInput(), rehydrated.isInput() );
+    
+    ExecutionProfile executionProfile = new ExecutionProfile("run1", "some/path/to/a.ktl", "tranformation", "A test profile");
 
+    long currentMillis = System.currentTimeMillis();
+    long futureMillis = currentMillis + 10000;
+    Timestamp startTime = new Timestamp(currentMillis);
+    Timestamp endTime = new Timestamp(futureMillis);    
+    executionProfile.getExecutionData().setStartTime( startTime );
+    executionProfile.getExecutionData().setEndTime( endTime );
+    executionProfile.getExecutionData().setClientExecuter( "client.executer" );
+    executionProfile.getExecutionData().setExecutingServer( "www.pentaho.com" );
+    executionProfile.getExecutionData().setExecutingUser( "wseyler" );
+    executionProfile.getExecutionData().setLoggingChannelId( "kettle.debug" );
+    executionProfile.getExecutionData().addParameter( new ParamInfo( "testParam1", "Larry", "Fine", "A Test Parameter" ) );
+    executionProfile.getExecutionData().addParameter( new ParamInfo( "testParam2", "Howard",  "Moe", "Another Parameter" ) );
+    executionProfile.getExecutionData().addParameter( new ParamInfo( "testParam3", "Fine", "Curly", "A Third Parameter") );
+    BaseResourceInfo externalResourceInfo = new BaseResourceInfo();
+    externalResourceInfo.setDescription( "A test csv file" );
+    externalResourceInfo.setInput( true );
+    externalResourceInfo.setName( "prices.csv" );
+    externalResourceInfo.setType( "csv" );
+    externalResourceInfo.putAttribute( "hair", "red");
+    executionProfile.getExecutionData().addExternalResource( externalResourceInfo );
+    
+    json = mapper.writeValueAsString( executionProfile );
+    System.out.println( json );
+    
+    ExecutionProfile rehydratedProfile = mapper.readValue( json, ExecutionProfile.class );
+    assertEquals( executionProfile.getName(), rehydratedProfile.getName() );
+    assertEquals( executionProfile.getPath(), rehydratedProfile.getPath() );
+    assertEquals( executionProfile.getType(), rehydratedProfile.getType() );
+    assertEquals( executionProfile.getDescription(), rehydratedProfile.getDescription() );
+    assertEquals( executionProfile.getExecutionData().getStartTime().compareTo( rehydratedProfile.getExecutionData().getStartTime()), 0 );
+    assertEquals( executionProfile.getExecutionData().getEndTime().compareTo( rehydratedProfile.getExecutionData().getEndTime()), 0 ) ;
+    assertEquals( executionProfile.getExecutionData().getFailureCount(), 0);
+    assertEquals( executionProfile.getExecutionData().getClientExecuter(), rehydratedProfile.getExecutionData().getClientExecuter());
+    assertEquals( executionProfile.getExecutionData().getExecutingServer(), rehydratedProfile.getExecutionData().getExecutingServer());
+    assertEquals( executionProfile.getExecutionData().getExecutingUser(), rehydratedProfile.getExecutionData().getExecutingUser());
+    assertEquals( executionProfile.getExecutionData().getLoggingChannelId(), rehydratedProfile.getExecutionData().getLoggingChannelId() );
+    assertEquals( rehydratedProfile.getExecutionData().getParameters().size(), 3);
   }
 }

@@ -26,17 +26,28 @@ import com.pentaho.metaverse.api.model.IParamInfo;
 
 public class ParamInfo extends BaseInfo implements IParamInfo<String> {
   private String defaultValue;
-
+  private String value;
+  
   public ParamInfo() {
-
+    this( null );
   }
 
   public ParamInfo( String name ) {
-    this( name, null, null );
+    this( name, null);
+  }
+  
+  public ParamInfo(String name, String value) {
+    this( name, value, null );
   }
 
-  public ParamInfo( String name, String description, String defaultValue ) {
+  public ParamInfo(String name, String value, String defaultValue ) {
+    this( name, value, defaultValue, null);
+  }
+  
+  public ParamInfo( String name, String value, String defaultValue, String description ) {
+    super();
     setName( name );
+    setValue( value );
     setDescription( description );
     setDefaultValue( defaultValue );
   }
@@ -47,5 +58,13 @@ public class ParamInfo extends BaseInfo implements IParamInfo<String> {
 
   public void setDefaultValue( String defaultValue ) {
     this.defaultValue = defaultValue;
+  }
+  
+  public void setValue( String value ) {
+    this.value = value;
+  }
+
+  @Override public String getValue() {
+    return value;
   }
 }
