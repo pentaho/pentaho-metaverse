@@ -29,62 +29,76 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-
 @JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class" )
 public interface IExecutionData {
-  
+
   @JsonProperty( "startTime" )
   public Date getStartTime();
+
   public void setStartTime( Date timestamp );
-  
+
   @JsonProperty( "endTime" )
   public Date getEndTime();
+
   public void setEndTime( Date timestamp );
-  
+
   @JsonProperty( "failureCount" )
   public long getFailureCount();
+
   public void setFailureCount( long failureCount );
-  
+
   @JsonProperty( "executorServer" )
   public String getExecutorServer();
+
   public void setExecutorServer( String executorServer );
-  
+
   @JsonProperty( "executorUser" )
   public String getExecutorUser();
+
   public void setExecutorUser( String executorUser );
-  
+
   @JsonProperty( "clientExecutor" )
   public String getClientExecutor();
+
   public void setClientExecutor( String clientExecutor );
-  
+
   @JsonProperty( "loggingChannelId" )
   public String getLoggingChannelId();
+
   public void setLoggingChannelId( String loggingChannelId );
-  
+
   @JsonProperty( "parameters" )
   public List<IParamInfo<String>> getParameters();
+
   public void setParameters( List<IParamInfo<String>> parameters );
-  public void addParameter( IParamInfo<String> parameter);
-  
+
+  public void addParameter( IParamInfo<String> parameter );
+
   @JsonProperty( "externalResources" )
   public List<IExternalResourceInfo> getExternalResources();
+
   public void setExternalResources( List<IExternalResourceInfo> externalResources );
+
   public void addExternalResource( IExternalResourceInfo externalResource );
-  
+
   @JsonProperty( "variables" )
   public Map<Object, Object> getVariables();
+
   public void addVariable( String name, String value );
-  
+
   @JsonProperty( "arguments" )
   public List<Object> getArguments();
+
   public void putArgument( int index, Object value );
-  
-  @JsonProperty( "artifactMeta")
+
+  @JsonProperty( "artifactMeta" )
   public IArtifactMetadata getArtifactMetadata();
+
   public void setArtifactMetadata( IArtifactMetadata artifactMetadata );
-  
-  @JsonProperty( "userMeta")
+
+  @JsonProperty( "userMeta" )
   public IUserMetadata getUserMetadata();
+
   public void setUserMetadata( IUserMetadata userMetadata );
 
 }

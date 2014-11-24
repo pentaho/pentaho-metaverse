@@ -30,11 +30,11 @@ import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 
 public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo {
 
-  protected String type;
-  protected Boolean isInput = false;
-  
-  protected Map<Object, Object> attributes = new HashMap<Object, Object>();
-  
+  private String type;
+  private Boolean isInput = false;
+
+  private Map<Object, Object> attributes = new HashMap<Object, Object>();
+
   @Override public String getType() {
     return type;
   }
@@ -46,7 +46,7 @@ public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo 
   @Override public boolean isInput() {
     return isInput;
   }
-  
+
   @JsonIgnore
   @Override public boolean isOutput() {
     return !isInput;
@@ -55,12 +55,12 @@ public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo 
   public void setInput( boolean isInput ) {
     this.isInput = isInput;
   }
-  
+
   @Override public Map<Object, Object> getAttributes() {
     return attributes;
   }
-  
-  public void putAttribute(Object key, Object value) {
+
+  public void putAttribute( Object key, Object value ) {
     attributes.put( key, value );
   }
 

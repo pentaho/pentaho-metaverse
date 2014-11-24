@@ -48,137 +48,137 @@ public class ExecutionData implements IExecutionData {
   private List<Object> arguments = new ArrayList<Object>();
   private IArtifactMetadata artifactMetadata;
   private IUserMetadata userMetadata;
-  
+
   @Override
   public Date getStartTime() {
     return startTime;
   }
-  
+
   @Override
   public void setStartTime( Date startTime ) {
     this.startTime = startTime;
   }
- 
+
   @Override
   public Date getEndTime() {
     return endTime;
   }
-  
+
   @Override
   public void setEndTime( Date endTime ) {
     this.endTime = endTime;
   }
-  
+
   @Override
   public long getFailureCount() {
     return failureCount;
   }
-  
+
   @Override
   public void setFailureCount( long failureCount ) {
     this.failureCount = failureCount;
   }
-  
+
   @Override
   public String getExecutorServer() {
     return executorServer;
   }
-  
+
   @Override
   public void setExecutorServer( String executorServer ) {
     this.executorServer = executorServer;
   }
-  
+
   @Override
   public String getExecutorUser() {
     return executorUser;
   }
-  
+
   @Override
   public void setExecutorUser( String executorUser ) {
     this.executorUser = executorUser;
   }
-  
+
   @Override
   public String getClientExecutor() {
     return clientExecutor;
   }
-  
+
   @Override
   public void setClientExecutor( String clientExecutor ) {
     this.clientExecutor = clientExecutor;
   }
-  
+
   @Override
   public String getLoggingChannelId() {
     return loggingChannelId;
   }
-  
+
   @Override
   public void setLoggingChannelId( String loggingChannelId ) {
     this.loggingChannelId = loggingChannelId;
   }
-  
+
   @Override
   public List<IParamInfo<String>> getParameters() {
     return parameters;
   }
-  
+
   @Override
   public void setParameters( List<IParamInfo<String>> parameters ) {
     this.parameters = parameters;
   }
 
   @Override
-  public void addParameter( IParamInfo<String> parameter) {
+  public void addParameter( IParamInfo<String> parameter ) {
     this.parameters.add( parameter );
   }
-  
+
   @Override
   public List<IExternalResourceInfo> getExternalResources() {
     return externalResources;
   }
-  
+
   @Override
   public void setExternalResources( List<IExternalResourceInfo> externalResources ) {
     this.externalResources = externalResources;
   }
-  
+
   @Override
-  public void addExternalResource( IExternalResourceInfo externalResource) {
+  public void addExternalResource( IExternalResourceInfo externalResource ) {
     this.externalResources.add( externalResource );
   }
-  
+
   @Override
   public Map<Object, Object> getVariables() {
     return variables;
   }
-  
+
   @Override
-  public void addVariable(String name, String value) {
+  public void addVariable( String name, String value ) {
     variables.put( name, value );
   }
-  
+
   @Override
   public List<Object> getArguments() {
     return arguments;
   }
-  
+
   @Override
-  public void putArgument(int index, Object value) {
+  public void putArgument( int index, Object value ) {
     arguments.add( index, value );
   }
-  
+
   @Override
   public IArtifactMetadata getArtifactMetadata() {
     return artifactMetadata;
   }
-  
+
   @Override
   public void setArtifactMetadata( IArtifactMetadata artifactMetadata ) {
     this.artifactMetadata = artifactMetadata;
   }
-  
+
   @Override
   public IUserMetadata getUserMetadata() {
     return userMetadata;
