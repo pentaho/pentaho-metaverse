@@ -28,19 +28,43 @@ public class BaseInfo implements IInfo {
   private String name;
   private String description;
 
-  @Override public String getName() {
+  /**
+   * Returns the name of this artifact
+   *
+   * @return a string representing the name of this artifact
+   */
+  @Override
+  public String getName() {
     return name;
   }
 
-  @Override public String getDescription() {
+  /**
+   * Returns a description of this artifact
+   *
+   * @return a string representing the description of this artifact
+   */
+  @Override
+  public String getDescription() {
     return description;
   }
 
-  @Override public void setName( String name ) {
+  /**
+   * Sets the name of this artifact
+   *
+   * @param name the name to set for the artifact
+   */
+  @Override
+  public void setName( String name ) {
     this.name = name;
   }
 
-  @Override public void setDescription( String description ) {
+  /**
+   * Sets the description of this artifact
+   *
+   * @param description the description to set for the artifact
+   */
+  @Override
+  public void setDescription( String description ) {
     this.description = description;
   }
 }
