@@ -22,8 +22,8 @@
 
 package com.pentaho.metaverse.impl.model;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +35,8 @@ import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.api.model.IUserMetadata;
 
 public class ExecutionData implements IExecutionData {
-  private Timestamp startTime;
-  private Timestamp endTime;
+  private Date startTime;
+  private Date endTime;
   private long failureCount = 0;
   private String executorServer;
   private String executorUser;
@@ -49,78 +49,102 @@ public class ExecutionData implements IExecutionData {
   private IArtifactMetadata artifactMetadata;
   private IUserMetadata userMetadata;
   
-  public Timestamp getStartTime() {
+  @Override
+  public Date getStartTime() {
     return startTime;
   }
-  public void setStartTime( Timestamp startTime ) {
+  
+  @Override
+  public void setStartTime( Date startTime ) {
     this.startTime = startTime;
   }
-  
-  public Timestamp getEndTime() {
+ 
+  @Override
+  public Date getEndTime() {
     return endTime;
   }
-  public void setEndTime( Timestamp endTime ) {
+  
+  @Override
+  public void setEndTime( Date endTime ) {
     this.endTime = endTime;
   }
   
+  @Override
   public long getFailureCount() {
     return failureCount;
   }
+  
+  @Override
   public void setFailureCount( long failureCount ) {
     this.failureCount = failureCount;
   }
   
+  @Override
   public String getExecutorServer() {
     return executorServer;
   }
+  
+  @Override
   public void setExecutorServer( String executorServer ) {
     this.executorServer = executorServer;
   }
   
+  @Override
   public String getExecutorUser() {
     return executorUser;
   }
   
+  @Override
   public void setExecutorUser( String executorUser ) {
     this.executorUser = executorUser;
   }
   
+  @Override
   public String getClientExecutor() {
     return clientExecutor;
   }
   
+  @Override
   public void setClientExecutor( String clientExecutor ) {
     this.clientExecutor = clientExecutor;
   }
   
+  @Override
   public String getLoggingChannelId() {
     return loggingChannelId;
   }
   
+  @Override
   public void setLoggingChannelId( String loggingChannelId ) {
     this.loggingChannelId = loggingChannelId;
   }
   
+  @Override
   public List<IParamInfo<String>> getParameters() {
     return parameters;
   }
   
+  @Override
   public void setParameters( List<IParamInfo<String>> parameters ) {
     this.parameters = parameters;
   }
 
+  @Override
   public void addParameter( IParamInfo<String> parameter) {
     this.parameters.add( parameter );
   }
   
+  @Override
   public List<IExternalResourceInfo> getExternalResources() {
     return externalResources;
   }
   
+  @Override
   public void setExternalResources( List<IExternalResourceInfo> externalResources ) {
     this.externalResources = externalResources;
   }
   
+  @Override
   public void addExternalResource( IExternalResourceInfo externalResource) {
     this.externalResources.add( externalResource );
   }
@@ -130,6 +154,7 @@ public class ExecutionData implements IExecutionData {
     return variables;
   }
   
+  @Override
   public void addVariable(String name, String value) {
     variables.put( name, value );
   }
@@ -139,16 +164,29 @@ public class ExecutionData implements IExecutionData {
     return arguments;
   }
   
+  @Override
   public void putArgument(int index, Object value) {
     arguments.add( index, value );
   }
   
+  @Override
   public IArtifactMetadata getArtifactMetadata() {
     return artifactMetadata;
   }
   
+  @Override
+  public void setArtifactMetadata( IArtifactMetadata artifactMetadata ) {
+    this.artifactMetadata = artifactMetadata;
+  }
+  
+  @Override
   public IUserMetadata getUserMetadata() {
     return userMetadata;
+  }
+
+  @Override
+  public void setUserMetadata( IUserMetadata userMetadata ) {
+    this.userMetadata = userMetadata;
   }
 
 }

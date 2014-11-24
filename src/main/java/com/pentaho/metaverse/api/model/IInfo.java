@@ -29,7 +29,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public interface IInfo {
   @JsonProperty( "name" )
   public String getName();
+  public void setName( String name );
 
   @JsonProperty( "description" )
   public String getDescription();
+  public void setDescription( String description );
 }
