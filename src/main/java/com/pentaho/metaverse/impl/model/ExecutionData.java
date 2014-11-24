@@ -24,22 +24,30 @@ package com.pentaho.metaverse.impl.model;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
+import com.pentaho.metaverse.api.model.IArtifactMetadata;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IParamInfo;
+import com.pentaho.metaverse.api.model.IUserMetadata;
 
 public class ExecutionData implements IExecutionData {
-  Timestamp startTime;
-  Timestamp endTime;
-  long failureCount = 0;
-  String executingServer;
-  String executingUser;
-  String clientExecuter;
-  String loggingChannelId;
-  List<IParamInfo<String>> parameters = new ArrayList<IParamInfo<String>>();
-  List<IExternalResourceInfo> externalResources = new ArrayList<IExternalResourceInfo>();
+  private Timestamp startTime;
+  private Timestamp endTime;
+  private long failureCount = 0;
+  private String executorServer;
+  private String executorUser;
+  private String clientExecutor;
+  private String loggingChannelId;
+  private List<IParamInfo<String>> parameters = new ArrayList<IParamInfo<String>>();
+  private List<IExternalResourceInfo> externalResources = new ArrayList<IExternalResourceInfo>();
+  private Map<Object, Object> variables = new Hashtable<Object, Object>();
+  private List<Object> arguments = new ArrayList<Object>();
+  private IArtifactMetadata artifactMetadata;
+  private IUserMetadata userMetadata;
   
   public Timestamp getStartTime() {
     return startTime;
@@ -62,27 +70,27 @@ public class ExecutionData implements IExecutionData {
     this.failureCount = failureCount;
   }
   
-  public String getExecutingServer() {
-    return executingServer;
+  public String getExecutorServer() {
+    return executorServer;
   }
-  public void setExecutingServer( String executingServer ) {
-    this.executingServer = executingServer;
-  }
-  
-  public String getExecutingUser() {
-    return executingUser;
+  public void setExecutorServer( String executorServer ) {
+    this.executorServer = executorServer;
   }
   
-  public void setExecutingUser( String executingUser ) {
-    this.executingUser = executingUser;
+  public String getExecutorUser() {
+    return executorUser;
   }
   
-  public String getClientExecuter() {
-    return clientExecuter;
+  public void setExecutorUser( String executorUser ) {
+    this.executorUser = executorUser;
   }
   
-  public void setClientExecuter( String clientExecuter ) {
-    this.clientExecuter = clientExecuter;
+  public String getClientExecutor() {
+    return clientExecutor;
+  }
+  
+  public void setClientExecutor( String clientExecutor ) {
+    this.clientExecutor = clientExecutor;
   }
   
   public String getLoggingChannelId() {
@@ -116,4 +124,31 @@ public class ExecutionData implements IExecutionData {
   public void addExternalResource( IExternalResourceInfo externalResource) {
     this.externalResources.add( externalResource );
   }
+  
+  @Override
+  public Map<Object, Object> getVariables() {
+    return variables;
+  }
+  
+  public void addVariable(String name, String value) {
+    variables.put( name, value );
+  }
+  
+  @Override
+  public List<Object> getArguments() {
+    return arguments;
+  }
+  
+  public void putArgument(int index, Object value) {
+    arguments.add( index, value );
+  }
+  
+  public IArtifactMetadata getArtifactMetadata() {
+    return artifactMetadata;
+  }
+  
+  public IUserMetadata getUserMetadata() {
+    return userMetadata;
+  }
+
 }

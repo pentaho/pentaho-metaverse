@@ -24,11 +24,15 @@ package com.pentaho.metaverse.impl.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import java.sql.Timestamp;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ModelSerializationIT {
 
@@ -55,7 +59,7 @@ public class ModelSerializationIT {
     jdbcResource.setInput( true );
 
     String json = mapper.writeValueAsString( jdbcResource );
-    System.out.println( json );
+//    System.out.println( json );
 
     JdbcResourceInfo rehydrated = mapper.readValue( json, JdbcResourceInfo.class );
 
@@ -74,23 +78,41 @@ public class ModelSerializationIT {
     Timestamp endTime = new Timestamp(futureMillis);    
     executionProfile.getExecutionData().setStartTime( startTime );
     executionProfile.getExecutionData().setEndTime( endTime );
-    executionProfile.getExecutionData().setClientExecuter( "client.executer" );
-    executionProfile.getExecutionData().setExecutingServer( "www.pentaho.com" );
-    executionProfile.getExecutionData().setExecutingUser( "wseyler" );
+    executionProfile.getExecutionData().setClientExecutor( "client.executer" );
+    executionProfile.getExecutionData().setExecutorServer( "www.pentaho.com" );
+    executionProfile.getExecutionData().setExecutorUser( "wseyler" );
     executionProfile.getExecutionData().setLoggingChannelId( "kettle.debug" );
     executionProfile.getExecutionData().addParameter( new ParamInfo( "testParam1", "Larry", "Fine", "A Test Parameter" ) );
     executionProfile.getExecutionData().addParameter( new ParamInfo( "testParam2", "Howard",  "Moe", "Another Parameter" ) );
     executionProfile.getExecutionData().addParameter( new ParamInfo( "testParam3", "Fine", "Curly", "A Third Parameter") );
+    
+    String externalResourceName = "prices.csv";
+    String externalResourceDescription = "A test csv file";
+    String externalResourceType = "csv";
+    String attributeName = "hair";
+    String attributeValue = "red";
     BaseResourceInfo externalResourceInfo = new BaseResourceInfo();
-    externalResourceInfo.setDescription( "A test csv file" );
+    externalResourceInfo.setName( externalResourceName );
+    externalResourceInfo.setDescription( externalResourceDescription );
     externalResourceInfo.setInput( true );
-    externalResourceInfo.setName( "prices.csv" );
-    externalResourceInfo.setType( "csv" );
-    externalResourceInfo.putAttribute( "hair", "red");
+    externalResourceInfo.setType( externalResourceType );
+    externalResourceInfo.putAttribute( attributeName, attributeValue );
     executionProfile.getExecutionData().addExternalResource( externalResourceInfo );
+    String variable1Name = "area";
+    String variable1Value = "West";
+    String variable2Name = "dept";
+    String variable2Value = "Sales";
+    executionProfile.getExecutionData().addVariable( variable1Name, variable1Value );
+    executionProfile.getExecutionData().addVariable( variable2Name, variable2Value );
+    String arg1 = "You're stupid";
+    String arg2 = "You're ugly";
+    String arg3 = "You're lazy";
+    executionProfile.getExecutionData().putArgument( 0, arg1 );
+    executionProfile.getExecutionData().putArgument( 1, arg2 );
+    executionProfile.getExecutionData().putArgument( 2, arg3 );
     
     json = mapper.writeValueAsString( executionProfile );
-    System.out.println( json );
+//    System.out.println( json );
     
     ExecutionProfile rehydratedProfile = mapper.readValue( json, ExecutionProfile.class );
     assertEquals( executionProfile.getName(), rehydratedProfile.getName() );
@@ -100,10 +122,21 @@ public class ModelSerializationIT {
     assertEquals( executionProfile.getExecutionData().getStartTime().compareTo( rehydratedProfile.getExecutionData().getStartTime()), 0 );
     assertEquals( executionProfile.getExecutionData().getEndTime().compareTo( rehydratedProfile.getExecutionData().getEndTime()), 0 ) ;
     assertEquals( executionProfile.getExecutionData().getFailureCount(), 0);
-    assertEquals( executionProfile.getExecutionData().getClientExecuter(), rehydratedProfile.getExecutionData().getClientExecuter());
-    assertEquals( executionProfile.getExecutionData().getExecutingServer(), rehydratedProfile.getExecutionData().getExecutingServer());
-    assertEquals( executionProfile.getExecutionData().getExecutingUser(), rehydratedProfile.getExecutionData().getExecutingUser());
+    assertEquals( executionProfile.getExecutionData().getClientExecutor(), rehydratedProfile.getExecutionData().getClientExecutor());
+    assertEquals( executionProfile.getExecutionData().getExecutorServer(), rehydratedProfile.getExecutionData().getExecutorServer());
+    assertEquals( executionProfile.getExecutionData().getExecutorUser(), rehydratedProfile.getExecutionData().getExecutorUser());
     assertEquals( executionProfile.getExecutionData().getLoggingChannelId(), rehydratedProfile.getExecutionData().getLoggingChannelId() );
-    assertEquals( rehydratedProfile.getExecutionData().getParameters().size(), 3);
+    assertEquals( rehydratedProfile.getExecutionData().getParameters().size(), 3 );
+    assertEquals( rehydratedProfile.getExecutionData().getExternalResources().size() , 1 );
+    Map<Object, Object> attributes = rehydratedProfile.getExecutionData().getExternalResources().get( 0 ).getAttributes();
+    assertEquals( attributes.get( attributeName ), attributeValue );
+    assertEquals( executionProfile.getExecutionData().getVariables().size(), 2 );
+    assertTrue( executionProfile.getExecutionData().getVariables().containsKey( variable1Name ) );
+    assertTrue( executionProfile.getExecutionData().getVariables().containsKey( variable2Name ) );
+    assertTrue( executionProfile.getExecutionData().getVariables().containsValue( variable1Value ) );
+    assertTrue( executionProfile.getExecutionData().getVariables().containsValue( variable2Value ) );
+    assertEquals(executionProfile.getExecutionData().getArguments().get( 0 ), arg1 );
+    assertEquals(executionProfile.getExecutionData().getArguments().get( 1 ), arg2 );
+    assertEquals(executionProfile.getExecutionData().getArguments().get( 2 ), arg3 );
   }
 }

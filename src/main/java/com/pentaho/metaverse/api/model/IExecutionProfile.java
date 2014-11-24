@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.pentaho.metaverse.impl.model.ExecutionData;
 
 public interface IExecutionProfile extends IInfo {
 
@@ -34,5 +33,5 @@ public interface IExecutionProfile extends IInfo {
   public String getType();
   
   @JsonProperty( "executionData" )
-  public ExecutionData getExecutionData();
+  public IExecutionData getExecutionData();
 }

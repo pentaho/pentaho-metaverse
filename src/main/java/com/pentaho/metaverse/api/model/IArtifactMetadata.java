@@ -22,54 +22,9 @@
 
 package com.pentaho.metaverse.api.model;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-
 @JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class" )
-public interface IExecutionData {
-  
-  @JsonProperty( "startTime" )
-  public Timestamp getStartTime();
-  
-  @JsonProperty( "endTime" )
-  public Timestamp getEndTime();
-  
-  @JsonProperty( "failureCount" )
-  public long getFailureCount();
-  
-  @JsonProperty( "executorServer" )
-  public String getExecutorServer();
-  
-  @JsonProperty( "executorUser" )
-  public String getExecutorUser();
-  
-  @JsonProperty( "clientExecutor" )
-  public String getClientExecutor();
-  
-  @JsonProperty( "loggingChannelId" )
-  public String getLoggingChannelId();
-  
-  @JsonProperty( "parameters" )
-  public List<IParamInfo<String>> getParameters();
-  
-  @JsonProperty( "externalResources" )
-  public List<IExternalResourceInfo> getExternalResources();
-  
-  @JsonProperty( "variables" )
-  public Map<Object, Object> getVariables();
-  
-  @JsonProperty( "arguments" )
-  public List<Object> getArguments();
-  
-  @JsonProperty( "artifactMeta")
-  public IArtifactMetadata getArtifactMetadata();
-  
-  @JsonProperty( "userMeta")
-  public IUserMetadata getUserMetadata();
+public interface IArtifactMetadata {
 
 }
