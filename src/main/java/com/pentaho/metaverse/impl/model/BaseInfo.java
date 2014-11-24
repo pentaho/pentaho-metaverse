@@ -36,11 +36,11 @@ public class BaseInfo implements IInfo {
     return description;
   }
 
-  public void setName( String name ) {
+  @Override public void setName( String name ) {
     this.name = name;
   }
 
-  public void setDescription( String description ) {
+  @Override public void setDescription( String description ) {
     this.description = description;
   }
 }

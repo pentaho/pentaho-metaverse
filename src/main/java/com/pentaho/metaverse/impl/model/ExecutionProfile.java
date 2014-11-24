@@ -22,13 +22,14 @@
 
 package com.pentaho.metaverse.impl.model;
 
+import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 
 public class ExecutionProfile extends BaseInfo implements IExecutionProfile  {
   
   private String path;
   private String type;
-  private ExecutionData executionData = new ExecutionData();
+  private IExecutionData executionData = new ExecutionData();
   
   public ExecutionProfile() {
     super();
@@ -58,11 +59,11 @@ public class ExecutionProfile extends BaseInfo implements IExecutionProfile  {
     this.type = type;
   }
 
-  public ExecutionData getExecutionData() {
+  public IExecutionData getExecutionData() {
     return executionData;
   }
 
-  protected void setExecutionData( ExecutionData executionData ) {
+  public void setExecutionData( IExecutionData executionData ) {
     this.executionData = executionData;
   }
 

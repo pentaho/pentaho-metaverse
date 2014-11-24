@@ -28,10 +28,13 @@ public interface IExecutionProfile extends IInfo {
 
   @JsonProperty( "path" )
   public String getPath();
+  public void setPath( String path );
   
   @JsonProperty( "type" )
   public String getType();
+  public void setType( String type );
   
   @JsonProperty( "executionData" )
   public IExecutionData getExecutionData();
+  public void setExecutionData( IExecutionData executionData );
 }
