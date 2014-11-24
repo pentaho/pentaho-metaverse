@@ -34,6 +34,6 @@ public interface IExternalResourceInfo extends IInfo {
   
   public boolean isOutput();
   
-  public Map<Object, Object> getAttibutes();
+  public Map<Object, Object> getAttributes();
   
 }

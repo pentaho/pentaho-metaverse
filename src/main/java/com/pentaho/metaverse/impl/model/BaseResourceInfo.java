@@ -56,7 +56,7 @@ public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo 
     this.isInput = isInput;
   }
   
-  @Override public Map<Object, Object> getAttibutes() {
+  @Override public Map<Object, Object> getAttributes() {
     return attributes;
   }
   
