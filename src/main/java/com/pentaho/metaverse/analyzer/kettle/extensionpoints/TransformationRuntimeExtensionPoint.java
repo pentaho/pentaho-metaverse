@@ -1,8 +1,5 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionEngine;
@@ -11,8 +8,10 @@ import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.impl.model.ExecutionData;
 import com.pentaho.metaverse.impl.model.ExecutionEngine;
 import com.pentaho.metaverse.impl.model.ExecutionProfile;
+import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;
 import com.pentaho.metaverse.impl.model.ParamInfo;
 import org.pentaho.di.core.KettleClientEnvironment;
+import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
@@ -38,9 +37,9 @@ import java.util.Map;
  * An extension point to gather runtime data for an execution of a transformation into an ExecutionProfile object
  */
 @ExtensionPoint(
-  description = "Transformation Runtime metadata extractor",
-  extensionPointId = "TransformationStartThreads",
-  id = "transRuntimeMetaverse" )
+    description = "Transformation Runtime metadata extractor",
+    extensionPointId = "TransformationStartThreads",
+    id = "transRuntimeMetaverse" )
 public class TransformationRuntimeExtensionPoint implements ExtensionPointInterface, TransListener {
 
   private Map<Trans, IExecutionProfile> profileMap = new HashMap<Trans, IExecutionProfile>();
@@ -75,18 +74,25 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
       return;
     }
 
+    // Create and populate an execution profile with what we know so far
+    ExecutionProfile executionProfile = new ExecutionProfile();
+    populateExecutionProfile( executionProfile, trans );
+
+    // Save the execution profile for later
+    profileMap.put( trans, executionProfile );
+  }
+
+  protected void populateExecutionProfile( IExecutionProfile executionProfile, Trans trans ) {
     TransMeta transMeta = trans.getTransMeta();
 
-    File f = new File( trans.getFilename() );
+    String filename = trans.getFilename();
 
     String filePath = null;
     try {
-      filePath = f.getCanonicalPath();
+      filePath = new File( filename ).getCanonicalPath();
     } catch ( IOException e ) {
-      e.printStackTrace();
+      // TODO ?
     }
-
-    ExecutionProfile executionProfile = new ExecutionProfile();
 
     // Set artifact information (path, type, description, etc.)
     executionProfile.setPath( filePath );
@@ -98,8 +104,8 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     executionEngine.setName( "Pentaho Data Integration" );
     executionEngine.setVersion( BuildVersion.getInstance().getVersion() );
     executionEngine.setDescription(
-      "Pentaho data integration prepares and blends data to create a complete picture of your business "
-        + "that drives actionable insights." );
+        "Pentaho data integration prepares and blends data to create a complete picture of your business "
+            + "that drives actionable insights." );
     executionProfile.setExecutionEngine( executionEngine );
 
     IExecutionData executionData = executionProfile.getExecutionData();
@@ -125,7 +131,7 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
       for ( String param : params ) {
         try {
           ParamInfo paramInfo = new ParamInfo( param, trans.getParameterDescription( param ),
-            trans.getParameterDefault( param ) );
+              trans.getParameterDefault( param ) );
           paramList.add( paramInfo );
         } catch ( UnknownParamException e ) {
           e.printStackTrace();
@@ -139,9 +145,6 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     if ( args != null ) {
       argList.addAll( Arrays.asList( args ) );
     }
-
-    // Save the execution profile for later
-    profileMap.put( trans, executionProfile );
   }
 
   /**
@@ -164,37 +167,41 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
   @Override
   public void transFinished( Trans trans ) throws KettleException {
 
+    if ( trans == null ) {
+      return;
+    }
+
     // Get the current execution profile for this transformation
     IExecutionProfile executionProfile = profileMap.remove( trans );
-    ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
-    executionData.setFailureCount( trans.getResult().getNrErrors() );
+    if ( executionProfile == null ) {
+      // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
+      // the same info, so populate a new ExecutionProfile using the current Trans
+      // TODO: Beware duplicate profiles!
 
-    // TODO where to persist the execution profile?
+      executionProfile = new ExecutionProfile();
+      populateExecutionProfile( executionProfile, trans );
+    }
+    ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
+    Result result = trans.getResult();
+    if ( result != null ) {
+      executionData.setFailureCount( result.getNrErrors() );
+    }
     try {
-      dumpExecutionProfile( System.out, executionProfile );
+      writeExecutionProfile( System.out, executionProfile );
     } catch ( IOException e ) {
       throw new KettleException( e );
     }
-
   }
 
-  // TODO move this somewhere else?
-  protected void dumpExecutionProfile( PrintStream out, IExecutionProfile executionProfile ) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.enable( SerializationFeature.INDENT_OUTPUT );
-    mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );
-    mapper.enable( SerializationFeature.WRAP_EXCEPTIONS );
-    try {
-      out.println( mapper.writeValueAsString( executionProfile ) );
-    } catch ( JsonProcessingException jpe ) {
-      throw new IOException( jpe );
-    }
+  protected void writeExecutionProfile( PrintStream out, IExecutionProfile executionProfile ) throws IOException {
+    // TODO where to persist the execution profile?
+    ExecutionProfileUtil.dumpExecutionProfile( out, executionProfile );
   }
 
   @ExtensionPoint(
-    description = "Transformation step external resource listener",
-    extensionPointId = "StepBeforeStart",
-    id = "stepExternalResource" )
+      description = "Transformation step external resource listener",
+      extensionPointId = "StepBeforeStart",
+      id = "stepExternalResource" )
   public static class ExternalResourceConsumerListener implements ExtensionPointInterface {
 
 
