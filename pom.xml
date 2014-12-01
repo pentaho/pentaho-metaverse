@@ -228,13 +228,6 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.4</version>
-        <configuration>
-          <finalName>${platform.plugin.name}-${project.version}</finalName>
-          <appendAssemblyId>false</appendAssemblyId>
-          <descriptors>
-            <descriptor>src/assembly/platform-plugin.xml</descriptor>
-          </descriptors>
-        </configuration>
         <executions>
           <execution>
             <id>make-platform-plugin</id>
@@ -242,6 +235,23 @@
             <goals>
               <goal>single</goal>
             </goals>
+            <configuration>
+              <finalName>${platform.plugin.name}-${project.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptor>src/assembly/platform-plugin.xml</descriptor>
+            </configuration>
+          </execution>
+          <execution>
+            <id>make-pdi-plugin</id>
+            <phase>install</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <finalName>${pdi.plugin.name}-${project.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptor>src/assembly/pdi-plugin.xml</descriptor>
+            </configuration>
           </execution>
         </executions>
       </plugin>
