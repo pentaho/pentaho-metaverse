@@ -49,6 +49,7 @@ public class TransformationRuntimeExtensionPointTest {
   @BeforeClass
   public static void setUpBeforeClass() throws KettleException {
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
+    KettleEnvironment.init();
   }
 
   @Before

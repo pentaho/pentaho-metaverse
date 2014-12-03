@@ -79,7 +79,7 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
   }
 
   protected IMetaverseNode createNodeFromDescriptor(
-    IMetaverseComponentDescriptor descriptor, ILogicalIdGenerator idGenerator ) {
+      IMetaverseComponentDescriptor descriptor, ILogicalIdGenerator idGenerator ) {
 
     String uuid = UUID.randomUUID().toString();
 
@@ -91,7 +91,7 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
         descriptor.getType() );
 
       if ( idGenerator.getLogicalIdPropertyKeys().contains( DictionaryConst.PROPERTY_NAMESPACE )
-        && descriptor.getParentNamespace() != null ) {
+          && descriptor.getParentNamespace() != null ) {
         node.setProperty( DictionaryConst.PROPERTY_NAMESPACE, descriptor.getNamespace().getNamespaceId() );
       }
       node.setLogicalIdGenerator( idGenerator );

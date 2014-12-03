@@ -112,6 +112,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
         }
         metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
+
       }
     }
 
@@ -221,6 +222,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
             metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
           }
           metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
+
         }
       }
     }

@@ -93,7 +93,7 @@ public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputM
     ValueMetaInterface filenameField = prevFields.searchValueMeta( meta.getFileNameField() );
     if ( filenameField != null ) {
       IMetaverseComponentDescriptor fileStreamFieldDescriptor = getStepFieldOriginDescriptor( descriptor,
-        filenameField.getName() );
+          filenameField.getName() );
       IMetaverseNode fileStreamFieldNode = createNodeFromDescriptor( fileStreamFieldDescriptor );
       metaverseBuilder.addNode( fileStreamFieldNode );
       metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fileStreamFieldNode );
@@ -105,10 +105,10 @@ public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputM
     for ( TextFileField outputField : outputFields ) {
       String fieldName = outputField.getName();
       IMetaverseComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
-        fieldName,
-        DictionaryConst.NODE_TYPE_FILE_FIELD,
-        descriptor,
-        descriptor.getContext() );
+          fieldName,
+          DictionaryConst.NODE_TYPE_FILE_FIELD,
+          descriptor,
+          descriptor.getContext() );
 
       // create the file field nodes
       IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
