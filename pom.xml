@@ -259,13 +259,6 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>${plugin.maven-assembly-plugin.version}</version>
-        <configuration>
-          <finalName>${platform.plugin.name}-${project.version}</finalName>
-          <appendAssemblyId>false</appendAssemblyId>
-          <descriptors>
-            <descriptor>src/assembly/platform-plugin.xml</descriptor>
-          </descriptors>
-        </configuration>
         <executions>
           <execution>
             <id>make-platform-plugin</id>

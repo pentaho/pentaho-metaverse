@@ -1,4 +1,4 @@
-/*
+/*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
@@ -19,42 +19,32 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
+package com.pentaho.metaverse.analyzer.kettle.plugin;
 
-package com.pentaho.metaverse.impl.model.kettle.json;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
-import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+@Documented
+@Retention( RetentionPolicy.RUNTIME )
+@Target( ElementType.TYPE )
+public @interface ExternalResourceConsumer {
+  String id();
 
-import java.io.IOException;
+  String name() default "";
 
-/**
- * User: RFellows Date: 11/17/14
- */
-public class TableOutputStepMetaJsonSerializer extends AbstractStepMetaJsonSerializer<TableOutputMeta> {
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass ) {
-    super( aClass );
-  }
+  String description() default "";
 
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass, LineageRepository repo ) {
-    super( aClass, repo );
-  }
+  String version() default "";
 
-  @Override
-  protected void writeFieldTransforms( TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
+  int category() default -1;
 
-    // no transformations
+  String categoryDescription() default "";
 
-  }
+  String i18nPackageName() default "";
 
+  String classLoaderGroup() default "";
 
-  @Override
-  protected void writeCustomProperties(
-    TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
-
-  }
 }

@@ -1,4 +1,4 @@
-/*
+/*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
@@ -19,42 +19,31 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
+package com.pentaho.metaverse.analyzer.kettle.plugin;
 
-package com.pentaho.metaverse.impl.model.kettle.json;
+import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.plugins.PluginRegistryExtension;
+import org.pentaho.di.core.plugins.PluginTypeInterface;
+import org.pentaho.di.core.plugins.RegistryPlugin;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
-import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+@RegistryPlugin(
+    id = "ExternalResourceConsumerPlugin",
+    name = "ExternalResourceConsumerPlugin",
+    description = "Registers plugins that report usage of external resources (files, e.g.)" )
+public class ExternalResourceConsumerPluginRegistrar implements PluginRegistryExtension {
 
-import java.io.IOException;
-
-/**
- * User: RFellows Date: 11/17/14
- */
-public class TableOutputStepMetaJsonSerializer extends AbstractStepMetaJsonSerializer<TableOutputMeta> {
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass ) {
-    super( aClass );
-  }
-
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass, LineageRepository repo ) {
-    super( aClass, repo );
+  @Override
+  public String getPluginId( Class<? extends PluginTypeInterface> arg0, Object arg1 ) {
+    return null;
   }
 
   @Override
-  protected void writeFieldTransforms( TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
-
-    // no transformations
-
+  public void init( PluginRegistry pluginRegistry ) {
+    PluginRegistry.addPluginType( ExternalResourceConsumerPluginType.getInstance() );
   }
-
 
   @Override
-  protected void writeCustomProperties(
-    TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
-
+  public void searchForType( PluginTypeInterface pluginTypeInterface ) {
   }
+
 }

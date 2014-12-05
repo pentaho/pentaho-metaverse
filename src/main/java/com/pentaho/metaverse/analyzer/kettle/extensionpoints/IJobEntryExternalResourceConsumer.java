@@ -1,4 +1,4 @@
-/*
+/*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
@@ -19,42 +19,11 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
+package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-package com.pentaho.metaverse.impl.model.kettle.json;
+import org.pentaho.di.job.entry.JobEntryInterface;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
-import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+public interface IJobEntryExternalResourceConsumer extends IExternalResourceConsumer<JobEntryInterface> {
 
-import java.io.IOException;
-
-/**
- * User: RFellows Date: 11/17/14
- */
-public class TableOutputStepMetaJsonSerializer extends AbstractStepMetaJsonSerializer<TableOutputMeta> {
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass ) {
-    super( aClass );
-  }
-
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass, LineageRepository repo ) {
-    super( aClass, repo );
-  }
-
-  @Override
-  protected void writeFieldTransforms( TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
-
-    // no transformations
-
-  }
-
-
-  @Override
-  protected void writeCustomProperties(
-    TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
-
-  }
+  JobEntryInterface getJobEntry();
 }

@@ -1,4 +1,4 @@
-/*
+/*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
@@ -19,42 +19,39 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
+package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-package com.pentaho.metaverse.impl.model.kettle.json;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
-import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
-
-import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
- * User: RFellows Date: 11/17/14
+ * This class is a do-nothing reference implementation for StepExternalConsumer plugins. Subclasses should override
+ * the various methods with business logic that can handle the external resources used by the given step.
  */
-public class TableOutputStepMetaJsonSerializer extends AbstractStepMetaJsonSerializer<TableOutputMeta> {
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass ) {
-    super( aClass );
-  }
+public abstract class BaseStepExternalResourceConsumer<T extends BaseStepMeta>
+    implements IStepExternalResourceConsumer<T> {
 
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass, LineageRepository repo ) {
-    super( aClass, repo );
+  public BaseStepExternalResourceConsumer() {
   }
 
   @Override
-  protected void writeFieldTransforms( TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
-
-    // no transformations
-
+  public boolean isDataDriven( StepMeta meta ) {
+    return false;
   }
 
+  @Override
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( StepMeta meta ) {
+    return Collections.emptyList();
+  }
 
   @Override
-  protected void writeCustomProperties(
-    TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
-
+  public Collection<IExternalResourceInfo> getResourcesFromRow(
+      StepMeta meta, RowMetaInterface rowMeta, Object[] row ) {
+    return Collections.emptyList();
   }
 }

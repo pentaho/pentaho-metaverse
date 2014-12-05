@@ -1,4 +1,4 @@
-/*
+/*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
@@ -19,42 +19,22 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
+package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-package com.pentaho.metaverse.impl.model.kettle.json;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.di.core.row.RowMetaInterface;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
-import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
-
-import java.io.IOException;
+import java.util.Collection;
 
 /**
- * User: RFellows Date: 11/17/14
+ * Created by mburgess on 12/2/14.
  */
-public class TableOutputStepMetaJsonSerializer extends AbstractStepMetaJsonSerializer<TableOutputMeta> {
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass ) {
-    super( aClass );
-  }
+public interface IExternalResourceConsumer<T> extends Cloneable {
 
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass, LineageRepository repo ) {
-    super( aClass, repo );
-  }
+  boolean isDataDriven( T meta );
 
-  @Override
-  protected void writeFieldTransforms( TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
+  Collection<IExternalResourceInfo> getResourcesFromMeta( T meta );
 
-    // no transformations
+  Collection<IExternalResourceInfo> getResourcesFromRow( T meta, RowMetaInterface rowMeta, Object[] row );
 
-  }
-
-
-  @Override
-  protected void writeCustomProperties(
-    TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
-
-  }
 }
