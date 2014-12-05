@@ -25,25 +25,28 @@ package com.pentaho.metaverse.impl.model;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.database.DatabaseMeta;
 
-public class JndiResourceInfo extends BaseDatabaseResourceInfo implements IExternalResourceInfo {
+/**
+ * User: RFellows Date: 12/5/14
+ */
+public class BaseDatabaseResourceInfo extends BaseResourceInfo implements IExternalResourceInfo {
 
-  public static final String JNDI = "JNDI";
+  private String pluginId;
 
-  @Override public String getType() {
-    return JNDI;
+  public BaseDatabaseResourceInfo() {
   }
 
-  public JndiResourceInfo( DatabaseMeta databaseMeta ) {
-    super( databaseMeta );
-    if ( !getType().equals( databaseMeta.getAccessTypeDesc() ) ) {
-      throw new IllegalArgumentException( "DatabaseMeta is not JNDI, it is " + databaseMeta.getAccessTypeDesc() );
-    }
+  public BaseDatabaseResourceInfo( DatabaseMeta databaseMeta ) {
+    setName( databaseMeta.getName() );
+    setDescription( databaseMeta.getDescription() );
+    setPluginId( databaseMeta.getDatabaseInterface().getPluginId() );
   }
 
-  public JndiResourceInfo() {
+  public String getPluginId() {
+    return pluginId;
   }
 
-  public JndiResourceInfo( String name ) {
-    setName( name );
+  public void setPluginId( String pluginId ) {
+    this.pluginId = pluginId;
   }
+
 }
