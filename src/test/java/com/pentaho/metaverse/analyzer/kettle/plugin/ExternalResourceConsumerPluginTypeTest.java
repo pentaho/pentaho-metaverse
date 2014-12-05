@@ -2,8 +2,12 @@ package com.pentaho.metaverse.analyzer.kettle.plugin;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.core.plugins.KettleSelectiveParentFirstClassLoader;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -91,6 +95,13 @@ public class ExternalResourceConsumerPluginTypeTest {
   @Test
   public void testExtractSeparateClassLoader() throws Exception {
     assertFalse( pluginType.extractSeparateClassLoader( null ) );
+  }
+
+  @Test
+  public void testCreateUrlClassLoader() throws Exception {
+    URLClassLoader ucl = pluginType.createUrlClassLoader(
+      new File( "." ).toURI().toURL(), this.getClass().getClassLoader() );
+    assertTrue( ucl instanceof KettleSelectiveParentFirstClassLoader );
   }
 
   @Test

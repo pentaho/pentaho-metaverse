@@ -6,7 +6,9 @@ import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -83,7 +85,7 @@ public class ExecutionDataTest {
     List<IParamInfo<String>> parameters = new ArrayList<IParamInfo<String>>();
     parameters.add( new ParamInfo( "Larry", "fine" ) );
     parameters.add( new ParamInfo( "moe", "howard" ) );
-    parameters.add( new ParamInfo( "curly", "fine") );
+    parameters.add( new ParamInfo( "curly", "fine" ) );
     assertEquals( executionData.getParameters().size(), 0 );
     executionData.setParameters( parameters );
     assertEquals( executionData.getParameters().size(), 3 );
@@ -91,19 +93,21 @@ public class ExecutionDataTest {
 
   @Test
   public void testGetSetExternalResources() {
+    Map<String, List<IExternalResourceInfo>> resourceMap = new HashMap<String, List<IExternalResourceInfo>>();
     List<IExternalResourceInfo> externalResources = new ArrayList<IExternalResourceInfo>();
     externalResources.add( new BaseResourceInfo() );
     assertEquals( executionData.getExternalResources().size(), 0 );
-    executionData.setExternalResources( externalResources );
-    assertEquals( executionData.getExternalResources().size(), 1 );
+    resourceMap.put( "testStep", externalResources );
+    executionData.setExternalResources( resourceMap );
+    assertEquals( executionData.getExternalResources().get( "testStep" ).size(), 1 );
   }
 
   @Test
   public void testAddExternalResource() {
     IExternalResourceInfo externalResource = new BaseResourceInfo();
     assertEquals( executionData.getExternalResources().size(), 0 );
-    executionData.addExternalResource( externalResource );
-    assertEquals( executionData.getExternalResources().get( 0 ), externalResource );
+    executionData.addExternalResource( "testStep", externalResource );
+    assertEquals( executionData.getExternalResources().get( "testStep" ).get( 0 ), externalResource );
 
   }
 

@@ -59,6 +59,7 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,12 +68,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * An extension point to gather runtime data for an execution of a transformation into an ExecutionProfile object
  */
 @ExtensionPoint(
-    description = "Transformation Runtime metadata extractor",
-    extensionPointId = "TransformationStartThreads",
-    id = "transRuntimeMetaverse" )
+  description = "Transformation Runtime metadata extractor",
+  extensionPointId = "TransformationStartThreads",
+  id = "transRuntimeMetaverse" )
 public class TransformationRuntimeExtensionPoint implements ExtensionPointInterface, TransListener {
 
-  private static Map<Trans, IExecutionProfile> profileMap = new ConcurrentHashMap<Trans, IExecutionProfile>();
+  protected static Map<Trans, IExecutionProfile> profileMap = new ConcurrentHashMap<Trans, IExecutionProfile>();
 
   /**
    * Callback when a transformation is about to be started
@@ -134,8 +135,8 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     executionEngine.setName( "Pentaho Data Integration" );
     executionEngine.setVersion( BuildVersion.getInstance().getVersion() );
     executionEngine.setDescription(
-        "Pentaho data integration prepares and blends data to create a complete picture of your business "
-            + "that drives actionable insights." );
+      "Pentaho data integration prepares and blends data to create a complete picture of your business "
+        + "that drives actionable insights." );
     executionProfile.setExecutionEngine( executionEngine );
 
     IExecutionData executionData = executionProfile.getExecutionData();
@@ -161,7 +162,7 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
       for ( String param : params ) {
         try {
           ParamInfo paramInfo = new ParamInfo( param, trans.getParameterDescription( param ),
-              trans.getParameterDefault( param ) );
+            trans.getParameterDefault( param ) );
           paramList.add( paramInfo );
         } catch ( UnknownParamException e ) {
           e.printStackTrace();
@@ -229,9 +230,9 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
   }
 
   @ExtensionPoint(
-      description = "Transformation step external resource listener",
-      extensionPointId = "StepBeforeStart",
-      id = "stepExternalResource" )
+    description = "Transformation step external resource listener",
+    extensionPointId = "StepBeforeStart",
+    id = "stepExternalResource" )
   public static class ExternalResourceConsumerListener implements ExtensionPointInterface {
 
 
@@ -256,8 +257,8 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
           if ( BaseStepMeta.class.isAssignableFrom( metaClass ) ) {
             @SuppressWarnings( "unchecked" )
             List<IStepExternalResourceConsumer> stepConsumers =
-                ExternalResourceConsumerMap.getInstance().getStepExternalResourceConsumers(
-                    (Class<? extends BaseStepMeta>) metaClass );
+              ExternalResourceConsumerMap.getInstance().getStepExternalResourceConsumers(
+                (Class<? extends BaseStepMeta>) metaClass );
             if ( stepConsumers != null ) {
               for ( IStepExternalResourceConsumer stepConsumer : stepConsumers ) {
                 // We might know enough at this point, so call the consumer
@@ -267,7 +268,7 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
                 // Add a RowListener if the step is data-driven
                 if ( stepConsumer.isDataDriven( stepMeta ) ) {
                   stepCombi.step.addRowListener(
-                      new StepExternalConsumerRowListener( stepConsumer, stepMeta ) );
+                    new StepExternalConsumerRowListener( stepConsumer, stepMeta ) );
                 }
               }
             }
@@ -280,7 +281,17 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
       if ( resources != null ) {
         // Add the resources to the execution profile
         IExecutionProfile executionProfile = profileMap.get( step.getTrans() );
-        executionProfile.getExecutionData().getExternalResources().addAll( resources );
+        if ( executionProfile != null ) {
+          String stepName = step.getStepname();
+          Map<String, List<IExternalResourceInfo>> resourceMap =
+            executionProfile.getExecutionData().getExternalResources();
+          List<IExternalResourceInfo> externalResources = resourceMap.get( stepName );
+          if ( externalResources == null ) {
+            externalResources = new LinkedList<IExternalResourceInfo>();
+          }
+          externalResources.addAll( resources );
+          resourceMap.put( stepName, externalResources );
+        }
         // TODO store by step?
       }
     }
@@ -293,7 +304,7 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     private StepMeta stepMeta;
 
     public StepExternalConsumerRowListener(
-        IStepExternalResourceConsumer stepExternalResourceConsumer, StepMeta stepMeta ) {
+      IStepExternalResourceConsumer stepExternalResourceConsumer, StepMeta stepMeta ) {
       this.stepExternalResourceConsumer = stepExternalResourceConsumer;
       this.stepMeta = stepMeta;
     }

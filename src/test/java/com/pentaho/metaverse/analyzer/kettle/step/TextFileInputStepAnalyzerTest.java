@@ -54,7 +54,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.class )
 public class TextFileInputStepAnalyzerTest {
 
   private TextFileInputStepAnalyzer textFileInputStepAnalyzer;
@@ -83,7 +83,6 @@ public class TextFileInputStepAnalyzerTest {
 
     mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
-//    when( mockNamespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( mockNamespace );
     when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
 
     textFileInputStepAnalyzer = new TextFileInputStepAnalyzer();
@@ -91,7 +90,7 @@ public class TextFileInputStepAnalyzerTest {
     descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
   }
 
-  @Test(expected = MetaverseAnalyzerException.class)
+  @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyze_nullInput() throws Exception {
     textFileInputStepAnalyzer.analyze( null, null );
   }
@@ -102,7 +101,7 @@ public class TextFileInputStepAnalyzerTest {
     StepMeta meta = new StepMeta( "test", mockTextFileInputMeta );
     StepMeta spyMeta = spy( meta );
 
-    String[] fileNames = new String[] { "MyTextInput.txt" };
+    String[] fileNames = new String[]{ "MyTextInput.txt" };
 
     when( mockTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( fileNames );
     when( mockTextFileInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
@@ -120,7 +119,7 @@ public class TextFileInputStepAnalyzerTest {
 
     // make sure there is a "readby" link added
     verify( mockBuilder, times( 1 ) ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
+      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
 
   }
 
@@ -130,7 +129,7 @@ public class TextFileInputStepAnalyzerTest {
     StepMeta meta = new StepMeta( "test", mockTextFileInputMeta );
     StepMeta spyMeta = spy( meta );
 
-    String[] fileNames = new String[] { "MyTextInput.txt" };
+    String[] fileNames = new String[]{ "MyTextInput.txt" };
 
     when( mockTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( fileNames );
     when( mockTextFileInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
@@ -140,19 +139,22 @@ public class TextFileInputStepAnalyzerTest {
     // set up the input fields
     TextFileInputField field1 = new TextFileInputField( "id", 0, 4 );
     TextFileInputField field2 = new TextFileInputField( "name", 1, 30 );
-    TextFileInputField[] inputFields = new TextFileInputField[] { field1, field2 };
+    TextFileInputField[] inputFields = new TextFileInputField[]{ field1, field2 };
 
     when( mockTextFileInputMeta.getInputFields() ).thenReturn( inputFields );
     when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "id", "name" } );
+    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "id", "name" } );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+      @Override
+      public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
-        if ( args[0] == "id" )
+        if ( args[0] == "id" ) {
           return new ValueMetaString( "id" );
-        if ( args[0] == "name" )
+        }
+        if ( args[0] == "name" ) {
           return new ValueMetaString( "name" );
+        }
         return null;
       }
     } );
@@ -168,13 +170,13 @@ public class TextFileInputStepAnalyzerTest {
 
     // make sure there are "readby" and "uses" links added (file, and each field)
     verify( mockBuilder, times( 1 ) ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
+      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
     verify( mockBuilder, times( inputFields.length ) ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
 
     // we should have "populates" links from input nodes to output nodes
     verify( mockBuilder, times( inputFields.length ) )
-        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
+      .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
 
   }
 
@@ -193,31 +195,36 @@ public class TextFileInputStepAnalyzerTest {
     // set up the input fields
     TextFileInputField field1 = new TextFileInputField( "id", 0, 4 );
     TextFileInputField field2 = new TextFileInputField( "name", 1, 30 );
-    TextFileInputField[] inputFields = new TextFileInputField[] { field1, field2 };
+    TextFileInputField[] inputFields = new TextFileInputField[]{ field1, field2 };
 
     when( mockTextFileInputMeta.getInputFields() ).thenReturn( inputFields );
     when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "id", "name" } );
+    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "id", "name" } );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+      @Override
+      public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
-        if ( args[0] == "id" )
+        if ( args[0] == "id" ) {
           return new ValueMetaString( "id" );
-        if ( args[0] == "name" )
+        }
+        if ( args[0] == "name" ) {
           return new ValueMetaString( "name" );
+        }
         return null;
       }
     } );
 
     RowMetaInterface mockPrevRowMeta = mock( RowMetaInterface.class );
-    when( mockPrevRowMeta.getFieldNames() ).thenReturn( new String[] { "inField" } );
+    when( mockPrevRowMeta.getFieldNames() ).thenReturn( new String[]{ "inField" } );
     when( mockPrevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+      @Override
+      public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
-        if ( args[0] == "inField" )
+        if ( args[0] == "inField" ) {
           return new ValueMetaString( "inField" );
+        }
         return null;
       }
     } );
@@ -236,15 +243,15 @@ public class TextFileInputStepAnalyzerTest {
 
     // Verify there are no READBY links (usually from file to step)
     verify( mockBuilder, never() ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
+      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
 
     // make sure there "uses" links added (each field, and the filename stream field)
     verify( mockBuilder, times( inputFields.length + 1 ) ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
 
     // we should have "populates" links from input nodes to output nodes
     verify( mockBuilder, times( inputFields.length ) )
-        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
+      .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
 
   }
 
@@ -255,6 +262,22 @@ public class TextFileInputStepAnalyzerTest {
     assertNotNull( types );
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( TextFileInputMeta.class ) );
+  }
+
+  @Test
+  public void testTextFileInputExternalResourceConsumer() {
+    TextFileInputStepAnalyzer.TextFileInputExternalResourceConsumer consumer =
+      new TextFileInputStepAnalyzer.TextFileInputExternalResourceConsumer();
+
+    StepMeta meta = new StepMeta( "test", mockTextFileInputMeta );
+    StepMeta spyMeta = spy( meta );
+
+    assertFalse( consumer.isDataDriven( spyMeta ) );
+    when( mockTextFileInputMeta.isAcceptingFilenames() ).thenReturn( true );
+    assertTrue( consumer.isDataDriven( spyMeta ) );
+    assertTrue( consumer.getResourcesFromMeta( spyMeta ).isEmpty() );
+    consumer.getResourcesFromRow( spyMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    assertEquals( TextFileInputMeta.class, consumer.getStepMetaClass() );
   }
 
 }
