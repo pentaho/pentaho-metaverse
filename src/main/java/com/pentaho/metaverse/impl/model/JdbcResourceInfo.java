@@ -25,7 +25,7 @@ package com.pentaho.metaverse.impl.model;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.database.DatabaseMeta;
 
-public class JdbcResourceInfo extends BaseResourceInfo implements IExternalResourceInfo {
+public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExternalResourceInfo {
 
   public static final String JDBC = "JDBC";
 
@@ -35,7 +35,8 @@ public class JdbcResourceInfo extends BaseResourceInfo implements IExternalResou
   private String password;
   private String databaseName;
 
-  @Override public String getType() {
+  @Override
+  public String getType() {
     return JDBC;
   }
 
@@ -43,10 +44,9 @@ public class JdbcResourceInfo extends BaseResourceInfo implements IExternalResou
   }
 
   public JdbcResourceInfo( DatabaseMeta databaseMeta ) {
+    super( databaseMeta );
     if ( "Native".equals( databaseMeta.getAccessTypeDesc() ) ) {
-      setName( databaseMeta.getName() );
-      setDescription( databaseMeta.getDescription() );
-      setServer( databaseMeta.getServername() );
+      setServer( databaseMeta.getHostname() );
       String portString = databaseMeta.getDatabasePortNumberString();
       if ( portString != null ) {
         setPort( Integer.valueOf( portString ) );
@@ -106,4 +106,5 @@ public class JdbcResourceInfo extends BaseResourceInfo implements IExternalResou
   public void setDatabaseName( String databaseName ) {
     this.databaseName = databaseName;
   }
+
 }

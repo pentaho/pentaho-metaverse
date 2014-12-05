@@ -29,12 +29,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.impl.model.JdbcResourceInfo;
+import com.pentaho.metaverse.impl.model.JndiResourceInfo;
 import com.pentaho.metaverse.impl.model.ParamInfo;
+import com.pentaho.metaverse.impl.model.kettle.HopInfo;
+import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.parameters.DuplicateParamException;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.StringObjectId;
+import org.pentaho.di.trans.TransHopMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -81,8 +87,65 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
     String desc = node.get( "description" ).textValue();
     transMeta = new TransMeta( null, name );
     transMeta.setDescription( desc );
-    ArrayNode paramsArrayNode = (ArrayNode) node.get( "parameters" );
 
+    // parameters
+    deserializeParameters( transMeta, node, mapper );
+
+    // steps
+    deserializeSteps( transMeta, node, mapper );
+
+    // connections
+    deserializeConnections( transMeta, node, mapper );
+
+    // hops
+    deserializeHops( transMeta, node, mapper );
+
+    return transMeta;
+
+  }
+
+  protected void deserializeConnections( TransMeta transMeta, JsonNode node, ObjectMapper mapper ) {
+    ArrayNode connectionsArrayNode = (ArrayNode) node.get( "connections" );
+    for ( int i = 0; i < connectionsArrayNode.size(); i++ ) {
+      JsonNode connNode = connectionsArrayNode.get( i );
+      String className = connNode.get( "@class" ).asText();
+      try {
+        Class clazz = this.getClass().getClassLoader().loadClass( className );
+        IExternalResourceInfo conn = (IExternalResourceInfo) clazz.newInstance();
+        conn = mapper.readValue( connNode.toString(), conn.getClass() );
+        DatabaseMeta dbMeta = null;
+        if ( conn instanceof JdbcResourceInfo ) {
+          JdbcResourceInfo db = (JdbcResourceInfo) conn;
+          dbMeta = new DatabaseMeta(
+              db.getName(),
+              db.getPluginId(),
+              DatabaseMeta.getAccessTypeDesc( DatabaseMeta.TYPE_ACCESS_NATIVE ),
+              db.getServer(),
+              db.getDatabaseName(),
+              String.valueOf( db.getPort() ),
+              db.getUsername(),
+              db.getPassword() );
+        } else if ( conn instanceof JndiResourceInfo ) {
+          JndiResourceInfo db = (JndiResourceInfo) conn;
+          dbMeta = new DatabaseMeta(
+              db.getName(),
+              db.getPluginId(),
+              DatabaseMeta.getAccessTypeDesc( DatabaseMeta.TYPE_ACCESS_JNDI ),
+              null,
+              null,
+              null,
+              null,
+              null );
+        }
+        transMeta.addDatabase( dbMeta );
+      } catch ( Exception e ) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  protected void deserializeParameters( TransMeta transMeta, JsonNode node, ObjectMapper mapper ) throws IOException {
+    ArrayNode paramsArrayNode = (ArrayNode) node.get( "parameters" );
     for ( int i = 0; i < paramsArrayNode.size(); i++ ) {
       JsonNode paramNode = paramsArrayNode.get( i );
       ParamInfo param = mapper.readValue( paramNode.toString(), ParamInfo.class );
@@ -92,7 +155,9 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
         e.printStackTrace();
       }
     }
+  }
 
+  protected void deserializeSteps( TransMeta transMeta, JsonNode node, ObjectMapper mapper ) throws IOException {
     ArrayNode stepsArrayNode = (ArrayNode) node.get( "steps" );
     for ( int i = 0; i < stepsArrayNode.size(); i++ ) {
       JsonNode stepNode = stepsArrayNode.get( i );
@@ -118,9 +183,6 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
         e.printStackTrace();
       }
     }
-
-    return transMeta;
-
   }
 
   protected void writeJsonFields( JsonNode fields, ObjectMapper mapper, ObjectId stepId ) throws IOException {
@@ -169,6 +231,25 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
           repository.saveStepAttribute( null, stepId, s, val == null ? null : (String) val );
         }
       } catch ( KettleException e ) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  protected void deserializeHops( TransMeta transMeta, JsonNode root, ObjectMapper mapper ) {
+    ArrayNode hopsArray = (ArrayNode) root.get( "hops" );
+    for ( int i = 0; i < hopsArray.size(); i++ ) {
+      JsonNode hopNode = hopsArray.get( i );
+      try {
+        HopInfo hop = mapper.readValue( hopNode.toString(), HopInfo.class );
+        if ( hop != null ) {
+          TransHopMeta hopMeta = new TransHopMeta();
+          hopMeta.setFromStep( transMeta.findStep( hop.getFromStepName() ) );
+          hopMeta.setToStep( transMeta.findStep( hop.getToStepName() ) );
+          hopMeta.setEnabled( hop.isEnabled() );
+          transMeta.addTransHop( hopMeta );
+        }
+      } catch ( IOException e ) {
         e.printStackTrace();
       }
     }

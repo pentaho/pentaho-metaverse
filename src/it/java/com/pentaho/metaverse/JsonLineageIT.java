@@ -92,6 +92,8 @@ public class JsonLineageIT {
     // now deserilaize it
     TransMeta rehydrated = mapper.readValue( json, TransMeta.class );
 
+//    String ktr = rehydrated.getXML();
+//    FileUtils.writeStringToFile( new File( "src/it/resources/tmp/" + tm.getName() + ".after.ktr" ), ktr );
     assertEquals( tm.getName(), rehydrated.getName() );
 
     json = mapper.writeValueAsString( rehydrated );

@@ -28,16 +28,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.pentaho.metaverse.impl.model.JdbcResourceInfo;
+import com.pentaho.metaverse.impl.model.JndiResourceInfo;
 import com.pentaho.metaverse.impl.model.ParamInfo;
+import com.pentaho.metaverse.impl.model.kettle.HopInfo;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.KettleEnvironment;
+import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.dummytrans.DummyTransMeta;
 
 import java.util.ArrayList;
@@ -47,6 +56,7 @@ import java.util.Map;
 
 import static com.tinkerpop.frames.util.Validate.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
@@ -76,10 +86,22 @@ public class TransMetaJsonDeserializerTest {
   @Mock JsonNode root_stepsArray_Node1_nameNode;
   @Mock JsonNode root_stepsArray_Node1_attributesNode;
   @Mock JsonNode root_stepsArray_Node1_fieldsNode;
+  @Mock JsonNode root_hopsArray_hop0;
+  @Mock JsonNode root_connectionsArray_Node0;
+  @Mock JsonNode root_connectionsArray_Node0_classNode;
+  @Mock JsonNode root_connectionsArray_Node1;
+  @Mock JsonNode root_connectionsArray_Node1_classNode;
+  @Mock HopInfo hop0;
+  @Mock StepMeta fromStep;
+  @Mock StepMeta toStep;
+
+  TransMeta transMeta;
 
   // DOH! can't mock/spy final classes like ArrayNode
   ArrayNode root_paramsArray = new ArrayNode( JsonNodeFactory.instance );
   ArrayNode root_stepsArray = new ArrayNode( JsonNodeFactory.instance );
+  ArrayNode root_hopsArray = new ArrayNode( JsonNodeFactory.instance );
+  ArrayNode root_connectionsArray = new ArrayNode( JsonNodeFactory.instance );
 
   ParamInfo param0 = new ParamInfo( "param0", null, "Hello", "param description" );
   ParamInfo param1 = new ParamInfo( "param1", null, "World", "param description" );
@@ -88,6 +110,11 @@ public class TransMetaJsonDeserializerTest {
   Map<String, Object> attrs1 = new HashMap<String, Object>();
   List<Map<String, Object>> fields0 = new ArrayList<Map<String, Object>>();
   List<Map<String, Object>> fields1 = new ArrayList<Map<String, Object>>();
+
+  @BeforeClass
+  public static void init() throws KettleException {
+    KettleEnvironment.init();
+  }
 
   @Before
   public void setUp() throws Exception {
@@ -98,6 +125,8 @@ public class TransMetaJsonDeserializerTest {
 
     root_stepsArray.add( root_stepsArray_Node0 );
     root_stepsArray.add( root_stepsArray_Node1 );
+
+    root_hopsArray.add( root_hopsArray_hop0 );
 
     // build parser expectations
     when( parser.getCodec() ).thenReturn( mapper );
@@ -116,6 +145,8 @@ public class TransMetaJsonDeserializerTest {
     when( root.get( "description" ) ).thenReturn( root_descNode );
     when( root.get( "parameters" ) ).thenReturn( root_paramsArray );
     when( root.get( "steps" ) ).thenReturn( root_stepsArray );
+    when( root.get( "hops" ) ).thenReturn( root_hopsArray );
+    when( root.get( "connections" ) ).thenReturn( root_connectionsArray );
 
     // build text property nodes expectations
     when( root_nameNode.textValue() ).thenReturn( "Trans Name" );
@@ -154,6 +185,23 @@ public class TransMetaJsonDeserializerTest {
     assertEquals( "Trans Description", tm.getDescription() );
     assertEquals( root_paramsArray.size(), tm.listParameters().length );
     assertEquals( root_stepsArray.size(), tm.getSteps().size() );
+  }
+
+  @Test
+  public void testDeserializeHops() throws Exception {
+    transMeta = spy( new TransMeta() );
+    when( transMeta.findStep( "from" ) ).thenReturn( fromStep );
+    when( transMeta.findStep( "to" ) ).thenReturn( toStep );
+    when( mapper.readValue( "to be mocked", HopInfo.class ) ).thenReturn( hop0 );
+    when( root_hopsArray_hop0.toString() ).thenReturn( "to be mocked" ); // mocked, value does not matter
+    when( hop0.isEnabled() ).thenReturn( true );
+    when( hop0.getFromStepName() ).thenReturn( "from" );
+    when( hop0.getToStepName() ).thenReturn( "to" );
+
+    deserializer.deserializeHops( transMeta, root, mapper );
+
+    assertEquals( root_hopsArray.size(), transMeta.nrTransHops() );
+
   }
 
   @Test
@@ -226,5 +274,36 @@ public class TransMetaJsonDeserializerTest {
     verify( repo, times( 2 ) ).saveStepAttribute( any( ObjectId.class ), eq( stepId ), anyInt(), eq( "double" ), eq( 3.0D ) );
     verify( repo, times( 2 ) ).saveStepAttribute( any( ObjectId.class ), eq( stepId ), anyInt(), eq( "bool" ), eq( true ) );
     verify( repo, times( 2 ) ).saveStepAttribute( any( ObjectId.class ), eq( stepId ), anyInt(), eq( "null" ), anyString() ) ;
+  }
+
+  @Test
+  public void testDeserializeConnections() throws Exception {
+    JndiResourceInfo jndi = new JndiResourceInfo( "jndi" );
+    jndi.setPluginId( "ORACLE" );
+    JdbcResourceInfo jdbc = new JdbcResourceInfo( "localhost", "test", 5432, "sa", "password" );
+    jdbc.setPluginId( "POSTGRESQL" );
+
+    transMeta = spy( new TransMeta() );
+
+    root_connectionsArray.add( root_connectionsArray_Node0 );
+    root_connectionsArray.add( root_connectionsArray_Node1 );
+
+    when( root_connectionsArray_Node0.toString() ).thenReturn( "mocked jdbc" );
+    when( root_connectionsArray_Node0.get( "@class" ) ).thenReturn( root_connectionsArray_Node0_classNode );
+    when( root_connectionsArray_Node0_classNode.asText() ).thenReturn( JdbcResourceInfo.class.getName() );
+
+    when( root_connectionsArray_Node1.toString() ).thenReturn( "mocked jndi" );
+    when( root_connectionsArray_Node1.get( "@class" ) ).thenReturn( root_connectionsArray_Node1_classNode );
+    when( root_connectionsArray_Node1_classNode.asText() ).thenReturn( JndiResourceInfo.class.getName() );
+
+    when( mapper.readValue( "mocked jdbc", JdbcResourceInfo.class ) ).thenReturn( jdbc );
+    when( mapper.readValue( "mocked jndi", JndiResourceInfo.class ) ).thenReturn( jndi );
+
+    deserializer.deserializeConnections( transMeta, root, mapper );
+    assertEquals( root_connectionsArray.size(), transMeta.getDatabases().size() );
+    for ( DatabaseMeta databaseMeta : transMeta.getDatabases() ) {
+      assertNotNull( databaseMeta.getDatabaseInterface() );
+    }
+
   }
 }

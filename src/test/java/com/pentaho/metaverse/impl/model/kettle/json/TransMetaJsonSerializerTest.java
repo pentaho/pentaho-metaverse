@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.impl.model.BaseResourceInfo;
+import com.pentaho.metaverse.impl.model.kettle.HopInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -39,6 +40,7 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
+import org.pentaho.di.trans.TransHopMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -105,7 +107,7 @@ public class TransMetaJsonSerializerTest {
     // get some exception handling code coverage
     when( transMeta.getParameterDescription( "invalid" ) ).thenThrow( new UnknownParamException() );
 
-    serializer.serialize( transMeta, json, provider );
+    serializer.serializeParameters( transMeta, json );
 
     verify( json ).writeArrayFieldStart( "parameters" );
     verify( json, times( params.length - 1 ) ).writeObject( any( IParamInfo.class ) );
@@ -127,7 +129,6 @@ public class TransMetaJsonSerializerTest {
       add( spyStep3 );
     }};
 
-    when( transMeta.listParameters() ).thenReturn( new String[] { } );
     when( transMeta.getSteps() ).thenReturn( steps );
     when( spyStep1.getStepMetaInterface() ).thenReturn( spyDummy1 );
     when( spyStep2.getStepMetaInterface() ).thenReturn( spyDummy2 );
@@ -136,7 +137,7 @@ public class TransMetaJsonSerializerTest {
     doThrow( new KettleException() ).when( spyDummy3 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
         any( ObjectId.class ), any( ObjectId.class ) );
 
-    serializer.serialize( transMeta, json, provider );
+    serializer.serializeSteps( transMeta, json );
 
     verify( json ).writeArrayFieldStart( "steps" );
     // make sure we call the saveRep method for each step to collect the common attribute stuff
@@ -162,7 +163,6 @@ public class TransMetaJsonSerializerTest {
       add( db1 );
       add( db2 );
     }};
-    when( transMeta.listParameters() ).thenReturn( new String[] { } );
     when( transMeta.getDatabases() ).thenReturn( dbs );
 
     when( db1.getAccessTypeDesc() ).thenReturn( "Native" );
@@ -178,7 +178,7 @@ public class TransMetaJsonSerializerTest {
     when( db2.getName() ).thenReturn( "DB2" );
     when( db2.getDescription() ).thenReturn( null );
 
-    serializer.serialize( transMeta, json, provider );
+    serializer.serializeConnections( transMeta, json );
     verify( json ).writeArrayFieldStart( "connections" );
 
     // make sure we write one of each types
@@ -191,5 +191,19 @@ public class TransMetaJsonSerializerTest {
     BaseStepMeta baseStepMeta = serializer.getBaseStepMetaFromStepMeta( null );
     assertNotNull( baseStepMeta );
     assertNull( baseStepMeta.getParentStepMeta() );
+  }
+
+  @Test
+  public void testSerializeHops() throws Exception {
+    TransHopMeta hop = mock( TransHopMeta.class );
+
+    when( transMeta.nrTransHops() ).thenReturn( 1 );
+    when( transMeta.getTransHop( 0 ) ).thenReturn( hop );
+
+    serializer.serializeHops( transMeta, json );
+
+    verify( json ).writeArrayFieldStart( "hops" );
+    verify( json ).writeObject( any( HopInfo.class ) );
+
   }
 }
