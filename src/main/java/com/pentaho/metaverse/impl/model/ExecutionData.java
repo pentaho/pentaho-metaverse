@@ -24,7 +24,9 @@ package com.pentaho.metaverse.impl.model;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +45,8 @@ public class ExecutionData implements IExecutionData {
   private String clientExecutor;
   private String loggingChannelId;
   private List<IParamInfo<String>> parameters = new ArrayList<IParamInfo<String>>();
-  private List<IExternalResourceInfo> externalResources = new ArrayList<IExternalResourceInfo>();
+  private Map<String, List<IExternalResourceInfo>> externalResources
+    = new HashMap<String, List<IExternalResourceInfo>>();
   private Map<Object, Object> variables = new Hashtable<Object, Object>();
   private List<Object> arguments = new ArrayList<Object>();
   private IArtifactMetadata artifactMetadata;
@@ -135,18 +138,23 @@ public class ExecutionData implements IExecutionData {
   }
 
   @Override
-  public List<IExternalResourceInfo> getExternalResources() {
+  public Map<String, List<IExternalResourceInfo>> getExternalResources() {
     return externalResources;
   }
 
   @Override
-  public void setExternalResources( List<IExternalResourceInfo> externalResources ) {
+  public void setExternalResources( Map<String, List<IExternalResourceInfo>> externalResources ) {
     this.externalResources = externalResources;
   }
 
   @Override
-  public void addExternalResource( IExternalResourceInfo externalResource ) {
-    this.externalResources.add( externalResource );
+  public void addExternalResource( String consumerName, IExternalResourceInfo externalResource ) {
+    List<IExternalResourceInfo> resources = this.externalResources.get( consumerName );
+    if ( resources == null ) {
+      resources = new LinkedList<IExternalResourceInfo>();
+    }
+    resources.add( externalResource );
+    this.externalResources.put( consumerName, resources );
   }
 
   @Override

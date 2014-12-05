@@ -75,11 +75,11 @@ public interface IExecutionData {
   public void addParameter( IParamInfo<String> parameter );
 
   @JsonProperty( "externalResources" )
-  public List<IExternalResourceInfo> getExternalResources();
+  public Map<String, List<IExternalResourceInfo>> getExternalResources();
 
-  public void setExternalResources( List<IExternalResourceInfo> externalResources );
+  public void setExternalResources( Map<String, List<IExternalResourceInfo>> externalResources );
 
-  public void addExternalResource( IExternalResourceInfo externalResource );
+  public void addExternalResource( String consumerName, IExternalResourceInfo externalResource );
 
   @JsonProperty( "variables" )
   public Map<Object, Object> getVariables();

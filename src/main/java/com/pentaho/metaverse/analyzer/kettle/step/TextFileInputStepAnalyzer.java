@@ -27,7 +27,6 @@ import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseStepExternalRes
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.impl.model.BaseResourceInfo;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -41,7 +40,6 @@ import org.pentaho.platform.api.metaverse.MetaverseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -141,9 +139,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
     public Collection<IExternalResourceInfo> getResourcesFromMeta( StepMeta meta ) {
       TextFileInputMeta tfim = (TextFileInputMeta) meta.getStepMetaInterface();
       // TODO call some method (refactored out of analyze()) that will collect the external resources
-      IExternalResourceInfo resource = new BaseResourceInfo();
-      resource.setName( "Step init resource" );
-      return Arrays.asList( resource );
+      return super.getResourcesFromMeta( meta );
     }
 
     @Override
