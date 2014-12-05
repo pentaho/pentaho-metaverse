@@ -25,13 +25,17 @@ package com.pentaho.metaverse.api.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class" )
+@JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = IInfo.JSON_PROPERTY_CLASS )
 public interface IInfo {
-  @JsonProperty( "name" )
+  public static final String JSON_PROPERTY_CLASS = "@class";
+  public static final String JSON_PROPERTY_NAME = "name";
+  public static final String JSON_PROPERTY_DESCRIPTION = "description";
+
+  @JsonProperty( JSON_PROPERTY_NAME )
   public String getName();
   public void setName( String name );
 
-  @JsonProperty( "description" )
+  @JsonProperty( JSON_PROPERTY_DESCRIPTION )
   public String getDescription();
   public void setDescription( String description );
 }

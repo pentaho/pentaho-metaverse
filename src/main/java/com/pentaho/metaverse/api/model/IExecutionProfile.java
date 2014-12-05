@@ -26,22 +26,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public interface IExecutionProfile extends IInfo {
 
-  @JsonProperty( "path" )
+  public static final String JSON_PROPERTY_PATH = "path";
+  public static final String JSON_PROPERTY_TYPE = "type";
+  public static final String JSON_PROPERTY_ENGINE = "engine";
+  public static final String JSON_PROPERTY_EXECUTION_DATA = "executionData";
+
+  @JsonProperty( JSON_PROPERTY_PATH )
   public String getPath();
 
   public void setPath( String path );
 
-  @JsonProperty( "type" )
+  @JsonProperty( JSON_PROPERTY_TYPE )
   public String getType();
 
   public void setType( String type );
 
-  @JsonProperty( "engine" )
+  @JsonProperty( JSON_PROPERTY_ENGINE )
   public IExecutionEngine getExecutionEngine();
 
   public void setExecutionEngine( IExecutionEngine executionEngine );
 
-  @JsonProperty( "executionData" )
+  @JsonProperty( JSON_PROPERTY_EXECUTION_DATA )
   public IExecutionData getExecutionData();
 
   public void setExecutionData( IExecutionData executionData );

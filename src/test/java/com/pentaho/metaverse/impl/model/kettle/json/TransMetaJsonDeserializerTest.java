@@ -28,11 +28,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.impl.model.JdbcResourceInfo;
 import com.pentaho.metaverse.impl.model.JndiResourceInfo;
 import com.pentaho.metaverse.impl.model.ParamInfo;
 import com.pentaho.metaverse.impl.model.kettle.HopInfo;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -56,8 +56,10 @@ import java.util.Map;
 
 import static com.tinkerpop.frames.util.Validate.assertNotNull;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -141,12 +143,12 @@ public class TransMetaJsonDeserializerTest {
     when( mapper.readValue( "fields1", fields1.getClass() ) ).thenReturn( fields1 );
 
     // build root node expectations
-    when( root.get( "name" ) ).thenReturn( root_nameNode );
-    when( root.get( "description" ) ).thenReturn( root_descNode );
-    when( root.get( "parameters" ) ).thenReturn( root_paramsArray );
-    when( root.get( "steps" ) ).thenReturn( root_stepsArray );
-    when( root.get( "hops" ) ).thenReturn( root_hopsArray );
-    when( root.get( "connections" ) ).thenReturn( root_connectionsArray );
+    when( root.get( IInfo.JSON_PROPERTY_NAME ) ).thenReturn( root_nameNode );
+    when( root.get( IInfo.JSON_PROPERTY_DESCRIPTION ) ).thenReturn( root_descNode );
+    when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_PARAMETERS ) ).thenReturn( root_paramsArray );
+    when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_STEPS ) ).thenReturn( root_stepsArray );
+    when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_HOPS ) ).thenReturn( root_hopsArray );
+    when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_CONNECTIONS ) ).thenReturn( root_connectionsArray );
 
     // build text property nodes expectations
     when( root_nameNode.textValue() ).thenReturn( "Trans Name" );
@@ -156,17 +158,21 @@ public class TransMetaJsonDeserializerTest {
     when( root_paramsArray_Node1.toString() ).thenReturn( "mocked param1" ); // mocked, values don't matter
 
     // build up the step nodes expectations
-    when( root_stepsArray_Node0.get( "@class" ) ).thenReturn( root_stepsArray_Node0_classNode );
-    when( root_stepsArray_Node0.get( "name" ) ).thenReturn( root_stepsArray_Node0_nameNode );
-    when( root_stepsArray_Node0.get( "attributes" ) ).thenReturn( root_stepsArray_Node0_attributesNode );
-    when( root_stepsArray_Node0.get( "fields" ) ).thenReturn( root_stepsArray_Node0_fieldsNode );
+    when( root_stepsArray_Node0.get( IInfo.JSON_PROPERTY_CLASS ) ).thenReturn( root_stepsArray_Node0_classNode );
+    when( root_stepsArray_Node0.get( IInfo.JSON_PROPERTY_NAME ) ).thenReturn( root_stepsArray_Node0_nameNode );
+    when( root_stepsArray_Node0.get( AbstractStepMetaJsonSerializer.JSON_PROPERTY_ATTRIBUTES ) )
+      .thenReturn( root_stepsArray_Node0_attributesNode );
+    when( root_stepsArray_Node0.get( AbstractStepMetaJsonSerializer.JSON_PROPERTY_FIELDS ) )
+      .thenReturn( root_stepsArray_Node0_fieldsNode );
     when( root_stepsArray_Node0_classNode.asText() ).thenReturn( DummyTransMeta.class.getName() );
     when( root_stepsArray_Node0_nameNode.asText() ).thenReturn( "Step 0" );
 
-    when( root_stepsArray_Node1.get( "@class" ) ).thenReturn( root_stepsArray_Node1_classNode );
-    when( root_stepsArray_Node1.get( "name" ) ).thenReturn( root_stepsArray_Node1_nameNode );
-    when( root_stepsArray_Node1.get( "attributes" ) ).thenReturn( root_stepsArray_Node1_attributesNode );
-    when( root_stepsArray_Node1.get( "fields" ) ).thenReturn( root_stepsArray_Node1_fieldsNode );
+    when( root_stepsArray_Node1.get( IInfo.JSON_PROPERTY_CLASS ) ).thenReturn( root_stepsArray_Node1_classNode );
+    when( root_stepsArray_Node1.get( IInfo.JSON_PROPERTY_NAME ) ).thenReturn( root_stepsArray_Node1_nameNode );
+    when( root_stepsArray_Node1.get( AbstractStepMetaJsonSerializer.JSON_PROPERTY_ATTRIBUTES ) )
+      .thenReturn( root_stepsArray_Node1_attributesNode );
+    when( root_stepsArray_Node1.get( AbstractStepMetaJsonSerializer.JSON_PROPERTY_FIELDS ) )
+      .thenReturn( root_stepsArray_Node1_fieldsNode );
     when( root_stepsArray_Node1_classNode.asText() ).thenReturn( DummyTransMeta.class.getName() );
     when( root_stepsArray_Node1_nameNode.asText() ).thenReturn( "Step 1" );
 
@@ -289,11 +295,13 @@ public class TransMetaJsonDeserializerTest {
     root_connectionsArray.add( root_connectionsArray_Node1 );
 
     when( root_connectionsArray_Node0.toString() ).thenReturn( "mocked jdbc" );
-    when( root_connectionsArray_Node0.get( "@class" ) ).thenReturn( root_connectionsArray_Node0_classNode );
+    when( root_connectionsArray_Node0.get( IInfo.JSON_PROPERTY_CLASS ) )
+      .thenReturn( root_connectionsArray_Node0_classNode );
     when( root_connectionsArray_Node0_classNode.asText() ).thenReturn( JdbcResourceInfo.class.getName() );
 
     when( root_connectionsArray_Node1.toString() ).thenReturn( "mocked jndi" );
-    when( root_connectionsArray_Node1.get( "@class" ) ).thenReturn( root_connectionsArray_Node1_classNode );
+    when( root_connectionsArray_Node1.get( IInfo.JSON_PROPERTY_CLASS ) )
+      .thenReturn( root_connectionsArray_Node1_classNode );
     when( root_connectionsArray_Node1_classNode.asText() ).thenReturn( JndiResourceInfo.class.getName() );
 
     when( mapper.readValue( "mocked jdbc", JdbcResourceInfo.class ) ).thenReturn( jdbc );
