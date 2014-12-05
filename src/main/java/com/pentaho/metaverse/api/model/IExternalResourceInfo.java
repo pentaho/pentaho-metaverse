@@ -22,16 +22,27 @@
 
 package com.pentaho.metaverse.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 
 public interface IExternalResourceInfo extends IInfo {
 
+  public static final String JSON_PROPERTY_TYPE = "type";
+  public static final String JSON_PROPERTY_INPUT = "input";
+  public static final String JSON_PROPERTY_OUTPUT = "output";
+  public static final String JSON_PROPERTY_ATTRIBUTES = "attributes";
+
+  @JsonProperty( JSON_PROPERTY_TYPE )
   public String getType();
 
+  @JsonProperty( JSON_PROPERTY_INPUT )
   public boolean isInput();
 
+  @JsonProperty( JSON_PROPERTY_OUTPUT )
   public boolean isOutput();
 
+  @JsonProperty( JSON_PROPERTY_ATTRIBUTES )
   public Map<Object, Object> getAttributes();
 
 }

@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.impl.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.database.DatabaseMeta;
 
@@ -29,8 +30,9 @@ import org.pentaho.di.core.database.DatabaseMeta;
  * User: RFellows Date: 12/5/14
  */
 public class BaseDatabaseResourceInfo extends BaseResourceInfo implements IExternalResourceInfo {
-
   private String pluginId;
+
+  public static final String JSON_PROPERTY_PLUGIN_ID = "pluginId";
 
   public BaseDatabaseResourceInfo() {
   }
@@ -41,6 +43,7 @@ public class BaseDatabaseResourceInfo extends BaseResourceInfo implements IExter
     setPluginId( databaseMeta.getDatabaseInterface().getPluginId() );
   }
 
+  @JsonProperty( JSON_PROPERTY_PLUGIN_ID )
   public String getPluginId() {
     return pluginId;
   }

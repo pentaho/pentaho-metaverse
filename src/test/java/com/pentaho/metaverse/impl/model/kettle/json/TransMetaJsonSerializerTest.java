@@ -24,6 +24,7 @@ package com.pentaho.metaverse.impl.model.kettle.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.impl.model.BaseResourceInfo;
 import com.pentaho.metaverse.impl.model.kettle.HopInfo;
@@ -85,13 +86,13 @@ public class TransMetaJsonSerializerTest {
     serializer.serialize( transMeta, json, provider );
 
     verify( json ).writeStartObject();
-    verify( json ).writeStringField( "@class", transMeta.getClass().getName() );
-    verify( json ).writeStringField( "name", transMeta.getName() );
-    verify( json ).writeStringField( "description", transMeta.getDescription() );
+    verify( json ).writeStringField( IInfo.JSON_PROPERTY_CLASS, transMeta.getClass().getName() );
+    verify( json ).writeStringField( IInfo.JSON_PROPERTY_NAME, transMeta.getName() );
+    verify( json ).writeStringField( IInfo.JSON_PROPERTY_DESCRIPTION, transMeta.getDescription() );
 
-    verify( json ).writeArrayFieldStart( "parameters" );
-    verify( json ).writeArrayFieldStart( "steps" );
-    verify( json ).writeArrayFieldStart( "connections" );
+    verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_PARAMETERS );
+    verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_STEPS );
+    verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_CONNECTIONS );
     verify( json ).writeEndObject();
   }
 
@@ -139,10 +140,10 @@ public class TransMetaJsonSerializerTest {
 
     serializer.serializeSteps( transMeta, json );
 
-    verify( json ).writeArrayFieldStart( "steps" );
+    verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_STEPS );
     // make sure we call the saveRep method for each step to collect the common attribute stuff
     verify( spyDummy1 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
-        any( ObjectId.class ), any( ObjectId.class ) );
+      any( ObjectId.class ), any( ObjectId.class ) );
     verify( spyDummy2 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
         any( ObjectId.class ), any( ObjectId.class ) );
     verify( spyDummy3 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
@@ -179,7 +180,7 @@ public class TransMetaJsonSerializerTest {
     when( db2.getDescription() ).thenReturn( null );
 
     serializer.serializeConnections( transMeta, json );
-    verify( json ).writeArrayFieldStart( "connections" );
+    verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_CONNECTIONS );
 
     // make sure we write one of each types
     verify( json, times( dbs.size() ) ).writeObject( any( BaseResourceInfo.class ) );
@@ -202,7 +203,7 @@ public class TransMetaJsonSerializerTest {
 
     serializer.serializeHops( transMeta, json );
 
-    verify( json ).writeArrayFieldStart( "hops" );
+    verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_HOPS );
     verify( json ).writeObject( any( HopInfo.class ) );
 
   }

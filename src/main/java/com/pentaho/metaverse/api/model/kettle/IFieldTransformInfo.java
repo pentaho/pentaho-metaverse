@@ -22,7 +22,9 @@
 
 package com.pentaho.metaverse.api.model.kettle;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.pentaho.metaverse.api.model.IInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -30,9 +32,18 @@ import java.util.Map;
 /**
  * User: RFellows Date: 11/3/14
  */
-@JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class" )
+@JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = IInfo.JSON_PROPERTY_CLASS )
 public interface IFieldTransformInfo {
+  public static final String JSON_PROPERTY_OPERATIONS = "operations";
+  public static final String JSON_PROPERTY_TARGET_FIELD = "targetField";
+  public static final String JSON_PROPERTY_SOURCE_FIELD = "sourceField";
+
+  @JsonProperty( JSON_PROPERTY_OPERATIONS )
   public Map<String, List<String>> getOperations();
+
+  @JsonProperty( JSON_PROPERTY_TARGET_FIELD )
   public String getTargetField();
+
+  @JsonProperty( JSON_PROPERTY_SOURCE_FIELD )
   public String getSourceField();
 }

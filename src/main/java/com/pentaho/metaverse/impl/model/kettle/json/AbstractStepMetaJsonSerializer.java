@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.impl.model.kettle.FieldInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import org.pentaho.di.core.exception.KettleStepException;
@@ -47,6 +48,14 @@ import java.util.Map;
  * User: RFellows Date: 11/17/14
  */
 public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> extends StdSerializer<T> {
+
+  public static final String JSON_PROPERTY_TYPE = "type";
+  public static final String JSON_PROPERTY_TRANSFORMS = "transforms";
+  public static final String JSON_PROPERTY_ATTRIBUTES = "attributes";
+  public static final String JSON_PROPERTY_FIELDS = "fields";
+  public static final String JSON_PROPERTY_INPUT_FIELDS = "inputFields";
+  public static final String JSON_PROPERTY_OUTPUT_FIELDS = "outputFields";
+
   protected AbstractStepMetaJsonSerializer( Class<T> aClass ) {
     super( aClass );
   }
@@ -72,9 +81,9 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
 
     StepMeta parentStepMeta = meta.getParentStepMeta();
     if ( parentStepMeta != null ) {
-      json.writeStringField( "@class", meta.getClass().getName() );
-      json.writeStringField( "name", parentStepMeta.getName() );
-      json.writeStringField( "type", getStepType( parentStepMeta ) );
+      json.writeStringField( IInfo.JSON_PROPERTY_CLASS, meta.getClass().getName() );
+      json.writeStringField( IInfo.JSON_PROPERTY_NAME, parentStepMeta.getName() );
+      json.writeStringField( JSON_PROPERTY_TYPE, getStepType( parentStepMeta ) );
 
       writeRepoAttributes( meta, json );
 
@@ -83,7 +92,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
       writeInputFields( parentStepMeta, json );
       writeOutputFields( parentStepMeta, json );
 
-      json.writeArrayFieldStart( "transforms" );
+      json.writeArrayFieldStart( JSON_PROPERTY_TRANSFORMS );
       writeFieldTransforms( meta, json, serializerProvider );
       json.writeEndArray();
 
@@ -101,10 +110,10 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
     LineageRepository repo = getLineageRepository();
     if ( repo != null ) {
       Map<String, Object> attrs = repo.getStepAttributesCache( stepId );
-      json.writeObjectField( "attributes", attrs );
+      json.writeObjectField( JSON_PROPERTY_ATTRIBUTES, attrs );
 
       List<Map<String, Object>> fields = repo.getStepFieldsCache( stepId );
-      json.writeObjectField( "fields", fields );
+      json.writeObjectField( JSON_PROPERTY_FIELDS, fields );
     }
   }
 
@@ -144,7 +153,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
     if ( parentTransMeta != null ) {
       try {
         RowMetaInterface prevStepFields = parentTransMeta.getPrevStepFields( parentStepMeta );
-        writeFields( json, prevStepFields, "inputFields" );
+        writeFields( json, prevStepFields, JSON_PROPERTY_INPUT_FIELDS );
       } catch ( KettleStepException e ) {
         e.printStackTrace();
       }
@@ -156,7 +165,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
     if ( parentTransMeta != null ) {
       try {
         RowMetaInterface stepFields = parentTransMeta.getStepFields( parentStepMeta );
-        writeFields( json, stepFields, "outputFields" );
+        writeFields( json, stepFields, JSON_PROPERTY_OUTPUT_FIELDS );
       } catch ( KettleStepException e ) {
         e.printStackTrace();
       }

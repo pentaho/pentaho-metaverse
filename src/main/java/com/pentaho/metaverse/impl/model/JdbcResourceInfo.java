@@ -22,12 +22,19 @@
 
 package com.pentaho.metaverse.impl.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.database.DatabaseMeta;
 
 public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExternalResourceInfo {
 
   public static final String JDBC = "JDBC";
+
+  public static final String JSON_PROPERTY_PORT = "port";
+  public static final String JSON_PROPERTY_SERVER = "server";
+  public static final String JSON_PROPERTY_USERNAME = "username";
+  public static final String JSON_PROPERTY_PASSWORD = "password";
+  public static final String JSON_PROPERTY_DATABASE_NAME = "databaseName";
 
   private Integer port;
   private String server;
@@ -67,6 +74,8 @@ public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExter
     this.password = password;
   }
 
+
+  @JsonProperty( JSON_PROPERTY_PORT )
   public Integer getPort() {
     return port;
   }
@@ -75,6 +84,7 @@ public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExter
     this.port = port;
   }
 
+  @JsonProperty( JSON_PROPERTY_SERVER )
   public String getServer() {
     return server;
   }
@@ -83,6 +93,7 @@ public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExter
     this.server = server;
   }
 
+  @JsonProperty( JSON_PROPERTY_USERNAME )
   public String getUsername() {
     return username;
   }
@@ -91,6 +102,7 @@ public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExter
     this.username = username;
   }
 
+  @JsonProperty( JSON_PROPERTY_PASSWORD )
   public String getPassword() {
     return password;
   }
@@ -99,6 +111,7 @@ public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExter
     this.password = password;
   }
 
+  @JsonProperty( JSON_PROPERTY_DATABASE_NAME )
   public String getDatabaseName() {
     return databaseName;
   }

@@ -24,6 +24,7 @@ package com.pentaho.metaverse.impl.model.kettle.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.api.model.kettle.IFieldInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import org.junit.Before;
@@ -53,10 +54,6 @@ import static org.mockito.Mockito.*;
 public class AbstractStepMetaJsonSerializerTest {
 
   public static final String STEP_META_NAME = "StepMetaName";
-  public static final String CLASS = "@class";
-  public static final String NAME = "name";
-  public static final String TYPE = "type";
-  public static final String TRANSFORMS = "transforms";
 
   AbstractStepMetaJsonSerializer<BaseStepMeta> serializer;
   LineageRepository repo;
@@ -92,9 +89,9 @@ public class AbstractStepMetaJsonSerializerTest {
     spySerializer.serialize( spyMeta, json, provider );
 
     verify( json ).writeStartObject();
-    verify( json ).writeStringField( CLASS, spyMeta.getClass().getName() );
-    verify( json ).writeStringField( NAME, spyParent.getName() );
-    verify( json ).writeStringField( eq( TYPE ), anyString() );
+    verify( json ).writeStringField( IInfo.JSON_PROPERTY_CLASS, spyMeta.getClass().getName() );
+    verify( json ).writeStringField( IInfo.JSON_PROPERTY_NAME, spyParent.getName() );
+    verify( json ).writeStringField( eq( AbstractStepMetaJsonSerializer.JSON_PROPERTY_TYPE ), anyString() );
 
     // make sure the templated methods are called
     verify( spySerializer ).writeRepoAttributes( spyMeta, json );
@@ -102,7 +99,7 @@ public class AbstractStepMetaJsonSerializerTest {
     verify( spySerializer ).writeInputFields( spyParent, json );
     verify( spySerializer ).writeOutputFields( spyParent, json );
 
-    verify( json ).writeArrayFieldStart( TRANSFORMS );
+    verify( json ).writeArrayFieldStart( AbstractStepMetaJsonSerializer.JSON_PROPERTY_TRANSFORMS );
     verify( spySerializer ).writeFieldTransforms( spyMeta, json, provider );
     verify( json ).writeEndObject();
   }
@@ -116,16 +113,16 @@ public class AbstractStepMetaJsonSerializerTest {
     spySerializer.serialize( spyMeta, json, provider );
 
     verify( json ).writeStartObject();
-    verify( json, times( 0 ) ).writeStringField( CLASS, spyMeta.getClass().getName() );
-    verify( json, times( 0 ) ).writeStringField( NAME, spyParent.getName() );
-    verify( json, times( 0 ) ).writeStringField( eq( TYPE ), anyString() );
+    verify( json, times( 0 ) ).writeStringField( IInfo.JSON_PROPERTY_CLASS, spyMeta.getClass().getName() );
+    verify( json, times( 0 ) ).writeStringField( IInfo.JSON_PROPERTY_NAME, spyParent.getName() );
+    verify( json, times( 0 ) ).writeStringField( eq( AbstractStepMetaJsonSerializer.JSON_PROPERTY_TYPE ), anyString() );
 
     // make sure the templated methods are called
     verify( spySerializer, times( 0 ) ).writeCustomProperties( spyMeta, json, provider );
     verify( spySerializer, times( 0 ) ).writeInputFields( spyParent, json );
     verify( spySerializer, times( 0 ) ).writeOutputFields( spyParent, json );
 
-    verify( json, times( 0 ) ).writeArrayFieldStart( TRANSFORMS );
+    verify( json, times( 0 ) ).writeArrayFieldStart( AbstractStepMetaJsonSerializer.JSON_PROPERTY_TRANSFORMS );
     verify( spySerializer, times( 0 ) ).writeFieldTransforms( spyMeta, json, provider );
 
     verify( json ).writeEndObject();

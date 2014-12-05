@@ -31,12 +31,10 @@ import com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonDeserializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonSerializer;
-import com.pentaho.metaverse.impl.model.kettle.json.ValueMetaInterfaceJsonSerializer;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.KettleEnvironment;
-import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -75,7 +73,6 @@ public class JsonLineageIT {
     baseStepMetaJsonSerializer.setLineageRepository( writeRepo );
     transModule.addSerializer( baseStepMetaJsonSerializer );
 
-    transModule.addSerializer( new ValueMetaInterfaceJsonSerializer( ValueMetaInterface.class ) );
     transModule.addSerializer( new TableOutputStepMetaJsonSerializer( TableOutputMeta.class, writeRepo ) );
 
     transModule.addDeserializer( TransMeta.class, new TransMetaJsonDeserializer( TransMeta.class, readRepo ) );

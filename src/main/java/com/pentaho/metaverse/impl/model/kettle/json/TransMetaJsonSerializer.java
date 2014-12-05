@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.impl.model.BaseResourceInfo;
 import com.pentaho.metaverse.impl.model.JdbcResourceInfo;
 import com.pentaho.metaverse.impl.model.JndiResourceInfo;
@@ -49,6 +50,12 @@ import java.io.IOException;
  * User: RFellows Date: 11/17/14
  */
 public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
+
+  public static final String JSON_PROPERTY_PARAMETERS = "parameters";
+  public static final String JSON_PROPERTY_STEPS = "steps";
+  public static final String JSON_PROPERTY_CONNECTIONS = "connections";
+  public static final String JSON_PROPERTY_HOPS = "hops";
+
   public TransMetaJsonSerializer( Class<TransMeta> aClass ) {
     super( aClass );
   }
@@ -68,9 +75,9 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
                                    SerializerProvider serializerProvider ) throws IOException, JsonGenerationException {
 
     json.writeStartObject();
-    json.writeStringField( "@class", meta.getClass().getName() );
-    json.writeStringField( "name", meta.getName() );
-    json.writeStringField( "description", meta.getDescription() );
+    json.writeStringField( IInfo.JSON_PROPERTY_CLASS, meta.getClass().getName() );
+    json.writeStringField( IInfo.JSON_PROPERTY_NAME, meta.getName() );
+    json.writeStringField( IInfo.JSON_PROPERTY_DESCRIPTION, meta.getDescription() );
 
     serializeParameters( meta, json );
     serializeSteps( meta, json );
@@ -82,7 +89,7 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
   }
 
   protected void serializeParameters( TransMeta meta, JsonGenerator json ) throws IOException {
-    json.writeArrayFieldStart( "parameters" );
+    json.writeArrayFieldStart( JSON_PROPERTY_PARAMETERS );
     for ( String param : meta.listParameters() ) {
       try {
         ParamInfo paramInfo = new ParamInfo( param, meta.getParameterDescription( param ),
@@ -96,7 +103,7 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
   }
 
   protected void serializeSteps( TransMeta meta, JsonGenerator json ) throws IOException {
-    json.writeArrayFieldStart( "steps" );
+    json.writeArrayFieldStart( JSON_PROPERTY_STEPS );
     for ( StepMeta stepMeta : meta.getSteps() ) {
       BaseStepMeta step = getBaseStepMetaFromStepMeta( stepMeta );
       LineageRepository repo = getLineageRepository();
@@ -114,7 +121,7 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
 
   protected void serializeConnections( TransMeta meta, JsonGenerator json ) throws IOException {
     // connections
-    json.writeArrayFieldStart( "connections" );
+    json.writeArrayFieldStart( JSON_PROPERTY_CONNECTIONS );
     for ( DatabaseMeta dbmeta : meta.getDatabases() ) {
       BaseResourceInfo resourceInfo;
       if ( "Native".equals( dbmeta.getAccessTypeDesc() ) ) {
@@ -131,7 +138,7 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
 
   protected void serializeHops( TransMeta meta, JsonGenerator json ) throws IOException {
     // Hops
-    json.writeArrayFieldStart( "hops" );
+    json.writeArrayFieldStart( JSON_PROPERTY_HOPS );
     int numberOfHops = meta.nrTransHops();
     for ( int i = 0; i < numberOfHops; i++ ) {
       TransHopMeta hopMeta = meta.getTransHop( i );
