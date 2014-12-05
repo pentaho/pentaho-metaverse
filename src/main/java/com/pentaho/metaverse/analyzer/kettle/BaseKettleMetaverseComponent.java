@@ -86,9 +86,9 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     IMetaverseNode node = null;
     if ( descriptor != null ) {
       node = metaverseObjectFactory.createNodeObject(
-        uuid,
-        descriptor.getName(),
-        descriptor.getType() );
+          uuid,
+          descriptor.getName(),
+          descriptor.getType() );
 
       if ( idGenerator.getLogicalIdPropertyKeys().contains( DictionaryConst.PROPERTY_NAMESPACE )
           && descriptor.getParentNamespace() != null ) {
@@ -99,7 +99,9 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     return node;
   }
 
-  protected IMetaverseNode createFileNode( String fileName, IMetaverseComponentDescriptor descriptor ) throws MetaverseException {
+  protected IMetaverseNode createFileNode( String fileName, IMetaverseComponentDescriptor descriptor )
+    throws MetaverseException {
+
     String normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
     IMetaverseNode fileNode = null;
 
@@ -109,9 +111,9 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     if ( descriptor != null ) {
 
       fileNode = metaverseObjectFactory.createNodeObject(
-        parentNs == null ? ns : parentNs,
-        normalized,
-        DictionaryConst.NODE_TYPE_FILE );
+          parentNs == null ? ns : parentNs,
+          normalized,
+          DictionaryConst.NODE_TYPE_FILE );
     }
 
     fileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );

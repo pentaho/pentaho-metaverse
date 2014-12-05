@@ -23,9 +23,15 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseStepExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.impl.model.BaseResourceInfo;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
@@ -35,6 +41,8 @@ import org.pentaho.platform.api.metaverse.MetaverseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -58,10 +66,10 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
       for ( TextFileInputField field : fields ) {
         String fieldName = field.getName();
         IMetaverseComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
-            fieldName,
-            DictionaryConst.NODE_TYPE_FILE_FIELD,
-            descriptor.getNamespace(),
-            descriptor.getContext() );
+          fieldName,
+          DictionaryConst.NODE_TYPE_FILE_FIELD,
+          descriptor.getNamespace(),
+          descriptor.getContext() );
         IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
         metaverseBuilder.addNode( fieldNode );
 
@@ -79,7 +87,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
     if ( textFileInputMeta.isAcceptingFilenames() ) {
       String acceptingFieldName = textFileInputMeta.getAcceptingField();
       IMetaverseComponentDescriptor transFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor,
-          acceptingFieldName );
+        acceptingFieldName );
       IMetaverseNode acceptingFieldNode = createNodeFromDescriptor( transFieldDescriptor );
 
       // add a link from the fileField to the text file input step node
@@ -113,5 +121,42 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
         add( TextFileInputMeta.class );
       }
     };
+  }
+
+  @ExternalResourceConsumer(
+    id = "TextFileInputExternalResourceConsumer",
+    name = "TextFileInputExternalResourceConsumer"
+  )
+  public static class TextFileInputExternalResourceConsumer
+    extends BaseStepExternalResourceConsumer<TextFileInputMeta> {
+
+    @Override
+    public boolean isDataDriven( StepMeta meta ) {
+      // We can safely assume that the StepMetaInterface object we get back is a TextFileInputMeta
+      TextFileInputMeta tfim = (TextFileInputMeta) meta.getStepMetaInterface();
+      return tfim.isAcceptingFilenames();
+    }
+
+    @Override
+    public Collection<IExternalResourceInfo> getResourcesFromMeta( StepMeta meta ) {
+      TextFileInputMeta tfim = (TextFileInputMeta) meta.getStepMetaInterface();
+      // TODO call some method (refactored out of analyze()) that will collect the external resources
+      IExternalResourceInfo resource = new BaseResourceInfo();
+      resource.setName( "Step init resource" );
+      return Arrays.asList( resource );
+    }
+
+    @Override
+    public Collection<IExternalResourceInfo> getResourcesFromRow(
+      StepMeta meta, RowMetaInterface rowMeta, Object[] row ) {
+      TextFileInputMeta tfim = (TextFileInputMeta) meta.getStepMetaInterface();
+      // TODO
+      return super.getResourcesFromMeta( meta );
+    }
+
+    @Override
+    public Class<TextFileInputMeta> getStepMetaClass() {
+      return TextFileInputMeta.class;
+    }
   }
 }
