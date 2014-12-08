@@ -154,8 +154,8 @@ public class ExternalResourceConsumerPluginType extends BasePluginType implement
         }
       }
     } catch ( Exception e ) {
-      LogChannel.GENERAL.logError( "Unexpected error searching for jar files in lib/ folder next to '"
-        + jarFileUrl + "'", e );
+      LogChannel.GENERAL.logError(
+        "Unexpected error searching for jar files in lib/ folder next to '" + jarFileUrl + "'", e );
     }
 
     urls.add( jarFileUrl );

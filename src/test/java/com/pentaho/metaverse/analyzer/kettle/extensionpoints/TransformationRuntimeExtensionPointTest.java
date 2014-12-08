@@ -3,6 +3,7 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import edu.emory.mathcs.backport.java.util.Arrays;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -69,7 +70,7 @@ public class TransformationRuntimeExtensionPointTest {
   public void setUp() throws Exception {
     transExtensionPoint = new TransformationRuntimeExtensionPoint();
 
-    transMeta = new TransMeta();
+    transMeta = spy( new TransMeta() );
     transMeta.setName( TEST_TRANS_NAME );
     transMeta.setDescription( TEST_TRANS_DESCRIPTION );
     transMeta.setFilename( TEST_TRANS_PATH );
@@ -78,8 +79,10 @@ public class TransformationRuntimeExtensionPointTest {
     trans.setExecutingServer( TEST_SERVER );
     trans.setExecutingUser( TEST_USER );
     trans.setVariable( TEST_VAR_NAME, TEST_VAR_VALUE );
+    when( transMeta.getUsedVariables() ).thenReturn( Collections.singletonList( TEST_VAR_NAME ) );
     trans.addParameterDefinition( TEST_PARAM_NAME, TEST_PARAM_DEFAULT_VALUE, TEST_PARAM_DESCRIPTION );
     trans.setParameterValue( TEST_PARAM_NAME, TEST_PARAM_VALUE );
+    trans.setArguments( new String[]{ "arg0", "arg1" } );
 
   }
 
@@ -178,10 +181,7 @@ public class TransformationRuntimeExtensionPointTest {
     StepInterface mockStep = mock( StepInterface.class );
     Trans mockTrans = mock( Trans.class );
     when( mockStep.getTrans() ).thenReturn( mockTrans );
-    IExecutionProfile executionProfile = mock( IExecutionProfile.class );
-    IExecutionData executionData = mock( IExecutionData.class );
-    when( executionProfile.getExecutionData() ).thenReturn( executionData );
-    TransformationRuntimeExtensionPoint.profileMap.put( mockTrans, executionProfile );
+    createExecutionProfile( mockTrans );
     Collection<IExternalResourceInfo> externalResources = new ArrayList<IExternalResourceInfo>();
     stepExtensionPoint.addExternalResources( externalResources, mockStep );
     IExternalResourceInfo externalResource = mock( IExternalResourceInfo.class );
@@ -192,13 +192,26 @@ public class TransformationRuntimeExtensionPointTest {
   @Test
   public void testStepExternalConsumerRowListener() throws Exception {
     IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );
-    StepMeta stepMeta = mock( StepMeta.class );
+    StepInterface mockStep = mock( StepInterface.class );
+    Trans mockTrans = mock( Trans.class );
+    when( mockStep.getTrans() ).thenReturn( mockTrans );
+    createExecutionProfile( mockTrans );
+
     TransformationRuntimeExtensionPoint.StepExternalConsumerRowListener listener =
-      new TransformationRuntimeExtensionPoint.StepExternalConsumerRowListener( consumer, stepMeta );
+      new TransformationRuntimeExtensionPoint.StepExternalConsumerRowListener( consumer, mockStep );
+
 
     RowMetaInterface rmi = mock( RowMetaInterface.class );
     Object[] row = new Object[0];
 
     listener.rowReadEvent( rmi, row );
+  }
+
+  private void createExecutionProfile( Trans trans ) {
+    IExecutionProfile executionProfile = mock( IExecutionProfile.class );
+
+    IExecutionData executionData = mock( IExecutionData.class );
+    when( executionProfile.getExecutionData() ).thenReturn( executionData );
+    TransformationRuntimeExtensionPoint.profileMap.put( trans, executionProfile );
   }
 }

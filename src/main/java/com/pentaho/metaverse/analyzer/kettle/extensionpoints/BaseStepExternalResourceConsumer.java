@@ -24,7 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.step.StepInterface;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -34,24 +34,25 @@ import java.util.Collections;
  * the various methods with business logic that can handle the external resources used by the given step.
  */
 public abstract class BaseStepExternalResourceConsumer<T extends BaseStepMeta>
-    implements IStepExternalResourceConsumer<T> {
+  implements IStepExternalResourceConsumer<T> {
 
   public BaseStepExternalResourceConsumer() {
   }
 
   @Override
-  public boolean isDataDriven( StepMeta meta ) {
+  public boolean isDataDriven( StepInterface meta ) {
     return false;
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( StepMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( StepInterface meta ) {
     return Collections.emptyList();
   }
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromRow(
-      StepMeta meta, RowMetaInterface rowMeta, Object[] row ) {
+    StepInterface meta, RowMetaInterface rowMeta, Object[] row ) {
     return Collections.emptyList();
   }
+
 }

@@ -3,6 +3,8 @@ package com.pentaho.metaverse.impl.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.pentaho.metaverse.api.model.IArtifactMetadata;
+import com.pentaho.metaverse.api.model.IUserMetadata;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -81,7 +85,7 @@ public class ExecutionDataTest {
   }
 
   @Test
-  public void testGetSetParameters() {
+  public void testGetSetAddParameters() {
     List<IParamInfo<String>> parameters = new ArrayList<IParamInfo<String>>();
     parameters.add( new ParamInfo( "Larry", "fine" ) );
     parameters.add( new ParamInfo( "moe", "howard" ) );
@@ -89,6 +93,7 @@ public class ExecutionDataTest {
     assertEquals( executionData.getParameters().size(), 0 );
     executionData.setParameters( parameters );
     assertEquals( executionData.getParameters().size(), 3 );
+    executionData.addParameter( new ParamInfo( "Shemp", "Howard" ) );
   }
 
   @Test
@@ -123,5 +128,21 @@ public class ExecutionDataTest {
     assertEquals( executionData.getVariables().size(), 0 );
     executionData.addVariable( "Captain", "Kangaroo" );
     assertEquals( executionData.getVariables().size(), 1 );
+  }
+
+  @Test
+  public void testGetSetArtifactMetadata() {
+    assertNull( executionData.getArtifactMetadata() );
+    IArtifactMetadata artifactMetadata = mock( IArtifactMetadata.class );
+    executionData.setArtifactMetadata( artifactMetadata );
+    assertSame( artifactMetadata, executionData.getArtifactMetadata() );
+  }
+
+  @Test
+  public void testGetSetUserMetadata() {
+    assertNull( executionData.getUserMetadata() );
+    IUserMetadata userMetadata = mock( IUserMetadata.class );
+    executionData.setUserMetadata( userMetadata );
+    assertSame( userMetadata, executionData.getUserMetadata() );
   }
 }
