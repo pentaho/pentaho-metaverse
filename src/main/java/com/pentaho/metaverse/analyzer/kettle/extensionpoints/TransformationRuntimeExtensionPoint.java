@@ -260,11 +260,11 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
             if ( stepConsumers != null ) {
               for ( IStepExternalResourceConsumer stepConsumer : stepConsumers ) {
                 // We might know enough at this point, so call the consumer
-                Collection<IExternalResourceInfo> resources = stepConsumer.getResourcesFromMeta( step );
+                Collection<IExternalResourceInfo> resources = stepConsumer.getResourcesFromMeta( meta );
                 addExternalResources( resources, step );
 
                 // Add a RowListener if the step is data-driven
-                if ( stepConsumer.isDataDriven( step ) ) {
+                if ( stepConsumer.isDataDriven( meta ) ) {
                   stepCombi.step.addRowListener(
                     new StepExternalConsumerRowListener( stepConsumer, step ) );
                 }

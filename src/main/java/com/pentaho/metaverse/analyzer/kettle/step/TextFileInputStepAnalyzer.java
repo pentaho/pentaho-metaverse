@@ -27,11 +27,15 @@ import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseStepExternalRes
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.impl.model.BaseResourceInfo;
+import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.vfs.KettleVFS;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepInterface;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
@@ -43,7 +47,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 /**
@@ -131,44 +137,64 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
     extends BaseStepExternalResourceConsumer<TextFileInputMeta> {
 
     @Override
-    public boolean isDataDriven( StepInterface step ) {
+    public boolean isDataDriven( TextFileInputMeta meta ) {
       // We can safely assume that the StepMetaInterface object we get back is a TextFileInputMeta
-      TextFileInputMeta tfim = (TextFileInputMeta) step.getStepMeta().getStepMetaInterface();
-      return tfim.isAcceptingFilenames();
+      return meta.isAcceptingFilenames();
     }
 
     @Override
-    public Collection<IExternalResourceInfo> getResourcesFromMeta( StepInterface step ) {
-      TextFileInputMeta tfim = (TextFileInputMeta) step.getStepMeta().getStepMetaInterface();
+    public Collection<IExternalResourceInfo> getResourcesFromMeta( TextFileInputMeta meta ) {
+      Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
       // We only need to collect these resources if we're not data-driven and there are no used variables in the 
       // metadata relating to external files.
-      if ( !isDataDriven( step ) /* TODO */ ) {
+      if ( !isDataDriven( meta ) /* TODO */ ) {
+        StepMeta parentStepMeta = meta.getParentStepMeta();
+        if ( parentStepMeta != null ) {
+          TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
+          if ( parentTransMeta != null ) {
+            String[] paths = meta.getFilePaths( parentTransMeta );
+            if ( paths != null ) {
+              resources = new ArrayList<IExternalResourceInfo>( paths.length );
 
-        String[] paths = tfim.getFilePaths( step.getTrans() );
-        if ( paths != null ) {
-          Collection<IExternalResourceInfo> resources = new ArrayList<IExternalResourceInfo>( paths.length );
+              for ( String path : paths ) {
+                if ( !Const.isEmpty( path ) ) {
+                  try {
 
-          for ( String path : paths ) {
-            BaseResourceInfo file = new BaseResourceInfo();
-            file.setName( path );
-            file.setInput( true );
-            file.setType( DictionaryConst.NODE_TYPE_FILE );
-            resources.add( file );
+                    IExternalResourceInfo resource = getFileResource( KettleVFS.getFileObject( path ) );
+                    if ( resource != null ) {
+                      resources.add( resource );
+                    } else {
+                      throw new KettleFileException( "Error getting file resource!" );
+                    }
+                  } catch ( KettleFileException kfe ) {
+                    // TODO throw or ignore?
+                  }
+                }
+              }
+            }
           }
-          return resources;
         }
-
       }
-      return super.getResourcesFromMeta( step ); // TODO
+      return resources;
     }
 
     @Override
     public Collection<IExternalResourceInfo> getResourcesFromRow(
-      StepInterface step, RowMetaInterface rowMeta, Object[] row ) {
-      TextFileInputMeta tfim = (TextFileInputMeta) step.getStepMeta().getStepMetaInterface();
-      // TODO
-      return super.getResourcesFromMeta( step );
+      TextFileInputMeta meta, RowMetaInterface rowMeta, Object[] row ) {
+      Collection<IExternalResourceInfo> resources = new LinkedList<IExternalResourceInfo>();
+
+      try {
+        String filename = rowMeta.getString( row, meta.getAcceptingField(), null );
+        if ( !Const.isEmpty( filename ) ) {
+          FileObject fileObject = KettleVFS.getFileObject( filename );
+          resources.add( getFileResource( fileObject ) );
+        }
+      } catch ( KettleException kve ) {
+        // TODO throw exception or ignore?
+      }
+
+      return resources;
     }
 
     @Override
