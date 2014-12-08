@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
@@ -33,9 +34,11 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaString;
+import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepInterface;
@@ -49,6 +52,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -266,19 +270,40 @@ public class TextFileInputStepAnalyzerTest {
   }
 
   @Test
-  public void testTextFileInputExternalResourceConsumer() {
+  public void testTextFileInputExternalResourceConsumer() throws Exception {
     TextFileInputStepAnalyzer.TextFileInputExternalResourceConsumer consumer =
       new TextFileInputStepAnalyzer.TextFileInputExternalResourceConsumer();
 
     StepMeta meta = new StepMeta( "test", mockTextFileInputMeta );
-    StepInterface step = mock( StepInterface.class );
-    when( step.getStepMeta() ).thenReturn( meta );
+    StepMeta spyMeta = spy( meta );
+
+    when( mockTextFileInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( mockTextFileInputMeta.getFileName() ).thenReturn( null );
+    when( mockTextFileInputMeta.isAcceptingFilenames() ).thenReturn( false );
+    String[] filePaths = { "/path/to/file1", "/another/path/to/file2" };
+    when( mockTextFileInputMeta.getFilePaths( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
 
     assertFalse( consumer.isDataDriven( mockTextFileInputMeta ) );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( mockTextFileInputMeta );
+    assertFalse( resources.isEmpty() );
+    assertEquals( 2, resources.size() );
+
+
     when( mockTextFileInputMeta.isAcceptingFilenames() ).thenReturn( true );
     assertTrue( consumer.isDataDriven( mockTextFileInputMeta ) );
     assertTrue( consumer.getResourcesFromMeta( mockTextFileInputMeta ).isEmpty() );
-    consumer.getResourcesFromRow( mockTextFileInputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+      .thenReturn( "/path/to/row/file" );
+    resources = consumer.getResourcesFromRow( mockTextFileInputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    assertFalse( resources.isEmpty() );
+    assertEquals( 1, resources.size() );
+
+    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+      .thenThrow( KettleException.class );
+    resources = consumer.getResourcesFromRow( mockTextFileInputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    assertTrue( resources.isEmpty() );
+
     assertEquals( TextFileInputMeta.class, consumer.getStepMetaClass() );
   }
 }

@@ -193,6 +193,11 @@ public class TransformationRuntimeExtensionPointTest {
   public void testStepExternalConsumerRowListener() throws Exception {
     IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );
     StepInterface mockStep = mock( StepInterface.class );
+    StepMeta mockStepMeta = mock( StepMeta.class );
+    BaseStepMeta bsm = mock( BaseStepMeta.class, withSettings().extraInterfaces( StepMetaInterface.class ) );
+    StepMetaInterface stepMetaInterface = (StepMetaInterface) bsm;
+    when( mockStep.getStepMeta() ).thenReturn( mockStepMeta );
+    when( mockStepMeta.getStepMetaInterface() ).thenReturn( stepMetaInterface );
     Trans mockTrans = mock( Trans.class );
     when( mockStep.getTrans() ).thenReturn( mockTrans );
     createExecutionProfile( mockTrans );
