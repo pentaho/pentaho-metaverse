@@ -26,31 +26,69 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
+import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
+import com.pentaho.metaverse.analyzer.kettle.step.TextFileInputStepAnalyzer;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonDeserializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonSerializer;
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.di.core.KettleEnvironment;
+import org.pentaho.di.core.plugins.PluginInterface;
+import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * User: RFellows Date: 10/31/14
  */
 public class JsonLineageIT {
 
-  @Before
-  public void setUp() throws Exception {
+  @BeforeClass
+  public static void setUp() throws Exception {
     KettleEnvironment.init();
+
+    PluginRegistry registry = PluginRegistry.getInstance();
+    ExternalResourceConsumerMap.ExternalResourceConsumerMapBuilder builder = new
+      ExternalResourceConsumerMap.ExternalResourceConsumerMapBuilder();
+
+    ExternalResourceConsumerPluginRegistrar registrar = new ExternalResourceConsumerPluginRegistrar();
+    registrar.init( registry );
+    PluginRegistry.init();
+
+    TextFileInputStepAnalyzer.TextFileInputExternalResourceConsumer tfiConsumer = new
+      TextFileInputStepAnalyzer.TextFileInputExternalResourceConsumer();
+
+    // Create a fake plugin to exercise the map building logic
+    PluginInterface mockPlugin = mock( PluginInterface.class );
+    when( mockPlugin.getIds() ).thenReturn( new String[] { "testId" } );
+    Map<Class<?>, String> classMap = new HashMap<Class<?>, String>();
+    classMap.put( IExternalResourceConsumer.class, tfiConsumer.getClass().getName() );
+
+    doReturn( IExternalResourceConsumer.class ).when( mockPlugin ).getMainType();
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockPlugin );
+
+    // Then add a class to the map to get through plugin registration
+    when( mockPlugin.getClassMap() ).thenReturn( classMap );
+
+    builder.onEnvironmentInit();
+
   }
 
   @Test

@@ -26,6 +26,9 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.impl.model.kettle.FieldInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
@@ -41,6 +44,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +59,9 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
   public static final String JSON_PROPERTY_FIELDS = "fields";
   public static final String JSON_PROPERTY_INPUT_FIELDS = "inputFields";
   public static final String JSON_PROPERTY_OUTPUT_FIELDS = "outputFields";
+  public static final String JSON_PROPERTY_EXTERNAL_RESOURCES = "externalResources";
+
+  private ExternalResourceConsumerMap map = ExternalResourceConsumerMap.getInstance();
 
   protected AbstractStepMetaJsonSerializer( Class<T> aClass ) {
     super( aClass );
@@ -95,6 +102,8 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
       json.writeArrayFieldStart( JSON_PROPERTY_TRANSFORMS );
       writeFieldTransforms( meta, json, serializerProvider );
       json.writeEndArray();
+
+      writeExternalResources( meta, json, serializerProvider );
 
     }
 
@@ -144,9 +153,27 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
    * @throws IOException
    * @throws JsonGenerationException
    */
-  protected abstract void writeCustomProperties( T meta, JsonGenerator json,
-      SerializerProvider serializerProvider ) throws IOException, JsonGenerationException;
+  protected abstract void writeCustomProperties( T meta, JsonGenerator json, SerializerProvider serializerProvider )
+    throws IOException, JsonGenerationException;
 
+
+  protected void writeExternalResources( T meta, JsonGenerator json, SerializerProvider serializerProvider )
+    throws IOException, JsonGenerationException {
+    List<IStepExternalResourceConsumer> resourceConsumers =
+        getExternalResourceConsumerMap().getStepExternalResourceConsumers( meta.getClass() );
+
+    json.writeArrayFieldStart( JSON_PROPERTY_EXTERNAL_RESOURCES );
+    if ( resourceConsumers != null ) {
+      for ( IStepExternalResourceConsumer resourceConsumer : resourceConsumers ) {
+
+        Collection<IExternalResourceInfo> infos = resourceConsumer.getResourcesFromMeta( meta );
+        for ( IExternalResourceInfo info : infos ) {
+          json.writeObject( info );
+        }
+      }
+    }
+    json.writeEndArray();
+  }
 
   protected void writeInputFields( StepMeta parentStepMeta, JsonGenerator json ) throws IOException {
     TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
@@ -191,5 +218,13 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
       stepType = parentStepMeta.getStepID();
     }
     return stepType;
+  }
+
+  protected ExternalResourceConsumerMap getExternalResourceConsumerMap() {
+    return map;
+  }
+
+  protected void setExternalResourceConsumerMap( ExternalResourceConsumerMap map ) {
+    this.map = map;
   }
 }
