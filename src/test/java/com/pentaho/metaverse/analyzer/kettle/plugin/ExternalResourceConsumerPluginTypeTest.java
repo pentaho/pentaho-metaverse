@@ -102,6 +102,13 @@ public class ExternalResourceConsumerPluginTypeTest {
     URLClassLoader ucl = pluginType.createUrlClassLoader(
       new File( "." ).toURI().toURL(), this.getClass().getClassLoader() );
     assertTrue( ucl instanceof KettleSelectiveParentFirstClassLoader );
+    // Create temp directory
+    File tmpDir = new File( "tmp/lib" );
+    tmpDir.mkdirs();
+    tmpDir.deleteOnExit();
+    ucl = pluginType.createUrlClassLoader(
+      tmpDir.toURI().toURL(), this.getClass().getClassLoader() );
+    assertTrue( ucl instanceof KettleSelectiveParentFirstClassLoader );
   }
 
   @Test

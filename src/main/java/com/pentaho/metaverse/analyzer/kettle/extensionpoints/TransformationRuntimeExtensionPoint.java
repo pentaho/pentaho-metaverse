@@ -318,7 +318,7 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     public void rowReadEvent( RowMetaInterface rowMeta, Object[] row ) throws KettleStepException {
 
       Collection<IExternalResourceInfo> resources =
-        stepExternalResourceConsumer.getResourcesFromRow( step, rowMeta, row );
+        stepExternalResourceConsumer.getResourcesFromRow( step.getStepMeta().getStepMetaInterface(), rowMeta, row );
       if ( resources != null ) {
         // Add the resources to the execution profile
         IExecutionProfile executionProfile = profileMap.get( step.getTrans() );
