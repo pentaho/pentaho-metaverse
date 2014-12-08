@@ -22,10 +22,15 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepInterface;
 
+/**
+ * IStepExternalResourceConsumer is a helper interface used by ExternalResourceConsumer plugins that handle a single
+ * PDI step type (see the parameterized type in declaration)
+ *
+ * @param <T> The type of step that will consume external resources
+ */
 public interface IStepExternalResourceConsumer<T extends BaseStepMeta>
-  extends IExternalResourceConsumer<StepInterface> {
+  extends IExternalResourceConsumer<T> {
 
   Class<T> getStepMetaClass();
 }

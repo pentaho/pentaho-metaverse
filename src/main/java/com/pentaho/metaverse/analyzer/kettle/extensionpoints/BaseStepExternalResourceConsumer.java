@@ -21,10 +21,12 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.impl.model.BaseResourceInfo;
+import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepInterface;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,23 +38,31 @@ import java.util.Collections;
 public abstract class BaseStepExternalResourceConsumer<T extends BaseStepMeta>
   implements IStepExternalResourceConsumer<T> {
 
-  public BaseStepExternalResourceConsumer() {
-  }
-
   @Override
-  public boolean isDataDriven( StepInterface meta ) {
+  public boolean isDataDriven( T meta ) {
     return false;
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( StepInterface meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( T meta ) {
     return Collections.emptyList();
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromRow(
-    StepInterface meta, RowMetaInterface rowMeta, Object[] row ) {
+  public Collection<IExternalResourceInfo> getResourcesFromRow( T meta, RowMetaInterface rowMeta, Object[] row ) {
     return Collections.emptyList();
   }
+
+  protected IExternalResourceInfo getFileResource( FileObject fileObject ) {
+    BaseResourceInfo resource = null;
+    if ( fileObject != null ) {
+      resource = new BaseResourceInfo();
+      resource.setName( fileObject.getName().getPath() );
+      resource.setInput( true );
+      resource.setType( DictionaryConst.NODE_TYPE_FILE );
+    }
+    return resource;
+  }
+
 
 }

@@ -274,12 +274,11 @@ public class TextFileInputStepAnalyzerTest {
     StepInterface step = mock( StepInterface.class );
     when( step.getStepMeta() ).thenReturn( meta );
 
-    assertFalse( consumer.isDataDriven( step ) );
+    assertFalse( consumer.isDataDriven( mockTextFileInputMeta ) );
     when( mockTextFileInputMeta.isAcceptingFilenames() ).thenReturn( true );
-    assertTrue( consumer.isDataDriven( step ) );
-    assertTrue( consumer.getResourcesFromMeta( step ).isEmpty() );
-    consumer.getResourcesFromRow( step, mockRowMetaInterface, new String[]{ "id", "name" } );
+    assertTrue( consumer.isDataDriven( mockTextFileInputMeta ) );
+    assertTrue( consumer.getResourcesFromMeta( mockTextFileInputMeta ).isEmpty() );
+    consumer.getResourcesFromRow( mockTextFileInputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertEquals( TextFileInputMeta.class, consumer.getStepMetaClass() );
   }
-
 }
