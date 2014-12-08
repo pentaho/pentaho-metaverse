@@ -27,14 +27,15 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import java.util.Collection;
 
 /**
- * Created by mburgess on 12/2/14.
+ * The IExternalResourceConsumer interface allows consumers of external resources to report the usages to those that
+ * are interested.
  */
 public interface IExternalResourceConsumer<T> extends Cloneable {
 
-  boolean isDataDriven( T meta );
+  boolean isDataDriven( T consumer );
 
-  Collection<IExternalResourceInfo> getResourcesFromMeta( T meta );
+  Collection<IExternalResourceInfo> getResourcesFromMeta( T consumer );
 
-  Collection<IExternalResourceInfo> getResourcesFromRow( T meta, RowMetaInterface rowMeta, Object[] row );
+  Collection<IExternalResourceInfo> getResourcesFromRow( T consumer, RowMetaInterface rowMeta, Object[] row );
 
 }

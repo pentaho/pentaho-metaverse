@@ -22,9 +22,10 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.step.StepInterface;
 
-public interface IStepExternalResourceConsumer<T extends BaseStepMeta> extends IExternalResourceConsumer<StepMeta> {
+public interface IStepExternalResourceConsumer<T extends BaseStepMeta>
+  extends IExternalResourceConsumer<StepInterface> {
 
   Class<T> getStepMetaClass();
 }

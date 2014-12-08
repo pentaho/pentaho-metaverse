@@ -47,7 +47,6 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.RowAdapter;
 import org.pentaho.di.trans.step.StepInterface;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.version.BuildVersion;
@@ -249,7 +248,6 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
       StepMetaDataCombi stepCombi = (StepMetaDataCombi) object;
       if ( stepCombi != null ) {
         StepMetaInterface meta = stepCombi.meta;
-        StepMeta stepMeta = stepCombi.stepMeta;
         StepInterface step = stepCombi.step;
 
         if ( meta != null ) {
@@ -262,13 +260,13 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
             if ( stepConsumers != null ) {
               for ( IStepExternalResourceConsumer stepConsumer : stepConsumers ) {
                 // We might know enough at this point, so call the consumer
-                Collection<IExternalResourceInfo> resources = stepConsumer.getResourcesFromMeta( stepMeta );
+                Collection<IExternalResourceInfo> resources = stepConsumer.getResourcesFromMeta( step );
                 addExternalResources( resources, step );
 
                 // Add a RowListener if the step is data-driven
-                if ( stepConsumer.isDataDriven( stepMeta ) ) {
+                if ( stepConsumer.isDataDriven( step ) ) {
                   stepCombi.step.addRowListener(
-                    new StepExternalConsumerRowListener( stepConsumer, stepMeta ) );
+                    new StepExternalConsumerRowListener( stepConsumer, step ) );
                 }
               }
             }
@@ -292,7 +290,6 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
           externalResources.addAll( resources );
           resourceMap.put( stepName, externalResources );
         }
-        // TODO store by step?
       }
     }
   }
@@ -301,12 +298,12 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
   public static class StepExternalConsumerRowListener extends RowAdapter {
 
     private IStepExternalResourceConsumer stepExternalResourceConsumer;
-    private StepMeta stepMeta;
+    private StepInterface step;
 
     public StepExternalConsumerRowListener(
-      IStepExternalResourceConsumer stepExternalResourceConsumer, StepMeta stepMeta ) {
+      IStepExternalResourceConsumer stepExternalResourceConsumer, StepInterface step ) {
       this.stepExternalResourceConsumer = stepExternalResourceConsumer;
-      this.stepMeta = stepMeta;
+      this.step = step;
     }
 
     /**
@@ -320,8 +317,23 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     @Override
     public void rowReadEvent( RowMetaInterface rowMeta, Object[] row ) throws KettleStepException {
 
-      stepExternalResourceConsumer.getResourcesFromRow( stepMeta, rowMeta, row );
-      //TODO
+      Collection<IExternalResourceInfo> resources =
+        stepExternalResourceConsumer.getResourcesFromRow( step, rowMeta, row );
+      if ( resources != null ) {
+        // Add the resources to the execution profile
+        IExecutionProfile executionProfile = profileMap.get( step.getTrans() );
+        if ( executionProfile != null ) {
+          String stepName = step.getStepname();
+          Map<String, List<IExternalResourceInfo>> resourceMap =
+            executionProfile.getExecutionData().getExternalResources();
+          List<IExternalResourceInfo> externalResources = resourceMap.get( stepName );
+          if ( externalResources == null ) {
+            externalResources = new LinkedList<IExternalResourceInfo>();
+          }
+          externalResources.addAll( resources );
+          resourceMap.put( stepName, externalResources );
+        }
+      }
     }
   }
 }

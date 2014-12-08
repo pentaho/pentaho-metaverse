@@ -38,6 +38,7 @@ import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
@@ -270,13 +271,14 @@ public class TextFileInputStepAnalyzerTest {
       new TextFileInputStepAnalyzer.TextFileInputExternalResourceConsumer();
 
     StepMeta meta = new StepMeta( "test", mockTextFileInputMeta );
-    StepMeta spyMeta = spy( meta );
+    StepInterface step = mock( StepInterface.class );
+    when( step.getStepMeta() ).thenReturn( meta );
 
-    assertFalse( consumer.isDataDriven( spyMeta ) );
+    assertFalse( consumer.isDataDriven( step ) );
     when( mockTextFileInputMeta.isAcceptingFilenames() ).thenReturn( true );
-    assertTrue( consumer.isDataDriven( spyMeta ) );
-    assertTrue( consumer.getResourcesFromMeta( spyMeta ).isEmpty() );
-    consumer.getResourcesFromRow( spyMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    assertTrue( consumer.isDataDriven( step ) );
+    assertTrue( consumer.getResourcesFromMeta( step ).isEmpty() );
+    consumer.getResourcesFromRow( step, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertEquals( TextFileInputMeta.class, consumer.getStepMetaClass() );
   }
 
