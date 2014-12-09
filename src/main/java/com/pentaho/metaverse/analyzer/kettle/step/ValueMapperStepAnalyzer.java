@@ -50,24 +50,28 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
     final String fieldToUse = valueMapperMeta.getFieldToUse();
     final boolean overwritesSourceField = Const.isEmpty( valueMapperMeta.getTargetField() );
     final String targetField = valueMapperMeta.getTargetField() == null ? fieldToUse : valueMapperMeta.getTargetField();
-    final String[] sourceValues = valueMapperMeta.getSourceValue();
-    final String[] targetValues = valueMapperMeta.getTargetValue();
 
     final IMetaverseNode sourceFieldNode = createNodeFromDescriptor(
-      getPrevStepFieldOriginDescriptor( descriptor, fieldToUse ) );
+        getPrevStepFieldOriginDescriptor( descriptor, fieldToUse ) );
 
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, sourceFieldNode );
 
-    final ComponentDerivationRecord changeRecord = buildChangeRecord( targetField, sourceValues, targetValues );
+    final Set<ComponentDerivationRecord> changeRecords = getChangeRecords( valueMapperMeta );
+
+    ComponentDerivationRecord changeRecord = null;
+    for ( ComponentDerivationRecord cr : changeRecords ) {
+      changeRecord = cr;
+      break;
+    }
 
     // if no target field specified
     if ( overwritesSourceField ) {
-      // add some data opera ion property to the source node
+      // add some data operation property to the source node
       sourceFieldNode.setProperty( DictionaryConst.PROPERTY_OPERATIONS, changeRecord.toString() );
       metaverseBuilder.updateNode( sourceFieldNode );
     } else {
       final IMetaverseComponentDescriptor desc = new MetaverseComponentDescriptor( targetField,
-        DictionaryConst.NODE_TYPE_TRANS_FIELD, descriptor.getNamespace() );
+          DictionaryConst.NODE_TYPE_TRANS_FIELD, descriptor.getNamespace() );
 
       // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
       final ValueMetaInterface inputFieldValueMeta = prevFields.searchValueMeta( fieldToUse );
@@ -83,13 +87,29 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
   }
 
   protected ComponentDerivationRecord buildChangeRecord(
-    final String fieldName, final String[] sourceValues, final String[] targetValues ) {
+      final String fieldName, final String[] sourceValues, final String[] targetValues ) {
 
     final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( fieldName );
     for ( int i = 0; i < sourceValues.length; i++ ) {
       changeRecord.addOperand( DictionaryConst.PROPERTY_TRANSFORMS, sourceValues[i] + " -> " + targetValues[i] );
     }
     return changeRecord;
+  }
+
+  @Override
+  public Set<ComponentDerivationRecord> getChangeRecords( ValueMapperMeta valueMapperMeta )
+    throws MetaverseAnalyzerException {
+
+    final String fieldToUse = valueMapperMeta.getFieldToUse();
+    final String targetField = valueMapperMeta.getTargetField() == null ? fieldToUse : valueMapperMeta.getTargetField();
+    final String[] sourceValues = valueMapperMeta.getSourceValue();
+    final String[] targetValues = valueMapperMeta.getTargetValue();
+
+    Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>( 1 );
+    final ComponentDerivationRecord changeRecord = buildChangeRecord( targetField, sourceValues, targetValues );
+
+    changeRecords.add( changeRecord );
+    return changeRecords;
   }
 
   @Override

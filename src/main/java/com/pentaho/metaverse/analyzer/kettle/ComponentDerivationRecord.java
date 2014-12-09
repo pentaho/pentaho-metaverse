@@ -1,5 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.pentaho.metaverse.api.model.IInfo;
 import flexjson.JSONSerializer;
 
 import java.util.HashMap;
@@ -12,26 +14,44 @@ import java.util.Map;
  * named operation(s) performed to derive the component. For example, a component derivation record for a
  * transformation stream field may include a named operation such as "modified" or "calculated".
  */
+@JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = IInfo.JSON_PROPERTY_CLASS )
 public class ComponentDerivationRecord {
 
-  protected String entityName;
+  protected String changedEntityName;
+  protected String originalEntityName;
+
   protected Map<String, List<String>> operations;
 
   public ComponentDerivationRecord() {
     operations = new HashMap<String, List<String>>();
   }
 
-  public ComponentDerivationRecord( String entityName ) {
+  public ComponentDerivationRecord( String originalEntityName, String changedEntityName ) {
     this();
-    this.entityName = entityName;
+    this.changedEntityName = changedEntityName;
+    this.originalEntityName = originalEntityName;
   }
 
-  public String getEntityName() {
-    return entityName;
+  public ComponentDerivationRecord( String changedEntityName ) {
+    this();
+    this.changedEntityName = changedEntityName;
+    this.originalEntityName = changedEntityName;
   }
 
-  public void setEntityName( String entityName ) {
-    this.entityName = entityName;
+  public String getChangedEntityName() {
+    return changedEntityName;
+  }
+
+  public void setChangedEntityName( String changedEntityName ) {
+    this.changedEntityName = changedEntityName;
+  }
+
+  public String getOriginalEntityName() {
+    return originalEntityName;
+  }
+
+  public void setOriginalEntityName( String originalEntityName ) {
+    this.originalEntityName = originalEntityName;
   }
 
   /**

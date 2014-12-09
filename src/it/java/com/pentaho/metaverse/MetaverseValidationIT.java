@@ -297,9 +297,11 @@ public class MetaverseValidationIT {
     // verify the nodes created by the step
     for ( StreamFieldNode node : selectValues.getStreamFieldNodesCreates() ) {
       // check for operations
-      Map<String, List<String>> ops = convertOperationsStringToMap( node.getOperations() );
-      assertNotNull( ops );
-      assertTrue( ops.size() > 0 );
+      if ( node.getOperations() != null ) {
+        Map<String, List<String>> ops = convertOperationsStringToMap( node.getOperations() );
+        assertNotNull( ops );
+        assertTrue( ops.size() > 0 );
+      }
 
       // check the created node is derived from something
       Iterable<StreamFieldNode> deriveNodes = node.getFieldNodesThatDeriveMe();

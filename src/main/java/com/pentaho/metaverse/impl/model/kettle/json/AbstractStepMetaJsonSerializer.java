@@ -26,8 +26,13 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepModifiesFields;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.impl.model.kettle.FieldInfo;
@@ -42,11 +47,15 @@ import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: RFellows Date: 11/17/14
@@ -73,6 +82,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
   }
 
   private LineageRepository lineageRepository;
+  private IStepAnalyzerProvider stepAnalyzerProvider;
 
   public LineageRepository getLineageRepository() {
     return lineageRepository;
@@ -80,6 +90,14 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
 
   public void setLineageRepository( LineageRepository repo ) {
     this.lineageRepository = repo;
+  }
+
+  protected IStepAnalyzerProvider getStepAnalyzerProvider() {
+    return stepAnalyzerProvider;
+  }
+
+  protected void setStepAnalyzerProvider( IStepAnalyzerProvider stepAnalyzerProvider ) {
+    this.stepAnalyzerProvider = stepAnalyzerProvider;
   }
 
   @Override public void serialize( T meta, JsonGenerator json,
@@ -142,8 +160,22 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
    * @throws IOException
    * @throws JsonGenerationException
    */
-  protected abstract void writeFieldTransforms( T meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException;
+  protected void writeFieldTransforms( T meta, JsonGenerator json, SerializerProvider serializerProvider )
+    throws IOException, JsonGenerationException {
+    IStepModifiesFields mapper = getStepModifiesFieldsHandler( meta );
+    try {
+      Set<ComponentDerivationRecord> changes = mapper.getChangeRecords( meta );
+      if ( changes != null ) {
+        for ( ComponentDerivationRecord change : changes ) {
+          if ( change.hasDelta() ) {
+            json.writeObject( change );
+          }
+        }
+      }
+    } catch ( MetaverseAnalyzerException e ) {
+      e.printStackTrace();
+    }
+  }
 
   /**
    * Free-for-all. put anything specific to your StepMeta here.
@@ -218,6 +250,30 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
       stepType = parentStepMeta.getStepID();
     }
     return stepType;
+  }
+
+
+
+  protected IStepModifiesFields getStepModifiesFieldsHandler( T meta ) {
+    IStepAnalyzerProvider provider = getStepAnalyzerProvider();
+    if ( provider == null ) {
+      // try to get it from PentahoSystem
+      provider = PentahoSystem.get( IStepAnalyzerProvider.class );
+    }
+
+    if ( provider != null ) {
+      Set<Class<?>> types = new HashSet<Class<?>>();
+      types.add( meta.getClass() );
+      Set<IStepAnalyzer> analyzers = provider.getAnalyzers( types );
+      if ( analyzers != null ) {
+        for ( IStepAnalyzer analyzer : analyzers ) {
+          if ( analyzer instanceof IStepModifiesFields ) {
+            return (IStepModifiesFields) analyzer;
+          }
+        }
+      }
+    }
+    return new GenericStepMetaAnalyzer();
   }
 
   protected ExternalResourceConsumerMap getExternalResourceConsumerMap() {

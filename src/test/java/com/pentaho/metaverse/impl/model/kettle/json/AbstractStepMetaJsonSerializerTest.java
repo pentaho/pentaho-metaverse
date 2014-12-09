@@ -24,8 +24,14 @@ package com.pentaho.metaverse.impl.model.kettle.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepModifiesFields;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.api.model.kettle.IFieldInfo;
@@ -43,12 +49,15 @@ import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.dummytrans.DummyTransMeta;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -212,5 +221,53 @@ public class AbstractStepMetaJsonSerializerTest {
     verify( consumer ).getResourcesFromMeta( anyObject() );
     verify( json, times( externalResources.size() ) ).writeObject( any( IExternalResourceInfo.class ) );
     verify( json ).writeEndArray();
+  }
+
+  @Test
+  public void testGetStepFieldMapper_noProviderAvailable() throws Exception {
+    IStepAnalyzerProvider provider = mock( IStepAnalyzerProvider.class );
+    when( provider.getAnalyzers( any( Set.class ) ) ).thenReturn( null );
+
+    serializer.setStepAnalyzerProvider( provider );
+    IStepModifiesFields handler = serializer.getStepModifiesFieldsHandler( spyMeta );
+    assertTrue( handler instanceof GenericStepMetaAnalyzer );
+  }
+
+  @Test
+  public void testGetStepFieldMapper() throws Exception {
+    IStepAnalyzerProvider provider = mock( IStepAnalyzerProvider.class );
+    IStepAnalyzer<DummyTransMeta> analyzer = mock( IStepAnalyzer.class, withSettings().extraInterfaces( IStepModifiesFields.class ) );
+    Set<IStepAnalyzer> analyzers = new HashSet<IStepAnalyzer>( 1 );
+    analyzers.add( analyzer );
+    when( provider.getAnalyzers( any( Set.class ) ) ).thenReturn( analyzers );
+
+    serializer.setStepAnalyzerProvider( provider );
+    IStepModifiesFields handler = serializer.getStepModifiesFieldsHandler( spyMeta );
+    assertFalse( handler instanceof GenericStepMetaAnalyzer );
+  }
+
+  @Test
+  public void testWriteFieldTransforms() throws Exception {
+    Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
+
+    ComponentDerivationRecord change1 = mock( ComponentDerivationRecord.class );
+    ComponentDerivationRecord change2 = mock( ComponentDerivationRecord.class );
+
+    when( change1.hasDelta() ).thenReturn( true );
+    when( change2.hasDelta() ).thenReturn( false );
+
+    changeRecords.add( change1 );
+    changeRecords.add( change2 );
+
+    IStepModifiesFields mapper = mock( IStepModifiesFields.class );
+    AbstractStepMetaJsonSerializer spy = spy( serializer );
+    when( spy.getStepModifiesFieldsHandler( spyMeta ) ).thenReturn( mapper );
+    when( mapper.getChangeRecords( spyMeta ) ).thenReturn( changeRecords );
+
+    spy.writeFieldTransforms( spyMeta, json, provider );
+
+    verify( json ).writeObject( change1 );
+    verify( json, never() ).writeObject( change2 );
+
   }
 }

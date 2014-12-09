@@ -38,8 +38,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * The SelectValuesStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the
- * fields operated on by Select Values steps.
+ * The SelectValuesStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the fields
+ * operated on by Select Values steps.
  */
 public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta> {
 
@@ -62,6 +62,40 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
 
     IMetaverseNode fieldNode = null;
     String inputFieldName = null;
+
+    Set<ComponentDerivationRecord> changes = getChangeRecords( selectValuesMeta );
+    for ( ComponentDerivationRecord change : changes ) {
+      inputFieldName = change.getOriginalEntityName();
+      fieldNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, inputFieldName ) );
+      // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
+      ValueMetaInterface inputFieldValueMeta = prevFields.searchValueMeta( inputFieldName );
+      if ( inputFieldValueMeta == null ) {
+        throw new MetaverseAnalyzerException( "Cannot determine type of field: " + inputFieldName );
+      }
+      IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, change );
+      if ( newFieldNode != null ) {
+        newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta.getTypeDesc() );
+        metaverseBuilder.addNode( newFieldNode );
+        metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
+      }
+      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
+    }
+
+    return rootNode;
+  }
+
+  @Override
+  public Set<ComponentDerivationRecord> getChangeRecords( SelectValuesMeta selectValuesMeta )
+    throws MetaverseAnalyzerException {
+
+    validateState( null, selectValuesMeta );
+    if ( prevFields == null || stepFields == null ) {
+      loadInputAndOutputStreamFields();
+    }
+
+    Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
+
+    String inputFieldName = null;
     String outputFieldName = null;
     ComponentDerivationRecord changeRecord = null;
 
@@ -73,46 +107,29 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
       int[] fieldPrecision = selectValuesMeta.getSelectPrecision();
 
       for ( int i = 0; i < fieldNames.length; i++ ) {
-        inputFieldName = fieldNames[i];
-        outputFieldName = fieldRenames[i];
+        inputFieldName = fieldNames[ i ];
+        outputFieldName = fieldRenames[ i ];
 
-        // We can't use our own descriptor here, we need to get the descriptor for the origin step
-        fieldNode =
-            createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, inputFieldName ) );
-
-        changeRecord = new ComponentDerivationRecord( inputFieldName );
+        changeRecord = new ComponentDerivationRecord( inputFieldName,
+            outputFieldName == null ? inputFieldName : outputFieldName );
 
         // NOTE: We use equalsIgnoreCase instead of equals because that's how Select Values currently works
         if ( inputFieldName != null && outputFieldName != null && !inputFieldName
             .equalsIgnoreCase( outputFieldName ) ) {
-          changeRecord.setEntityName( outputFieldName );
           changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "name" );
         }
 
         // Check for changes in field length
-        if ( fieldLength != null && fieldLength[i] != NOT_CHANGED ) {
+        if ( fieldLength != null && fieldLength[ i ] != NOT_CHANGED ) {
           changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "length" );
         }
 
         // Check for changes in field precision
-        if ( fieldPrecision != null && fieldPrecision[i] != NOT_CHANGED ) {
+        if ( fieldPrecision != null && fieldPrecision[ i ] != NOT_CHANGED ) {
           changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "precision" );
         }
 
-        // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
-        ValueMetaInterface inputFieldValueMeta = prevFields.searchValueMeta( inputFieldName );
-        if ( inputFieldValueMeta == null ) {
-          throw new MetaverseAnalyzerException( "Cannot determine type of field: " + inputFieldName );
-        }
-
-        IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, changeRecord );
-        if ( newFieldNode != null ) {
-          newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta.getTypeDesc() );
-          metaverseBuilder.addNode( newFieldNode );
-          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
-        }
-        metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
-
+        changeRecords.add( changeRecord );
       }
     }
 
@@ -124,18 +141,14 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
       if ( metadataChanges != null ) {
         for ( SelectMetadataChange metadataChange : metadataChanges ) {
           inputFieldName = metadataChange.getName();
-          // We can't use our own descriptor here, we need to get the descriptor for the origin step
-          fieldNode =
-              createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, inputFieldName ) );
-
-          changeRecord = new ComponentDerivationRecord( inputFieldName );
-
           outputFieldName = metadataChange.getRename();
+
+          changeRecord = new ComponentDerivationRecord( inputFieldName,
+              outputFieldName == null ? inputFieldName : outputFieldName );
 
           // NOTE: We use equalsIgnoreCase instead of equals because that's how Select Values currently works
           if ( inputFieldName != null && outputFieldName != null && !inputFieldName
               .equalsIgnoreCase( outputFieldName ) ) {
-            changeRecord.setEntityName( outputFieldName );
             changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "name" );
           }
 
@@ -167,7 +180,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           // Check for changes in conversion mask
           if ( ( metadataChange.getConversionMask() != null )
               && ( inputFieldValueMeta.getConversionMask() == null
-              ||  !inputFieldValueMeta.getConversionMask().equals( metadataChange.getConversionMask() ) ) ) {
+              || !inputFieldValueMeta.getConversionMask().equals( metadataChange.getConversionMask() ) ) ) {
             changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "conversionmask" );
           }
           // Check for changes in date format leniency
@@ -177,13 +190,13 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           // Check for changes in date format locale
           if ( ( metadataChange.getDateFormatLocale() != null )
               && ( inputFieldValueMeta.getDateFormatLocale() == null
-              ||  !inputFieldValueMeta.getDateFormatLocale().equals( metadataChange.getDateFormatLocale() ) ) ) {
+              || !inputFieldValueMeta.getDateFormatLocale().equals( metadataChange.getDateFormatLocale() ) ) ) {
             changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "datelocale" );
           }
           // Check for changes in date format locale
           if ( ( metadataChange.getDateFormatTimeZone() != null )
               && ( inputFieldValueMeta.getDateFormatTimeZone() == null
-              ||  !inputFieldValueMeta.getDateFormatTimeZone().equals( metadataChange.getDateFormatTimeZone() ) ) ) {
+              || !inputFieldValueMeta.getDateFormatTimeZone().equals( metadataChange.getDateFormatTimeZone() ) ) ) {
             changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "datetimezone" );
           }
           // Check for changes in date format locale
@@ -193,7 +206,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           // Check for changes in encoding
           if ( ( metadataChange.getDateFormatTimeZone() != null )
               && ( inputFieldValueMeta.getStringEncoding() == null
-              ||  !inputFieldValueMeta.getStringEncoding().equals( metadataChange.getDateFormatTimeZone() ) ) ) {
+              || !inputFieldValueMeta.getStringEncoding().equals( metadataChange.getDateFormatTimeZone() ) ) ) {
             changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "encoding" );
           }
           // Check for changes in encoding
@@ -214,20 +227,11 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
               || !inputFieldValueMeta.getCurrencySymbol().equals( metadataChange.getCurrencySymbol() ) ) ) {
             changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "currencysymbol" );
           }
-
-          IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, changeRecord );
-          if ( newFieldNode != null ) {
-            newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta.getTypeDesc() );
-            metaverseBuilder.addNode( newFieldNode );
-            metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
-          }
-          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
-
+          changeRecords.add( changeRecord );
         }
       }
     }
-
-    return rootNode;
+    return changeRecords;
   }
 
   @Override
