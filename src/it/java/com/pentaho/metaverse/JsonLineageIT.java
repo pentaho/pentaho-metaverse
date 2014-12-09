@@ -77,7 +77,8 @@ public class JsonLineageIT {
 
     // Create a fake plugin to exercise the map building logic
     PluginInterface mockPlugin = mock( PluginInterface.class );
-    when( mockPlugin.getIds() ).thenReturn( new String[] { "testId" } );
+    when( mockPlugin.getIds() ).thenReturn( new String[]{ "testId" } );
+    when( mockPlugin.getName() ).thenReturn( "TextFileInputExternalResourceConsumer" );
     Map<Class<?>, String> classMap = new HashMap<Class<?>, String>();
     classMap.put( IExternalResourceConsumer.class, tfiConsumer.getClass().getName() );
 
@@ -92,7 +93,7 @@ public class JsonLineageIT {
   }
 
   @Test
-  public void testJsonSerialze() throws Exception {
+  public void testJsonSerialize() throws Exception {
     ObjectMapper mapper = new ObjectMapper();
     mapper.enable( SerializationFeature.INDENT_OUTPUT );
     mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );

@@ -23,10 +23,20 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseStepExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleFileException;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.vfs.KettleVFS;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
@@ -36,7 +46,11 @@ import org.pentaho.platform.api.metaverse.MetaverseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 /**
@@ -93,7 +107,7 @@ public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputM
     ValueMetaInterface filenameField = prevFields.searchValueMeta( meta.getFileNameField() );
     if ( filenameField != null ) {
       IMetaverseComponentDescriptor fileStreamFieldDescriptor = getStepFieldOriginDescriptor( descriptor,
-          filenameField.getName() );
+        filenameField.getName() );
       IMetaverseNode fileStreamFieldNode = createNodeFromDescriptor( fileStreamFieldDescriptor );
       metaverseBuilder.addNode( fileStreamFieldNode );
       metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fileStreamFieldNode );
@@ -105,10 +119,10 @@ public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputM
     for ( TextFileField outputField : outputFields ) {
       String fieldName = outputField.getName();
       IMetaverseComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
-          fieldName,
-          DictionaryConst.NODE_TYPE_FILE_FIELD,
-          descriptor,
-          descriptor.getContext() );
+        fieldName,
+        DictionaryConst.NODE_TYPE_FILE_FIELD,
+        descriptor,
+        descriptor.getContext() );
 
       // create the file field nodes
       IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
@@ -132,6 +146,80 @@ public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputM
         add( TextFileOutputMeta.class );
       }
     };
+  }
+
+  @ExternalResourceConsumer(
+    id = "TextFileOutputExternalResourceConsumer",
+    name = "TextFileOutputExternalResourceConsumer"
+  )
+  public static class TextFileOutputExternalResourceConsumer
+    extends BaseStepExternalResourceConsumer<TextFileOutputMeta> {
+
+    @Override
+    public boolean isDataDriven( TextFileOutputMeta meta ) {
+      // We can safely assume that the StepMetaInterface object we get back is a TextFileOutputMeta
+      return meta.isFileNameInField();
+    }
+
+    @Override
+    public Collection<IExternalResourceInfo> getResourcesFromMeta( TextFileOutputMeta meta ) {
+      Collection<IExternalResourceInfo> resources = Collections.emptyList();
+
+      // We only need to collect these resources if we're not data-driven and there are no used variables in the 
+      // metadata relating to external files.
+      if ( !isDataDriven( meta ) /* TODO */ ) {
+        StepMeta parentStepMeta = meta.getParentStepMeta();
+        if ( parentStepMeta != null ) {
+          TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
+          if ( parentTransMeta != null ) {
+            String[] paths = meta.getFiles( parentTransMeta );
+            if ( paths != null ) {
+              resources = new ArrayList<IExternalResourceInfo>( paths.length );
+
+              for ( String path : paths ) {
+                if ( !Const.isEmpty( path ) ) {
+                  try {
+
+                    IExternalResourceInfo resource = getFileResource( KettleVFS.getFileObject( path ), false );
+                    if ( resource != null ) {
+                      resources.add( resource );
+                    } else {
+                      throw new KettleFileException( "Error getting file resource!" );
+                    }
+                  } catch ( KettleFileException kfe ) {
+                    // TODO throw or ignore?
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      return resources;
+    }
+
+    @Override
+    public Collection<IExternalResourceInfo> getResourcesFromRow(
+      TextFileOutputMeta meta, RowMetaInterface rowMeta, Object[] row ) {
+      Collection<IExternalResourceInfo> resources = new LinkedList<IExternalResourceInfo>();
+
+      try {
+        String filename = rowMeta.getString( row, meta.getFileNameField(), null );
+        if ( !Const.isEmpty( filename ) ) {
+          FileObject fileObject = KettleVFS.getFileObject( filename );
+          resources.add( getFileResource( fileObject, false ) );
+        }
+      } catch ( KettleException kve ) {
+        // TODO throw exception or ignore?
+      }
+
+      return resources;
+    }
+
+    @Override
+    public Class<TextFileOutputMeta> getStepMetaClass() {
+      return TextFileOutputMeta.class;
+    }
   }
 
 }

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.pentaho.di.core.KettleClientEnvironment;
+import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
@@ -50,19 +51,18 @@ import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.impl.model.ExecutionData;
 import com.pentaho.metaverse.impl.model.ExecutionEngine;
 import com.pentaho.metaverse.impl.model.ExecutionProfile;
-import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;
 import com.pentaho.metaverse.impl.model.ParamInfo;
 
 /**
  * An extension point to gather runtime data for an execution of a job into an ExecutionProfile object
  */
 @ExtensionPoint(
-    description = "Job Runtime metadata extractor",
-    extensionPointId = "JobStart",
-    id = "jobRuntimeMetaverse" )
-public class JobRuntimeExtensionPoint implements ExtensionPointInterface, JobListener {
+  description = "Job Runtime metadata extractor",
+  extensionPointId = "JobStart",
+  id = "jobRuntimeMetaverse" )
+public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements JobListener {
 
-  private Map<Job, IExecutionProfile> profileMap = new HashMap<Job, IExecutionProfile>();
+  protected static Map<Job, IExecutionProfile> profileMap = new HashMap<Job, IExecutionProfile>();
 
   /**
    * Callback when a job is about to be started
@@ -104,8 +104,8 @@ public class JobRuntimeExtensionPoint implements ExtensionPointInterface, JobLis
       executionEngine.setName( "Pentaho Data Integration" );
       executionEngine.setVersion( BuildVersion.getInstance().getVersion() );
       executionEngine.setDescription(
-          "Pentaho data integration prepares and blends data to create a complete picture of your business "
-              + "that drives actionable insights." );
+        "Pentaho data integration prepares and blends data to create a complete picture of your business "
+          + "that drives actionable insights." );
       executionProfile.setExecutionEngine( executionEngine );
 
       IExecutionData executionData = executionProfile.getExecutionData();
@@ -131,7 +131,7 @@ public class JobRuntimeExtensionPoint implements ExtensionPointInterface, JobLis
         for ( String param : params ) {
           try {
             ParamInfo paramInfo = new ParamInfo( param, job.getParameterDescription( param ),
-                job.getParameterDefault( param ) );
+              job.getParameterDefault( param ) );
             paramList.add( paramInfo );
           } catch ( UnknownParamException e ) {
             e.printStackTrace();
@@ -161,27 +161,89 @@ public class JobRuntimeExtensionPoint implements ExtensionPointInterface, JobLis
   @Override
   public void jobFinished( Job job ) throws KettleException {
 
+    if ( job == null ) {
+      return;
+    }
+
     // Get the current execution profile for this job
     IExecutionProfile executionProfile = profileMap.remove( job );
     if ( executionProfile == null ) {
-      String jobName = job == null ? "null" : job.getName();
-      System.out.println( "Couldn't find job profile for: " + jobName );
-    } else {
+      // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
+      // the same info, so populate a new ExecutionProfile using the current Trans
+      // TODO: Beware duplicate profiles!
+
+      executionProfile = new ExecutionProfile();
       populateExecutionProfile( executionProfile, job );
     }
-
-    // TODO where to persist the execution profile?
+    ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
+    Result result = job.getResult();
+    if ( result != null ) {
+      executionData.setFailureCount( result.getNrErrors() );
+    }
     try {
-      ExecutionProfileUtil.dumpExecutionProfile( System.out, executionProfile );
+      writeExecutionProfile( System.out, executionProfile );
     } catch ( IOException e ) {
       throw new KettleException( e );
     }
-
   }
 
   protected void populateExecutionProfile( IExecutionProfile executionProfile, Job job ) {
-    ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
-    executionData.setFailureCount( job.getResult().getNrErrors() );
+    JobMeta jobMeta = job.getJobMeta();
+
+    String filename = job.getFilename();
+
+    String filePath = null;
+    try {
+      filePath = new File( filename ).getCanonicalPath();
+    } catch ( IOException e ) {
+      // TODO ?
+    }
+
+    // Set artifact information (path, type, description, etc.)
+    executionProfile.setPath( filePath );
+    executionProfile.setType( DictionaryConst.NODE_TYPE_TRANS );
+    executionProfile.setDescription( jobMeta.getDescription() );
+
+    // Set execution engine information
+    executionProfile.setExecutionEngine( getExecutionEngineInfo() );
+
+    IExecutionData executionData = executionProfile.getExecutionData();
+
+    // Store execution information (client, server, user, etc.)
+    executionData.setStartTime( new Timestamp( new Date().getTime() ) );
+    executionData.setClientExecutor( KettleClientEnvironment.getInstance().getClient().name() );
+    executionData.setExecutorUser( job.getExecutingUser() );
+    executionData.setExecutorServer( job.getExecutingServer() );
+
+    // Store variables
+    List<String> vars = jobMeta.getUsedVariables();
+    Map<Object, Object> variableMap = executionData.getVariables();
+    for ( String var : vars ) {
+      String value = job.getVariable( var );
+      variableMap.put( var, value );
+    }
+
+    // Store parameters
+    String[] params = job.listParameters();
+    List<IParamInfo<String>> paramList = executionData.getParameters();
+    if ( params != null ) {
+      for ( String param : params ) {
+        try {
+          ParamInfo paramInfo = new ParamInfo( param, job.getParameterDescription( param ),
+            job.getParameterDefault( param ) );
+          paramList.add( paramInfo );
+        } catch ( UnknownParamException e ) {
+          e.printStackTrace();
+        }
+      }
+    }
+
+    // Store arguments
+    String[] args = job.getArguments();
+    List<Object> argList = executionData.getArguments();
+    if ( args != null ) {
+      argList.addAll( Arrays.asList( args ) );
+    }
   }
 
   @Override
@@ -190,9 +252,9 @@ public class JobRuntimeExtensionPoint implements ExtensionPointInterface, JobLis
   }
 
   @ExtensionPoint(
-      description = "Job step external resource listener",
-      extensionPointId = "JobBeforeJobEntryExecution",
-      id = "jobEntryExternalResource" )
+    description = "Job step external resource listener",
+    extensionPointId = "JobBeforeJobEntryExecution",
+    id = "jobEntryExternalResource" )
   public static class ExternalResourceConsumerListener implements ExtensionPointInterface {
 
 

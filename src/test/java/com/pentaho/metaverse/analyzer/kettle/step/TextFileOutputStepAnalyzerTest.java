@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
@@ -33,6 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaString;
@@ -49,6 +51,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -56,10 +59,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-/**
- * User: RFellows Date: 9/22/14
- */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.class )
 public class TextFileOutputStepAnalyzerTest {
 
   private TextFileOutputStepAnalyzer analyzer;
@@ -104,7 +104,7 @@ public class TextFileOutputStepAnalyzerTest {
     descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
   }
 
-  @Test(expected = MetaverseAnalyzerException.class)
+  @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyze_nullInput() throws Exception {
     analyzer.analyze( null, null );
   }
@@ -116,8 +116,8 @@ public class TextFileOutputStepAnalyzerTest {
 
     when( mockTextFileOutputMeta.isFileNameInField() ).thenReturn( false );
     when( mockTextFileOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( mockTextFileOutputMeta.getFiles( any( VariableSpace.class ) ) ).thenReturn( new String[] { "/tmp/out.txt" } );
-    when( mockTextFileOutputMeta.getOutputFields() ).thenReturn( new TextFileField[]{} );
+    when( mockTextFileOutputMeta.getFiles( any( VariableSpace.class ) ) ).thenReturn( new String[]{ "/tmp/out.txt" } );
+    when( mockTextFileOutputMeta.getOutputFields() ).thenReturn( new TextFileField[]{ } );
 
     when( mockBuilder.addNode( any( IMetaverseNode.class ) ) ).thenReturn( mockBuilder );
     when( mockBuilder.addLink( any( IMetaverseNode.class ),
@@ -149,7 +149,7 @@ public class TextFileOutputStepAnalyzerTest {
 
     when( mockTextFileOutputMeta.isFileNameInField() ).thenReturn( false );
     when( mockTextFileOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( mockTextFileOutputMeta.getFiles( any( VariableSpace.class ) ) ).thenReturn( new String[] { "/tmp/out.txt" } );
+    when( mockTextFileOutputMeta.getFiles( any( VariableSpace.class ) ) ).thenReturn( new String[]{ "/tmp/out.txt" } );
 
     TextFileField[] fields = new TextFileField[]{ mockField1, mockField2 };
     when( mockTextFileOutputMeta.getOutputFields() ).thenReturn( fields );
@@ -161,15 +161,18 @@ public class TextFileOutputStepAnalyzerTest {
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
 
     when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "Field 1", "Field 2" } );
+    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "Field 1", "Field 2" } );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+      @Override
+      public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
-        if ( args[ 0 ] == "Field 1" )
+        if ( args[0] == "Field 1" ) {
           return new ValueMetaString( "Field 1" );
-        if ( args[ 0 ] == "Field 2" )
+        }
+        if ( args[0] == "Field 2" ) {
           return new ValueMetaString( "Field 2" );
+        }
         return null;
       }
     } );
@@ -211,18 +214,22 @@ public class TextFileOutputStepAnalyzerTest {
 
     when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
     when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    String[] incomingFields = new String[] { "Field 1", "Field 2", "filename" };
+    String[] incomingFields = new String[]{ "Field 1", "Field 2", "filename" };
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( incomingFields );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+      @Override
+      public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
-        if ( args[ 0 ] == "Field 1" )
+        if ( args[0] == "Field 1" ) {
           return new ValueMetaString( "Field 1" );
-        if ( args[ 0 ] == "Field 2" )
+        }
+        if ( args[0] == "Field 2" ) {
           return new ValueMetaString( "Field 2" );
-        if ( args[ 0 ] == "filename" )
+        }
+        if ( args[0] == "filename" ) {
           return new ValueMetaString( "filename" );
+        }
         return null;
       }
     } );
@@ -255,5 +262,43 @@ public class TextFileOutputStepAnalyzerTest {
     assertNotNull( types );
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( TextFileOutputMeta.class ) );
+  }
+
+  @Test
+  public void testTextFileOutputExternalResourceConsumer() throws Exception {
+    TextFileOutputStepAnalyzer.TextFileOutputExternalResourceConsumer consumer =
+      new TextFileOutputStepAnalyzer.TextFileOutputExternalResourceConsumer();
+
+    StepMeta meta = new StepMeta( "test", mockTextFileOutputMeta );
+    StepMeta spyMeta = spy( meta );
+
+    when( mockTextFileOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( mockTextFileOutputMeta.getFileName() ).thenReturn( null );
+    when( mockTextFileOutputMeta.isFileNameInField() ).thenReturn( false );
+    String[] filePaths = { "/path/to/file1", "/another/path/to/file2" };
+    when( mockTextFileOutputMeta.getFiles( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
+
+    assertFalse( consumer.isDataDriven( mockTextFileOutputMeta ) );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( mockTextFileOutputMeta );
+    assertFalse( resources.isEmpty() );
+    assertEquals( 2, resources.size() );
+
+
+    when( mockTextFileOutputMeta.isFileNameInField() ).thenReturn( true );
+    assertTrue( consumer.isDataDriven( mockTextFileOutputMeta ) );
+    assertTrue( consumer.getResourcesFromMeta( mockTextFileOutputMeta ).isEmpty() );
+    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+      .thenReturn( "/path/to/row/file" );
+    resources = consumer.getResourcesFromRow( mockTextFileOutputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    assertFalse( resources.isEmpty() );
+    assertEquals( 1, resources.size() );
+
+    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+      .thenThrow( KettleException.class );
+    resources = consumer.getResourcesFromRow( mockTextFileOutputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    assertTrue( resources.isEmpty() );
+
+    assertEquals( TextFileOutputMeta.class, consumer.getStepMetaClass() );
   }
 }

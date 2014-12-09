@@ -100,7 +100,7 @@
       </field>
     </fields>
     <data>
-      <line> <item>&#x24;&#x7b;Internal.Transformation.Filename.Directory&#x7d;&#x2f;customers-100.txt</item> </line>
+      <line> <item>src/it/resources/repo/customers-100.txt</item> </line>
     </data>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>

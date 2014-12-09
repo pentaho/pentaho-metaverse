@@ -48,13 +48,14 @@ public class BaseStepExternalResourceConsumerTest {
 
   @Test
   public void testGetFileResource() {
-    assertNull( consumer.getFileResource( null ) );
+    assertNull( consumer.getFileResource( null, true ) );
     FileObject mockFile = mock( FileObject.class );
     FileName mockFilename = mock( FileName.class );
     when( mockFilename.getPath() ).thenReturn( "/path/to/file" );
     when( mockFile.getName() ).thenReturn( mockFilename );
-    IExternalResourceInfo resource = consumer.getFileResource( mockFile );
+    IExternalResourceInfo resource = consumer.getFileResource( mockFile, false );
     assertNotNull( resource );
     assertEquals( "/path/to/file", resource.getName() );
+    assertFalse( resource.isInput() );
   }
 }

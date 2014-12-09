@@ -23,14 +23,11 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.model.IExecutionData;
-import com.pentaho.metaverse.api.model.IExecutionEngine;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.impl.model.ExecutionData;
-import com.pentaho.metaverse.impl.model.ExecutionEngine;
 import com.pentaho.metaverse.impl.model.ExecutionProfile;
-import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;
 import com.pentaho.metaverse.impl.model.ParamInfo;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
@@ -49,11 +46,9 @@ import org.pentaho.di.trans.step.RowAdapter;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.version.BuildVersion;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collection;
@@ -70,7 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
   description = "Transformation Runtime metadata extractor",
   extensionPointId = "TransformationStartThreads",
   id = "transRuntimeMetaverse" )
-public class TransformationRuntimeExtensionPoint implements ExtensionPointInterface, TransListener {
+public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements TransListener {
 
   protected static Map<Trans, IExecutionProfile> profileMap = new ConcurrentHashMap<Trans, IExecutionProfile>();
 
@@ -130,13 +125,7 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     executionProfile.setDescription( transMeta.getDescription() );
 
     // Set execution engine information
-    IExecutionEngine executionEngine = new ExecutionEngine();
-    executionEngine.setName( "Pentaho Data Integration" );
-    executionEngine.setVersion( BuildVersion.getInstance().getVersion() );
-    executionEngine.setDescription(
-      "Pentaho data integration prepares and blends data to create a complete picture of your business "
-        + "that drives actionable insights." );
-    executionProfile.setExecutionEngine( executionEngine );
+    executionProfile.setExecutionEngine( getExecutionEngineInfo() );
 
     IExecutionData executionData = executionProfile.getExecutionData();
 
@@ -223,10 +212,6 @@ public class TransformationRuntimeExtensionPoint implements ExtensionPointInterf
     }
   }
 
-  protected void writeExecutionProfile( PrintStream out, IExecutionProfile executionProfile ) throws IOException {
-    // TODO where to persist the execution profile?
-    ExecutionProfileUtil.dumpExecutionProfile( out, executionProfile );
-  }
 
   @ExtensionPoint(
     description = "Transformation step external resource listener",

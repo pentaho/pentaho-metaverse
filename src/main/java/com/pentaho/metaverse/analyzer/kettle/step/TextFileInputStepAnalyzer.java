@@ -161,7 +161,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
                 if ( !Const.isEmpty( path ) ) {
                   try {
 
-                    IExternalResourceInfo resource = getFileResource( KettleVFS.getFileObject( path ) );
+                    IExternalResourceInfo resource = getFileResource( KettleVFS.getFileObject( path ), true );
                     if ( resource != null ) {
                       resources.add( resource );
                     } else {
@@ -188,7 +188,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
         String filename = rowMeta.getString( row, meta.getAcceptingField(), null );
         if ( !Const.isEmpty( filename ) ) {
           FileObject fileObject = KettleVFS.getFileObject( filename );
-          resources.add( getFileResource( fileObject ) );
+          resources.add( getFileResource( fileObject, true ) );
         }
       } catch ( KettleException kve ) {
         // TODO throw exception or ignore?
