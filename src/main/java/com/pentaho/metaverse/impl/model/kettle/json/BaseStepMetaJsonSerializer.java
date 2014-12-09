@@ -43,12 +43,6 @@ public class BaseStepMetaJsonSerializer extends AbstractStepMetaJsonSerializer<B
   }
 
   @Override
-  protected void writeFieldTransforms( BaseStepMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
-    // no transforms for the fallback
-  }
-
-  @Override
   protected void writeCustomProperties( BaseStepMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
     throws IOException, JsonGenerationException {
     // nothing custom here

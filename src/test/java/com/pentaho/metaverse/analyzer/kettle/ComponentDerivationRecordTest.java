@@ -20,16 +20,16 @@ public class ComponentDerivationRecordTest {
 
   @Test
   public void testGetEntityName() throws Exception {
-    assertEquals( "myRecord", record.getEntityName() );
-    assertNull( new ComponentDerivationRecord().getEntityName() );
+    assertEquals( "myRecord", record.getChangedEntityName() );
+    assertNull( new ComponentDerivationRecord().getChangedEntityName() );
 
   }
 
   @Test
   public void testSetEntityName() throws Exception {
-    assertEquals( "myRecord", record.getEntityName() );
-    record.setEntityName( "newName" );
-    assertEquals( "newName", record.getEntityName() );
+    assertEquals( "myRecord", record.getChangedEntityName() );
+    record.setChangedEntityName( "newName" );
+    assertEquals( "newName", record.getChangedEntityName() );
   }
 
   @Test

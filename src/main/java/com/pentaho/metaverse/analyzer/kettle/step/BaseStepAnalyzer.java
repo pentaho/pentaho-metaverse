@@ -56,7 +56,7 @@ import java.util.UUID;
  * gather metadata for the metaverse.
  */
 public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
-    extends BaseKettleMetaverseComponentWithDatabases implements IStepAnalyzer<T> {
+    extends BaseKettleMetaverseComponentWithDatabases implements IStepAnalyzer<T>, IStepModifiesFields<T> {
 
   /**
    * The stream fields coming into the step
@@ -368,7 +368,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     if ( changeRecord != null && changeRecord.hasDelta() && descriptor != null ) {
       // Create a new node for the renamed field
       IMetaverseComponentDescriptor newFieldDescriptor = new MetaverseComponentDescriptor(
-          changeRecord.getEntityName(),
+          changeRecord.getChangedEntityName(),
           DictionaryConst.NODE_TYPE_TRANS_FIELD,
           new Namespace( rootNode.getLogicalId() ),
           descriptor.getContext() );
@@ -377,5 +377,10 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
       metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_DERIVES, newFieldNode );
     }
     return newFieldNode;
+  }
+
+  @Override
+  public Set<ComponentDerivationRecord> getChangeRecords( T meta ) throws MetaverseAnalyzerException {
+    return null;
   }
 }

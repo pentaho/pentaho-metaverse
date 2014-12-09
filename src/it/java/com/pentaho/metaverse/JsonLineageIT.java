@@ -39,7 +39,6 @@ import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonSerializer;
 import org.apache.commons.io.FileUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.trans.TransMeta;
@@ -51,9 +50,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * User: RFellows Date: 10/31/14
@@ -62,7 +59,7 @@ public class JsonLineageIT {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    KettleEnvironment.init();
+    IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution" );
 
     PluginRegistry registry = PluginRegistry.getInstance();
     ExternalResourceConsumerMap.ExternalResourceConsumerMapBuilder builder = new
@@ -113,7 +110,6 @@ public class JsonLineageIT {
     transModule.addSerializer( baseStepMetaJsonSerializer );
 
     transModule.addSerializer( new TableOutputStepMetaJsonSerializer( TableOutputMeta.class, writeRepo ) );
-
     transModule.addDeserializer( TransMeta.class, new TransMetaJsonDeserializer( TransMeta.class, readRepo ) );
 
     mapper.registerModule( transModule );
