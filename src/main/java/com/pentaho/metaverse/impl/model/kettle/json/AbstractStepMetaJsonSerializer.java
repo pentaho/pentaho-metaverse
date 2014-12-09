@@ -37,6 +37,7 @@ import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.impl.model.kettle.FieldInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
@@ -49,6 +50,8 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -69,6 +72,8 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
   public static final String JSON_PROPERTY_INPUT_FIELDS = "inputFields";
   public static final String JSON_PROPERTY_OUTPUT_FIELDS = "outputFields";
   public static final String JSON_PROPERTY_EXTERNAL_RESOURCES = "externalResources";
+
+  private static final Logger LOGGER = LoggerFactory.getLogger( AbstractStepMetaJsonSerializer.class );
 
   private ExternalResourceConsumerMap map = ExternalResourceConsumerMap.getInstance();
 
@@ -173,7 +178,8 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
         }
       }
     } catch ( MetaverseAnalyzerException e ) {
-      e.printStackTrace();
+      LOGGER.warn( Messages.getString( "WARNING.Serialization.Step.WriteFieldTransforms",
+          meta.getParentStepMeta().getName() ), e );
     }
   }
 
@@ -214,7 +220,8 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
         RowMetaInterface prevStepFields = parentTransMeta.getPrevStepFields( parentStepMeta );
         writeFields( json, prevStepFields, JSON_PROPERTY_INPUT_FIELDS );
       } catch ( KettleStepException e ) {
-        e.printStackTrace();
+        LOGGER.warn( Messages.getString( "WARNING.Serialization.Step.InputFields",
+            parentStepMeta.getName() ), e );
       }
     }
   }
@@ -226,7 +233,8 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
         RowMetaInterface stepFields = parentTransMeta.getStepFields( parentStepMeta );
         writeFields( json, stepFields, JSON_PROPERTY_OUTPUT_FIELDS );
       } catch ( KettleStepException e ) {
-        e.printStackTrace();
+        LOGGER.warn( Messages.getString( "WARNING.Serialization.Step.OutputFields",
+            parentStepMeta.getName() ), e );
       }
     }
   }
