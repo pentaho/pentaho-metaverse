@@ -33,6 +33,7 @@ import com.pentaho.metaverse.impl.model.JndiResourceInfo;
 import com.pentaho.metaverse.impl.model.ParamInfo;
 import com.pentaho.metaverse.impl.model.kettle.HopInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.parameters.UnknownParamException;
@@ -43,6 +44,8 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -55,6 +58,8 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
   public static final String JSON_PROPERTY_STEPS = "steps";
   public static final String JSON_PROPERTY_CONNECTIONS = "connections";
   public static final String JSON_PROPERTY_HOPS = "hops";
+
+  private static final Logger LOGGER = LoggerFactory.getLogger( TransMetaJsonSerializer.class );
 
   public TransMetaJsonSerializer( Class<TransMeta> aClass ) {
     super( aClass );
@@ -96,7 +101,7 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
             meta.getParameterDefault( param ) );
         json.writeObject( paramInfo );
       } catch ( UnknownParamException e ) {
-        e.printStackTrace();
+        LOGGER.warn( Messages.getString( "WARNING.Serialization.Trans.Param", param ), e );
       }
     }
     json.writeEndArray();
@@ -112,7 +117,7 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
       try {
         step.saveRep( repo, null, null, stepId );
       } catch ( KettleException e ) {
-        e.printStackTrace();
+        LOGGER.warn( Messages.getString( "INFO.Serialization.Trans.Step", stepMeta.getName() ), e );
       }
       json.writeObject( step );
     }

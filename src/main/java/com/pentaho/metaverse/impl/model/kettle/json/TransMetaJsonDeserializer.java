@@ -35,6 +35,7 @@ import com.pentaho.metaverse.impl.model.JdbcResourceInfo;
 import com.pentaho.metaverse.impl.model.JndiResourceInfo;
 import com.pentaho.metaverse.impl.model.ParamInfo;
 import com.pentaho.metaverse.impl.model.kettle.HopInfo;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.parameters.DuplicateParamException;
@@ -46,6 +47,8 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,6 +62,7 @@ import java.util.Map;
 public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
 
   private Repository repository;
+  private static final Logger LOGGER = LoggerFactory.getLogger( TransMetaJsonDeserializer.class );
 
   public TransMetaJsonDeserializer( Class<?> aClass ) {
     super( aClass );
@@ -107,12 +111,13 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
 
   protected void deserializeConnections( TransMeta transMeta, JsonNode node, ObjectMapper mapper ) {
     ArrayNode connectionsArrayNode = (ArrayNode) node.get( TransMetaJsonSerializer.JSON_PROPERTY_CONNECTIONS );
+    IExternalResourceInfo conn = null;
     for ( int i = 0; i < connectionsArrayNode.size(); i++ ) {
       JsonNode connNode = connectionsArrayNode.get( i );
       String className = connNode.get( IInfo.JSON_PROPERTY_CLASS ).asText();
       try {
         Class clazz = this.getClass().getClassLoader().loadClass( className );
-        IExternalResourceInfo conn = (IExternalResourceInfo) clazz.newInstance();
+        conn = (IExternalResourceInfo) clazz.newInstance();
         conn = mapper.readValue( connNode.toString(), conn.getClass() );
         DatabaseMeta dbMeta = null;
         if ( conn instanceof JdbcResourceInfo ) {
@@ -140,7 +145,8 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
         }
         transMeta.addDatabase( dbMeta );
       } catch ( Exception e ) {
-        e.printStackTrace();
+        LOGGER.warn( Messages.getString( "WARNING.Deserialization.Trans.Connections",
+            conn.getName(), transMeta.getName() ), e );
       }
     }
   }
@@ -153,17 +159,18 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
       try {
         transMeta.addParameterDefinition( param.getName(), param.getDefaultValue(), param.getDescription() );
       } catch ( DuplicateParamException e ) {
-        e.printStackTrace();
+        LOGGER.warn( Messages.getString( "WARNING.Deserialization.Trans.DuplicateParam", param.getName() ), e );
       }
     }
   }
 
   protected void deserializeSteps( TransMeta transMeta, JsonNode node, ObjectMapper mapper ) throws IOException {
     ArrayNode stepsArrayNode = (ArrayNode) node.get( TransMetaJsonSerializer.JSON_PROPERTY_STEPS );
+    String stepName = null;
     for ( int i = 0; i < stepsArrayNode.size(); i++ ) {
       JsonNode stepNode = stepsArrayNode.get( i );
       String className = stepNode.get( IInfo.JSON_PROPERTY_CLASS ).asText();
-      String stepName = stepNode.get( IInfo.JSON_PROPERTY_NAME ).asText();
+      stepName = stepNode.get( IInfo.JSON_PROPERTY_NAME ).asText();
       ObjectId stepId = new StringObjectId( stepName );
 
       // add the step attributes to the repo so they can be found when they are looked up by the readRep impl
@@ -181,7 +188,7 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
         transMeta.addStep( step );
 
       } catch ( Exception e ) {
-        e.printStackTrace();
+        LOGGER.warn( Messages.getString( "WARNING.Deserialization.Trans.Steps", stepName ), e );
       }
     }
   }
@@ -206,7 +213,8 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
             repository.saveStepAttribute( null, stepId, idx, s, val == null ? null : (String) val );
           }
         } catch ( KettleException e ) {
-          e.printStackTrace();
+          LOGGER.info( Messages.getString( "INFO.Deserialization.Trans.SavingAttributes", s,
+              String.valueOf( idx ) ), e );
         }
       }
       idx++;
@@ -232,7 +240,7 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
           repository.saveStepAttribute( null, stepId, s, val == null ? null : (String) val );
         }
       } catch ( KettleException e ) {
-        e.printStackTrace();
+        LOGGER.info( Messages.getString( "INFO.Deserialization.Trans.SavingAttributes", s ), e );
       }
     }
   }
@@ -251,7 +259,7 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
           transMeta.addTransHop( hopMeta );
         }
       } catch ( IOException e ) {
-        e.printStackTrace();
+        LOGGER.warn( Messages.getString( "WARNING.Deserialization.Trans.Hops" ), e );
       }
     }
   }
