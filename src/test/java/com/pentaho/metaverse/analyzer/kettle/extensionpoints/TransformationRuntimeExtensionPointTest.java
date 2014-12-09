@@ -3,7 +3,9 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+
 import edu.emory.mathcs.backport.java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

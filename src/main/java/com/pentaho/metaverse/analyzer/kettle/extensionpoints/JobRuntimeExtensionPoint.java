@@ -21,16 +21,15 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.model.IExecutionData;
-import com.pentaho.metaverse.api.model.IExecutionEngine;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.api.model.IParamInfo;
-import com.pentaho.metaverse.impl.model.ExecutionData;
-import com.pentaho.metaverse.impl.model.ExecutionEngine;
-import com.pentaho.metaverse.impl.model.ExecutionProfile;
-import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;
-import com.pentaho.metaverse.impl.model.ParamInfo;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
@@ -43,14 +42,16 @@ import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.version.BuildVersion;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.model.IExecutionData;
+import com.pentaho.metaverse.api.model.IExecutionEngine;
+import com.pentaho.metaverse.api.model.IExecutionProfile;
+import com.pentaho.metaverse.api.model.IParamInfo;
+import com.pentaho.metaverse.impl.model.ExecutionData;
+import com.pentaho.metaverse.impl.model.ExecutionEngine;
+import com.pentaho.metaverse.impl.model.ExecutionProfile;
+import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;
+import com.pentaho.metaverse.impl.model.ParamInfo;
 
 /**
  * An extension point to gather runtime data for an execution of a job into an ExecutionProfile object
@@ -163,10 +164,10 @@ public class JobRuntimeExtensionPoint implements ExtensionPointInterface, JobLis
     // Get the current execution profile for this job
     IExecutionProfile executionProfile = profileMap.remove( job );
     if ( executionProfile == null ) {
-      System.out.println( "Couldn't find job profile for: " + job.getName() );
+      String jobName = job == null ? "null" : job.getName();
+      System.out.println( "Couldn't find job profile for: " + jobName );
     } else {
-      ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
-      executionData.setFailureCount( job.getResult().getNrErrors() );
+      populateExecutionProfile( executionProfile, job );
     }
 
     // TODO where to persist the execution profile?
@@ -176,6 +177,11 @@ public class JobRuntimeExtensionPoint implements ExtensionPointInterface, JobLis
       throw new KettleException( e );
     }
 
+  }
+
+  protected void populateExecutionProfile( IExecutionProfile executionProfile, Job job ) {
+    ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
+    executionData.setFailureCount( job.getResult().getNrErrors() );
   }
 
   @Override
@@ -204,4 +210,5 @@ public class JobRuntimeExtensionPoint implements ExtensionPointInterface, JobLis
       // TODO get job entries that use external resources, match them to this step
     }
   }
+
 }
