@@ -53,12 +53,12 @@ public abstract class BaseStepExternalResourceConsumer<T extends BaseStepMeta>
     return Collections.emptyList();
   }
 
-  protected IExternalResourceInfo getFileResource( FileObject fileObject ) {
+  protected IExternalResourceInfo getFileResource( FileObject fileObject, boolean isInput ) {
     BaseResourceInfo resource = null;
     if ( fileObject != null ) {
       resource = new BaseResourceInfo();
       resource.setName( fileObject.getName().getPath() );
-      resource.setInput( true );
+      resource.setInput( isInput );
       resource.setType( DictionaryConst.NODE_TYPE_FILE );
     }
     return resource;

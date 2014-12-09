@@ -214,6 +214,10 @@ public class TransformationRuntimeExtensionPointTest {
     listener.rowReadEvent( rmi, row );
   }
 
+  /**
+   * Helper method to create a mock ExecutionProfile and map it to the given Trans
+   * @param trans The Trans object to which the ExecutionProfile object is mapped.
+   */
   private void createExecutionProfile( Trans trans ) {
     IExecutionProfile executionProfile = mock( IExecutionProfile.class );
 
