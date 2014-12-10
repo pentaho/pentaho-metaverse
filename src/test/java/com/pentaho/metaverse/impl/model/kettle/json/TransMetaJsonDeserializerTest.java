@@ -78,6 +78,8 @@ public class TransMetaJsonDeserializerTest {
   @Mock JsonNode root_descNode;
   @Mock JsonNode root_paramsArray_Node0;
   @Mock JsonNode root_paramsArray_Node1;
+  @Mock JsonNode root_varsArray_Node0;
+  @Mock JsonNode root_varsArray_Node1;
   @Mock JsonNode root_stepsArray_Node0;
   @Mock JsonNode root_stepsArray_Node1;
   @Mock JsonNode root_stepsArray_Node0_classNode;
@@ -101,12 +103,16 @@ public class TransMetaJsonDeserializerTest {
 
   // DOH! can't mock/spy final classes like ArrayNode
   ArrayNode root_paramsArray = new ArrayNode( JsonNodeFactory.instance );
+  ArrayNode root_varsArray = new ArrayNode( JsonNodeFactory.instance );
   ArrayNode root_stepsArray = new ArrayNode( JsonNodeFactory.instance );
   ArrayNode root_hopsArray = new ArrayNode( JsonNodeFactory.instance );
   ArrayNode root_connectionsArray = new ArrayNode( JsonNodeFactory.instance );
 
   ParamInfo param0 = new ParamInfo( "param0", null, "Hello", "param description" );
   ParamInfo param1 = new ParamInfo( "param1", null, "World", "param description" );
+
+  ParamInfo var0 = new ParamInfo( "var0", "hello" );
+  ParamInfo var1 = new ParamInfo( "var1", "world" );
 
   Map<String, Object> attrs0 = new HashMap<String, Object>();
   Map<String, Object> attrs1 = new HashMap<String, Object>();
@@ -125,6 +131,9 @@ public class TransMetaJsonDeserializerTest {
     root_paramsArray.add( root_paramsArray_Node0 );
     root_paramsArray.add( root_paramsArray_Node1 );
 
+    root_varsArray.add( root_varsArray_Node0 );
+    root_varsArray.add( root_varsArray_Node1 );
+
     root_stepsArray.add( root_stepsArray_Node0 );
     root_stepsArray.add( root_stepsArray_Node1 );
 
@@ -137,6 +146,8 @@ public class TransMetaJsonDeserializerTest {
     when( mapper.readTree( parser ) ).thenReturn( root );
     when( mapper.readValue( "mocked param0", ParamInfo.class ) ).thenReturn( param0 );
     when( mapper.readValue( "mocked param1", ParamInfo.class ) ).thenReturn( param1 );
+    when( mapper.readValue( "mocked var0", ParamInfo.class ) ).thenReturn( var0 );
+    when( mapper.readValue( "mocked var1", ParamInfo.class ) ).thenReturn( var1 );
     when( mapper.readValue( "attrs0", attrs0.getClass() ) ).thenReturn( attrs0 );
     when( mapper.readValue( "attrs1", attrs1.getClass() ) ).thenReturn( attrs1 );
     when( mapper.readValue( "fields0", fields0.getClass() ) ).thenReturn( fields0 );
@@ -146,6 +157,7 @@ public class TransMetaJsonDeserializerTest {
     when( root.get( IInfo.JSON_PROPERTY_NAME ) ).thenReturn( root_nameNode );
     when( root.get( IInfo.JSON_PROPERTY_DESCRIPTION ) ).thenReturn( root_descNode );
     when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_PARAMETERS ) ).thenReturn( root_paramsArray );
+    when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_VARIABLES ) ).thenReturn( root_varsArray );
     when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_STEPS ) ).thenReturn( root_stepsArray );
     when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_HOPS ) ).thenReturn( root_hopsArray );
     when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_CONNECTIONS ) ).thenReturn( root_connectionsArray );
@@ -156,6 +168,9 @@ public class TransMetaJsonDeserializerTest {
 
     when( root_paramsArray_Node0.toString() ).thenReturn( "mocked param0" ); // mocked, values don't matter
     when( root_paramsArray_Node1.toString() ).thenReturn( "mocked param1" ); // mocked, values don't matter
+
+    when( root_varsArray_Node0.toString() ).thenReturn( "mocked var0" ); // mocked, values don't matter
+    when( root_varsArray_Node1.toString() ).thenReturn( "mocked var1" ); // mocked, values don't matter
 
     // build up the step nodes expectations
     when( root_stepsArray_Node0.get( IInfo.JSON_PROPERTY_CLASS ) ).thenReturn( root_stepsArray_Node0_classNode );
@@ -207,6 +222,16 @@ public class TransMetaJsonDeserializerTest {
     deserializer.deserializeHops( transMeta, root, mapper );
 
     assertEquals( root_hopsArray.size(), transMeta.nrTransHops() );
+
+  }
+
+  @Test
+  public void testDeserializeVariables() throws Exception {
+    transMeta = spy( new TransMeta() );
+
+    deserializer.deserializeVariables( transMeta, root, mapper );
+
+    verify( transMeta, times( root_varsArray.size() ) ).setVariable( anyString(), anyString() );
 
   }
 

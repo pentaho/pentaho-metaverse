@@ -96,6 +96,9 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
     // parameters
     deserializeParameters( transMeta, node, mapper );
 
+    // variables
+    deserializeVariables( transMeta, node, mapper );
+
     // steps
     deserializeSteps( transMeta, node, mapper );
 
@@ -161,6 +164,15 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
       } catch ( DuplicateParamException e ) {
         LOGGER.warn( Messages.getString( "WARNING.Deserialization.Trans.DuplicateParam", param.getName() ), e );
       }
+    }
+  }
+
+  protected void deserializeVariables( TransMeta transMeta, JsonNode node, ObjectMapper mapper ) throws IOException {
+    ArrayNode varsArrayNode = (ArrayNode) node.get( TransMetaJsonSerializer.JSON_PROPERTY_VARIABLES );
+    for ( int i = 0; i < varsArrayNode.size(); i++ ) {
+      JsonNode paramNode = varsArrayNode.get( i );
+      ParamInfo param = mapper.readValue( paramNode.toString(), ParamInfo.class );
+      transMeta.setVariable( param.getName(), param.getValue() );
     }
   }
 
