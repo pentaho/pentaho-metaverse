@@ -82,7 +82,6 @@ public class TransMetaJsonSerializerTest {
 
   @Test
   public void testSerializeBasic() throws Exception {
-    when( transMeta.listParameters() ).thenReturn( new String[] { } );
     serializer.serialize( transMeta, json, provider );
 
     verify( json ).writeStartObject();
@@ -91,6 +90,7 @@ public class TransMetaJsonSerializerTest {
     verify( json ).writeStringField( IInfo.JSON_PROPERTY_DESCRIPTION, transMeta.getDescription() );
 
     verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_PARAMETERS );
+    verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_VARIABLES );
     verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_STEPS );
     verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_CONNECTIONS );
     verify( json ).writeEndObject();
@@ -112,6 +112,26 @@ public class TransMetaJsonSerializerTest {
 
     verify( json ).writeArrayFieldStart( "parameters" );
     verify( json, times( params.length - 1 ) ).writeObject( any( IParamInfo.class ) );
+  }
+
+  @Test
+  public void testSerializeVariables() throws Exception {
+    List<String> vars = new ArrayList<String>(){{
+      add( "var1" );
+      add( "var2" );
+      add( "no value" );
+    }};
+
+    when( transMeta.getUsedVariables() ).thenReturn( vars );
+    when( transMeta.getVariable( "var1" ) ).thenReturn( "value1" );
+    when( transMeta.getVariable( "var2" ) ).thenReturn( "value2" );
+    // get some exception handling code coverage
+    when( transMeta.getVariable( "no value" ) ).thenReturn( null );
+
+    serializer.serializeVariables( transMeta, json );
+
+    verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_VARIABLES );
+    verify( json, times( vars.size() ) ).writeObject( any( IParamInfo.class ) );
   }
 
   @Test

@@ -10,8 +10,8 @@
   <parent>
     <groupId>com.pentaho</groupId>
     <artifactId>pentaho-ee-jar-parent-pom</artifactId>
-    <version>1.0.4</version>
-    <!-- https://github.com/pentaho/maven-parent-poms/blob/pentaho-ee-jar-parent-pom-1.0.4/pentaho-ee-jar-parent-pom/pom.xml -->
+    <version>1.0.5</version>
+    <!-- https://github.com/pentaho/maven-parent-poms/blob/pentaho-ee-jar-parent-pom-1.0.5/pentaho-ee-jar-parent-pom/pom.xml -->
   </parent>
 
   <name>Pentaho Enterprise Edition Project: ${project.artifactId}</name>
@@ -59,10 +59,6 @@
     <pdi.plugin.name>pdi-metaverse-extensions</pdi.plugin.name>
     <target.jdk.version>1.6</target.jdk.version>
     <pmd.rulesets.url>https://raw.githubusercontent.com/pmd/pmd/pmd_releases/5.1.2/pmd/src/main/resources/rulesets/java</pmd.rulesets.url>
-
-    <!-- Overrides from parent -->
-    <proguard.pro.path>src/assembly/proguard.pro</proguard.pro.path>
-    <obf-zip-assembly.path>src/assembly/obf-zip-assembly.xml</obf-zip-assembly.path>
 
     <!-- Compile dependencies -->
     <dependency.com.sun.jersey.jersey-core.version>1.16</dependency.com.sun.jersey.jersey-core.version>
