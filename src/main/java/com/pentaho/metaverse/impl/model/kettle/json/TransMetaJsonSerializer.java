@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * User: RFellows Date: 11/17/14
@@ -58,6 +59,7 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
   public static final String JSON_PROPERTY_STEPS = "steps";
   public static final String JSON_PROPERTY_CONNECTIONS = "connections";
   public static final String JSON_PROPERTY_HOPS = "hops";
+  public static final String JSON_PROPERTY_VARIABLES = "variables";
 
   private static final Logger LOGGER = LoggerFactory.getLogger( TransMetaJsonSerializer.class );
 
@@ -85,6 +87,7 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
     json.writeStringField( IInfo.JSON_PROPERTY_DESCRIPTION, meta.getDescription() );
 
     serializeParameters( meta, json );
+    serializeVariables( meta, json );
     serializeSteps( meta, json );
     serializeConnections( meta, json );
     serializeHops( meta, json );
@@ -95,13 +98,28 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
 
   protected void serializeParameters( TransMeta meta, JsonGenerator json ) throws IOException {
     json.writeArrayFieldStart( JSON_PROPERTY_PARAMETERS );
-    for ( String param : meta.listParameters() ) {
-      try {
-        ParamInfo paramInfo = new ParamInfo( param, meta.getParameterDescription( param ),
-            meta.getParameterDefault( param ) );
+    String[] parameters = meta.listParameters();
+    if ( parameters != null ) {
+      for ( String param : meta.listParameters() ) {
+        try {
+          ParamInfo paramInfo = new ParamInfo( param, null, meta.getParameterDefault( param ),
+              meta.getParameterDescription( param ) );
+          json.writeObject( paramInfo );
+        } catch ( UnknownParamException e ) {
+          LOGGER.warn( Messages.getString( "WARNING.Serialization.Trans.Param", param ), e );
+        }
+      }
+    }
+    json.writeEndArray();
+  }
+
+  protected void serializeVariables( TransMeta meta, JsonGenerator json ) throws IOException {
+    json.writeArrayFieldStart( JSON_PROPERTY_VARIABLES );
+    List<String> variables = meta.getUsedVariables();
+    if ( variables != null ) {
+      for ( String param : variables ) {
+        ParamInfo paramInfo = new ParamInfo( param, meta.getVariable( param ) );
         json.writeObject( paramInfo );
-      } catch ( UnknownParamException e ) {
-        LOGGER.warn( Messages.getString( "WARNING.Serialization.Trans.Param", param ), e );
       }
     }
     json.writeEndArray();
