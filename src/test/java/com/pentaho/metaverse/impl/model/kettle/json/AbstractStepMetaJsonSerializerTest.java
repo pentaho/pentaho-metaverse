@@ -27,14 +27,15 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
-import com.pentaho.metaverse.analyzer.kettle.step.IStepModifiesFields;
+import com.pentaho.metaverse.analyzer.kettle.step.IFieldLineageMetadataProvider;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.api.model.kettle.IFieldInfo;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -229,20 +230,20 @@ public class AbstractStepMetaJsonSerializerTest {
     when( provider.getAnalyzers( any( Set.class ) ) ).thenReturn( null );
 
     serializer.setStepAnalyzerProvider( provider );
-    IStepModifiesFields handler = serializer.getStepModifiesFieldsHandler( spyMeta );
+    IFieldLineageMetadataProvider handler = serializer.getFieldLineageMetadataProvider( spyMeta );
     assertTrue( handler instanceof GenericStepMetaAnalyzer );
   }
 
   @Test
   public void testGetStepFieldMapper() throws Exception {
     IStepAnalyzerProvider provider = mock( IStepAnalyzerProvider.class );
-    IStepAnalyzer<DummyTransMeta> analyzer = mock( IStepAnalyzer.class, withSettings().extraInterfaces( IStepModifiesFields.class ) );
+    IStepAnalyzer<DummyTransMeta> analyzer = mock( IStepAnalyzer.class, withSettings().extraInterfaces( IFieldLineageMetadataProvider.class ) );
     Set<IStepAnalyzer> analyzers = new HashSet<IStepAnalyzer>( 1 );
     analyzers.add( analyzer );
     when( provider.getAnalyzers( any( Set.class ) ) ).thenReturn( analyzers );
 
     serializer.setStepAnalyzerProvider( provider );
-    IStepModifiesFields handler = serializer.getStepModifiesFieldsHandler( spyMeta );
+    IFieldLineageMetadataProvider handler = serializer.getFieldLineageMetadataProvider( spyMeta );
     assertFalse( handler instanceof GenericStepMetaAnalyzer );
   }
 
@@ -259,15 +260,35 @@ public class AbstractStepMetaJsonSerializerTest {
     changeRecords.add( change1 );
     changeRecords.add( change2 );
 
-    IStepModifiesFields mapper = mock( IStepModifiesFields.class );
+    IFieldLineageMetadataProvider mapper = mock( IFieldLineageMetadataProvider.class );
     AbstractStepMetaJsonSerializer spy = spy( serializer );
-    when( spy.getStepModifiesFieldsHandler( spyMeta ) ).thenReturn( mapper );
+    when( spy.getFieldLineageMetadataProvider( spyMeta ) ).thenReturn( mapper );
     when( mapper.getChangeRecords( spyMeta ) ).thenReturn( changeRecords );
 
     spy.writeFieldTransforms( spyMeta, json, provider );
 
     verify( json ).writeObject( change1 );
     verify( json, never() ).writeObject( change2 );
+
+  }
+
+  @Test
+  public void testWriteFieldMappings() throws Exception {
+    Set<IFieldMapping> mappings = new HashSet<IFieldMapping>();
+    FieldMapping fieldMapping1 = new FieldMapping( "full name", "first name" );
+    FieldMapping fieldMapping2 = new FieldMapping( "full name", "last name" );
+    mappings.add( fieldMapping1 );
+    mappings.add( fieldMapping2 );
+
+    IFieldLineageMetadataProvider mapper = mock( IFieldLineageMetadataProvider.class );
+    AbstractStepMetaJsonSerializer spy = spy( serializer );
+    when( spy.getFieldLineageMetadataProvider( spyMeta ) ).thenReturn( mapper );
+    when( mapper.getFieldMappings( spyMeta ) ).thenReturn( mappings );
+
+    spy.writeFieldMappings( spyMeta, json, provider );
+
+    verify( json ).writeObject( fieldMapping1 );
+    verify( json ).writeObject( fieldMapping2 );
 
   }
 }

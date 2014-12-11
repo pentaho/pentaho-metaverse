@@ -20,25 +20,26 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step;
+package com.pentaho.metaverse.api.model.kettle;
 
-import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
-
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.pentaho.metaverse.api.model.IInfo;
 
 /**
- * IStepFieldMapper interface is for classes that can build a field mapping for a specific kind of PDI Step
+ * User: RFellows Date: 12/11/14
  */
-public interface IStepModifiesFields<T extends BaseStepMeta> {
+@JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = IInfo.JSON_PROPERTY_CLASS )
+public interface IFieldMapping {
+  public static final String JSON_PROPERTY_SOURCE_FIELD_NAME = "sourceFieldName";
+  public static final String JSON_PROPERTY_TARGET_FIELD_NAME = "targetFieldName";
 
-  /**
-   * Get all of the ComponentDerivationRecord's defined by a step
-   * @param meta
-   * @return
-   * @throws MetaverseAnalyzerException
-   */
-  public Set<ComponentDerivationRecord> getChangeRecords( T meta ) throws MetaverseAnalyzerException;
+  @JsonProperty( JSON_PROPERTY_SOURCE_FIELD_NAME )
+  public String getSourceFieldName();
+  public void setSourceFieldName( String sourceFieldName );
+
+  @JsonProperty( JSON_PROPERTY_TARGET_FIELD_NAME )
+  public String getTargetFieldName();
+  public void setTargetFieldName( String targetFieldName );
 
 }

@@ -25,6 +25,8 @@ package com.pentaho.metaverse.analyzer.kettle.step.selectvalues;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaFactory;
@@ -35,7 +37,9 @@ import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -93,7 +97,6 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
     if ( prevFields == null || stepFields == null ) {
       loadInputAndOutputStreamFields();
     }
-
     Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
 
     String inputFieldName = null;
@@ -233,6 +236,50 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
       }
     }
     return changeRecords;
+  }
+
+  @Override
+  public Set<IFieldMapping> getFieldMappings( SelectValuesMeta selectValuesMeta ) throws MetaverseAnalyzerException {
+    validateState( null, selectValuesMeta );
+    if ( prevFields == null || stepFields == null ) {
+      loadInputAndOutputStreamFields();
+    }
+    List<IFieldMapping> fieldMappings = new ArrayList<IFieldMapping>();
+
+    // Would love to use selectValuesMeta.getFieldnameLineage() here,
+    // but it only gives back info on fields that were renamed. We need all input fields to output fields
+
+    String[] inputs = selectValuesMeta.getSelectName();
+    String[] outputs = selectValuesMeta.getSelectRename();
+    for ( int i = 0; i < inputs.length; i++ ) {
+      String input = inputs[i];
+      String output = outputs[i];
+      FieldMapping fm = new FieldMapping( input, output );
+      if ( Const.isEmpty( output ) ) {
+        fm.setTargetFieldName( input );
+      }
+      fieldMappings.add( fm );
+    }
+
+    SelectMetadataChange[] metadataChanges = selectValuesMeta.getMeta();
+    for ( int i = 0; i < metadataChanges.length; i++ ) {
+      String input = metadataChanges[i].getName();
+      String output = metadataChanges[i].getRename();
+      if ( !Const.isEmpty( output ) ) {
+        FieldMapping fm = new FieldMapping( input, output );
+        for ( int j = 0; j < fieldMappings.size(); j++ ) {
+          IFieldMapping fieldMapping = fieldMappings.get( j );
+          if ( fieldMapping.getSourceFieldName().equalsIgnoreCase( input ) ) {
+            fieldMappings.remove( fieldMapping );
+            fieldMappings.add( j, fm );
+            break;
+          }
+        }
+
+      }
+    }
+    Set<IFieldMapping> fieldMappingSet = new HashSet<IFieldMapping>( fieldMappings );
+    return fieldMappingSet;
   }
 
   @Override

@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.impl.model.kettle;
 
+import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.repository.ObjectId;
 
@@ -193,5 +194,20 @@ public class LineageRepository extends SimpleRepository {
     return number;
   }
 
+  @Override public DatabaseMeta loadDatabaseMetaFromStepAttribute( ObjectId id_step, String code,
+    List<DatabaseMeta> databases ) throws KettleException {
+    // do nothing for now
+    return null;
+  }
+
+  @Override public void saveDatabaseMetaStepAttribute( ObjectId id_transformation, ObjectId id_step, String code,
+    DatabaseMeta database ) throws KettleException {
+    // do nothing
+  }
+
+  @Override public void insertStepDatabase( ObjectId id_transformation, ObjectId id_step, ObjectId id_database )
+    throws KettleException {
+    // do nothing
+  }
 }
 

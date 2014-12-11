@@ -27,6 +27,7 @@ import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponentWithDat
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.api.model.kettle.IFieldInfo;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.Namespace;
 import com.pentaho.metaverse.impl.model.kettle.FieldInfo;
@@ -56,7 +57,7 @@ import java.util.UUID;
  * gather metadata for the metaverse.
  */
 public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
-    extends BaseKettleMetaverseComponentWithDatabases implements IStepAnalyzer<T>, IStepModifiesFields<T> {
+    extends BaseKettleMetaverseComponentWithDatabases implements IStepAnalyzer<T>, IFieldLineageMetadataProvider<T> {
 
   /**
    * The stream fields coming into the step
@@ -383,4 +384,16 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   public Set<ComponentDerivationRecord> getChangeRecords( T meta ) throws MetaverseAnalyzerException {
     return null;
   }
+
+  /**
+   * Override this to provide field mappings. Otherwise no field mappings can be assumed.
+   * @param meta
+   * @return null
+   * @throws MetaverseAnalyzerException
+   */
+  @Override
+  public Set<IFieldMapping> getFieldMappings( T meta ) throws MetaverseAnalyzerException {
+    return null;
+  }
+
 }

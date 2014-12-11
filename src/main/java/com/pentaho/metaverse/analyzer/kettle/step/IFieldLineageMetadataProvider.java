@@ -20,53 +20,34 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model.kettle;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.model.kettle.IFieldTransformInfo;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
- * User: RFellows Date: 11/4/14
+ * IStepFieldMapper interface is for classes that can build a field mapping for a specific kind of PDI Step
  */
-public class FieldTransformInfo implements IFieldTransformInfo {
+public interface IFieldLineageMetadataProvider<T extends BaseStepMeta> {
 
-  private Map<String, List<String>> operations;
-  private String sourceField;
-  private String targetField;
+  /**
+   * Get all of the ComponentDerivationRecord's defined by a step
+   * @param meta
+   * @return
+   * @throws MetaverseAnalyzerException
+   */
+  public Set<ComponentDerivationRecord> getChangeRecords( T meta ) throws MetaverseAnalyzerException;
 
-  public FieldTransformInfo() {
-  }
+  /**
+   * Get the mappings of input fields to output fields for a step
+   * @param meta
+   * @return
+   * @throws MetaverseAnalyzerException
+   */
+  public Set<IFieldMapping> getFieldMappings( T meta ) throws MetaverseAnalyzerException;
 
-  public FieldTransformInfo( String sourceField, ComponentDerivationRecord changeRecord ) {
-    setTargetField( changeRecord.getChangedEntityName() );
-    setOperations( changeRecord.getOperations() );
-    setSourceField( sourceField );
-  }
-
-  @Override public Map<String, List<String>> getOperations() {
-    return operations;
-  }
-
-  public void setOperations( Map<String, List<String>> operations ) {
-    this.operations = operations;
-  }
-
-  @Override public String getSourceField() {
-    return sourceField;
-  }
-
-  public void setSourceField( String sourceField ) {
-    this.sourceField = sourceField;
-  }
-
-  @Override public String getTargetField() {
-    return targetField;
-  }
-
-  public void setTargetField( String targetField ) {
-    this.targetField = targetField;
-  }
 }

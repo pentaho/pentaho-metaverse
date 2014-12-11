@@ -2,6 +2,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.selectvalues;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
@@ -276,4 +277,126 @@ public class SelectValuesStepAnalyzerTest {
     assertTrue( types.contains( SelectValuesMeta.class ) );
   }
 
+  @Test
+  public void testGetFieldMappings_selectAndRename() throws Exception {
+    StepMeta meta = new StepMeta( DEFAULT_STEP_NAME, selectValuesMeta );
+    StepMeta spyMeta = spy( meta );
+
+    when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when(spyMeta.getStepID()).thenReturn( "Select values" );
+
+    String[] fieldNames = { "field1", "field2" };
+    String[] fieldRenames = { null, "field3" };
+
+    // set up the input fields
+    when( selectValuesMeta.getSelectName() ).thenReturn( fieldNames );
+    when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
+    when( selectValuesMeta.getMeta() ).thenReturn( new SelectMetadataChange[]{} );
+    when( transMeta.getPrevStepFields( spyMeta ) ).thenReturn( prevRowMeta );
+    when( transMeta.getStepFields( spyMeta ) ).thenReturn( stepRowMeta );
+    when( stepRowMeta.getFieldNames() ).thenReturn( fieldNames );
+    when( stepRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+
+      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        if ( args[0] == "field1" )
+          return new ValueMetaString( "field1" );
+        if ( args[0] == "field2" )
+          return new ValueMetaString( "field2" );
+        return null;
+      }
+    } );
+    when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
+    when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+
+      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        if ( args[0] == "field1" )
+          return new ValueMetaString( "field1" );
+        if ( args[0] == "field2" )
+          return new ValueMetaString( "field2" );
+        return null;
+      }
+    } );
+
+    Set<IFieldMapping> fieldMappings = analyzer.getFieldMappings( selectValuesMeta );
+    assertNotNull( fieldMappings );
+    assertEquals( 2, fieldMappings.size() );
+    for ( IFieldMapping fieldMapping : fieldMappings ) {
+      if( fieldMapping.getSourceFieldName().equalsIgnoreCase( "field1" ) ) {
+        assertEquals( "field1", fieldMapping.getTargetFieldName() );
+      } else {
+        assertEquals( "field3", fieldMapping.getTargetFieldName() );
+      }
+    }
+  }
+
+  @Test
+  public void testGetFieldMappings_selectAndRenamePlusMeta() throws Exception {
+    StepMeta meta = new StepMeta( DEFAULT_STEP_NAME, selectValuesMeta );
+    StepMeta spyMeta = spy( meta );
+
+    when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when(spyMeta.getStepID()).thenReturn( "Select values" );
+
+    String[] fieldNames = { "field1", "field2" };
+    String[] fieldRenames = { null, "field3" };
+    String[] metaNames = { "field1" };
+    String[] metaRenames = { "column1" };
+
+    SelectMetadataChange[] changes = new SelectMetadataChange[2];
+    SelectMetadataChange c1 = mock( SelectMetadataChange.class );
+    SelectMetadataChange c2 = mock( SelectMetadataChange.class );
+    when( c1.getName() ).thenReturn( "field1" );
+    when( c1.getRename() ).thenReturn( "column1" );
+    when( c2.getName() ).thenReturn( "field2" );
+    when( c2.getRename() ).thenReturn( "column2" );
+
+    changes[0] = c1;
+    changes[1] = c2;
+
+    // set up the input fields
+    when( selectValuesMeta.getSelectName() ).thenReturn( fieldNames );
+    when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
+    when( selectValuesMeta.getMeta() ).thenReturn( changes );
+    when( transMeta.getPrevStepFields( spyMeta ) ).thenReturn( prevRowMeta );
+    when( transMeta.getStepFields( spyMeta ) ).thenReturn( stepRowMeta );
+    when( stepRowMeta.getFieldNames() ).thenReturn( fieldNames );
+    when( stepRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+
+      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        if ( args[0] == "field1" )
+          return new ValueMetaString( "field1" );
+        if ( args[0] == "field2" )
+          return new ValueMetaString( "field2" );
+        return null;
+      }
+    } );
+    when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
+    when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+
+      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        if ( args[0] == "field1" )
+          return new ValueMetaString( "field1" );
+        if ( args[0] == "field2" )
+          return new ValueMetaString( "field2" );
+        return null;
+      }
+    } );
+
+    Set<IFieldMapping> fieldMappings = analyzer.getFieldMappings( selectValuesMeta );
+    assertNotNull( fieldMappings );
+    assertEquals( 2, fieldMappings.size() );
+    for ( IFieldMapping fieldMapping : fieldMappings ) {
+      if( fieldMapping.getSourceFieldName().equalsIgnoreCase( "field1" ) ) {
+        assertEquals( "column1", fieldMapping.getTargetFieldName() );
+      } else {
+        assertEquals( "column2", fieldMapping.getTargetFieldName() );
+      }
+    }
+  }
 }

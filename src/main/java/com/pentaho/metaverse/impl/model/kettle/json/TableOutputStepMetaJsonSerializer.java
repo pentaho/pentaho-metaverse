@@ -43,15 +43,6 @@ public class TableOutputStepMetaJsonSerializer extends AbstractStepMetaJsonSeria
   }
 
   @Override
-  protected void writeFieldTransforms( TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException {
-
-    // no transformations
-
-  }
-
-
-  @Override
   protected void writeCustomProperties(
     TableOutputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
     throws IOException, JsonGenerationException {
