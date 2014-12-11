@@ -30,6 +30,7 @@ import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceCon
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
+import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer;
@@ -69,8 +70,7 @@ public class JsonLineageIT {
     registrar.init( registry );
     PluginRegistry.init();
 
-    TextFileInputStepAnalyzer.TextFileInputExternalResourceConsumer tfiConsumer = new
-      TextFileInputStepAnalyzer.TextFileInputExternalResourceConsumer();
+    TextFileInputExternalResourceConsumer tfiConsumer = new TextFileInputExternalResourceConsumer();
 
     // Create a fake plugin to exercise the map building logic
     PluginInterface mockPlugin = mock( PluginInterface.class );

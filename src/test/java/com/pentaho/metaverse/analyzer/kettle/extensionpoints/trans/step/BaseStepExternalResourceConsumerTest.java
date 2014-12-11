@@ -1,11 +1,12 @@
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
+package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
 
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.apache.commons.vfs.FileName;
 import org.apache.commons.vfs.FileObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.pentaho.di.trans.step.StepMeta;
 
 import java.util.Collection;
 

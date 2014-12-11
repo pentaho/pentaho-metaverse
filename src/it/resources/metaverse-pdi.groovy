@@ -35,7 +35,7 @@ import org.pentaho.groovy.ui.spoon.repo.*
 i:{
 
   try {
-    c = Class.forName('com.pentaho.metaverse.analyzer.kettle.extensionpoints.TransformationRuntimeExtensionPoint')
+    c = Class.forName('com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint')
     ExtensionPointPluginType.getInstance().registerCustom( c, "custom", "transRuntimeMetaverse", "TransformationStartThreads", "no description", null )
   }
   catch(e) {

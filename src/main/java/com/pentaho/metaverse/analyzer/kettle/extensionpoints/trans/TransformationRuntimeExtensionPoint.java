@@ -19,12 +19,12 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
+package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.impl.model.ExecutionData;
 import com.pentaho.metaverse.impl.model.ExecutionProfile;
@@ -32,28 +32,18 @@ import com.pentaho.metaverse.impl.model.ParamInfo;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.extension.ExtensionPoint;
-import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
-import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.RowAdapter;
-import org.pentaho.di.trans.step.StepInterface;
-import org.pentaho.di.trans.step.StepMetaDataCombi;
-import org.pentaho.di.trans.step.StepMetaInterface;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,7 +57,11 @@ import java.util.concurrent.ConcurrentHashMap;
   id = "transRuntimeMetaverse" )
 public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements TransListener {
 
-  protected static Map<Trans, IExecutionProfile> profileMap = new ConcurrentHashMap<Trans, IExecutionProfile>();
+  private static Map<Trans, IExecutionProfile> profileMap = new ConcurrentHashMap<Trans, IExecutionProfile>();
+
+  public static Map<Trans, IExecutionProfile> getProfileMap() {
+    return profileMap;
+  }
 
   /**
    * Callback when a transformation is about to be started
@@ -209,116 +203,6 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       writeExecutionProfile( System.out, executionProfile );
     } catch ( IOException e ) {
       throw new KettleException( e );
-    }
-  }
-
-
-  @ExtensionPoint(
-    description = "Transformation step external resource listener",
-    extensionPointId = "StepBeforeStart",
-    id = "stepExternalResource" )
-  public static class ExternalResourceConsumerListener implements ExtensionPointInterface {
-
-
-    /**
-     * This method is called by the Kettle code when a step is about to start
-     *
-     * @param log    the logging channel to log debugging information to
-     * @param object The subject object that is passed to the plugin code
-     * @throws KettleException In case the plugin decides that an error has occurred
-     *                         and the parent process should stop.
-     */
-    @Override
-    public void callExtensionPoint( LogChannelInterface log, Object object ) throws KettleException {
-      StepMetaDataCombi stepCombi = (StepMetaDataCombi) object;
-      if ( stepCombi != null ) {
-        StepMetaInterface meta = stepCombi.meta;
-        StepInterface step = stepCombi.step;
-
-        if ( meta != null ) {
-          Class<?> metaClass = meta.getClass();
-          if ( BaseStepMeta.class.isAssignableFrom( metaClass ) ) {
-            @SuppressWarnings( "unchecked" )
-            List<IStepExternalResourceConsumer> stepConsumers =
-              ExternalResourceConsumerMap.getInstance().getStepExternalResourceConsumers(
-                (Class<? extends BaseStepMeta>) metaClass );
-            if ( stepConsumers != null ) {
-              for ( IStepExternalResourceConsumer stepConsumer : stepConsumers ) {
-                // We might know enough at this point, so call the consumer
-                Collection<IExternalResourceInfo> resources = stepConsumer.getResourcesFromMeta( meta );
-                addExternalResources( resources, step );
-
-                // Add a RowListener if the step is data-driven
-                if ( stepConsumer.isDataDriven( meta ) ) {
-                  stepCombi.step.addRowListener(
-                    new StepExternalConsumerRowListener( stepConsumer, step ) );
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    protected void addExternalResources( Collection<IExternalResourceInfo> resources, StepInterface step ) {
-      if ( resources != null ) {
-        // Add the resources to the execution profile
-        IExecutionProfile executionProfile = profileMap.get( step.getTrans() );
-        if ( executionProfile != null ) {
-          String stepName = step.getStepname();
-          Map<String, List<IExternalResourceInfo>> resourceMap =
-            executionProfile.getExecutionData().getExternalResources();
-          List<IExternalResourceInfo> externalResources = resourceMap.get( stepName );
-          if ( externalResources == null ) {
-            externalResources = new LinkedList<IExternalResourceInfo>();
-          }
-          externalResources.addAll( resources );
-          resourceMap.put( stepName, externalResources );
-        }
-      }
-    }
-  }
-
-
-  public static class StepExternalConsumerRowListener extends RowAdapter {
-
-    private IStepExternalResourceConsumer stepExternalResourceConsumer;
-    private StepInterface step;
-
-    public StepExternalConsumerRowListener(
-      IStepExternalResourceConsumer stepExternalResourceConsumer, StepInterface step ) {
-      this.stepExternalResourceConsumer = stepExternalResourceConsumer;
-      this.step = step;
-    }
-
-    /**
-     * Called when rows are read by the step to which this listener is attached
-     *
-     * @param rowMeta The metadata (value types, e.g.) of the associated row data
-     * @param row     An array of Objects corresponding to the row data
-     * @see org.pentaho.di.trans.step.RowListener#rowReadEvent(org.pentaho.di.core.row.RowMetaInterface,
-     * Object[])
-     */
-    @Override
-    public void rowReadEvent( RowMetaInterface rowMeta, Object[] row ) throws KettleStepException {
-
-      Collection<IExternalResourceInfo> resources =
-        stepExternalResourceConsumer.getResourcesFromRow( step.getStepMeta().getStepMetaInterface(), rowMeta, row );
-      if ( resources != null ) {
-        // Add the resources to the execution profile
-        IExecutionProfile executionProfile = profileMap.get( step.getTrans() );
-        if ( executionProfile != null ) {
-          String stepName = step.getStepname();
-          Map<String, List<IExternalResourceInfo>> resourceMap =
-            executionProfile.getExecutionData().getExternalResources();
-          List<IExternalResourceInfo> externalResources = resourceMap.get( stepName );
-          if ( externalResources == null ) {
-            externalResources = new LinkedList<IExternalResourceInfo>();
-          }
-          externalResources.addAll( resources );
-          resourceMap.put( stepName, externalResources );
-        }
-      }
     }
   }
 }

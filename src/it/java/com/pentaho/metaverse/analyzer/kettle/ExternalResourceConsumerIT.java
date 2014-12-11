@@ -23,10 +23,11 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.TransformationRuntimeExtensionPoint;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExternalResourceConsumerListener;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
-import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,7 +93,7 @@ public class ExternalResourceConsumerIT {
     registrar.init( registry );
 
     ExternalResourceConsumerPluginType.getInstance().registerCustom(
-      TextFileInputStepAnalyzer.TextFileInputExternalResourceConsumer.class,
+      TextFileInputExternalResourceConsumer.class,
       "internal",
       "TextFileInputExternalResourceConsumer",
       "TextFileInputExternalResourceConsumer",
@@ -104,7 +105,7 @@ public class ExternalResourceConsumerIT {
       "custom", "transExecutionProfile", "TransformationStartThreads", "no description", null );
 
     ExtensionPointPluginType.getInstance().registerCustom(
-      TransformationRuntimeExtensionPoint.ExternalResourceConsumerListener.class,
+      StepExternalResourceConsumerListener.class,
       "custom", "stepExternalResource", "StepBeforeStart", "no description", null );
 
 

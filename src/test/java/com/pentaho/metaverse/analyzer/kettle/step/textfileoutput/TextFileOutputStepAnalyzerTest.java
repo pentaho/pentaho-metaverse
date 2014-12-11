@@ -267,8 +267,7 @@ public class TextFileOutputStepAnalyzerTest {
 
   @Test
   public void testTextFileOutputExternalResourceConsumer() throws Exception {
-    TextFileOutputStepAnalyzer.TextFileOutputExternalResourceConsumer consumer =
-      new TextFileOutputStepAnalyzer.TextFileOutputExternalResourceConsumer();
+    TextFileOutputExternalResourceConsumer consumer = new TextFileOutputExternalResourceConsumer();
 
     StepMeta meta = new StepMeta( "test", mockTextFileOutputMeta );
     StepMeta spyMeta = spy( meta );
