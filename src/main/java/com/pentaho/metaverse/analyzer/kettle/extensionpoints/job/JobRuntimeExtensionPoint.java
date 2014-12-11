@@ -19,7 +19,7 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
+package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,15 +30,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
-import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
-import org.pentaho.di.job.JobExecutionExtension;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.version.BuildVersion;
@@ -250,27 +249,4 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
   public void jobStarted( Job job ) throws KettleException {
     // Do nothing, this method has already been called before the extension point could add the listener
   }
-
-  @ExtensionPoint(
-    description = "Job step external resource listener",
-    extensionPointId = "JobBeforeJobEntryExecution",
-    id = "jobEntryExternalResource" )
-  public static class ExternalResourceConsumerListener implements ExtensionPointInterface {
-
-
-    /**
-     * This method is called by the Kettle code when a step is about to start
-     *
-     * @param log    the logging channel to log debugging information to
-     * @param object The subject object that is passed to the plugin code
-     * @throws org.pentaho.di.core.exception.KettleException In case the plugin decides that an error has occurred
-     *                                                       and the parent process should stop.
-     */
-    @Override
-    public void callExtensionPoint( LogChannelInterface log, Object object ) throws KettleException {
-      JobExecutionExtension jobExec = (JobExecutionExtension) object;
-      // TODO get job entries that use external resources, match them to this step
-    }
-  }
-
 }

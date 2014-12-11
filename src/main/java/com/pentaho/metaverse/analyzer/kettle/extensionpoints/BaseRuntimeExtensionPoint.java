@@ -49,7 +49,7 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
    * @param executionProfile the execution profile to be output
    * @throws IOException
    */
-  protected void writeExecutionProfile( PrintStream out, IExecutionProfile executionProfile ) throws IOException {
+  public void writeExecutionProfile( PrintStream out, IExecutionProfile executionProfile ) throws IOException {
     // TODO where to persist the execution profile?
     ExecutionProfileUtil.dumpExecutionProfile( out, executionProfile );
   }
@@ -59,7 +59,7 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
    *
    * @return information about the current execution engine
    */
-  protected IExecutionEngine getExecutionEngineInfo() {
+  public IExecutionEngine getExecutionEngineInfo() {
     IExecutionEngine executionEngine = new ExecutionEngine();
     executionEngine.setName( EXECUTION_ENGINE_NAME );
     executionEngine.setVersion( BuildVersion.getInstance().getVersion() );

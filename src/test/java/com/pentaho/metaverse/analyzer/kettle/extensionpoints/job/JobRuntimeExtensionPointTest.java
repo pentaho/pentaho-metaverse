@@ -1,4 +1,4 @@
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
+package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -15,6 +15,7 @@ import java.io.PrintStream;
 import java.util.Collections;
 import java.util.List;
 
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -23,22 +24,19 @@ import org.mockito.Mockito;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
 
 import com.pentaho.metaverse.api.model.IExecutionProfile;
-import org.pentaho.di.job.Job;
-import org.pentaho.di.trans.Trans;
 
 public class JobRuntimeExtensionPointTest {
 
   private static final String TEST_SERVER = "test.pentaho.com";
   private static final String TEST_USER = "joe";
-  private static final String TEST_JOB_NAME = "test jobformation";
-  private static final String TEST_JOB_PATH = "/path/to/test/jobformation.ktr";
-  private static final String TEST_JOB_DESCRIPTION = "This is a test jobformation.";
+  private static final String TEST_JOB_NAME = "test job";
+  private static final String TEST_JOB_PATH = "/path/to/test/job.kjb";
+  private static final String TEST_JOB_DESCRIPTION = "This is a test job.";
   private static final String TEST_VAR_NAME = "testVariable";
   private static final String TEST_VAR_VALUE = "testVariableValue";
   private static final String TEST_PARAM_NAME = "testParam";
@@ -59,7 +57,9 @@ public class JobRuntimeExtensionPointTest {
   public void setUp() throws Exception {
     jobExtensionPoint = new JobRuntimeExtensionPoint();
     jobMeta = spy( new JobMeta() );
-    jobMeta.setFilename( "test.kjb" );
+    jobMeta.setName( TEST_JOB_NAME );
+    jobMeta.setFilename( TEST_JOB_PATH );
+    jobMeta.setDescription( TEST_JOB_DESCRIPTION );
     job = new Job( null, jobMeta );
     job.setExecutingServer( TEST_SERVER );
     job.setExecutingUser( TEST_USER );
