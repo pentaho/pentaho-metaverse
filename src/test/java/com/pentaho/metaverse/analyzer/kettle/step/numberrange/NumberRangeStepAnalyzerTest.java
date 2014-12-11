@@ -20,7 +20,7 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step;
+package com.pentaho.metaverse.analyzer.kettle.step.numberrange;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;

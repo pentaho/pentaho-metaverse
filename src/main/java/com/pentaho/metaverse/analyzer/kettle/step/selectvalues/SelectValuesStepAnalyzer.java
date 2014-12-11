@@ -20,10 +20,11 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step;
+package com.pentaho.metaverse.analyzer.kettle.step.selectvalues;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaFactory;

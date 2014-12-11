@@ -26,7 +26,7 @@ import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceCon
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.TransformationRuntimeExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
-import com.pentaho.metaverse.analyzer.kettle.step.TextFileInputStepAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;

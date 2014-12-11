@@ -30,7 +30,7 @@ import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceCon
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
-import com.pentaho.metaverse.analyzer.kettle.step.TextFileInputStepAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer;

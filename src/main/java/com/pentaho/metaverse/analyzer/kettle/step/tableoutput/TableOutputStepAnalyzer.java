@@ -20,9 +20,10 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step;
+package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.Namespace;
 import org.pentaho.di.trans.step.BaseStepMeta;

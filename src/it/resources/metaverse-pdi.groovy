@@ -1,3 +1,5 @@
+import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer
 import org.pentaho.platform.api.metaverse.*
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.graph.*

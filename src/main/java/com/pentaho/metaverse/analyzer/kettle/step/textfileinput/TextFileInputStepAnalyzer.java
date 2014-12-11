@@ -20,11 +20,12 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step;
+package com.pentaho.metaverse.analyzer.kettle.step.textfileinput;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.apache.commons.vfs.FileObject;
