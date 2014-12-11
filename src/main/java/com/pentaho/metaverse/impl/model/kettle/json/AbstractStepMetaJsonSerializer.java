@@ -30,11 +30,12 @@ import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.step.IFieldLineageMetadataProvider;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
-import com.pentaho.metaverse.analyzer.kettle.step.IStepModifiesFields;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.model.kettle.FieldInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import com.pentaho.metaverse.messages.Messages;
@@ -72,6 +73,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
   public static final String JSON_PROPERTY_INPUT_FIELDS = "inputFields";
   public static final String JSON_PROPERTY_OUTPUT_FIELDS = "outputFields";
   public static final String JSON_PROPERTY_EXTERNAL_RESOURCES = "externalResources";
+  public static final String JSON_PROPERTY_MAPPINGS = "fieldMappings";
 
   private static final Logger LOGGER = LoggerFactory.getLogger( AbstractStepMetaJsonSerializer.class );
 
@@ -122,9 +124,8 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
       writeInputFields( parentStepMeta, json );
       writeOutputFields( parentStepMeta, json );
 
-      json.writeArrayFieldStart( JSON_PROPERTY_TRANSFORMS );
       writeFieldTransforms( meta, json, serializerProvider );
-      json.writeEndArray();
+      writeFieldMappings( meta, json, serializerProvider );
 
       writeExternalResources( meta, json, serializerProvider );
 
@@ -132,6 +133,27 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
 
     json.writeEndObject();
 
+  }
+
+  protected void writeFieldMappings( T meta, JsonGenerator json, SerializerProvider serializerProvider )
+    throws IOException {
+
+    json.writeArrayFieldStart( JSON_PROPERTY_MAPPINGS );
+
+    IFieldLineageMetadataProvider mapper = getFieldLineageMetadataProvider( meta );
+    try {
+      Set<IFieldMapping> fieldMappings = mapper.getFieldMappings( meta );
+      if ( fieldMappings != null ) {
+        for ( IFieldMapping fieldMapping : fieldMappings ) {
+          json.writeObject( fieldMapping );
+        }
+      }
+    } catch ( MetaverseAnalyzerException e ) {
+      LOGGER.warn( Messages.getString( "WARNING.Serialization.Step.WriteFieldMappings",
+          meta.getParentStepMeta().getName() ), e );
+    }
+
+    json.writeEndArray();
   }
 
   protected void writeRepoAttributes( T meta, JsonGenerator json ) throws IOException {
@@ -149,25 +171,12 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
     }
   }
 
-  /**
-   * The wrapping array will already be constructed for you, just add serializations of the transforms
-   * as objects.
-   * <code>
-   *   ...
-   *   "transforms" : [
-   *     // your transform objects here
-   *   ]
-   *   ...
-   * </code>
-   * @param meta
-   * @param json
-   * @param serializerProvider
-   * @throws IOException
-   * @throws JsonGenerationException
-   */
   protected void writeFieldTransforms( T meta, JsonGenerator json, SerializerProvider serializerProvider )
     throws IOException, JsonGenerationException {
-    IStepModifiesFields mapper = getStepModifiesFieldsHandler( meta );
+
+    json.writeArrayFieldStart( JSON_PROPERTY_TRANSFORMS );
+
+    IFieldLineageMetadataProvider mapper = getFieldLineageMetadataProvider( meta );
     try {
       Set<ComponentDerivationRecord> changes = mapper.getChangeRecords( meta );
       if ( changes != null ) {
@@ -181,6 +190,9 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
       LOGGER.warn( Messages.getString( "WARNING.Serialization.Step.WriteFieldTransforms",
           meta.getParentStepMeta().getName() ), e );
     }
+
+    json.writeEndArray();
+
   }
 
   /**
@@ -260,9 +272,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
     return stepType;
   }
 
-
-
-  protected IStepModifiesFields getStepModifiesFieldsHandler( T meta ) {
+  protected IFieldLineageMetadataProvider getFieldLineageMetadataProvider( T meta ) {
     IStepAnalyzerProvider provider = getStepAnalyzerProvider();
     if ( provider == null ) {
       // try to get it from PentahoSystem
@@ -275,8 +285,8 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
       Set<IStepAnalyzer> analyzers = provider.getAnalyzers( types );
       if ( analyzers != null ) {
         for ( IStepAnalyzer analyzer : analyzers ) {
-          if ( analyzer instanceof IStepModifiesFields ) {
-            return (IStepModifiesFields) analyzer;
+          if ( analyzer instanceof IFieldLineageMetadataProvider ) {
+            return (IFieldLineageMetadataProvider) analyzer;
           }
         }
       }
