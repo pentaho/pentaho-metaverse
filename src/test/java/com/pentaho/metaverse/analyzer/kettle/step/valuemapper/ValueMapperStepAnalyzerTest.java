@@ -20,10 +20,12 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step;
+package com.pentaho.metaverse.analyzer.kettle.step.valuemapper;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzerTest;
+import com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
@@ -82,11 +84,9 @@ public class ValueMapperStepAnalyzerTest {
   public void setUp() throws Exception {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
-//    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
     when( namespace.getNamespaceId() ).thenReturn( "namespace" );
     when( descriptor.getNamespace() ).thenReturn( namespace );
-//    when( descriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
     when( descriptor.getParentNamespace() ).thenReturn( namespace );
     when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
 
@@ -148,9 +148,6 @@ public class ValueMapperStepAnalyzerTest {
     verify( builder, times( 1 ) ).updateNode( any( IMetaverseNode.class ) );
 
     // make sure that we didn't get into the handling of new field creation instead of overwriting the existing one
-    verify( spyAnalyzer, times( 0 ) ).processFieldChangeRecord( any( IMetaverseComponentDescriptor.class ),
-      any( IMetaverseNode.class ), any( ComponentDerivationRecord.class ) );
-
     verify( builder, times( 0 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ),
       any( IMetaverseNode.class ) );
   }
@@ -184,9 +181,6 @@ public class ValueMapperStepAnalyzerTest {
       any( IMetaverseNode.class ) );
 
     verify( builder, times( 0 ) ).updateNode( any( IMetaverseNode.class ) );
-
-    verify( spyAnalyzer, times( 1 ) ).processFieldChangeRecord( any( IMetaverseComponentDescriptor.class ),
-      any( IMetaverseNode.class ), any( ComponentDerivationRecord.class ) );
 
     verify( builder, times( 1 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ),
       any( IMetaverseNode.class ) );

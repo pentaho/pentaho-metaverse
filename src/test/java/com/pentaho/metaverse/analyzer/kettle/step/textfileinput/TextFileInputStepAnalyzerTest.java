@@ -20,9 +20,10 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step;
+package com.pentaho.metaverse.analyzer.kettle.step.textfileinput;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -41,7 +42,6 @@ import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;

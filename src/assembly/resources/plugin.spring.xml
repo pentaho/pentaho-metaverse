@@ -56,14 +56,14 @@
     </property>
   </bean>
 
-  <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableOutputStepAnalyzer"/>
-  <bean id="TextFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TextFileInputStepAnalyzer"/>
-  <bean id="SelectValuesStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.SelectValuesStepAnalyzer"/>
-  <bean id="NumberRangeStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.NumberRangeStepAnalyzer"/>
+  <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer"/>
+  <bean id="TextFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer"/>
+  <bean id="SelectValuesStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer"/>
+  <bean id="NumberRangeStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer"/>
   <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
-  <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.TransJobEntryAnalyzer" />
-  <bean id="ValueMapperStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.ValueMapperStepAnalyzer"/>
-  <bean id="TextFileOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TextFileOutputStepAnalyzer"/>
+  <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer" />
+  <bean id="ValueMapperStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer"/>
+  <bean id="TextFileOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputStepAnalyzer"/>
 
   <bean id="IDatabaseConnectionAnalyzerProvider"
         class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzerProvider" scope="singleton">

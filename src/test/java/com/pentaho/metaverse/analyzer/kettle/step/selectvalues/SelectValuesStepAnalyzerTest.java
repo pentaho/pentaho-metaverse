@@ -1,6 +1,7 @@
-package com.pentaho.metaverse.analyzer.kettle.step;
+package com.pentaho.metaverse.analyzer.kettle.step.selectvalues;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
