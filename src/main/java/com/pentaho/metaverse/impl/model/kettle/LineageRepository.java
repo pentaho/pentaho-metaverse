@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.impl.model.kettle;
 
+import org.pentaho.di.core.Condition;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.repository.ObjectId;
@@ -220,6 +221,17 @@ public class LineageRepository extends SimpleRepository {
   @Override public void insertStepDatabase( ObjectId id_transformation, ObjectId id_step, ObjectId id_database )
     throws KettleException {
     // do nothing
+  }
+
+  @Override
+  public void saveConditionStepAttribute( ObjectId id_transformation, ObjectId id_step, String code, Condition condition ) throws KettleException {
+    // TODO
+  }
+
+  @Override
+  public Condition loadConditionFromStepAttribute( ObjectId id_step, String code ) throws KettleException {
+    // TODO
+    return new Condition();
   }
 }
 

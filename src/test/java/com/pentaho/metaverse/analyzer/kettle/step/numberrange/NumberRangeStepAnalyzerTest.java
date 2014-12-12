@@ -23,7 +23,9 @@
 package com.pentaho.metaverse.analyzer.kettle.step.numberrange;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +51,7 @@ import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -138,43 +141,45 @@ public class NumberRangeStepAnalyzerTest {
     vmiInField.setOrigin( "originStep" );
     final ValueMetaInterface vmiOutField = new ValueMetaString( "outField" );
     vmiOutField.setOrigin( "test" );
-    final String[] inFields = new String[] { "inField" };
-    final String[] outFields = new String[] { "inField,outField" };
+    final String[] inFields = new String[]{ "inField" };
+    final String[] outFields = new String[]{ "inField,outField" };
     List<ValueMetaInterface> prevStepFieldsValueMetaList = Arrays.asList( vmiInField );
     List<ValueMetaInterface> stepFieldsValueMetaList = Arrays.asList( vmiInField, vmiOutField );
 
     when( mockInRowMetaInterface.getFieldNames() ).thenReturn( inFields );
     when( mockInRowMetaInterface.getValueMetaList() ).thenReturn( prevStepFieldsValueMetaList );
     when( mockInRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(
-        new Answer<ValueMetaInterface>() {
+      new Answer<ValueMetaInterface>() {
 
-          @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-            Object[] args = invocation.getArguments();
-            if ( args[0] == "inField" ) {
-              return vmiInField;
-            }
-            return null;
+        @Override
+        public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+          Object[] args = invocation.getArguments();
+          if ( args[0] == "inField" ) {
+            return vmiInField;
           }
+          return null;
         }
+      }
     );
 
     when( mockOutRowMetaInterface.getFieldNames() ).thenReturn( outFields );
     when( mockOutRowMetaInterface.getValueMetaList() ).thenReturn( stepFieldsValueMetaList );
     when( mockOutRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(
-        new Answer<ValueMetaInterface>() {
+      new Answer<ValueMetaInterface>() {
 
-          @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-            Object[] args = invocation.getArguments();
-            if ( args[0] == "inField" ) {
+        @Override
+        public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+          Object[] args = invocation.getArguments();
+          if ( args[0] == "inField" ) {
 
-              return vmiInField;
-            }
-            if ( args[0] == "outField" ) {
-              return vmiOutField;
-            }
-            return null;
+            return vmiInField;
           }
+          if ( args[0] == "outField" ) {
+            return vmiOutField;
+          }
+          return null;
         }
+      }
     );
 
     IMetaverseNode result = analyzer.analyze( descriptor, numberRangeMeta );
@@ -189,12 +194,83 @@ public class NumberRangeStepAnalyzerTest {
 
     // make sure there is a "uses" link added
     verify( mockBuilder, times( 1 ) ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
 
     // make sure there is a "uses" link added
     verify( mockBuilder, times( 1 ) ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+  }
 
+  @Test
+  public void testGetFieldMappings() throws Exception {
+    StepMeta meta = new StepMeta( "test", numberRangeMeta );
+    StepMeta spyMeta = spy( meta );
+
+    when( numberRangeMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( spyMeta.getStepID() ).thenReturn( "Select values" );
+
+    // set up the input fields
+    String[] inFields = { "field1", "field2" };
+    String[] outFields = { "field1", "field2", "field3" };
+    final ValueMetaInterface field1 = new ValueMetaNumber( "field1" );
+    field1.setOrigin( "originStep" );
+    final ValueMetaInterface field2 = new ValueMetaNumber( "field2" );
+    field1.setOrigin( "originStep" );
+    final ValueMetaInterface field3 = new ValueMetaString( "field3" );
+    field3.setOrigin( "test" );
+
+    when( mockInRowMetaInterface.getFieldNames() ).thenReturn( inFields );
+    when( mockInRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(
+      new Answer<ValueMetaInterface>() {
+
+        @Override
+        public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+          Object[] args = invocation.getArguments();
+          if ( args[0] == "field1" ) {
+            return field1;
+          } else if ( args[0] == "field2" ) {
+            return field2;
+          }
+          return null;
+        }
+      }
+    );
+
+    when( mockOutRowMetaInterface.getFieldNames() ).thenReturn( outFields );
+    when( mockOutRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(
+      new Answer<ValueMetaInterface>() {
+
+        @Override
+        public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+          Object[] args = invocation.getArguments();
+          if ( args[0] == "field1" ) {
+            return field1;
+          } else if ( args[0] == "field2" ) {
+            return field2;
+          } else if ( args[0] == "field3" ) {
+            return field3;
+          }
+          return null;
+        }
+      }
+    );
+
+    // set up the input fields
+    when( numberRangeMeta.getInputField() ).thenReturn( "field1" );
+    when( numberRangeMeta.getOutputField() ).thenReturn( "field3" );
+    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockInRowMetaInterface );
+    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockOutRowMetaInterface );
+    when( mockOutRowMetaInterface.getFieldNames() ).thenReturn( outFields );
+
+    Set<IFieldMapping> mappings = analyzer.getFieldMappings( numberRangeMeta );
+
+    Set<IFieldMapping> goldenData = new HashSet<IFieldMapping>( 3 );
+    goldenData.add( new FieldMapping( "field1", "field1" ) );
+    goldenData.add( new FieldMapping( "field2", "field2" ) );
+    goldenData.add( new FieldMapping( "field1", "field3" ) );
+    assertTrue( mappings.containsAll( goldenData ) );
+    assertEquals( goldenData.size(), mappings.size() );
   }
 
   @Test

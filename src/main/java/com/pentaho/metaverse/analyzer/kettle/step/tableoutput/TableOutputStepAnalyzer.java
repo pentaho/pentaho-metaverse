@@ -57,8 +57,8 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
     IMetaverseNode node = super.analyze( descriptor, tableOutputMeta );
 
     String tableName = descriptor.getContext().getContextName().equals( DictionaryConst.CONTEXT_RUNTIME )
-        ? parentTransMeta.environmentSubstitute( tableOutputMeta.getTableName() )
-        : tableOutputMeta.getTableName();
+      ? parentTransMeta.environmentSubstitute( tableOutputMeta.getTableName() )
+      : tableOutputMeta.getTableName();
 
     String[] fieldNames = tableOutputMeta.getFieldStream();
     if ( fieldNames == null || fieldNames.length <= 0 || !tableOutputMeta.specifyFields() ) {
@@ -81,8 +81,8 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
         IMetaverseNode dbn = dbNodes.get( dbConnectionName );
         if ( dbn != null ) {
           IMetaverseComponentDescriptor dbTableDescriptor = new MetaverseComponentDescriptor(
-              tableName, DictionaryConst.NODE_TYPE_DATA_TABLE,
-              new Namespace( dbn.getLogicalId() ) );
+            tableName, DictionaryConst.NODE_TYPE_DATA_TABLE,
+            new Namespace( dbn.getLogicalId() ) );
 
           IMetaverseNode tableNode = createNodeFromDescriptor( dbTableDescriptor );
           tableNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, dbn.getLogicalId() );
@@ -99,13 +99,13 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
           String tableLogicalId = tableNode.getLogicalId();
 
           for ( int i = 0; i < fieldNames.length; i++ ) {
-            String fieldName = fieldNames[ i ];
+            String fieldName = fieldNames[i];
 
             // We can't use our own descriptor here, we need to get the descriptor for the origin step
             IMetaverseComponentDescriptor origin = getPrevStepFieldOriginDescriptor( descriptor, fieldName );
 
             IMetaverseNode fieldNode = createNodeFromDescriptor(
-                new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD, origin ) );
+              new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD, origin ) );
 
             fieldNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, origin.getNamespaceId() );
 
@@ -114,10 +114,10 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
             if ( dbFieldNames != null ) {
 
               IMetaverseComponentDescriptor dbColumnDescriptor = new MetaverseComponentDescriptor(
-                  dbFieldNames[ i ],
-                  DictionaryConst.NODE_TYPE_DATA_COLUMN,
-                  new Namespace( tableLogicalId ),
-                  descriptor.getContext() );
+                dbFieldNames[i],
+                DictionaryConst.NODE_TYPE_DATA_COLUMN,
+                new Namespace( tableLogicalId ),
+                descriptor.getContext() );
               IMetaverseNode dbFieldNode = createNodeFromDescriptor( dbColumnDescriptor );
 
               metaverseBuilder.addNode( dbFieldNode );
@@ -133,29 +133,19 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
     return rootNode;
   }
 
-  @Override public Set<IFieldMapping> getFieldMappings( TableOutputMeta meta ) throws MetaverseAnalyzerException {
+  @Override
+  public Set<IFieldMapping> getFieldMappings( TableOutputMeta meta ) throws MetaverseAnalyzerException {
     Set<IFieldMapping> mappings = new LinkedHashSet<IFieldMapping>();
     if ( meta.specifyFields() ) {
       String[] streamFields = meta.getFieldStream();
       String[] dbTableFields = meta.getFieldDatabase();
       for ( int i = 0; i < dbTableFields.length; i++ ) {
-        String streamField = streamFields[ i ];
-        String tableField = dbTableFields[ i ];
+        String streamField = streamFields[i];
+        String tableField = dbTableFields[i];
         mappings.add( new FieldMapping( streamField, tableField ) );
       }
     } else {
-      // inputs map directly to outputs
-      if ( prevFields == null ) {
-        validateState( null, meta );
-        loadInputAndOutputStreamFields();
-        if ( prevFields == null ) {
-          // either not connected or there aren't any fields coming into the step so there are no mappings
-          return null;
-        }
-      }
-      for ( String field : prevFields.getFieldNames() ) {
-        mappings.add( new FieldMapping( field, field ) );
-      }
+      mappings.addAll( getPassthruFieldMappings( meta ) );
     }
     return mappings;
   }

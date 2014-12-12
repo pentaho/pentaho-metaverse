@@ -92,7 +92,7 @@ public class JsonLineageIT {
   }
 
   @Test
-  public void testJsonSerialize() throws Exception {
+  public void testFileToTableJsonSerialize() throws Exception {
     ObjectMapper mapper = new ObjectMapper();
     mapper.enable( SerializationFeature.INDENT_OUTPUT );
     mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );
@@ -117,6 +117,50 @@ public class JsonLineageIT {
     mapper.registerModule( transModule );
 
     String ktrPath = "src/it/resources/repo/samples/file_to_table.ktr";
+    TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
+
+    String json = mapper.writeValueAsString( tm );
+    File jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".json" );
+    FileUtils.writeStringToFile( jsonOut, json );
+
+    // now deserilaize it
+    TransMeta rehydrated = mapper.readValue( json, TransMeta.class );
+
+//    String ktr = rehydrated.getXML();
+//    FileUtils.writeStringToFile( new File( "src/it/resources/tmp/" + tm.getName() + ".after.ktr" ), ktr );
+    assertEquals( tm.getName(), rehydrated.getName() );
+
+    json = mapper.writeValueAsString( rehydrated );
+    jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".after.json" );
+    FileUtils.writeStringToFile( jsonOut, json );
+  }
+
+  @Test
+  public void testGettingStartedJsonSerialize() throws Exception {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.enable( SerializationFeature.INDENT_OUTPUT );
+    mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );
+    mapper.enable( SerializationFeature.WRAP_EXCEPTIONS );
+
+    LineageRepository writeRepo = new LineageRepository();
+    LineageRepository readRepo = new LineageRepository();
+
+    SimpleModule transModule = new SimpleModule( "PDIModule", new Version( 1, 0, 0, null ) );
+    TransMetaJsonSerializer transMetaJsonSerializer = new TransMetaJsonSerializer( TransMeta.class );
+    transMetaJsonSerializer.setLineageRepository( writeRepo );
+    transModule.addSerializer( transMetaJsonSerializer );
+
+    BaseStepMetaJsonSerializer baseStepMetaJsonSerializer = new BaseStepMetaJsonSerializer( BaseStepMeta.class );
+
+    baseStepMetaJsonSerializer.setLineageRepository( writeRepo );
+    transModule.addSerializer( baseStepMetaJsonSerializer );
+
+    transModule.addSerializer( new TableOutputStepMetaJsonSerializer( TableOutputMeta.class, writeRepo ) );
+    transModule.addDeserializer( TransMeta.class, new TransMetaJsonDeserializer( TransMeta.class, readRepo ) );
+
+    mapper.registerModule( transModule );
+
+    String ktrPath = "src/it/resources/repo/demo/Getting Started Transformation.ktr";
     TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
 
     String json = mapper.writeValueAsString( tm );
