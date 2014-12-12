@@ -28,8 +28,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.impl.model.BaseResourceInfo;
-import com.pentaho.metaverse.impl.model.JdbcResourceInfo;
-import com.pentaho.metaverse.impl.model.JndiResourceInfo;
+import com.pentaho.metaverse.impl.model.DatabaseResourceInfoUtil;
 import com.pentaho.metaverse.impl.model.ParamInfo;
 import com.pentaho.metaverse.impl.model.kettle.HopInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
@@ -146,14 +145,8 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
     // connections
     json.writeArrayFieldStart( JSON_PROPERTY_CONNECTIONS );
     for ( DatabaseMeta dbmeta : meta.getDatabases() ) {
-      BaseResourceInfo resourceInfo;
-      if ( "Native".equals( dbmeta.getAccessTypeDesc() ) ) {
-        resourceInfo = new JdbcResourceInfo( dbmeta );
-      } else {
-        resourceInfo = new JndiResourceInfo( dbmeta );
-      }
+      BaseResourceInfo resourceInfo = (BaseResourceInfo) DatabaseResourceInfoUtil.createDatabaseResource( dbmeta );
       resourceInfo.setInput( true );
-
       json.writeObject( resourceInfo );
     }
     json.writeEndArray();

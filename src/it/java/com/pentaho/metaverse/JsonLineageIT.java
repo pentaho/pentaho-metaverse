@@ -30,8 +30,8 @@ import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceCon
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
+import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer;
@@ -71,6 +71,7 @@ public class JsonLineageIT {
     PluginRegistry.init();
 
     TextFileInputExternalResourceConsumer tfiConsumer = new TextFileInputExternalResourceConsumer();
+    TableOutputExternalResourceConsumer toConsumer = new TableOutputExternalResourceConsumer();
 
     // Create a fake plugin to exercise the map building logic
     PluginInterface mockPlugin = mock( PluginInterface.class );
@@ -78,6 +79,7 @@ public class JsonLineageIT {
     when( mockPlugin.getName() ).thenReturn( "TextFileInputExternalResourceConsumer" );
     Map<Class<?>, String> classMap = new HashMap<Class<?>, String>();
     classMap.put( IExternalResourceConsumer.class, tfiConsumer.getClass().getName() );
+    classMap.put( IExternalResourceConsumer.class, toConsumer.getClass().getName() );
 
     doReturn( IExternalResourceConsumer.class ).when( mockPlugin ).getMainType();
     registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockPlugin );
