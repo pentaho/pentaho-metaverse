@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
@@ -178,5 +179,62 @@ public class TableOutputStepAnalyzerTest {
     assertNotNull( types );
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( TableOutputMeta.class ) );
+  }
+
+  @Test
+  public void testGetFieldMappings() throws Exception {
+    String[] streamFields = { "name", "age", "date of birth" };
+    String[] tableFields = { "name", "age", "DOB" };
+
+    when( mockTableOutputMeta.specifyFields() ).thenReturn( true );
+    when( mockTableOutputMeta.getFieldStream() ).thenReturn( streamFields );
+    when( mockTableOutputMeta.getFieldDatabase() ).thenReturn( tableFields );
+
+    Set<IFieldMapping> mappings = analyzer.getFieldMappings( mockTableOutputMeta );
+    assertEquals( 3, mappings.size() );
+    for ( IFieldMapping mapping : mappings ) {
+      if ( mapping.getSourceFieldName().equalsIgnoreCase( "date of birth" ) ) {
+        assertEquals( "DOB", mapping.getTargetFieldName() );
+      } else {
+        // otherwise they are the same name
+        assertEquals( mapping.getSourceFieldName(), mapping.getTargetFieldName() );
+      }
+    }
+  }
+
+  @Test
+  public void testGetFieldMappings_fieldsNoSpecified() throws Exception {
+    StepMeta meta = new StepMeta( "test", mockTableOutputMeta );
+    StepMeta spyMeta = spy( meta );
+
+    when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+
+    // additional hydration needed to get test lines code coverage
+    when( mockDatabaseMeta.getDatabaseName() ).thenReturn( "testDatabase" );
+    when( mockDatabaseMeta.getAccessTypeDesc() ).thenReturn( "Native" );
+    when( mockTableOutputMeta.getDatabaseMeta() ).thenReturn( mockDatabaseMeta );
+    when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
+    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "test1", "test2" } );
+    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+
+      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        if ( args[0] == "test1" )
+          return new ValueMetaString( "test1" );
+        if ( args[0] == "test2" )
+          return new ValueMetaString( "test2" );
+        return null;
+      }
+    } );
+
+    when( mockTableOutputMeta.specifyFields() ).thenReturn( false );
+
+    Set<IFieldMapping> mappings = analyzer.getFieldMappings( mockTableOutputMeta );
+    assertEquals( 2, mappings.size() );
+    for ( IFieldMapping mapping : mappings ) {
+      assertEquals( mapping.getSourceFieldName(), mapping.getTargetFieldName() );
+    }
   }
 }
