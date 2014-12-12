@@ -24,8 +24,10 @@ package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.Namespace;
+import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
@@ -33,6 +35,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -128,6 +131,33 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
     }
 
     return rootNode;
+  }
+
+  @Override public Set<IFieldMapping> getFieldMappings( TableOutputMeta meta ) throws MetaverseAnalyzerException {
+    Set<IFieldMapping> mappings = new LinkedHashSet<IFieldMapping>();
+    if ( meta.specifyFields() ) {
+      String[] streamFields = meta.getFieldStream();
+      String[] dbTableFields = meta.getFieldDatabase();
+      for ( int i = 0; i < dbTableFields.length; i++ ) {
+        String streamField = streamFields[ i ];
+        String tableField = dbTableFields[ i ];
+        mappings.add( new FieldMapping( streamField, tableField ) );
+      }
+    } else {
+      // inputs map directly to outputs
+      if ( prevFields == null ) {
+        validateState( null, meta );
+        loadInputAndOutputStreamFields();
+        if ( prevFields == null ) {
+          // either not connected or there aren't any fields coming into the step so there are no mappings
+          return null;
+        }
+      }
+      for ( String field : prevFields.getFieldNames() ) {
+        mappings.add( new FieldMapping( field, field ) );
+      }
+    }
+    return mappings;
   }
 
   @Override
