@@ -24,6 +24,8 @@ package com.pentaho.metaverse.analyzer.kettle.step.numberrange;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.numberrange.NumberRangeMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
@@ -41,12 +43,12 @@ public class NumberRangeStepAnalyzer extends BaseStepAnalyzer<NumberRangeMeta> {
 
   /**
    * Analyzes Number Range steps to determine the various operations performed on fields and their data
-   * 
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor,java.lang.Object)
+   *
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor, java.lang.Object)
    */
   @Override
   public IMetaverseNode analyze(
-      IMetaverseComponentDescriptor descriptor, NumberRangeMeta numberRangeMeta ) throws MetaverseAnalyzerException {
+    IMetaverseComponentDescriptor descriptor, NumberRangeMeta numberRangeMeta ) throws MetaverseAnalyzerException {
 
     // Do common analysis for all steps
     super.analyze( descriptor, numberRangeMeta );
@@ -57,7 +59,7 @@ public class NumberRangeStepAnalyzer extends BaseStepAnalyzer<NumberRangeMeta> {
     if ( inputFieldName != null && outputFieldName != null ) {
       // We can't use our own descriptor here, we need to get the descriptor for the origin step
       IMetaverseNode inputFieldNode =
-          createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, inputFieldName ) );
+        createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, inputFieldName ) );
 
       // Not sure if we need a new node or not, but the builder will take care of it, so just create a node
       // so we can add the "derives" link
@@ -68,6 +70,21 @@ public class NumberRangeStepAnalyzer extends BaseStepAnalyzer<NumberRangeMeta> {
       metaverseBuilder.addLink( inputFieldNode, DictionaryConst.LINK_DERIVES, outputFieldNode );
     }
     return rootNode;
+  }
+
+  /**
+   * Provide field mappings that occur in this step.
+   *
+   * @param meta The step metadata
+   * @return a set of field mappings (input field -> output field)
+   * @throws org.pentaho.platform.api.metaverse.MetaverseAnalyzerException
+   */
+  @Override
+  public Set<IFieldMapping> getFieldMappings( NumberRangeMeta meta ) throws MetaverseAnalyzerException {
+    Set<IFieldMapping> fieldMappings = new HashSet<IFieldMapping>();
+    fieldMappings.add( new FieldMapping( meta.getInputField(), meta.getOutputField() ) );
+    fieldMappings.addAll( getPassthruFieldMappings( meta ) );
+    return fieldMappings;
   }
 
   @Override
