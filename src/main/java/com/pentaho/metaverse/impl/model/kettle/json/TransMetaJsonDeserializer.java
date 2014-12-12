@@ -99,11 +99,11 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
     // variables
     deserializeVariables( transMeta, node, mapper );
 
-    // steps
-    deserializeSteps( transMeta, node, mapper );
-
     // connections
     deserializeConnections( transMeta, node, mapper );
+
+    // steps
+    deserializeSteps( transMeta, node, mapper );
 
     // hops
     deserializeHops( transMeta, node, mapper );
@@ -194,7 +194,7 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
       try {
         Class clazz = this.getClass().getClassLoader().loadClass( className );
         BaseStepMeta meta = (BaseStepMeta) clazz.newInstance();
-        meta.readRep( getRepository(), null, stepId, null );
+        meta.readRep( getRepository(), null, stepId, transMeta.getDatabases() );
         StepMetaInterface smi = (StepMetaInterface) meta;
         StepMeta step = new StepMeta( stepName, smi );
         transMeta.addStep( step );
