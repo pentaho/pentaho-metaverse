@@ -196,13 +196,25 @@ public class LineageRepository extends SimpleRepository {
 
   @Override public DatabaseMeta loadDatabaseMetaFromStepAttribute( ObjectId id_step, String code,
     List<DatabaseMeta> databases ) throws KettleException {
-    // do nothing for now
-    return null;
+    DatabaseMeta db = null;
+    Map<String, Object> attrs = getStepAttributesCache( id_step );
+    for ( DatabaseMeta database : databases ) {
+      Object dbname = attrs.get( code );
+      if ( database.getName().equals( dbname ) ) {
+        db = database;
+        break;
+      }
+    }
+    return db;
   }
 
   @Override public void saveDatabaseMetaStepAttribute( ObjectId id_transformation, ObjectId id_step, String code,
     DatabaseMeta database ) throws KettleException {
-    // do nothing
+    Map<String, Object> attrs = getStepAttributesCache( id_step );
+    // just save that database name as a reference here
+    if ( database != null ) {
+      attrs.put( code, database.getName() );
+    }
   }
 
   @Override public void insertStepDatabase( ObjectId id_transformation, ObjectId id_step, ObjectId id_database )

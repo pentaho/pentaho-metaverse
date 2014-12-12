@@ -24,6 +24,7 @@ package com.pentaho.metaverse.impl.model.kettle;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.StringObjectId;
 
@@ -32,9 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * User: RFellows Date: 12/3/14
@@ -234,5 +235,25 @@ public class LineageRepositoryTest {
   public void testCountNrStepAttributes() throws Exception {
     int count = repo.countNrStepAttributes( stepId, "intField" );
     assertEquals( 1, count );
+  }
+
+  @Test
+  public void testSaveDatabaseMetaStepAttribute() throws Exception {
+    List<DatabaseMeta> dbs = new ArrayList<DatabaseMeta>();
+    DatabaseMeta dbmeta = mock( DatabaseMeta.class );
+    DatabaseMeta dbmetaA = mock( DatabaseMeta.class );
+    DatabaseMeta dbmetaB = mock( DatabaseMeta.class );
+    dbs.add( dbmetaA );
+    dbs.add( dbmeta );
+    dbs.add( dbmetaB );
+
+    when( dbmeta.getName() ).thenReturn( "MyConnection" );
+    when( dbmetaA.getName() ).thenReturn( "NotMyConnection" );
+    when( dbmetaB.getName() ).thenReturn( "NotMyConnectionEither" );
+
+    repo.saveDatabaseMetaStepAttribute( null, saveStepId, "id_connection", dbmeta );
+    DatabaseMeta result = repo.loadDatabaseMetaFromStepAttribute( saveStepId, "id_connection", dbs );
+
+    assertEquals( "MyConnection", result.getName() );
   }
 }
