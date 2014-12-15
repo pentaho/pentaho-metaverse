@@ -22,10 +22,9 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.valuemapper;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -34,8 +33,12 @@ import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 
 /**
  * User: RFellows Date: 9/16/14
@@ -121,4 +124,20 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
       }
     };
   }
+  
+  /**
+   * Provide field mappings that occur in this step.
+   *
+   * @param meta The step metadata
+   * @return a set of field mappings (input field -> output field)
+   * @throws org.pentaho.platform.api.metaverse.MetaverseAnalyzerException
+   */
+  @Override
+  public Set<IFieldMapping> getFieldMappings( ValueMapperMeta meta ) throws MetaverseAnalyzerException {
+    Set<IFieldMapping> fieldMappings = new HashSet<IFieldMapping>();
+    fieldMappings.add( new FieldMapping( meta.getFieldToUse(), meta.getTargetField() ) );
+    fieldMappings.addAll( getPassthruFieldMappings( meta ) );
+    return fieldMappings;
+  }
+
 }
