@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
 import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer;
@@ -75,17 +76,28 @@ public class JsonLineageIT {
 
     // Create a fake plugin to exercise the map building logic
     PluginInterface mockPlugin = mock( PluginInterface.class );
-    when( mockPlugin.getIds() ).thenReturn( new String[]{ "testId" } );
+    when( mockPlugin.getIds() ).thenReturn( new String[]{ "TextFileInputExternalResourceConsumer" } );
     when( mockPlugin.getName() ).thenReturn( "TextFileInputExternalResourceConsumer" );
     Map<Class<?>, String> classMap = new HashMap<Class<?>, String>();
     classMap.put( IExternalResourceConsumer.class, tfiConsumer.getClass().getName() );
-    classMap.put( IExternalResourceConsumer.class, toConsumer.getClass().getName() );
 
     doReturn( IExternalResourceConsumer.class ).when( mockPlugin ).getMainType();
     registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockPlugin );
 
     // Then add a class to the map to get through plugin registration
     when( mockPlugin.getClassMap() ).thenReturn( classMap );
+
+    PluginInterface mockPlugin2 = mock( PluginInterface.class );
+    when( mockPlugin2.getIds() ).thenReturn( new String[]{ "TableOutputExternalResourceConsumer" } );
+    when( mockPlugin2.getName() ).thenReturn( "TableOutputExternalResourceConsumer" );
+    Map<Class<?>, String> classMap2 = new HashMap<Class<?>, String>();
+    classMap2.put( IExternalResourceConsumer.class, toConsumer.getClass().getName() );
+
+    doReturn( IExternalResourceConsumer.class ).when( mockPlugin2 ).getMainType();
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockPlugin2 );
+
+    // Then add a class to the map to get through plugin registration
+    when( mockPlugin2.getClassMap() ).thenReturn( classMap2 );
 
     builder.onEnvironmentInit();
 
