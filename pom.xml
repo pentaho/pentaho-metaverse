@@ -69,9 +69,9 @@
     <dependency.org.codehaus.jackson.jackson-mapper-asl.version>1.9.3</dependency.org.codehaus.jackson.jackson-mapper-asl.version>
     <dependency.org.slf4j.slf4j-api.version>1.7.7</dependency.org.slf4j.slf4j-api.version>
     <dependency.org.springFramework.spring.version>2.5.6</dependency.org.springFramework.spring.version>
-    <dependency.pentaho.pentaho-platform-api.version>METAVERSE-SNAPSHOT</dependency.pentaho.pentaho-platform-api.version>
-    <dependency.pentaho.pentaho-platform-core.version>TRUNK-SNAPSHOT</dependency.pentaho.pentaho-platform-core.version>
-    <dependency.pentaho.pentaho-platform-repository.version>TRUNK-SNAPSHOT</dependency.pentaho.pentaho-platform-repository.version>
+    <dependency.pentaho.pentaho-platform-api.version>INNOVATION-SNAPSHOT</dependency.pentaho.pentaho-platform-api.version>
+    <dependency.pentaho.pentaho-platform-core.version>INNOVATION-SNAPSHOT</dependency.pentaho.pentaho-platform-core.version>
+    <dependency.pentaho.pentaho-platform-repository.version>INNOVATION-SNAPSHOT</dependency.pentaho.pentaho-platform-repository.version>
     <dependency.pentaho-kettle.kettle-core.version>TRUNK-SNAPSHOT</dependency.pentaho-kettle.kettle-core.version>
     
     <!-- Testing dependencies -->
@@ -82,7 +82,7 @@
     <dependency.org.mockito.mockito-all.version>1.9.5</dependency.org.mockito.mockito-all.version>
     <dependency.org.slf4j.slf4j-log4j12.version>1.7.7</dependency.org.slf4j.slf4j-log4j12.version>
     <dependency.org.springframework.spring-context.version>2.5.6</dependency.org.springframework.spring-context.version>
-    <dependency.pentaho-platform-core-test.version>TRUNK-SNAPSHOT</dependency.pentaho-platform-core-test.version>
+    <dependency.pentaho-platform-core-test.version>INNOVATION-SNAPSHOT</dependency.pentaho-platform-core-test.version>
     
     <!-- Plugin dependencies -->
     <plugin.com.tinkerpop.blueprints.blueprints-core.version>2.6.0</plugin.com.tinkerpop.blueprints.blueprints-core.version>
