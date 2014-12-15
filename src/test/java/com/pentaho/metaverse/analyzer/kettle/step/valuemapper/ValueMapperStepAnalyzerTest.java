@@ -26,15 +26,23 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzerTest;
 import com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaNumber;
+import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -46,6 +54,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -79,6 +88,15 @@ public class ValueMapperStepAnalyzerTest {
 
   @Mock
   ValueMetaInterface valueMetaInterfaceMock;
+
+  @Mock
+  private TransMeta mockTransMeta;
+
+  @Mock
+  private RowMetaInterface mockInRowMetaInterface;
+
+  @Mock
+  private RowMetaInterface mockOutRowMetaInterface;
 
   @Before
   public void setUp() throws Exception {
@@ -213,6 +231,78 @@ public class ValueMapperStepAnalyzerTest {
     assertNotNull( types );
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( ValueMapperMeta.class ) );
+  }
+
+  @Test
+  public void testGetFieldMappings() throws Exception {
+    StepMeta meta = new StepMeta( "test", valueMapperMeta );
+    StepMeta spyMeta = spy( meta );
+
+    when( valueMapperMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( spyMeta.getStepID() ).thenReturn( "Select values" );
+
+    // set up the input fields
+    String[] inFields = { "field1", "field2" };
+    String[] outFields = { "field1", "field2", "field3" };
+    final ValueMetaInterface field1 = new ValueMetaNumber( "field1" );
+    field1.setOrigin( "originStep" );
+    final ValueMetaInterface field2 = new ValueMetaNumber( "field2" );
+    field1.setOrigin( "originStep" );
+    final ValueMetaInterface field3 = new ValueMetaString( "field3" );
+    field3.setOrigin( "test" );
+
+    when( mockInRowMetaInterface.getFieldNames() ).thenReturn( inFields );
+    when( mockInRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(
+      new Answer<ValueMetaInterface>() {
+
+        @Override
+        public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+          Object[] args = invocation.getArguments();
+          if ( args[0] == "field1" ) {
+            return field1;
+          } else if ( args[0] == "field2" ) {
+            return field2;
+          }
+          return null;
+        }
+      }
+    );
+
+    when( mockOutRowMetaInterface.getFieldNames() ).thenReturn( outFields );
+    when( mockOutRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(
+      new Answer<ValueMetaInterface>() {
+
+        @Override
+        public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+          Object[] args = invocation.getArguments();
+          if ( args[0] == "field1" ) {
+            return field1;
+          } else if ( args[0] == "field2" ) {
+            return field2;
+          } else if ( args[0] == "field3" ) {
+            return field3;
+          }
+          return null;
+        }
+      }
+    );
+
+    // set up the input fields
+    when( valueMapperMeta.getFieldToUse() ).thenReturn( "field1" );
+    when( valueMapperMeta.getTargetField() ).thenReturn( "field3" );
+    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockInRowMetaInterface );
+    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockOutRowMetaInterface );
+    when( mockOutRowMetaInterface.getFieldNames() ).thenReturn( outFields );
+
+    Set<IFieldMapping> mappings = analyzer.getFieldMappings( valueMapperMeta );
+
+    Set<IFieldMapping> goldenData = new HashSet<IFieldMapping>( 3 );
+    goldenData.add( new FieldMapping( "field1", "field1" ) );
+    goldenData.add( new FieldMapping( "field2", "field2" ) );
+    goldenData.add( new FieldMapping( "field1", "field3" ) );
+    assertTrue( mappings.containsAll( goldenData ) );
+    assertEquals( goldenData.size(), mappings.size() );
   }
 
 }
