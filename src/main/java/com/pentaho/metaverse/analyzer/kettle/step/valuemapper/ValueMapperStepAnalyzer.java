@@ -124,7 +124,7 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
       }
     };
   }
-  
+
   /**
    * Provide field mappings that occur in this step.
    *
