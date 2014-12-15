@@ -11,18 +11,16 @@
     <groupId>com.pentaho</groupId>
     <artifactId>pentaho-ee-jar-parent-pom</artifactId>
     <version>1.0.5</version>
-    <!-- https://github.com/pentaho/maven-parent-poms/blob/pentaho-ee-jar-parent-pom-1.0.5/pentaho-ee-jar-parent-pom/pom.xml -->
   </parent>
 
   <name>Pentaho Enterprise Edition Project: ${project.artifactId}</name>
-  <description>a Pentaho closed source project</description>
+  <description>A Pentaho closed-source project to provide data lineage capabilities</description>
   <url>http://www.pentaho.com</url>
 
   <licenses>
     <license>
       <name>Pentaho Proprietary License</name>
-      <!-- TODO: figure out if the proprietary license is publically available -->
-      <url>http://www.pentaho.com</url>
+      <url>http://www.pentaho.com/agreements/enterprise/20140209</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -55,8 +53,8 @@
   	<!-- General properties -->
     <pentaho.public.release.repo>http://nexus.pentaho.org/content/repositories/private-release/</pentaho.public.release.repo>
     <pentaho.public.snapshot.repo>http://nexus.pentaho.org/content/repositories/private-snapshot/</pentaho.public.snapshot.repo>
-    <platform.plugin.name>metaverse</platform.plugin.name>
-    <pdi.plugin.name>pdi-metaverse-extensions</pdi.plugin.name>
+    <platform.plugin.name>platform</platform.plugin.name>
+    <pdi.plugin.name>pdi</pdi.plugin.name>
     <target.jdk.version>1.6</target.jdk.version>
     <pmd.rulesets.url>https://raw.githubusercontent.com/pmd/pmd/pmd_releases/5.1.2/pmd/src/main/resources/rulesets/java</pmd.rulesets.url>
 
@@ -274,8 +272,8 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>${platform.plugin.name}-${project.version}</finalName>
-              <appendAssemblyId>false</appendAssemblyId>
+              <finalName>${project.artifactId}</finalName>
+              <appendAssemblyId>true</appendAssemblyId>
               <descriptor>src/assembly/platform-plugin.xml</descriptor>
             </configuration>
           </execution>
@@ -286,8 +284,8 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>${pdi.plugin.name}-${project.version}</finalName>
-              <appendAssemblyId>false</appendAssemblyId>
+              <finalName>${project.artifactId}</finalName>
+              <appendAssemblyId>true</appendAssemblyId>
               <descriptor>src/assembly/pdi-plugin.xml</descriptor>
             </configuration>
           </execution>

@@ -7,7 +7,7 @@
     <format>zip</format>
   </formats>
   <includeBaseDirectory>true</includeBaseDirectory>
-  <baseDirectory>${pdi.plugin.name}</baseDirectory>
+  <baseDirectory>${project.artifactId}</baseDirectory>
   
   <dependencySets>
     <dependencySet>
