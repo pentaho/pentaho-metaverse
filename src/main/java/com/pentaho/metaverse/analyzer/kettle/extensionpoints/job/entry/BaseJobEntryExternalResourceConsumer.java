@@ -19,12 +19,12 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
+package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IJobEntryExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.job.entry.JobEntryBase;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,8 +33,8 @@ import java.util.Collections;
  * This class is a do-nothing reference implementation for StepExternalConsumer plugins. Subclasses should override
  * the various methods with business logic that can handle the external resources used by the given step.
  */
-public abstract class BaseStepExternalResourceConsumer<T extends BaseStepMeta>
-  implements IStepExternalResourceConsumer<T> {
+public abstract class BaseJobEntryExternalResourceConsumer<T extends JobEntryBase>
+  implements IJobEntryExternalResourceConsumer<T> {
 
   @Override
   public boolean isDataDriven( T meta ) {

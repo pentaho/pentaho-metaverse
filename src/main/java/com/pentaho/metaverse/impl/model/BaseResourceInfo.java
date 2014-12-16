@@ -26,7 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.apache.commons.vfs.FileObject;
 
 public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo {
 
@@ -35,7 +37,8 @@ public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo 
 
   private Map<Object, Object> attributes = new HashMap<Object, Object>();
 
-  @Override public String getType() {
+  @Override
+  public String getType() {
     return type;
   }
 
@@ -43,12 +46,14 @@ public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo 
     this.type = type;
   }
 
-  @Override public boolean isInput() {
+  @Override
+  public boolean isInput() {
     return isInput;
   }
 
   @JsonIgnore
-  @Override public boolean isOutput() {
+  @Override
+  public boolean isOutput() {
     return !isInput;
   }
 
@@ -56,12 +61,24 @@ public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo 
     this.isInput = isInput;
   }
 
-  @Override public Map<Object, Object> getAttributes() {
+  @Override
+  public Map<Object, Object> getAttributes() {
     return attributes;
   }
 
   public void putAttribute( Object key, Object value ) {
     attributes.put( key, value );
+  }
+
+  public static IExternalResourceInfo getFileResource( FileObject fileObject, boolean isInput ) {
+    BaseResourceInfo resource = null;
+    if ( fileObject != null ) {
+      resource = new BaseResourceInfo();
+      resource.setName( fileObject.getName().getPath() );
+      resource.setInput( isInput );
+      resource.setType( DictionaryConst.NODE_TYPE_FILE );
+    }
+    return resource;
   }
 
 }

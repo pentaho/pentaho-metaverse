@@ -1,4 +1,4 @@
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
+package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
 import org.junit.Before;
@@ -8,13 +8,13 @@ import java.util.Collection;
 
 import static org.junit.Assert.*;
 
-public class BaseStepExternalResourceConsumerTest {
+public class BaseJobEntryExternalResourceConsumerTest {
 
-  BaseStepExternalResourceConsumer consumer;
+  BaseJobEntryExternalResourceConsumer consumer;
 
   @Before
   public void setUp() throws Exception {
-    consumer = new BaseStepExternalResourceConsumer() {
+    consumer = new BaseJobEntryExternalResourceConsumer() {
       @Override
       public Class getMetaClass() {
         return null;

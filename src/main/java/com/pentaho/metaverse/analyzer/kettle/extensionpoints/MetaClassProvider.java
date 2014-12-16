@@ -19,35 +19,13 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
-
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.trans.step.BaseStepMeta;
-
-import java.util.Collection;
-import java.util.Collections;
+package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
 /**
- * This class is a do-nothing reference implementation for StepExternalConsumer plugins. Subclasses should override
- * the various methods with business logic that can handle the external resources used by the given step.
+ * MetaClassProvider is a helper interface that allows the users to retrieve a "metadata class" associated with the
+ * implementation.
  */
-public abstract class BaseStepExternalResourceConsumer<T extends BaseStepMeta>
-  implements IStepExternalResourceConsumer<T> {
+public interface MetaClassProvider<T> {
 
-  @Override
-  public boolean isDataDriven( T meta ) {
-    return false;
-  }
-
-  @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( T meta ) {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public Collection<IExternalResourceInfo> getResourcesFromRow( T meta, RowMetaInterface rowMeta, Object[] row ) {
-    return Collections.emptyList();
-  }
+  Class<T> getMetaClass();
 }

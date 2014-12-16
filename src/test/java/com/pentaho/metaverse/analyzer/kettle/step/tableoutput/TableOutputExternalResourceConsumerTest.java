@@ -23,10 +23,8 @@
 package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.impl.model.JndiResourceInfo;
 import org.junit.Before;
 import org.junit.Test;
-import org.osjava.sj.naming.Jndi;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -35,7 +33,6 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 public class TableOutputExternalResourceConsumerTest {
@@ -49,7 +46,7 @@ public class TableOutputExternalResourceConsumerTest {
 
   @Test
   public void testGetStepMetaClass() throws Exception {
-    assertEquals( TableOutputMeta.class, consumer.getStepMetaClass() );
+    assertEquals( TableOutputMeta.class, consumer.getMetaClass() );
   }
 
   @Test

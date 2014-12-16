@@ -21,9 +21,8 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import org.pentaho.di.job.entry.JobEntryInterface;
+import org.pentaho.di.job.entry.JobEntryBase;
 
-public interface IJobEntryExternalResourceConsumer extends IExternalResourceConsumer<JobEntryInterface> {
-
-  JobEntryInterface getJobEntry();
+public interface IJobEntryExternalResourceConsumer<T extends JobEntryBase>
+  extends IExternalResourceConsumer<T> {
 }
