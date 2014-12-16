@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
 import org.pentaho.di.core.KettleClientEnvironment;
@@ -40,15 +40,12 @@ import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.version.BuildVersion;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.model.IExecutionData;
-import com.pentaho.metaverse.api.model.IExecutionEngine;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.impl.model.ExecutionData;
-import com.pentaho.metaverse.impl.model.ExecutionEngine;
 import com.pentaho.metaverse.impl.model.ExecutionProfile;
 import com.pentaho.metaverse.impl.model.ParamInfo;
 
@@ -61,7 +58,11 @@ import com.pentaho.metaverse.impl.model.ParamInfo;
   id = "jobRuntimeMetaverse" )
 public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements JobListener {
 
-  protected static Map<Job, IExecutionProfile> profileMap = new HashMap<Job, IExecutionProfile>();
+  protected static Map<Job, IExecutionProfile> profileMap = new ConcurrentHashMap<Job, IExecutionProfile>();
+
+  public static Map<Job, IExecutionProfile> getProfileMap() {
+    return profileMap;
+  }
 
   /**
    * Callback when a job is about to be started
@@ -99,13 +100,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       executionProfile.setDescription( jobMeta.getDescription() );
 
       // Set execution engine information
-      IExecutionEngine executionEngine = new ExecutionEngine();
-      executionEngine.setName( "Pentaho Data Integration" );
-      executionEngine.setVersion( BuildVersion.getInstance().getVersion() );
-      executionEngine.setDescription(
-        "Pentaho data integration prepares and blends data to create a complete picture of your business "
-          + "that drives actionable insights." );
-      executionProfile.setExecutionEngine( executionEngine );
+      executionProfile.setExecutionEngine( getExecutionEngineInfo() );
 
       IExecutionData executionData = executionProfile.getExecutionData();
 

@@ -31,6 +31,4 @@ import org.pentaho.di.trans.step.BaseStepMeta;
  */
 public interface IStepExternalResourceConsumer<T extends BaseStepMeta>
   extends IExternalResourceConsumer<T> {
-
-  Class<T> getStepMetaClass();
 }

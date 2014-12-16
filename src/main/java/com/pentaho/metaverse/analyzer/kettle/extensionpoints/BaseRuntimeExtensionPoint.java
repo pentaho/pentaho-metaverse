@@ -59,7 +59,7 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
    *
    * @return information about the current execution engine
    */
-  public IExecutionEngine getExecutionEngineInfo() {
+  public static IExecutionEngine getExecutionEngineInfo() {
     IExecutionEngine executionEngine = new ExecutionEngine();
     executionEngine.setName( EXECUTION_ENGINE_NAME );
     executionEngine.setVersion( BuildVersion.getInstance().getVersion() );

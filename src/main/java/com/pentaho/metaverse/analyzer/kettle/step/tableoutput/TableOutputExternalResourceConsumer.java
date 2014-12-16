@@ -40,7 +40,7 @@ import java.util.Set;
 )
 public class TableOutputExternalResourceConsumer extends BaseStepExternalResourceConsumer<TableOutputMeta> {
   @Override
-  public Class<TableOutputMeta> getStepMetaClass() {
+  public Class<TableOutputMeta> getMetaClass() {
     return TableOutputMeta.class;
   }
 

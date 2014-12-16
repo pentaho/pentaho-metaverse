@@ -21,20 +21,79 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IJobEntryExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
+import com.pentaho.metaverse.api.model.IExecutionData;
+import com.pentaho.metaverse.api.model.IExecutionProfile;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobExecutionExtension;
+import org.pentaho.di.job.entry.JobEntryBase;
+import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.job.entry.JobEntryInterface;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 public class JobEntryExternalResourceConsumerListenerTest {
   @Test
-  public void testCallStepExtensionPoint() throws Exception {
+  public void testCallJobEntryExtensionPoint() throws Exception {
+    JobEntryExternalResourceConsumerListener jobEntryExtensionPoint =
+      new JobEntryExternalResourceConsumerListener();
+    JobExecutionExtension jobExec = mock( JobExecutionExtension.class );
+    JobEntryBase jobEntryBase = mock( JobEntryBase.class, withSettings().extraInterfaces( JobEntryInterface.class ) );
+    JobEntryInterface jobEntryInterface = (JobEntryInterface) jobEntryBase;
+    JobEntryCopy jobEntryCopy = mock( JobEntryCopy.class );
+    when( jobEntryCopy.getEntry() ).thenReturn( jobEntryInterface );
+    jobExec.jobEntryCopy = jobEntryCopy;
+    jobEntryExtensionPoint.callExtensionPoint( null, jobExec );
+
+    // Adda consumer
+    Map<Class<? extends JobEntryBase>, List<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap =
+      ExternalResourceConsumerMap.getInstance().getJobEntryConsumerMap();
+    List<IJobEntryExternalResourceConsumer> consumers = new ArrayList<IJobEntryExternalResourceConsumer>();
+    jobEntryConsumerMap.put( jobEntryBase.getClass(), consumers );
+    jobEntryExtensionPoint.callExtensionPoint( null, jobExec );
+
+    IJobEntryExternalResourceConsumer consumer = mock( IJobEntryExternalResourceConsumer.class );
+    when( consumer.getResourcesFromMeta( Mockito.any() ) ).thenReturn( Collections.emptyList() );
+    consumers.add( consumer );
+    Job mockJob = mock( Job.class );
+    when( jobEntryInterface.getParentJob() ).thenReturn( mockJob );
+    jobExec.job = mockJob;
+    jobEntryExtensionPoint.callExtensionPoint( null, jobExec );
+    when( consumer.isDataDriven( Mockito.any() ) ).thenReturn( Boolean.TRUE );
+    jobEntryExtensionPoint.callExtensionPoint( null, jobExec );
+  }
+
+  @Test
+  public void testCallJobEntryAddExternalResources() {
     JobEntryExternalResourceConsumerListener stepExtensionPoint =
       new JobEntryExternalResourceConsumerListener();
-    JobExecutionExtension jobExecutionExtension = mock( JobExecutionExtension.class );
+    stepExtensionPoint.addExternalResources( null, null );
+    JobEntryInterface mockJobEntry = mock( JobEntryInterface.class );
+    Job mockJob = mock( Job.class );
+    when( mockJobEntry.getParentJob() ).thenReturn( mockJob );
 
+    IExecutionProfile executionProfile = mock( IExecutionProfile.class );
+    IExecutionData executionData = mock( IExecutionData.class );
+    when( executionProfile.getExecutionData() ).thenReturn( executionData );
+    JobRuntimeExtensionPoint.getProfileMap().put( mockJob, executionProfile );
 
-    stepExtensionPoint.callExtensionPoint( null, jobExecutionExtension );
-
+    Collection<IExternalResourceInfo> externalResources = new ArrayList<IExternalResourceInfo>();
+    stepExtensionPoint.addExternalResources( externalResources, mockJobEntry );
+    IExternalResourceInfo externalResource = mock( IExternalResourceInfo.class );
+    externalResources.add( externalResource );
+    stepExtensionPoint.addExternalResources( externalResources, mockJobEntry );
   }
 }

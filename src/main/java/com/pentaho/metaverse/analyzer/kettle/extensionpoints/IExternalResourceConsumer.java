@@ -30,7 +30,7 @@ import java.util.Collection;
  * The IExternalResourceConsumer interface allows consumers of external resources to report the usages to those that
  * are interested.
  */
-public interface IExternalResourceConsumer<T> extends Cloneable {
+public interface IExternalResourceConsumer<T> extends MetaClassProvider<T>, Cloneable {
 
   boolean isDataDriven( T consumer );
 

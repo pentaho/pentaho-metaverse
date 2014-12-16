@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step.textfileinput;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -303,6 +302,6 @@ public class TextFileInputStepAnalyzerTest {
     resources = consumer.getResourcesFromRow( mockTextFileInputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertTrue( resources.isEmpty() );
 
-    assertEquals( TextFileInputMeta.class, consumer.getStepMetaClass() );
+    assertEquals( TextFileInputMeta.class, consumer.getMetaClass() );
   }
 }

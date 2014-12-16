@@ -21,11 +21,24 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IJobEntryExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
+import com.pentaho.metaverse.api.model.IExecutionProfile;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.job.JobExecutionExtension;
+import org.pentaho.di.job.entry.JobEntryBase;
+import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.job.entry.JobEntryInterface;
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @ExtensionPoint(
   description = "Job entry external resource listener",
@@ -45,6 +58,48 @@ public class JobEntryExternalResourceConsumerListener implements ExtensionPointI
   @Override
   public void callExtensionPoint( LogChannelInterface log, Object object ) throws KettleException {
     JobExecutionExtension jobExec = (JobExecutionExtension) object;
-    // TODO get job entries that use external resources, match them to this step
+    JobEntryCopy jobEntryCopy = jobExec.jobEntryCopy;
+    if ( jobEntryCopy != null ) {
+      JobEntryInterface meta = jobEntryCopy.getEntry();
+      if ( meta != null ) {
+        Class<?> metaClass = meta.getClass();
+        if ( JobEntryBase.class.isAssignableFrom( metaClass ) ) {
+          @SuppressWarnings( "unchecked" )
+          List<IJobEntryExternalResourceConsumer> jobEntryConsumers =
+            ExternalResourceConsumerMap.getInstance().getJobEntryExternalResourceConsumers(
+              (Class<? extends JobEntryBase>) metaClass );
+          if ( jobEntryConsumers != null ) {
+            for ( IJobEntryExternalResourceConsumer jobEntryConsumer : jobEntryConsumers ) {
+              // We might know enough at this point, so call the consumer
+              Collection<IExternalResourceInfo> resources = jobEntryConsumer.getResourcesFromMeta( meta );
+              addExternalResources( resources, meta );
+
+              // Add a JobEntryListener to collect external resource info after a job entry has finished
+              if ( jobExec.job != null && jobEntryConsumer.isDataDriven( meta ) ) {
+                jobExec.job.addJobEntryListener( new JobEntryExternalResourceListener() );
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  protected void addExternalResources( Collection<IExternalResourceInfo> resources, JobEntryInterface jobEntry ) {
+    if ( resources != null ) {
+      // Add the resources to the execution profile
+      IExecutionProfile executionProfile = JobRuntimeExtensionPoint.getProfileMap().get( jobEntry.getParentJob() );
+      if ( executionProfile != null ) {
+        String jobEntryName = jobEntry.getName();
+        Map<String, List<IExternalResourceInfo>> resourceMap =
+          executionProfile.getExecutionData().getExternalResources();
+        List<IExternalResourceInfo> externalResources = resourceMap.get( jobEntryName );
+        if ( externalResources == null ) {
+          externalResources = new LinkedList<IExternalResourceInfo>();
+        }
+        externalResources.addAll( resources );
+        resourceMap.put( jobEntryName, externalResources );
+      }
+    }
   }
 }

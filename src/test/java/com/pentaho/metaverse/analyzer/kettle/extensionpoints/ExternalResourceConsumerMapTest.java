@@ -13,6 +13,8 @@ import org.pentaho.di.core.lifecycle.LifecycleException;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.job.entry.JobEntryBase;
+import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
@@ -47,25 +49,39 @@ public class ExternalResourceConsumerMapTest {
   }
 
   @Test
+  public void testGetJobEntryExternalResourceConsumers() throws Exception {
+    assertNotNull( map.getJobEntryExternalResourceConsumers( JobEntryBase.class ) );
+  }
+
+  @Test
   public void testExternalResourceConsumerMapBuilder() throws Exception {
     PluginRegistry registry = PluginRegistry.getInstance();
     ExternalResourceConsumerMap.ExternalResourceConsumerMapBuilder builder = new
-        ExternalResourceConsumerMap.ExternalResourceConsumerMapBuilder();
+      ExternalResourceConsumerMap.ExternalResourceConsumerMapBuilder();
 
     ExternalResourceConsumerPluginRegistrar registrar = new ExternalResourceConsumerPluginRegistrar();
     registrar.init( registry );
     PluginRegistry.init();
 
-    // Create a fake plugin to exercise the map building logic
-    PluginInterface mockPlugin = mock( PluginInterface.class );
-    when( mockPlugin.getIds() ).thenReturn( new String[]{ "testId" } );
-    IStepExternalResourceConsumer consumer = new StepExternalResourceConsumerStub();
+    // Create a fake step consumer plugin to exercise the map building logic
+    PluginInterface mockStepPlugin = mock( PluginInterface.class );
+    when( mockStepPlugin.getIds() ).thenReturn( new String[]{ "testStepId" } );
+    when( mockStepPlugin.getName() ).thenReturn( "testStepName" );
+    IStepExternalResourceConsumer stepConsumer = new StepExternalResourceConsumerStub();
+    Map<Class<?>, String> stepClassMap = new HashMap<Class<?>, String>();
+    stepClassMap.put( IExternalResourceConsumer.class, stepConsumer.getClass().getName() );
+    doReturn( IExternalResourceConsumer.class ).when( mockStepPlugin ).getMainType();
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockStepPlugin );
 
-    Map<Class<?>, String> classMap = new HashMap<Class<?>, String>();
-    classMap.put( IExternalResourceConsumer.class, consumer.getClass().getName() );
-
-    doReturn( IExternalResourceConsumer.class ).when( mockPlugin ).getMainType();
-    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockPlugin );
+    // Create a fake step consumer plugin to exercise the map building logic
+    PluginInterface mockJobEntryPlugin = mock( PluginInterface.class );
+    when( mockJobEntryPlugin.getIds() ).thenReturn( new String[]{ "testJobEntryId" } );
+    when( mockJobEntryPlugin.getName() ).thenReturn( "testJobEntryName" );
+    IJobEntryExternalResourceConsumer jobEntryConsumer = new JobEntryExternalResourceConsumerStub();
+    Map<Class<?>, String> jobEntryClassMap = new HashMap<Class<?>, String>();
+    jobEntryClassMap.put( IExternalResourceConsumer.class, jobEntryConsumer.getClass().getName() );
+    doReturn( IExternalResourceConsumer.class ).when( mockJobEntryPlugin ).getMainType();
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockJobEntryPlugin );
 
     // Call once to generate plugin exception
     try {
@@ -75,12 +91,13 @@ public class ExternalResourceConsumerMapTest {
       // We're good, we expected this
     }
 
-    // Then add a class to the map to get through plugin registration
-    when( mockPlugin.getClassMap() ).thenReturn( classMap );
+    // Then add a class to the maps to get through plugin registration
+    when( mockStepPlugin.getClassMap() ).thenReturn( stepClassMap );
+    when( mockJobEntryPlugin.getClassMap() ).thenReturn( jobEntryClassMap );
 
     builder.onEnvironmentInit();
 
-    // Noop, called for coverage
+    // No-op, called for coverage
     builder.onEnvironmentShutdown();
   }
 
@@ -98,13 +115,37 @@ public class ExternalResourceConsumerMapTest {
 
     @Override
     public Collection<IExternalResourceInfo> getResourcesFromRow(
-        Object meta, RowMetaInterface rowMeta, Object[] row ) {
+      Object meta, RowMetaInterface rowMeta, Object[] row ) {
       return null;
     }
 
     @Override
-    public Class<?> getStepMetaClass() {
+    public Class<?> getMetaClass() {
       return BaseStepMeta.class;
+    }
+  }
+
+  public static class JobEntryExternalResourceConsumerStub implements IJobEntryExternalResourceConsumer {
+
+    @Override
+    public boolean isDataDriven( Object meta ) {
+      return false;
+    }
+
+    @Override
+    public Collection<IExternalResourceInfo> getResourcesFromMeta( Object meta ) {
+      return null;
+    }
+
+    @Override
+    public Collection<IExternalResourceInfo> getResourcesFromRow(
+      Object meta, RowMetaInterface rowMeta, Object[] row ) {
+      return null;
+    }
+
+    @Override
+    public Class<?> getMetaClass() {
+      return JobEntryBase.class;
     }
   }
 }
