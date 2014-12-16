@@ -22,20 +22,12 @@
 
 package com.pentaho.metaverse.impl.model.kettle.json;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.pentaho.metaverse.api.model.IInfo;
-import com.pentaho.metaverse.impl.model.BaseResourceInfo;
-import com.pentaho.metaverse.impl.model.DatabaseResourceInfoUtil;
-import com.pentaho.metaverse.impl.model.ParamInfo;
+import com.fasterxml.jackson.databind.JavaType;
 import com.pentaho.metaverse.impl.model.kettle.HopInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import com.pentaho.metaverse.messages.Messages;
-import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.trans.TransHopMeta;
@@ -52,13 +44,7 @@ import java.util.List;
 /**
  * User: RFellows Date: 11/17/14
  */
-public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
-
-  public static final String JSON_PROPERTY_PARAMETERS = "parameters";
-  public static final String JSON_PROPERTY_STEPS = "steps";
-  public static final String JSON_PROPERTY_CONNECTIONS = "connections";
-  public static final String JSON_PROPERTY_HOPS = "hops";
-  public static final String JSON_PROPERTY_VARIABLES = "variables";
+public class TransMetaJsonSerializer extends AbstractMetaJsonSerializer<TransMeta> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger( TransMetaJsonSerializer.class );
 
@@ -66,64 +52,19 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
     super( aClass );
   }
 
-  private LineageRepository lineageRepository;
-
-  public LineageRepository getLineageRepository() {
-    return lineageRepository;
+  public TransMetaJsonSerializer( JavaType javaType ) {
+    super( javaType );
   }
 
-  public void setLineageRepository( LineageRepository repo ) {
-    this.lineageRepository = repo;
+  public TransMetaJsonSerializer( Class<?> aClass, boolean b ) {
+    super( aClass, b );
+  }
+
+  @Override protected List<String> getUsedVariables( TransMeta meta ) {
+    return meta.getUsedVariables();
   }
 
   @Override
-  public void serialize( TransMeta meta, JsonGenerator json,
-                                   SerializerProvider serializerProvider ) throws IOException, JsonGenerationException {
-
-    json.writeStartObject();
-    json.writeStringField( IInfo.JSON_PROPERTY_CLASS, meta.getClass().getName() );
-    json.writeStringField( IInfo.JSON_PROPERTY_NAME, meta.getName() );
-    json.writeStringField( IInfo.JSON_PROPERTY_DESCRIPTION, meta.getDescription() );
-
-    serializeParameters( meta, json );
-    serializeVariables( meta, json );
-    serializeSteps( meta, json );
-    serializeConnections( meta, json );
-    serializeHops( meta, json );
-
-    json.writeEndObject();
-
-  }
-
-  protected void serializeParameters( TransMeta meta, JsonGenerator json ) throws IOException {
-    json.writeArrayFieldStart( JSON_PROPERTY_PARAMETERS );
-    String[] parameters = meta.listParameters();
-    if ( parameters != null ) {
-      for ( String param : meta.listParameters() ) {
-        try {
-          ParamInfo paramInfo = new ParamInfo( param, null, meta.getParameterDefault( param ),
-              meta.getParameterDescription( param ) );
-          json.writeObject( paramInfo );
-        } catch ( UnknownParamException e ) {
-          LOGGER.warn( Messages.getString( "WARNING.Serialization.Trans.Param", param ), e );
-        }
-      }
-    }
-    json.writeEndArray();
-  }
-
-  protected void serializeVariables( TransMeta meta, JsonGenerator json ) throws IOException {
-    json.writeArrayFieldStart( JSON_PROPERTY_VARIABLES );
-    List<String> variables = meta.getUsedVariables();
-    if ( variables != null ) {
-      for ( String param : variables ) {
-        ParamInfo paramInfo = new ParamInfo( param, meta.getVariable( param ) );
-        json.writeObject( paramInfo );
-      }
-    }
-    json.writeEndArray();
-  }
-
   protected void serializeSteps( TransMeta meta, JsonGenerator json ) throws IOException {
     json.writeArrayFieldStart( JSON_PROPERTY_STEPS );
     for ( StepMeta stepMeta : meta.getSteps() ) {
@@ -141,17 +82,7 @@ public class TransMetaJsonSerializer extends StdSerializer<TransMeta> {
     json.writeEndArray();
   }
 
-  protected void serializeConnections( TransMeta meta, JsonGenerator json ) throws IOException {
-    // connections
-    json.writeArrayFieldStart( JSON_PROPERTY_CONNECTIONS );
-    for ( DatabaseMeta dbmeta : meta.getDatabases() ) {
-      BaseResourceInfo resourceInfo = (BaseResourceInfo) DatabaseResourceInfoUtil.createDatabaseResource( dbmeta );
-      resourceInfo.setInput( true );
-      json.writeObject( resourceInfo );
-    }
-    json.writeEndArray();
-  }
-
+  @Override
   protected void serializeHops( TransMeta meta, JsonGenerator json ) throws IOException {
     // Hops
     json.writeArrayFieldStart( JSON_PROPERTY_HOPS );

@@ -45,12 +45,16 @@ public class LineageRepositoryTest {
   LineageRepository repo;
   ObjectId stepId;
   ObjectId saveStepId;
+  ObjectId jobId;
+  ObjectId jobEntryId;
 
   @Before
   public void setUp() throws Exception {
     repo = new LineageRepository();
     stepId = new StringObjectId( "testStepId" );
     saveStepId = new StringObjectId( "saveStepId" );
+    jobId = new StringObjectId( "testJobId" );
+    jobEntryId = new StringObjectId( "saveJobEntryId" );
 
     Map<String, Object> attrs = new HashMap<String, Object>();
 
@@ -75,6 +79,7 @@ public class LineageRepositoryTest {
 
     repo.stepFieldCache.put( stepId, stepFields );
     repo.stepAttributeCache.put( stepId, attrs );
+
   }
 
   @Test
@@ -255,5 +260,44 @@ public class LineageRepositoryTest {
     DatabaseMeta result = repo.loadDatabaseMetaFromStepAttribute( saveStepId, "id_connection", dbs );
 
     assertEquals( "MyConnection", result.getName() );
+  }
+
+  @Test
+  public void testSaveJobEntryAttribute_string() throws Exception {
+    repo.saveJobEntryAttribute( jobId, jobEntryId, "name", "test" );
+    String result = repo.getJobEntryAttributeString( jobEntryId, "name" );
+    assertEquals( "test", result );
+  }
+  @Test
+  public void testSaveJobEntryAttribute_string_idx() throws Exception {
+    repo.saveJobEntryAttribute( jobId, jobEntryId, 2, "name", "test" );
+    String result = repo.getJobEntryAttributeString( jobEntryId, 2, "name" );
+    assertEquals( "test", result );
+  }
+
+  @Test
+  public void testSaveJobEntryAttribute_boolean() throws Exception {
+    repo.saveJobEntryAttribute( jobId, jobEntryId, "hasName", true );
+    Boolean result = repo.getJobEntryAttributeBoolean( jobEntryId, "hasName" );
+    assertEquals( true, result );
+  }
+  @Test
+  public void testSaveJobEntryAttribute_boolean_idx() throws Exception {
+    repo.saveJobEntryAttribute( jobId, jobEntryId, 4, "hasName", true );
+    Boolean result = repo.getJobEntryAttributeBoolean( jobEntryId, 4, "hasName" );
+    assertEquals( true, result );
+  }
+
+  @Test
+  public void testSaveJobEntryAttribute_long() throws Exception {
+    repo.saveJobEntryAttribute( jobId, jobEntryId, "count", 4L );
+    long result = repo.getJobEntryAttributeInteger( jobEntryId, "count" );
+    assertEquals( 4L, result );
+  }
+  @Test
+  public void testSaveJobEntryAttribute_long_idx() throws Exception {
+    repo.saveJobEntryAttribute( jobId, jobEntryId, 0, "count", 4L );
+    long result = repo.getJobEntryAttributeInteger( jobEntryId, 0, "count" );
+    assertEquals( 4L, result );
   }
 }

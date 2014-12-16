@@ -25,7 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.textfileoutput;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.impl.model.BaseResourceInfo;
+import com.pentaho.metaverse.impl.model.ExternalResourceInfoFactory;
 import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -73,7 +73,8 @@ public class TextFileOutputExternalResourceConsumer
               if ( !Const.isEmpty( path ) ) {
                 try {
 
-                  IExternalResourceInfo resource = BaseResourceInfo.getFileResource( KettleVFS.getFileObject( path ), false );
+                  IExternalResourceInfo resource = ExternalResourceInfoFactory
+                    .createFileResource( KettleVFS.getFileObject( path ), false );
                   if ( resource != null ) {
                     resources.add( resource );
                   } else {
@@ -100,7 +101,7 @@ public class TextFileOutputExternalResourceConsumer
       String filename = rowMeta.getString( row, meta.getFileNameField(), null );
       if ( !Const.isEmpty( filename ) ) {
         FileObject fileObject = KettleVFS.getFileObject( filename );
-        resources.add( BaseResourceInfo.getFileResource( fileObject, false ) );
+        resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, false ) );
       }
     } catch ( KettleException kve ) {
       // TODO throw exception or ignore?

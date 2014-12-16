@@ -33,6 +33,7 @@ import com.pentaho.metaverse.impl.model.JdbcResourceInfo;
 import com.pentaho.metaverse.impl.model.JndiResourceInfo;
 import com.pentaho.metaverse.impl.model.ParamInfo;
 import com.pentaho.metaverse.impl.model.kettle.HopInfo;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,6 +51,7 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.dummytrans.DummyTransMeta;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,11 @@ public class TransMetaJsonDeserializerTest {
   @Mock JsonNode root;
   @Mock JsonNode root_nameNode;
   @Mock JsonNode root_descNode;
+  @Mock JsonNode root_pathNode;
+  @Mock JsonNode root_createdByNode;
+  @Mock JsonNode root_createdDateNode;
+  @Mock JsonNode root_modifiedByNode;
+  @Mock JsonNode root_modifiedDateNode;
   @Mock JsonNode root_paramsArray_Node0;
   @Mock JsonNode root_paramsArray_Node1;
   @Mock JsonNode root_varsArray_Node0;
@@ -156,15 +163,28 @@ public class TransMetaJsonDeserializerTest {
     // build root node expectations
     when( root.get( IInfo.JSON_PROPERTY_NAME ) ).thenReturn( root_nameNode );
     when( root.get( IInfo.JSON_PROPERTY_DESCRIPTION ) ).thenReturn( root_descNode );
+    when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_PATH ) ).thenReturn( root_pathNode );
+    when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_CREATED_BY ) ).thenReturn( root_createdByNode );
+    when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_LAST_MODIFIED_BY ) ).thenReturn( root_modifiedByNode );
+    when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_CREATED_DATE ) ).thenReturn( root_createdDateNode );
+    when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_LAST_MODIFIED_DATE ) ).thenReturn( root_modifiedDateNode );
+
     when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_PARAMETERS ) ).thenReturn( root_paramsArray );
     when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_VARIABLES ) ).thenReturn( root_varsArray );
     when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_STEPS ) ).thenReturn( root_stepsArray );
     when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_HOPS ) ).thenReturn( root_hopsArray );
     when( root.get( TransMetaJsonSerializer.JSON_PROPERTY_CONNECTIONS ) ).thenReturn( root_connectionsArray );
 
+    Date date = new Date();
+
     // build text property nodes expectations
     when( root_nameNode.textValue() ).thenReturn( "Trans Name" );
     when( root_descNode.textValue() ).thenReturn( "Trans Description" );
+    when( root_pathNode.textValue() ).thenReturn( "path/to/file" );
+    when( root_createdByNode.textValue() ).thenReturn( "rfellows" );
+    when( root_modifiedByNode.textValue() ).thenReturn( "rfellows" );
+    when( root_createdDateNode.asLong() ).thenReturn( date.getTime() );
+    when( root_modifiedDateNode.asLong() ).thenReturn( date.getTime() );
 
     when( root_paramsArray_Node0.toString() ).thenReturn( "mocked param0" ); // mocked, values don't matter
     when( root_paramsArray_Node1.toString() ).thenReturn( "mocked param1" ); // mocked, values don't matter
@@ -204,6 +224,12 @@ public class TransMetaJsonDeserializerTest {
     assertNotNull( tm );
     assertEquals( "Trans Name", tm.getName() );
     assertEquals( "Trans Description", tm.getDescription() );
+    assertEquals( "rfellows", tm.getCreatedUser() );
+    assertNotNull( tm.getCreatedDate() );
+    assertEquals( "rfellows", tm.getModifiedUser() );
+    assertNotNull( tm.getModifiedDate() );
+    assertEquals( "path/to/file", tm.getFilename() );
+
     assertEquals( root_paramsArray.size(), tm.listParameters().length );
     assertEquals( root_stepsArray.size(), tm.getSteps().size() );
   }

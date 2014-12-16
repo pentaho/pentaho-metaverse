@@ -22,13 +22,11 @@
 
 package com.pentaho.metaverse.impl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.apache.commons.vfs.FileObject;
 
 public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo {
 
@@ -68,17 +66,6 @@ public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo 
 
   public void putAttribute( Object key, Object value ) {
     attributes.put( key, value );
-  }
-
-  public static IExternalResourceInfo getFileResource( FileObject fileObject, boolean isInput ) {
-    BaseResourceInfo resource = null;
-    if ( fileObject != null ) {
-      resource = new BaseResourceInfo();
-      resource.setName( fileObject.getName().getPath() );
-      resource.setInput( isInput );
-      resource.setType( DictionaryConst.NODE_TYPE_FILE );
-    }
-    return resource;
   }
 
 }

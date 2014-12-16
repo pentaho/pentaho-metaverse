@@ -145,7 +145,6 @@ public class AbstractStepMetaJsonSerializerTest {
 
     verify( json ).writeEndObject();
 
-    verify( spySerializer, times( 0 ) ).writeExternalResources( spyMeta, json, provider );
   }
 
   @Test

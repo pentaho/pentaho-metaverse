@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.impl.model.kettle;
 
 import com.pentaho.metaverse.api.model.kettle.IHopInfo;
+import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.trans.TransHopMeta;
 
 /**
@@ -43,6 +44,14 @@ public class HopInfo implements IHopInfo {
       setToStepName( transHopMeta.getToStep().getName() );
     }
     setEnabled( transHopMeta.isEnabled() );
+  }
+
+  public HopInfo( JobHopMeta jobHopMeta ) {
+    if ( jobHopMeta.getFromEntry() != null && jobHopMeta.getToEntry() != null ) {
+      setFromStepName( jobHopMeta.getFromEntry().getName() );
+      setToStepName( jobHopMeta.getToEntry().getName() );
+    }
+    setEnabled( jobHopMeta.isEnabled() );
   }
 
   @Override public String getFromStepName() {

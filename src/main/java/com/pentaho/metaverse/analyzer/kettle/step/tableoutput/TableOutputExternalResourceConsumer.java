@@ -25,7 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.impl.model.DatabaseResourceInfoUtil;
+import com.pentaho.metaverse.impl.model.ExternalResourceInfoFactory;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 
@@ -49,7 +49,7 @@ public class TableOutputExternalResourceConsumer extends BaseStepExternalResourc
     Set<IExternalResourceInfo> resources = new HashSet<IExternalResourceInfo>();
     DatabaseMeta dbMeta = meta.getDatabaseMeta();
     if ( dbMeta != null ) {
-      resources.add( DatabaseResourceInfoUtil.createDatabaseResource( dbMeta ) );
+      resources.add( ExternalResourceInfoFactory.createDatabaseResource( dbMeta ) );
     }
     return resources;
   }
