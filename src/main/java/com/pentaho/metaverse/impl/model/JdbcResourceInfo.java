@@ -22,9 +22,12 @@
 
 package com.pentaho.metaverse.impl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.encryption.Encr;
 
 public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExternalResourceInfo {
 
@@ -102,13 +105,20 @@ public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExter
     this.username = username;
   }
 
-  @JsonProperty( JSON_PROPERTY_PASSWORD )
+  @JsonIgnore
   public String getPassword() {
     return password;
   }
 
+  @JsonProperty( JSON_PROPERTY_PASSWORD )
   public void setPassword( String password ) {
-    this.password = password;
+    this.password = Encr.decryptPasswordOptionallyEncrypted( password );
+  }
+
+  @JsonProperty( JSON_PROPERTY_PASSWORD )
+  private String getEncryptedPassword() {
+    // Need "Encrypted prefix for decryptPasswordOptionallyEncrypted() to operate properly
+    return "Encrypted " + Encr.encryptPassword( password );
   }
 
   @JsonProperty( JSON_PROPERTY_DATABASE_NAME )
