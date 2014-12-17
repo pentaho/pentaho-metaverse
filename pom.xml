@@ -56,7 +56,7 @@
     <platform.plugin.name>platform</platform.plugin.name>
     <pdi.plugin.name>pdi</pdi.plugin.name>
     <target.jdk.version>1.6</target.jdk.version>
-    <pmd.rulesets.url>https://raw.githubusercontent.com/pmd/pmd/pmd_releases/5.1.2/pmd/src/main/resources/rulesets/java</pmd.rulesets.url>
+    <pmd.rulesets.url>https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/pmd/rulesets/java</pmd.rulesets.url>
 
     <!-- Compile dependencies -->
     <dependency.com.sun.jersey.jersey-core.version>1.16</dependency.com.sun.jersey.jersey-core.version>
