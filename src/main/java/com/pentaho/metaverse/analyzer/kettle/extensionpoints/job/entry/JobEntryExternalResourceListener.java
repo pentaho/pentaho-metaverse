@@ -60,6 +60,9 @@ public class JobEntryExternalResourceListener implements JobEntryListener {
 
   @Override
   public void afterExecution( Job job, JobEntryCopy jobEntryCopy, JobEntryInterface jobEntryInterface, Result result ) {
+    IExecutionProfile executionProfile = JobRuntimeExtensionPoint.getProfileMap().get( job );
+    IExecutionData executionData = executionProfile.getExecutionData();
+
     // Get input files (aka Resource Dependencies)
     JobMeta jobMeta = job.getJobMeta();
     if ( jobMeta != null ) {
@@ -69,8 +72,8 @@ public class JobEntryExternalResourceListener implements JobEntryListener {
           List<ResourceEntry> resourceEntries = ref.getEntries();
           if ( resourceEntries != null ) {
             for ( ResourceEntry entry : resourceEntries ) {
-              // TODO
-              String resource = entry.getResource();
+              executionData.addExternalResource( jobEntryInterface.getName(),
+                ExternalResourceInfoFactory.createResource( entry, true ) );
             }
           }
         }
@@ -81,8 +84,6 @@ public class JobEntryExternalResourceListener implements JobEntryListener {
     if ( result != null ) {
       List<ResultFile> resultFiles = result.getResultFilesList();
       if ( resultFiles != null ) {
-        IExecutionProfile executionProfile = JobRuntimeExtensionPoint.getProfileMap().get( job );
-        IExecutionData executionData = executionProfile.getExecutionData();
         for ( ResultFile resultFile : resultFiles ) {
           executionData.addExternalResource( jobEntryInterface.getName(),
             ExternalResourceInfoFactory.createFileResource( resultFile.getFile(), false ) );
