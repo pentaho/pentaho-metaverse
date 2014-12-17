@@ -37,6 +37,8 @@ import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.extension.ExtensionPointPluginType;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.variables.Variables;
+import org.pentaho.di.job.Job;
+import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 
@@ -54,9 +56,7 @@ public class ExternalResourceConsumerIT {
 
   private static final String REPO_PATH = "src/it/resources/repo";
 
-  private TransMeta tm;
-
-  private String ktrPath;
+  private String transOrJobPath;
   private Map<String, String> variables;
 
   @Parameterized.Parameters( name = "{0}" )
@@ -73,13 +73,19 @@ public class ExternalResourceConsumerIT {
         new HashMap<String, String>() {{
           put( "Internal.Transformation.Filename.Directory", REPO_PATH );
         }}
+      },
+      {
+        REPO_PATH + "/process all tables/Process one table.kjb",
+        new HashMap<String, String>() {{
+          put( "Internal.Job.Filename.Directory", REPO_PATH + "/process all tables" );
+        }}
       }
     };
     return Arrays.asList( inputs );
   }
 
-  public ExternalResourceConsumerIT( String ktrPath, Map<String, String> variables ) {
-    this.ktrPath = ktrPath;
+  public ExternalResourceConsumerIT( String transOrJobPath, Map<String, String> variables ) {
+    this.transOrJobPath = transOrJobPath;
     this.variables = variables;
   }
 
@@ -117,22 +123,38 @@ public class ExternalResourceConsumerIT {
 
   @Test
   public void testExternalResourceConsumer() throws Exception {
-    FileInputStream xmlStream = new FileInputStream( ktrPath );
+    FileInputStream xmlStream = new FileInputStream( transOrJobPath );
     Variables vars = new Variables();
 
     for ( String key : variables.keySet() ) {
       vars.setVariable( key, variables.get( key ) );
     }
 
-    // run the trans
-    tm = new TransMeta( xmlStream, null, true, vars, null );
-    tm.setFilename( tm.getName() );
-    Trans trans = new Trans( tm, null, tm.getName(), REPO_PATH, ktrPath );
-    for ( String var : vars.listVariables() ) {
-      trans.setVariable( var, vars.getVariable( var ) );
-    }
+    // run the trans or job
+    if ( transOrJobPath.endsWith( ".ktr" ) ) {
+      TransMeta tm = new TransMeta( xmlStream, null, true, vars, null );
+      tm.setFilename( tm.getName() );
+      Trans trans = new Trans( tm, null, tm.getName(), REPO_PATH, transOrJobPath );
+      for ( String var : vars.listVariables() ) {
+        trans.setVariable( var, vars.getVariable( var ) );
+      }
 
-    trans.execute( null );
-    trans.waitUntilFinished();
+      trans.execute( null );
+      trans.waitUntilFinished();
+    } else {
+      JobMeta jm = new JobMeta( xmlStream, null, null );
+      jm.setFilename( jm.getName() );
+      Job job = new Job( null, jm );
+      Variables variables = new Variables();
+      variables.initializeVariablesFrom( job.getParentJob() );
+      job.setInternalKettleVariables( variables );
+      job.copyParametersFrom( jm );
+      for ( String var : vars.listVariables() ) {
+        job.setVariable( var, vars.getVariable( var ) );
+        jm.setVariable( var, vars.getVariable( var ) );
+      }
+      job.activateParameters();
+      job.execute( 0, null );
+    }
   }
 }

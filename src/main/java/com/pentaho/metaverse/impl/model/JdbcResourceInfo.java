@@ -116,9 +116,9 @@ public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExter
   }
 
   @JsonProperty( JSON_PROPERTY_PASSWORD )
-  private String getEncryptedPassword() {
+  protected String getEncryptedPassword() {
     // Need "Encrypted prefix for decryptPasswordOptionallyEncrypted() to operate properly
-    return "Encrypted " + Encr.encryptPassword( password );
+    return Encr.PASSWORD_ENCRYPTED_PREFIX + Encr.encryptPassword( password );
   }
 
   @JsonProperty( JSON_PROPERTY_DATABASE_NAME )

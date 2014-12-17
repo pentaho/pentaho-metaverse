@@ -29,7 +29,11 @@ import java.sql.Timestamp;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.pentaho.di.core.encryption.Encr;
+import org.pentaho.di.core.encryption.TwoWayPasswordEncoderPluginType;
+import org.pentaho.di.core.plugins.PluginRegistry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -37,6 +41,14 @@ import static org.junit.Assert.assertTrue;
 public class ModelSerializationIT {
 
   ObjectMapper mapper;
+
+  @BeforeClass
+  public static void init() throws Exception {
+    // Register the default Kettle encoder (needed for password stuff)
+    PluginRegistry.addPluginType( TwoWayPasswordEncoderPluginType.getInstance() );
+    PluginRegistry.init();
+    Encr.init( "Kettle" );
+  }
 
   @Before
   public void setUp() throws Exception {

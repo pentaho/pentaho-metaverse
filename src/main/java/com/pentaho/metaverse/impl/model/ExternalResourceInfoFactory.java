@@ -29,11 +29,16 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.resource.ResourceEntry;
 
 /**
- * User: RFellows Date: 12/12/14
+ * ExternalResourceInfoFactory provides a number of utility methods to create IExternalResourceInfo objects out of
+ * other objects (such as DatabaseMeta, ResourceEntry, FileObject, etc.)
  */
 public class ExternalResourceInfoFactory {
 
   private static final boolean DEFAULT_IS_INPUT = true;
+
+  protected ExternalResourceInfoFactory() {
+    // Protected per Singleton pattern (but available for test/coverage)
+  }
 
   public static IExternalResourceInfo createDatabaseResource( DatabaseMeta databaseMeta ) {
     return createDatabaseResource( databaseMeta, DEFAULT_IS_INPUT );
@@ -58,18 +63,21 @@ public class ExternalResourceInfoFactory {
     BaseResourceInfo resourceInfo = new BaseResourceInfo();
     resourceInfo.setName( resourceEntry.getResource() );
     resourceInfo.setInput( isInput );
-    switch( resourceEntry.getResourcetype() ) {
+    switch ( resourceEntry.getResourcetype() ) {
       case ACTIONFILE:
       case FILE:
         resourceInfo.setType( DictionaryConst.NODE_TYPE_FILE );
         break;
       case URL:
         resourceInfo.setType( DictionaryConst.NODE_TYPE_WEBSERVICE );
+        break;
       case CONNECTION:
       case DATABASENAME:
         resourceInfo.setType( DictionaryConst.NODE_TYPE_DATASOURCE );
+        break;
       case SERVER:
         resourceInfo.setType( "SERVER" );
+        break;
       case OTHER:
       default:
         resourceInfo.setType( "OTHER" );
