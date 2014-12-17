@@ -25,9 +25,7 @@ package com.pentaho.metaverse.impl.model.kettle.json;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IFieldLineageMetadataProvider;
@@ -64,20 +62,15 @@ import java.util.Set;
 /**
  * User: RFellows Date: 11/17/14
  */
-public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> extends StdSerializer<T> {
+public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
+  extends GenericStepOrJobEntryJsonSerializer<T> {
 
-  public static final String JSON_PROPERTY_TYPE = "type";
   public static final String JSON_PROPERTY_TRANSFORMS = "transforms";
-  public static final String JSON_PROPERTY_ATTRIBUTES = "attributes";
-  public static final String JSON_PROPERTY_FIELDS = "fields";
   public static final String JSON_PROPERTY_INPUT_FIELDS = "inputFields";
   public static final String JSON_PROPERTY_OUTPUT_FIELDS = "outputFields";
-  public static final String JSON_PROPERTY_EXTERNAL_RESOURCES = "externalResources";
   public static final String JSON_PROPERTY_MAPPINGS = "fieldMappings";
 
   private static final Logger LOGGER = LoggerFactory.getLogger( AbstractStepMetaJsonSerializer.class );
-
-  private ExternalResourceConsumerMap map = ExternalResourceConsumerMap.getInstance();
 
   protected AbstractStepMetaJsonSerializer( Class<T> aClass ) {
     super( aClass );
@@ -88,16 +81,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
     setLineageRepository( repo );
   }
 
-  private LineageRepository lineageRepository;
   private IStepAnalyzerProvider stepAnalyzerProvider;
-
-  public LineageRepository getLineageRepository() {
-    return lineageRepository;
-  }
-
-  public void setLineageRepository( LineageRepository repo ) {
-    this.lineageRepository = repo;
-  }
 
   protected IStepAnalyzerProvider getStepAnalyzerProvider() {
     return stepAnalyzerProvider;
@@ -107,18 +91,21 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
     this.stepAnalyzerProvider = stepAnalyzerProvider;
   }
 
-  @Override public void serialize( T meta, JsonGenerator json,
-                                   SerializerProvider serializerProvider ) throws IOException, JsonGenerationException {
-    json.writeStartObject();
-
+  @Override
+  protected void writeBasicInfo( T meta, JsonGenerator json ) throws IOException {
     StepMeta parentStepMeta = meta.getParentStepMeta();
     if ( parentStepMeta != null ) {
       json.writeStringField( IInfo.JSON_PROPERTY_CLASS, meta.getClass().getName() );
       json.writeStringField( IInfo.JSON_PROPERTY_NAME, parentStepMeta.getName() );
       json.writeStringField( JSON_PROPERTY_TYPE, getStepType( parentStepMeta ) );
+    }
+  }
 
-      writeRepoAttributes( meta, json );
-
+  @Override
+  protected void writeCustom( T meta, JsonGenerator json, SerializerProvider serializerProvider )
+    throws IOException {
+    StepMeta parentStepMeta = meta.getParentStepMeta();
+    if ( parentStepMeta != null ) {
       writeCustomProperties( meta, json, serializerProvider );
 
       writeInputFields( parentStepMeta, json );
@@ -126,13 +113,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
 
       writeFieldTransforms( meta, json, serializerProvider );
       writeFieldMappings( meta, json, serializerProvider );
-
-      writeExternalResources( meta, json, serializerProvider );
-
     }
-
-    json.writeEndObject();
-
   }
 
   protected void writeFieldMappings( T meta, JsonGenerator json, SerializerProvider serializerProvider )
@@ -157,17 +138,19 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
   }
 
   protected void writeRepoAttributes( T meta, JsonGenerator json ) throws IOException {
+    StepMeta parentStepMeta = meta.getParentStepMeta();
+    if ( parentStepMeta != null ) {
+      String id = meta.getObjectId() == null ? parentStepMeta.getName() : meta.getObjectId().toString();
+      ObjectId stepId = new StringObjectId( id );
 
-    String id = meta.getObjectId() == null ? meta.getParentStepMeta().getName() : meta.getObjectId().toString();
-    ObjectId stepId = new StringObjectId( id );
+      LineageRepository repo = getLineageRepository();
+      if ( repo != null ) {
+        Map<String, Object> attrs = repo.getStepAttributesCache( stepId );
+        json.writeObjectField( JSON_PROPERTY_ATTRIBUTES, attrs );
 
-    LineageRepository repo = getLineageRepository();
-    if ( repo != null ) {
-      Map<String, Object> attrs = repo.getStepAttributesCache( stepId );
-      json.writeObjectField( JSON_PROPERTY_ATTRIBUTES, attrs );
-
-      List<Map<String, Object>> fields = repo.getStepFieldsCache( stepId );
-      json.writeObjectField( JSON_PROPERTY_FIELDS, fields );
+        List<Map<String, Object>> fields = repo.getStepFieldsCache( stepId );
+        json.writeObjectField( JSON_PROPERTY_FIELDS, fields );
+      }
     }
   }
 
@@ -294,11 +277,4 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta> ext
     return new GenericStepMetaAnalyzer();
   }
 
-  protected ExternalResourceConsumerMap getExternalResourceConsumerMap() {
-    return map;
-  }
-
-  protected void setExternalResourceConsumerMap( ExternalResourceConsumerMap map ) {
-    this.map = map;
-  }
 }

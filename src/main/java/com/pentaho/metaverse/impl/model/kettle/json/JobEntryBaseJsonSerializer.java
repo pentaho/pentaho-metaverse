@@ -20,22 +20,34 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model;
+package com.pentaho.metaverse.impl.model.kettle.json;
 
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.database.DatabaseMeta;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import org.pentaho.di.job.entry.JobEntryBase;
+
+import java.io.IOException;
 
 /**
- * User: RFellows Date: 12/12/14
+ * User: RFellows Date: 12/15/14
  */
-public class DatabaseResourceInfoUtil {
-  public static IExternalResourceInfo createDatabaseResource( DatabaseMeta databaseMeta ) {
-    BaseDatabaseResourceInfo resourceInfo;
-    if ( "Native".equals( databaseMeta.getAccessTypeDesc() ) ) {
-      resourceInfo = new JdbcResourceInfo( databaseMeta );
-    } else {
-      resourceInfo = new JndiResourceInfo( databaseMeta );
-    }
-    return resourceInfo;
+public class JobEntryBaseJsonSerializer extends AbstractJobEntryJsonSerializer<JobEntryBase> {
+  public JobEntryBaseJsonSerializer( Class<JobEntryBase> aClass ) {
+    super( aClass );
+  }
+
+  public JobEntryBaseJsonSerializer( JavaType javaType ) {
+    super( javaType );
+  }
+
+  public JobEntryBaseJsonSerializer( Class<?> aClass, boolean b ) {
+    super( aClass, b );
+  }
+
+  @Override
+  protected void writeCustom( JobEntryBase meta, JsonGenerator json, SerializerProvider serializerProvider )
+    throws IOException {
+    // nothing custom yet
   }
 }

@@ -28,21 +28,25 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
 import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer;
+import com.pentaho.metaverse.impl.model.kettle.json.JobEntryBaseJsonSerializer;
+import com.pentaho.metaverse.impl.model.kettle.json.JobMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonDeserializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonSerializer;
 import org.apache.commons.io.FileUtils;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -59,8 +63,10 @@ import static org.mockito.Mockito.*;
  */
 public class JsonLineageIT {
 
+  private ObjectMapper mapper;
+
   @BeforeClass
-  public static void setUp() throws Exception {
+  public static void init() throws Exception {
     IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution" );
 
     PluginRegistry registry = PluginRegistry.getInstance();
@@ -103,9 +109,9 @@ public class JsonLineageIT {
 
   }
 
-  @Test
-  public void testFileToTableJsonSerialize() throws Exception {
-    ObjectMapper mapper = new ObjectMapper();
+  @Before
+  public void setUp() throws Exception {
+    mapper = new ObjectMapper();
     mapper.enable( SerializationFeature.INDENT_OUTPUT );
     mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );
     mapper.enable( SerializationFeature.WRAP_EXCEPTIONS );
@@ -118,15 +124,27 @@ public class JsonLineageIT {
     transMetaJsonSerializer.setLineageRepository( writeRepo );
     transModule.addSerializer( transMetaJsonSerializer );
 
+    JobMetaJsonSerializer jobMetaJsonSerializer = new JobMetaJsonSerializer( JobMeta.class );
+    jobMetaJsonSerializer.setLineageRepository( writeRepo );
+    transModule.addSerializer( jobMetaJsonSerializer );
+
     BaseStepMetaJsonSerializer baseStepMetaJsonSerializer = new BaseStepMetaJsonSerializer( BaseStepMeta.class );
+    JobEntryBaseJsonSerializer jobEntryBaseJsonSerializer = new JobEntryBaseJsonSerializer(
+        JobEntryBase.class );
 
     baseStepMetaJsonSerializer.setLineageRepository( writeRepo );
+    jobEntryBaseJsonSerializer.setLineageRepository( writeRepo );
     transModule.addSerializer( baseStepMetaJsonSerializer );
+    transModule.addSerializer( jobEntryBaseJsonSerializer );
 
     transModule.addSerializer( new TableOutputStepMetaJsonSerializer( TableOutputMeta.class, writeRepo ) );
     transModule.addDeserializer( TransMeta.class, new TransMetaJsonDeserializer( TransMeta.class, readRepo ) );
 
     mapper.registerModule( transModule );
+  }
+
+  @Test
+  public void testFileToTableJsonSerialize() throws Exception {
 
     String ktrPath = "src/it/resources/repo/samples/file_to_table.ktr";
     TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
@@ -135,7 +153,7 @@ public class JsonLineageIT {
     File jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".json" );
     FileUtils.writeStringToFile( jsonOut, json );
 
-    // now deserilaize it
+    // now deserialize it
     TransMeta rehydrated = mapper.readValue( json, TransMeta.class );
 
 //    String ktr = rehydrated.getXML();
@@ -149,28 +167,6 @@ public class JsonLineageIT {
 
   @Test
   public void testGettingStartedJsonSerialize() throws Exception {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.enable( SerializationFeature.INDENT_OUTPUT );
-    mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );
-    mapper.enable( SerializationFeature.WRAP_EXCEPTIONS );
-
-    LineageRepository writeRepo = new LineageRepository();
-    LineageRepository readRepo = new LineageRepository();
-
-    SimpleModule transModule = new SimpleModule( "PDIModule", new Version( 1, 0, 0, null ) );
-    TransMetaJsonSerializer transMetaJsonSerializer = new TransMetaJsonSerializer( TransMeta.class );
-    transMetaJsonSerializer.setLineageRepository( writeRepo );
-    transModule.addSerializer( transMetaJsonSerializer );
-
-    BaseStepMetaJsonSerializer baseStepMetaJsonSerializer = new BaseStepMetaJsonSerializer( BaseStepMeta.class );
-
-    baseStepMetaJsonSerializer.setLineageRepository( writeRepo );
-    transModule.addSerializer( baseStepMetaJsonSerializer );
-
-    transModule.addSerializer( new TableOutputStepMetaJsonSerializer( TableOutputMeta.class, writeRepo ) );
-    transModule.addDeserializer( TransMeta.class, new TransMetaJsonDeserializer( TransMeta.class, readRepo ) );
-
-    mapper.registerModule( transModule );
 
     String ktrPath = "src/it/resources/repo/demo/Getting Started Transformation.ktr";
     TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
@@ -179,7 +175,7 @@ public class JsonLineageIT {
     File jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".json" );
     FileUtils.writeStringToFile( jsonOut, json );
 
-    // now deserilaize it
+    // now deserialize it
     TransMeta rehydrated = mapper.readValue( json, TransMeta.class );
 
 //    String ktr = rehydrated.getXML();
@@ -189,5 +185,18 @@ public class JsonLineageIT {
     json = mapper.writeValueAsString( rehydrated );
     jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".after.json" );
     FileUtils.writeStringToFile( jsonOut, json );
+  }
+
+  @Test
+  public void testJobSerialization() throws Exception {
+    String kjbPath = "src/it/resources/repo/samples/launch_transformation_job.kjb";
+    JobMeta meta = new JobMeta( kjbPath, null );
+
+    String json = mapper.writeValueAsString( meta );
+    File jsonOut = new File( "src/it/resources/tmp/" + meta.getName() + ".json" );
+    FileUtils.writeStringToFile( jsonOut, json );
+
+    // TODO: now deserialize it
+
   }
 }

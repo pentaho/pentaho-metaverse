@@ -41,9 +41,14 @@ public class LineageRepository extends SimpleRepository {
   Map<ObjectId, Map<String, Object>> stepAttributeCache;
   Map<ObjectId, List<Map<String, Object>>> stepFieldCache;
 
+  Map<ObjectId, Map<String, Object>> jobEntryAttributeCache;
+  Map<ObjectId, List<Map<String, Object>>> jobEntryFieldCache;
+
   public LineageRepository() {
     stepAttributeCache = new HashMap<ObjectId, Map<String, Object>>();
     stepFieldCache = new HashMap<ObjectId, List<Map<String, Object>>>();
+    jobEntryAttributeCache = new HashMap<ObjectId, Map<String, Object>>();
+    jobEntryFieldCache = new HashMap<ObjectId, List<Map<String, Object>>>();
   }
 
   @Override public boolean getStepAttributeBoolean( ObjectId id_step, int nr, String code, boolean def )
@@ -128,6 +133,39 @@ public class LineageRepository extends SimpleRepository {
       fieldList.add( number, fieldAttrs );
     }
     return fieldAttrs;
+  }
+
+  public Map<String, Object> getJobEntryAttributesCache( ObjectId id_jobentry ) {
+    Map<String, Object> attrs = jobEntryAttributeCache.get( id_jobentry );
+    if ( attrs == null ) {
+      attrs = new TreeMap<String, Object>();
+      jobEntryAttributeCache.put( id_jobentry, attrs );
+    }
+    return attrs;
+  }
+
+  public Map<String, Object> getJobEntryFieldAttributesCache( ObjectId id_jobentry, int number ) {
+    List<Map<String, Object>> fieldList = getJobEntryFieldsCache( id_jobentry );
+    if ( number + 1 > fieldList.size() ) {
+      for ( int i = fieldList.size(); i < number + 1; i++ ) {
+        fieldList.add( i, new TreeMap<String, Object>() );
+      }
+    }
+    Map<String, Object> fieldAttrs = fieldList.get( number );
+    if ( fieldAttrs == null ) {
+      fieldAttrs = new TreeMap<String, Object>();
+      fieldList.add( number, fieldAttrs );
+    }
+    return fieldAttrs;
+  }
+
+  public List<Map<String, Object>> getJobEntryFieldsCache( ObjectId id_jobentry ) {
+    List<Map<String, Object>> fieldList = jobEntryFieldCache.get( id_jobentry );
+    if ( fieldList == null ) {
+      fieldList = new ArrayList<Map<String, Object>>( 100 );
+      jobEntryFieldCache.put( id_jobentry, fieldList );
+    }
+    return fieldList;
   }
 
   @Override public void saveStepAttribute( ObjectId id_transformation, ObjectId id_step, int nr, String code,
@@ -224,7 +262,8 @@ public class LineageRepository extends SimpleRepository {
   }
 
   @Override
-  public void saveConditionStepAttribute( ObjectId id_transformation, ObjectId id_step, String code, Condition condition ) throws KettleException {
+  public void saveConditionStepAttribute( ObjectId id_transformation, ObjectId id_step, String code,
+    Condition condition ) throws KettleException {
     // TODO
   }
 
@@ -232,6 +271,97 @@ public class LineageRepository extends SimpleRepository {
   public Condition loadConditionFromStepAttribute( ObjectId id_step, String code ) throws KettleException {
     // TODO
     return new Condition();
+  }
+
+  @Override
+  public void saveJobEntryAttribute( ObjectId id_job, ObjectId id_jobentry, int nr, String code, String value )
+    throws KettleException {
+    Map<String, Object> attrs = getJobEntryFieldAttributesCache( id_jobentry, nr );
+    attrs.put( code, value );
+  }
+
+  @Override
+  public void saveJobEntryAttribute( ObjectId id_job, ObjectId id_jobentry, String code, String value )
+    throws KettleException {
+    Map<String, Object> attrs = getJobEntryAttributesCache( id_jobentry );
+    attrs.put( code, value );
+  }
+
+  @Override
+  public void saveJobEntryAttribute( ObjectId id_job, ObjectId id_jobentry, int nr, String code, boolean value )
+    throws KettleException {
+    Map<String, Object> attrs = getJobEntryFieldAttributesCache( id_jobentry, nr );
+    attrs.put( code, value );
+  }
+
+  @Override
+  public void saveJobEntryAttribute( ObjectId id_job, ObjectId id_jobentry, String code, boolean value )
+    throws KettleException {
+    Map<String, Object> attrs = getJobEntryAttributesCache( id_jobentry );
+    attrs.put( code, value );
+  }
+
+  @Override
+  public void saveJobEntryAttribute( ObjectId id_job, ObjectId id_jobentry, int nr, String code, long value )
+    throws KettleException {
+    Map<String, Object> attrs = getJobEntryFieldAttributesCache( id_jobentry, nr );
+    attrs.put( code, value );
+  }
+
+  @Override
+  public void saveJobEntryAttribute( ObjectId id_job, ObjectId id_jobentry, String code, long value )
+    throws KettleException {
+    Map<String, Object> attrs = getJobEntryAttributesCache( id_jobentry );
+    attrs.put( code, value );
+  }
+
+  @Override
+  public boolean getJobEntryAttributeBoolean( ObjectId id_jobentry, String code ) throws KettleException {
+    Map<String, Object> attrs = getJobEntryAttributesCache( id_jobentry );
+    Boolean attr = (Boolean) attrs.get( code );
+    return attr == null ? null : attr;
+  }
+
+  @Override
+  public boolean getJobEntryAttributeBoolean( ObjectId id_jobentry, int nr, String code ) throws KettleException {
+    Map<String, Object> attrs = getJobEntryFieldAttributesCache( id_jobentry, nr );
+    Boolean attr = (Boolean) attrs.get( code );
+    return attr == null ? false : attr;
+  }
+
+  @Override
+  public boolean getJobEntryAttributeBoolean( ObjectId id_jobentry, String code, boolean def ) throws KettleException {
+    Map<String, Object> attrs = getJobEntryAttributesCache( id_jobentry );
+    Boolean attr = (Boolean) attrs.get( code );
+    return attr == null ? def : attr;
+  }
+
+  @Override
+  public long getJobEntryAttributeInteger( ObjectId id_jobentry, String code ) throws KettleException {
+    Map<String, Object> attrs = getJobEntryAttributesCache( id_jobentry );
+    Number attr = (Number) attrs.get( code );
+    return attr == null ? 0L : attr.longValue();
+  }
+
+  @Override
+  public long getJobEntryAttributeInteger( ObjectId id_jobentry, int nr, String code ) throws KettleException {
+    Map<String, Object> attrs = getJobEntryFieldAttributesCache( id_jobentry, nr );
+    Number attr = (Number) attrs.get( code );
+    return attr == null ? 0L : attr.longValue();
+  }
+
+  @Override
+  public String getJobEntryAttributeString( ObjectId id_jobentry, String code ) throws KettleException {
+    Map<String, Object> attrs = getJobEntryAttributesCache( id_jobentry );
+    String attr = (String) attrs.get( code );
+    return attr;
+  }
+
+  @Override
+  public String getJobEntryAttributeString( ObjectId id_jobentry, int nr, String code ) throws KettleException {
+    Map<String, Object> attrs = getJobEntryFieldAttributesCache( id_jobentry, nr );
+    String attr = (String) attrs.get( code );
+    return attr;
   }
 }
 

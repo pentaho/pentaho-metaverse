@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,8 +91,21 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
 
     String name = node.get( IInfo.JSON_PROPERTY_NAME ).textValue();
     String desc = node.get( IInfo.JSON_PROPERTY_DESCRIPTION ).textValue();
+
+    String createdBy = node.get( TransMetaJsonSerializer.JSON_PROPERTY_CREATED_BY ).textValue();
+    String modifiedBy = node.get( TransMetaJsonSerializer.JSON_PROPERTY_LAST_MODIFIED_BY ).textValue();
+    Date createdDate = new Date( node.get( TransMetaJsonSerializer.JSON_PROPERTY_CREATED_DATE ).asLong() );
+    Date modifiedDate = new Date( node.get( TransMetaJsonSerializer.JSON_PROPERTY_LAST_MODIFIED_DATE ).asLong() );
+    String path = node.get( TransMetaJsonSerializer.JSON_PROPERTY_PATH ).textValue();
+
     transMeta = new TransMeta( null, name );
     transMeta.setDescription( desc );
+
+    transMeta.setCreatedDate( createdDate );
+    transMeta.setCreatedUser( createdBy );
+    transMeta.setModifiedDate( modifiedDate );
+    transMeta.setModifiedUser( modifiedBy );
+    transMeta.setFilename( path );
 
     // parameters
     deserializeParameters( transMeta, node, mapper );

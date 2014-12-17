@@ -25,7 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.textfileinput;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.impl.model.BaseResourceInfo;
+import com.pentaho.metaverse.impl.model.ExternalResourceInfoFactory;
 import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -72,7 +72,8 @@ public class TextFileInputExternalResourceConsumer extends BaseStepExternalResou
               if ( !Const.isEmpty( path ) ) {
                 try {
 
-                  IExternalResourceInfo resource = BaseResourceInfo.getFileResource( KettleVFS.getFileObject( path ), true );
+                  IExternalResourceInfo resource = ExternalResourceInfoFactory
+                    .createFileResource( KettleVFS.getFileObject( path ), true );
                   if ( resource != null ) {
                     resources.add( resource );
                   } else {
@@ -99,7 +100,7 @@ public class TextFileInputExternalResourceConsumer extends BaseStepExternalResou
       String filename = rowMeta.getString( row, meta.getAcceptingField(), null );
       if ( !Const.isEmpty( filename ) ) {
         FileObject fileObject = KettleVFS.getFileObject( filename );
-        resources.add( BaseResourceInfo.getFileResource( fileObject, true ) );
+        resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, true ) );
       }
     } catch ( KettleException kve ) {
       // TODO throw exception or ignore?

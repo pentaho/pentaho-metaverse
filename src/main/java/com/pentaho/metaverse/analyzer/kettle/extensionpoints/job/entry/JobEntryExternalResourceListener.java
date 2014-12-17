@@ -25,7 +25,7 @@ import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IJobEntryExternalRe
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.impl.model.BaseResourceInfo;
+import com.pentaho.metaverse.impl.model.ExternalResourceInfoFactory;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.ResultFile;
 import org.pentaho.di.job.Job;
@@ -85,7 +85,7 @@ public class JobEntryExternalResourceListener implements JobEntryListener {
         IExecutionData executionData = executionProfile.getExecutionData();
         for ( ResultFile resultFile : resultFiles ) {
           executionData.addExternalResource( jobEntryInterface.getName(),
-            BaseResourceInfo.getFileResource( resultFile.getFile(), false ) );
+            ExternalResourceInfoFactory.createFileResource( resultFile.getFile(), false ) );
         }
       }
     }
