@@ -134,7 +134,9 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     Map<Object, Object> variableMap = executionData.getVariables();
     for ( String var : vars ) {
       String value = trans.getVariable( var );
-      variableMap.put( var, value );
+      if ( var != null && value != null ) {
+        variableMap.put( var, value );
+      }
     }
 
     // Store parameters

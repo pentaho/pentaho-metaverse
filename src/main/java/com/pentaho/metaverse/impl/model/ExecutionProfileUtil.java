@@ -13,6 +13,10 @@ import java.io.PrintStream;
  */
 public class ExecutionProfileUtil {
 
+  protected ExecutionProfileUtil() {
+    // Protected per Singleton pattern (but available for testing)
+  }
+
   public static void dumpExecutionProfile( PrintStream out, IExecutionProfile executionProfile ) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     mapper.enable( SerializationFeature.INDENT_OUTPUT );
