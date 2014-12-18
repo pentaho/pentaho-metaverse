@@ -27,6 +27,7 @@ import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaFactory;
@@ -36,6 +37,8 @@ import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -47,6 +50,9 @@ import java.util.Set;
  * operated on by Select Values steps.
  */
 public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta> {
+
+  private static final Logger log = LoggerFactory.getLogger( SelectValuesStepAnalyzer.class );
+
 
   /**
    * This value is used by Select Values to indicate "no change" to a particular piece of metadata (precision, e.g.)
@@ -159,7 +165,8 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
           ValueMetaInterface inputFieldValueMeta = prevFields.searchValueMeta( inputFieldName );
           if ( inputFieldValueMeta == null ) {
-            throw new MetaverseAnalyzerException( "Cannot determine type of field: " + inputFieldName );
+            log.warn( Messages.getString( "WARNING.CannotDetermineFieldType", inputFieldName ) );
+            continue;
           }
           String kettleType = inputFieldValueMeta.getTypeDesc();
 
