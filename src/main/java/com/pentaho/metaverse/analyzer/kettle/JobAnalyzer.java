@@ -72,7 +72,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
    */
   private IJobEntryAnalyzerProvider jobEntryAnalyzerProvider;
 
-  private Logger log = LoggerFactory.getLogger( JobAnalyzer.class );
+  private static final Logger log = LoggerFactory.getLogger( JobAnalyzer.class );
 
   @Override
   public synchronized IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, IMetaverseDocument document )

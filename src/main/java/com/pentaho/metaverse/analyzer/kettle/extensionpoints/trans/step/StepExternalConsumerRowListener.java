@@ -38,8 +38,8 @@ import java.util.Map;
 
 public class StepExternalConsumerRowListener extends RowAdapter {
 
-  private IStepExternalResourceConsumer stepExternalResourceConsumer;
-  private StepInterface step;
+  private final IStepExternalResourceConsumer stepExternalResourceConsumer;
+  private final StepInterface step;
 
   public StepExternalConsumerRowListener(
     IStepExternalResourceConsumer stepExternalResourceConsumer, StepInterface step ) {

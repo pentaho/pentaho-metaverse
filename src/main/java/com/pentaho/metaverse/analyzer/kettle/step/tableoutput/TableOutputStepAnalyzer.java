@@ -28,6 +28,8 @@ import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.Namespace;
 import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
@@ -36,6 +38,7 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -61,7 +64,7 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
       : tableOutputMeta.getTableName();
 
     String[] fieldNames = tableOutputMeta.getFieldStream();
-    if ( fieldNames == null || fieldNames.length <= 0 || !tableOutputMeta.specifyFields() ) {
+    if ( ArrayUtils.isEmpty( fieldNames ) || !tableOutputMeta.specifyFields() ) {
       // If no incoming fields are specified, get them from the previous step
       // NOTE: This check depends on the guarantee that super.loadInputAndOutputStreamFields() has been called.
       //  it is not done again here for performance purposes. Currently it's being called during super.analyze()
@@ -77,8 +80,8 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
       String dbConnectionName = tableOutputMeta.getDatabaseMeta().getName();
 
       // the table is unique within the connection to it, that is it's namespace
-      if ( dbNodes != null ) {
-        IMetaverseNode dbn = dbNodes.get( dbConnectionName );
+      if ( !MapUtils.isEmpty( getDatabaseNodes() ) ) {
+        IMetaverseNode dbn = getDatabaseNodes().get( dbConnectionName );
         if ( dbn != null ) {
           IMetaverseComponentDescriptor dbTableDescriptor = new MetaverseComponentDescriptor(
             tableName, DictionaryConst.NODE_TYPE_DATA_TABLE,
@@ -91,7 +94,7 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
 
           metaverseBuilder.addLink( node, DictionaryConst.LINK_WRITESTO, tableNode );
 
-          if ( dbFieldNames == null || dbFieldNames.length == 0 || !tableOutputMeta.specifyFields() ) {
+          if ( ArrayUtils.isEmpty( dbFieldNames ) || !tableOutputMeta.specifyFields() ) {
             // If no field names are specified, then all the incoming fields are written out by name verbatim
             dbFieldNames = fieldNames;
           }
@@ -131,6 +134,10 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
     }
 
     return rootNode;
+  }
+
+  protected Map<String, IMetaverseNode> getDatabaseNodes() {
+    return dbNodes;
   }
 
   @Override

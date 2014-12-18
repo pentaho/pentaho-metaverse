@@ -100,9 +100,9 @@ public class MetaverseService {
     String mediaType = acceptTypes.get( 0 ).toString();
     String format;
 
-    if ( MediaType.APPLICATION_JSON.toString().equals( mediaType.toString() ) ) {
+    if ( MediaType.APPLICATION_JSON.toString().equals( mediaType ) ) {
       format = IMetaverseReader.FORMAT_JSON;
-    } else if ( MediaType.TEXT_PLAIN.toString().equals( mediaType.toString() ) ) {
+    } else if ( MediaType.TEXT_PLAIN.toString().equals( mediaType ) ) {
       format = IMetaverseReader.FORMAT_CSV;
     } else {
       format = IMetaverseReader.FORMAT_XML;

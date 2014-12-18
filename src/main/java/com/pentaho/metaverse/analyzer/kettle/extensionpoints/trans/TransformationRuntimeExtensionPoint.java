@@ -74,7 +74,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
   public void callExtensionPoint( LogChannelInterface logChannelInterface, Object o ) throws KettleException {
 
     // Transformation Started listeners get called after the extension point is invoked, so just add a trans listener
-    if ( o != null && o instanceof Trans ) {
+    if ( o instanceof Trans ) {
       Trans trans = ( (Trans) o );
       trans.addTransListener( this );
     }

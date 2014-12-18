@@ -49,13 +49,17 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -170,6 +174,61 @@ public class TableOutputStepAnalyzerTest {
     } );
 
     assertNotNull( analyzer.analyze( descriptor, mockTableOutputMeta ) );
+  }
+
+  @Test
+  public void testAnalyzeWithDbNodes() throws Exception {
+    StepMeta meta = new StepMeta( "test", mockTableOutputMeta );
+    StepMeta spyMeta = spy( meta );
+    TableOutputStepAnalyzer spy = spy( analyzer );
+
+    Map<String, IMetaverseNode> dbNodes = new HashMap<String, IMetaverseNode>();
+    IMetaverseNode dbNode = mock( IMetaverseNode.class );
+    dbNodes.put( "MyConnection", dbNode );
+
+    when( spy.getDatabaseNodes() ).thenReturn( dbNodes );
+
+    when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+
+    // additional hydration needed to get test lines code coverage
+    when( mockDatabaseMeta.getDatabaseName() ).thenReturn( "testDatabase" );
+    when( mockDatabaseMeta.getName() ).thenReturn( "MyConnection" );
+    when( mockDatabaseMeta.getAccessTypeDesc() ).thenReturn( "Native" );
+    when( mockTableOutputMeta.getDatabaseMeta() ).thenReturn( mockDatabaseMeta );
+    when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
+    when( mockTableOutputMeta.getFieldStream() ).thenReturn(  new String[] { "test1", "test2" }  );
+    when( mockTableOutputMeta.specifyFields() ).thenReturn( true );
+    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+
+      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        if ( args[0] == "test1" )
+          return new ValueMetaString( "test1" );
+        if ( args[0] == "test2" )
+          return new ValueMetaString( "test2" );
+        return null;
+      }
+    } );
+
+    assertNotNull( spy.analyze( descriptor, mockTableOutputMeta ) );
+
+  }
+
+  @Test
+  public void testAnalyzeWithNoDbNodes() throws Exception {
+    StepMeta meta = new StepMeta( "test", mockTableOutputMeta );
+    StepMeta spyMeta = spy( meta );
+    TableOutputStepAnalyzer spy = spy( analyzer );
+
+    when( spy.getDatabaseNodes() ).thenReturn( null );
+
+    when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+
+    assertNotNull( spy.analyze( descriptor, mockTableOutputMeta ) );
+
   }
 
   @Test

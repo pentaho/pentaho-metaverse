@@ -75,7 +75,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
   public void callExtensionPoint( LogChannelInterface logChannelInterface, Object o ) throws KettleException {
 
     // Job Started listeners get called after the extension point is invoked, so just add a job listener
-    if ( o != null && o instanceof Job ) {
+    if ( o instanceof Job ) {
       Job job = ( (Job) o );
 
       // Add the job finished listener

@@ -44,8 +44,8 @@ public class ExternalResourceConsumerMap {
 
   private static ExternalResourceConsumerMap INSTANCE = new ExternalResourceConsumerMap();
 
-  private Map<Class<? extends BaseStepMeta>, List<IStepExternalResourceConsumer>> stepConsumerMap;
-  private Map<Class<? extends JobEntryBase>, List<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap;
+  private final Map<Class<? extends BaseStepMeta>, List<IStepExternalResourceConsumer>> stepConsumerMap;
+  private final Map<Class<? extends JobEntryBase>, List<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap;
 
   private ExternalResourceConsumerMap() {
     stepConsumerMap =

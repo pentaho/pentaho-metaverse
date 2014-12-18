@@ -90,7 +90,7 @@ public class MetaverseLogicalIdGenerator implements ILogicalIdGenerator {
         int i = 0;
         for ( String key : propertyKeys ) {
           if ( i++ > 0 ) {
-            sb.append( "," );
+            sb.append( ',' );
           }
           sb.append( QUOTE )
             .append( key )

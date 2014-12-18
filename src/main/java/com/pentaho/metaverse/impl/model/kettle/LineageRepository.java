@@ -353,15 +353,13 @@ public class LineageRepository extends SimpleRepository {
   @Override
   public String getJobEntryAttributeString( ObjectId id_jobentry, String code ) throws KettleException {
     Map<String, Object> attrs = getJobEntryAttributesCache( id_jobentry );
-    String attr = (String) attrs.get( code );
-    return attr;
+    return (String) attrs.get( code );
   }
 
   @Override
   public String getJobEntryAttributeString( ObjectId id_jobentry, int nr, String code ) throws KettleException {
     Map<String, Object> attrs = getJobEntryFieldAttributesCache( id_jobentry, nr );
-    String attr = (String) attrs.get( code );
-    return attr;
+    return (String) attrs.get( code );
   }
 }
 

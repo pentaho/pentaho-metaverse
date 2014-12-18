@@ -77,7 +77,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
 
   private IStepAnalyzerProvider stepAnalyzerProvider;
 
-  private Logger log = LoggerFactory.getLogger( TransformationAnalyzer.class );
+  private static final Logger log = LoggerFactory.getLogger( TransformationAnalyzer.class );
 
   @Override
   public synchronized IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, IMetaverseDocument document )
