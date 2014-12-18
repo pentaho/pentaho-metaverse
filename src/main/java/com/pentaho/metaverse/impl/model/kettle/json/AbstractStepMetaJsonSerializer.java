@@ -70,6 +70,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
   public static final String JSON_PROPERTY_OUTPUT_FIELDS = "outputFields";
   public static final String JSON_PROPERTY_MAPPINGS = "fieldMappings";
 
+  private IStepAnalyzerProvider stepAnalyzerProvider;
   private static final Logger LOGGER = LoggerFactory.getLogger( AbstractStepMetaJsonSerializer.class );
 
   protected AbstractStepMetaJsonSerializer( Class<T> aClass ) {
@@ -80,8 +81,6 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
     super( aClass );
     setLineageRepository( repo );
   }
-
-  private IStepAnalyzerProvider stepAnalyzerProvider;
 
   protected IStepAnalyzerProvider getStepAnalyzerProvider() {
     return stepAnalyzerProvider;

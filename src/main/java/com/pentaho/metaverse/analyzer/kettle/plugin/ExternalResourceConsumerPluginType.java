@@ -44,7 +44,7 @@ import java.util.Map;
 
 @PluginMainClassType( IExternalResourceConsumer.class )
 @PluginAnnotationType( ExternalResourceConsumer.class )
-public class ExternalResourceConsumerPluginType extends BasePluginType implements PluginTypeInterface {
+public final class ExternalResourceConsumerPluginType extends BasePluginType implements PluginTypeInterface {
 
   /* Use the parent classloader to load classes from this package when loading an ExternalResourceConsumer plugin */
   private static final String[] PLUGIN_PACKAGE_PATTERNS = {
