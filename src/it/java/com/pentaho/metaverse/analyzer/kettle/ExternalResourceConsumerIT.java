@@ -23,6 +23,8 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry.JobEntryExternalResourceConsumerListener;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExternalResourceConsumerListener;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
@@ -34,7 +36,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.KettleEnvironment;
+import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.extension.ExtensionPointPluginType;
+import org.pentaho.di.core.extension.KettleExtensionPoint;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.job.Job;
@@ -75,8 +79,9 @@ public class ExternalResourceConsumerIT {
         }}
       },
       {
-        REPO_PATH + "/process all tables/Process one table.kjb",
+        REPO_PATH + "/process all tables/Process all tables.kjb",
         new HashMap<String, String>() {{
+          put( "Internal.Transformation.Filename.Directory", REPO_PATH + "/process all tables" );
           put( "Internal.Job.Filename.Directory", REPO_PATH + "/process all tables" );
         }}
       }
@@ -110,14 +115,20 @@ public class ExternalResourceConsumerIT {
     ExtensionPointPluginType.getInstance().registerCustom( TransformationRuntimeExtensionPoint.class,
       "custom", "transExecutionProfile", "TransformationStartThreads", "no description", null );
 
+    ExtensionPointPluginType.getInstance().registerCustom( JobRuntimeExtensionPoint.class,
+      "custom", "jobRuntimeMetaverse", "JobStart", "no description", null );
+
     ExtensionPointPluginType.getInstance().registerCustom(
       StepExternalResourceConsumerListener.class,
       "custom", "stepExternalResource", "StepBeforeStart", "no description", null );
 
+    ExtensionPointPluginType.getInstance().registerCustom(
+      JobEntryExternalResourceConsumerListener.class,
+      "custom", "jobEntryExternalResource", "JobBeforeJobEntryExecution", "no description", null );
+
 
     KettleEnvironment.init();
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
-
     builder.onEnvironmentInit();
   }
 
@@ -132,6 +143,7 @@ public class ExternalResourceConsumerIT {
 
     // run the trans or job
     if ( transOrJobPath.endsWith( ".ktr" ) ) {
+      KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
       TransMeta tm = new TransMeta( xmlStream, null, true, vars, null );
       tm.setFilename( tm.getName() );
       Trans trans = new Trans( tm, null, tm.getName(), REPO_PATH, transOrJobPath );
@@ -142,19 +154,24 @@ public class ExternalResourceConsumerIT {
       trans.execute( null );
       trans.waitUntilFinished();
     } else {
-      JobMeta jm = new JobMeta( xmlStream, null, null );
+      KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.KITCHEN );
+      JobMeta jm = new JobMeta( new Variables(), transOrJobPath, null, null, null );
       jm.setFilename( jm.getName() );
       Job job = new Job( null, jm );
       Variables variables = new Variables();
       variables.initializeVariablesFrom( job.getParentJob() );
-      job.setInternalKettleVariables( variables );
-      job.copyParametersFrom( jm );
+      jm.setInternalKettleVariables( variables );
       for ( String var : vars.listVariables() ) {
-        job.setVariable( var, vars.getVariable( var ) );
         jm.setVariable( var, vars.getVariable( var ) );
       }
+      job.copyParametersFrom( jm );
+      job.copyVariablesFrom( jm );
       job.activateParameters();
+
+      // We have to call the extension point ourselves -- don't ask :(
+      ExtensionPointHandler.callExtensionPoint( job.getLogChannel(), KettleExtensionPoint.JobStart.id, job );
       job.execute( 0, null );
+      job.fireJobFinishListeners();
     }
   }
 }

@@ -48,7 +48,7 @@ public class JobEntryExternalResourceConsumerListener implements ExtensionPointI
 
 
   /**
-   * This method is called by the Kettle code when a step is about to start
+   * This method is called by the Kettle code when a job entry is about to start
    *
    * @param log    the logging channel to log debugging information to
    * @param object The subject object that is passed to the plugin code
@@ -73,11 +73,20 @@ public class JobEntryExternalResourceConsumerListener implements ExtensionPointI
               // We might know enough at this point, so call the consumer
               Collection<IExternalResourceInfo> resources = jobEntryConsumer.getResourcesFromMeta( meta );
               addExternalResources( resources, meta );
-
               // Add a JobEntryListener to collect external resource info after a job entry has finished
               if ( jobExec.job != null && jobEntryConsumer.isDataDriven( meta ) ) {
-                jobExec.job.addJobEntryListener( new JobEntryExternalResourceListener() );
+                // Add the consumer as a resource listener, this is done to override the default impl
+                if ( jobEntryConsumer instanceof JobEntryExternalResourceListener ) {
+                  jobExec.job.addJobEntryListener( (JobEntryExternalResourceListener) jobEntryConsumer );
+                } else {
+                  jobExec.job.addJobEntryListener( new JobEntryExternalResourceListener() );
+                }
               }
+            }
+          } else {
+            // Add a JobEntryListener to collect external resource info after a job entry has finished
+            if ( jobExec.job != null ) {
+              jobExec.job.addJobEntryListener( new JobEntryExternalResourceListener() );
             }
           }
         }
