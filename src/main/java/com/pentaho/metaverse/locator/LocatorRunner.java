@@ -26,8 +26,8 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.io.FilenameUtils;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.slf4j.Logger;
@@ -134,7 +134,7 @@ public abstract class LocatorRunner<T> implements Runnable {
       IMetaverseBuilder metaverseBuilder = locator.getMetaverseBuilder();
       IMetaverseObjectFactory objectFactory = metaverseBuilder.getMetaverseObjectFactory();
 
-      IMetaverseDocument metaverseDocument = objectFactory.createDocumentObject();
+      IDocument metaverseDocument = objectFactory.createDocumentObject();
 
       metaverseDocument.setNamespace( namespace );
       metaverseDocument.setContent( locator.getContents( file ) );

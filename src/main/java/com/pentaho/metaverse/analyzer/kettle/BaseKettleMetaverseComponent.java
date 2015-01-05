@@ -23,8 +23,8 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
@@ -74,12 +74,12 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     return namespace.getSiblingNamespace( siblingName, siblingType );
   }
 
-  protected IMetaverseNode createNodeFromDescriptor( IMetaverseComponentDescriptor descriptor ) {
+  protected IMetaverseNode createNodeFromDescriptor( IComponentDescriptor descriptor ) {
     return createNodeFromDescriptor( descriptor, getLogicalIdGenerator() );
   }
 
   protected IMetaverseNode createNodeFromDescriptor(
-      IMetaverseComponentDescriptor descriptor, ILogicalIdGenerator idGenerator ) {
+      IComponentDescriptor descriptor, ILogicalIdGenerator idGenerator ) {
 
     String uuid = UUID.randomUUID().toString();
 
@@ -99,7 +99,7 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     return node;
   }
 
-  protected IMetaverseNode createFileNode( String fileName, IMetaverseComponentDescriptor descriptor )
+  protected IMetaverseNode createFileNode( String fileName, IComponentDescriptor descriptor )
     throws MetaverseException {
 
     String normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );

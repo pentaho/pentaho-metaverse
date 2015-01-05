@@ -10,8 +10,8 @@ import org.pentaho.platform.api.metaverse.IAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
@@ -45,9 +45,9 @@ public class DocumentControllerTest {
   @Mock
   private IDocumentEvent mockEvent;
   @Mock
-  private IMetaverseDocument mockDoc;
+  private IDocument mockDoc;
   @Mock
-  private IMetaverseComponentDescriptor mockDescriptor;
+  private IComponentDescriptor mockDescriptor;
 
   @Before
   public void setup() {
@@ -149,8 +149,8 @@ public class DocumentControllerTest {
     docController.onEvent( mockEvent );
     MetaverseCompletionService.getInstance().waitTillEmpty();
 
-    verify( dummyAnalyzer ).analyze( any( IMetaverseComponentDescriptor.class ), eq( mockDoc ) );
-    verify( testAndDummyAnalyzer ).analyze( any( IMetaverseComponentDescriptor.class ), eq( mockDoc ) );
+    verify( dummyAnalyzer ).analyze( any( IComponentDescriptor.class ), eq( mockDoc ) );
+    verify( testAndDummyAnalyzer ).analyze( any( IComponentDescriptor.class ), eq( mockDoc ) );
   }
 
   @Test
@@ -161,9 +161,9 @@ public class DocumentControllerTest {
     docController.onEvent( mockEvent );
     MetaverseCompletionService.getInstance().waitTillEmpty();
 
-    verify( dummyAnalyzer, never() ).analyze( any( IMetaverseComponentDescriptor.class ), eq( mockDoc ) );
-    verify( testAndDummyAnalyzer ).analyze( any( IMetaverseComponentDescriptor.class ), eq( mockDoc ) );
-    verify( anotherAnalyzer, never() ).analyze( any( IMetaverseComponentDescriptor.class ), eq( mockDoc ) );
+    verify( dummyAnalyzer, never() ).analyze( any( IComponentDescriptor.class ), eq( mockDoc ) );
+    verify( testAndDummyAnalyzer ).analyze( any( IComponentDescriptor.class ), eq( mockDoc ) );
+    verify( anotherAnalyzer, never() ).analyze( any( IComponentDescriptor.class ), eq( mockDoc ) );
   }
 
   @Test

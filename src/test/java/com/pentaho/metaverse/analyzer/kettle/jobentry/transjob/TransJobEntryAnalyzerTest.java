@@ -23,7 +23,6 @@ package com.pentaho.metaverse.analyzer.kettle.jobentry.transjob;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -39,13 +38,11 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -62,7 +59,7 @@ public class TransJobEntryAnalyzerTest {
 
   private TransJobEntryAnalyzer analyzer = new TransJobEntryAnalyzer();
 
-  private IMetaverseComponentDescriptor descriptor;
+  private IComponentDescriptor descriptor;
 
   @Mock
   private JobEntryTrans jobEntryTrans;

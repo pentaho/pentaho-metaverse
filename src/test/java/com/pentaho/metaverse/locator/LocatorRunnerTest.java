@@ -33,7 +33,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -145,7 +145,7 @@ public class LocatorRunnerTest {
            */
           @Override public Void answer( InvocationOnMock invocation ) throws Throwable {
             IDocumentEvent event = (IDocumentEvent) invocation.getArguments()[0];
-            IMetaverseDocument doc = event.getDocument();
+            IDocument doc = event.getDocument();
             assertNotNull( doc );
             assertNull( doc.getMimeType() );
             assertEquals( doc.getName(), "test.ktr" );

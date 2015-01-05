@@ -43,8 +43,8 @@ import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
@@ -83,7 +83,7 @@ public class JobAnalyzerTest {
   private IMetaverseBuilder mockBuilder;
 
   @Mock
-  private IMetaverseDocument mockJobDoc;
+  private IDocument mockJobDoc;
 
   @Mock
   private INamespace namespace;
@@ -226,7 +226,7 @@ public class JobAnalyzerTest {
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeWithBadXML() throws MetaverseAnalyzerException {
-    IMetaverseDocument newMockJobDoc = mock( IMetaverseDocument.class );
+    IDocument newMockJobDoc = mock( IDocument.class );
     when( newMockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );
     when( newMockJobDoc.getContent() ).thenReturn(
         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +

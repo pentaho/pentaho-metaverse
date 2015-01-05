@@ -22,8 +22,8 @@
 
 package com.pentaho.metaverse.impl;
 
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 
 /**
  * Simple implementation of @see org.pentaho.platform.api.metaverse.IDocumentEvent
@@ -32,16 +32,16 @@ import org.pentaho.platform.api.metaverse.IMetaverseDocument;
  */
 public class DocumentEvent implements IDocumentEvent {
 
-  private IMetaverseDocument document;
+  private IDocument document;
 
   private String type;
 
   @Override
-  public IMetaverseDocument getDocument() {
+  public IDocument getDocument() {
     return document;
   }
 
-  public void setDocument( IMetaverseDocument document ) {
+  public void setDocument( IDocument document ) {
     this.document = document;
   }
 

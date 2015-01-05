@@ -32,7 +32,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -50,10 +50,10 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor,java.lang.Object)
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IComponentDescriptor,java.lang.Object)
    */
   @Override
-  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, TableOutputMeta tableOutputMeta )
+  public IMetaverseNode analyze( IComponentDescriptor descriptor, TableOutputMeta tableOutputMeta )
     throws MetaverseAnalyzerException {
 
     // Do common analysis for all step
@@ -83,7 +83,7 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
       if ( !MapUtils.isEmpty( getDatabaseNodes() ) ) {
         IMetaverseNode dbn = getDatabaseNodes().get( dbConnectionName );
         if ( dbn != null ) {
-          IMetaverseComponentDescriptor dbTableDescriptor = new MetaverseComponentDescriptor(
+          IComponentDescriptor dbTableDescriptor = new MetaverseComponentDescriptor(
             tableName, DictionaryConst.NODE_TYPE_DATA_TABLE,
             new Namespace( dbn.getLogicalId() ) );
 
@@ -105,7 +105,7 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
             String fieldName = fieldNames[i];
 
             // We can't use our own descriptor here, we need to get the descriptor for the origin step
-            IMetaverseComponentDescriptor origin = getPrevStepFieldOriginDescriptor( descriptor, fieldName );
+            IComponentDescriptor origin = getPrevStepFieldOriginDescriptor( descriptor, fieldName );
 
             IMetaverseNode fieldNode = createNodeFromDescriptor(
               new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD, origin ) );
@@ -116,7 +116,7 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
 
             if ( dbFieldNames != null ) {
 
-              IMetaverseComponentDescriptor dbColumnDescriptor = new MetaverseComponentDescriptor(
+              IComponentDescriptor dbColumnDescriptor = new MetaverseComponentDescriptor(
                 dbFieldNames[i],
                 DictionaryConst.NODE_TYPE_DATA_COLUMN,
                 new Namespace( tableLogicalId ),

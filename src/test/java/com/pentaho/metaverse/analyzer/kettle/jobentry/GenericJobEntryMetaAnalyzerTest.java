@@ -12,7 +12,7 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -27,7 +27,7 @@ public class GenericJobEntryMetaAnalyzerTest {
 
   private GenericJobEntryMetaAnalyzer analyzer = new GenericJobEntryMetaAnalyzer();
 
-  private IMetaverseComponentDescriptor descriptor;
+  private IComponentDescriptor descriptor;
 
   @Mock
   private JobEntryInterface mockJobEntry;

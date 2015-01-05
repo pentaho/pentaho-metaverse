@@ -38,10 +38,10 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.xml.XMLInterface;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
@@ -83,13 +83,13 @@ public class MetaverseDocumentAnalyzerTest {
 
   private IMetaverseBuilder builder;
 
-  private IMetaverseDocument transDoc;
+  private IDocument transDoc;
 
   private IMetaverseObjectFactory factory;
 
   private INamespace namespace;
 
-  private IMetaverseComponentDescriptor descriptor;
+  private IComponentDescriptor descriptor;
 
   /**
    * @throws Exception
@@ -111,7 +111,7 @@ public class MetaverseDocumentAnalyzerTest {
   @Before
   public void setUp() throws Exception {
     builder = mock( IMetaverseBuilder.class );
-    transDoc = mock( IMetaverseDocument.class );
+    transDoc = mock( IDocument.class );
     namespace = mock( INamespace.class );
     descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, namespace );
 
@@ -165,7 +165,7 @@ public class MetaverseDocumentAnalyzerTest {
   @Test
   public void testAnalyzeTransDocument() throws MetaverseAnalyzerException {
 
-    IMetaverseNode node = analyzer.analyze( descriptor, transDoc );
+    IMetaverseNode node = (IMetaverseNode) analyzer.analyze( descriptor, transDoc );
     assertNotNull( node );
 
   }
@@ -191,7 +191,7 @@ public class MetaverseDocumentAnalyzerTest {
 
     when( transDoc.getContent() ).thenReturn( content.getXML() );
 
-    IMetaverseNode node = analyzer.analyze( descriptor, transDoc );
+    IMetaverseNode node = (IMetaverseNode) analyzer.analyze( descriptor, transDoc );
     assertNotNull( node );
 
   }

@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * Created by mburgess on 7/29/14.
  */
-public interface IJobEntryAnalyzer<T extends JobEntryInterface> extends IAnalyzer<T> {
+public interface IJobEntryAnalyzer<S, T extends JobEntryInterface> extends IAnalyzer<S, T> {
 
   /**
    * Gets the set of job entry classes that can be analyzed by this analyzer

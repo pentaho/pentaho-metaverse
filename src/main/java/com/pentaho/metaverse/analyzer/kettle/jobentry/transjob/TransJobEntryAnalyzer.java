@@ -28,7 +28,7 @@ import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ public class TransJobEntryAnalyzer extends BaseJobEntryAnalyzer<JobEntryTrans> {
   private Logger log = LoggerFactory.getLogger( TransJobEntryAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, JobEntryTrans entry )
+  public IMetaverseNode analyze( IComponentDescriptor descriptor, JobEntryTrans entry )
     throws MetaverseAnalyzerException {
 
     IMetaverseNode node = super.analyze( descriptor, entry );
@@ -66,7 +66,7 @@ public class TransJobEntryAnalyzer extends BaseJobEntryAnalyzer<JobEntryTrans> {
         log.error( e.getMessage(), e );
       }
 
-      IMetaverseComponentDescriptor ds = new MetaverseComponentDescriptor(
+      IComponentDescriptor ds = new MetaverseComponentDescriptor(
           name,
           DictionaryConst.NODE_TYPE_TRANS,
           descriptor.getNamespace().getParentNamespace() );
