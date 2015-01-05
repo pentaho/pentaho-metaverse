@@ -44,7 +44,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
@@ -86,7 +86,7 @@ public class GenericStepMetaAnalyzerTest {
   INamespace namespace;
 
   @Mock
-  IMetaverseComponentDescriptor mockDescriptor;
+  IComponentDescriptor mockDescriptor;
 
   /**
    * @throws java.lang.Exception

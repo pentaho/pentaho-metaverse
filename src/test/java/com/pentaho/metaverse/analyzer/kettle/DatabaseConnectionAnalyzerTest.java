@@ -35,8 +35,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
@@ -64,7 +64,7 @@ public class DatabaseConnectionAnalyzerTest {
   private INamespace namespace;
 
   @Mock
-  private IMetaverseComponentDescriptor mockDescriptor;
+  private IComponentDescriptor mockDescriptor;
 
   /**
    * @throws java.lang.Exception

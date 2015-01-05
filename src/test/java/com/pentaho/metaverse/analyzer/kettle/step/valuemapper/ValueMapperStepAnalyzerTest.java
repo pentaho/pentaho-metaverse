@@ -23,9 +23,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step.valuemapper;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzerTest;
-import com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
@@ -48,7 +45,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
@@ -69,7 +66,7 @@ public class ValueMapperStepAnalyzerTest {
   private ValueMapperStepAnalyzer analyzer = null;
 
   @Mock
-  private IMetaverseComponentDescriptor descriptor;
+  private IComponentDescriptor descriptor;
 
   @Mock
   private INamespace namespace;

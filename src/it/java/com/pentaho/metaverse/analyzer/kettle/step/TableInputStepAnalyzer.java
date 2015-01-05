@@ -28,7 +28,7 @@ import com.pentaho.metaverse.impl.Namespace;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ public class TableInputStepAnalyzer extends BaseStepAnalyzer<TableInputMeta> {
   private Logger log = LoggerFactory.getLogger( TableInputStepAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, TableInputMeta tableFileInputMeta )
+  public IMetaverseNode analyze( IComponentDescriptor descriptor, TableInputMeta tableFileInputMeta )
       throws MetaverseAnalyzerException {
 
     // do the common analysis for all step
@@ -58,7 +58,7 @@ public class TableInputStepAnalyzer extends BaseStepAnalyzer<TableInputMeta> {
       List<ValueMetaInterface> stepFieldValueMetas = stepFields.getValueMetaList();
       for ( ValueMetaInterface fieldMeta : stepFieldValueMetas ) {
         String fieldName = fieldMeta.getName();
-        IMetaverseComponentDescriptor dbColumnDescriptor = new MetaverseComponentDescriptor(
+        IComponentDescriptor dbColumnDescriptor = new MetaverseComponentDescriptor(
             fieldName,
             DictionaryConst.NODE_TYPE_DATA_COLUMN,
             new Namespace( fieldName ),
@@ -67,7 +67,7 @@ public class TableInputStepAnalyzer extends BaseStepAnalyzer<TableInputMeta> {
         metaverseBuilder.addNode( dbColumnNode );
 
         // Get the stream field output from this step. It should've already been created when we called super.analyze()
-        IMetaverseComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
+        IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
         IMetaverseNode outNode = createNodeFromDescriptor( transFieldDescriptor );
 
         metaverseBuilder.addLink( dbColumnNode, DictionaryConst.LINK_POPULATES, outNode );

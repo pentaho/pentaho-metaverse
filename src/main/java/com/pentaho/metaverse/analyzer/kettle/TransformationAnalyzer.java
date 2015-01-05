@@ -39,9 +39,8 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.platform.api.metaverse.IAnalyzer;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -80,7 +79,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
   private static final Logger log = LoggerFactory.getLogger( TransformationAnalyzer.class );
 
   @Override
-  public synchronized IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, IMetaverseDocument document )
+  public synchronized IMetaverseNode analyze( IComponentDescriptor descriptor, IDocument document )
     throws MetaverseAnalyzerException {
 
     validateState( document );
@@ -107,7 +106,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     Trans t = new Trans( transMeta );
     t.setInternalKettleVariables( transMeta );
 
-    IMetaverseComponentDescriptor documentDescriptor = new MetaverseComponentDescriptor( document.getStringID(),
+    IComponentDescriptor documentDescriptor = new MetaverseComponentDescriptor( document.getStringID(),
       DictionaryConst.NODE_TYPE_TRANS, new Namespace( descriptor.getLogicalId() ), descriptor.getContext() );
 
     // Create a metaverse node and start filling in details
@@ -189,16 +188,16 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
           }
 
           IMetaverseNode stepNode = null;
-          IMetaverseComponentDescriptor stepDescriptor = new MetaverseComponentDescriptor( stepMeta.getName(),
+          IComponentDescriptor stepDescriptor = new MetaverseComponentDescriptor( stepMeta.getName(),
             DictionaryConst.NODE_TYPE_TRANS_STEP, node, documentDescriptor.getContext() );
           Set<IStepAnalyzer> stepAnalyzers = getStepAnalyzers( stepMeta );
           if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
             for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
               stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-              stepNode = stepAnalyzer.analyze( stepDescriptor, getBaseStepMetaFromStepMeta( stepMeta ) );
+              stepNode = (IMetaverseNode) stepAnalyzer.analyze( stepDescriptor, getBaseStepMetaFromStepMeta( stepMeta ) );
             }
           } else {
-            IAnalyzer<BaseStepMeta> defaultStepAnalyzer = new GenericStepMetaAnalyzer();
+            GenericStepMetaAnalyzer defaultStepAnalyzer = new GenericStepMetaAnalyzer();
             defaultStepAnalyzer.setMetaverseBuilder( metaverseBuilder );
             stepNode = defaultStepAnalyzer.analyze( stepDescriptor, getBaseStepMetaFromStepMeta( stepMeta ) );
           }

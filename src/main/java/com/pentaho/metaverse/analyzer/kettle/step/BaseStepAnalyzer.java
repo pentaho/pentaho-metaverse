@@ -39,7 +39,7 @@ import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -98,10 +98,10 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
    *
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor, Object)
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(org.pentaho.platform.api.metaverse.IComponentDescriptor, Object)
    */
   @Override
-  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, T object )
+  public IMetaverseNode analyze( IComponentDescriptor descriptor, T object )
     throws MetaverseAnalyzerException {
 
     validateState( descriptor, object );
@@ -134,7 +134,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
    *
    * @throws MetaverseAnalyzerException
    */
-  protected void addDatabaseConnectionNodes( IMetaverseComponentDescriptor descriptor )
+  protected void addDatabaseConnectionNodes( IComponentDescriptor descriptor )
     throws MetaverseAnalyzerException {
 
     if ( baseStepMeta == null ) {
@@ -151,7 +151,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
             dbAnalyzer.setMetaverseBuilder( metaverseBuilder );
             for ( DatabaseMeta db : dbs ) {
               try {
-                IMetaverseComponentDescriptor dbDescriptor = new MetaverseComponentDescriptor(
+                IComponentDescriptor dbDescriptor = new MetaverseComponentDescriptor(
                   db.getName(),
                   DictionaryConst.NODE_TYPE_DATASOURCE,
                   descriptor.getNamespace(),
@@ -174,7 +174,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   /**
    * Adds to the metaverse any fields created by this step
    */
-  protected void addCreatedFieldNodes( IMetaverseComponentDescriptor descriptor ) {
+  protected void addCreatedFieldNodes( IComponentDescriptor descriptor ) {
     try {
       if ( stepFields != null ) {
         // Find fields that were created by this step
@@ -183,7 +183,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
           for ( ValueMetaInterface outRowMeta : outRowValueMetas ) {
             if ( prevFields != null && prevFields.searchValueMeta( outRowMeta.getName() ) == null ) {
               // This field didn't come into the step, so assume it has been created here
-              IMetaverseComponentDescriptor fieldDescriptor = new MetaverseComponentDescriptor( outRowMeta.getName(),
+              IComponentDescriptor fieldDescriptor = new MetaverseComponentDescriptor( outRowMeta.getName(),
                 DictionaryConst.NODE_TYPE_TRANS_FIELD, rootNode, descriptor.getContext() );
 
               IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
@@ -207,7 +207,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   /**
    * Adds to the metaverse links to fields that are input to a step but not output from the step
    */
-  protected void addDeletedFieldLinks( IMetaverseComponentDescriptor descriptor ) {
+  protected void addDeletedFieldLinks( IComponentDescriptor descriptor ) {
     try {
       if ( prevFields != null ) {
         List<ValueMetaInterface> inRowValueMetas = prevFields.getValueMetaList();
@@ -216,7 +216,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
             // Find fields that were deleted by this step
             if ( stepFields != null && stepFields.searchValueMeta( inRowMeta.getName() ) == null ) {
               // This field didn't leave the step, so assume it has been deleted here
-              IMetaverseComponentDescriptor fieldDescriptor =
+              IComponentDescriptor fieldDescriptor =
                 getPrevStepFieldOriginDescriptor( descriptor, inRowMeta.getName() );
               IMetaverseNode inFieldNode = createNodeFromDescriptor( fieldDescriptor );
 
@@ -252,8 +252,8 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     }
   }
 
-  protected IMetaverseComponentDescriptor getPrevStepFieldOriginDescriptor(
-    IMetaverseComponentDescriptor descriptor, String fieldName ) {
+  protected IComponentDescriptor getPrevStepFieldOriginDescriptor(
+    IComponentDescriptor descriptor, String fieldName ) {
     if ( descriptor == null ) {
       return null;
     }
@@ -270,7 +270,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
 
     INamespace stepFieldNamespace = new Namespace( tmpOriginNode.getLogicalId() );
 
-    IMetaverseComponentDescriptor prevFieldDescriptor = new MetaverseComponentDescriptor(
+    IComponentDescriptor prevFieldDescriptor = new MetaverseComponentDescriptor(
       fieldName,
       DictionaryConst.NODE_TYPE_TRANS_FIELD,
       stepFieldNamespace,
@@ -278,8 +278,8 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     return prevFieldDescriptor;
   }
 
-  protected IMetaverseComponentDescriptor getStepFieldOriginDescriptor(
-    IMetaverseComponentDescriptor descriptor, String fieldName ) {
+  protected IComponentDescriptor getStepFieldOriginDescriptor(
+    IComponentDescriptor descriptor, String fieldName ) {
     if ( descriptor == null || stepFields == null ) {
       return null;
     }
@@ -304,7 +304,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
    * @param object     the object being analyzed
    * @throws MetaverseAnalyzerException if the state of the internal objects is not valid
    */
-  protected void validateState( IMetaverseComponentDescriptor descriptor, T object ) throws MetaverseAnalyzerException {
+  protected void validateState( IComponentDescriptor descriptor, T object ) throws MetaverseAnalyzerException {
     baseStepMeta = object;
     if ( baseStepMeta == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMetaInterface.IsNull" ) );
@@ -340,7 +340,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
    * @return a metaverse node corresponding to the derived stream field.
    */
   protected IMetaverseNode processFieldChangeRecord(
-    IMetaverseComponentDescriptor descriptor,
+    IComponentDescriptor descriptor,
     IMetaverseNode fieldNode,
     ComponentDerivationRecord changeRecord ) {
 
@@ -349,7 +349,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     // There should be at least one operation in order to create a new stream field
     if ( changeRecord != null && changeRecord.hasDelta() && descriptor != null ) {
       // Create a new node for the renamed field
-      IMetaverseComponentDescriptor newFieldDescriptor = new MetaverseComponentDescriptor(
+      IComponentDescriptor newFieldDescriptor = new MetaverseComponentDescriptor(
         changeRecord.getChangedEntityName(),
         DictionaryConst.NODE_TYPE_TRANS_FIELD,
         new Namespace( rootNode.getLogicalId() ),

@@ -25,15 +25,15 @@ package com.pentaho.metaverse.impl;
 import com.pentaho.dictionary.DictionaryConst;
 import org.pentaho.platform.api.metaverse.IAnalysisContext;
 import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
- * Implementation of an @see org.pentaho.platform.api.metaverse.IMetaverseDocument
+ * Implementation of an @see org.pentaho.platform.api.metaverse.IDocument
  *
  * @author jdixon
  */
-public class MetaverseDocument extends PropertiesHolder implements IMetaverseDocument {
+public class MetaverseDocument extends PropertiesHolder implements IDocument {
 
   protected ILogicalIdGenerator logicalIdGenerator = DictionaryConst.LOGICAL_ID_GENERATOR_DEFAULT;
   private String logicalId;
@@ -54,7 +54,7 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
   private IAnalysisContext context;
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getExtension()
+   * @see org.pentaho.platform.api.metaverse.IDocument#getExtension()
    */
   @Override
   public String getExtension() {
@@ -62,7 +62,7 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#setExtension( String extension)
+   * @see org.pentaho.platform.api.metaverse.IDocument#setExtension( String extension)
    */
   @Override
   public void setExtension( String extension ) {
@@ -70,7 +70,7 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getMimeType()
+   * @see org.pentaho.platform.api.metaverse.IDocument#getMimeType()
    */
   @Override
   public String getMimeType() {
@@ -78,7 +78,7 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#setMimeType( String mimeType )
+   * @see org.pentaho.platform.api.metaverse.IDocument#setMimeType( String mimeType )
    */
   @Override
   public void setMimeType( String mimeType ) {
@@ -86,7 +86,7 @@ public class MetaverseDocument extends PropertiesHolder implements IMetaverseDoc
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IMetaverseDocument#getContent()
+   * @see org.pentaho.platform.api.metaverse.IDocument#getContent()
    */
   @Override
   public Object getContent() {

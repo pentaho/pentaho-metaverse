@@ -33,7 +33,7 @@ import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -45,7 +45,7 @@ import java.util.Set;
  * Created by gmoran on 7/16/14.
  */
 public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
-    extends BaseKettleMetaverseComponentWithDatabases implements IJobEntryAnalyzer<T> {
+    extends BaseKettleMetaverseComponentWithDatabases implements IJobEntryAnalyzer<IMetaverseNode, T> {
 
   /**
    * A reference to the JobEntryInterface under analysis
@@ -80,7 +80,7 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
    * @throws MetaverseAnalyzerException
    */
   @Override
-  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, T entry ) throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( IComponentDescriptor descriptor, T entry ) throws MetaverseAnalyzerException {
 
     validateState( descriptor, entry );
 
@@ -105,7 +105,7 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
    *
    * @throws MetaverseAnalyzerException
    */
-  protected void addDatabaseConnectionNodes( IMetaverseComponentDescriptor descriptor )
+  protected void addDatabaseConnectionNodes( IComponentDescriptor descriptor )
     throws MetaverseAnalyzerException {
 
     if ( jobEntryInterface == null ) {
@@ -121,7 +121,7 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
           if ( dbAnalyzer != null ) {
             for ( DatabaseMeta db : dbs ) {
               try {
-                IMetaverseComponentDescriptor dbDescriptor = new MetaverseComponentDescriptor(
+                IComponentDescriptor dbDescriptor = new MetaverseComponentDescriptor(
                     db.getName(),
                     DictionaryConst.NODE_TYPE_DATASOURCE,
                     descriptor.getNamespace(),
@@ -139,7 +139,7 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
     }
   }
 
-  protected void validateState( IMetaverseComponentDescriptor descriptor, T entry ) throws MetaverseAnalyzerException {
+  protected void validateState( IComponentDescriptor descriptor, T entry ) throws MetaverseAnalyzerException {
 
     if ( entry == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );

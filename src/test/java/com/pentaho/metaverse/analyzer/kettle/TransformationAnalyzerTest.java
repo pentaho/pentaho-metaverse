@@ -44,9 +44,9 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.rowgenerator.RowGeneratorMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
@@ -85,7 +85,7 @@ public class TransformationAnalyzerTest {
   private IMetaverseBuilder mockBuilder;
 
   @Mock
-  private IMetaverseDocument mockTransDoc;
+  private IDocument mockTransDoc;
 
   @Mock
   private IStepAnalyzerProvider stepAnalyzerProvider;
@@ -93,7 +93,7 @@ public class TransformationAnalyzerTest {
   @Mock
   private INamespace namespace;
 
-  private IMetaverseComponentDescriptor descriptor;
+  private IComponentDescriptor descriptor;
 
   /**
    * @throws Exception
@@ -208,7 +208,7 @@ public class TransformationAnalyzerTest {
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeWithBadXML() throws MetaverseAnalyzerException {
-    IMetaverseDocument newMockTransDoc = mock( IMetaverseDocument.class );
+    IDocument newMockTransDoc = mock( IDocument.class );
     when( newMockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( newMockTransDoc.getContent() ).thenReturn(
         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
@@ -218,7 +218,7 @@ public class TransformationAnalyzerTest {
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeWithMissingPlugin() throws MetaverseAnalyzerException {
-    IMetaverseDocument newMockTransDoc = mock( IMetaverseDocument.class );
+    IDocument newMockTransDoc = mock( IDocument.class );
     when( newMockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( newMockTransDoc.getContent() ).thenReturn(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?><transformation><step><name>Load text from file</name>"

@@ -29,7 +29,7 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.api.metaverse.MetaverseException;
@@ -47,7 +47,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
   private Logger log = LoggerFactory.getLogger( TextFileInputStepAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, TextFileInputMeta textFileInputMeta )
+  public IMetaverseNode analyze( IComponentDescriptor descriptor, TextFileInputMeta textFileInputMeta )
     throws MetaverseAnalyzerException {
 
     // do the common analysis for all step
@@ -58,7 +58,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
     if ( fields != null ) {
       for ( TextFileInputField field : fields ) {
         String fieldName = field.getName();
-        IMetaverseComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
+        IComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
           fieldName,
           DictionaryConst.NODE_TYPE_FILE_FIELD,
           descriptor.getNamespace(),
@@ -67,7 +67,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
         metaverseBuilder.addNode( fieldNode );
 
         // Get the stream field output from this step. It should've already been created when we called super.analyze()
-        IMetaverseComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
+        IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
         IMetaverseNode outNode = createNodeFromDescriptor( transFieldDescriptor );
 
         metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outNode );
@@ -79,7 +79,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
 
     if ( textFileInputMeta.isAcceptingFilenames() ) {
       String acceptingFieldName = textFileInputMeta.getAcceptingField();
-      IMetaverseComponentDescriptor transFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor,
+      IComponentDescriptor transFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor,
         acceptingFieldName );
       IMetaverseNode acceptingFieldNode = createNodeFromDescriptor( transFieldDescriptor );
 

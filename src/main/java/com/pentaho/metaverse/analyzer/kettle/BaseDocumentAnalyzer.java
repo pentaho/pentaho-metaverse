@@ -2,16 +2,17 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.messages.Messages;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
  * Created by gmoran on 8/11/14.
  */
-public abstract class BaseDocumentAnalyzer extends BaseKettleMetaverseComponent implements IDocumentAnalyzer {
+public abstract class BaseDocumentAnalyzer extends BaseKettleMetaverseComponent
+  implements IDocumentAnalyzer<IMetaverseNode> {
 
   /**
    * This method handles null checks for state validation
@@ -19,7 +20,7 @@ public abstract class BaseDocumentAnalyzer extends BaseKettleMetaverseComponent 
    * @param document the document that will be processed in non-abstract subclasses
    * @throws MetaverseAnalyzerException
    */
-  protected void validateState( IMetaverseDocument document ) throws MetaverseAnalyzerException {
+  protected void validateState( IDocument document ) throws MetaverseAnalyzerException {
 
     if ( document == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.Document.IsNull" ) );
@@ -48,7 +49,7 @@ public abstract class BaseDocumentAnalyzer extends BaseKettleMetaverseComponent 
    * @param child the document node
    * @throws MetaverseAnalyzerException
    */
-  public void addParentLink( IMetaverseComponentDescriptor descriptor, IMetaverseNode child )
+  public void addParentLink( IComponentDescriptor descriptor, IMetaverseNode child )
     throws MetaverseAnalyzerException {
 
     // The document is always a child of the locator. If this nis not the case, then do not

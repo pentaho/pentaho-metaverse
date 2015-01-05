@@ -25,7 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -39,10 +39,10 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
    * Analyzes a database connection for metadata.
    *
    * @param dbMeta the object
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor, java.lang.Object)
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(org.pentaho.platform.api.metaverse.IComponentDescriptor, java.lang.Object)
    */
   @Override
-  public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, DatabaseMeta dbMeta )
+  public IMetaverseNode analyze( IComponentDescriptor descriptor, DatabaseMeta dbMeta )
     throws MetaverseAnalyzerException {
 
     if ( dbMeta == null ) {

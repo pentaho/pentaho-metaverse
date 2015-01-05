@@ -29,7 +29,7 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -46,7 +46,7 @@ import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
 
   @Override
-  public IMetaverseNode analyze( final IMetaverseComponentDescriptor descriptor, final ValueMapperMeta valueMapperMeta )
+  public IMetaverseNode analyze( final IComponentDescriptor descriptor, final ValueMapperMeta valueMapperMeta )
     throws MetaverseAnalyzerException {
 
     final IMetaverseNode node = super.analyze( descriptor, valueMapperMeta );
@@ -74,7 +74,7 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
       sourceFieldNode.setProperty( DictionaryConst.PROPERTY_OPERATIONS, changeRecord.toString() );
       metaverseBuilder.updateNode( sourceFieldNode );
     } else {
-      final IMetaverseComponentDescriptor desc = new MetaverseComponentDescriptor( targetField,
+      final IComponentDescriptor desc = new MetaverseComponentDescriptor( targetField,
           DictionaryConst.NODE_TYPE_TRANS_FIELD, descriptor.getNamespace() );
 
       // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed

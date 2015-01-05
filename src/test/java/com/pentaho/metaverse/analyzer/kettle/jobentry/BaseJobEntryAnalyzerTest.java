@@ -38,8 +38,8 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -65,7 +65,7 @@ public class BaseJobEntryAnalyzerTest {
   private JobEntryInterface mockJobEntryInterface;
 
   @Mock
-  private IMetaverseComponentDescriptor mockDescriptor;
+  private IComponentDescriptor mockDescriptor;
 
   @Mock
   private Job mockJob;
@@ -107,7 +107,7 @@ public class BaseJobEntryAnalyzerTest {
           }
 
           @Override
-          public IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, Object object )
+          public IMetaverseNode analyze( IComponentDescriptor descriptor, Object object )
               throws MetaverseAnalyzerException {
             return null;
           }

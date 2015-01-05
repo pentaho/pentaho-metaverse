@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IDocument;
 
 import static org.junit.Assert.*;
 
@@ -45,7 +45,7 @@ public class DocumentEventTest {
   DocumentEvent docEvent;
 
   @Mock
-  private IMetaverseDocument document;
+  private IDocument document;
 
   /**
    * @throws java.lang.Exception

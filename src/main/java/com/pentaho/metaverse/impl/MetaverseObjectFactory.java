@@ -25,8 +25,8 @@ package com.pentaho.metaverse.impl;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.MetaverseLink;
 import com.pentaho.dictionary.MetaverseTransientNode;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
@@ -38,7 +38,7 @@ import java.util.UUID;
 public class MetaverseObjectFactory implements IMetaverseObjectFactory {
 
   @Override
-  public IMetaverseDocument createDocumentObject() {
+  public IDocument createDocumentObject() {
     return new MetaverseDocument( );
   }
 

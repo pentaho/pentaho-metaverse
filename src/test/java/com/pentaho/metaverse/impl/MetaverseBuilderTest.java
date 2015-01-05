@@ -10,7 +10,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
@@ -424,7 +424,7 @@ public class MetaverseBuilderTest {
 
   @Test
   public void testCreateMetaverseDocument() {
-    IMetaverseDocument doc = builder.createDocumentObject();
+    IDocument doc = builder.createDocumentObject();
     assertNotNull( doc );
   }
 

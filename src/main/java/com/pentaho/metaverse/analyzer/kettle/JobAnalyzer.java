@@ -37,8 +37,8 @@ import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseDocument;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -75,7 +75,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
   private static final Logger log = LoggerFactory.getLogger( JobAnalyzer.class );
 
   @Override
-  public synchronized IMetaverseNode analyze( IMetaverseComponentDescriptor descriptor, IMetaverseDocument document )
+  public synchronized IMetaverseNode analyze( IComponentDescriptor descriptor, IDocument document )
     throws MetaverseAnalyzerException {
 
     validateState( document );
@@ -103,7 +103,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     Job j = new Job( null, jobMeta );
     j.setInternalKettleVariables( jobMeta );
 
-    IMetaverseComponentDescriptor documentDescriptor = new MetaverseComponentDescriptor( document.getStringID(),
+    IComponentDescriptor documentDescriptor = new MetaverseComponentDescriptor( document.getStringID(),
       DictionaryConst.NODE_TYPE_JOB, new Namespace( descriptor.getLogicalId() ), descriptor.getContext() );
 
     // Create a metaverse node and start filling in details
@@ -186,19 +186,19 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
           IMetaverseNode jobEntryNode = null;
           JobEntryInterface jobEntryInterface = entry.getEntry();
 
-          IMetaverseComponentDescriptor entryDescriptor = new MetaverseComponentDescriptor( entry.getName(),
+          IComponentDescriptor entryDescriptor = new MetaverseComponentDescriptor( entry.getName(),
             DictionaryConst.NODE_TYPE_JOB_ENTRY, node, descriptor.getContext() );
 
           Set<IJobEntryAnalyzer> jobEntryAnalyzers = getJobEntryAnalyzers( jobEntryInterface );
           if ( jobEntryAnalyzers != null && !jobEntryAnalyzers.isEmpty() ) {
             for ( IJobEntryAnalyzer jobEntryAnalyzer : jobEntryAnalyzers ) {
               jobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
-              jobEntryNode = jobEntryAnalyzer.analyze( entryDescriptor, entry.getEntry() );
+              jobEntryNode = (IMetaverseNode) jobEntryAnalyzer.analyze( entryDescriptor, entry.getEntry() );
             }
           } else {
-            IJobEntryAnalyzer<JobEntryInterface> defaultJobEntryAnalyzer = new GenericJobEntryMetaAnalyzer();
+            GenericJobEntryMetaAnalyzer defaultJobEntryAnalyzer = new GenericJobEntryMetaAnalyzer();
             defaultJobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
-            jobEntryNode = defaultJobEntryAnalyzer.analyze( entryDescriptor, jobEntryInterface );
+            jobEntryNode = (IMetaverseNode) defaultJobEntryAnalyzer.analyze( entryDescriptor, jobEntryInterface );
           }
           if ( jobEntryNode != null ) {
             metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, jobEntryNode );

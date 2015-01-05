@@ -28,7 +28,7 @@ import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.numberrange.NumberRangeMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
@@ -44,11 +44,11 @@ public class NumberRangeStepAnalyzer extends BaseStepAnalyzer<NumberRangeMeta> {
   /**
    * Analyzes Number Range steps to determine the various operations performed on fields and their data
    *
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IMetaverseComponentDescriptor, java.lang.Object)
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(org.pentaho.platform.api.metaverse.IComponentDescriptor, java.lang.Object)
    */
   @Override
   public IMetaverseNode analyze(
-    IMetaverseComponentDescriptor descriptor, NumberRangeMeta numberRangeMeta ) throws MetaverseAnalyzerException {
+    IComponentDescriptor descriptor, NumberRangeMeta numberRangeMeta ) throws MetaverseAnalyzerException {
 
     // Do common analysis for all steps
     super.analyze( descriptor, numberRangeMeta );
@@ -63,7 +63,7 @@ public class NumberRangeStepAnalyzer extends BaseStepAnalyzer<NumberRangeMeta> {
 
       // Not sure if we need a new node or not, but the builder will take care of it, so just create a node
       // so we can add the "derives" link
-      IMetaverseComponentDescriptor outputFieldDescriptor = getStepFieldOriginDescriptor( descriptor, outputFieldName );
+      IComponentDescriptor outputFieldDescriptor = getStepFieldOriginDescriptor( descriptor, outputFieldName );
       IMetaverseNode outputFieldNode = createNodeFromDescriptor( outputFieldDescriptor );
 
       metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, inputFieldNode );
