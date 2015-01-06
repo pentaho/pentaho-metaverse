@@ -21,13 +21,16 @@ public class ComponentDerivationRecordTest {
   @Test
   public void testNonDefaultConstructor() {
     record = new ComponentDerivationRecord( "originalRecord", "myRecord" );
+    assertEquals( ChangeType.METADATA, record.getChangeType() );
+
+    record.setChangeType( ChangeType.DATA );
+    assertEquals( ChangeType.DATA, record.getChangeType() );
   }
 
   @Test
   public void testGetEntityName() throws Exception {
     assertEquals( "myRecord", record.getChangedEntityName() );
     assertNull( new ComponentDerivationRecord().getChangedEntityName() );
-
   }
 
   @Test

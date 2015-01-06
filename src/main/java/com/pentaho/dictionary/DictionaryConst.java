@@ -94,9 +94,14 @@ public class DictionaryConst {
   public static final String PROPERTY_STATUS = "status";
 
   /**
-   * Property key for "operations"
+   * Property key for "metadataOperations"
    */
-  public static final String PROPERTY_OPERATIONS = "operations";
+  public static final String PROPERTY_OPERATIONS = "metadataOperations";
+
+  /**
+   * Property key for "dataOperations"
+   */
+  public static final String PROPERTY_DATA_OPERATIONS = "dataOperations";
 
   /**
    * Property key for "transforms"

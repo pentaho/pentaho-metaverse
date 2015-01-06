@@ -35,7 +35,10 @@ public interface FieldNode extends Concept {
   public String getKettleType();
 
   @Property( DictionaryConst.PROPERTY_OPERATIONS )
-  public String getOperations();
+  public String getMetadataOperations();
+
+  @Property( DictionaryConst.PROPERTY_DATA_OPERATIONS )
+  public String getDataOperations();
 
   @Adjacency( label = "uses", direction = Direction.IN )
   public Iterable<TransformationStepNode> getStepsThatUseMe();

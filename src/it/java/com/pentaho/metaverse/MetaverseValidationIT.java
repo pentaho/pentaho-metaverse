@@ -297,8 +297,8 @@ public class MetaverseValidationIT {
     // verify the nodes created by the step
     for ( StreamFieldNode node : selectValues.getStreamFieldNodesCreates() ) {
       // check for operations
-      if ( node.getOperations() != null ) {
-        Map<String, List<String>> ops = convertOperationsStringToMap( node.getOperations() );
+      if ( node.getMetadataOperations() != null ) {
+        Map<String, List<String>> ops = convertOperationsStringToMap( node.getMetadataOperations() );
         assertNotNull( ops );
         assertTrue( ops.size() > 0 );
       }
@@ -308,6 +308,9 @@ public class MetaverseValidationIT {
       for ( StreamFieldNode deriveNode : deriveNodes ) {
         assertNotNull( deriveNode );
       }
+
+      // there should not be any data operations on nodes touched by this step
+      assertNull( node.getDataOperations() );
     }
 
     // verify fields deleted
@@ -472,12 +475,15 @@ public class MetaverseValidationIT {
 
     ValueMapperMeta meta = (ValueMapperMeta) getStepMeta( valueMapperStepNode );
     assertEquals( meta.getFieldToUse(), usesNode.getName() );
-    Map<String, List<String>> ops = convertOperationsStringToMap( usesNode.getOperations() );
+    Map<String, List<String>> ops = convertOperationsStringToMap( usesNode.getDataOperations() );
     assertEquals( meta.getSourceValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
     assertEquals( meta.getTargetValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
 
     int derivedCount = getIterableSize( usesNode.getFieldNodesDerivedFromMe() );
     assertEquals( 0, derivedCount );
+
+    // there should not be any metadata operations
+    assertNull( usesNode.getMetadataOperations() );
   }
 
   @Test
@@ -503,7 +509,7 @@ public class MetaverseValidationIT {
     ValueMapperMeta meta = (ValueMapperMeta) getStepMeta( valueMapperStepNode );
     assertEquals( meta.getFieldToUse(), usesNode.getName() );
     assertEquals( meta.getTargetField(), createsNode.getName() );
-    assertNull( usesNode.getOperations() );
+    assertNull( usesNode.getMetadataOperations() );
 
     int derivesCount = getIterableSize( createsNode.getFieldNodesThatDeriveMe() );
     assertEquals( 1, derivesCount );
@@ -513,10 +519,13 @@ public class MetaverseValidationIT {
       assertEquals( usesNode.getType(), derives.getType() );
     }
 
-    Map<String, List<String>> ops = convertOperationsStringToMap( createsNode.getOperations() );
+    Map<String, List<String>> ops = convertOperationsStringToMap( createsNode.getDataOperations() );
+
     assertEquals( meta.getSourceValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
     assertEquals( meta.getTargetValue().length, ops.get( DictionaryConst.PROPERTY_TRANSFORMS ).size() );
 
+    // there should not be any metadata operations
+    assertNull( createsNode.getMetadataOperations() );
   }
 
   @Test

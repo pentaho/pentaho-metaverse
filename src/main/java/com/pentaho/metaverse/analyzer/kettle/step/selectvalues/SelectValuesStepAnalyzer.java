@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step.selectvalues;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
@@ -121,7 +122,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
         outputFieldName = fieldRenames[ i ];
 
         changeRecord = new ComponentDerivationRecord( inputFieldName,
-            outputFieldName == null ? inputFieldName : outputFieldName );
+            outputFieldName == null ? inputFieldName : outputFieldName, ChangeType.METADATA );
 
         // NOTE: We use equalsIgnoreCase instead of equals because that's how Select Values currently works
         if ( inputFieldName != null && outputFieldName != null && !inputFieldName
@@ -154,7 +155,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           outputFieldName = metadataChange.getRename();
 
           changeRecord = new ComponentDerivationRecord( inputFieldName,
-              outputFieldName == null ? inputFieldName : outputFieldName );
+              outputFieldName == null ? inputFieldName : outputFieldName, ChangeType.METADATA );
 
           // NOTE: We use equalsIgnoreCase instead of equals because that's how Select Values currently works
           if ( inputFieldName != null && outputFieldName != null && !inputFieldName
