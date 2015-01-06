@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponentWithDatabases;
+import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
@@ -355,7 +356,18 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
         new Namespace( rootNode.getLogicalId() ),
         descriptor.getContext() );
       newFieldNode = createNodeFromDescriptor( newFieldDescriptor );
-      newFieldNode.setProperty( DictionaryConst.PROPERTY_OPERATIONS, changeRecord.toString() );
+      final String changePropertyType;
+      ChangeType changeType = changeRecord.getChangeType();
+      switch( changeType ) {
+        case DATA:
+          changePropertyType = DictionaryConst.PROPERTY_DATA_OPERATIONS;
+          break;
+        case METADATA:
+        default:
+          changePropertyType = DictionaryConst.PROPERTY_OPERATIONS;
+          break;
+      }
+      newFieldNode.setProperty( changePropertyType, changeRecord.toString() );
       metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_DERIVES, newFieldNode );
     }
     return newFieldNode;

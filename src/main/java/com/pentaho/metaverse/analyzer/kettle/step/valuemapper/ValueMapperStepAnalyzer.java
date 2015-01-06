@@ -22,9 +22,13 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.valuemapper;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.ChangeType;
+import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -33,15 +37,13 @@ import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
- * User: RFellows Date: 9/16/14
+ * The ValueMapperStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the fields
+ * operated on by Value Mapper steps.
  */
 public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
 
@@ -71,7 +73,7 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
     // if no target field specified
     if ( overwritesSourceField ) {
       // add some data operation property to the source node
-      sourceFieldNode.setProperty( DictionaryConst.PROPERTY_OPERATIONS, changeRecord.toString() );
+      sourceFieldNode.setProperty( DictionaryConst.PROPERTY_DATA_OPERATIONS, changeRecord.toString() );
       metaverseBuilder.updateNode( sourceFieldNode );
     } else {
       final IComponentDescriptor desc = new MetaverseComponentDescriptor( targetField,
@@ -93,7 +95,8 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
   protected ComponentDerivationRecord buildChangeRecord(
       final String fieldName, final String[] sourceValues, final String[] targetValues ) {
 
-    final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( fieldName );
+    final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( fieldName, ChangeType.DATA );
+
     for ( int i = 0; i < sourceValues.length; i++ ) {
       changeRecord.addOperand( DictionaryConst.PROPERTY_TRANSFORMS, sourceValues[i] + " -> " + targetValues[i] );
     }

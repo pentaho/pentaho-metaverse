@@ -19,23 +19,42 @@ public class ComponentDerivationRecord {
 
   protected String changedEntityName;
   protected String originalEntityName;
+  protected ChangeType changeType;
 
   protected Map<String, List<String>> operations;
 
   public ComponentDerivationRecord() {
+    changeType = ChangeType.METADATA;
     operations = new HashMap<String, List<String>>();
   }
 
   public ComponentDerivationRecord( String originalEntityName, String changedEntityName ) {
+    this( originalEntityName, changedEntityName, ChangeType.METADATA );
+  }
+
+  public ComponentDerivationRecord( String originalEntityName, String changedEntityName, ChangeType changeType ) {
     this();
     this.changedEntityName = changedEntityName;
     this.originalEntityName = originalEntityName;
+    this.changeType = changeType;
   }
 
-  public ComponentDerivationRecord( String changedEntityName ) {
+  public ComponentDerivationRecord( String changedEntityName, ChangeType changeType ) {
     this();
     this.changedEntityName = changedEntityName;
     this.originalEntityName = changedEntityName;
+    this.changeType = changeType;
+  }
+  public ComponentDerivationRecord( String changedEntityName ) {
+    this( changedEntityName, ChangeType.METADATA );
+  }
+
+  public ChangeType getChangeType() {
+    return changeType;
+  }
+
+  public void setChangeType( ChangeType changeType ) {
+    this.changeType = changeType;
   }
 
   public String getChangedEntityName() {
