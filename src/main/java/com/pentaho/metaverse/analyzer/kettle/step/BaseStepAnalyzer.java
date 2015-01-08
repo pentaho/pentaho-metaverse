@@ -72,7 +72,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   /**
    * A reference to the step under analysis
    */
-  protected BaseStepMeta baseStepMeta = null;
+  protected T baseStepMeta = null;
 
   /**
    * The step's parent StepMeta object (to get the parent TransMeta, in/out fields, etc.)
@@ -182,7 +182,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
         List<ValueMetaInterface> outRowValueMetas = stepFields.getValueMetaList();
         if ( outRowValueMetas != null ) {
           for ( ValueMetaInterface outRowMeta : outRowValueMetas ) {
-            if ( prevFields != null && prevFields.searchValueMeta( outRowMeta.getName() ) == null ) {
+            if ( !fieldNameExistsInInput( outRowMeta.getName() ) ) {
               // This field didn't come into the step, so assume it has been created here
               IComponentDescriptor fieldDescriptor = new MetaverseComponentDescriptor( outRowMeta.getName(),
                 DictionaryConst.NODE_TYPE_TRANS_FIELD, rootNode, descriptor.getContext() );
@@ -203,6 +203,10 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
       // TODO Don't throw an exception here, just log the error and move on
       t.printStackTrace( System.err );
     }
+  }
+
+  protected boolean fieldNameExistsInInput( String fieldName ) {
+    return prevFields != null && prevFields.searchValueMeta( fieldName ) != null;
   }
 
   /**
@@ -254,7 +258,12 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   }
 
   protected IComponentDescriptor getPrevStepFieldOriginDescriptor(
-    IComponentDescriptor descriptor, String fieldName ) {
+      IComponentDescriptor descriptor, String fieldName ) {
+    return getPrevStepFieldOriginDescriptor( descriptor, fieldName, prevFields );
+  }
+
+  protected IComponentDescriptor getPrevStepFieldOriginDescriptor(
+    IComponentDescriptor descriptor, String fieldName, RowMetaInterface prevFields ) {
     if ( descriptor == null ) {
       return null;
     }

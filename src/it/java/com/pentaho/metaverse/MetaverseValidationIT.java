@@ -31,6 +31,7 @@ import com.pentaho.metaverse.frames.FramedMetaverseNode;
 import com.pentaho.metaverse.frames.JobEntryNode;
 import com.pentaho.metaverse.frames.JobNode;
 import com.pentaho.metaverse.frames.LocatorNode;
+import com.pentaho.metaverse.frames.MergeJoinStepNode;
 import com.pentaho.metaverse.frames.RootNode;
 import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import com.pentaho.metaverse.frames.StreamFieldNode;
@@ -60,6 +61,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
@@ -411,7 +413,6 @@ public class MetaverseValidationIT {
       assertNotNull( ds.getName() );
       assertNotNull( ds.getDatabaseName() );
       assertNotNull( ds.getPort() );
-      assertNotNull( ds.getUserName() );
       assertNotNull( ds.getAccessType() );
       assertNotNull( ds.getAccessTypeDesc() );
     }
@@ -588,6 +589,35 @@ public class MetaverseValidationIT {
       } else {
         assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
       }
+    }
+
+  }
+
+  @Test
+  public void testMergeJoinStepNode_duplicateFieldNames() throws Exception {
+    MergeJoinStepNode node = root.getMergeJoinStepNode();
+    MergeJoinMeta meta = (MergeJoinMeta) getStepMeta( node );
+    TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
+
+    assertEquals( meta.getJoinType(), node.getJoinType() );
+    assertEquals( meta.getKeyFields1().length, node.getJoinFieldsLeft().size() );
+    assertEquals( meta.getKeyFields2().length, node.getJoinFieldsRight().size() );
+
+    Iterable<StreamFieldNode> usedFields = node.getStreamFieldNodesUses();
+    for ( StreamFieldNode usedField : usedFields ) {
+      boolean isOnLeft = node.getJoinFieldsLeft().contains( usedField.getName() );
+      boolean isOnRight = node.getJoinFieldsRight().contains( usedField.getName() );
+      assertTrue( isOnLeft || isOnRight );
+      assertTrue( usedField.getFieldNodesThatIJoinTo() != null );
+      assertTrue( usedField.getFieldNodesThatJoinToMe() != null );
+    }
+
+    Iterable<StreamFieldNode> createdFields = node.getStreamFieldNodesCreates();
+    assertEquals( 2, getIterableSize( createdFields ) );
+
+    for ( StreamFieldNode createdField : createdFields ) {
+      // these should have derives links
+      assertTrue( createdField.getFieldNodesThatDeriveMe() != null );
     }
 
   }
