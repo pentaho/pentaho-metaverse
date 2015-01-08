@@ -134,11 +134,11 @@ i:{
     "loaded repo from ${folder}" 
   }
   loadDemo = {
-    loadFolder '../../../pentaho-metaverse-ee/src/it/resources/repo/demo'
+    loadFolder 'src/it/resources/repo/demo'
   }
 
-  loadRuntime = {
-    loadFolder '../../../pentaho-metaverse-ee/src/it/resources/repo/runtime'
+  loadSamples = {
+    loadFolder 'src/it/resources/repo/samples'
   }
 
   loadGraph = { fname ->
