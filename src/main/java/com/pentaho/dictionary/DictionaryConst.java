@@ -146,6 +146,21 @@ public class DictionaryConst {
   public static final String PROPERTY_NAMESPACE = "namespace";
 
   /**
+   * Property key for joinType, the value should represent the type of join performed by a step
+   */
+  public static final String PROPERTY_JOIN_TYPE = "joinType";
+
+  /**
+   * Property key for leftFields, the value should represent fields used in a join operation from the left side
+   */
+  public static final String PROPERTY_JOIN_FIELDS_LEFT = "leftFields";
+
+  /**
+   * Property key for rightFields, the value should represent fields used in a join operation from the right side
+   */
+  public static final String PROPERTY_JOIN_FIELDS_RIGHT = "rightFields";
+
+  /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
    */
   public static final String LINK_EXECUTES = "executes";
@@ -180,6 +195,12 @@ public class DictionaryConst {
    * populate a database column.
    */
   public static final String LINK_USES = "uses";
+
+  /**
+   * Label for a "joins" edge in the graph, e.g. a merge join step adds "joins" links between fields from the incoming
+   * streams (like "CTR" joins "Country")
+   */
+  public static final String LINK_JOINS = "joins";
 
   /**
    * Label for an "writes to" edge in the graph, e.g. a table output step writes to a table

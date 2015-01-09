@@ -24,6 +24,7 @@
   <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
   <bean id="ValueMapperStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer"/>
   <bean id="TextFileOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputStepAnalyzer"/>
+  <bean id="MergeJoinStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer"/>
 
   <bean id="IDatabaseConnectionAnalyzerProvider"
         class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzerProvider" scope="singleton">
@@ -59,6 +60,7 @@
         <ref bean="NumberRangeStepAnalyzer"/>
         <ref bean="ValueMapperStepAnalyzer"/>
         <ref bean="TextFileOutputStepAnalyzer"/>
+        <ref bean="MergeJoinStepAnalyzer"/>
       </set>
     </property>
   </bean>

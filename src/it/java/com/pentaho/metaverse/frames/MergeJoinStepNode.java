@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -22,22 +22,18 @@
 
 package com.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
+import com.pentaho.dictionary.DictionaryConst;
+import com.tinkerpop.frames.Property;
 
-/**
- * User: RFellows Date: 9/4/14
- */
-public interface StreamFieldNode extends FieldNode {
-  @Adjacency( label = "derives", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getFieldNodesDerivedFromMe();
+import java.util.List;
 
-  @Adjacency( label = "derives", direction = Direction.IN )
-  public Iterable<StreamFieldNode> getFieldNodesThatDeriveMe();
+public interface MergeJoinStepNode extends TransformationStepNode {
+  @Property( DictionaryConst.PROPERTY_JOIN_TYPE )
+  public String getJoinType();
 
-  @Adjacency( label = "joins", direction = Direction.IN )
-  public Iterable<StreamFieldNode> getFieldNodesThatJoinToMe();
+  @Property( DictionaryConst.PROPERTY_JOIN_FIELDS_LEFT )
+  public List<String> getJoinFieldsLeft();
 
-  @Adjacency( label = "joins", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getFieldNodesThatIJoinTo();
+  @Property( DictionaryConst.PROPERTY_JOIN_FIELDS_LEFT )
+  public List<String> getJoinFieldsRight();
 }
