@@ -56,6 +56,17 @@
     </property>
   </bean>
 
+  <bean id="IDocumentController" class="com.pentaho.metaverse.impl.DocumentController">
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    <property name="metaverseObjectFactory" ref="IMetaverseObjectFactory"/>
+    <property name="documentAnalyzers">
+      <set>
+        <ref bean="TransformationAnalyzer"/>
+        <ref bean="JobAnalyzer"/>
+      </set>
+    </property>
+  </bean>
+
   <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer"/>
   <bean id="TextFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer"/>
   <bean id="SelectValuesStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer"/>

@@ -23,15 +23,19 @@
 package com.pentaho.metaverse.impl;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.pentaho.dictionary.DictionaryConst;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
- * User: RFellows Date: 10/8/14
+ * This is the default implementation for namespace objects and includes methods for working with namespaces
  */
 public class Namespace implements INamespace {
+
+  // Single re-usable ObjectMapper for JSON-to-Java conversions
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   private String namespace;
 
@@ -48,10 +52,14 @@ public class Namespace implements INamespace {
   public INamespace getParentNamespace() {
     if ( namespace != null ) {
       try {
-        JSONObject jsonObject = new JSONObject( namespace );
-        String parent = jsonObject.getString( DictionaryConst.PROPERTY_NAMESPACE );
+        JsonNode jsonObject = objectMapper.readTree( namespace );
+        JsonNode namespaceNode = jsonObject.get( DictionaryConst.PROPERTY_NAMESPACE );
+        if ( namespaceNode == null ) {
+          return null;
+        }
+        String parent = namespaceNode.toString();
         return new Namespace( parent );
-      } catch ( JSONException e ) {
+      } catch ( Exception e ) {
         return null;
       }
     }
@@ -62,13 +70,16 @@ public class Namespace implements INamespace {
   public INamespace getSiblingNamespace( String name, String type ) {
     if ( namespace != null ) {
       try {
-        JSONObject jsonObject = new JSONObject( namespace );
+        JsonNode jsonObject = objectMapper.readTree( namespace );
 
-        jsonObject.put( DictionaryConst.PROPERTY_NAME, name );
-        jsonObject.put( DictionaryConst.PROPERTY_TYPE, type );
+        if ( jsonObject.isObject() ) {
+          ObjectNode object = (ObjectNode) jsonObject;
+          object.put( DictionaryConst.PROPERTY_NAME, name );
+          object.put( DictionaryConst.PROPERTY_TYPE, type );
+        }
 
-        return new Namespace( jsonObject.toString() );
-      } catch ( JSONException e ) {
+        return new Namespace( objectMapper.writeValueAsString( jsonObject ) );
+      } catch ( Exception e ) {
         return null;
       }
     }

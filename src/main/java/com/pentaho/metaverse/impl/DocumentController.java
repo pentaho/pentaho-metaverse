@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.metaverse.api.IDocumentAnalyzerProvider;
+import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
@@ -31,6 +31,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,11 @@ import java.util.concurrent.Future;
 /**
  * Coordinates passing IDocumentEvent's to the appropriate IDocumentAnalyzer's
  */
-public class DocumentController implements IDocumentListener, IMetaverseBuilder, IDocumentAnalyzerProvider {
+public class DocumentController implements
+  IDocumentController,
+  IDocumentListener,
+  IRequiresMetaverseBuilder,
+  IMetaverseBuilder {
 
   /**
    * The metaverse builder.
@@ -97,6 +102,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
    *
    * @param metaverseBuilder the new metaverse builder
    */
+  @Override
   public void setMetaverseBuilder( IMetaverseBuilder metaverseBuilder ) {
     this.metaverseBuilder = metaverseBuilder;
   }
@@ -163,6 +169,7 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
    *
    * @param documentAnalyzers the complete Set of IDocumentAnalyzers
    */
+  @Override
   public void setDocumentAnalyzers( Set<IDocumentAnalyzer> documentAnalyzers ) {
     this.documentAnalyzers = documentAnalyzers;
     // reset the analyzer type map
@@ -226,11 +233,11 @@ public class DocumentController implements IDocumentListener, IMetaverseBuilder,
         try {
 
           analyzer.analyze(
-              new MetaverseComponentDescriptor(
-                event.getDocument().getName(),
-                event.getDocument().getType(),
-                event.getDocument() ),
-                event.getDocument()
+            new MetaverseComponentDescriptor(
+              event.getDocument().getName(),
+              event.getDocument().getType(),
+              event.getDocument() ),
+            event.getDocument()
           );
         } catch ( MetaverseAnalyzerException mae ) {
           log.error( Messages.getString( "ERROR.AnalyzingDocument", event.getDocument().getStringID() ), mae );
