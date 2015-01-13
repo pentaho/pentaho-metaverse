@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.MetaverseKettleLifecycleHandler;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry.JobEntryExternalResourceConsumerListener;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExternalResourceConsumerListener;
@@ -97,8 +98,7 @@ public class ExternalResourceConsumerIT {
   @BeforeClass
   public static void init() throws Exception {
     PluginRegistry registry = PluginRegistry.getInstance();
-    ExternalResourceConsumerMap.ExternalResourceConsumerMapBuilder builder = new
-      ExternalResourceConsumerMap.ExternalResourceConsumerMapBuilder();
+    MetaverseKettleLifecycleHandler metaverseKettleLifecycleHandler = new MetaverseKettleLifecycleHandler();
 
     ExternalResourceConsumerPluginRegistrar registrar = new ExternalResourceConsumerPluginRegistrar();
     registrar.init( registry );
@@ -129,7 +129,7 @@ public class ExternalResourceConsumerIT {
 
     KettleEnvironment.init();
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
-    builder.onEnvironmentInit();
+    metaverseKettleLifecycleHandler.onEnvironmentInit();
   }
 
   @Test

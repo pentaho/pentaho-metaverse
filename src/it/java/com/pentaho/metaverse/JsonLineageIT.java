@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.MetaverseKettleLifecycleHandler;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
 import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer;
@@ -39,7 +40,9 @@ import com.pentaho.metaverse.impl.model.kettle.json.JobMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonDeserializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonSerializer;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import org.apache.commons.io.FileUtils;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,11 +70,10 @@ public class JsonLineageIT {
 
   @BeforeClass
   public static void init() throws Exception {
-    IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution" );
+    IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution/system/pentahoObjects.spring.xml" );
 
     PluginRegistry registry = PluginRegistry.getInstance();
-    ExternalResourceConsumerMap.ExternalResourceConsumerMapBuilder builder = new
-      ExternalResourceConsumerMap.ExternalResourceConsumerMapBuilder();
+    MetaverseKettleLifecycleHandler metaverseKettleLifecycleHandler = new MetaverseKettleLifecycleHandler();
 
     ExternalResourceConsumerPluginRegistrar registrar = new ExternalResourceConsumerPluginRegistrar();
     registrar.init( registry );
@@ -105,7 +107,7 @@ public class JsonLineageIT {
     // Then add a class to the map to get through plugin registration
     when( mockPlugin2.getClassMap() ).thenReturn( classMap2 );
 
-    builder.onEnvironmentInit();
+    metaverseKettleLifecycleHandler.onEnvironmentInit();
 
   }
 
@@ -141,6 +143,11 @@ public class JsonLineageIT {
     transModule.addDeserializer( TransMeta.class, new TransMetaJsonDeserializer( TransMeta.class, readRepo ) );
 
     mapper.registerModule( transModule );
+  }
+
+  @AfterClass
+  public static void cleanUp() throws Exception {
+    IntegrationTestUtil.shutdownPentahoSystem();
   }
 
   @Test
