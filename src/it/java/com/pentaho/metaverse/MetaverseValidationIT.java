@@ -42,6 +42,7 @@ import com.pentaho.metaverse.frames.TransformationNode;
 import com.pentaho.metaverse.frames.TransformationStepNode;
 import com.pentaho.metaverse.frames.ValueMapperStepNode;
 import com.pentaho.metaverse.locator.FileSystemLocator;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
@@ -91,7 +92,7 @@ public class MetaverseValidationIT {
 
   @BeforeClass
   public static void init() throws Exception {
-    IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution" );
+    IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution/system/pentahoObjects.spring.xml" );
 
     // we only care about the demo folder
     FileSystemLocator fileSystemLocator = PentahoSystem.get( FileSystemLocator.class );

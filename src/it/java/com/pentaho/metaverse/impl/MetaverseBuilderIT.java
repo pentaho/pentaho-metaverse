@@ -25,6 +25,7 @@ import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.IntegrationTestUtil;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
@@ -50,7 +51,7 @@ public class MetaverseBuilderIT {
   private int edgeCount = 0;
 
   public static String getSolutionPath() {
-    return "src/it/resources/solution";
+    return "src/it/resources/solution/system/pentahoObjects.spring.xml";
   }
 
   @BeforeClass

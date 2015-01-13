@@ -22,9 +22,9 @@
 
 package com.pentaho.metaverse.locator;
 
-import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.messages.Messages;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
@@ -107,7 +107,7 @@ public abstract class LocatorRunner<T> implements Runnable {
    * @param namespace The namespace to use for creating ids
    * @param name      The name of the file
    * @param id        The id of the file
-   * @param file  The contents of the file
+   * @param file      The contents of the file
    */
   public void processFile( INamespace namespace, String name, String id, Object file ) {
 
@@ -134,16 +134,8 @@ public abstract class LocatorRunner<T> implements Runnable {
       IMetaverseBuilder metaverseBuilder = locator.getMetaverseBuilder();
       IMetaverseObjectFactory objectFactory = metaverseBuilder.getMetaverseObjectFactory();
 
-      IDocument metaverseDocument = objectFactory.createDocumentObject();
-
-      metaverseDocument.setNamespace( namespace );
-      metaverseDocument.setContent( locator.getContents( file ) );
-      metaverseDocument.setStringID( id );
-      metaverseDocument.setName( name );
-      metaverseDocument.setExtension( extension );
-      metaverseDocument.setMimeType( mimeType );
-      metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, id );
-      metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
+      IDocument metaverseDocument = MetaverseUtil.createDocument(
+        objectFactory, namespace, locator.getContents( file ), id, name, extension, mimeType );
 
       DocumentEvent event = new DocumentEvent();
       event.setEventType( "add" );

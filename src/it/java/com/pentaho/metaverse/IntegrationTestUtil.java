@@ -25,11 +25,13 @@ package com.pentaho.metaverse;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.platform.api.engine.IPentahoObjectFactory;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
+import org.pentaho.platform.api.metaverse.MetaverseException;
 import org.pentaho.platform.engine.core.system.PathBasedSystemSettings;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
@@ -49,13 +51,10 @@ import java.util.Set;
  */
 public class IntegrationTestUtil {
 
-  public static synchronized void initializePentahoSystem( String solutionPath ) {
+  public static synchronized void initializePentahoSystem( String solutionPath ) throws MetaverseException {
     StandaloneApplicationContext appContext = new StandaloneApplicationContext( solutionPath, "" );
     PentahoSystem.setSystemSettingsService( new PathBasedSystemSettings() );
-    ApplicationContext springApplicationContext = getSpringApplicationContext( solutionPath );
-    IPentahoObjectFactory pentahoObjectFactory = new StandaloneSpringPentahoObjectFactory();
-    pentahoObjectFactory.init( null, springApplicationContext );
-    PentahoSystem.registerObjectFactory( pentahoObjectFactory );
+    MetaverseUtil.initializeMetaverseObjects( solutionPath );
     PentahoSystem.init( appContext );
     PentahoSessionHolder.setSession( new StandaloneSession() );
 
@@ -73,43 +72,21 @@ public class IntegrationTestUtil {
     PentahoSystem.shutdown();
   }
 
-  private static synchronized ApplicationContext getSpringApplicationContext( String solutionPath ) {
-    GenericApplicationContext ctx = new GenericApplicationContext();
-    XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader( ctx );
-    File f = new File( solutionPath + "/system/pentahoObjects.spring.xml" );
-    if ( f.exists() ) {
-      try {
-        reader.loadBeanDefinitions( new FileSystemResource( f ) );
-      } catch ( Exception e ) {
-        System.err.println( e.getMessage() );
-        e.printStackTrace();
-      }
-    }
-
-    String[] beanNames = ctx.getBeanDefinitionNames();
-    System.out.println( "Loaded Beans: " ); //$NON-NLS-1$
-    for ( String n : beanNames ) {
-      System.out.println( "bean: " + n ); //$NON-NLS-1$
-    }
-
-    return ctx;
-  }
-
-  public static synchronized Graph buildMetaverseGraph( IDocumentLocatorProvider provider) throws Exception {
+  public static synchronized Graph buildMetaverseGraph( IDocumentLocatorProvider provider ) throws Exception {
     IDocumentLocatorProvider documentLocatorProvider = provider;
     IMetaverseReader reader = PentahoSystem.get( IMetaverseReader.class );
     Set<IDocumentLocator> locators = documentLocatorProvider.getDocumentLocators();
 
     long freeMemAtInit = Runtime.getRuntime().freeMemory();
     MetaverseCompletionService mcs = MetaverseCompletionService.getInstance();
-    System.out.println("freeMemAtInit = "+freeMemAtInit);
+    System.out.println( "freeMemAtInit = " + freeMemAtInit );
     // build it
     for ( IDocumentLocator locator : locators ) {
       locator.startScan();
     }
     mcs.waitTillEmpty();
     long freeMemAtEnd = Runtime.getRuntime().freeMemory();
-    System.out.println("MetaverseIT mem usage after waitTillEmpty() = "+(freeMemAtInit - freeMemAtEnd));
+    System.out.println( "MetaverseIT mem usage after waitTillEmpty() = " + ( freeMemAtInit - freeMemAtEnd ) );
 
     return reader.getMetaverse();
   }

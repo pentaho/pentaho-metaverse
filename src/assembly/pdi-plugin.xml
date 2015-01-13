@@ -8,7 +8,17 @@
   </formats>
   <includeBaseDirectory>true</includeBaseDirectory>
   <baseDirectory>${project.artifactId}</baseDirectory>
-  
+
+  <fileSets>
+    <fileSet>
+      <outputDirectory></outputDirectory>
+      <directory>src/assembly/resources</directory>
+      <includes>
+        <include>plugin.spring.xml</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+
   <dependencySets>
     <dependencySet>
       <outputDirectory>lib</outputDirectory>
@@ -18,9 +28,9 @@
         <include>com.fasterxml.jackson.core:jackson-core</include>
         <include>com.fasterxml.jackson.core:jackson-databind</include>
         <include>com.fasterxml.jackson.core:jackson-annotations</include>
+        <include>net.sf.flexjson:flexjson</include>
 
         <!-- TEMPORARY until this is in the platform distribution -->
-        <include>pentaho:pentaho-platform-api</include>
         <include>commons-configuration:commons-configuration</include>
       </includes>
     </dependencySet>
