@@ -106,10 +106,14 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
     String filename = trans.getFilename();
 
+    if ( filename == null ) {
+      filename = transMeta.getPathAndName();
+    }
+
     String filePath = null;
     try {
       filePath = new File( filename ).getCanonicalPath();
-    } catch ( IOException e ) {
+    } catch ( Exception e ) {
       // TODO ?
     }
 
