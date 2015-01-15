@@ -112,6 +112,7 @@ public class SelectValuesStepAnalyzerTest {
 
     when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( transMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
     when(spyMeta.getStepID()).thenReturn( "Select values" );
 
     String[] fieldNames = { "field1", "field2" };
@@ -169,6 +170,7 @@ public class SelectValuesStepAnalyzerTest {
 
     when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( transMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
 
     String[] fieldNames = { "field1", "field2" };
     String[] fieldRenames = { null, null };
@@ -214,6 +216,7 @@ public class SelectValuesStepAnalyzerTest {
 
     when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( transMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
 
     String[] fieldNames = { "field1", "field2" };
 

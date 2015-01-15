@@ -24,9 +24,11 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -49,5 +51,19 @@ public interface IFieldLineageMetadataProvider<T extends BaseStepMeta> {
    * @throws MetaverseAnalyzerException
    */
   public Set<IFieldMapping> getFieldMappings( T meta ) throws MetaverseAnalyzerException;
+
+  /**
+   * Get RowMetaInterface(s) of Input step(s).
+   * @param meta
+   * @return Map of input step name to the RowMetaInterface coming from it
+   */
+  public Map<String, RowMetaInterface> getInputFields( T meta );
+
+  /**
+   * Get the RowMetaInterface for the output of the step
+   * @param meta
+   * @return
+   */
+  public RowMetaInterface getOutputFields( T meta );
 
 }

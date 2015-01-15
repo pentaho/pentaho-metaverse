@@ -30,6 +30,7 @@ import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
@@ -80,7 +81,8 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
           DictionaryConst.NODE_TYPE_TRANS_FIELD, descriptor.getNamespace() );
 
       // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
-      final ValueMetaInterface inputFieldValueMeta = prevFields.searchValueMeta( fieldToUse );
+      RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
+      final ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( fieldToUse );
       if ( inputFieldValueMeta == null ) {
         throw new MetaverseAnalyzerException( "Cannot determine type of field: " + fieldToUse );
       }

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IFieldLineageMetadataProvider;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
@@ -37,6 +38,7 @@ import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.model.kettle.FieldInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import com.pentaho.metaverse.messages.Messages;
+import org.apache.commons.collections.MapUtils;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
@@ -53,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -107,7 +110,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
     if ( parentStepMeta != null ) {
       writeCustomProperties( meta, json, serializerProvider );
 
-      writeInputFields( parentStepMeta, json );
+      writeInputFields( meta, json );
       writeOutputFields( parentStepMeta, json );
 
       writeFieldTransforms( meta, json, serializerProvider );
@@ -207,17 +210,16 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
     json.writeEndArray();
   }
 
-  protected void writeInputFields( StepMeta parentStepMeta, JsonGenerator json ) throws IOException {
-    TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
-    if ( parentTransMeta != null ) {
-      try {
-        RowMetaInterface prevStepFields = parentTransMeta.getPrevStepFields( parentStepMeta );
-        writeFields( json, prevStepFields, JSON_PROPERTY_INPUT_FIELDS );
-      } catch ( KettleStepException e ) {
-        LOGGER.warn( Messages.getString( "WARNING.Serialization.Step.InputFields",
-            parentStepMeta.getName() ), e );
+  protected void writeInputFields( T meta, JsonGenerator json ) throws IOException {
+    IFieldLineageMetadataProvider fieldLineageProvider = getFieldLineageMetadataProvider( meta );
+    Map<String, RowMetaInterface> fieldMap = fieldLineageProvider.getInputFields( meta );
+    List<RowMetaInterface> fieldMetaList = new ArrayList<RowMetaInterface>();
+    if ( !MapUtils.isEmpty( fieldMap ) ) {
+      for ( RowMetaInterface rowMetaInterface : fieldMap.values() ) {
+        fieldMetaList.add( rowMetaInterface );
       }
     }
+    writeFields( json, fieldMetaList, JSON_PROPERTY_INPUT_FIELDS );
   }
 
   protected void writeOutputFields( StepMeta parentStepMeta, JsonGenerator json ) throws IOException {
@@ -233,14 +235,22 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
     }
   }
 
-  protected void writeFields( JsonGenerator json, RowMetaInterface fields, String arrayObjectName ) throws IOException {
+  protected void writeFields( JsonGenerator json, List<RowMetaInterface> fieldMetaList, String arrayObjectName )
+    throws IOException {
     json.writeArrayFieldStart( arrayObjectName );
-    List<ValueMetaInterface> valueMetaInterfaces = fields.getValueMetaList();
-    for ( ValueMetaInterface valueMetaInterface : valueMetaInterfaces ) {
-      FieldInfo fieldInfo = new FieldInfo( valueMetaInterface );
-      json.writeObject( fieldInfo );
+    for ( RowMetaInterface fields : fieldMetaList ) {
+      List<ValueMetaInterface> valueMetaInterfaces = fields.getValueMetaList();
+      for ( ValueMetaInterface valueMetaInterface : valueMetaInterfaces ) {
+        FieldInfo fieldInfo = new FieldInfo( valueMetaInterface );
+        json.writeObject( fieldInfo );
+      }
     }
     json.writeEndArray();
+  }
+  protected void writeFields( JsonGenerator json, RowMetaInterface fields, String arrayObjectName ) throws IOException {
+    List<RowMetaInterface> fieldMetaList = new ArrayList<RowMetaInterface>( 1 );
+    fieldMetaList.add( fields );
+    writeFields( json, fieldMetaList, arrayObjectName );
   }
 
   protected String getStepType( StepMeta parentStepMeta ) {
@@ -267,6 +277,16 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
       Set<IStepAnalyzer> analyzers = provider.getAnalyzers( types );
       if ( analyzers != null ) {
         for ( IStepAnalyzer analyzer : analyzers ) {
+          // try to set up the analyzer with parent step & trans meta
+          if ( analyzer instanceof BaseStepAnalyzer ) {
+            BaseStepAnalyzer bsa = (BaseStepAnalyzer) analyzer;
+            try {
+              bsa.validateState( null, meta );
+              bsa.loadInputAndOutputStreamFields( meta );
+            } catch ( MetaverseAnalyzerException e ) {
+              // eat it
+            }
+          }
           if ( analyzer instanceof IFieldLineageMetadataProvider ) {
             return (IFieldLineageMetadataProvider) analyzer;
           }

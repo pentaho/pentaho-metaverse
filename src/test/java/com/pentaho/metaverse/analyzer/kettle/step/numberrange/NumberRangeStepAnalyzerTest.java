@@ -133,6 +133,8 @@ public class NumberRangeStepAnalyzerTest {
   public void testAnalyze_Fields() throws Exception {
 
     when( mockTransMeta.getPrevStepFields( parentStepMeta ) ).thenReturn( mockInRowMetaInterface );
+    String[] prevFieldNames = { "prev step name" };
+    when( mockTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( prevFieldNames );
     when( numberRangeMeta.getInputField() ).thenReturn( "inField" );
     when( numberRangeMeta.getOutputField() ).thenReturn( "outField" );
     when( mockTransMeta.getStepFields( parentStepMeta ) ).thenReturn( mockOutRowMetaInterface );
@@ -209,6 +211,8 @@ public class NumberRangeStepAnalyzerTest {
     when( numberRangeMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
     when( spyMeta.getStepID() ).thenReturn( "Select values" );
+    String[] prevFieldNames = { "prev step name" };
+    when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( prevFieldNames );
 
     // set up the input fields
     String[] inFields = { "field1", "field2" };

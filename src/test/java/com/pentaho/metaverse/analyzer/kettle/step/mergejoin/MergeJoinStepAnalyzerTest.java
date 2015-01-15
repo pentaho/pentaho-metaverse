@@ -47,6 +47,7 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -222,18 +223,25 @@ public class MergeJoinStepAnalyzerTest {
   }
 
   @Test
-  public void testLoadInputAndOutputStreamFields() throws Exception {
-    assertNull( analyzer.getPrevFields() );
-    assertNull( analyzer.getStepFields() );
+  public void testGetInputFields() throws Exception {
+    analyzer.setParentTransMeta( transMeta );
+    analyzer.setBaseStepMeta( mergeJoinMeta );
+    analyzer.setParentStepMeta( parentStepMeta );
+    when( stepMeta1.getName() ).thenReturn( "step1" );
+    when( stepMeta2.getName() ).thenReturn( "step2" );
+    Map<String, RowMetaInterface> inputRowMeta = analyzer.getInputFields( mergeJoinMeta );
+    assertNotNull( inputRowMeta );
+    assertEquals( 2, inputRowMeta.size() );
+  }
 
+  @Test
+  public void testGetOutputFields() throws Exception {
     analyzer.setParentTransMeta( transMeta );
     analyzer.setBaseStepMeta( mergeJoinMeta );
     analyzer.setParentStepMeta( parentStepMeta );
 
-    analyzer.loadInputAndOutputStreamFields();
-
-    assertNotNull( analyzer.getPrevFields() );
-    assertNotNull( analyzer.getStepFields() );
+    RowMetaInterface outputFields = analyzer.getOutputFields( mergeJoinMeta );
+    assertNotNull( outputFields );
   }
 
   @Test

@@ -112,10 +112,12 @@ public class TableOutputStepAnalyzerTest {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
     when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
+    when( mockNamespace.getNamespaceId() ).thenReturn( "namespaceID" );
 
     analyzer = new TableOutputStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, mockNamespace );
+    descriptor = spy( new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, mockNamespace ) );
+    when( descriptor.getParentNamespace() ).thenReturn( mockNamespace );
   }
 
   /**
@@ -199,18 +201,18 @@ public class TableOutputStepAnalyzerTest {
     when( mockTableOutputMeta.getFieldStream() ).thenReturn(  new String[] { "test1", "test2" }  );
     when( mockTableOutputMeta.specifyFields() ).thenReturn( true );
     when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
       @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
-        if ( args[0] == "test1" )
+        if ( args[ 0 ] == "test1" )
           return new ValueMetaString( "test1" );
-        if ( args[0] == "test2" )
+        if ( args[ 0 ] == "test2" )
           return new ValueMetaString( "test2" );
         return null;
       }
     } );
-
     assertNotNull( spy.analyze( descriptor, mockTableOutputMeta ) );
 
   }
@@ -267,7 +269,7 @@ public class TableOutputStepAnalyzerTest {
 
     when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-
+    when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[]{"prev step name"} );
     // additional hydration needed to get test lines code coverage
     when( mockDatabaseMeta.getDatabaseName() ).thenReturn( "testDatabase" );
     when( mockDatabaseMeta.getAccessTypeDesc() ).thenReturn( "Native" );

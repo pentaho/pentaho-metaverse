@@ -53,6 +53,7 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.dummytrans.DummyTransMeta;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -100,6 +101,9 @@ public class AbstractStepMetaJsonSerializerTest {
   @Test
   public void testSerializeBasic() throws Exception {
     AbstractStepMetaJsonSerializer<BaseStepMeta> spySerializer = spy( serializer );
+    IFieldLineageMetadataProvider mapper = mock( IFieldLineageMetadataProvider.class );
+    when( spySerializer.getFieldLineageMetadataProvider( spyMeta ) ).thenReturn( mapper );
+    when( mapper.getInputFields( spyMeta ) ).thenReturn( new HashMap<String, RowMetaInterface>() );
 
     spySerializer.serialize( spyMeta, json, provider );
 
@@ -111,7 +115,7 @@ public class AbstractStepMetaJsonSerializerTest {
     // make sure the templated methods are called
     verify( spySerializer ).writeRepoAttributes( spyMeta, json );
     verify( spySerializer ).writeCustomProperties( spyMeta, json, provider );
-    verify( spySerializer ).writeInputFields( spyParent, json );
+    verify( spySerializer ).writeInputFields( spyMeta, json );
     verify( spySerializer ).writeOutputFields( spyParent, json );
 
     verify( json ).writeArrayFieldStart( AbstractStepMetaJsonSerializer.JSON_PROPERTY_TRANSFORMS );
@@ -137,7 +141,7 @@ public class AbstractStepMetaJsonSerializerTest {
 
     // make sure the templated methods are called
     verify( spySerializer, times( 0 ) ).writeCustomProperties( spyMeta, json, provider );
-    verify( spySerializer, times( 0 ) ).writeInputFields( spyParent, json );
+    verify( spySerializer, times( 0 ) ).writeInputFields( spyMeta, json );
     verify( spySerializer, times( 0 ) ).writeOutputFields( spyParent, json );
 
     verify( json, times( 0 ) ).writeArrayFieldStart( AbstractStepMetaJsonSerializer.JSON_PROPERTY_TRANSFORMS );
@@ -154,6 +158,10 @@ public class AbstractStepMetaJsonSerializerTest {
 
     when( spyParent.getParentTransMeta() ).thenReturn( spyParentTrans );
 
+    IFieldLineageMetadataProvider mapper = mock( IFieldLineageMetadataProvider.class );
+    AbstractStepMetaJsonSerializer spy = spy( serializer );
+    when( spy.getFieldLineageMetadataProvider( spyMeta ) ).thenReturn( mapper );
+
     RowMetaInterface rmi = mock( RowMetaInterface.class );
     List<ValueMetaInterface> vml = new ArrayList<ValueMetaInterface>();
     ValueMetaInterface col1 = mock( ValueMetaInterface.class );
@@ -164,8 +172,10 @@ public class AbstractStepMetaJsonSerializerTest {
     vml.add( col3 );
     when( rmi.getValueMetaList() ).thenReturn( vml );
 
-    when( spyParentTrans.getPrevStepFields( any( StepMeta.class ) ) ).thenReturn( rmi );
-    serializer.writeInputFields( spyParent, json );
+    HashMap<String, RowMetaInterface> fieldMetaMap = new HashMap<String, RowMetaInterface>( 1 );
+    fieldMetaMap.put( "prev step name", rmi );
+    when( mapper.getInputFields( spyMeta ) ).thenReturn( fieldMetaMap );
+    spy.writeInputFields( spyMeta, json );
 
     verify( json, times( 3 ) ).writeObject( any( IFieldInfo.class ) );
 

@@ -185,8 +185,26 @@ public class JsonLineageIT {
     // now deserialize it
     TransMeta rehydrated = mapper.readValue( json, TransMeta.class );
 
-//    String ktr = rehydrated.getXML();
-//    FileUtils.writeStringToFile( new File( "src/it/resources/tmp/" + tm.getName() + ".after.ktr" ), ktr );
+    assertEquals( tm.getName(), rehydrated.getName() );
+
+    json = mapper.writeValueAsString( rehydrated );
+    jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".after.json" );
+    FileUtils.writeStringToFile( jsonOut, json );
+  }
+
+  @Test
+  public void testMergeJoinJsonSerialize() throws Exception {
+
+    String ktrPath = "src/it/resources/repo/validation/merge_join.ktr";
+    TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
+
+    String json = mapper.writeValueAsString( tm );
+    File jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".json" );
+    FileUtils.writeStringToFile( jsonOut, json );
+
+    // now deserialize it
+    TransMeta rehydrated = mapper.readValue( json, TransMeta.class );
+
     assertEquals( tm.getName(), rehydrated.getName() );
 
     json = mapper.writeValueAsString( rehydrated );

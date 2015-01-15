@@ -26,6 +26,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
@@ -91,7 +92,8 @@ public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputM
   protected void addUsesLinkForStreamFileNameField( IComponentDescriptor descriptor,
                                                     TextFileOutputMeta meta ) {
 
-    ValueMetaInterface filenameField = prevFields.searchValueMeta( meta.getFileNameField() );
+    RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
+    ValueMetaInterface filenameField = rowMetaInterface.searchValueMeta( meta.getFileNameField() );
     if ( filenameField != null ) {
       IComponentDescriptor fileStreamFieldDescriptor = getStepFieldOriginDescriptor( descriptor,
         filenameField.getName() );

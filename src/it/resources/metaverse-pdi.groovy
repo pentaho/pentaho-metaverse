@@ -1,5 +1,9 @@
+import com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer
 import org.pentaho.platform.api.metaverse.*
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.graph.*
@@ -61,16 +65,37 @@ i:{
     dba = new DatabaseConnectionAnalyzer()
     dbap = new DatabaseConnectionAnalyzerProvider()
     dbap.setDatabaseConnectionAnalyzers([dba] as Set)
+
+    //**********************************************************************
+    // Set up the step analyzers
   	tfia = new TextFileInputStepAnalyzer()
   	tfia.setDatabaseConnectionAnalyzerProvider(dbap)
 
   	tfoa = new TableOutputStepAnalyzer()
   	tfoa.setDatabaseConnectionAnalyzerProvider(dbap)
 
+    mergeJoinAnalyzer = new MergeJoinStepAnalyzer()
+    mergeJoinAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+
+    numberRangeAnalyzer = new NumberRangeStepAnalyzer()
+    numberRangeAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+
+    selectValuesAnalyzer = new SelectValuesStepAnalyzer()
+    selectValuesAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+
+    tableInputAnalyzer = new TableInputStepAnalyzer()
+    tableInputAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+
+    valueMapperAnalyzer = new ValueMapperStepAnalyzer()
+    valueMapperAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+    //**********************************************************************
+
   	ksap = new StepAnalyzerProvider()
-  	ksap.setStepAnalyzers([tfia,tfoa] as Set)
+  	ksap.setStepAnalyzers([tfia,tfoa, mergeJoinAnalyzer, numberRangeAnalyzer, selectValuesAnalyzer, tableInputAnalyzer, valueMapperAnalyzer] as Set)
+
   	ta = new TransformationAnalyzer()
   	ta.setStepAnalyzerProvider(ksap)
+
   	ja = new JobAnalyzer()
   	dc.setDocumentAnalyzers([ta,ja] as Set)
   	
@@ -139,6 +164,10 @@ i:{
 
   loadSamples = {
     loadFolder 'src/it/resources/repo/samples'
+  }
+
+  loadValidation = {
+    loadFolder 'src/it/resources/repo/validation'
   }
 
   loadGraph = { fname ->
