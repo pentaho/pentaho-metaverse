@@ -68,8 +68,8 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
       // If no incoming fields are specified, get them from the previous step
       // NOTE: This check depends on the guarantee that super.loadInputAndOutputStreamFields() has been called.
       //  it is not done again here for performance purposes. Currently it's being called during super.analyze()
-      if ( prevFields != null ) {
-        fieldNames = prevFields.getFieldNames();
+      if ( prevFields != null && !ArrayUtils.isEmpty( prevStepNames ) ) {
+        fieldNames = prevFields.get( prevStepNames[0] ).getFieldNames();
       }
     }
 

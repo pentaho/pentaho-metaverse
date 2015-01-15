@@ -375,7 +375,7 @@
           </execution>
         </executions>
         <configuration>
-          <classpathScope>runtime</classpathScope>
+          <classpathScope>test</classpathScope>
           <includeProjectDependencies>true</includeProjectDependencies>
           <includePluginDependencies>true</includePluginDependencies>
           <executableDependency>

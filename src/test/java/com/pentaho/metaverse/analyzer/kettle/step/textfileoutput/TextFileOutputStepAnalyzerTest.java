@@ -214,6 +214,7 @@ public class TextFileOutputStepAnalyzerTest {
 
     when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
     when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
     String[] incomingFields = new String[]{ "Field 1", "Field 2", "filename" };
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( incomingFields );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {

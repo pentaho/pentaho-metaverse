@@ -32,6 +32,7 @@ public interface IFieldInfo extends IInfo {
   public static final String JSON_PROPERTY_DATA_TYPE = "dataType";
   public static final String JSON_PROPERTY_PRECISION = "precision";
   public static final String JSON_PROPERTY_LENGTH = "length";
+  public static final String JSON_PROPERTY_STEP_NAME = "stepName";
 
   @JsonProperty( JSON_PROPERTY_DATA_TYPE )
   public String getDataType();
@@ -41,4 +42,8 @@ public interface IFieldInfo extends IInfo {
 
   @JsonProperty( JSON_PROPERTY_LENGTH )
   public Integer getLength();
+
+  @JsonProperty( JSON_PROPERTY_STEP_NAME )
+  public String getStepName();
+
 }

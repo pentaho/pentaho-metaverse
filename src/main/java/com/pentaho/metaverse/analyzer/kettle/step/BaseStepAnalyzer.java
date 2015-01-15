@@ -32,7 +32,9 @@ import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.Namespace;
 import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import com.pentaho.metaverse.messages.Messages;
+import org.apache.commons.lang.ArrayUtils;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -44,7 +46,10 @@ import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -59,10 +64,14 @@ import java.util.UUID;
 public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   extends BaseKettleMetaverseComponentWithDatabases implements IStepAnalyzer<T>, IFieldLineageMetadataProvider<T> {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger( BaseStepAnalyzer.class );
+
   /**
    * The stream fields coming into the step
    */
-  protected RowMetaInterface prevFields = null;
+  protected Map<String, RowMetaInterface> prevFields = null;
+
+  protected String[] prevStepNames = null;
 
   /**
    * The stream fields coming out of the step
@@ -124,7 +133,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     addDatabaseConnectionNodes( descriptor );
 
     // Interrogate API to see what default field information is available
-    loadInputAndOutputStreamFields();
+    loadInputAndOutputStreamFields( object );
     addCreatedFieldNodes( descriptor );
     addDeletedFieldLinks( descriptor );
     return rootNode;
@@ -163,7 +172,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
                 metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
               } catch ( Throwable t ) {
                 // Don't throw the exception if a DB connection couldn't be analyzed, just log it and move on
-                t.printStackTrace( System.err );
+                LOGGER.warn( Messages.getString( "WARNING.AnalyzingDatabaseConnection", db.getName() ), t );
               }
             }
           }
@@ -201,65 +210,90 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
       }
     } catch ( Throwable t ) {
       // TODO Don't throw an exception here, just log the error and move on
-      t.printStackTrace( System.err );
+      LOGGER.warn( Messages.getString( "WARNING.AddingNodesCreated" ), t );
     }
   }
 
   protected boolean fieldNameExistsInInput( String fieldName ) {
-    return prevFields != null && prevFields.searchValueMeta( fieldName ) != null;
+    boolean match = false;
+    if ( prevFields != null ) {
+      for ( String stepName : prevFields.keySet() ) {
+        RowMetaInterface rmi = prevFields.get( stepName );
+        if ( rmi != null ) {
+          if ( rmi.searchValueMeta( fieldName ) != null ) {
+            match = true;
+            break;
+          }
+        }
+      }
+    }
+    return match;
   }
 
   /**
    * Adds to the metaverse links to fields that are input to a step but not output from the step
    */
   protected void addDeletedFieldLinks( IComponentDescriptor descriptor ) {
-    try {
-      if ( prevFields != null ) {
-        List<ValueMetaInterface> inRowValueMetas = prevFields.getValueMetaList();
-        if ( inRowValueMetas != null ) {
-          for ( ValueMetaInterface inRowMeta : inRowValueMetas ) {
-            // Find fields that were deleted by this step
-            if ( stepFields != null && stepFields.searchValueMeta( inRowMeta.getName() ) == null ) {
-              // This field didn't leave the step, so assume it has been deleted here
-              IComponentDescriptor fieldDescriptor =
-                getPrevStepFieldOriginDescriptor( descriptor, inRowMeta.getName() );
-              IMetaverseNode inFieldNode = createNodeFromDescriptor( fieldDescriptor );
+    if ( prevFields != null ) {
+      // check all incoming fields
+      for ( RowMetaInterface rowMetaInterface : prevFields.values() ) {
+        try {
+          // for some reason, searchValueMeta isn't always finding valid fields when it should
+          List<String> outFields = Arrays.asList( stepFields.getFieldNames() );
+          List<ValueMetaInterface> inRowValueMetas = rowMetaInterface.getValueMetaList();
+          if ( inRowValueMetas != null ) {
+            for ( ValueMetaInterface inRowMeta : inRowValueMetas ) {
+              // Find fields that were deleted by this step
 
-              // Add link to show that this step created the field
-              metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_DELETES, inFieldNode );
+              if ( stepFields != null && !outFields.contains( inRowMeta.getName() ) ) {
+                // This field didn't leave the step, so assume it has been deleted here
+                IComponentDescriptor fieldDescriptor =
+                    getPrevStepFieldOriginDescriptor( descriptor, inRowMeta.getName() );
+                IMetaverseNode inFieldNode = createNodeFromDescriptor( fieldDescriptor );
+
+                // Add link to show that this step created the field
+                metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_DELETES, inFieldNode );
+              }
+              // no else clause: if we can't determine the fields, we can't do anything else
             }
-            // no else clause: if we can't determine the fields, we can't do anything else
           }
+        } catch ( Throwable t ) {
+          // TODO Don't throw an exception here, just log the error and move on
+          LOGGER.warn( Messages.getString( "WARNING.AddingNodesRemoved" ), t );
         }
       }
-    } catch ( Throwable t ) {
-      // TODO Don't throw an exception here, just log the error and move on
-      t.printStackTrace( System.err );
     }
-
   }
 
   /**
    * Loads the in/out fields for this step into member variables for use by the analyzer
    */
-  protected void loadInputAndOutputStreamFields() {
-    if ( parentTransMeta != null ) {
-      try {
-        prevFields = parentTransMeta.getPrevStepFields( parentStepMeta );
-      } catch ( Throwable t ) {
-        prevFields = null;
-      }
-      try {
-        stepFields = parentTransMeta.getStepFields( parentStepMeta );
-      } catch ( Throwable t ) {
-        stepFields = null;
-      }
-    }
+  public void loadInputAndOutputStreamFields( T meta ) {
+    prevFields = getInputFields( meta );
+    stepFields = getOutputFields( meta );
   }
 
   protected IComponentDescriptor getPrevStepFieldOriginDescriptor(
       IComponentDescriptor descriptor, String fieldName ) {
-    return getPrevStepFieldOriginDescriptor( descriptor, fieldName, prevFields );
+
+    IComponentDescriptor componentDescriptor = null;
+
+    // try the first step
+    if ( parentTransMeta != null && prevFields != null ) {
+      if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
+        componentDescriptor = getPrevStepFieldOriginDescriptor( descriptor, fieldName,
+            prevFields.get( prevStepNames[0] ) );
+      } else if ( prevFields.size() > 0 ) {
+        // just use one of the inputs as a last resort
+        for ( String s : prevFields.keySet() ) {
+          LOGGER.debug( Messages.getString( "DEBUG.FallingBackToFirstSetOfInputFields", s ) );
+          componentDescriptor = getPrevStepFieldOriginDescriptor( descriptor, fieldName,
+              prevFields.get( prevStepNames ) );
+          break;
+        }
+      }
+    }
+    return componentDescriptor;
   }
 
   protected IComponentDescriptor getPrevStepFieldOriginDescriptor(
@@ -314,7 +348,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
    * @param object     the object being analyzed
    * @throws MetaverseAnalyzerException if the state of the internal objects is not valid
    */
-  protected void validateState( IComponentDescriptor descriptor, T object ) throws MetaverseAnalyzerException {
+  public void validateState( IComponentDescriptor descriptor, T object ) throws MetaverseAnalyzerException {
     baseStepMeta = object;
     if ( baseStepMeta == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMetaInterface.IsNull" ) );
@@ -399,19 +433,59 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     return null;
   }
 
+  @Override
+  public Map<String, RowMetaInterface> getInputFields( T meta ) {
+    Map<String, RowMetaInterface> rowMeta = new HashMap<String, RowMetaInterface>();
+    try {
+      validateState( null, meta );
+    } catch ( MetaverseAnalyzerException e ) {
+      // eat it
+    }
+    try {
+      prevStepNames = parentTransMeta.getPrevStepNames( parentStepMeta );
+      RowMetaInterface rmi = parentTransMeta.getPrevStepFields( parentStepMeta );
+      if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
+        rowMeta.put( prevStepNames[0], rmi );
+      }
+    } catch ( KettleStepException e ) {
+      rowMeta = null;
+    }
+    return rowMeta;
+  }
+
+  @Override
+  public RowMetaInterface getOutputFields( T meta ) {
+    RowMetaInterface rmi = null;
+    try {
+      validateState( null, meta );
+    } catch ( MetaverseAnalyzerException e ) {
+      // eat it
+    }
+    if ( parentTransMeta != null ) {
+      try {
+        rmi = parentTransMeta.getStepFields( parentStepMeta );
+      } catch ( KettleStepException e ) {
+        rmi = null;
+      }
+    }
+    return rmi;
+  }
+
   public Set<IFieldMapping> getPassthruFieldMappings( T meta ) throws MetaverseAnalyzerException {
     Set<IFieldMapping> mappings = new HashSet<IFieldMapping>();
     // inputs map directly to outputs
     if ( prevFields == null ) {
       this.validateState( null, meta );
-      loadInputAndOutputStreamFields();
+      loadInputAndOutputStreamFields( meta );
       if ( prevFields == null ) {
         // either not connected or there aren't any fields coming into the step so there are no mappings
         return mappings;
       }
     }
-    for ( String field : prevFields.getFieldNames() ) {
-      mappings.add( new FieldMapping( field, field ) );
+    for ( RowMetaInterface rowMetaInterface : prevFields.values() ) {
+      for ( String field : rowMetaInterface.getFieldNames() ) {
+        mappings.add( new FieldMapping( field, field ) );
+      }
     }
     return mappings;
   }

@@ -30,6 +30,7 @@ import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaFactory;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -80,7 +81,8 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
       inputFieldName = change.getOriginalEntityName();
       fieldNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, inputFieldName ) );
       // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
-      ValueMetaInterface inputFieldValueMeta = prevFields.searchValueMeta( inputFieldName );
+      RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
+      ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( inputFieldName );
       if ( inputFieldValueMeta == null ) {
         throw new MetaverseAnalyzerException( "Cannot determine type of field: " + inputFieldName );
       }
@@ -102,7 +104,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
 
     validateState( null, selectValuesMeta );
     if ( prevFields == null || stepFields == null ) {
-      loadInputAndOutputStreamFields();
+      loadInputAndOutputStreamFields( selectValuesMeta );
     }
     Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
 
@@ -164,7 +166,15 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           }
 
           // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
-          ValueMetaInterface inputFieldValueMeta = prevFields.searchValueMeta( inputFieldName );
+          if ( prevFields == null ) {
+            prevFields = getInputFields( selectValuesMeta );
+            if ( prevFields == null ) {
+              log.warn( Messages.getString( "WARNING.CannotDetermineFieldType", inputFieldName ) );
+              continue;
+            }
+          }
+          RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
+          ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( inputFieldName );
           if ( inputFieldValueMeta == null ) {
             log.warn( Messages.getString( "WARNING.CannotDetermineFieldType", inputFieldName ) );
             continue;
@@ -250,7 +260,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
   public Set<IFieldMapping> getFieldMappings( SelectValuesMeta selectValuesMeta ) throws MetaverseAnalyzerException {
     validateState( null, selectValuesMeta );
     if ( prevFields == null || stepFields == null ) {
-      loadInputAndOutputStreamFields();
+      loadInputAndOutputStreamFields( selectValuesMeta );
     }
     List<IFieldMapping> fieldMappings = new ArrayList<IFieldMapping>();
 

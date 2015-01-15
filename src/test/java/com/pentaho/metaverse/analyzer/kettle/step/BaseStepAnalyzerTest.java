@@ -149,7 +149,10 @@ public class BaseStepAnalyzerTest {
     analyzer.parentStepMeta = parentStepMeta;
     analyzer.parentTransMeta = mockTransMeta;
 
+    String[] prevSteps = { "previous step name" };
+
     when( analyzer.parentTransMeta.getPrevStepFields( analyzer.parentStepMeta ) ).thenReturn( mockPrevFields );
+    when( analyzer.parentTransMeta.getPrevStepNames( analyzer.parentStepMeta ) ).thenReturn( prevSteps );
     when( analyzer.parentTransMeta.getStepFields( analyzer.parentStepMeta ) ).thenReturn( mockStepFields );
   }
 
@@ -175,7 +178,7 @@ public class BaseStepAnalyzerTest {
 
   @Test
   public void testLoadInputAndOutputStreamFields() throws KettleStepException {
-    analyzer.loadInputAndOutputStreamFields();
+    analyzer.loadInputAndOutputStreamFields( mockStepMeta );
     assertNotNull( analyzer.prevFields );
     assertNotNull( analyzer.stepFields );
   }
@@ -185,7 +188,7 @@ public class BaseStepAnalyzerTest {
     when( analyzer.parentTransMeta.getPrevStepFields( analyzer.parentStepMeta ) )
         .thenThrow( KettleStepException.class );
     when( analyzer.parentTransMeta.getStepFields( analyzer.parentStepMeta ) ).thenThrow( KettleStepException.class );
-    analyzer.loadInputAndOutputStreamFields();
+    analyzer.loadInputAndOutputStreamFields( mockStepMeta );
     assertNull( analyzer.prevFields );
     assertNull( analyzer.stepFields );
   }
@@ -249,17 +252,7 @@ public class BaseStepAnalyzerTest {
             return rowMeta;
           }
         } );
-    when( mockPrevFields.searchValueMeta( anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "testInt" ) {
-          return vmi;
-        }
-        return null;
-      }
-    } );
-    when( mockStepFields.searchValueMeta( anyString() ) ).thenReturn( null );
+    when( mockStepFields.getFieldNames() ).thenReturn( new String[] { "outfield" } );
     IMetaverseNode node = analyzer.analyze( mockDescriptor, mockStepMeta );
     assertNotNull( node );
 

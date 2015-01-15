@@ -126,6 +126,7 @@ public class ValueMapperStepAnalyzerTest {
     when( valueMapperMeta.getParentStepMeta() ).thenReturn( spyStepMeta );
     when( spyStepMeta.getParentTransMeta() ).thenReturn( transMeta );
     when( transMeta.getPrevStepFields( spyStepMeta ) ).thenReturn( prevRowMeta );
+    when( transMeta.getPrevStepNames( spyStepMeta ) ).thenReturn( new String[] { "prev step name" } );
 
     IMetaverseNode node = analyzer.analyze( descriptor, valueMapperMeta );
     assertNotNull( node );
@@ -146,6 +147,7 @@ public class ValueMapperStepAnalyzerTest {
     when( spyStepMeta.getParentTransMeta() ).thenReturn( transMeta );
 
     when( transMeta.getPrevStepFields( spyStepMeta ) ).thenReturn( prevRowMeta );
+    when( transMeta.getPrevStepNames( spyStepMeta ) ).thenReturn( new String[] { "prev step name" } );
 
     when( valueMapperMeta.getTargetField() ).thenReturn( null );
 
@@ -177,6 +179,7 @@ public class ValueMapperStepAnalyzerTest {
     when( spyStepMeta.getParentTransMeta() ).thenReturn( transMeta );
 
     when( transMeta.getPrevStepFields( spyStepMeta ) ).thenReturn( prevRowMeta );
+    when( transMeta.getPrevStepNames( spyStepMeta ) ).thenReturn( new String[] { "prev step name" } );
     when( prevRowMeta.searchValueMeta( anyString() ) ).thenReturn( valueMetaInterfaceMock );
 
     when( valueMapperMeta.getTargetField() ).thenReturn( "CTR" );
@@ -211,6 +214,7 @@ public class ValueMapperStepAnalyzerTest {
     when( spyStepMeta.getParentTransMeta() ).thenReturn( transMeta );
 
     when( transMeta.getPrevStepFields( spyStepMeta ) ).thenReturn( prevRowMeta );
+    when( transMeta.getPrevStepNames( spyStepMeta ) ).thenReturn( new String[] { "prev step name" } );
 
     when( valueMapperMeta.getTargetField() ).thenReturn( "CTR" );
 
@@ -288,6 +292,7 @@ public class ValueMapperStepAnalyzerTest {
     when( valueMapperMeta.getFieldToUse() ).thenReturn( "field1" );
     when( valueMapperMeta.getTargetField() ).thenReturn( "field3" );
     when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockInRowMetaInterface );
+    when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
     when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockOutRowMetaInterface );
     when( mockOutRowMetaInterface.getFieldNames() ).thenReturn( outFields );
 

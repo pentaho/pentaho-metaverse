@@ -24,8 +24,6 @@ package com.pentaho.metaverse.analyzer.kettle.step.mergejoin;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
-import edu.emory.mathcs.backport.java.util.Arrays;
-import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -36,8 +34,11 @@ import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -112,29 +113,29 @@ public class MergeJoinStepAnalyzer extends BaseStepAnalyzer<MergeJoinMeta> {
     return node;
   }
 
-  @Override
-  protected void loadInputAndOutputStreamFields() {
+  @Override public Map<String, RowMetaInterface> getInputFields( MergeJoinMeta meta ) {
+    Map<String, RowMetaInterface> rowMeta = null;
+    try {
+      validateState( null, meta );
+    } catch ( MetaverseAnalyzerException e ) {
+      // eat it
+    }
     if ( parentTransMeta != null ) {
+      rowMeta = new HashMap<String, RowMetaInterface>();
       try {
-        StepMeta stepMeta1 = baseStepMeta.getStepIOMeta().getInfoStreams().get( 0 ).getStepMeta();
+        StepMeta stepMeta1 = meta.getStepIOMeta().getInfoStreams().get( 0 ).getStepMeta();
         leftStepFields = parentTransMeta.getStepFields( stepMeta1 );
 
-        StepMeta stepMeta2 = baseStepMeta.getStepIOMeta().getInfoStreams().get( 1 ).getStepMeta();
+        StepMeta stepMeta2 = meta.getStepIOMeta().getInfoStreams().get( 1 ).getStepMeta();
         rightStepFields = parentTransMeta.getStepFields( stepMeta2 );
-
-        prevFields = new RowMeta();
-        prevFields.addRowMeta( leftStepFields );
-        prevFields.addRowMeta( rightStepFields );
+        rowMeta.put( stepMeta1.getName(), leftStepFields );
+        rowMeta.put( stepMeta2.getName(), rightStepFields );
 
       } catch ( Throwable t ) {
         prevFields = null;
       }
-      try {
-        stepFields = parentTransMeta.getStepFields( parentStepMeta );
-      } catch ( Throwable t ) {
-        stepFields = null;
-      }
     }
+    return rowMeta;
   }
 
   @Override
@@ -152,7 +153,7 @@ public class MergeJoinStepAnalyzer extends BaseStepAnalyzer<MergeJoinMeta> {
   }
 
   // ******** Start - Used to aid in unit testing **********
-  protected RowMetaInterface getPrevFields() {
+  protected Map<String, RowMetaInterface> getPrevFields() {
     return prevFields;
   }
   protected RowMetaInterface getStepFields() {

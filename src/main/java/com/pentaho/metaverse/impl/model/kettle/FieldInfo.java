@@ -33,6 +33,7 @@ public class FieldInfo extends BaseInfo implements IFieldInfo {
   private String dataType;
   private Integer precision;
   private Integer length;
+  private String stepName;
 
   public FieldInfo() {
   }
@@ -43,18 +44,27 @@ public class FieldInfo extends BaseInfo implements IFieldInfo {
     setDataType( vmi.getTypeDesc() );
     setLength( vmi.getLength() );
     setPrecision( vmi.getPrecision() );
+    setStepName( vmi.getOrigin() );
   }
 
-  @Override public String getDataType() {
+  @Override
+  public String getDataType() {
     return dataType;
   }
 
-  @Override public Integer getPrecision() {
+  @Override
+  public Integer getPrecision() {
     return precision;
   }
 
-  @Override public Integer getLength() {
+  @Override
+  public Integer getLength() {
     return length;
+  }
+
+  @Override
+  public String getStepName() {
+    return stepName;
   }
 
   public void setDataType( String dataType ) {
@@ -67,5 +77,9 @@ public class FieldInfo extends BaseInfo implements IFieldInfo {
 
   public void setLength( Integer length ) {
     this.length = length;
+  }
+
+  public void setStepName( String stepName ) {
+    this.stepName = stepName;
   }
 }
