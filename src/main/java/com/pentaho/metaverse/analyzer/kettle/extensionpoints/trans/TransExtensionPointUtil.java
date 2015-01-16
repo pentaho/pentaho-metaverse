@@ -21,6 +21,7 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.Namespace;
 import com.pentaho.metaverse.messages.Messages;
@@ -31,6 +32,8 @@ import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseException;
 
@@ -47,14 +50,21 @@ public class TransExtensionPointUtil {
       throw new MetaverseException( Messages.getString( "ERROR.Document.IsNull" ) );
     }
 
-    final INamespace namespace = new Namespace( KettleClientEnvironment.getInstance().getClient().toString() );
-
     final Graph graph = new TinkerGraph();
     final IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
+    final IMetaverseObjectFactory objFactory = metaverseBuilder.getMetaverseObjectFactory();
+
+    // Add the client design node
+    final String clientName = KettleClientEnvironment.getInstance().getClient().toString();
+    final INamespace namespace = new Namespace( clientName );
+
+    final IMetaverseNode designNode =
+      objFactory.createNodeObject( clientName, clientName, DictionaryConst.NODE_TYPE_LOCATOR );
+    metaverseBuilder.addNode( designNode );
 
     // Create a document object containing the transMeta
     final IDocument document = MetaverseUtil.createDocument(
-      metaverseBuilder.getMetaverseObjectFactory(),
+      objFactory,
       namespace,
       transMeta,
       transMeta.getFilename(),
