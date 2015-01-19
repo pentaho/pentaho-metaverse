@@ -99,7 +99,7 @@
         <ref bean="NumberRangeStepAnalyzer"/>
         <ref bean="TextFileOutputStepAnalyzer"/>
         <ref bean="MergeJoinStepAnalyzer"/>
-        <ref bean="SteamLookupStepAnalyzer"/>
+        <ref bean="StreamLookupStepAnalyzer"/>
       </set>
     </property>
   </bean>
