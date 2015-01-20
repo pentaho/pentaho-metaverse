@@ -22,11 +22,17 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.streamlookup;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.streamlookup.StreamLookupMeta;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -34,7 +40,14 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta> {
+
+  String[] keyLookups;
+  String[] keyStreams;
+  String[] values;
+  String[] valueNames;
 
   @Override
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
@@ -48,10 +61,10 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
     throws MetaverseAnalyzerException {
     IMetaverseNode node = super.analyze( descriptor, streamLookupMeta );
 
-    String[] keyLookups = streamLookupMeta.getKeylookup();
-    String[] keyStreams = streamLookupMeta.getKeystream();
-    String[] values = streamLookupMeta.getValue();
-    String[] valueNames = streamLookupMeta.getValueName();
+    keyLookups = streamLookupMeta.getKeylookup();
+    keyStreams = streamLookupMeta.getKeystream();
+    values = streamLookupMeta.getValue();
+    valueNames = streamLookupMeta.getValueName();
 
     for ( int i = 0; i < keyLookups.length; i++ ) {
       IMetaverseNode keyNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, keyStreams[i] ) );
@@ -73,4 +86,51 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
     return node;
   }
 
+  @Override
+  protected boolean fieldNameExistsInInput( String fieldName ) {
+    List<String> inputs = new ArrayList<String>();
+    if ( keyLookups != null ) {
+      inputs.addAll( Arrays.asList( keyLookups ) );
+    }
+    if ( keyStreams != null ) {
+      inputs.addAll( Arrays.asList( keyStreams ) );
+    }
+    if ( values != null ) {
+      inputs.addAll( Arrays.asList( values ) );
+    }
+    if ( valueNames != null ) {
+      inputs.addAll( Arrays.asList( valueNames ) );
+    }
+    return inputs.contains( fieldName );
+  }
+
+  @Override
+  public Map<String, RowMetaInterface> getInputFields( StreamLookupMeta meta ) {
+    Map<String, RowMetaInterface> rowMeta = null;
+    try {
+      validateState( null, meta );
+    } catch ( MetaverseAnalyzerException e ) {
+      // eat it
+    }
+    if ( parentTransMeta != null ) {
+      prevStepNames = parentTransMeta.getPrevStepNames( parentStepMeta );
+      rowMeta = new HashMap<String, RowMetaInterface>();
+      try {
+        StepMeta stepMeta = meta.getStepIOMeta().getInfoStreams().get( 0 ).getStepMeta();
+        RowMetaInterface stepFields = parentTransMeta.getStepFields( stepMeta );
+        String lookupMetaName = stepMeta.getName();
+        rowMeta.put( lookupMetaName, stepFields );
+
+        String[] prevStepNames = parentTransMeta.getStepNames();
+        for ( String prevStepName : prevStepNames ) {
+          if ( !prevStepName.equals( lookupMetaName ) ) {
+            rowMeta.put( prevStepName, parentTransMeta.getPrevStepFields( prevStepName ) );
+          }
+        }
+      } catch ( Throwable t ) {
+        prevFields = null;
+      }
+    }
+    return rowMeta;
+  }
 }
