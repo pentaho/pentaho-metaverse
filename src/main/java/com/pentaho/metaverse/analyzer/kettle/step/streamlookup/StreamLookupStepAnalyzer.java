@@ -29,10 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.streamlookup.StreamLookupMeta;
-import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -66,7 +67,7 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
     values = streamLookupMeta.getValue();
     valueNames = streamLookupMeta.getValueName();
 
-    for ( int i = 0; i < keyLookups.length; i++ ) {
+    for ( int i = 0; i < values.length; i++ ) {
       IMetaverseNode keyNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, keyStreams[i] ) );
       metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, keyNode );
 
@@ -121,8 +122,7 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
         String lookupMetaName = stepMeta.getName();
         rowMeta.put( lookupMetaName, stepFields );
 
-        String[] prevStepNames = parentTransMeta.getStepNames();
-        for ( String prevStepName : prevStepNames ) {
+        for ( String prevStepName : parentTransMeta.getStepNames() ) {
           if ( !prevStepName.equals( lookupMetaName ) ) {
             rowMeta.put( prevStepName, parentTransMeta.getPrevStepFields( prevStepName ) );
           }
@@ -133,4 +133,31 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
     }
     return rowMeta;
   }
+
+  // ******** Start - Used to aid in unit testing **********
+  protected void setKeyLookups( String[] keyLookups ) {
+    this.keyLookups = keyLookups;
+  }
+
+  protected void setKeyStreams( String[] keyStreams ) {
+    this.keyStreams = keyStreams;
+  }
+
+  protected void setValues( String[] values ) {
+    this.values = values;
+  }
+
+  protected void setValueNames( String[] valueNames ) {
+    this.valueNames = valueNames;
+  }
+
+  public void setParentTransMeta( TransMeta parentTransMeta ) {
+    this.parentTransMeta = parentTransMeta;
+  }
+
+  public void setParentStepMeta( StepMeta parentStepMeta ) {
+    this.parentStepMeta = parentStepMeta;
+  }
+  // ******** End - Used to aid in unit testing **********
+
 }

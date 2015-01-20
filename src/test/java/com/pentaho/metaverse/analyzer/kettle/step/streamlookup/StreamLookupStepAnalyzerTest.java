@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
@@ -74,7 +75,7 @@ public class StreamLookupStepAnalyzerTest {
 
   @Mock private IMetaverseBuilder builder;
   @Mock private StreamLookupMeta streamLookupMeta;
-  @Mock private TransMeta transMeta;
+  @Mock private TransMeta parentTransMeta;
   @Mock private RowMetaInterface prevRowMeta;
   @Mock private RowMetaInterface stepRowMeta;
   @Mock private INamespace namespace;
@@ -115,14 +116,18 @@ public class StreamLookupStepAnalyzerTest {
     when( streamLookupMeta.getStepIOMeta() ).thenReturn( stepIoMeta );
     when( streamLookupMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
 
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
 
     when( stepIoMeta.getInfoStreams() ).thenReturn( streams );
+    when(stepMeta1.getName()).thenReturn("step1");
+    when(stepMeta2.getName()).thenReturn( "step2" );
     when( stream1.getStepMeta() ).thenReturn( stepMeta1 );
     when( stream2.getStepMeta() ).thenReturn( stepMeta2 );
-    when( transMeta.getStepFields( stepMeta1 ) ).thenReturn( rowMeta1 );
-    when( transMeta.getStepFields( stepMeta2 ) ).thenReturn( rowMeta2 );
-    when( transMeta.getStepFields( parentStepMeta ) ).thenReturn( stepRowMeta );
+    when( parentTransMeta.getStepFields( stepMeta1 ) ).thenReturn( rowMeta1 );
+    when( parentTransMeta.getStepFields( stepMeta2 ) ).thenReturn( rowMeta2 );
+    when( parentTransMeta.getStepFields( parentStepMeta ) ).thenReturn( stepRowMeta );
+    String[] stepNames = {"step1", "step2"};
+    when( parentTransMeta.getStepNames()).thenReturn( stepNames );
 
     analyzer = new StreamLookupStepAnalyzer();
     analyzer.setMetaverseBuilder( builder );
@@ -150,6 +155,30 @@ public class StreamLookupStepAnalyzerTest {
     } catch (MetaverseAnalyzerException e) {
       // noop
     }
+  }
+
+  @Test
+  public void testGetInputFields() throws Exception {
+    analyzer.setParentTransMeta( parentTransMeta );
+    analyzer.setParentStepMeta( parentStepMeta );
+    Map<String, RowMetaInterface> inputRowMeta = analyzer.getInputFields( streamLookupMeta );
+    assertNotNull( inputRowMeta );
+    assertEquals( 2, inputRowMeta.size() );
+  }
+
+  @Test
+  public void testFieldNameExistsInInput() {
+    String[] keyLookups = {"EAST", "WEST"};
+    String[] keyStreams = {"SALES", "MARKETING"};
+    String[] values     = {"TERRITORY", "COUNTRY"};
+    String[] valueNames = {"LOCATION", "NATIONALITY"};
+    analyzer.setKeyLookups(keyLookups);
+    analyzer.setKeyStreams( keyStreams );
+    analyzer.setValues( values );
+    analyzer.setValueNames( valueNames );
+    
+    assert( analyzer.fieldNameExistsInInput( "TERRITORY" ) );
+    assert( !analyzer.fieldNameExistsInInput( "AFRICA" ) );
   }
   
   @Test
