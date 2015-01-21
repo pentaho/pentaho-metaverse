@@ -49,6 +49,32 @@ i:{
   PluginRegistry.addPluginType( ExtensionPointPluginType.getInstance() );
   KettleEnvironment.init()
   Gremlin.load()
+  // Add custom Gremlin steps for convenience
+  Gremlin.defineStep('steps',[Vertex,Pipe],
+          { name ->
+            _().has('type', DictionaryConst.NODE_TYPE_TRANS_STEP)
+          }
+  )
+  Gremlin.defineStep('step',[Vertex,Pipe],
+          { name ->
+              _().steps().has('name', name)
+          }
+  )
+  Gremlin.defineStep('myTrans',[Vertex,Pipe],
+          {
+            _().in.loop(1) {it.loops < 10} {it.object.type == 'Transformation'}
+          }
+  )
+  Gremlin.defineStep('creator',[Vertex,Pipe],
+          { field ->
+            _().in('hops_to').loop(1){it.loops<10}{it.object != null}.as('step').out('creates').has('name', field).back("step")
+          }
+  )
+  Gremlin.defineStep('origin', [Vertex,Pipe],
+          { transName, stepName ->
+            _().and( _().has("name", stepName), _().in("contains").and( _().has("name", transName), _().has("type", "Transformation") ) )
+          }
+  )
   mtos = [:]
   mcs = MetaverseCompletionService.instance
 
