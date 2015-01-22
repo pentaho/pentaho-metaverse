@@ -47,9 +47,9 @@ import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta> {
-  
+
   private static final Logger LOGGER = LoggerFactory.getLogger( BaseStepAnalyzer.class );
-  
+
   protected String[] keyLookups;
   protected String[] keyStreams;
   protected String[] values;
@@ -95,7 +95,7 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
   @Override
   protected boolean fieldNameExistsInInput( String fieldName ) {
     boolean result = super.fieldNameExistsInInput( fieldName );
-    if (result) {
+    if ( result ) {
       return true;
     }
     List<String> inputs = new ArrayList<String>();
@@ -117,17 +117,17 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
   @Override
   public Map<String, RowMetaInterface> getInputFields( StreamLookupMeta meta ) {
     Map<String, RowMetaInterface> rowMeta = super.getInputFields( meta );
-    
+
     if ( parentTransMeta != null ) {
-        for ( String prevStepName : parentTransMeta.getStepNames() ) {
-          if ( !rowMeta.containsKey( prevStepName ) ) {
-            try {
-              rowMeta.put( prevStepName, parentTransMeta.getPrevStepFields( prevStepName ) );
-            } catch ( KettleStepException e ) {
-              LOGGER.warn( Messages.getString( "WARNING.CannotDetermineRowMeta" ) );
-            }
+      for ( String prevStepName : parentTransMeta.getStepNames() ) {
+        if ( !rowMeta.containsKey( prevStepName ) ) {
+          try {
+            rowMeta.put( prevStepName, parentTransMeta.getPrevStepFields( prevStepName ) );
+          } catch ( KettleStepException e ) {
+            LOGGER.warn( Messages.getString( "WARNING.CannotDetermineRowMeta", prevStepName, e.getLocalizedMessage() ) );
           }
         }
+      }
     }
     return rowMeta;
   }
