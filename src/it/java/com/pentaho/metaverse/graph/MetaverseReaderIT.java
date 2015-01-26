@@ -29,6 +29,7 @@ import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
@@ -45,12 +46,11 @@ import static org.junit.Assert.assertNotNull;
  */
 public class MetaverseReaderIT {
 
-  private IMetaverseReader reader;
-  private Graph graph;
+  private static IMetaverseReader reader;
+  private static Graph graph;
 
-  @Before
-  public void setUp() throws Exception {
-
+  @BeforeClass
+  public static void init() throws Exception {
     IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution/system/pentahoObjects.spring.xml" );
     graph = IntegrationTestUtil.buildMetaverseGraph();
     reader = PentahoSystem.get( IMetaverseReader.class );

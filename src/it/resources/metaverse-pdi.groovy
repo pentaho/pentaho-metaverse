@@ -6,9 +6,11 @@ import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputSte
 import com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer
 import org.pentaho.platform.api.metaverse.*
 import com.pentaho.metaverse.api.*
+import com.pentaho.metaverse.client.*
 import com.pentaho.metaverse.graph.*
 import com.pentaho.metaverse.impl.*
 import com.pentaho.metaverse.locator.*
+import com.pentaho.metaverse.util.*
 import com.pentaho.metaverse.service.*
 import com.pentaho.metaverse.analyzer.kettle.*
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.*
@@ -147,6 +149,8 @@ i:{
   shell.gw = obj.gw
   shell.gr = obj.gr
 
+  MetaverseUtil.documentController = shell.dc
+
   // Helper constants (to save typing)
   shell.TRANS = DictionaryConst.NODE_TYPE_TRANS
   shell.STEP = DictionaryConst.NODE_TYPE_TRANS_STEP
@@ -200,6 +204,13 @@ i:{
     new File(fname).withInputStream { i -> gr.inputGraph(i) }
   }
 
+  lineageClient = { fname ->
+    tm = new TransMeta(fname)
+    doc = MetaverseUtil.createDocument(dc.metaverseObjectFactory, new Namespace("SPOON"), tm, tm.filename, tm.name,'ktr',URLConnection.fileNameMap.getContentTypeFor( tm.filename ))
+    MetaverseUtil.addLineageGraph(doc, graph = new TinkerGraph())
+    new LineageClient()
+  }
+
   // Measures the number of seconds it takes to run the given closure 
   timeToRun = { closureToMeasure ->
     now = System.currentTimeMillis()
@@ -211,6 +222,8 @@ i:{
   ls = { dir ->
     new File(dir ?:'.').list()
   }
+
+
 
   loadIT()
   'Gremlin-Kettle-Metaverse initialized successfully'

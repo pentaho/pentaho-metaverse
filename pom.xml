@@ -60,7 +60,7 @@
 
     <!-- Compile dependencies -->
     <dependency.com.sun.jersey.jersey-core.version>1.16</dependency.com.sun.jersey.jersey-core.version>
-    <dependency.com.tinkerpop.blueprints.blueprints-core.version>2.6.0</dependency.com.tinkerpop.blueprints.blueprints-core.version>
+    <dependency.com.tinkerpop.blueprints.version>2.6.0</dependency.com.tinkerpop.blueprints.version>
     <dependency.javax.jcr.jcr.version>2.0</dependency.javax.jcr.jcr.version>
     <dependency.net.sf.flexjson.flexjson.version>2.1</dependency.net.sf.flexjson.flexjson.version>
     <dependency.org.codehaus.jackson.jackson-core-asl.version>1.9.3</dependency.org.codehaus.jackson.jackson-core-asl.version>
@@ -116,8 +116,14 @@
     <dependency>
       <groupId>com.tinkerpop.blueprints</groupId>
       <artifactId>blueprints-core</artifactId>
-      <version>${dependency.com.tinkerpop.blueprints.blueprints-core.version}</version>
+      <version>${dependency.com.tinkerpop.blueprints.version}</version>
       <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.tinkerpop.gremlin</groupId>
+      <artifactId>gremlin-java</artifactId>
+      <version>${plugin.com.tinkerpop.blueprints.blueprints-core.version}</version>
     </dependency>
 
     <dependency>
@@ -194,6 +200,13 @@
       <scope>compile</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>11.0</version>
+      <scope>compile</scope>
+    </dependency>
+
     <!-- 'RUNTIME' SCOPED DEPS -->
 
     <!-- 'PROVIDED' SCOPED DEPS -->
@@ -255,6 +268,7 @@
       <version>${dependency.pentaho-platform-core-test.version}</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
   
   <build>

@@ -104,9 +104,12 @@ public class MergeJoinStepAnalyzer extends BaseStepAnalyzer<MergeJoinMeta> {
         String unsuffixName = fieldName.replaceAll( "_\\d*$", "" );
         IMetaverseNode originalField = createNodeFromDescriptor(
             getPrevStepFieldOriginDescriptor( descriptor, unsuffixName, rightStepFields ) );
+        IMetaverseNode contributingField = createNodeFromDescriptor(
+          getPrevStepFieldOriginDescriptor( descriptor, unsuffixName, leftStepFields ) );
         IMetaverseNode renamedField = createNodeFromDescriptor(
             getStepFieldOriginDescriptor( descriptor, fieldName ) );
         metaverseBuilder.addLink( originalField, DictionaryConst.LINK_DERIVES, renamedField );
+        metaverseBuilder.addLink( contributingField, DictionaryConst.LINK_DERIVES, renamedField );
       }
     }
 
