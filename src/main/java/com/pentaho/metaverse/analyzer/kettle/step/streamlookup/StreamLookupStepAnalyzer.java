@@ -72,15 +72,16 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
       metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, keyNode );
 
       IMetaverseNode keyLookupNode =
-          createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, keyLookups[i] ) );
+        createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, keyLookups[i] ) );
       metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, keyLookupNode );
 
-      IMetaverseNode valueNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, values[i] ) ); // Bidirection
-                                                                                                                        // join
+      // Bidirectional join
+      IMetaverseNode valueNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, values[i] ) );
       metaverseBuilder.addLink( keyLookupNode, DictionaryConst.LINK_JOINS, valueNode );
       metaverseBuilder.addLink( valueNode, DictionaryConst.LINK_JOINS, keyLookupNode );
 
       IMetaverseNode valueName = createNodeFromDescriptor( getStepFieldOriginDescriptor( descriptor, valueNames[i] ) );
+      metaverseBuilder.addLink( keyLookupNode, DictionaryConst.LINK_DERIVES, valueName );
       metaverseBuilder.addLink( valueNode, DictionaryConst.LINK_DERIVES, valueName );
     }
 
