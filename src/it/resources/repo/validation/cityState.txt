@@ -1,0 +1,5 @@
+City;State
+Orlando                                                               ;FL
+Miami                                                                 ;FL
+Jacksonville                                                          ;FL
+New York                                                              ;NY

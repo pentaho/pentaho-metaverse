@@ -166,6 +166,11 @@ public class DictionaryConst {
   public static final String PROPERTY_JOIN_FIELDS_RIGHT = "rightFields";
 
   /**
+   * Property key for query, the value should be a query expression
+   */
+  public static final String PROPERTY_QUERY = "query";
+
+  /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
    */
   public static final String LINK_EXECUTES = "executes";

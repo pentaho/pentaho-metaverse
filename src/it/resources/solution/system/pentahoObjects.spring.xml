@@ -16,12 +16,23 @@
   <bean id="TransformationAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer"/>
   <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer"/>
 
-  <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer"/>
-  <bean id="TableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableInputStepAnalyzer"/>
+  <bean id="stepDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.StepDatabaseConnectionAnalyzer">
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+  </bean>
+  <bean id="jobEntryDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryDatabaseConnectionAnalyzer">
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+  </bean>
+  <bean id="mongoDbConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.MongoDbConnectionAnalyzer">
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+  </bean>
+
+  <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer">
+    <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
+  </bean>
+  <!--<bean id="TableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableInputStepAnalyzer"/>-->
   <bean id="TextFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer"/>
   <bean id="SelectValuesStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer"/>
   <bean id="NumberRangeStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer"/>
-  <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
   <bean id="ValueMapperStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer"/>
   <bean id="TextFileOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputStepAnalyzer"/>
   <bean id="MergeJoinStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer"/>
@@ -30,18 +41,11 @@
   <bean id="CsvFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer"/>
   <bean id="ExcelInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer"/>
   <bean id="GroupByStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer"/>
-  
-  <bean id="IDatabaseConnectionAnalyzerProvider"
-        class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzerProvider" scope="singleton">
-    <property name="databaseConnectionAnalyzers">
-      <set>
-        <ref bean="IDatabaseConnectionAnalyzer"/>
-      </set>
-    </property>
+  <bean id="MongoDbInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputStepAnalyzer">
+    <property name="connectionAnalyzer" ref="mongoDbConnectionAnalyzer"/>
   </bean>
 
   <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer" />
-
 
   <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
@@ -70,7 +74,7 @@
     <property name="stepAnalyzers">
       <set>
         <ref bean="TableOutputStepAnalyzer"/>
-        <ref bean="TableInputStepAnalyzer"/>
+        <!--<ref bean="TableInputStepAnalyzer"/>-->
         <ref bean="TextFileInputStepAnalyzer"/>
         <ref bean="SelectValuesStepAnalyzer"/>
         <ref bean="NumberRangeStepAnalyzer"/>
@@ -78,6 +82,7 @@
         <ref bean="TextFileOutputStepAnalyzer"/>
         <ref bean="MergeJoinStepAnalyzer"/>
         <ref bean="StreamLookupStepAnalyzer"/>
+        <ref bean="MongoDbInputStepAnalyzer"/>
         <ref bean="CalculatorStepAnalyzer"/>
         <ref bean="CsvFileInputStepAnalyzer"/>
         <ref bean="ExcelInputStepAnalyzer"/>

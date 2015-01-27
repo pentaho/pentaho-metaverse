@@ -23,17 +23,19 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 /**
  * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
  */
-public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent implements IDatabaseConnectionAnalyzer {
+public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseComponent
+    implements IDatabaseConnectionAnalyzer<T> {
 
   /**
    * Analyzes a database connection for metadata.
@@ -96,4 +98,17 @@ public class DatabaseConnectionAnalyzer extends BaseKettleMetaverseComponent imp
   protected ILogicalIdGenerator getLogicalIdGenerator() {
     return DictionaryConst.LOGICAL_ID_GENERATOR_DB_JDBC;
   }
+
+  @Override
+  public IComponentDescriptor buildComponentDescriptor( IComponentDescriptor parentDescriptor,
+                                                        DatabaseMeta connection ) {
+
+    IComponentDescriptor dbDescriptor =
+        new MetaverseComponentDescriptor( connection.getName(), DictionaryConst.NODE_TYPE_DATASOURCE, parentDescriptor
+            .getNamespace(), parentDescriptor.getContext() );
+
+    return dbDescriptor;
+
+  }
+
 }

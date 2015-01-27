@@ -24,7 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzerProvider;
+import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.impl.AnalysisContext;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
@@ -65,7 +65,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -169,16 +168,16 @@ public class BaseStepAnalyzerTest {
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
-  public void addDatabaseConnectionNodesWithNullStep() throws MetaverseAnalyzerException {
-    analyzer.addDatabaseConnectionNodes( mockDescriptor );
+  public void addConnectionNodesWithNullStep() throws MetaverseAnalyzerException {
+    analyzer.addConnectionNodes( mockDescriptor );
   }
 
   @Test
-  public void testAddDatabaseConnectionNodesException() throws MetaverseAnalyzerException {
+  public void testAddConnectionNodesException() throws MetaverseAnalyzerException {
     analyzer.baseStepMeta = mock( BaseStepMeta.class );
     BaseStepAnalyzer mockAnalyzer = spy( analyzer );
     when( mockDescriptor.getContext() ).thenThrow( Exception.class );
-    mockAnalyzer.addDatabaseConnectionNodes( mockDescriptor );
+    mockAnalyzer.addConnectionNodes( mockDescriptor );
   }
 
   @Test
@@ -267,7 +266,7 @@ public class BaseStepAnalyzerTest {
 
     // make sure there is not a "derives" link added
     verify( mockBuilder, never() ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
   }
 
   @Test
@@ -332,24 +331,20 @@ public class BaseStepAnalyzerTest {
   }
 
   @Test
-  public void testAddDatabaseConnectionNodes() throws MetaverseAnalyzerException {
+  public void testAddConnectionNodes() throws MetaverseAnalyzerException {
     DatabaseMeta[] dbs = new DatabaseMeta[]{ mockDatabaseMeta };
     when( mockStepMetaInterface.getUsedDatabaseConnections() ).thenReturn( dbs );
     when( mockStepMeta.getUsedDatabaseConnections() ).thenReturn( dbs );
-    analyzer.setDatabaseConnectionAnalyzerProvider( new DatabaseConnectionAnalyzerProvider() );
     analyzer.baseStepMeta = mockStepMeta;
-    analyzer.addDatabaseConnectionNodes( mockDescriptor );
+    DatabaseConnectionAnalyzer dbAnalyzer = new StepDatabaseConnectionAnalyzer();
+    dbAnalyzer.setMetaverseBuilder( mockBuilder );
+    analyzer.setConnectionAnalyzer( dbAnalyzer );
+    analyzer.addConnectionNodes( mockDescriptor );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
-  public void testAddDatabaseConnectionNodesNullStepMeta() throws MetaverseAnalyzerException {
-    analyzer.addDatabaseConnectionNodes( mockDescriptor );
-  }
-
-  @Test
-  public void testSetDatabaseConnectionAnalyzerProvider() {
-    analyzer.setDatabaseConnectionAnalyzerProvider( new DatabaseConnectionAnalyzerProvider() );
-    assertNotNull( analyzer.getDatabaseConnectionAnalyzers() );
+  public void testAddConnectionNodesNullStepMeta() throws MetaverseAnalyzerException {
+    analyzer.addConnectionNodes( mockDescriptor );
   }
 
   @Test

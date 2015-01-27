@@ -23,11 +23,9 @@
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponentWithDatabases;
-import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
+import com.pentaho.metaverse.analyzer.kettle.IConnectionAnalyzer;
 import com.pentaho.metaverse.messages.Messages;
-import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.job.Job;
@@ -36,8 +34,11 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Set;
+import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * The JobEntryAnalyzer provides JobEntryCopy metadata to the metaverse.
@@ -45,12 +46,14 @@ import java.util.Set;
  * Created by gmoran on 7/16/14.
  */
 public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
-    extends BaseKettleMetaverseComponentWithDatabases implements IJobEntryAnalyzer<IMetaverseNode, T> {
+    extends BaseKettleMetaverseComponent implements IJobEntryAnalyzer<IMetaverseNode, T> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger( BaseJobEntryAnalyzer.class );
 
   /**
    * A reference to the JobEntryInterface under analysis
    */
-  protected JobEntryInterface jobEntryInterface = null;
+  protected T jobEntryInterface = null;
 
   /**
    * A reference to the entry's parent Job
@@ -68,9 +71,9 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
   protected IMetaverseNode rootNode = null;
 
   /**
-   * A reference to the database connection analyzer
+   * A reference to the connection analyzer
    */
-  protected IDatabaseConnectionAnalyzer dbConnectionAnalyzer = null;
+  protected IConnectionAnalyzer<Object, T> connectionAnalyzer = null;
 
   /**
    * Analyzes job entries
@@ -105,38 +108,36 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
    *
    * @throws MetaverseAnalyzerException
    */
-  protected void addDatabaseConnectionNodes( IComponentDescriptor descriptor )
+  protected void addConnectionNodes( IComponentDescriptor descriptor )
     throws MetaverseAnalyzerException {
 
     if ( jobEntryInterface == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );
     }
 
-    // Analyze the database connections
-    DatabaseMeta[] dbs = jobEntryInterface.getUsedDatabaseConnections();
-    if ( dbs != null ) {
-      Set<IDatabaseConnectionAnalyzer> dbAnalyzers = getDatabaseConnectionAnalyzers();
-      if ( dbAnalyzers != null ) {
-        for ( IDatabaseConnectionAnalyzer dbAnalyzer : dbAnalyzers ) {
-          if ( dbAnalyzer != null ) {
-            for ( DatabaseMeta db : dbs ) {
-              try {
-                IComponentDescriptor dbDescriptor = new MetaverseComponentDescriptor(
-                    db.getName(),
-                    DictionaryConst.NODE_TYPE_DATASOURCE,
-                    descriptor.getNamespace(),
-                    descriptor.getContext() );
-                IMetaverseNode dbNode = dbAnalyzer.analyze( dbDescriptor, db );
-                metaverseBuilder.addLink( dbNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
-              } catch ( Throwable t ) {
-                // Don't throw the exception if a DB connection couldn't be analyzed, just log it and move on
-                t.printStackTrace( System.err );
-              }
-            }
-          }
+    if ( connectionAnalyzer != null ) {
+      List<? extends Object> connections = connectionAnalyzer.getUsedConnections( jobEntryInterface );
+      for ( Object connection : connections ) {
+        String connName = null;
+        // see if the connection object has a getName method
+        try {
+          Method getNameMethod = connection.getClass().getMethod( "getName", null );
+          connName = (String) getNameMethod.invoke( connection, null );
+        } catch ( Exception e ) {
+          // doesn't have a getName method, will try to get it from the descriptor later
+        }
+        try {
+          IComponentDescriptor connDescriptor = connectionAnalyzer.buildComponentDescriptor( descriptor, connection );
+          connName = connName == null ? descriptor.getName() : connName;
+          IMetaverseNode connNode = connectionAnalyzer.analyze( connDescriptor, connection );
+          metaverseBuilder.addLink( connNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
+        } catch ( Throwable t ) {
+          // Don't throw the exception if a DB connection couldn't be analyzed, just log it and move on
+          LOGGER.warn( Messages.getString( "WARNING.AnalyzingDatabaseConnection", connName ), t );
         }
       }
     }
+
   }
 
   protected void validateState( IComponentDescriptor descriptor, T entry ) throws MetaverseAnalyzerException {
@@ -165,4 +166,13 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MetaverseObjectFactory.IsNull" ) );
     }
   }
+
+  public IConnectionAnalyzer<Object, T> getConnectionAnalyzer() {
+    return connectionAnalyzer;
+  }
+
+  public void setConnectionAnalyzer( IConnectionAnalyzer<Object, T> connectionAnalyzer ) {
+    this.connectionAnalyzer = connectionAnalyzer;
+  }
+
 }

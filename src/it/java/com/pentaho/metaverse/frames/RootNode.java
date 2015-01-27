@@ -102,4 +102,11 @@ public interface RootNode extends FramedMetaverseNode {
   
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Group by'}.as('step').in('contains').has('name', T.eq, 'group_by').back('step')" )
   public GroupByStepNode getGroupByStepNode();
+
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'MongoDB Connection' }" )
+  public Iterable<MongoDbDatasourceNode> getMongoDbDatasourceNodes();
+
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'MongoDB Connection' && it.object.name == name }" )
+  public MongoDbDatasourceNode getMongoDbDatasourceNode( @GremlinParam( "name" ) String name );
+
 }
