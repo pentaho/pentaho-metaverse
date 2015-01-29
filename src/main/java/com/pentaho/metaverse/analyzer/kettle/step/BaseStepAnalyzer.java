@@ -248,7 +248,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
               if ( stepFields != null && !outFields.contains( inRowMeta.getName() ) ) {
                 // This field didn't leave the step, so assume it has been deleted here
                 IComponentDescriptor fieldDescriptor =
-                    getPrevStepFieldOriginDescriptor( descriptor, inRowMeta.getName() );
+                  getPrevStepFieldOriginDescriptor( descriptor, inRowMeta.getName() );
                 IMetaverseNode inFieldNode = createNodeFromDescriptor( fieldDescriptor );
 
                 // Add link to show that this step created the field
@@ -274,7 +274,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   }
 
   protected IComponentDescriptor getPrevStepFieldOriginDescriptor(
-      IComponentDescriptor descriptor, String fieldName ) {
+    IComponentDescriptor descriptor, String fieldName ) {
 
     IComponentDescriptor componentDescriptor = null;
 
@@ -282,13 +282,13 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     if ( parentTransMeta != null && prevFields != null ) {
       if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
         componentDescriptor = getPrevStepFieldOriginDescriptor( descriptor, fieldName,
-            prevFields.get( prevStepNames[0] ) );
+          prevFields.get( prevStepNames[0] ) );
       } else if ( prevFields.size() > 0 ) {
         // just use one of the inputs as a last resort
         for ( String s : prevFields.keySet() ) {
           LOGGER.debug( Messages.getString( "DEBUG.FallingBackToFirstSetOfInputFields", s ) );
           componentDescriptor = getPrevStepFieldOriginDescriptor( descriptor, fieldName,
-              prevFields.get( prevStepNames ) );
+            prevFields.get( prevStepNames ) );
           break;
         }
       }
@@ -298,7 +298,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
 
   protected IComponentDescriptor getPrevStepFieldOriginDescriptor(
     IComponentDescriptor descriptor, String fieldName, RowMetaInterface prevFields ) {
-    if ( descriptor == null ) {
+    if ( descriptor == null || prevFields == null ) {
       return null;
     }
 
@@ -331,7 +331,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     String origin = ( vmi == null ) ? fieldName : vmi.getOrigin();
 
     IMetaverseNode tmpOriginNode = metaverseObjectFactory.createNodeObject( UUID.randomUUID().toString(),
-        origin, DictionaryConst.NODE_TYPE_TRANS_STEP );
+      origin, DictionaryConst.NODE_TYPE_TRANS_STEP );
     tmpOriginNode.setProperty( "namespace", rootNode.getProperty( "namespace" ) );
     INamespace stepFieldNamespace = new Namespace( tmpOriginNode.getLogicalId() );
 
@@ -401,7 +401,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
       newFieldNode = createNodeFromDescriptor( newFieldDescriptor );
       final String changePropertyType;
       ChangeType changeType = changeRecord.getChangeType();
-      switch( changeType ) {
+      switch ( changeType ) {
         case DATA:
           changePropertyType = DictionaryConst.PROPERTY_DATA_OPERATIONS;
           break;

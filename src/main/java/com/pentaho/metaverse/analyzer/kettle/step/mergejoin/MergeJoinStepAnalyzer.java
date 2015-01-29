@@ -75,20 +75,24 @@ public class MergeJoinStepAnalyzer extends BaseStepAnalyzer<MergeJoinMeta> {
 
     for ( int i = 0; i < keyFields1.length; i++ ) {
       fieldNode1 = createNodeFromDescriptor(
-          getPrevStepFieldOriginDescriptor( descriptor, keyFields1[ i ], leftStepFields ) );
+        getPrevStepFieldOriginDescriptor( descriptor, keyFields1[i], leftStepFields ) );
 
       fieldNode2 = createNodeFromDescriptor(
-          getPrevStepFieldOriginDescriptor( descriptor, keyFields2[ i ], rightStepFields ) );
+        getPrevStepFieldOriginDescriptor( descriptor, keyFields2[i], rightStepFields ) );
 
       // add the uses links between the input fields and the step
-      metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, fieldNode1 );
-      metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, fieldNode2 );
+      if ( fieldNode1 != null ) {
+        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, fieldNode1 );
+      }
+      if ( fieldNode2 != null ) {
+        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, fieldNode2 );
+      }
 
       // handle links for join types between fields
-      if ( isInner || isLeftOuter || isFullOuter ) {
+      if ( ( isInner || isLeftOuter || isFullOuter ) && fieldNode1 != null && fieldNode2 != null ) {
         metaverseBuilder.addLink( fieldNode1, DictionaryConst.LINK_JOINS, fieldNode2 );
       }
-      if ( isInner || isRightOuter || isFullOuter ) {
+      if ( ( isInner || isRightOuter || isFullOuter ) && fieldNode1 != null && fieldNode2 != null ) {
         metaverseBuilder.addLink( fieldNode2, DictionaryConst.LINK_JOINS, fieldNode1 );
       }
     }
@@ -96,27 +100,30 @@ public class MergeJoinStepAnalyzer extends BaseStepAnalyzer<MergeJoinMeta> {
     // if any fields where created by this step it was due to a name collision.
     // example: join fields in both input steps named COUNTRY. the second (right) field gets renamed with a suffix
     // on the way out of the step. You end up with COUNTRY (from the left) & COUNTRY_1 (from the right)
-    List<ValueMetaInterface> valueMetas = stepFields.getValueMetaList();
-    for ( ValueMetaInterface valueMeta : valueMetas ) {
-      String fieldName = valueMeta.getName();
-      if ( !fieldNameExistsInInput( fieldName ) ) {
-        // chop off the _NN suffix
-        String unsuffixName = fieldName.replaceAll( "_\\d*$", "" );
-        IMetaverseNode originalField = createNodeFromDescriptor(
+    if ( stepFields != null ) {
+      List<ValueMetaInterface> valueMetas = stepFields.getValueMetaList();
+      for ( ValueMetaInterface valueMeta : valueMetas ) {
+        String fieldName = valueMeta.getName();
+        if ( !fieldNameExistsInInput( fieldName ) ) {
+          // chop off the _NN suffix
+          String unsuffixName = fieldName.replaceAll( "_\\d*$", "" );
+          IMetaverseNode originalField = createNodeFromDescriptor(
             getPrevStepFieldOriginDescriptor( descriptor, unsuffixName, rightStepFields ) );
-        IMetaverseNode contributingField = createNodeFromDescriptor(
-          getPrevStepFieldOriginDescriptor( descriptor, unsuffixName, leftStepFields ) );
-        IMetaverseNode renamedField = createNodeFromDescriptor(
+          IMetaverseNode contributingField = createNodeFromDescriptor(
+            getPrevStepFieldOriginDescriptor( descriptor, unsuffixName, leftStepFields ) );
+          IMetaverseNode renamedField = createNodeFromDescriptor(
             getStepFieldOriginDescriptor( descriptor, fieldName ) );
-        metaverseBuilder.addLink( originalField, DictionaryConst.LINK_DERIVES, renamedField );
-        metaverseBuilder.addLink( contributingField, DictionaryConst.LINK_DERIVES, renamedField );
+          metaverseBuilder.addLink( originalField, DictionaryConst.LINK_DERIVES, renamedField );
+          metaverseBuilder.addLink( contributingField, DictionaryConst.LINK_DERIVES, renamedField );
+        }
       }
     }
 
     return node;
   }
 
-  @Override public Map<String, RowMetaInterface> getInputFields( MergeJoinMeta meta ) {
+  @Override
+  public Map<String, RowMetaInterface> getInputFields( MergeJoinMeta meta ) {
     Map<String, RowMetaInterface> rowMeta = null;
     try {
       validateState( null, meta );
@@ -159,6 +166,7 @@ public class MergeJoinStepAnalyzer extends BaseStepAnalyzer<MergeJoinMeta> {
   protected Map<String, RowMetaInterface> getPrevFields() {
     return prevFields;
   }
+
   protected RowMetaInterface getStepFields() {
     return stepFields;
   }
@@ -170,6 +178,7 @@ public class MergeJoinStepAnalyzer extends BaseStepAnalyzer<MergeJoinMeta> {
   protected void setParentTransMeta( TransMeta parent ) {
     parentTransMeta = parent;
   }
+
   protected void setParentStepMeta( StepMeta parent ) {
     parentStepMeta = parent;
   }
