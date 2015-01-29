@@ -61,7 +61,7 @@ public class MetaverseUtilTest {
 
   @Test( expected = MetaverseException.class )
   public void testInitializeMetaverseObjectsBadPath() throws Exception {
-    // Testing a good path is an integration test not a unit test, since the file needs to exist
+    // Testing a good path is an integration creatorSteps not a unit creatorSteps, since the file needs to exist
     MetaverseUtil.initializeMetaverseObjects( "bad/path" );
   }
 

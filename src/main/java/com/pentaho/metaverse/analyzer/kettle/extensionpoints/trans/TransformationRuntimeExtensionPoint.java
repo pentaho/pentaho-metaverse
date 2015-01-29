@@ -129,7 +129,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
     // Store execution information (client, server, user, etc.)
     executionData.setStartTime( new Timestamp( new Date().getTime() ) );
-    executionData.setClientExecutor( KettleClientEnvironment.getInstance().getClient().name() );
+    KettleClientEnvironment.ClientType clientType = KettleClientEnvironment.getInstance().getClient();
+    executionData.setClientExecutor( clientType == null ? "DI Server" : clientType.name() );
     executionData.setExecutorUser( trans.getExecutingUser() );
     executionData.setExecutorServer( trans.getExecutingServer() );
 

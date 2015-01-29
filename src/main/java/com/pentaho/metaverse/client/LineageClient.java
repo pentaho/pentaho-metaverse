@@ -48,8 +48,17 @@ import java.util.concurrent.Future;
  */
 public class LineageClient implements ILineageClient {
 
-  private static final int MAX_LOOPS = 10;
+  protected static final int MAX_LOOPS = 10;
 
+  /**
+   * Generates a list of names of steps that create a field with the specified name
+   *
+   * @param transName      the name of the transformation
+   * @param targetStepName the name of the step from which to start searching for the field
+   * @param fieldName      the name of the field for which its creating step(s) will be returned
+   * @return a list of names of steps that create a field with the specified name
+   * @throws MetaverseException if an error occurred while searching for creator steps
+   */
   public List<String> getCreatorSteps( String transName, String targetStepName, String fieldName )
     throws MetaverseException {
 
@@ -70,6 +79,15 @@ public class LineageClient implements ILineageClient {
     return new ArrayList<String>();
   }
 
+  /**
+   * Generates a list of names of steps that create a field with the specified name
+   *
+   * @param transMeta      a reference to the transformation metadata
+   * @param targetStepName the name of the step from which to start searching for the field
+   * @param fieldName      the name of the field for which its creating step(s) will be returned
+   * @return a list of names of steps that create a field with the specified name
+   * @throws MetaverseException if an error occurred while searching for creator steps
+   */
   @Override
   public List<String> getCreatorSteps( TransMeta transMeta, String targetStepName, String fieldName )
     throws MetaverseException {
@@ -78,9 +96,9 @@ public class LineageClient implements ILineageClient {
       Future<Graph> lineageGraphTask = LineageGraphMap.getInstance().get( transMeta );
       if ( lineageGraphTask != null ) {
         Graph lineageGraph = lineageGraphTask.get();
-        GremlinPipeline creatorStepsPipe =
-          new GremlinPipeline( lineageGraph ).V( DictionaryConst.PROPERTY_NAME, targetStepName );
-        creatorStepsPipe.add( creatorSteps( fieldName ) );
+
+        // Call the internal creatorSteps() method, then get the resultant vertices out and into a list by name
+        GremlinPipeline<Vertex, Vertex> creatorStepsPipe = creatorSteps( lineageGraph, targetStepName, fieldName );
         List<Vertex> stepNodeList = creatorStepsPipe.toList();
         if ( !Const.isEmpty( stepNodeList ) ) {
           for ( Vertex stepNode : stepNodeList ) {
@@ -98,13 +116,13 @@ public class LineageClient implements ILineageClient {
 
   /**
    * Gets the origin steps and fields that contribute to the target field in the target step.
-   * <p/>
+   *
    * The basic approach is to find the node(s) that create the target field, then see if that field is derived by
    * other(s). Then we get those Origin steps and so on
    *
-   * @param transMeta
-   * @param targetStepName
-   * @param fieldName
+   * @param transMeta a reference to the transformation
+   * @param targetStepName the name of the step from which to start searching for the field
+   * @param fieldName the name of the field for which its origin step(s) will be returned
    * @return
    * @throws MetaverseException
    */
@@ -118,9 +136,16 @@ public class LineageClient implements ILineageClient {
       Future<Graph> lineageGraphTask = LineageGraphMap.getInstance().get( transMeta );
       if ( lineageGraphTask != null ) {
         Graph lineageGraph = lineageGraphTask.get();
-        GremlinPipeline pipe = new GremlinPipeline( lineageGraph ).V( DictionaryConst.PROPERTY_NAME, targetStepName )
-          .add( creatorFields( fieldName ) )
-            //.ifThenElse{it.in('derives').hasNext()}{it.in('derives').loop(1){it.loops<10}{it.object != null}.transform{[it.name,it.in('creates').name.first()]}}{it.transform{[it.name,it.in('creates').name.first()]}}
+        // First, start with the fields that create the specified target field. Basically we want to find the Vertex
+        // that has the given field name, but by traversing backwards along the steps' "hops_to" links. So start with
+        // the specified (target) step, see if it creates the field, and if not, walk the "hops_to" links backwards
+        // and in turn check those steps to see if they created the field.
+        GremlinPipeline pipe = creatorFields( lineageGraph, targetStepName, fieldName )
+
+          // Determine if some other field derives the creatorField. If so, we want to walk back along the "derives"
+          // links in order to find a field that has no incoming "derives" links (meaning it wasn't derived from
+          // some other field), then find the step that created it. It's possible that the current Vertex has no
+          // "derives" links, which means the search is over.
           .ifThenElse(
             // it.in('derives').hasNext()
             new PipeFunction<Vertex, Boolean>() {
@@ -169,8 +194,8 @@ public class LineageClient implements ILineageClient {
    * @param fieldName the target fieldname for which to find the creating step(s)
    * @return a GremlinPipeline which will determine the steps that create the given field
    */
-  protected GremlinPipeline<Vertex, Vertex> creatorSteps( String fieldName ) {
-    return creatorFields( fieldName ).back( 2 ).cast( Vertex.class );
+  protected GremlinPipeline<Vertex, Vertex> creatorSteps( Graph lineageGraph, String targetStepName, String fieldName ) {
+    return creatorFields( lineageGraph, targetStepName, fieldName ).back( 2 ).cast( Vertex.class );
   }
 
 
@@ -183,19 +208,34 @@ public class LineageClient implements ILineageClient {
    * @param fieldName the target fieldname for which to find the creating fields
    * @return a GremlinPipeline which will determine the creating fields for the given target field
    */
-  protected GremlinPipeline<Vertex, Vertex> creatorFields( String fieldName ) {
-    GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<Vertex, Vertex>();
-    return pipe.in( DictionaryConst.LINK_HOPSTO ).loop( 1,
-      // {it.loops < MAX_LOOPS}
-      new NumLoops<Vertex>( MAX_LOOPS ),
-      // {it.object != null}
-      new NoNullObjectsInLoop<Vertex>()
-    )
-      .out( DictionaryConst.LINK_CREATES ).has( DictionaryConst.PROPERTY_NAME, fieldName ).cast( Vertex.class );
+  protected GremlinPipeline<Vertex, Vertex> creatorFields( Graph lineageGraph, String targetStepName, String fieldName ) {
+    GremlinPipeline<Vertex, Vertex> creatorStepsPipe =
+      new GremlinPipeline<Vertex, Vertex>( lineageGraph ).V( DictionaryConst.PROPERTY_NAME, targetStepName );
+    // Check to see if this step has the "creates" link
+    GremlinPipeline<Vertex, Vertex> testPipe =
+      new GremlinPipeline<Vertex, Vertex>( lineageGraph )
+        .V( DictionaryConst.PROPERTY_NAME, targetStepName )
+        .out( DictionaryConst.LINK_CREATES )
+        .has( DictionaryConst.PROPERTY_NAME, fieldName ).cast( Vertex.class );
+
+    if ( testPipe.hasNext() ) {
+      creatorStepsPipe = creatorStepsPipe.out( DictionaryConst.LINK_CREATES )
+        .has( DictionaryConst.PROPERTY_NAME, fieldName ).cast( Vertex.class );
+    } else {
+      creatorStepsPipe = creatorStepsPipe.in( DictionaryConst.LINK_HOPSTO ).loop( 1,
+        // {it.loops < MAX_LOOPS}
+        new NumLoops<Vertex>( MAX_LOOPS ),
+        // {it.object != null}
+        new NoNullObjectsInLoop<Vertex>()
+      )
+        .out( DictionaryConst.LINK_CREATES ).has( DictionaryConst.PROPERTY_NAME, fieldName ).cast( Vertex.class );
+    }
+    return creatorStepsPipe;
   }
 
   /**
    * This is a loop closure that returns true if the current loop count is less than the given number, false otherwise
+   *
    * @param <S> the type of object passed into the loop closure
    */
   protected static class NumLoops<S> implements PipeFunction<LoopPipe.LoopBundle<S>, Boolean> {
@@ -213,6 +253,7 @@ public class LineageClient implements ILineageClient {
 
   /**
    * This is a simple loop emit closure that will emit the incoming object if its associated object is not null
+   *
    * @param <S> the type of object passed into the loop emit closure
    */
   public static class NoNullObjectsInLoop<S> implements PipeFunction<LoopPipe.LoopBundle<S>, Boolean> {
@@ -224,8 +265,8 @@ public class LineageClient implements ILineageClient {
 
   /**
    * This class provides a transformation closure that takes a field vertex and creates a list containing two elements:
-   *  1) the name of the field
-   *  2) the name of the step that created the field
+   * 1) the name of the field
+   * 2) the name of the step that created the field
    */
   protected static class FieldAndStepList implements PipeFunction<Vertex, List<String>> {
     @Override
