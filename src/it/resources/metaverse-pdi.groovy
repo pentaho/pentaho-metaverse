@@ -1,3 +1,4 @@
+import com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer
@@ -98,6 +99,8 @@ i:{
     // Set up the step analyzers
   	tfia = new TextFileInputStepAnalyzer()
   	tfia.setDatabaseConnectionAnalyzerProvider(dbap)
+    cfia = new CsvFileInputStepAnalyzer()
+    cfia.setDatabaseConnectionAnalyzerProvider(dbap)
 
   	tfoa = new TableOutputStepAnalyzer()
   	tfoa.setDatabaseConnectionAnalyzerProvider(dbap)
@@ -119,7 +122,7 @@ i:{
     //**********************************************************************
 
   	ksap = new StepAnalyzerProvider()
-  	ksap.setStepAnalyzers([tfia,tfoa, mergeJoinAnalyzer, numberRangeAnalyzer, selectValuesAnalyzer, tableInputAnalyzer, valueMapperAnalyzer] as Set)
+  	ksap.setStepAnalyzers([tfia, tfoa, cfia, mergeJoinAnalyzer, numberRangeAnalyzer, selectValuesAnalyzer, tableInputAnalyzer, valueMapperAnalyzer] as Set)
 
   	ta = new TransformationAnalyzer()
   	ta.setStepAnalyzerProvider(ksap)

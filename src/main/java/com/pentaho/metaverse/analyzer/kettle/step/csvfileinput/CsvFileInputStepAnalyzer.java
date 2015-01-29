@@ -20,15 +20,15 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step.textfileinput;
+package com.pentaho.metaverse.analyzer.kettle.step.csvfileinput;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
@@ -40,21 +40,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * The TextFileInputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
+ * The CsvInputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
  * other metaverse entities
  */
-public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMeta> {
-  private Logger log = LoggerFactory.getLogger( TextFileInputStepAnalyzer.class );
+public class CsvFileInputStepAnalyzer extends BaseStepAnalyzer<CsvInputMeta> {
+  private Logger log = LoggerFactory.getLogger( CsvFileInputStepAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, TextFileInputMeta textFileInputMeta )
+  public IMetaverseNode analyze( IComponentDescriptor descriptor, CsvInputMeta csvFileInputMeta )
     throws MetaverseAnalyzerException {
 
     // do the common analysis for all step
-    IMetaverseNode node = super.analyze( descriptor, textFileInputMeta );
+    IMetaverseNode node = super.analyze( descriptor, csvFileInputMeta );
 
     // add the fields as nodes, add the links too
-    TextFileInputField[] fields = textFileInputMeta.getInputFields();
+    TextFileInputField[] fields = csvFileInputMeta.getInputFields();
     if ( fields != null ) {
       for ( TextFileInputField field : fields ) {
         String fieldName = field.getName();
@@ -77,30 +77,20 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
       }
     }
 
-    if ( textFileInputMeta.isAcceptingFilenames() ) {
-      String acceptingFieldName = textFileInputMeta.getAcceptingField();
-      IComponentDescriptor transFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor,
-        acceptingFieldName );
-      IMetaverseNode acceptingFieldNode = createNodeFromDescriptor( transFieldDescriptor );
+    String[] fileNames = parentTransMeta.environmentSubstitute( csvFileInputMeta.getFilePaths( parentTransMeta ) );
 
-      // add a link from the fileField to the text file input step node
-      metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, acceptingFieldNode );
-    } else {
-      String[] fileNames = parentTransMeta.environmentSubstitute( textFileInputMeta.getFileName() );
+    // add a link from the file(s) being read to the step
+    if ( fileNames != null ) {
+      for ( String fileName : fileNames ) {
+        if ( !Const.isEmpty( fileName ) ) {
+          try {
+            // first add the node for the file
+            IMetaverseNode csvFileNode = createFileNode( fileName, descriptor );
+            metaverseBuilder.addNode( csvFileNode );
 
-      // add a link from the file(s) being read to the step
-      if ( fileNames != null ) {
-        for ( String fileName : fileNames ) {
-          if ( !Const.isEmpty( fileName ) ) {
-            try {
-              // first add the node for the file
-              IMetaverseNode textFileNode = createFileNode( fileName, descriptor );
-              metaverseBuilder.addNode( textFileNode );
-
-              metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
-            } catch ( MetaverseException e ) {
-              log.error( e.getMessage(), e );
-            }
+            metaverseBuilder.addLink( csvFileNode, DictionaryConst.LINK_READBY, node );
+          } catch ( MetaverseException e ) {
+            log.error( e.getMessage(), e );
           }
         }
       }
@@ -113,7 +103,7 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
     return new HashSet<Class<? extends BaseStepMeta>>() {
       {
-        add( TextFileInputMeta.class );
+        add( CsvInputMeta.class );
       }
     };
   }
