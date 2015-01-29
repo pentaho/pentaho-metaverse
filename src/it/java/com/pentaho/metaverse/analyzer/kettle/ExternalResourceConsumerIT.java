@@ -74,6 +74,12 @@ public class ExternalResourceConsumerIT {
         }}
       },
       {
+        REPO_PATH + "/CSV input.ktr",
+        new HashMap<String, String>() {{
+          put( "Internal.Transformation.Filename.Directory", REPO_PATH );
+        }}
+      },
+      {
         REPO_PATH + "/Textfile input - filename from field.ktr",
         new HashMap<String, String>() {{
           put( "Internal.Transformation.Filename.Directory", REPO_PATH );
