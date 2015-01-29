@@ -22,40 +22,90 @@
 
 package com.pentaho.metaverse.client;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import com.tinkerpop.gremlin.java.GremlinPipeline;
+import com.tinkerpop.pipes.branch.LoopPipe;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class LineageClientTest {
 
+  private LineageClient lineageClient;
+  private Graph g;
+
   @Before
   public void setUp() throws Exception {
-
+    lineageClient = new LineageClient();
+    g = new TinkerGraph();
   }
 
   @Test
   public void testGetCreatorSteps() throws Exception {
+    assertTrue( lineageClient.getCreatorSteps( (String) null, null, null ).isEmpty() );
+    assertTrue( lineageClient.getCreatorSteps( "testTrans", null, null ).isEmpty() );
 
   }
 
   @Test
-  public void testGetCreatorSteps1() throws Exception {
+  public void testGetCreatorFields() {
 
+    Vertex step = g.addVertex( "1" );
+    step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
+    Vertex field = g.addVertex( "2" );
+    field.setProperty( DictionaryConst.PROPERTY_NAME, "testField" );
+    g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
+    Vertex targetStep = g.addVertex( "4" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
+    g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
+
+    GremlinPipeline pipe = lineageClient.creatorFields( g, "targetStep", "testField" );
+    assertTrue( pipe.hasNext() );
+    pipe = lineageClient.creatorFields( g, "testStep", "testField" );
+    assertTrue( pipe.hasNext() );
   }
 
   @Test
-  public void testCreatorSteps() throws Exception {
-
+  public void testNumLoops() {
+    LoopPipe.LoopBundle bundle = mock( LoopPipe.LoopBundle.class );
+    when( bundle.getLoops() ).thenReturn( LineageClient.MAX_LOOPS - 1 );
+    LineageClient.NumLoops loopFunc = new LineageClient.NumLoops( LineageClient.MAX_LOOPS );
+    assertTrue( loopFunc.compute( bundle ) );
+    when( bundle.getLoops() ).thenReturn( LineageClient.MAX_LOOPS );
+    assertFalse( loopFunc.compute( bundle ) );
   }
 
   @Test
-  public void testGetOriginSteps() throws Exception {
-
+  public void testNoNullObjectsInLoop() {
+    LoopPipe.LoopBundle bundle = mock( LoopPipe.LoopBundle.class );
+    when( bundle.getObject() ).thenReturn( null );
+    LineageClient.NoNullObjectsInLoop loopFunc = new LineageClient.NoNullObjectsInLoop();
+    assertFalse( loopFunc.compute( bundle ) );
+    when( bundle.getObject() ).thenReturn( new Object() );
+    assertTrue( loopFunc.compute( bundle ) );
   }
 
   @Test
-  public void testDerivingFields() throws Exception {
-
+  public void testFieldAndStepList() {
+    Vertex step = g.addVertex( "1" );
+    step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
+    Vertex field = g.addVertex( "2" );
+    field.setProperty( DictionaryConst.PROPERTY_NAME, "testField" );
+    g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
+    List<String> creatorSteps = new LineageClient.FieldAndStepList().compute( field );
+    assertNotNull( creatorSteps );
+    assertEquals( 2, creatorSteps.size() );
+    // The list should contain the field name followed by the step name
+    assertEquals( "testField", creatorSteps.get( 0 ) );
+    assertEquals( "testStep", creatorSteps.get( 1 ) );
   }
+
 }

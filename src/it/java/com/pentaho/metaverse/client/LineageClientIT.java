@@ -100,7 +100,18 @@ public class LineageClientIT {
     assertEquals( 1, creatorSteps.size() );
     assertEquals( "Merge Join", creatorSteps.get( 0 ) );
 
+    creatorSteps = client.getCreatorSteps( transMeta, "Merge Join", "COUNTRY_1" );
+    assertNotNull( creatorSteps );
+    assertEquals( 1, creatorSteps.size() );
+    assertEquals( "Merge Join", creatorSteps.get( 0 ) );
+
     creatorSteps = client.getCreatorSteps( transMeta, "Dummy (do nothing)", "COUNTRY" );
+    assertNotNull( creatorSteps );
+    assertEquals( 2, creatorSteps.size() );
+    assertTrue( creatorSteps.contains( "Data Grid" ) );
+    assertTrue( creatorSteps.contains( "Table input" ) );
+
+    creatorSteps = client.getCreatorSteps( transMeta, "Merge Join", "COUNTRY" );
     assertNotNull( creatorSteps );
     assertEquals( 2, creatorSteps.size() );
     assertTrue( creatorSteps.contains( "Data Grid" ) );
@@ -116,6 +127,22 @@ public class LineageClientIT {
   @Test
   public void testGetOriginSteps() throws Exception {
     Multimap<String, String> originSteps = client.getOriginSteps( transMeta, "Dummy (do nothing)", "COUNTRY_1" );
+    assertNotNull( originSteps );
+    assertEquals( 2, originSteps.size() );
+    // We're not sure which step will be in which order, but both fields are named COUNTRY
+    for ( Map.Entry<String, String> stepField : originSteps.entries() ) {
+      assertEquals( "COUNTRY", stepField.getKey() );
+    }
+
+    originSteps = client.getOriginSteps( transMeta, "Merge Join", "COUNTRY_1" );
+    assertNotNull( originSteps );
+    assertEquals( 2, originSteps.size() );
+    // We're not sure which step will be in which order, but both fields are named COUNTRY
+    for ( Map.Entry<String, String> stepField : originSteps.entries() ) {
+      assertEquals( "COUNTRY", stepField.getKey() );
+    }
+
+    originSteps = client.getOriginSteps( transMeta, "Dummy (do nothing)", "COUNTRY" );
     assertNotNull( originSteps );
     assertEquals( 2, originSteps.size() );
     // We're not sure which step will be in which order, but both fields are named COUNTRY
