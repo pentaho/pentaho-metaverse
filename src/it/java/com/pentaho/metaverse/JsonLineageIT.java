@@ -22,18 +22,23 @@
 
 package com.pentaho.metaverse;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.MetaverseKettleLifecycleHandler;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
+import com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
+import com.pentaho.metaverse.impl.model.kettle.json.AbstractStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.JobEntryBaseJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.JobMetaJsonSerializer;
@@ -52,9 +57,11 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,8 +88,9 @@ public class JsonLineageIT {
 
     TextFileInputExternalResourceConsumer tfiConsumer = new TextFileInputExternalResourceConsumer();
     TableOutputExternalResourceConsumer toConsumer = new TableOutputExternalResourceConsumer();
+    CsvFileInputExternalResourceConsumer csviConsumer = new CsvFileInputExternalResourceConsumer();
 
-    // Create a fake plugin to exercise the map building logic
+    // Create a fake plugin to exercise the map building logic for Text File Input
     PluginInterface mockPlugin = mock( PluginInterface.class );
     when( mockPlugin.getIds() ).thenReturn( new String[]{ "TextFileInputExternalResourceConsumer" } );
     when( mockPlugin.getName() ).thenReturn( "TextFileInputExternalResourceConsumer" );
@@ -95,6 +103,7 @@ public class JsonLineageIT {
     // Then add a class to the map to get through plugin registration
     when( mockPlugin.getClassMap() ).thenReturn( classMap );
 
+    // Create a fake plugin to exercise the map building logic for Table Output
     PluginInterface mockPlugin2 = mock( PluginInterface.class );
     when( mockPlugin2.getIds() ).thenReturn( new String[]{ "TableOutputExternalResourceConsumer" } );
     when( mockPlugin2.getName() ).thenReturn( "TableOutputExternalResourceConsumer" );
@@ -106,6 +115,19 @@ public class JsonLineageIT {
 
     // Then add a class to the map to get through plugin registration
     when( mockPlugin2.getClassMap() ).thenReturn( classMap2 );
+
+    // Create a fake plugin to exercise the map building logic for CSV Input
+    PluginInterface mockPlugin3 = mock( PluginInterface.class );
+    when( mockPlugin3.getIds() ).thenReturn( new String[]{ "CsvFileInputExternalResourceConsumer" } );
+    when( mockPlugin3.getName() ).thenReturn( "CsvFileInputExternalResourceConsumer" );
+    Map<Class<?>, String> classMap3 = new HashMap<Class<?>, String>();
+    classMap3.put( IExternalResourceConsumer.class, csviConsumer.getClass().getName() );
+
+    doReturn( IExternalResourceConsumer.class ).when( mockPlugin3 ).getMainType();
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockPlugin3 );
+
+    // Then add a class to the map to get through plugin registration
+    when( mockPlugin3.getClassMap() ).thenReturn( classMap3 );
 
     metaverseKettleLifecycleHandler.onEnvironmentInit();
 
@@ -132,7 +154,7 @@ public class JsonLineageIT {
 
     BaseStepMetaJsonSerializer baseStepMetaJsonSerializer = new BaseStepMetaJsonSerializer( BaseStepMeta.class );
     JobEntryBaseJsonSerializer jobEntryBaseJsonSerializer = new JobEntryBaseJsonSerializer(
-        JobEntryBase.class );
+      JobEntryBase.class );
 
     baseStepMetaJsonSerializer.setLineageRepository( writeRepo );
     jobEntryBaseJsonSerializer.setLineageRepository( writeRepo );
@@ -141,6 +163,17 @@ public class JsonLineageIT {
 
     transModule.addSerializer( new TableOutputStepMetaJsonSerializer( TableOutputMeta.class, writeRepo ) );
     transModule.addDeserializer( TransMeta.class, new TransMetaJsonDeserializer( TransMeta.class, readRepo ) );
+
+    transModule.addSerializer(
+      new AbstractStepMetaJsonSerializer<CsvInputMeta>( CsvInputMeta.class, writeRepo ) {
+        @Override
+        protected void writeCustomProperties(
+          CsvInputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
+          throws IOException {
+
+        }
+      }
+    );
 
     mapper.registerModule( transModule );
   }
@@ -223,5 +256,25 @@ public class JsonLineageIT {
 
     // TODO: now deserialize it
 
+  }
+
+  @Test
+  public void testCsvInputJsonSerialize() throws Exception {
+
+    String ktrPath = "src/it/resources/repo/CSV input.ktr";
+    TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
+
+    String json = mapper.writeValueAsString( tm );
+    File jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".json" );
+    FileUtils.writeStringToFile( jsonOut, json );
+
+    // now deserialize it
+    TransMeta rehydrated = mapper.readValue( json, TransMeta.class );
+
+    assertEquals( tm.getName(), rehydrated.getName() );
+
+    json = mapper.writeValueAsString( rehydrated );
+    jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".after.json" );
+    FileUtils.writeStringToFile( jsonOut, json );
   }
 }

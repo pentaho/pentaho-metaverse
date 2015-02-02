@@ -55,7 +55,7 @@ public class CsvFileInputExternalResourceConsumer extends BaseStepExternalResour
 
     // We only need to collect these resources if we're not data-driven and there are no used variables in the
     // metadata relating to external files.
-    if ( !isDataDriven( meta ) /* TODO */ ) {
+    if ( !isDataDriven( meta ) ) {
       StepMeta parentStepMeta = meta.getParentStepMeta();
       if ( parentStepMeta != null ) {
         TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
