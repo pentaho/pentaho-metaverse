@@ -83,7 +83,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
       JobMeta jobMeta = job.getJobMeta();
 
-      File f = new File( job.getFilename() );
+      File f = new File( getFilename ( job ) );
 
       String filePath = null;
       try {
@@ -106,7 +106,8 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
       // Store execution information (client, server, user, etc.)
       executionData.setStartTime( new Timestamp( new Date().getTime() ) );
-      executionData.setClientExecutor( KettleClientEnvironment.getInstance().getClient().name() );
+      KettleClientEnvironment.ClientType clientType = KettleClientEnvironment.getInstance().getClient();
+      executionData.setClientExecutor( clientType == null ? "DI Server" : clientType.name() );
       executionData.setExecutorUser( job.getExecutingUser() );
       executionData.setExecutorServer( job.getExecutingServer() );
 
@@ -243,5 +244,16 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
   @Override
   public void jobStarted( Job job ) throws KettleException {
     // Do nothing, this method has already been called before the extension point could add the listener
+  }
+
+  public static String getFilename( Job job ) {
+    String filename = job.getFilename();
+    if ( filename == null && job.getJobMeta() != null ) {
+      filename = job.getJobMeta().getName();
+    }
+    if ( filename == null ) {
+      filename = "";
+    }
+    return filename;
   }
 }
