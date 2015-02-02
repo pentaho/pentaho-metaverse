@@ -23,6 +23,7 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
 import java.util.Collection;
@@ -43,13 +44,14 @@ public class StepExternalResourceConsumerStub implements IStepExternalResourceCo
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromRow(
-    Object meta, RowMetaInterface rowMeta, Object[] row ) {
-    return null;
+  public Class<?> getMetaClass() {
+    return BaseStepMeta.class;
   }
 
   @Override
-  public Class<?> getMetaClass() {
-    return BaseStepMeta.class;
+  public Collection<IExternalResourceInfo> getResourcesFromRow(
+    BaseStep consumer, RowMetaInterface rowMeta, Object[] row ) {
+
+    return null;
   }
 }

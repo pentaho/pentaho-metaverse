@@ -34,6 +34,7 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.textfileinput.TextFileInput;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 
 import java.util.ArrayList;
@@ -45,7 +46,8 @@ import java.util.LinkedList;
   id = "TextFileInputExternalResourceConsumer",
   name = "TextFileInputExternalResourceConsumer"
 )
-public class TextFileInputExternalResourceConsumer extends BaseStepExternalResourceConsumer<TextFileInputMeta> {
+public class TextFileInputExternalResourceConsumer
+  extends BaseStepExternalResourceConsumer<TextFileInput, TextFileInputMeta> {
 
   @Override
   public boolean isDataDriven( TextFileInputMeta meta ) {
@@ -93,8 +95,9 @@ public class TextFileInputExternalResourceConsumer extends BaseStepExternalResou
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromRow(
-    TextFileInputMeta meta, RowMetaInterface rowMeta, Object[] row ) {
+    TextFileInput textFileInput, RowMetaInterface rowMeta, Object[] row ) {
     Collection<IExternalResourceInfo> resources = new LinkedList<IExternalResourceInfo>();
+    TextFileInputMeta meta = (TextFileInputMeta) textFileInput.getStepMetaInterface();
 
     try {
       String filename = rowMeta.getString( row, meta.getAcceptingField(), null );

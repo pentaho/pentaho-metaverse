@@ -21,6 +21,7 @@ import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.csvinput.CsvInput;
 import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
@@ -48,6 +49,9 @@ import static org.mockito.Mockito.when;
 public class CsvFileInputStepAnalyzerTest {
 
   private CsvFileInputStepAnalyzer csvFileInputStepAnalyzer;
+
+  @Mock
+  private CsvInput mockCsvInput;
 
   @Mock
   private CsvInputMeta mockCsvInputMeta;
@@ -97,6 +101,7 @@ public class CsvFileInputStepAnalyzerTest {
     when( mockCsvInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
     when( mockCsvInputMeta.getFilePaths( Mockito.any( VariableSpace.class ) ) ).thenReturn( fileNames );
+    when( mockCsvInput.getStepMetaInterface()).thenReturn( mockCsvInputMeta );
 
     IMetaverseNode result = csvFileInputStepAnalyzer.analyze( descriptor, mockCsvInputMeta );
     assertNotNull( result );
@@ -198,7 +203,7 @@ public class CsvFileInputStepAnalyzerTest {
 
     when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenThrow( KettleException.class );
-    resources = consumer.getResourcesFromRow( mockCsvInputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    resources = consumer.getResourcesFromRow( mockCsvInput, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertTrue( resources.isEmpty() );
 
     assertEquals( CsvInputMeta.class, consumer.getMetaClass() );

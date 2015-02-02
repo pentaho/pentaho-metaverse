@@ -74,9 +74,68 @@
   </notepads>
   <order>
   <hop> <from>Data Grid</from><to>Text file output</to><enabled>Y</enabled> </hop>
-  <hop> <from>Data Grid</from><to>WriteToThisFile</to><enabled>Y</enabled> </hop>
-  <hop> <from>WriteToThisFile</from><to>Text file output - file from field</to><enabled>Y</enabled> </hop>
+  <hop> <from>Data Grid</from><to>Text file output - file from field</to><enabled>Y</enabled> </hop>
   </order>
+  <step>
+    <name>Data Grid</name>
+    <type>DataGrid</type>
+    <description/>
+    <distribute>N</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <name>City</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>70</length>
+        <precision>-1</precision>
+        <set_empty_string>N</set_empty_string>
+      </field>
+      <field>
+        <name>State</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>2</length>
+        <precision>-1</precision>
+        <set_empty_string>N</set_empty_string>
+      </field>
+      <field>
+        <name>file</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <set_empty_string>N</set_empty_string>
+      </field>
+    </fields>
+    <data>
+      <line> <item>Orlando</item><item>FL</item><item>textFileOutputTest</item> </line>
+      <line> <item>Miami</item><item>FL</item><item>textFileOutputTest</item> </line>
+      <line> <item>Jacksonville</item><item>FL</item><item>textFileOutputTest</item> </line>
+      <line> <item>New York</item><item>NY</item><item>textFileOutputTest</item> </line>
+    </data>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>127</xloc>
+      <yloc>148</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
   <step>
     <name>Text file output</name>
     <type>TextFileOutput</type>
@@ -94,7 +153,7 @@
     <enclosure_fix_disabled>N</enclosure_fix_disabled>
     <header>Y</header>
     <footer>N</footer>
-    <format>DOS</format>
+    <format>UNIX</format>
     <compression>None</compression>
     <encoding/>
     <endedLine/>
@@ -147,92 +206,8 @@
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>361</xloc>
-      <yloc>148</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>Data Grid</name>
-    <type>DataGrid</type>
-    <description/>
-    <distribute>N</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <fields>
-      <field>
-        <name>City</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>70</length>
-        <precision>-1</precision>
-        <set_empty_string>N</set_empty_string>
-      </field>
-      <field>
-        <name>State</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>2</length>
-        <precision>-1</precision>
-        <set_empty_string>N</set_empty_string>
-      </field>
-    </fields>
-    <data>
-      <line> <item>Orlando</item><item>FL</item> </line>
-      <line> <item>Miami</item><item>FL</item> </line>
-      <line> <item>Jacksonville</item><item>FL</item> </line>
-      <line> <item>New York</item><item>NY</item> </line>
-    </data>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>127</xloc>
-      <yloc>148</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>WriteToThisFile</name>
-    <type>DataGrid</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <fields>
-      <field>
-        <name>file</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>500</length>
-        <precision>-1</precision>
-        <set_empty_string>N</set_empty_string>
-      </field>
-    </fields>
-    <data>
-      <line> <item/> </line>
-    </data>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>233</xloc>
-      <yloc>257</yloc>
+      <xloc>247</xloc>
+      <yloc>82</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
@@ -254,7 +229,7 @@
     <enclosure_fix_disabled>N</enclosure_fix_disabled>
     <header>Y</header>
     <footer>N</footer>
-    <format>DOS</format>
+    <format>UNIX</format>
     <compression>None</compression>
     <encoding/>
     <endedLine/>
@@ -267,7 +242,7 @@
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>Y</do_not_open_new_file_init>
       <extention>txt</extention>
-      <append>N</append>
+      <append>Y</append>
       <split>N</split>
       <haspartno>N</haspartno>
       <add_date>N</add_date>
@@ -307,8 +282,8 @@
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>395</xloc>
-      <yloc>257</yloc>
+      <xloc>248</xloc>
+      <yloc>222</yloc>
       <draw>Y</draw>
       </GUI>
     </step>

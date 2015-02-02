@@ -22,7 +22,6 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.row.RowMetaInterface;
 
 import java.util.Collection;
 
@@ -35,7 +34,4 @@ public interface IExternalResourceConsumer<T> extends MetaClassProvider<T>, Clon
   boolean isDataDriven( T consumer );
 
   Collection<IExternalResourceInfo> getResourcesFromMeta( T consumer );
-
-  Collection<IExternalResourceInfo> getResourcesFromRow( T consumer, RowMetaInterface rowMeta, Object[] row );
-
 }

@@ -23,7 +23,6 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IJobEntryExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.job.entry.JobEntryBase;
 
 import java.util.Collection;
@@ -46,8 +45,4 @@ public abstract class BaseJobEntryExternalResourceConsumer<T extends JobEntryBas
     return Collections.emptyList();
   }
 
-  @Override
-  public Collection<IExternalResourceInfo> getResourcesFromRow( T meta, RowMetaInterface rowMeta, Object[] row ) {
-    return Collections.emptyList();
-  }
 }
