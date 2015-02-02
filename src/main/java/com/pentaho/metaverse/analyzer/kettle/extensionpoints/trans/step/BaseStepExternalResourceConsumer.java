@@ -24,6 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
 import java.util.Collection;
@@ -33,21 +34,21 @@ import java.util.Collections;
  * This class is a do-nothing reference implementation for StepExternalConsumer plugins. Subclasses should override
  * the various methods with business logic that can handle the external resources used by the given step.
  */
-public abstract class BaseStepExternalResourceConsumer<T extends BaseStepMeta>
-  implements IStepExternalResourceConsumer<T> {
+public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M extends BaseStepMeta>
+  implements IStepExternalResourceConsumer<S, M> {
 
   @Override
-  public boolean isDataDriven( T meta ) {
+  public boolean isDataDriven( M meta ) {
     return false;
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( T meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( M meta ) {
     return Collections.emptyList();
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromRow( T meta, RowMetaInterface rowMeta, Object[] row ) {
+  public Collection<IExternalResourceInfo> getResourcesFromRow( S step, RowMetaInterface rowMeta, Object[] row ) {
     return Collections.emptyList();
   }
 }

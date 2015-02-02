@@ -552,7 +552,7 @@ public class MetaverseValidationIT {
     Iterable<StreamFieldNode> usedFields = textFileOutputStepNode.getStreamFieldNodesUses();
     int usedFieldCount = getIterableSize( usedFields );
     assertEquals( outputFields.length, usedFieldCount );
-    assertEquals( incomingFields.size(), usedFieldCount );
+    assertEquals( incomingFields.size()-1, usedFieldCount );
 
     for ( StreamFieldNode usedField : usedFields ) {
       ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );

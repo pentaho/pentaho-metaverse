@@ -34,6 +34,8 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutput;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputData;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 
 import java.util.ArrayList;
@@ -46,7 +48,7 @@ import java.util.LinkedList;
   name = "TextFileOutputExternalResourceConsumer"
 )
 public class TextFileOutputExternalResourceConsumer
-  extends BaseStepExternalResourceConsumer<TextFileOutputMeta> {
+  extends BaseStepExternalResourceConsumer<TextFileOutput, TextFileOutputMeta> {
 
   @Override
   public boolean isDataDriven( TextFileOutputMeta meta ) {
@@ -94,11 +96,20 @@ public class TextFileOutputExternalResourceConsumer
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromRow(
-    TextFileOutputMeta meta, RowMetaInterface rowMeta, Object[] row ) {
+    TextFileOutput textFileOutput, RowMetaInterface rowMeta, Object[] row ) {
     Collection<IExternalResourceInfo> resources = new LinkedList<IExternalResourceInfo>();
+    // For some reason the step doesn't return the StepMetaInterface directly, so go around it
+    TextFileOutputMeta meta = (TextFileOutputMeta) textFileOutput.getStepMeta().getStepMetaInterface();
 
     try {
-      String filename = rowMeta.getString( row, meta.getFileNameField(), null );
+      TextFileOutputData data = ( (TextFileOutputData) textFileOutput.getStepDataInterface() );
+      String filename = rowMeta.getString( row, meta.getFileNameField(), meta.getFileName() );
+      if ( null != data ) {
+        // For some reason, the first call to process row doesn't have the data.fileName filled in, so
+        // fall back to the filename field value, and then to the meta's filename
+        filename = textFileOutput.buildFilename( Const.isEmpty( data.fileName ) ? filename : data.fileName, true );
+      }
+
       if ( !Const.isEmpty( filename ) ) {
         FileObject fileObject = KettleVFS.getFileObject( filename );
         resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, false ) );

@@ -31,6 +31,7 @@ import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.csvinput.CsvInput;
 import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ import java.util.Collections;
   id = "CsvFileInputExternalResourceConsumer",
   name = "CsvFileInputExternalResourceConsumer"
 )
-public class CsvFileInputExternalResourceConsumer extends BaseStepExternalResourceConsumer<CsvInputMeta> {
+public class CsvFileInputExternalResourceConsumer extends BaseStepExternalResourceConsumer<CsvInput, CsvInputMeta> {
 
   @Override
   public boolean isDataDriven( CsvInputMeta meta ) {

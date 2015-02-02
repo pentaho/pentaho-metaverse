@@ -28,6 +28,7 @@ import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.RowAdapter;
 import org.pentaho.di.trans.step.StepInterface;
 
@@ -56,10 +57,11 @@ public class StepExternalConsumerRowListener extends RowAdapter {
    * Object[])
    */
   @Override
+  @SuppressWarnings( "unchecked" )
   public void rowReadEvent( RowMetaInterface rowMeta, Object[] row ) throws KettleStepException {
 
     Collection<IExternalResourceInfo> resources =
-      stepExternalResourceConsumer.getResourcesFromRow( step.getStepMeta().getStepMetaInterface(), rowMeta, row );
+      stepExternalResourceConsumer.getResourcesFromRow( (BaseStep) step, rowMeta, row );
     if ( resources != null ) {
       // Add the resources to the execution profile
       IExecutionProfile executionProfile = TransformationRuntimeExtensionPoint.getProfileMap().get( step.getTrans() );
