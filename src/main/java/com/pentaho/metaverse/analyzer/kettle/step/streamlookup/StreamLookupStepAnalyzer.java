@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step.streamlookup;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,8 +41,6 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta> {
 
