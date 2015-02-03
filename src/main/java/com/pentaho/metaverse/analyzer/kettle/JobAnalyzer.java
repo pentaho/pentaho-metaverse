@@ -253,7 +253,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     return defaultSupportedTypes;
   }
 
-  protected Set<IJobEntryAnalyzer> getJobEntryAnalyzers( final JobEntryInterface jobEntryInterface ) {
+  public Set<IJobEntryAnalyzer> getJobEntryAnalyzers( final JobEntryInterface jobEntryInterface ) {
 
     Set<IJobEntryAnalyzer> jobEntryAnalyzers = new HashSet<IJobEntryAnalyzer>();
 
@@ -274,7 +274,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     return jobEntryAnalyzers;
   }
 
-  protected void setJobEntryAnalyzerProvider( IJobEntryAnalyzerProvider jobEntryAnalyzerProvider ) {
+  public void setJobEntryAnalyzerProvider( IJobEntryAnalyzerProvider jobEntryAnalyzerProvider ) {
     this.jobEntryAnalyzerProvider = jobEntryAnalyzerProvider;
   }
 
@@ -283,7 +283,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
    *
    * @return the IKettleStepAnalyzer provider instance that provides step-specific analyzers
    */
-  protected IJobEntryAnalyzerProvider getJobEntryAnalyzerProvider() {
+  public IJobEntryAnalyzerProvider getJobEntryAnalyzerProvider() {
     if ( jobEntryAnalyzerProvider != null ) {
       return jobEntryAnalyzerProvider;
     }

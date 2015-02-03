@@ -272,7 +272,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     return stepAnalyzers;
   }
 
-  protected void setStepAnalyzerProvider( IStepAnalyzerProvider stepAnalyzerProvider ) {
+  public void setStepAnalyzerProvider( IStepAnalyzerProvider stepAnalyzerProvider ) {
     this.stepAnalyzerProvider = stepAnalyzerProvider;
   }
 
@@ -281,7 +281,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
    *
    * @return the IKettleStepAnalyzer provider instance that provides step-specific analyzers
    */
-  protected IStepAnalyzerProvider getStepAnalyzerProvider() {
+  public IStepAnalyzerProvider getStepAnalyzerProvider() {
     if ( stepAnalyzerProvider != null ) {
       return stepAnalyzerProvider;
     }
