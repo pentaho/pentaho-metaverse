@@ -278,18 +278,6 @@
         <version>${plugin.maven-assembly-plugin.version}</version>
         <executions>
           <execution>
-            <id>make-platform-plugin</id>
-            <phase>install</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <finalName>${project.artifactId}</finalName>
-              <appendAssemblyId>true</appendAssemblyId>
-              <descriptor>src/assembly/platform-plugin.xml</descriptor>
-            </configuration>
-          </execution>
-          <execution>
             <id>make-pdi-plugin</id>
             <phase>install</phase>
             <goals>
