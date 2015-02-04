@@ -25,6 +25,7 @@ package com.pentaho.metaverse;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.frames.CalculatorStepNode;
 import com.pentaho.metaverse.frames.DatasourceNode;
 import com.pentaho.metaverse.frames.FieldNode;
 import com.pentaho.metaverse.frames.FramedMetaverseNode;
@@ -35,6 +36,7 @@ import com.pentaho.metaverse.frames.MergeJoinStepNode;
 import com.pentaho.metaverse.frames.RootNode;
 import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import com.pentaho.metaverse.frames.StreamFieldNode;
+import com.pentaho.metaverse.frames.StreamLookupStepNode;
 import com.pentaho.metaverse.frames.TableOutputStepNode;
 import com.pentaho.metaverse.frames.TextFileInputStepNode;
 import com.pentaho.metaverse.frames.TextFileOutputStepNode;
@@ -47,7 +49,10 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 import flexjson.JSONDeserializer;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -62,7 +67,10 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
+import org.pentaho.di.trans.steps.calculator.CalculatorMetaFunction;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
+import org.pentaho.di.trans.steps.streamlookup.StreamLookupMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
@@ -73,6 +81,7 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -150,7 +159,8 @@ public class MetaverseValidationIT {
 
   @Test
   public void testEntity_FileSystemLocator() throws Exception {
-    LocatorNode node = (LocatorNode) framedGraph.getVertex( "{\"name\":\"FILE_SYSTEM_REPO\",\"type\":\"Locator\"}", LocatorNode.class );
+    LocatorNode node =
+        (LocatorNode) framedGraph.getVertex( "{\"name\":\"FILE_SYSTEM_REPO\",\"type\":\"Locator\"}", LocatorNode.class );
     assertEquals( DictionaryConst.NODE_TYPE_LOCATOR, node.getType() );
     assertEquals( "FILE_SYSTEM_REPO", node.getName() );
     assertNotNull( node.getDescription() );
@@ -160,7 +170,8 @@ public class MetaverseValidationIT {
 
     File folder = new File( ROOT_FOLDER );
     int fileCount = folder.listFiles( new FilenameFilter() {
-      @Override public boolean accept( File dir, String name ) {
+      @Override
+      public boolean accept( File dir, String name ) {
         return ( name.endsWith( ".ktr" ) || name.endsWith( ".kjb" ) );
       }
     } ).length;
@@ -240,8 +251,7 @@ public class MetaverseValidationIT {
         assertEquals( jobEntry.getName(), jobEntryNode.getName() );
         assertEquals( jobEntry.getDescription(), jobEntryNode.getDescription() );
         assertEquals( "Incorrect type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getType() );
-        assertEquals( "Incorrect entity type", DictionaryConst.NODE_TYPE_JOB_ENTRY,
-            jobEntryNode.getEntity().getName() );
+        assertEquals( "Incorrect entity type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getEntity().getName() );
         matchCount++;
       }
 
@@ -275,11 +285,11 @@ public class MetaverseValidationIT {
         matchCount++;
       }
 
-      assertEquals( "Not all transformation steps are modeled in the graph for [" + tm.getName() + "]",
-          transMetaSteps.size(), matchCount );
+      assertEquals( "Not all transformation steps are modeled in the graph for [" + tm.getName() + "]", transMetaSteps
+          .size(), matchCount );
 
-      assertEquals( "Incorrect number of Steps in the graph for transformation [" + tm.getName() + "]",
-          transMetaSteps.size(), stepCount );
+      assertEquals( "Incorrect number of Steps in the graph for transformation [" + tm.getName() + "]", transMetaSteps
+          .size(), stepCount );
 
     }
   }
@@ -397,8 +407,8 @@ public class MetaverseValidationIT {
     assertEquals( 1, countDeletedFieldNodes );
 
     for ( StreamFieldNode deletedFieldNode : deletedFieldNodes ) {
-      assertEquals( "Should delete the stream field that defines the source files",
-          filenameField, deletedFieldNode.getName() );
+      assertEquals( "Should delete the stream field that defines the source files", filenameField, deletedFieldNode
+          .getName() );
     }
   }
 
@@ -446,19 +456,18 @@ public class MetaverseValidationIT {
     assertEquals( meta.getFieldStream().length, fieldsUsedCount );
     // they should all populate a db column
     for ( StreamFieldNode fieldNode : uses ) {
-      assertNotNull( "Used field does not populate anything [" + fieldNode.getName() + "]",
-          fieldNode.getFieldPopulatedByMe() );
+      assertNotNull( "Used field does not populate anything [" + fieldNode.getName() + "]", fieldNode
+          .getFieldPopulatedByMe() );
       assertEquals( "Stream Field [" + fieldNode.getName() + "] populates the wrong kind of node",
           DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
     }
 
     int countDbConnections = getIterableSize( tableOutputStepNode.getDatasources() );
     for ( DatabaseMeta dbMeta : meta.getUsedDatabaseConnections() ) {
-      assertNotNull( "Datasource is not used but should be [" + dbMeta.getName() + "]",
-          tableOutputStepNode.getDatasource( dbMeta.getName() ) );
+      assertNotNull( "Datasource is not used but should be [" + dbMeta.getName() + "]", tableOutputStepNode
+          .getDatasource( dbMeta.getName() ) );
     }
     assertEquals( meta.getUsedDatabaseConnections().length, countDbConnections );
-
 
   }
 
@@ -532,7 +541,8 @@ public class MetaverseValidationIT {
 
   @Test
   public void testTextFileOutputStepNode() throws Exception {
-    TextFileOutputStepNode textFileOutputStepNode = root.getTextFileOutputStepNode( "textFileOutput", "Text file output" );
+    TextFileOutputStepNode textFileOutputStepNode =
+        root.getTextFileOutputStepNode( "textFileOutput", "Text file output" );
     TextFileOutputMeta meta = (TextFileOutputMeta) getStepMeta( textFileOutputStepNode );
     TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
     String[] fileNames = meta.getFiles( tm );
@@ -563,8 +573,8 @@ public class MetaverseValidationIT {
 
   @Test
   public void testTextFileOutputStepNode_FileFromSteamField() throws Exception {
-    TextFileOutputStepNode textFileOutputStepNode = root.getTextFileOutputStepNode(
-      "textFileOutput", "Text file output - file from field" );
+    TextFileOutputStepNode textFileOutputStepNode =
+        root.getTextFileOutputStepNode( "textFileOutput", "Text file output - file from field" );
 
     TextFileOutputMeta meta = (TextFileOutputMeta) getStepMeta( textFileOutputStepNode );
     TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
@@ -621,6 +631,88 @@ public class MetaverseValidationIT {
       assertTrue( createdField.getFieldNodesThatDeriveMe() != null );
     }
 
+  }
+
+  @Test
+  public void testStreamLookupStepNode() throws Exception {
+    StreamLookupStepNode node = root.getStreamLookupStepNode();
+
+    assertEquals( 2, getIterableSize( node.getStreamFieldNodesUses() ) );
+    assertEquals( 1, getIterableSize( node.getStreamFieldNodesCreates() ) );
+
+    StreamFieldNode createdNode = node.getStreamFieldNodesCreates().iterator().next();
+    assertEquals( 1, getIterableSize( createdNode.getFieldNodesThatDeriveMe() ) );
+    StreamFieldNode derivedFromNode = createdNode.getFieldNodesThatDeriveMe().iterator().next();
+    assertEquals( "territory", derivedFromNode.getName() );
+    assertEquals( 1, getIterableSize( derivedFromNode.getFieldNodesThatJoinToMe() ) );
+    StreamFieldNode joinedNode = derivedFromNode.getFieldNodesThatJoinToMe().iterator().next();
+    assertEquals( "code", joinedNode.getName() );
+    StreamFieldNode joinedNode2 = joinedNode.getFieldNodesThatJoinToMe().iterator().next();
+    assertEquals( "territory", joinedNode2.getName() );
+  }
+
+  @Test
+  public void testCalculatorStepNode() throws Exception {
+    CalculatorStepNode node = root.getCalculatorStepNode();
+    CalculatorMeta meta = (CalculatorMeta) getStepMeta( node );
+
+    // Make sure we have the right number of links used, created and deleted.
+    List<String> nodeUses = new ArrayList<String>();
+    for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
+      nodeUses.add( sfn.getName() );
+    }
+
+    StreamFieldNode area = null;
+    StreamFieldNode kelvin = null;
+    StreamFieldNode celsius = null;
+    List<String> nodeCreates = new ArrayList<String>();
+    for ( StreamFieldNode sfn : node.getStreamFieldNodesCreates() ) {
+      nodeCreates.add( sfn.getName() );
+      if ( sfn.getName().equals( "area" ) ) {
+        area = sfn;
+      } else if ( sfn.getName().equals( "celsius" ) ) {
+        celsius = sfn;
+      } else if ( sfn.getName().equals( "kelvin" ) ) {
+        kelvin = sfn;
+      }
+    }
+
+    assertEquals( 2, getIterableSize( area.getFieldNodesThatDeriveMe() ) );
+    String[] fieldsThatDerive = new String[2];
+    int i = 0;
+    for ( StreamFieldNode sfn : area.getFieldNodesThatDeriveMe() ) {
+      fieldsThatDerive[i++] = sfn.getName();
+    }
+
+    assert ( Arrays.asList( fieldsThatDerive ).contains( "Height" ) );
+    assert ( Arrays.asList( fieldsThatDerive ).contains( "Length" ) );
+
+    fieldsThatDerive = new String[2];
+    i = 0;
+    for ( StreamFieldNode sfn : celsius.getFieldNodesThatDeriveMe() ) {
+      fieldsThatDerive[i++] = sfn.getName();
+    }
+
+    assert ( Arrays.asList( fieldsThatDerive ).contains( "tempCelsius" ) );
+    assert ( Arrays.asList( fieldsThatDerive ).contains( "tempRatio" ) );
+
+    List<String> nodeDeletes = new ArrayList<String>();
+    for ( StreamFieldNode sfn : node.getStreamFieldNodesDeletes() ) {
+      nodeDeletes.add( sfn.getName() );
+    }
+
+    fieldsThatDerive = new String[2];
+    i = 0;
+    for ( StreamFieldNode sfn : kelvin.getFieldNodesThatDeriveMe() ) {
+      fieldsThatDerive[i++] = sfn.getName();
+    }
+
+    assert ( Arrays.asList( fieldsThatDerive ).contains( "tempKelvin" ) );
+    assert ( Arrays.asList( fieldsThatDerive ).contains( "tempRatio" ) );
+
+    assertEquals( 2, nodeUses.size() );
+    assertEquals( 5, nodeCreates.size() );
+    assertEquals( 2, nodeDeletes.size() );
   }
 
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {
