@@ -59,6 +59,7 @@
     <pmd.rulesets.url>https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/pmd/rulesets/java</pmd.rulesets.url>
 
     <!-- Compile dependencies -->
+    <dependency.commons-configuration.commons-configuration.version>1.9</dependency.commons-configuration.commons-configuration.version>
     <dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>2.7.12</dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>
     <dependency.com.google.guava.guava.version>17.0</dependency.com.google.guava.guava.version>
     <dependency.com.tinkerpop.blueprints.version>2.6.0</dependency.com.tinkerpop.blueprints.version>
@@ -118,6 +119,16 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${dependency.com.google.guava.guava.version}</version>
+    </dependency>
+
+    <!--
+      tinkerpop blueprints uses commons-configuration, but brings in an older non-osgi version.
+      so we force a higher version that is more compatible
+    -->
+    <dependency>
+      <groupId>commons-configuration</groupId>
+      <artifactId>commons-configuration</artifactId>
+      <version>${dependency.commons-configuration.commons-configuration.version}</version>
     </dependency>
 
     <dependency>
