@@ -87,6 +87,7 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
 
       IMetaverseNode valueName = createNodeFromDescriptor( getStepFieldOriginDescriptor( descriptor, valueNames[i] ) );
       metaverseBuilder.addLink( valueNode, DictionaryConst.LINK_DERIVES, valueName );
+      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, valueName );
     }
 
     return node;
