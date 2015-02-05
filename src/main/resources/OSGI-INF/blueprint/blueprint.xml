@@ -84,6 +84,9 @@
     </property>
   </bean>
 
+  <!-- Make the doc controller available to the system -->
+  <service id="documentControllerService" interface="com.pentaho.metaverse.api.IDocumentController" ref="IDocumentListener"/>
+
   <bean id="IStepAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
         scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
@@ -151,6 +154,5 @@
     <property name="repositoryId" value="DI_REPO"/>
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
-  <!-- -->
 
 </blueprint>
