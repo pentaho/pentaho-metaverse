@@ -25,6 +25,7 @@ package com.pentaho.metaverse;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.frames.CsvFileInputStepNode;
 import com.pentaho.metaverse.frames.DatasourceNode;
 import com.pentaho.metaverse.frames.FieldNode;
 import com.pentaho.metaverse.frames.FramedMetaverseNode;
@@ -562,7 +563,7 @@ public class MetaverseValidationIT {
   }
 
   @Test
-  public void testTextFileOutputStepNode_FileFromSteamField() throws Exception {
+  public void testTextFileOutputStepNode_FileFromStreamField() throws Exception {
     TextFileOutputStepNode textFileOutputStepNode = root.getTextFileOutputStepNode(
       "textFileOutput", "Text file output - file from field" );
 
@@ -598,8 +599,7 @@ public class MetaverseValidationIT {
   public void testMergeJoinStepNode_duplicateFieldNames() throws Exception {
     MergeJoinStepNode node = root.getMergeJoinStepNode();
     MergeJoinMeta meta = (MergeJoinMeta) getStepMeta( node );
-    TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
-
+    
     assertEquals( meta.getJoinType(), node.getJoinType() );
     assertEquals( meta.getKeyFields1().length, node.getJoinFieldsLeft().size() );
     assertEquals( meta.getKeyFields2().length, node.getJoinFieldsRight().size() );
@@ -620,6 +620,39 @@ public class MetaverseValidationIT {
       // these should have derives links
       assertTrue( createdField.getFieldNodesThatDeriveMe() != null );
     }
+
+  }
+
+  @Test
+  public void testCsvFileInputStep() throws Exception {
+    // this is testing a specific CsvFileInputStep instance
+    CsvFileInputStepNode csvFileInputStepNode = root.getCsvFileInputStepNode();
+    assertNotNull( csvFileInputStepNode );
+
+    Iterable<FramedMetaverseNode> inputFiles = csvFileInputStepNode.getInputFiles();
+    int countInputFiles = getIterableSize( inputFiles );
+    int countCreates = getIterableSize( csvFileInputStepNode.getStreamFieldNodesCreates() );
+    int countDeletes = getIterableSize( csvFileInputStepNode.getStreamFieldNodesDeletes() );
+    assertEquals( 1, countInputFiles );
+    assertEquals( 10, countCreates );
+    assertEquals( 0, countDeletes );
+
+    for ( FramedMetaverseNode inputFile : inputFiles ) {
+      assertTrue( inputFile.getName().endsWith( "customers-100.txt" ) );
+    }
+
+    assertEquals( "CSV file input", csvFileInputStepNode.getStepType() );
+
+    int countFileFieldNode = getIterableSize( csvFileInputStepNode.getFileFieldNodesUses() );
+
+    Iterable<StreamFieldNode> streamFieldNodes = csvFileInputStepNode.getStreamFieldNodesCreates();
+    int countStreamFieldNode = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+
+    // we should create as many fields as we read in
+    assertEquals( countFileFieldNode, countStreamFieldNode );
 
   }
 

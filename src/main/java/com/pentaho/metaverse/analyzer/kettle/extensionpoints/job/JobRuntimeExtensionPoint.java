@@ -83,7 +83,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
       JobMeta jobMeta = job.getJobMeta();
 
-      File f = new File( getFilename ( job ) );
+      File f = new File( getFilename( job ) );
 
       String filePath = null;
       try {

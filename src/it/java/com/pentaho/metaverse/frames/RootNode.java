@@ -85,4 +85,8 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Merge Join'}.as('step').in('contains').has('name', T.eq, 'merge_join').back('step')" )
   public MergeJoinStepNode getMergeJoinStepNode();
 
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'CSV file input'}.as('step').in('contains').has('name', T.eq, 'CSV Input').back('step')" )
+  public CsvFileInputStepNode getCsvFileInputStepNode();
+
+
 }
