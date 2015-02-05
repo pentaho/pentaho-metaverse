@@ -43,6 +43,8 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutput;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputData;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
@@ -65,7 +67,16 @@ public class TextFileOutputStepAnalyzerTest {
   private TextFileOutputStepAnalyzer analyzer;
 
   @Mock
+  private StepMeta mockStepMeta;
+
+  @Mock
+  private TextFileOutput mockTextFileOutput;
+
+  @Mock
   private TextFileOutputMeta mockTextFileOutputMeta;
+
+  @Mock
+  private TextFileOutputData mockTextFileOutputData;
 
   @Mock
   private TransMeta mockTransMeta;
@@ -93,7 +104,6 @@ public class TextFileOutputStepAnalyzerTest {
   public void setUp() throws Exception {
     mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
-//    when( mockNamespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( mockNamespace );
     when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
 
     when( mockField1.getName() ).thenReturn( "Field 1" );
@@ -102,6 +112,11 @@ public class TextFileOutputStepAnalyzerTest {
     analyzer = new TextFileOutputStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
     descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
+
+    when( mockTextFileOutput.getStepMetaInterface() ).thenReturn( mockTextFileOutputMeta );
+    when( mockTextFileOutput.getStepDataInterface() ).thenReturn( mockTextFileOutputData );
+    when( mockTextFileOutput.getStepMeta() ).thenReturn( mockStepMeta );
+    when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockTextFileOutputMeta );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
@@ -214,7 +229,7 @@ public class TextFileOutputStepAnalyzerTest {
 
     when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
     when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
+    when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[]{ "prev step name" } );
     String[] incomingFields = new String[]{ "Field 1", "Field 2", "filename" };
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( incomingFields );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
@@ -286,17 +301,27 @@ public class TextFileOutputStepAnalyzerTest {
 
 
     when( mockTextFileOutputMeta.isFileNameInField() ).thenReturn( true );
+    when( mockTextFileOutputMeta.getExtension() ).thenReturn( "txt" );
+
     assertTrue( consumer.isDataDriven( mockTextFileOutputMeta ) );
     assertTrue( consumer.getResourcesFromMeta( mockTextFileOutputMeta ).isEmpty() );
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
-      .thenReturn( "/path/to/row/file" );
-    resources = consumer.getResourcesFromRow( mockTextFileOutputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+
+    mockTextFileOutputData.fileName = "/path/to/row/file";
+    when( mockTextFileOutput.buildFilename( Mockito.anyString(), Mockito.anyBoolean() ) )
+      .thenAnswer( new Answer<String>() {
+        @Override
+        public String answer( InvocationOnMock invocation ) throws Throwable {
+          Object[] args = invocation.getArguments();
+          return ( args[0].toString() + ".txt" );
+        }
+      } );
+
+    resources = consumer.getResourcesFromRow( mockTextFileOutput, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
-      .thenThrow( KettleException.class );
-    resources = consumer.getResourcesFromRow( mockTextFileOutputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    when( mockTextFileOutputData.fileName ).thenThrow( KettleException.class );
+    resources = consumer.getResourcesFromRow( mockTextFileOutput, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertTrue( resources.isEmpty() );
 
     assertEquals( TextFileOutputMeta.class, consumer.getMetaClass() );

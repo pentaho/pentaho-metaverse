@@ -28,6 +28,7 @@ import com.pentaho.metaverse.api.model.IExecutionProfile;
 import org.junit.Test;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.Trans;
+import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
@@ -42,7 +43,7 @@ public class StepExternalConsumerRowListenerTest {
   @Test
   public void testStepExternalConsumerRowListener() throws Exception {
     IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );
-    StepInterface mockStep = mock( StepInterface.class );
+    BaseStep mockStep = mock( BaseStep.class, withSettings().extraInterfaces( StepInterface.class ) );
     StepMeta mockStepMeta = mock( StepMeta.class );
     BaseStepMeta bsm = mock( BaseStepMeta.class, withSettings().extraInterfaces( StepMetaInterface.class ) );
     StepMetaInterface stepMetaInterface = (StepMetaInterface) bsm;

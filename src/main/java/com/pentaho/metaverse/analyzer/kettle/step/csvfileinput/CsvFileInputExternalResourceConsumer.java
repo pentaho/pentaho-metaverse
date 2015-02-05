@@ -20,48 +20,43 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step.textfileinput;
+package com.pentaho.metaverse.analyzer.kettle.step.csvfileinput;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.model.ExternalResourceInfoFactory;
-import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.Const;
-import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
-import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInput;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
+import org.pentaho.di.trans.steps.csvinput.CsvInput;
+import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 
 @ExternalResourceConsumer(
-  id = "TextFileInputExternalResourceConsumer",
-  name = "TextFileInputExternalResourceConsumer"
+  id = "CsvFileInputExternalResourceConsumer",
+  name = "CsvFileInputExternalResourceConsumer"
 )
-public class TextFileInputExternalResourceConsumer
-  extends BaseStepExternalResourceConsumer<TextFileInput, TextFileInputMeta> {
+public class CsvFileInputExternalResourceConsumer extends BaseStepExternalResourceConsumer<CsvInput, CsvInputMeta> {
 
   @Override
-  public boolean isDataDriven( TextFileInputMeta meta ) {
-    // We can safely assume that the StepMetaInterface object we get back is a TextFileInputMeta
-    return meta.isAcceptingFilenames();
+  public boolean isDataDriven( CsvInputMeta meta ) {
+    // We can safely assume that the StepMetaInterface object we get back is a CsvInputMeta
+    return false;
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( TextFileInputMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( CsvInputMeta meta ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not data-driven and there are no used variables in the
     // metadata relating to external files.
-    if ( !isDataDriven( meta ) /* TODO */ ) {
+    if ( !isDataDriven( meta ) ) {
       StepMeta parentStepMeta = meta.getParentStepMeta();
       if ( parentStepMeta != null ) {
         TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
@@ -94,26 +89,7 @@ public class TextFileInputExternalResourceConsumer
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromRow(
-    TextFileInput textFileInput, RowMetaInterface rowMeta, Object[] row ) {
-    Collection<IExternalResourceInfo> resources = new LinkedList<IExternalResourceInfo>();
-    TextFileInputMeta meta = (TextFileInputMeta) textFileInput.getStepMetaInterface();
-
-    try {
-      String filename = rowMeta.getString( row, meta.getAcceptingField(), null );
-      if ( !Const.isEmpty( filename ) ) {
-        FileObject fileObject = KettleVFS.getFileObject( filename );
-        resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, true ) );
-      }
-    } catch ( KettleException kve ) {
-      // TODO throw exception or ignore?
-    }
-
-    return resources;
-  }
-
-  @Override
-  public Class<TextFileInputMeta> getMetaClass() {
-    return TextFileInputMeta.class;
+  public Class<CsvInputMeta> getMetaClass() {
+    return CsvInputMeta.class;
   }
 }

@@ -78,6 +78,7 @@
   <bean id="MergeJoinStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer"/>
   <bean id="StreamLookupStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer"/>
   <bean id="CalculatorStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.calculator.CalculatorStepAnalyzer"/>
+  <bean id="CsvFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer"/>
 
   <bean id="IDatabaseConnectionAnalyzerProvider"
         class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzerProvider" scope="singleton">
@@ -102,6 +103,7 @@
         <ref bean="MergeJoinStepAnalyzer"/>
         <ref bean="StreamLookupStepAnalyzer"/>
         <ref bean="CalculatorStepAnalyzer"/>
+        <ref bean="CsvFileInputStepAnalyzer"/>
       </set>
     </property>
   </bean>

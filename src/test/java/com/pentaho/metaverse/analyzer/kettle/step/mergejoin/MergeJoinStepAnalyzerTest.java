@@ -218,7 +218,7 @@ public class MergeJoinStepAnalyzerTest {
     verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
         eq( DictionaryConst.LINK_JOINS), any( IMetaverseNode.class ) );
 
-    verify( builder, times( fields1.length ) ).addLink( any( IMetaverseNode.class ),
+    verify( builder, times( fields1.length + fields2.length) ).addLink( any( IMetaverseNode.class ),
         eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
   }
 

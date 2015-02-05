@@ -6,6 +6,7 @@ import com.pentaho.dictionary.MetaverseLink;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.impl.MetaverseNode;
 import com.pentaho.metaverse.messages.Messages;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -29,23 +30,19 @@ import java.util.Set;
 
 /**
  * An implementation of an IMetaverseReader that uses a Blueprints graph as the underlying storage
- * @author jdixon
  *
+ * @author jdixon
  */
 public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   private static final long serialVersionUID = -3813738340722424284L;
   private static final Logger LOGGER = LoggerFactory.getLogger( BlueprintsGraphMetaverseReader.class );
 
-  private static final String MESSAGE_PREFIX_NODETYPE = "USER.nodetype.";
-  private static final String MESSAGE_PREFIX_LINKTYPE = "USER.linktype.";
-  private static final String MESSAGE_PREFIX_CATEGORY = "USER.category.";
-  private static final String MESSAGE_FAILED_PREFIX = "!";
-
   private Graph graph;
 
   /**
    * Constructor that accepts a Graph
+   *
    * @param graph the Graph to read from
    */
   public BlueprintsGraphMetaverseReader( Graph graph ) {
@@ -54,6 +51,7 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   /**
    * Gets the complete, underlying graph
+   *
    * @return the entire Graph
    */
   protected Graph getGraph() {
@@ -66,7 +64,7 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
     if ( vertex == null ) {
       return null;
     }
-    enhanceVertex( vertex );
+    MetaverseUtil.enhanceVertex( vertex );
     MetaverseNode node = new MetaverseNode( vertex );
     return node;
   }
@@ -106,7 +104,7 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
           IMetaverseNode node2 = new MetaverseNode( vertex2 );
           String label = edge.getLabel();
           link.setLabel( label );
-          String localized = Messages.getString( MESSAGE_PREFIX_LINKTYPE + label );
+          String localized = Messages.getString( MetaverseUtil.MESSAGE_PREFIX_LINKTYPE + label );
           if ( !localized.startsWith( "!" ) ) {
             link.setProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localized );
           }
@@ -155,9 +153,9 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   /**
    * Exports the metaverse graph by writing it to an output stream
-   * 
+   *
    * @param format The format for the export: XML, JSON, or CSV
-   * @param out The output stream to write to
+   * @param out    The output stream to write to
    * @throws IOException Thrown if there is an I/O issue
    */
   public void exportToStream( String format, OutputStream out ) throws IOException {
@@ -210,10 +208,10 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
   }
 
   private void traverseGraph( Vertex startVertex, Graph subGraph, List<String> resultTypes, GraphPath path,
-      Set<Object> done, Map<Object, GraphPath> shortestPaths, Direction direction, boolean shortestOnly ) {
+                              Set<Object> done, Map<Object, GraphPath> shortestPaths, Direction direction, boolean shortestOnly ) {
     boolean isTargetType = resultTypes == null
-        || resultTypes.size() == 0
-        || resultTypes.contains( startVertex.getProperty( DictionaryConst.PROPERTY_TYPE ) );
+      || resultTypes.size() == 0
+      || resultTypes.contains( startVertex.getProperty( DictionaryConst.PROPERTY_TYPE ) );
     if ( !isTargetType && done.contains( startVertex.getId() ) ) {
       return;
     }
@@ -222,7 +220,7 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
       // this is one of our target types
       if ( shortestOnly ) {
         GraphPath shortestPath = shortestPaths.get( startVertex.getId() );
-        if ( shortestPath == null || path.getLength() < shortestPath.getLength()  ) {
+        if ( shortestPath == null || path.getLength() < shortestPath.getLength() ) {
           shortestPaths.put( startVertex.getId(), path.clone() );
           if ( done.contains( startVertex.getId() ) ) {
             path.pop();
@@ -294,16 +292,17 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
   }
 
   /**
-   * Traces all of the 
-   * @param vertex The source vertex to traverse from
-   * @param clone The clone of the source vertex in the sub-graph
+   * Traces all of the
+   *
+   * @param vertex    The source vertex to traverse from
+   * @param clone     The clone of the source vertex in the sub-graph
    * @param direction The direction to traverse the graph in
-   * @param graph1 The source graph
-   * @param graph2 The sub-graph being built
+   * @param graph1    The source graph
+   * @param graph2    The sub-graph being built
    * @param edgeTypes The types of edges to include in the traversal. Can be null (all edges).
    */
   private void traceVertices( Vertex vertex, Vertex clone, Direction direction,
-      Graph graph1, Graph graph2, Set<String> edgeTypes ) {
+                              Graph graph1, Graph graph2, Set<String> edgeTypes ) {
     Direction opDirection = direction == Direction.IN ? Direction.OUT : Direction.IN;
     Iterator<Edge> edges = vertex.getEdges( direction ).iterator();
     while ( edges.hasNext() ) {
@@ -332,7 +331,7 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   /**
    * Adds localized types and categories, add node color information
-   * 
+   *
    * @param g The graph to enhance
    * @return The enhanced graph
    */
@@ -343,52 +342,16 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
     // enhance the vertixes
     while ( vertices.hasNext() ) {
       Vertex vertex = vertices.next();
-      enhanceVertex( vertex );
+      MetaverseUtil.enhanceVertex( vertex );
     }
     Iterator<Edge> edges = g.getEdges().iterator();
     // enhance the vertixes
     while ( edges.hasNext() ) {
       Edge edge = edges.next();
-      enhanceEdge( edge );
+      MetaverseUtil.enhanceEdge( edge );
     }
     return g;
   }
 
-  /**
-   * Enhances an edge by adding a localized type
-   * 
-   * @param edge The edge to enhance
-   */
-  protected void enhanceEdge( Edge edge ) {
-    String type = edge.getLabel();
-    //localize the node type
-    String localizedType = Messages.getString( MESSAGE_PREFIX_LINKTYPE + type );
-    if ( !localizedType.startsWith( MESSAGE_FAILED_PREFIX ) ) {
-      edge.setProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localizedType );
-    }
-  }
 
-  /**
-   * Enhances a vertex by adding localized type and category, and a suggested color
-   * @param vertex The vertex to enhance
-   */
-  protected void enhanceVertex( Vertex vertex ) {
-    String type = vertex.getProperty( DictionaryConst.PROPERTY_TYPE );
-    //localize the node type
-    String localizedType = Messages.getString( MESSAGE_PREFIX_NODETYPE + type );
-    if ( !localizedType.startsWith( MESSAGE_FAILED_PREFIX ) ) {
-      vertex.setProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localizedType );
-    }
-    // get the vertex category and set it
-    String category = DictionaryHelper.getCategoryForType( type );
-    vertex.setProperty( DictionaryConst.PROPERTY_CATEGORY, category );
-    // get the vertex category color and set it
-    String color = DictionaryHelper.getColorForCategory( category );
-    vertex.setProperty( DictionaryConst.PROPERTY_COLOR, color );
-    //localize the category 
-    String localizedCat = Messages.getString( MESSAGE_PREFIX_CATEGORY + category );
-    if ( !localizedCat.startsWith( MESSAGE_FAILED_PREFIX ) ) {
-      vertex.setProperty( DictionaryConst.PROPERTY_CATEGORY_LOCALIZED, localizedCat );
-    }
-  }
 }

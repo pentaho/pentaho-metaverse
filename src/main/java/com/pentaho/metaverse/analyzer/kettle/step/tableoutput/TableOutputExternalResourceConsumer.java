@@ -27,6 +27,7 @@ import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.model.ExternalResourceInfoFactory;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.trans.steps.tableoutput.TableOutput;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 
 import java.util.Collection;
@@ -38,7 +39,8 @@ import java.util.Set;
   id = "TableOutputExternalResourceConsumer",
   name = "TableOutputExternalResourceConsumer"
 )
-public class TableOutputExternalResourceConsumer extends BaseStepExternalResourceConsumer<TableOutputMeta> {
+public class TableOutputExternalResourceConsumer
+  extends BaseStepExternalResourceConsumer<TableOutput, TableOutputMeta> {
   @Override
   public Class<TableOutputMeta> getMetaClass() {
     return TableOutputMeta.class;

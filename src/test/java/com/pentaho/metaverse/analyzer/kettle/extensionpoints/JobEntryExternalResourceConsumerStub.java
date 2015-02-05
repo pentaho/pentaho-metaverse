@@ -22,12 +22,6 @@ public class JobEntryExternalResourceConsumerStub implements IJobEntryExternalRe
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromRow(
-    Object meta, RowMetaInterface rowMeta, Object[] row ) {
-    return null;
-  }
-
-  @Override
   public Class<?> getMetaClass() {
     return JobEntryBase.class;
   }

@@ -34,10 +34,4 @@ public class BaseJobEntryExternalResourceConsumerTest {
     assertTrue( resources.isEmpty() );
   }
 
-  @Test
-  public void testGetResourcesFromRow() throws Exception {
-    Collection<IExternalResourceConsumer> resources = consumer.getResourcesFromRow( null, null, null );
-    assertNotNull( resources );
-    assertTrue( resources.isEmpty() );
-  }
 }

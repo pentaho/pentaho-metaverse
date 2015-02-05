@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:jaxrs="http://cxf.apache.org/blueprint/jaxrs"
+           xmlns:cxf="http://cxf.apache.org/blueprint/core"
+           xsi:schemaLocation="
+             http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+             http://cxf.apache.org/blueprint/jaxrs http://cxf.apache.org/schemas/blueprint/jaxrs.xsd
+             http://cxf.apache.org/blueprint/core http://cxf.apache.org/schemas/blueprint/core.xsd
+             ">
+
+  <!-- Configure our graph using the SynchronizedGraphFactory and a configuration file -->
+  <bean id="MetaverseGraphImpl" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open">
+    <argument>
+      <map>
+        <entry key="blueprints.graph" value="com.tinkerpop.blueprints.impls.tg.TinkerGraph"/>
+      </map>
+    </argument>
+  </bean>
+
+  <cxf:bus>
+    <cxf:features>
+      <cxf:logging/>
+    </cxf:features>
+  </cxf:bus>
+
+  <bean id="metaverseServiceBean" class="com.pentaho.metaverse.service.MetaverseService">
+    <argument ref="IMetaverseReader"/>
+    <argument ref="IDocumentLocatorProvider"/>
+  </bean>
+
+  <jaxrs:server id="metaverseService" address="/lineage">
+    <jaxrs:providers>
+      <bean class="org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider"/>
+    </jaxrs:providers>
+    <jaxrs:serviceBeans>
+      <ref component-id="metaverseServiceBean" />
+    </jaxrs:serviceBeans>
+  </jaxrs:server>
+
+  <bean id="IMetaverseBuilder" class="com.pentaho.metaverse.impl.MetaverseBuilder" scope="singleton">
+    <argument ref="MetaverseGraphImpl"/>
+  </bean>
+
+  <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.impl.MetaverseObjectFactory" scope="singleton"/>
+
+  <bean id="TransformationAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer">
+    <property name="stepAnalyzerProvider" ref="IStepAnalyzerProvider"/>
+  </bean>
+  <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer">
+    <property name="jobEntryAnalyzerProvider" ref="IJobEntryAnalyzerProvider"/>
+  </bean>
+
+  <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer"/>
+  <!--<bean id="TableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableInputStepAnalyzer"/>-->
+  <bean id="TextFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer"/>
+  <bean id="SelectValuesStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer"/>
+  <bean id="NumberRangeStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer"/>
+  <bean id="IDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer"/>
+  <bean id="ValueMapperStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer"/>
+  <bean id="TextFileOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputStepAnalyzer"/>
+  <bean id="MergeJoinStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer"/>
+  <bean id="StreamLookupStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer"/>
+
+  <bean id="IDatabaseConnectionAnalyzerProvider"
+        class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzerProvider" scope="singleton">
+    <property name="databaseConnectionAnalyzers">
+      <set>
+        <ref component-id="IDatabaseConnectionAnalyzer"/>
+      </set>
+    </property>
+  </bean>
+
+  <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer" />
+
+
+  <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    <property name="documentAnalyzers">
+      <set>
+        <ref component-id="TransformationAnalyzer"/>
+        <ref component-id="JobAnalyzer"/>
+      </set>
+    </property>
+  </bean>
+
+  <bean id="IStepAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
+        scope="singleton">
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    <property name="stepAnalyzers">
+      <set>
+        <ref component-id="TableOutputStepAnalyzer"/>
+        <!--<ref component-id="TableInputStepAnalyzer"/>-->
+        <ref component-id="TextFileInputStepAnalyzer"/>
+        <ref component-id="SelectValuesStepAnalyzer"/>
+        <ref component-id="NumberRangeStepAnalyzer"/>
+        <ref component-id="ValueMapperStepAnalyzer"/>
+        <ref component-id="TextFileOutputStepAnalyzer"/>
+        <ref component-id="MergeJoinStepAnalyzer"/>
+        <ref component-id="StreamLookupStepAnalyzer"/>
+      </set>
+    </property>
+  </bean>
+
+  <bean id="IJobEntryAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider"
+        scope="singleton">
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    <property name="jobEntryAnalyzers">
+      <set>
+        <ref component-id="TransJobEntryAnalyzer"/>
+      </set>
+    </property>
+  </bean>
+
+
+  <bean id="IMetaverseReader" class="com.pentaho.metaverse.graph.BlueprintsGraphMetaverseReader" scope="singleton">
+    <argument ref="MetaverseGraphImpl"/>
+  </bean>
+
+  <!--
+  <bean id="FileSystemLocator" class="com.pentaho.metaverse.locator.FileSystemLocator" scope="singleton">
+    <argument>
+      <list>
+        <ref component-id="IDocumentListener"/>
+      </list>
+    </argument>
+    <property name="repositoryId" value="FILE_SYSTEM_REPO"/>
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    <property name="rootFolder" value="src/it/resources/repo"/>
+  </bean>
+  -->
+
+  <bean id="IDocumentLocatorProvider" class="com.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider"
+        scope="singleton">
+    <argument>
+      <set>
+        <ref component-id="DIRepositoryLocator"/>
+        <!--<ref component-id="FileSystemLocator"/>-->
+      </set>
+    </argument>
+  </bean>
+
+
+  <!-- DI Repository config if ever needed/desired -->
+  <bean id="DIRepositoryLocator" class="com.pentaho.metaverse.locator.DIRepositoryLocator" scope="prototype">
+    <argument>
+      <list>
+        <ref component-id="IDocumentListener"/>
+      </list>
+    </argument>
+    <property name="repositoryId" value="DI_REPO"/>
+    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+  </bean>
+  <!-- -->
+
+</blueprint>

@@ -50,6 +50,8 @@ public class TransExtensionPointUtil {
       throw new MetaverseException( Messages.getString( "ERROR.Document.IsNull" ) );
     }
 
+    String filename = getFilename( transMeta );
+
     final Graph graph = new TinkerGraph();
     final IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
     final IMetaverseObjectFactory objFactory = metaverseBuilder.getMetaverseObjectFactory();
@@ -67,12 +69,23 @@ public class TransExtensionPointUtil {
       objFactory,
       namespace,
       transMeta,
-      transMeta.getFilename(),
+      filename,
       transMeta.getName(),
       "ktr",
-      URLConnection.getFileNameMap().getContentTypeFor( transMeta.getFilename() )
+      URLConnection.getFileNameMap().getContentTypeFor( "trans.ktr" )
     );
 
     MetaverseUtil.addLineageGraph( document, graph );
+  }
+
+  public static String getFilename( TransMeta transMeta ) {
+    String filename = transMeta.getFilename();
+    if ( filename == null ) {
+      filename = transMeta.getPathAndName();
+    }
+    if ( filename == null ) {
+      filename = "";
+    }
+    return filename;
   }
 }

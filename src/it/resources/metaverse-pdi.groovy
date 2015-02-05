@@ -1,3 +1,4 @@
+import com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer
@@ -6,9 +7,11 @@ import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputSte
 import com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer
 import org.pentaho.platform.api.metaverse.*
 import com.pentaho.metaverse.api.*
+import com.pentaho.metaverse.client.*
 import com.pentaho.metaverse.graph.*
 import com.pentaho.metaverse.impl.*
 import com.pentaho.metaverse.locator.*
+import com.pentaho.metaverse.util.*
 import com.pentaho.metaverse.service.*
 import com.pentaho.metaverse.analyzer.kettle.*
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.*
@@ -96,6 +99,8 @@ i:{
     // Set up the step analyzers
   	tfia = new TextFileInputStepAnalyzer()
   	tfia.setDatabaseConnectionAnalyzerProvider(dbap)
+    cfia = new CsvFileInputStepAnalyzer()
+    cfia.setDatabaseConnectionAnalyzerProvider(dbap)
 
   	tfoa = new TableOutputStepAnalyzer()
   	tfoa.setDatabaseConnectionAnalyzerProvider(dbap)
@@ -117,7 +122,7 @@ i:{
     //**********************************************************************
 
   	ksap = new StepAnalyzerProvider()
-  	ksap.setStepAnalyzers([tfia,tfoa, mergeJoinAnalyzer, numberRangeAnalyzer, selectValuesAnalyzer, tableInputAnalyzer, valueMapperAnalyzer] as Set)
+  	ksap.setStepAnalyzers([tfia, tfoa, cfia, mergeJoinAnalyzer, numberRangeAnalyzer, selectValuesAnalyzer, tableInputAnalyzer, valueMapperAnalyzer] as Set)
 
   	ta = new TransformationAnalyzer()
   	ta.setStepAnalyzerProvider(ksap)
@@ -146,6 +151,8 @@ i:{
   shell.ta = obj.ta
   shell.gw = obj.gw
   shell.gr = obj.gr
+
+  MetaverseUtil.documentController = shell.dc
 
   // Helper constants (to save typing)
   shell.TRANS = DictionaryConst.NODE_TYPE_TRANS
@@ -200,6 +207,13 @@ i:{
     new File(fname).withInputStream { i -> gr.inputGraph(i) }
   }
 
+  lineageClient = { fname ->
+    tm = new TransMeta(fname)
+    doc = MetaverseUtil.createDocument(dc.metaverseObjectFactory, new Namespace("SPOON"), tm, tm.filename, tm.name,'ktr',URLConnection.fileNameMap.getContentTypeFor( tm.filename ))
+    MetaverseUtil.addLineageGraph(doc, graph = new TinkerGraph())
+    new LineageClient()
+  }
+
   // Measures the number of seconds it takes to run the given closure 
   timeToRun = { closureToMeasure ->
     now = System.currentTimeMillis()
@@ -211,6 +225,8 @@ i:{
   ls = { dir ->
     new File(dir ?:'.').list()
   }
+
+
 
   loadIT()
   'Gremlin-Kettle-Metaverse initialized successfully'

@@ -42,6 +42,7 @@ import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.textfileinput.TextFileInput;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
@@ -62,6 +63,9 @@ import static org.mockito.Mockito.*;
 public class TextFileInputStepAnalyzerTest {
 
   private TextFileInputStepAnalyzer textFileInputStepAnalyzer;
+
+  @Mock
+  private TextFileInput mockTextFileInput;
 
   @Mock
   private TextFileInputMeta mockTextFileInputMeta;
@@ -92,6 +96,8 @@ public class TextFileInputStepAnalyzerTest {
     textFileInputStepAnalyzer = new TextFileInputStepAnalyzer();
     textFileInputStepAnalyzer.setMetaverseBuilder( mockBuilder );
     descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
+
+    when( mockTextFileInput.getStepMetaInterface() ).thenReturn( mockTextFileInputMeta );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
@@ -293,13 +299,13 @@ public class TextFileInputStepAnalyzerTest {
     assertTrue( consumer.getResourcesFromMeta( mockTextFileInputMeta ).isEmpty() );
     when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenReturn( "/path/to/row/file" );
-    resources = consumer.getResourcesFromRow( mockTextFileInputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    resources = consumer.getResourcesFromRow( mockTextFileInput, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
     when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenThrow( KettleException.class );
-    resources = consumer.getResourcesFromRow( mockTextFileInputMeta, mockRowMetaInterface, new String[]{ "id", "name" } );
+    resources = consumer.getResourcesFromRow( mockTextFileInput, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertTrue( resources.isEmpty() );
 
     assertEquals( TextFileInputMeta.class, consumer.getMetaClass() );
