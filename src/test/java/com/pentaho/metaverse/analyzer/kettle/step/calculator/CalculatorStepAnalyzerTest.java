@@ -94,7 +94,9 @@ public class CalculatorStepAnalyzerTest {
     
     when( calculatorMeta.getCalculation()).thenReturn( calcFunctions );
     when( parentTransMeta.getPrevStepNames( parentStepMeta )).thenReturn(new String[]{"StepA","StepB"});
+    when( rowMeta1.getFieldNames()).thenReturn( new String[]{"field1", "field2"} );
     when( parentTransMeta.getPrevStepFields( parentStepMeta )).thenReturn( rowMeta1 );
+    when( parentTransMeta.getStepFields( parentStepMeta )).thenReturn( rowMeta1 );
     when( parentStepMeta.getParentTransMeta()).thenReturn( parentTransMeta );
     when( calculatorMeta.getParentStepMeta()).thenReturn( parentStepMeta );
     analyzer = new CalculatorStepAnalyzer();    
