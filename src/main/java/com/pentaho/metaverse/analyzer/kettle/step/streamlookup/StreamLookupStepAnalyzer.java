@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.pentaho.commons.connection.Messages;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -43,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.messages.Messages;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -87,6 +87,7 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
 
       IMetaverseNode valueName = createNodeFromDescriptor( getStepFieldOriginDescriptor( descriptor, valueNames[i] ) );
       metaverseBuilder.addLink( valueNode, DictionaryConst.LINK_DERIVES, valueName );
+      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, valueName );
     }
 
     return node;
