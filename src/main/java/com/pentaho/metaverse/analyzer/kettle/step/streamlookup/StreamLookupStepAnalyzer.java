@@ -72,7 +72,10 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
     values = streamLookupMeta.getValue();
     valueNames = streamLookupMeta.getValueName();
 
-    for ( int i = 0; i < values.length; i++ ) {
+    IMetaverseNode valueNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, values[0] ) );
+    IMetaverseNode valueName = createNodeFromDescriptor( getStepFieldOriginDescriptor( descriptor, valueNames[0] ) );
+
+    for ( int i = 0; i < keyLookups.length; i++ ) {
       IMetaverseNode keyNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, keyStreams[i] ) );
       metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, keyNode );
 
@@ -80,13 +83,14 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
           createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, keyLookups[i] ) );
       metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, keyLookupNode );
 
-      IMetaverseNode valueNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, values[i] ) ); // Bidirection
-                                                                                                                        // join
+      // Bidirectional Join
       metaverseBuilder.addLink( keyLookupNode, DictionaryConst.LINK_JOINS, valueNode );
       metaverseBuilder.addLink( valueNode, DictionaryConst.LINK_JOINS, keyLookupNode );
 
-      IMetaverseNode valueName = createNodeFromDescriptor( getStepFieldOriginDescriptor( descriptor, valueNames[i] ) );
+      // Derives
       metaverseBuilder.addLink( valueNode, DictionaryConst.LINK_DERIVES, valueName );
+
+      // Link
       metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, valueName );
     }
 
@@ -123,7 +127,7 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
       for ( String prevStepName : parentTransMeta.getStepNames() ) {
         if ( !rowMeta.containsKey( prevStepName ) ) {
           try {
-            rowMeta.put( prevStepName, parentTransMeta.getPrevStepFields( prevStepName ) );
+            rowMeta.put( prevStepName, parentTransMeta.getStepFields( prevStepName ) );
           } catch ( KettleStepException e ) {
             LOGGER.warn( Messages.getString( "WARNING.CannotDetermineRowMeta" ) );
           }

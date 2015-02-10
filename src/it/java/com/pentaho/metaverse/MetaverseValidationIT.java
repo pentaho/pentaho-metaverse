@@ -83,6 +83,7 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -563,7 +564,7 @@ public class MetaverseValidationIT {
     Iterable<StreamFieldNode> usedFields = textFileOutputStepNode.getStreamFieldNodesUses();
     int usedFieldCount = getIterableSize( usedFields );
     assertEquals( outputFields.length, usedFieldCount );
-    assertEquals( incomingFields.size()-1, usedFieldCount );
+    assertEquals( incomingFields.size() - 1, usedFieldCount );
 
     for ( StreamFieldNode usedField : usedFields ) {
       ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
@@ -573,11 +574,10 @@ public class MetaverseValidationIT {
   }
 
   @Test
-
   public void testTextFileOutputStepNode_FileFromStreamField() throws Exception {
-    TextFileOutputStepNode textFileOutputStepNode = root.getTextFileOutputStepNode(
-      "textFileOutput", "Text file output - file from field" );
-    
+    TextFileOutputStepNode textFileOutputStepNode =
+        root.getTextFileOutputStepNode( "textFileOutput", "Text file output - file from field" );
+
     TextFileOutputMeta meta = (TextFileOutputMeta) getStepMeta( textFileOutputStepNode );
     TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
 
@@ -610,7 +610,7 @@ public class MetaverseValidationIT {
   public void testMergeJoinStepNode_duplicateFieldNames() throws Exception {
     MergeJoinStepNode node = root.getMergeJoinStepNode();
     MergeJoinMeta meta = (MergeJoinMeta) getStepMeta( node );
-    
+
     assertEquals( meta.getJoinType(), node.getJoinType() );
     assertEquals( meta.getKeyFields1().length, node.getJoinFieldsLeft().size() );
     assertEquals( meta.getKeyFields2().length, node.getJoinFieldsRight().size() );
@@ -641,15 +641,26 @@ public class MetaverseValidationIT {
     assertEquals( 2, getIterableSize( node.getStreamFieldNodesUses() ) );
     assertEquals( 1, getIterableSize( node.getStreamFieldNodesCreates() ) );
 
-    StreamFieldNode createdNode = node.getStreamFieldNodesCreates().iterator().next();
-    assertEquals( 1, getIterableSize( createdNode.getFieldNodesThatDeriveMe() ) );
-    StreamFieldNode derivedFromNode = createdNode.getFieldNodesThatDeriveMe().iterator().next();
-    assertEquals( "territory", derivedFromNode.getName() );
-    assertEquals( 1, getIterableSize( derivedFromNode.getFieldNodesThatJoinToMe() ) );
-    StreamFieldNode joinedNode = derivedFromNode.getFieldNodesThatJoinToMe().iterator().next();
-    assertEquals( "code", joinedNode.getName() );
-    StreamFieldNode joinedNode2 = joinedNode.getFieldNodesThatJoinToMe().iterator().next();
-    assertEquals( "territory", joinedNode2.getName() );
+    List<String> expectations = new ArrayList<String>();
+    expectations.add( "territory" );
+    expectations.add( "code" );
+
+    Iterator<StreamFieldNode> iter1 = node.getStreamFieldNodesCreates().iterator();
+    while ( iter1.hasNext() ) {
+      StreamFieldNode createdNode = iter1.next();
+      assertEquals( 1, getIterableSize( createdNode.getFieldNodesThatDeriveMe() ) );
+      Iterator<StreamFieldNode> iter2 = createdNode.getFieldNodesThatDeriveMe().iterator();
+      while ( iter2.hasNext() ) {
+        StreamFieldNode derivedFromNode = iter2.next();
+        assertTrue( expectations.contains( derivedFromNode.getName() ) );
+        assertEquals( 1, getIterableSize( derivedFromNode.getFieldNodesThatJoinToMe() ) );
+        Iterator<StreamFieldNode> iter3 = derivedFromNode.getFieldNodesThatJoinToMe().iterator();
+        while ( iter3.hasNext() ) {
+          StreamFieldNode joinedNode = iter3.next();
+          assertTrue( expectations.contains( joinedNode.getName() ) );
+        }
+      }
+    }
   }
 
   @Test
@@ -680,15 +691,6 @@ public class MetaverseValidationIT {
 
     assertEquals( 2, getIterableSize( area.getFieldNodesThatDeriveMe() ) );
     String[] fieldsThatDerive = new String[2];
-//    int i = 0;
-//    for ( StreamFieldNode sfn : area.getFieldNodesThatDeriveMe() ) {
-//      fieldsThatDerive[i++] = sfn.getName();
-//    }
-//
-//    System.out.println( "*********************** " + fieldsThatDerive +" *****************");
-//    assert ( Arrays.asList( fieldsThatDerive ).contains( "Height" ) );
-//    assert ( Arrays.asList( fieldsThatDerive ).contains( "Length" ) );
-//
     fieldsThatDerive = new String[2];
     int i = 0;
     for ( StreamFieldNode sfn : celsius.getFieldNodesThatDeriveMe() ) {

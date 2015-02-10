@@ -61,8 +61,8 @@ import java.util.UUID;
  * KettleBaseStepAnalyzer provides a default implementation (and generic helper methods) for analyzing PDI step to
  * gather metadata for the metaverse.
  */
-public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
-  extends BaseKettleMetaverseComponentWithDatabases implements IStepAnalyzer<T>, IFieldLineageMetadataProvider<T> {
+public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettleMetaverseComponentWithDatabases
+    implements IStepAnalyzer<T>, IFieldLineageMetadataProvider<T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger( BaseStepAnalyzer.class );
 
@@ -108,11 +108,11 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
    *
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(org.pentaho.platform.api.metaverse.IComponentDescriptor, Object)
+   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(org.pentaho.platform.api.metaverse.IComponentDescriptor,
+   *      Object)
    */
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, T object )
-    throws MetaverseAnalyzerException {
+  public IMetaverseNode analyze( IComponentDescriptor descriptor, T object ) throws MetaverseAnalyzerException {
 
     validateState( descriptor, object );
 
@@ -120,8 +120,8 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     rootNode = createNodeFromDescriptor( descriptor );
     String stepType = null;
     try {
-      stepType = PluginRegistry.getInstance().findPluginWithId(
-        StepPluginType.class, parentStepMeta.getStepID() ).getName();
+      stepType =
+          PluginRegistry.getInstance().findPluginWithId( StepPluginType.class, parentStepMeta.getStepID() ).getName();
     } catch ( Throwable t ) {
       stepType = parentStepMeta.getStepID();
     }
@@ -144,8 +144,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
    *
    * @throws MetaverseAnalyzerException
    */
-  protected void addDatabaseConnectionNodes( IComponentDescriptor descriptor )
-    throws MetaverseAnalyzerException {
+  protected void addDatabaseConnectionNodes( IComponentDescriptor descriptor ) throws MetaverseAnalyzerException {
 
     if ( baseStepMeta == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.StepMetaInterface.IsNull" ) );
@@ -161,11 +160,9 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
             dbAnalyzer.setMetaverseBuilder( metaverseBuilder );
             for ( DatabaseMeta db : dbs ) {
               try {
-                IComponentDescriptor dbDescriptor = new MetaverseComponentDescriptor(
-                  db.getName(),
-                  DictionaryConst.NODE_TYPE_DATASOURCE,
-                  descriptor.getNamespace(),
-                  descriptor.getContext() );
+                IComponentDescriptor dbDescriptor =
+                    new MetaverseComponentDescriptor( db.getName(), DictionaryConst.NODE_TYPE_DATASOURCE, descriptor
+                        .getNamespace(), descriptor.getContext() );
                 IMetaverseNode dbNode = dbAnalyzer.analyze( dbDescriptor, db );
                 // save the nodes we add for later use in namespacing database related things
                 dbNodes.put( db.getName(), dbNode );
@@ -193,8 +190,9 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
           for ( ValueMetaInterface outRowMeta : outRowValueMetas ) {
             if ( !fieldNameExistsInInput( outRowMeta.getName() ) ) {
               // This field didn't come into the step, so assume it has been created here
-              IComponentDescriptor fieldDescriptor = new MetaverseComponentDescriptor( outRowMeta.getName(),
-                DictionaryConst.NODE_TYPE_TRANS_FIELD, rootNode, descriptor.getContext() );
+              IComponentDescriptor fieldDescriptor =
+                  new MetaverseComponentDescriptor( outRowMeta.getName(), DictionaryConst.NODE_TYPE_TRANS_FIELD,
+                      rootNode, descriptor.getContext() );
 
               IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
               newFieldNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, rootNode.getLogicalId() );
@@ -248,7 +246,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
               if ( stepFields != null && !outFields.contains( inRowMeta.getName() ) ) {
                 // This field didn't leave the step, so assume it has been deleted here
                 IComponentDescriptor fieldDescriptor =
-                  getPrevStepFieldOriginDescriptor( descriptor, inRowMeta.getName() );
+                    getPrevStepFieldOriginDescriptor( descriptor, inRowMeta.getName() );
                 IMetaverseNode inFieldNode = createNodeFromDescriptor( fieldDescriptor );
 
                 // Add link to show that this step created the field
@@ -273,22 +271,31 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     stepFields = getOutputFields( meta );
   }
 
-  protected IComponentDescriptor getPrevStepFieldOriginDescriptor(
-    IComponentDescriptor descriptor, String fieldName ) {
+  protected IComponentDescriptor getPrevStepFieldOriginDescriptor( IComponentDescriptor descriptor, String fieldName ) {
 
     IComponentDescriptor componentDescriptor = null;
 
     // try the first step
     if ( parentTransMeta != null && prevFields != null ) {
       if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
-        componentDescriptor = getPrevStepFieldOriginDescriptor( descriptor, fieldName,
-          prevFields.get( prevStepNames[0] ) );
+        for ( String prevStepName : prevStepNames ) {
+          RowMetaInterface rmi = prevFields.get( prevStepName );
+          if ( rmi != null && rmi.searchValueMeta( fieldName ) != null ) {
+            componentDescriptor =
+                getPrevStepFieldOriginDescriptor( descriptor, fieldName, prevFields.get( prevStepName ) );
+            break;
+          }
+        }
+        if ( componentDescriptor == null ) {
+          componentDescriptor =
+              getPrevStepFieldOriginDescriptor( descriptor, fieldName, prevFields.get( prevStepNames[0] ) );
+        }
       } else if ( prevFields.size() > 0 ) {
         // just use one of the inputs as a last resort
         for ( String s : prevFields.keySet() ) {
           LOGGER.debug( Messages.getString( "DEBUG.FallingBackToFirstSetOfInputFields", s ) );
-          componentDescriptor = getPrevStepFieldOriginDescriptor( descriptor, fieldName,
-            prevFields.get( prevStepNames ) );
+          componentDescriptor =
+              getPrevStepFieldOriginDescriptor( descriptor, fieldName, prevFields.get( prevStepNames ) );
           break;
         }
       }
@@ -296,8 +303,8 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
     return componentDescriptor;
   }
 
-  protected IComponentDescriptor getPrevStepFieldOriginDescriptor(
-    IComponentDescriptor descriptor, String fieldName, RowMetaInterface prevFields ) {
+  protected IComponentDescriptor getPrevStepFieldOriginDescriptor( IComponentDescriptor descriptor, String fieldName,
+      RowMetaInterface prevFields ) {
     if ( descriptor == null || prevFields == null ) {
       return null;
     }
@@ -307,36 +314,33 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
 
     Object nsObj = rootNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE );
     INamespace ns = new Namespace( nsObj != null ? nsObj.toString() : null );
-    IMetaverseNode tmpOriginNode = metaverseObjectFactory.createNodeObject(
-      ns,
-      origin,
-      DictionaryConst.NODE_TYPE_TRANS_STEP );
+    IMetaverseNode tmpOriginNode =
+        metaverseObjectFactory.createNodeObject( ns, origin, DictionaryConst.NODE_TYPE_TRANS_STEP );
 
     INamespace stepFieldNamespace = new Namespace( tmpOriginNode.getLogicalId() );
 
-    IComponentDescriptor prevFieldDescriptor = new MetaverseComponentDescriptor(
-      fieldName,
-      DictionaryConst.NODE_TYPE_TRANS_FIELD,
-      stepFieldNamespace,
-      descriptor.getContext() );
+    IComponentDescriptor prevFieldDescriptor =
+        new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD, stepFieldNamespace,
+            descriptor.getContext() );
     return prevFieldDescriptor;
   }
 
-  protected IComponentDescriptor getStepFieldOriginDescriptor(
-    IComponentDescriptor descriptor, String fieldName ) {
+  protected IComponentDescriptor getStepFieldOriginDescriptor( IComponentDescriptor descriptor, String fieldName ) {
     if ( descriptor == null || stepFields == null ) {
       return null;
     }
     ValueMetaInterface vmi = stepFields.searchValueMeta( fieldName );
     String origin = ( vmi == null ) ? fieldName : vmi.getOrigin();
 
-    IMetaverseNode tmpOriginNode = metaverseObjectFactory.createNodeObject( UUID.randomUUID().toString(),
-      origin, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    IMetaverseNode tmpOriginNode =
+        metaverseObjectFactory.createNodeObject( UUID.randomUUID().toString(), origin,
+            DictionaryConst.NODE_TYPE_TRANS_STEP );
     tmpOriginNode.setProperty( "namespace", rootNode.getProperty( "namespace" ) );
     INamespace stepFieldNamespace = new Namespace( tmpOriginNode.getLogicalId() );
 
-    MetaverseComponentDescriptor d = new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD,
-      tmpOriginNode, descriptor.getContext() );
+    MetaverseComponentDescriptor d =
+        new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD, tmpOriginNode, descriptor
+            .getContext() );
     return d;
   }
 
@@ -344,9 +348,12 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
    * Checks for the validity/presence of objects used internally in step analysis, such as the reference to the
    * metaverse builder.
    *
-   * @param descriptor the descriptor for the object argument
-   * @param object     the object being analyzed
-   * @throws MetaverseAnalyzerException if the state of the internal objects is not valid
+   * @param descriptor
+   *          the descriptor for the object argument
+   * @param object
+   *          the object being analyzed
+   * @throws MetaverseAnalyzerException
+   *           if the state of the internal objects is not valid
    */
   public void validateState( IComponentDescriptor descriptor, T object ) throws MetaverseAnalyzerException {
     baseStepMeta = object;
@@ -378,26 +385,25 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta>
    * Processes the given field changes, applying them to the metaverse. This method returns a metaverse node
    * corresponding to the derived field, but does not add it to the metaverse.
    *
-   * @param descriptor   the descriptor for the field
-   * @param fieldNode    the original field's metaverse node
-   * @param changeRecord the record of changes made to the field
+   * @param descriptor
+   *          the descriptor for the field
+   * @param fieldNode
+   *          the original field's metaverse node
+   * @param changeRecord
+   *          the record of changes made to the field
    * @return a metaverse node corresponding to the derived stream field.
    */
-  protected IMetaverseNode processFieldChangeRecord(
-    IComponentDescriptor descriptor,
-    IMetaverseNode fieldNode,
-    ComponentDerivationRecord changeRecord ) {
+  protected IMetaverseNode processFieldChangeRecord( IComponentDescriptor descriptor, IMetaverseNode fieldNode,
+      ComponentDerivationRecord changeRecord ) {
 
     IMetaverseNode newFieldNode = null;
 
     // There should be at least one operation in order to create a new stream field
     if ( changeRecord != null && changeRecord.hasDelta() && descriptor != null ) {
       // Create a new node for the renamed field
-      IComponentDescriptor newFieldDescriptor = new MetaverseComponentDescriptor(
-        changeRecord.getChangedEntityName(),
-        DictionaryConst.NODE_TYPE_TRANS_FIELD,
-        new Namespace( rootNode.getLogicalId() ),
-        descriptor.getContext() );
+      IComponentDescriptor newFieldDescriptor =
+          new MetaverseComponentDescriptor( changeRecord.getChangedEntityName(), DictionaryConst.NODE_TYPE_TRANS_FIELD,
+              new Namespace( rootNode.getLogicalId() ), descriptor.getContext() );
       newFieldNode = createNodeFromDescriptor( newFieldDescriptor );
       final String changePropertyType;
       ChangeType changeType = changeRecord.getChangeType();
