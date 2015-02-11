@@ -24,6 +24,7 @@ package com.pentaho.metaverse.graph;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.IntegrationTestUtil;
+import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
@@ -52,6 +53,7 @@ public class MetaverseReaderIT {
   @BeforeClass
   public static void init() throws Exception {
     IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution/system/pentahoObjects.spring.xml" );
+    MetaverseUtil.setDocumentController( PentahoSystem.get( IDocumentController.class ) );
     graph = IntegrationTestUtil.buildMetaverseGraph();
     reader = PentahoSystem.get( IMetaverseReader.class );
   }

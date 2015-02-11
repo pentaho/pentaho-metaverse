@@ -45,11 +45,7 @@ import java.util.concurrent.Future;
 /**
  * Coordinates passing IDocumentEvent's to the appropriate IDocumentAnalyzer's
  */
-public class DocumentController implements
-  IDocumentController,
-  IDocumentListener,
-  IRequiresMetaverseBuilder,
-  IMetaverseBuilder {
+public class DocumentController implements IDocumentController, IDocumentListener, IRequiresMetaverseBuilder {
 
   /**
    * The metaverse builder.
@@ -93,7 +89,8 @@ public class DocumentController implements
    *
    * @return the metaverse builder
    */
-  protected IMetaverseBuilder getMetaverseBuilder() {
+  @Override
+  public IMetaverseBuilder getMetaverseBuilder() {
     return metaverseBuilder;
   }
 

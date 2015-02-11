@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -19,39 +19,32 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
+package com.pentaho.metaverse.util;
 
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-import com.pentaho.metaverse.util.MetaverseUtil;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.KettleClientEnvironment;
-import org.pentaho.di.trans.TransMeta;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
-public class TransOpenedExtensionPointTest {
-
-  @Mock
-  TransMeta transMeta;
+public class MetaverseBeanUtilTest {
 
   @Before
   public void setUp() throws Exception {
-    KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
-    when( transMeta.getFilename() ).thenReturn( "/path/to/file.ktr" );
-    when( transMeta.getName() ).thenReturn( "testTrans" );
-    MetaverseUtil.setDocumentController( MetaverseTestUtils.getDocumentController() );
+
   }
 
   @Test
-  public void testCallExtensionPoint() throws Exception {
-    TransOpenedExtensionPoint extensionPoint = new TransOpenedExtensionPoint();
-    extensionPoint.callExtensionPoint( null, null );
-    extensionPoint.callExtensionPoint( null, transMeta );
+  public void testGetInstance() throws Exception {
+
+  }
+
+  @Test
+  public void testSetBundleContext() throws Exception {
+
+  }
+
+  @Test
+  public void testGet() throws Exception {
+
   }
 }

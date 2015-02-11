@@ -22,7 +22,6 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
-import com.pentaho.metaverse.util.MetaverseUtil;
 import org.pentaho.di.core.annotations.KettleLifecyclePlugin;
 import org.pentaho.di.core.exception.KettlePluginException;
 import org.pentaho.di.core.lifecycle.KettleLifecycleListener;
@@ -32,7 +31,6 @@ import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,18 +44,6 @@ public class MetaverseKettleLifecycleHandler implements KettleLifecycleListener 
 
   @Override
   public void onEnvironmentInit() throws LifecycleException {
-    // Initialize the metaverse system (analyzers, locators, etc.)
-    try {
-      MetaverseUtil.initializeMetaverseObjects( new File(
-          MetaverseKettleLifecycleHandler.class.getProtectionDomain().getCodeSource().getLocation().getPath() )
-          .getParent() + "/plugin.spring.xml"
-      );
-    } catch ( Throwable t ) {
-      // We probably don't have access to the application context or the Spring classes, so fall back to a
-      // config file for injection of analyzers, etc.
-      t.printStackTrace( System.err );
-    }
-
     // Populate the map of steps to external resource consumer plugins
     loadExternalResourceConsumerMap();
   }

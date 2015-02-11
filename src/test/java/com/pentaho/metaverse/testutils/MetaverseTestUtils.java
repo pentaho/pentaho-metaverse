@@ -22,18 +22,31 @@
 
 package com.pentaho.metaverse.testutils;
 
+import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.impl.MetaverseObjectFactory;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author mburgess
- * 
  */
 public class MetaverseTestUtils {
 
-  private static final IMetaverseObjectFactory metaverseObjectFactory = new MetaverseObjectFactory();
+  private static IMetaverseObjectFactory metaverseObjectFactory = new MetaverseObjectFactory();
 
   public static IMetaverseObjectFactory getMetaverseObjectFactory() {
     return metaverseObjectFactory;
+  }
+
+  public static IDocumentController getDocumentController() {
+    IDocumentController documentController = mock( IDocumentController.class );
+    IMetaverseBuilder metaverseBuilder = mock( IMetaverseBuilder.class );
+    when( metaverseBuilder.getMetaverseObjectFactory() ).thenReturn( getMetaverseObjectFactory() );
+    when( documentController.getMetaverseObjectFactory() ).thenReturn( getMetaverseObjectFactory() );
+    when( documentController.getMetaverseBuilder() ).thenReturn( metaverseBuilder );
+    return documentController;
   }
 }
