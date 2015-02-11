@@ -23,6 +23,7 @@ package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.IntegrationTestUtil;
+import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.util.MetaverseUtil;
@@ -63,6 +64,8 @@ public class MetaverseBuilderIT {
 
     IDocumentLocatorProvider provider = PentahoSystem.get( IDocumentLocatorProvider.class );
 
+    MetaverseUtil.setDocumentController( PentahoSystem.get( IDocumentController.class ) );
+
     // Uncomment below to run integration test against only the "demo" folder
     /*
     FileSystemLocator fileSystemLocator = PentahoSystem.get( FileSystemLocator.class );
@@ -86,7 +89,8 @@ public class MetaverseBuilderIT {
   private static void cleanUpSampleData() {
     File dir = new File( "." );
     File[] sampleDataFiles = dir.listFiles( new FilenameFilter() {
-      @Override public boolean accept( File dir, String name ) {
+      @Override
+      public boolean accept( File dir, String name ) {
         return name.startsWith( "SampleData" );
       }
     } );
@@ -121,7 +125,7 @@ public class MetaverseBuilderIT {
 
   }
 
-  private void testAndCountNodesByType(String type) {
+  private void testAndCountNodesByType( String type ) {
     int count = 0;
     for ( Vertex v : readerGraph.getVertices( "type", type ) ) {
       count++;
@@ -138,7 +142,7 @@ public class MetaverseBuilderIT {
     for ( Edge e : readerGraph.getEdges( "text", label ) ) {
       count++;
     }
-    if (count > 0 ) {
+    if ( count > 0 ) {
       System.out.println( "Found " + count + " " + label + " links" );
     }
   }

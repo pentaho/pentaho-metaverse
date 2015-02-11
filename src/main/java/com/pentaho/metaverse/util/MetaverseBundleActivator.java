@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -20,24 +20,33 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.api;
+package com.pentaho.metaverse.util;
 
-import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 
-import java.util.Set;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 /**
- * IDocumentController provides an interface for interacting with document controller instances. These instances are
- * responsible for (among other things) maintaining collection(s) of document analyzers.
+ * Created by mburgess on 2/9/15.
  */
-public interface IDocumentController extends IDocumentAnalyzerProvider, IRequiresMetaverseBuilder, IMetaverseBuilder {
+public class MetaverseBundleActivator implements BundleActivator {
+  private BundleContext bundleContext;
 
-  /**
-   * Set the analyzers that are available in the system
-   *
-   * @param documentAnalyzers the complete Set of IDocumentAnalyzers
-   */
-  public void setDocumentAnalyzers( Set<IDocumentAnalyzer> documentAnalyzers );
+  public MetaverseBundleActivator() {
+
+  }
+
+  public BundleContext getBundleContext() {
+    return bundleContext;
+  }
+
+
+  @Override
+  public void start( BundleContext bundleContext ) throws Exception {
+    this.bundleContext = bundleContext;
+    MetaverseBeanUtil.getInstance().setBundleContext( bundleContext );
+  }
+
+  public void stop( BundleContext bundleContext ) throws Exception {
+  }
 }

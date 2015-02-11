@@ -75,7 +75,7 @@
   <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer" />
 
 
-  <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
+  <bean id="IDocumentController" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="documentAnalyzers">
       <set>
@@ -86,7 +86,7 @@
   </bean>
 
   <!-- Make the doc controller available to the system -->
-  <service id="documentControllerService" interface="com.pentaho.metaverse.api.IDocumentController" ref="IDocumentListener"/>
+  <service id="documentControllerService" interface="com.pentaho.metaverse.api.IDocumentController" ref="IDocumentController"/>
 
   <bean id="IStepAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
         scope="singleton">
@@ -126,7 +126,7 @@
   <bean id="FileSystemLocator" class="com.pentaho.metaverse.locator.FileSystemLocator" scope="singleton">
     <argument>
       <list>
-        <ref component-id="IDocumentListener"/>
+        <ref component-id="IDocumentController"/>
       </list>
     </argument>
     <property name="repositoryId" value="FILE_SYSTEM_REPO"/>
@@ -150,7 +150,7 @@
   <bean id="DIRepositoryLocator" class="com.pentaho.metaverse.locator.DIRepositoryLocator" scope="prototype">
     <argument>
       <list>
-        <ref component-id="IDocumentListener"/>
+        <ref component-id="IDocumentController"/>
       </list>
     </argument>
     <property name="repositoryId" value="DI_REPO"/>

@@ -70,6 +70,7 @@ public class LineageClientIT {
     fileSystemLocator.setRootFolder( ROOT_FOLDER );
     provider.addDocumentLocator( fileSystemLocator );
     docController = (DocumentController) PentahoSystem.get( IDocumentController.class );
+    MetaverseUtil.setDocumentController( docController );
   }
 
   @AfterClass
@@ -81,7 +82,6 @@ public class LineageClientIT {
   public void setUp() throws Exception {
     transMeta = new TransMeta( MERGE_JOIN_KTR_FILENAME );
     IDocument doc = MetaverseUtil.createDocument(
-      docController.getMetaverseObjectFactory(),
       new Namespace( "SPOON" ),
       transMeta,
       transMeta.getFilename(),

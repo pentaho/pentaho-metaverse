@@ -54,7 +54,7 @@ public class TransExtensionPointUtil {
 
     final Graph graph = new TinkerGraph();
     final IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
-    final IMetaverseObjectFactory objFactory = metaverseBuilder.getMetaverseObjectFactory();
+    final IMetaverseObjectFactory objFactory = MetaverseUtil.getDocumentController().getMetaverseObjectFactory();
 
     // Add the client design node
     final String clientName = KettleClientEnvironment.getInstance().getClient().toString();
@@ -66,7 +66,6 @@ public class TransExtensionPointUtil {
 
     // Create a document object containing the transMeta
     final IDocument document = MetaverseUtil.createDocument(
-      objFactory,
       namespace,
       transMeta,
       filename,

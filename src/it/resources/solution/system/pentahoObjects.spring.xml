@@ -41,7 +41,7 @@
   <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer" />
 
 
-    <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
+  <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="documentAnalyzers">
       <set>
@@ -51,7 +51,7 @@
     </property>
   </bean>
 
-  <bean id="IDocumentController" class="com.pentaho.metaverse.impl.DocumentController">
+  <bean id="IDocumentController" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="metaverseObjectFactory" ref="IMetaverseObjectFactory"/>
     <property name="documentAnalyzers">

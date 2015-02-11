@@ -23,6 +23,7 @@
 package com.pentaho.metaverse;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.frames.CalculatorStepNode;
@@ -113,6 +114,8 @@ public class MetaverseValidationIT {
     fileSystemLocator.setRootFolder( ROOT_FOLDER );
     provider.addDocumentLocator( fileSystemLocator );
 
+    MetaverseUtil.setDocumentController( PentahoSystem.get( IDocumentController.class ) );
+
     // build the graph using our updated locator/provider
     graph = IntegrationTestUtil.buildMetaverseGraph( provider );
     reader = PentahoSystem.get( IMetaverseReader.class );
@@ -126,12 +129,13 @@ public class MetaverseValidationIT {
   public static void cleanUp() throws Exception {
     IntegrationTestUtil.shutdownPentahoSystem();
 
-    File exportFile = new File( "src/it/resources/validationGraph.graphml" );
+    File exportFile = new File( "target/outputfiles/validationGraph.graphml" );
     FileUtils.writeStringToFile( exportFile, reader.exportToXml(), "UTF-8" );
   }
 
   @Before
   public void setUp() throws Exception {
+
   }
 
   @Test
@@ -258,10 +262,10 @@ public class MetaverseValidationIT {
       }
 
       assertEquals( "Not all job entries are accounted for in the graph for Job [" + jobMeta.getName() + "]",
-          numJobEntries, matchCount );
+        numJobEntries, matchCount );
 
       assertEquals( "Incorrect number of job entries for in the graph for Job [" + jobMeta.getName() + "]",
-          numJobEntries, getIterableSize( jobNode.getJobEntryNodes() ) );
+        numJobEntries, getIterableSize( jobNode.getJobEntryNodes() ) );
 
       // it should be contained in a "Locator" node
       jobNode.getLocator();
@@ -390,7 +394,7 @@ public class MetaverseValidationIT {
 
     String filenameField = null;
     TransMeta tm =
-        new TransMeta( new FileInputStream( textFileInputStepNode.getTransNode().getPath() ), null, true, null, null );
+      new TransMeta( new FileInputStream( textFileInputStepNode.getTransNode().getPath() ), null, true, null, null );
     for ( StepMeta stepMeta : tm.getSteps() ) {
       if ( stepMeta.getName().equals( textFileInputStepNode.getName() ) ) {
         TextFileInputMeta meta = (TextFileInputMeta) getBaseStepMetaFromStepMeta( stepMeta );
@@ -461,7 +465,7 @@ public class MetaverseValidationIT {
       assertNotNull( "Used field does not populate anything [" + fieldNode.getName() + "]", fieldNode
           .getFieldPopulatedByMe() );
       assertEquals( "Stream Field [" + fieldNode.getName() + "] populates the wrong kind of node",
-          DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
+        DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
     }
 
     int countDbConnections = getIterableSize( tableOutputStepNode.getDatasources() );

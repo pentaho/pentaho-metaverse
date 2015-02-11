@@ -22,7 +22,7 @@
 package com.pentaho.metaverse.util;
 
 import com.pentaho.metaverse.api.IDocumentController;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
@@ -35,14 +35,11 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.MetaverseException;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 
-import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -51,18 +48,7 @@ public class MetaverseUtilTest {
 
   @Before
   public void setUp() throws Exception {
-
-  }
-
-  @Test( expected = MetaverseException.class )
-  public void testInitializeMetaverseObjectsNullPath() throws Exception {
-    MetaverseUtil.initializeMetaverseObjects( null );
-  }
-
-  @Test( expected = MetaverseException.class )
-  public void testInitializeMetaverseObjectsBadPath() throws Exception {
-    // Testing a good path is an integration creatorSteps not a unit creatorSteps, since the file needs to exist
-    MetaverseUtil.initializeMetaverseObjects( "bad/path" );
+    MetaverseUtil.setDocumentController( MetaverseTestUtils.getDocumentController() );
   }
 
   @Test
@@ -75,9 +61,7 @@ public class MetaverseUtilTest {
     IDocumentController documentController = MetaverseUtil.getDocumentController();
     assertNotNull( documentController );
     MetaverseUtil.documentController = null;
-    IDocumentController documentController2 = MetaverseUtil.getDocumentController();
-    assertNotNull( MetaverseUtil.getDocumentController() );
-    assertNotEquals( documentController, documentController2 );
+    assertNull( MetaverseUtil.getDocumentController() );
   }
 
   @Test
@@ -85,7 +69,6 @@ public class MetaverseUtilTest {
     Object content = new Object();
     INamespace namespace = mock( INamespace.class );
     IDocument document = MetaverseUtil.createDocument(
-      null,
       namespace,
       content,
       "myID",

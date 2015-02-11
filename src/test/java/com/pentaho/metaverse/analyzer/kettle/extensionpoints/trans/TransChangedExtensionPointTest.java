@@ -21,6 +21,8 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +44,7 @@ public class TransChangedExtensionPointTest {
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
     when( transMeta.getFilename() ).thenReturn( "/path/to/file.ktr" );
     when( transMeta.getName() ).thenReturn( "testTrans" );
+    MetaverseUtil.setDocumentController( MetaverseTestUtils.getDocumentController() );
   }
 
   @Test

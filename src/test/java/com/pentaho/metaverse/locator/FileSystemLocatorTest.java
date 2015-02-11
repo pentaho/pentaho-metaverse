@@ -26,6 +26,8 @@ import com.pentaho.metaverse.graph.GraphMLWriter;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
 import com.pentaho.metaverse.impl.MetaverseDocument;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,6 +74,7 @@ public class FileSystemLocatorTest implements IDocumentListener {
       e.printStackTrace();
     }
 
+    MetaverseUtil.setDocumentController( MetaverseTestUtils.getDocumentController() );
   }
 
   @Test

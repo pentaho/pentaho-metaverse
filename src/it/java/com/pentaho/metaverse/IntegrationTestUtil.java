@@ -25,6 +25,7 @@ package com.pentaho.metaverse;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
+import com.pentaho.metaverse.messages.Messages;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
 import org.pentaho.di.core.KettleEnvironment;
@@ -54,7 +55,23 @@ public class IntegrationTestUtil {
   public static synchronized void initializePentahoSystem( String solutionPath ) throws MetaverseException {
     StandaloneApplicationContext appContext = new StandaloneApplicationContext( solutionPath, "" );
     PentahoSystem.setSystemSettingsService( new PathBasedSystemSettings() );
-    MetaverseUtil.initializeMetaverseObjects( solutionPath );
+    if ( solutionPath == null ) {
+      throw new MetaverseException( Messages.getString( "ERROR.MetaverseInit.BadConfigPath", solutionPath ) );
+    }
+
+    try {
+      ClassLoader cl = Thread.currentThread().getContextClassLoader();
+
+      Thread.currentThread().setContextClassLoader( MetaverseUtil.class.getClassLoader() );
+      IPentahoObjectFactory pentahoObjectFactory = new StandaloneSpringPentahoObjectFactory();
+      pentahoObjectFactory.init( solutionPath, PentahoSystem.getApplicationContext() );
+      PentahoSystem.registerObjectFactory( pentahoObjectFactory );
+
+      // Restore context classloader
+      Thread.currentThread().setContextClassLoader( cl );
+    } catch ( Exception e ) {
+      throw new MetaverseException( Messages.getString( "ERROR.MetaverseInit.CouldNotInit" ), e );
+    }
     PentahoSystem.init( appContext );
     PentahoSessionHolder.setSession( new StandaloneSession() );
 

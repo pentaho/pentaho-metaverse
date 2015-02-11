@@ -27,26 +27,20 @@ import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.graph.LineageGraphCompletionService;
 import com.pentaho.metaverse.graph.LineageGraphMap;
-import com.pentaho.metaverse.impl.DocumentController;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.impl.MetaverseObjectFactory;
 import com.pentaho.metaverse.messages.Messages;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import org.pentaho.platform.api.engine.IPentahoObjectFactory;
 import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.api.metaverse.MetaverseException;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
-import org.pentaho.platform.engine.core.system.objfac.StandaloneSpringPentahoObjectFactory;
 
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -64,50 +58,23 @@ public class MetaverseUtil {
 
   protected static IDocumentController documentController = null;
 
-  /**
-   * Creates a Spring object factory using the given config file, and injects the bean definitions therein.
-   *
-   * @param configPath the path of the plugin/solution. The config file should be located under this path at
-   *                   /system/plugin.spring.xml
-   */
-  public static synchronized void initializeMetaverseObjects( String configPath ) throws MetaverseException {
-
-    if ( configPath == null ) {
-      throw new MetaverseException( Messages.getString( "ERROR.MetaverseInit.BadConfigPath", configPath ) );
-    }
-
-    try {
-      ClassLoader cl = Thread.currentThread().getContextClassLoader();
-
-      Thread.currentThread().setContextClassLoader( MetaverseUtil.class.getClassLoader() );
-      IPentahoObjectFactory pentahoObjectFactory = new StandaloneSpringPentahoObjectFactory();
-      pentahoObjectFactory.init( configPath, PentahoSystem.getApplicationContext() );
-      PentahoSystem.registerObjectFactory( pentahoObjectFactory );
-
-      // Restore context classloader
-      Thread.currentThread().setContextClassLoader( cl );
-    } catch ( Exception e ) {
-      throw new MetaverseException( Messages.getString( "ERROR.MetaverseInit.CouldNotInit" ), e );
-    }
-  }
-
   public static IDocumentController getDocumentController() {
     if ( documentController != null ) {
       return documentController;
     }
     try {
-      documentController = PentahoSystem.get( IDocumentController.class );
-      if ( documentController == null ) {
-        documentController = new DocumentController();
-      }
+      documentController = (IDocumentController) MetaverseBeanUtil.getInstance().get( "IDocumentController" );
     } catch ( Exception e ) {
-      documentController = new DocumentController();
+      // Just return null
     }
     return documentController;
   }
 
+  public static void setDocumentController( IDocumentController docController ) {
+    documentController = docController;
+  }
+
   public static IDocument createDocument(
-    IMetaverseObjectFactory objectFactory,
     INamespace namespace,
     Object content,
     String id,
@@ -115,10 +82,7 @@ public class MetaverseUtil {
     String extension,
     String mimeType ) {
 
-    if ( objectFactory == null ) {
-      objectFactory = new MetaverseObjectFactory();
-    }
-    IDocument metaverseDocument = objectFactory.createDocumentObject();
+    IDocument metaverseDocument = getDocumentController().getMetaverseObjectFactory().createDocumentObject();
 
     metaverseDocument.setNamespace( namespace );
     metaverseDocument.setContent( content );

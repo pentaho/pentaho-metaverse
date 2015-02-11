@@ -63,7 +63,7 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     }
   }
 
-  protected IMetaverseBuilder getMetaverseBuilder() {
+  public IMetaverseBuilder getMetaverseBuilder() {
     return metaverseBuilder;
   }
 

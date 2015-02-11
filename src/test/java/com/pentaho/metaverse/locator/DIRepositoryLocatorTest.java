@@ -24,6 +24,8 @@ package com.pentaho.metaverse.locator;
 
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseDocument;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -46,6 +48,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -56,7 +59,7 @@ import static org.mockito.Mockito.*;
  *
  * @author jdixon
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.class )
 public class DIRepositoryLocatorTest implements IDocumentListener {
 
   private List<IDocumentEvent> events;
@@ -73,6 +76,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     } catch ( KettleException e ) {
       e.printStackTrace();
     }
+    MetaverseUtil.setDocumentController( MetaverseTestUtils.getDocumentController() );
   }
 
   /**
@@ -169,7 +173,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     LocatorTestUtils.delay = 300;
 
     assertNotNull( "Indexer type is null", spyLocator.getLocatorType() );
-    events = new ArrayList<IDocumentEvent>();
+    events = Collections.synchronizedList( new ArrayList<IDocumentEvent>() );
     System.out.println( "call startScan" );
     spyLocator.startScan();
     Thread.sleep( 1000 );
@@ -221,7 +225,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     spyLocator.getRootUri();
 
     GetRepositoryLocationMethodProvider getRepositoryLocationMethodProvider =
-        new GetRepositoryLocationMethodProvider( null );
+      new GetRepositoryLocationMethodProvider( null );
     when( mockRepo.getRepositoryMeta() ).thenReturn( getRepositoryLocationMethodProvider );
     // This one won't get too far due to no RepositoryLocation being determined
     spyLocator.getRootUri();
@@ -239,7 +243,7 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
   @Test
   public void testGetUnifiedRepositoryWithBadRepoClass() throws Exception {
     spyLocator.setRepository( new KettleFileRepository() );
-    spyLocator.getUnifiedRepository( mock( IPentahoSession.class) );
+    spyLocator.getUnifiedRepository( mock( IPentahoSession.class ) );
   }
 
   @Override
