@@ -31,15 +31,13 @@ import org.osgi.service.blueprint.container.BlueprintContainer;
 import java.util.Collection;
 
 /**
- * Created by mburgess on 2/9/15.
+ * MetaverseBeanUtil is a type of object factory that allows users to get blueprint-injected instances of objects
  */
 public class MetaverseBeanUtil {
 
   private static MetaverseBeanUtil INSTANCE = new MetaverseBeanUtil();
 
   private BundleContext bundleContext;
-
-  private BlueprintContainer service;
 
   private MetaverseBeanUtil() {
     // private for singleton pattern
@@ -54,9 +52,10 @@ public class MetaverseBeanUtil {
   }
 
   public Object get( String id ) {
-    Bundle bundle = this.bundleContext.getBundle();
-
+    BlueprintContainer service = null;
     try {
+      Bundle bundle = this.bundleContext.getBundle();
+
       Collection<ServiceReference<BlueprintContainer>> serviceReferences =
         bundleContext.getServiceReferences( BlueprintContainer.class,
           "(osgi.blueprint.container.symbolicname=" + bundle.getSymbolicName() + ")" );
@@ -65,8 +64,7 @@ public class MetaverseBeanUtil {
         service = bundleContext.getService( reference );
       }
     } catch ( InvalidSyntaxException e ) {
-      // TODO logger.error( "Error finding blueprint container", e );
-
+      // No-op, service will be null
     }
     if ( service == null ) {
       return null;

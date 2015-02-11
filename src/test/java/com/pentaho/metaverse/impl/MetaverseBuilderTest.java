@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -35,6 +36,20 @@ public class MetaverseBuilderTest {
     node.setStringID( "node1" );
     node.setName( "node1 name" );
     node.setType( "test type" );
+  }
+
+  @Test
+  public void testGetGraph() {
+    assertEquals( graph, builder.getGraph() );
+  }
+
+  @Test
+  public void testGetSetMetaverseObjectFactory() {
+
+    IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
+    builder.setMetaverseObjectFactory( objectFactory );
+    assertEquals( objectFactory, builder.getMetaverseObjectFactory() );
+
   }
 
   @Test
@@ -292,7 +307,7 @@ public class MetaverseBuilderTest {
 
     when( mockFrom.getStringID() ).thenReturn( "not in graph" );
     when( mockFrom.getLogicalId() ).thenReturn( "not in graph" );
-    
+
     // now lets try to delete the link
     builder.deleteLink( link );
 

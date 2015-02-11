@@ -38,6 +38,12 @@ import static org.mockito.Mockito.mock;
 
 public class SynchronizedGraphFactoryTest {
 
+  @Test( expected = UnsupportedOperationException.class )
+  public void testProtected_Constructor() {
+    new SynchronizedGraphFactory() {
+    };
+  }
+
   @Test
   public void testOpen_Configuration() throws Exception {
     Configuration config = new PropertiesConfiguration();

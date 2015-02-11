@@ -112,4 +112,12 @@ public class MetaverseComponentDescriptorTest {
     assertNull( descriptor.getNamespaceId() );
   }
 
+  @Test
+  public void testSetLogicalIdGenerator() {
+    // Call for coverage
+    INamespace mockEmptyNamespace = null;
+    descriptor = new MetaverseComponentDescriptor( null, null, mockEmptyNamespace );
+    descriptor.setLogicalIdGenerator( null );
+  }
+
 }
