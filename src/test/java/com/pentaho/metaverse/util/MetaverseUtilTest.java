@@ -23,11 +23,17 @@ package com.pentaho.metaverse.util;
 
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
@@ -36,6 +42,7 @@ import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.MetaverseException;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,6 +68,20 @@ public class MetaverseUtilTest {
     IDocumentController documentController = MetaverseUtil.getDocumentController();
     assertNotNull( documentController );
     MetaverseUtil.documentController = null;
+    assertNull( MetaverseUtil.getDocumentController() );
+
+    // Generate an exception
+    MetaverseBeanUtil instance = MetaverseBeanUtil.getInstance();
+    BundleContext bundleContext = mock( BundleContext.class );
+    Bundle bundle = mock( Bundle.class );
+    when( bundleContext.getBundle() ).thenReturn( bundle );
+    instance.setBundleContext( bundleContext );
+
+    ServiceReference serviceReference = mock( ServiceReference.class );
+    BlueprintContainer service = mock( BlueprintContainer.class );
+    when( bundleContext.getService( Mockito.any( ServiceReference.class ) ) ).thenReturn( service );
+
+    when( service.getComponentInstance( "IDocumentController" ) ).thenReturn( documentController );
     assertNull( MetaverseUtil.getDocumentController() );
   }
 
@@ -117,5 +138,21 @@ public class MetaverseUtilTest {
     MetaverseUtil.addLineageGraph( document, graph );
 
     MetaverseUtil.addLineageGraph( document, null );
+  }
+
+  @Test
+  public void testEnhanceEdge() {
+    Graph graph = new TinkerGraph();
+    Vertex v1 = graph.addVertex( 1 );
+    Vertex v2 = graph.addVertex( 2 );
+    Edge edge = graph.addEdge( 3, v1, v2, "testLabel" );
+    MetaverseUtil.enhanceEdge( edge );
+  }
+
+  @Test
+  public void testEnhanceVertex() {
+    Graph graph = new TinkerGraph();
+    Vertex v1 = graph.addVertex( 1 );
+    MetaverseUtil.enhanceVertex( v1 );
   }
 }

@@ -23,28 +23,35 @@ package com.pentaho.metaverse.util;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.framework.BundleContext;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 public class MetaverseBundleActivatorTest {
 
+  private MetaverseBundleActivator metaverseBundleActivator;
+
   @Before
   public void setUp() throws Exception {
-
+    metaverseBundleActivator = new MetaverseBundleActivator();
   }
 
   @Test
   public void testGetBundleContext() throws Exception {
+    assertNull( metaverseBundleActivator.getBundleContext() );
 
   }
 
   @Test
   public void testStart() throws Exception {
-
+    BundleContext bundleContext = mock( BundleContext.class );
+    metaverseBundleActivator.start( bundleContext );
+    assertEquals( bundleContext, metaverseBundleActivator.getBundleContext() );
   }
 
   @Test
   public void testStop() throws Exception {
-
+    metaverseBundleActivator.stop( null );
   }
 }

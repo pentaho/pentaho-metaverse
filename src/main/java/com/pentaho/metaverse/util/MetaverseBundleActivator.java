@@ -33,7 +33,6 @@ public class MetaverseBundleActivator implements BundleActivator {
   private BundleContext bundleContext;
 
   public MetaverseBundleActivator() {
-
   }
 
   public BundleContext getBundleContext() {
