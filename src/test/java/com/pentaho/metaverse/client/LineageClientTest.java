@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 
 public class LineageClientTest {
 
+  private static final String TEST_FIELD = "testField";
   private LineageClient lineageClient;
   private Graph g;
 
@@ -52,7 +53,6 @@ public class LineageClientTest {
   public void testGetCreatorSteps() throws Exception {
     assertTrue( lineageClient.getCreatorSteps( (String) null, null, null ).isEmpty() );
     assertTrue( lineageClient.getCreatorSteps( "testTrans", null, null ).isEmpty() );
-
   }
 
   @Test
@@ -60,17 +60,42 @@ public class LineageClientTest {
 
     Vertex step = g.addVertex( "1" );
     step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
+    step.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     Vertex field = g.addVertex( "2" );
-    field.setProperty( DictionaryConst.PROPERTY_NAME, "testField" );
+    field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
     g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
     Vertex targetStep = g.addVertex( "4" );
     targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
 
-    GremlinPipeline pipe = lineageClient.creatorFields( g, "targetStep", "testField" );
-    assertTrue( pipe.hasNext() );
-    pipe = lineageClient.creatorFields( g, "testStep", "testField" );
-    assertTrue( pipe.hasNext() );
+    List<Vertex> creatorFields = lineageClient.creatorFields( g, "targetStep", TEST_FIELD );
+    assertNotNull( creatorFields );
+    assertEquals( 1, creatorFields.size() );
+    Vertex v = creatorFields.get( 0 );
+    assertEquals( v.getProperty( DictionaryConst.PROPERTY_NAME ), TEST_FIELD );
+
+  }
+
+  @Test
+  public void testCreatorSteps() {
+    Vertex step = g.addVertex( "1" );
+    step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
+    step.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    Vertex field = g.addVertex( "2" );
+    field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
+    Vertex targetStep = g.addVertex( "4" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
+
+    List<StepField> creatorSteps = lineageClient.creatorSteps( g, "targetStep", TEST_FIELD );
+    assertNotNull( creatorSteps );
+    assertEquals( 1, creatorSteps.size() );
+    StepField stepField = creatorSteps.get( 0 );
+    assertEquals( stepField.getStepName(), "testStep" );
+    assertEquals( stepField.getFieldName(), TEST_FIELD );
   }
 
   @Test
@@ -98,13 +123,13 @@ public class LineageClientTest {
     Vertex step = g.addVertex( "1" );
     step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
     Vertex field = g.addVertex( "2" );
-    field.setProperty( DictionaryConst.PROPERTY_NAME, "testField" );
+    field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
     g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
     List<String> creatorSteps = new LineageClient.FieldAndStepList().compute( field );
     assertNotNull( creatorSteps );
     assertEquals( 2, creatorSteps.size() );
     // The list should contain the field name followed by the step name
-    assertEquals( "testField", creatorSteps.get( 0 ) );
+    assertEquals( TEST_FIELD, creatorSteps.get( 0 ) );
     assertEquals( "testStep", creatorSteps.get( 1 ) );
   }
 
