@@ -209,7 +209,7 @@ i:{
 
   lineageClient = { fname ->
     tm = new TransMeta(fname)
-    doc = MetaverseUtil.createDocument(dc.metaverseObjectFactory, new Namespace("SPOON"), tm, tm.filename, tm.name,'ktr',URLConnection.fileNameMap.getContentTypeFor( tm.filename ))
+    doc = MetaverseUtil.createDocument(new Namespace("SPOON"), tm, tm.filename, tm.name,'ktr',URLConnection.fileNameMap.getContentTypeFor( tm.filename ))
     MetaverseUtil.addLineageGraph(doc, graph = new TinkerGraph())
     new LineageClient()
   }

@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -21,27 +21,34 @@
  */
 package com.pentaho.metaverse.api;
 
-import com.google.common.collect.Multimap;
+import com.pentaho.metaverse.client.StepField;
+import com.pentaho.metaverse.client.StepFieldOperations;
+import com.pentaho.metaverse.client.StepFieldTarget;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.metaverse.MetaverseException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Created by mburgess on 1/21/15.
+ * The ILineageClient interface specifies methods to be used by consumers of the lineage capabilities. These are
+ * meant to be domain-driven in order to abstract the underlying graph traversals and to answer the actual
+ * business question(s).
  */
 public interface ILineageClient {
 
   /**
    * Finds the step(s) in the given transformation that created the given field
    *
-   * @param transMeta
-   * @param targetStepName
-   * @param fieldName
-   * @return a list of step names, where each step has created a field with the given name
-   * @throws MetaverseException
+   * @param transMeta      a reference to a transformation's metadata
+   * @param targetStepName the target step name associated with the given field names
+   * @param fieldNames     an array of field names associated with the target step, for which to find the step(s) that
+   *                       created those fields
+   * @return a list of step-to-field objects, where each step has created a field with the given name
+   * @throws MetaverseException if an error occurred while finding the creating steps
    */
-  public List<String> getCreatorSteps( TransMeta transMeta, String targetStepName, String fieldName )
+  public List<StepField> getCreatorSteps( TransMeta transMeta, String targetStepName, String... fieldNames )
     throws MetaverseException;
 
   /**
@@ -52,15 +59,34 @@ public interface ILineageClient {
    * rather, this method will traverse other relationships ("uses", "derives", e.g.) to find the actual origin fields
    * that comprise the final field in the target step.
    *
-   * @param transMeta
-   * @param targetStepName
-   * @param fieldName
-   * @return a map of step names to field names, where each step has created a field with the returned name, and that
-   * field has contributed in some way to the specified field in the target step.
-   * @throws MetaverseException
+   * @param transMeta      a reference to a transformation's metadata
+   * @param targetStepName the target step name associated with the given field names
+   * @param fieldNames     an array of field names associated with the target step, for which to find the step(s) and
+   *                       field(s) that contributed to those fields
+   * @return a list of step-field-targetfield objects, where each step has created a field with the returned name, and
+   * that field has contributed in some way to the specified field in the target step.
+   * @throws MetaverseException if an error occurred while finding the origin steps
    */
-  public Multimap<String, String> getOriginSteps( TransMeta transMeta, String targetStepName, String fieldName )
+  public Set<StepFieldTarget> getOriginSteps( TransMeta transMeta, String targetStepName, String... fieldNames )
     throws MetaverseException;
 
 
+  /**
+   * Returns the paths between the origin field(s) and target field(s). A path in this context is an ordered list of
+   * StepFieldOperations objects, each of which corresponds to a field at a certain step where operation(s) are
+   * applied. The order of the list corresponds to the order of the steps from the origin step (see getOriginSteps())
+   * to the target step. This method can be used to trace a target field back to its origin and discovering what
+   * operations were performed upon it during it's lifetime. Inversely the path could be used to re-apply the operations
+   * to the origin field, resulting in the field's "value" at each point in the path.
+   *
+   * @param transMeta      a reference to a transformation's metadata
+   * @param targetStepName the target step name associated with the given field names
+   * @param fieldNames     an array of field names associated with the target step, for which to find the step(s) and
+   *                       field(s) and operation(s) that contributed to those fields
+   * @return a map of target field name to an ordered list of StepFieldOperations objects, describing the path from the
+   * origin step field to the target step field, including the operations performed.
+   * @throws MetaverseException if an error occurred while finding the origin steps
+   */
+  public Map<String, List<StepFieldOperations>> getOperationPaths(
+    TransMeta transMeta, String targetStepName, String... fieldNames ) throws MetaverseException;
 }
