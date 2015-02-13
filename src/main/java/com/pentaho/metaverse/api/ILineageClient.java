@@ -83,10 +83,10 @@ public interface ILineageClient {
    * @param targetStepName the target step name associated with the given field names
    * @param fieldNames     a collection of field names associated with the target step, for which to find the step(s)
    *                       and field(s) and operation(s) that contributed to those fields
-   * @return a map of target field name to an ordered list of StepFieldOperations objects, describing the path from the
-   * origin step field to the target step field, including the operations performed.
+   * @return a map of target field name to a set of paths. Each path is an ordered list of StepFieldOperations objects,
+   * describing the path from the origin step field to the target step field, including the operations performed.
    * @throws MetaverseException if an error occurred while finding the origin steps
    */
-  public Map<String, List<StepFieldOperations>> getOperationPaths(
+  public Map<String, Set<List<StepFieldOperations>>> getOperationPaths(
     TransMeta transMeta, String targetStepName, Collection<String> fieldNames ) throws MetaverseException;
 }

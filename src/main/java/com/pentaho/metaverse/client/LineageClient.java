@@ -23,6 +23,8 @@ package com.pentaho.metaverse.client;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.ILineageClient;
+import com.pentaho.metaverse.api.model.Operation;
+import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.graph.LineageGraphMap;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Graph;
@@ -53,6 +55,9 @@ import java.util.concurrent.Future;
 public class LineageClient implements ILineageClient {
 
   protected static final int MAX_LOOPS = 10;
+
+  private static final StepFieldPipeFunction STEPFIELD_PIPE_FUNC = new StepFieldPipeFunction();
+  private static final StepFieldOperationsPipeFunction STEPFIELDOPS_PIPE_FUNC = new StepFieldOperationsPipeFunction();
 
   /**
    * Generates a list of names of steps that create a field with the specified name
@@ -129,8 +134,6 @@ public class LineageClient implements ILineageClient {
 
     Map<String, Set<StepField>> originStepsMap = new HashMap<String, Set<StepField>>();
 
-    //= new HashSet<StepField>();
-
     try {
       Future<Graph> lineageGraphTask = LineageGraphMap.getInstance().get( transMeta );
       if ( lineageGraphTask != null ) {
@@ -144,7 +147,7 @@ public class LineageClient implements ILineageClient {
         for ( String targetField : creatorFields.keySet() ) {
 
           GremlinPipeline pipe =
-            getOriginStepsPipe( creatorFields.get( targetField ) ).transform( new FieldAndStepList() );
+            getOriginStepsPipe( creatorFields.get( targetField ), false ).transform( new StepFieldPipeFunction() );
           List<List<String>> stepFieldList = (List<List<String>>) pipe.toList();
           if ( stepFieldList != null ) {
             Set<StepField> originStepsSet = originStepsMap.get( targetField );
@@ -185,12 +188,63 @@ public class LineageClient implements ILineageClient {
    * @throws MetaverseException if an error occurred while finding the origin steps
    */
   @Override
-  public Map<String, List<StepFieldOperations>> getOperationPaths(
+  public Map<String, Set<List<StepFieldOperations>>> getOperationPaths(
     TransMeta transMeta, String targetStepName, Collection<String> fieldNames ) throws MetaverseException {
-    Map<String, List<StepFieldOperations>> operationPathMap = new HashMap<String, List<StepFieldOperations>>();
 
-    //TODO
+    Map<String, Set<List<StepFieldOperations>>> operationPathMap =
+      new HashMap<String, Set<List<StepFieldOperations>>>();
 
+    try {
+      Future<Graph> lineageGraphTask = LineageGraphMap.getInstance().get( transMeta );
+      if ( lineageGraphTask != null ) {
+        Graph lineageGraph = lineageGraphTask.get();
+
+        if ( lineageGraph != null ) {
+          // Get the creator field nodes for all the field names passed in
+          Map<String, Set<Vertex>> creatorFields = creatorFields( lineageGraph, targetStepName, fieldNames );
+
+          for ( String targetField : creatorFields.keySet() ) {
+            // The "origin steps pipe" with a second param of true returns a pipeline that will return paths between
+            // the origin field nodes and the target field node.
+            GremlinPipeline pipe = getOriginStepsPipe( creatorFields.get( targetField ), true );
+            List<List<Vertex>> pathList = pipe.toList();
+            if ( pathList != null ) {
+              Set<List<StepFieldOperations>> pathSet = operationPathMap.get( targetField );
+              if ( pathSet == null ) {
+                pathSet = new HashSet<List<StepFieldOperations>>();
+                operationPathMap.put( targetField, pathSet );
+              }
+              for ( List<Vertex> path : pathList ) {
+                // Transform each path of vertices into a "path" of StepFieldOperations objects (basically save off
+                // properties of each vertex into a new list)
+                List<StepFieldOperations> stepFieldOps = new ArrayList<StepFieldOperations>();
+                for ( Vertex v : path ) {
+                  Map<String, String> stepField = STEPFIELDOPS_PIPE_FUNC.compute( v );
+                  String stepName = stepField.get( "stepName" );
+                  String fieldName = stepField.get( "fieldName" );
+                  Operations operations = new Operations();
+                  // Add operations if there are any
+                  String ops = stepField.get( DictionaryConst.PROPERTY_OPERATIONS );
+                  if ( !Const.isEmpty( ops ) ) {
+                    operations.addOperation( DictionaryConst.PROPERTY_OPERATIONS,
+                      new Operation( "ops", ops ) );
+                  }
+                  String dataOps = stepField.get( DictionaryConst.PROPERTY_DATA_OPERATIONS );
+                  if ( !Const.isEmpty( dataOps ) ) {
+                    operations.addOperation( DictionaryConst.PROPERTY_DATA_OPERATIONS,
+                      new Operation( "data_ops", dataOps ) );
+                  }
+                  stepFieldOps.add( new StepFieldOperations( stepName, fieldName, operations ) );
+                }
+                pathSet.add( stepFieldOps );
+              }
+            }
+          }
+        }
+      }
+    } catch ( Exception e ) {
+      throw new MetaverseException( e );
+    }
     return operationPathMap;
   }
 
@@ -263,7 +317,6 @@ public class LineageClient implements ILineageClient {
       // Steps have unique names in the graph, so this list should have one element, just grab the first one
       final Vertex stepNode = stepNodeList.get( 0 );
 
-
       if ( fieldNames != null ) {
         for ( String targetFieldName : fieldNames ) {
           Set<Vertex> creatorFields = creatorFieldsMap.get( targetFieldName );
@@ -271,7 +324,6 @@ public class LineageClient implements ILineageClient {
             creatorFields = new HashSet<Vertex>();
             creatorFieldsMap.put( targetFieldName, creatorFields );
           }
-
 
           // Does the target step create this field?
           GremlinPipeline<Vertex, Vertex> testPipe =
@@ -309,7 +361,7 @@ public class LineageClient implements ILineageClient {
   }
 
 
-  protected GremlinPipeline getOriginStepsPipe( Set<Vertex> inV ) {
+  protected GremlinPipeline getOriginStepsPipe( Set<Vertex> inV, final boolean returnPaths ) {
     GremlinPipeline pipe = new GremlinPipeline( inV )
 
       // Determine if some other field derives the creatorField. If so, we want to walk back along the "derives"
@@ -325,14 +377,24 @@ public class LineageClient implements ILineageClient {
             // Do a lookahead in the loop function to see if there's a "derives" link. If not, emit the node;
             //  if so, don't emit the node. The loop will have followed that derives link separately, so it will be
             //  processed by the loop logic until it has no more derives links, at which point it will be emitted.
-            return new GremlinPipeline( it ).in( DictionaryConst.LINK_DERIVES )
+            GremlinPipeline basePipe = new GremlinPipeline( it ).in( DictionaryConst.LINK_DERIVES )
               .loop( 1, new NumLoops( MAX_LOOPS ), new NotNullAndNotDeriviativeLoop() );
+            if ( returnPaths ) {
+              return basePipe.path();
+            } else {
+              return basePipe;
+            }
           }
         },
         new PipeFunction<Vertex, GremlinPipeline>() {
           @Override
           public GremlinPipeline compute( Vertex it ) {
-            return new GremlinPipeline( it );
+            GremlinPipeline basePipe = new GremlinPipeline( it );
+            if ( returnPaths ) {
+              return basePipe.path();
+            } else {
+              return basePipe;
+            }
           }
         } );
 
@@ -362,7 +424,7 @@ public class LineageClient implements ILineageClient {
    *
    * @param <S> the type of object passed into the loop emit closure
    */
-  public static class NoNullObjectsInLoop<S> implements PipeFunction<LoopPipe.LoopBundle<S>, Boolean> {
+  protected static class NoNullObjectsInLoop<S> implements PipeFunction<LoopPipe.LoopBundle<S>, Boolean> {
     @Override
     public Boolean compute( LoopPipe.LoopBundle<S> argument ) {
       return argument.getObject() != null;
@@ -374,7 +436,7 @@ public class LineageClient implements ILineageClient {
    * vertices that do not have incoming "derives" links, and is used to prune the paths returned during methods like
    * getOriginSteps.
    */
-  public static class NotNullAndNotDeriviativeLoop implements PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> {
+  protected static class NotNullAndNotDeriviativeLoop implements PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> {
     @Override
     public Boolean compute( LoopPipe.LoopBundle<Vertex> argument ) {
       Vertex v = argument.getObject();
@@ -383,7 +445,11 @@ public class LineageClient implements ILineageClient {
     }
   }
 
-  public static class HasDerivesLink implements PipeFunction<Vertex, Boolean> {
+  /**
+   * This pipe function determines whether the given vertex has an in-link of "derives", meaning that some other
+   * field(s) have contributed to the value and/or metadata of this field
+   */
+  protected static class HasDerivesLink implements PipeFunction<Vertex, Boolean> {
     @Override
     public Boolean compute( Vertex v ) {
       return v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES ).iterator().hasNext();
@@ -395,13 +461,47 @@ public class LineageClient implements ILineageClient {
    * 1) the name of the field
    * 2) the name of the step that created the field
    */
-  protected static class FieldAndStepList implements PipeFunction<Vertex, List<String>> {
+  protected static class StepFieldPipeFunction implements PipeFunction<Vertex, List<String>> {
     @Override
     public List<String> compute( Vertex it ) {
       return Arrays.asList(
         it.getProperty( DictionaryConst.PROPERTY_NAME ).toString(),
         it.getVertices( Direction.IN, DictionaryConst.LINK_CREATES )
           .iterator().next().getProperty( DictionaryConst.PROPERTY_NAME ).toString() );
+    }
+  }
+
+  /**
+   * This class provides a transformation closure that takes a field vertex and creates a list containing two elements:
+   * 1) the name of the field
+   * 2) the name of the step that created the field
+   */
+  protected static class StepFieldOperationsPipeFunction implements PipeFunction<Vertex, Map<String, String>> {
+    @Override
+    public Map<String, String> compute( Vertex it ) {
+      Map<String, String> stepFieldOpsMap = new HashMap<String, String>();
+
+      stepFieldOpsMap.put(
+        "stepName",
+        (String) it.getVertices( Direction.IN, DictionaryConst.LINK_CREATES )
+          .iterator().next().getProperty( DictionaryConst.PROPERTY_NAME )
+      );
+
+      stepFieldOpsMap.put(
+        "fieldName",
+        (String) it.getProperty( DictionaryConst.PROPERTY_NAME )
+      );
+
+      // Add (metadata) operations and data operations if there are any, otherwise don't set the property
+      String operations = it.getProperty( DictionaryConst.PROPERTY_OPERATIONS );
+      if ( !Const.isEmpty( operations ) ) {
+        stepFieldOpsMap.put( DictionaryConst.PROPERTY_OPERATIONS, operations );
+      }
+      String dataOperations = it.getProperty( DictionaryConst.PROPERTY_DATA_OPERATIONS );
+      if ( !Const.isEmpty( dataOperations ) ) {
+        stepFieldOpsMap.put( DictionaryConst.PROPERTY_DATA_OPERATIONS, dataOperations );
+      }
+      return stepFieldOpsMap;
     }
   }
 }
