@@ -34,8 +34,10 @@ public class Operations extends HashMap<String, List<Operation>> {
     List<Operation> operations = get( operationType );
     if ( operations == null ) {
       operations = new ArrayList<Operation>();
+      put( operationType, operations );
     }
     operations.add( operation );
+
   }
 
   public List<Operation> getOperationByType( String operationType ) {
