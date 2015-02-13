@@ -33,8 +33,6 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -125,7 +123,7 @@ public class LineageClientTest {
     targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
     targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
-    GremlinPipeline pipe = lineageClient.getOriginStepsPipe( Sets.newHashSet( field ) );
+    GremlinPipeline pipe = lineageClient.getOriginStepsPipe( Sets.newHashSet( field ), false );
     assertNotNull( pipe );
     assertNotNull( pipe.toList() );
   }
@@ -173,18 +171,34 @@ public class LineageClientTest {
   }
 
   @Test
-  public void testFieldAndStepList() {
+  public void testStepFieldPipeFunction() {
     Vertex step = g.addVertex( "1" );
     step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
     Vertex field = g.addVertex( "2" );
     field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
     g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
-    List<String> creatorSteps = new LineageClient.FieldAndStepList().compute( field );
+    List<String> creatorSteps = new LineageClient.StepFieldPipeFunction().compute( field );
     assertNotNull( creatorSteps );
     assertEquals( 2, creatorSteps.size() );
     // The list should contain the field name followed by the step name
     assertEquals( TEST_FIELD, creatorSteps.get( 0 ) );
     assertEquals( "testStep", creatorSteps.get( 1 ) );
+  }
+
+  @Test
+  public void testStepFieldOperationsPipeFunction() {
+    Vertex step = g.addVertex( "1" );
+    step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
+    Vertex field = g.addVertex( "2" );
+    field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
+    Map<String, String> creatorSteps = new LineageClient.StepFieldOperationsPipeFunction().compute( field );
+    assertNotNull( creatorSteps );
+    assertEquals( 2, creatorSteps.size() );
+    // The list should contain the field name followed by the step name
+    assertEquals( TEST_FIELD, creatorSteps.get( "fieldName" ) );
+    assertEquals( "testStep", creatorSteps.get( "stepName" ) );
+
   }
 
 }

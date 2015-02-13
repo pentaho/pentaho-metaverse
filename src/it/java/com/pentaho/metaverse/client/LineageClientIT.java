@@ -238,7 +238,24 @@ public class LineageClientIT {
         assertEquals( "COUNTRY", stepField.getFieldName() );
       }
     }
+  }
 
+  @Test
+  public void testGetOperationPaths() throws Exception {
+    Map<String, Set<List<StepFieldOperations>>> operationPathMap =
+      client.getOperationPaths( transMeta, "Select values", Arrays.asList( "HELLO" ) );
+
+    assertNotNull( operationPathMap );
+    assertEquals( 1, operationPathMap.size() );
+    assertNull( operationPathMap.get( "COUNTRY" ) );
+    Set<List<StepFieldOperations>> operationPaths = operationPathMap.get( "HELLO" );
+    assertNotNull( operationPaths );
+    assertEquals( 2, operationPaths.size() );
+    for ( List<StepFieldOperations> operationPath : operationPaths ) {
+      // Verify the first and last nodes and operations
+      assertTrue( operationPath.size() > 1 );
+
+    }
   }
 
 }
