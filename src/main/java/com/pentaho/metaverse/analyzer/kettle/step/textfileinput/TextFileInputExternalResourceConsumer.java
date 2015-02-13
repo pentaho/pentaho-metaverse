@@ -100,7 +100,7 @@ public class TextFileInputExternalResourceConsumer
     TextFileInputMeta meta = (TextFileInputMeta) textFileInput.getStepMetaInterface();
 
     try {
-      String filename = rowMeta.getString( row, meta.getAcceptingField(), null );
+      String filename = meta == null ? null : rowMeta.getString( row, meta.getAcceptingField(), null );
       if ( !Const.isEmpty( filename ) ) {
         FileObject fileObject = KettleVFS.getFileObject( filename );
         resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, true ) );

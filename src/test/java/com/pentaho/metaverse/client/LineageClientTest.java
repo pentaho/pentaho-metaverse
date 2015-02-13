@@ -22,7 +22,10 @@
 
 package com.pentaho.metaverse.client;
 
+import com.google.common.collect.Sets;
 import com.pentaho.dictionary.DictionaryConst;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
@@ -30,8 +33,14 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -69,12 +78,15 @@ public class LineageClientTest {
     targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
 
-    List<Vertex> creatorFields = lineageClient.creatorFields( g, "targetStep", TEST_FIELD );
+    Map<String, Set<Vertex>> creatorFieldsMap = lineageClient.creatorFields( g, "targetStep", Arrays.asList( TEST_FIELD ) );
+    assertNotNull( creatorFieldsMap );
+    assertEquals( 1, creatorFieldsMap.size() );
+    Set<Vertex> creatorFields = creatorFieldsMap.get( TEST_FIELD );
     assertNotNull( creatorFields );
     assertEquals( 1, creatorFields.size() );
-    Vertex v = creatorFields.get( 0 );
+    Vertex v = creatorFields.iterator().next();
+    assertNotNull( v );
     assertEquals( v.getProperty( DictionaryConst.PROPERTY_NAME ), TEST_FIELD );
-
   }
 
   @Test
@@ -90,12 +102,32 @@ public class LineageClientTest {
     targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
 
-    List<StepField> creatorSteps = lineageClient.creatorSteps( g, "targetStep", TEST_FIELD );
+    Map<String, Set<StepField>> creatorStepsMap = lineageClient.creatorSteps( g, "targetStep", Arrays.asList( TEST_FIELD ) );
+    assertNotNull( creatorStepsMap );
+    assertEquals( 1, creatorStepsMap.size() );
+    Set<StepField> creatorSteps = creatorStepsMap.get( TEST_FIELD );
     assertNotNull( creatorSteps );
     assertEquals( 1, creatorSteps.size() );
-    StepField stepField = creatorSteps.get( 0 );
+    StepField stepField = creatorSteps.iterator().next();
     assertEquals( stepField.getStepName(), "testStep" );
     assertEquals( stepField.getFieldName(), TEST_FIELD );
+  }
+
+  @Test
+  public void testGetOriginStepsPipe() {
+    Vertex step = g.addVertex( "1" );
+    step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
+    step.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    Vertex field = g.addVertex( "2" );
+    field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
+    Vertex targetStep = g.addVertex( "4" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
+    GremlinPipeline pipe = lineageClient.getOriginStepsPipe( Sets.newHashSet( field ) );
+    assertNotNull( pipe );
+    assertNotNull( pipe.toList() );
   }
 
   @Test
@@ -116,6 +148,28 @@ public class LineageClientTest {
     assertFalse( loopFunc.compute( bundle ) );
     when( bundle.getObject() ).thenReturn( new Object() );
     assertTrue( loopFunc.compute( bundle ) );
+  }
+
+  @Test
+  public void testNotNullAndNotDeriviativeLoop() {
+    LoopPipe.LoopBundle bundle = mock( LoopPipe.LoopBundle.class );
+    when( bundle.getObject() ).thenReturn( null );
+    LineageClient.NotNullAndNotDeriviativeLoop loopFunc = new LineageClient.NotNullAndNotDeriviativeLoop();
+    assertFalse( loopFunc.compute( bundle ) );
+    Vertex v = mock( Vertex.class );
+    when( v.getEdges( Direction.IN, DictionaryConst.LINK_DERIVES ) ).thenReturn( new ArrayList<Edge>() );
+    when( bundle.getObject() ).thenReturn( v );
+    assertTrue( loopFunc.compute( bundle ) );
+  }
+
+  @Test
+  public void testHasDerivesLinks() {
+    Vertex v = mock( Vertex.class );
+    LineageClient.HasDerivesLink loopFunc = new LineageClient.HasDerivesLink();
+    when( v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES ) ).thenReturn( new ArrayList<Vertex>() );
+    assertFalse( loopFunc.compute( v ) );
+    when( v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES ) ).thenReturn( Arrays.asList( mock( Vertex.class ) ) );
+    assertTrue( loopFunc.compute( v ) );
   }
 
   @Test

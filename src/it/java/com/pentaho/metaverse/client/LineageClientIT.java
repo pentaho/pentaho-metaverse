@@ -41,7 +41,9 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -95,96 +97,148 @@ public class LineageClientIT {
   @Test
   public void testGetCreatorSteps() throws Exception {
 
-    List<StepField> creatorSteps = client.getCreatorSteps( transMeta, "Select values", "COUNTRY_1" );
+    Map<String, Set<StepField>> creatorSteps = client.getCreatorSteps( transMeta, "Select values", Arrays.asList( "COUNTRY_1" ) );
     assertNotNull( creatorSteps );
     assertEquals( 1, creatorSteps.size() );
-    assertEquals( "Merge Join", creatorSteps.get( 0 ).getStepName() );
+    Set<StepField> creatorStepsSet = creatorSteps.get( "COUNTRY_1" );
+    assertNotNull( creatorStepsSet );
+    assertEquals( 1, creatorStepsSet.size() );
+    assertEquals( "Merge Join", creatorStepsSet.iterator().next().getStepName() );
 
-    creatorSteps = client.getCreatorSteps( transMeta, "Merge Join", "COUNTRY_1" );
+    creatorSteps = client.getCreatorSteps( transMeta, "Merge Join", Arrays.asList( "COUNTRY_1" ) );
     assertNotNull( creatorSteps );
     assertEquals( 1, creatorSteps.size() );
-    assertEquals( "Merge Join", creatorSteps.get( 0 ).getStepName() );
+    creatorStepsSet = creatorSteps.get( "COUNTRY_1" );
+    assertNotNull( creatorStepsSet );
+    assertEquals( 1, creatorStepsSet.size() );
+    assertEquals( "Merge Join", creatorStepsSet.iterator().next().getStepName() );
 
-    creatorSteps = client.getCreatorSteps( transMeta, "Select values", "COUNTRY" );
+    creatorSteps = client.getCreatorSteps( transMeta, "Select values", Arrays.asList( "COUNTRY" ) );
     assertNotNull( creatorSteps );
-    assertEquals( 2, creatorSteps.size() );
+    assertEquals( 1, creatorSteps.size() );
+    creatorStepsSet = creatorSteps.get( "COUNTRY" );
+    assertNotNull( creatorStepsSet );
+    assertEquals( 2, creatorStepsSet.size() );
     List<String> stepNames = new ArrayList<String>( 2 );
-    for ( StepField stepField : creatorSteps ) {
+    for ( StepField stepField : creatorStepsSet ) {
       stepNames.add( stepField.getStepName() );
     }
     assertTrue( stepNames.contains( "Data Grid" ) );
     assertTrue( stepNames.contains( "Table input" ) );
 
-    creatorSteps = client.getCreatorSteps( transMeta, "Merge Join", "COUNTRY" );
+    creatorSteps = client.getCreatorSteps( transMeta, "Merge Join", Arrays.asList( "COUNTRY" ) );
     assertNotNull( creatorSteps );
-    assertEquals( 2, creatorSteps.size() );
+    assertEquals( 1, creatorSteps.size() );
+    creatorStepsSet = creatorSteps.get( "COUNTRY" );
+    assertNotNull( creatorStepsSet );
+    assertEquals( 2, creatorStepsSet.size() );
     stepNames = new ArrayList<String>( 2 );
-    for ( StepField stepField : creatorSteps ) {
+    for ( StepField stepField : creatorStepsSet ) {
       stepNames.add( stepField.getStepName() );
     }
     assertTrue( stepNames.contains( "Data Grid" ) );
     assertTrue( stepNames.contains( "Table input" ) );
 
-    creatorSteps = client.getCreatorSteps( transMeta, "Select values", new String[]{ "COUNTRY", "COUNTRY_1", "HELLO" } );
+    creatorSteps = client.getCreatorSteps( transMeta, "Select values", Arrays.asList( "COUNTRY", "COUNTRY_1", "HELLO" ) );
     assertNotNull( creatorSteps );
-    assertEquals( 4, creatorSteps.size() );
-    stepNames = new ArrayList<String>( 4 );
-    for ( StepField stepField : creatorSteps ) {
+    assertEquals( 3, creatorSteps.size() );
+    creatorStepsSet = creatorSteps.get( "COUNTRY" );
+    assertNotNull( creatorStepsSet );
+    assertEquals( 2, creatorStepsSet.size() );
+    stepNames = new ArrayList<String>( 2 );
+    for ( StepField stepField : creatorStepsSet ) {
       stepNames.add( stepField.getStepName() );
     }
     assertTrue( stepNames.contains( "Data Grid" ) );
     assertTrue( stepNames.contains( "Table input" ) );
+
+    creatorStepsSet = creatorSteps.get( "COUNTRY_1" );
+    assertNotNull( creatorStepsSet );
+    assertEquals( 1, creatorStepsSet.size() );
+    stepNames = new ArrayList<String>( 1 );
+    for ( StepField stepField : creatorStepsSet ) {
+      stepNames.add( stepField.getStepName() );
+    }
     assertTrue( stepNames.contains( "Merge Join" ) );
+
+    creatorStepsSet = creatorSteps.get( "HELLO" );
+    assertNotNull( creatorStepsSet );
+    assertEquals( 1, creatorStepsSet.size() );
+    stepNames = new ArrayList<String>( 1 );
+    for ( StepField stepField : creatorStepsSet ) {
+      stepNames.add( stepField.getStepName() );
+    }
     assertTrue( stepNames.contains( "Select values" ) );
 
     // Test non-API version that takes a String filename for the transformation
-    creatorSteps = client.getCreatorSteps( MERGE_JOIN_KTR_FILENAME, "Select values", "COUNTRY_1" );
+    creatorSteps = client.getCreatorSteps( MERGE_JOIN_KTR_FILENAME, "Select values", Arrays.asList( "COUNTRY_1" ) );
     assertNotNull( creatorSteps );
     assertEquals( 1, creatorSteps.size() );
-    assertEquals( "Merge Join", creatorSteps.get( 0 ).getStepName() );
+    creatorStepsSet = creatorSteps.get( "COUNTRY_1" );
+    assertNotNull( creatorStepsSet );
+    assertEquals( 1, creatorStepsSet.size() );
+    assertEquals( "Merge Join", creatorStepsSet.iterator().next().getStepName() );
   }
 
   @Test
   public void testGetOriginSteps() throws Exception {
-    Set<StepFieldTarget> originSteps = client.getOriginSteps( transMeta, "Select values", "COUNTRY_1" );
+    Map<String, Set<StepField>> originSteps =
+      client.getOriginSteps( transMeta, "Select values", Arrays.asList( "COUNTRY_1" ) );
     assertNotNull( originSteps );
-    assertEquals( 2, originSteps.size() );
+    assertEquals( 1, originSteps.size() );
+    Set<StepField> originStepsSet = originSteps.get( "COUNTRY_1" );
+    assertNotNull( originStepsSet );
+    assertEquals( 2, originStepsSet.size() );
     // We're not sure which step will be in which order, but both fields are named COUNTRY
-    for ( StepFieldTarget stepField : originSteps ) {
+    for ( StepField stepField : originStepsSet ) {
       assertEquals( "COUNTRY", stepField.getFieldName() );
     }
 
-    originSteps = client.getOriginSteps( transMeta, "Merge Join", "COUNTRY_1" );
+    originSteps = client.getOriginSteps( transMeta, "Merge Join", Arrays.asList( "COUNTRY_1" ) );
     assertNotNull( originSteps );
-    assertEquals( 2, originSteps.size() );
+    assertEquals( 1, originSteps.size() );
+    originStepsSet = originSteps.get( "COUNTRY_1" );
+    assertNotNull( originStepsSet );
+    assertEquals( 2, originStepsSet.size() );
     // We're not sure which step will be in which order, but both fields are named COUNTRY
-    for ( StepFieldTarget stepField : originSteps ) {
+    for ( StepField stepField : originStepsSet ) {
       assertEquals( "COUNTRY", stepField.getFieldName() );
     }
 
-    originSteps = client.getOriginSteps( transMeta, "Select values", "COUNTRY" );
+    originSteps = client.getOriginSteps( transMeta, "Select values", Arrays.asList( "COUNTRY" ) );
     assertNotNull( originSteps );
-    assertEquals( 2, originSteps.size() );
+    assertEquals( 1, originSteps.size() );
+    originStepsSet = originSteps.get( "COUNTRY" );
+    assertNotNull( originStepsSet );
+    assertEquals( 2, originStepsSet.size() );
     // We're not sure which step will be in which order, but both fields are named COUNTRY
-    for ( StepFieldTarget stepField : originSteps ) {
+    for ( StepField stepField : originStepsSet ) {
       assertEquals( "COUNTRY", stepField.getFieldName() );
     }
 
-    originSteps = client.getOriginSteps( transMeta, "Select values", "HELLO" );
+    originSteps = client.getOriginSteps( transMeta, "Select values", Arrays.asList( "HELLO" ) );
     assertNotNull( originSteps );
-    assertEquals( 2, originSteps.size() );
+    assertEquals( 1, originSteps.size() );
+    originStepsSet = originSteps.get( "HELLO" );
+    assertNotNull( originStepsSet );
+    assertEquals( 2, originStepsSet.size() );
     // We're not sure which step will be in which order, but both fields are named COUNTRY
-    for ( StepFieldTarget stepField : originSteps ) {
+    for ( StepField stepField : originStepsSet ) {
       assertEquals( "COUNTRY", stepField.getFieldName() );
     }
 
-    originSteps = client.getOriginSteps( transMeta, "Select values", new String[]{ "COUNTRY", "COUNTRY_1", "HELLO" } );
+    originSteps = client.getOriginSteps( transMeta, "Select values", Arrays.asList( "COUNTRY", "COUNTRY_1", "HELLO" ) );
     assertNotNull( originSteps );
-    assertEquals( 2, originSteps.size() );
-    // We're not sure which step will be in which order, but both fields are named COUNTRY
-    for ( StepFieldTarget stepField : originSteps ) {
-      assertEquals( "COUNTRY", stepField.getFieldName() );
+    assertEquals( 3, originSteps.size() );
+    for ( Set<StepField> originStepsSetValues : originSteps.values() ) {
+      assertNotNull( originStepsSetValues );
+      assertEquals( 2, originStepsSetValues.size() );
+      // We're not sure which step will be in which order, but both fields are named COUNTRY
+      for ( StepField stepField : originStepsSetValues ) {
+        assertEquals( "COUNTRY", stepField.getFieldName() );
+      }
     }
+
   }
 
 }
