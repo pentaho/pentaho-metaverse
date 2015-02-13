@@ -99,7 +99,7 @@
 
   <scm>
     <connection>scm:git:git@github.com:${github.user}/${project.artifactId}.git</connection>
-    <url>scm:git:git@github.com:${github.user}/${project.artifactId}.git</url>
+    <url>https://github.com/pentaho/${project.artifactId}</url>
     <developerConnection>scm:git:git@github.com:${github.user}/${project.artifactId}.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
