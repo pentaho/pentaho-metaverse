@@ -29,7 +29,9 @@ import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.frames.CalculatorStepNode;
 import com.pentaho.metaverse.frames.CsvFileInputStepNode;
 import com.pentaho.metaverse.frames.DatasourceNode;
+import com.pentaho.metaverse.frames.ExcelInputStepNode;
 import com.pentaho.metaverse.frames.FieldNode;
+import com.pentaho.metaverse.frames.FileFieldNode;
 import com.pentaho.metaverse.frames.FramedMetaverseNode;
 import com.pentaho.metaverse.frames.JobEntryNode;
 import com.pentaho.metaverse.frames.JobNode;
@@ -70,6 +72,7 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
 import org.pentaho.di.trans.steps.calculator.CalculatorMetaFunction;
+import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
 import org.pentaho.di.trans.steps.streamlookup.StreamLookupMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -337,6 +340,67 @@ public class MetaverseValidationIT {
       // check the created node is never used to "populate" anything
       FieldNode populatedNode = node.getFieldPopulatedByMe();
       assertNull( populatedNode );
+    }
+  }
+
+  @Test
+  public void testExcelInputStep() throws Exception {
+    // this is testing a specific TextFileInputStep instance
+    ExcelInputStepNode excelInputStepNode = root.getExcelInputStepNode();
+    assertNotNull( excelInputStepNode );
+
+    Iterable<FramedMetaverseNode> inputFiles = excelInputStepNode.getInputFiles();
+    int countInputFiles = getIterableSize( inputFiles );
+    assertEquals( 1, countInputFiles );
+    for ( FramedMetaverseNode inputFile : inputFiles ) {
+      assertTrue( inputFile.getName().endsWith( "SacramentoCrime.xls" ) );
+    }
+
+    assertEquals( "Microsoft Excel Input", excelInputStepNode.getStepType() );
+
+    int countFileFieldNode = getIterableSize( excelInputStepNode.getFileFieldNodesUses() );
+
+    Iterable<StreamFieldNode> streamFieldNodes = excelInputStepNode.getStreamFieldNodesCreates();
+    int countStreamFieldNode = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+
+    // we should create as many fields as we read in
+    assertEquals( countFileFieldNode, countStreamFieldNode );
+
+  }
+
+  @Test
+  public void testExcelInputStep_filenameFromField() throws Exception {
+    // this is testing a specific TextFileInputStep instance
+    ExcelInputStepNode excelInputStepNode = root.getExcelInputFileNameFromFieldStepNode();
+    assertNotNull( excelInputStepNode );
+
+    int countUsesFieldNodes = getIterableSize( excelInputStepNode.getFileFieldNodesUses() );
+
+    Iterable<StreamFieldNode> streamFieldNodes = excelInputStepNode.getStreamFieldNodesCreates();
+    int countCreatesFieldNodes = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+
+    // we should create as many fields as we read in PLUS 1 for the incoming field that defines the files
+    assertEquals( countUsesFieldNodes - 1, countCreatesFieldNodes );
+
+    String filenameField = null;
+    TransMeta tm =
+      new TransMeta( new FileInputStream( excelInputStepNode.getTransNode().getPath() ), null, true, null, null );
+    for ( StepMeta stepMeta : tm.getSteps() ) {
+      if ( stepMeta.getName().equals( excelInputStepNode.getName() ) ) {
+        ExcelInputMeta meta = (ExcelInputMeta) getBaseStepMetaFromStepMeta( stepMeta );
+        assertTrue( meta.isAcceptingFilenames() );
+        filenameField = meta.getAcceptingField();
+        assertNotNull( filenameField );
+
+        // this was the one we cared about...
+        break;
+      }
     }
   }
 
