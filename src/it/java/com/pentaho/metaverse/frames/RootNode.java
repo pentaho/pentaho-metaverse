@@ -94,4 +94,9 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'CSV file input'}.as('step').in('contains').has('name', T.eq, 'CSV Input').back('step')" )
   public CsvFileInputStepNode getCsvFileInputStepNode();
 
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Input'}.as('step').in('contains').has('name', T.eq, 'excel_input').back('step')" )
+  public ExcelInputStepNode getExcelInputStepNode();
+
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Input'}.as('step').in('contains').has('name', T.eq, 'Excel input - filename from field').back('step')" )
+  public ExcelInputStepNode getExcelInputFileNameFromFieldStepNode();
 }
