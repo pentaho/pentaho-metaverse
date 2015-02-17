@@ -22,9 +22,12 @@
 
 package com.pentaho.metaverse.client;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.IntegrationTestUtil;
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
+import com.pentaho.metaverse.api.model.Operation;
+import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.impl.DocumentController;
 import com.pentaho.metaverse.impl.Namespace;
 import com.pentaho.metaverse.locator.FileSystemLocator;
@@ -252,9 +255,38 @@ public class LineageClientIT {
     assertNotNull( operationPaths );
     assertEquals( 2, operationPaths.size() );
     for ( List<StepFieldOperations> operationPath : operationPaths ) {
-      // Verify the first and last nodes and operations
-      assertTrue( operationPath.size() > 1 );
+      // Should be 3 nodes along each path
+      assertEquals( 3, operationPath.size() );
 
+      // The end and last nodes should be the same for both paths
+      StepFieldOperations last = operationPath.get( 2 );
+      assertEquals( "Select values", last.getStepName() );
+      assertEquals( "HELLO", last.getFieldName() );
+      Operations ops = last.getOperations();
+      assertNotNull( ops );
+      assertEquals( 1, ops.size() );
+      List<Operation> dataOps = ops.getOperationsByType( DictionaryConst.PROPERTY_DATA_OPERATIONS );
+      assertNull( dataOps );
+      List<Operation> metadataOps = ops.getOperationsByType( DictionaryConst.PROPERTY_OPERATIONS );
+      assertNotNull( metadataOps );
+      assertEquals( 1, metadataOps.size() );
+      assertEquals( "ops", metadataOps.get( 0 ).getName() );
+      assertEquals( "{\"modified\":[\"name\"]}", metadataOps.get( 0 ).getDescription() );
+
+      StepFieldOperations middle = operationPath.get( 1 );
+      assertEquals( "Merge Join", middle.getStepName() );
+      assertEquals( "COUNTRY_1", middle.getFieldName() );
+      metadataOps = ops.getOperationsByType( DictionaryConst.PROPERTY_OPERATIONS );
+      assertNotNull( metadataOps );
+      assertEquals( 1, metadataOps.size() );
+      assertEquals( "ops", metadataOps.get( 0 ).getName() );
+      assertEquals( "{\"modified\":[\"name\"]}", metadataOps.get( 0 ).getDescription() );
+
+      StepFieldOperations first = operationPath.get( 0 );
+      assertEquals( "COUNTRY", first.getFieldName() );
+      // The step name is either "Table input" or "Data Grid"
+      String firstStepName = first.getStepName();
+      assertTrue( "Table input".equals( firstStepName ) || "Data Grid".equals( firstStepName ) );
     }
   }
 

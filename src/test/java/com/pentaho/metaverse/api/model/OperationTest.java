@@ -48,4 +48,9 @@ public class OperationTest {
     operation.setDescription( "newDescription" );
     assertEquals( "newDescription", operation.getDescription() );
   }
+
+  @Test
+  public void testToString() {
+    assertEquals( "operationName: operationDescription", operation.toString() );
+  }
 }
