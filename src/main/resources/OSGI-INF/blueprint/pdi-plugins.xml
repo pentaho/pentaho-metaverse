@@ -256,4 +256,53 @@
     </service-properties>
   </service>
 
+  <!-- StepExternalResourceConsumerListener extension point -->
+  <bean id="stepExternalResourceConsumerListener"
+        scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExternalResourceConsumerListener"/>
+  <bean id="stepExternalResourceConsumerListenerPlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
+    <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
+    <property name="name" value="StepBeforeStart"/>
+    <property name="ID" value="stepExternalResource"/>
+    <property name="description" value="Step external resource listener"/>
+    <property name="pluginTypeInterface" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    <property name="category" value="Data Lineage"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="org.pentaho.di.core.extension.ExtensionPointInterface" value="stepExternalResourceConsumerListener"/>
+      </map>
+    </property>
+  </bean>
+  <service id="stepExternalResourceConsumerListenerPluginService"
+           interface="org.pentaho.di.core.plugins.PluginInterface"
+           ref="stepExternalResourceConsumerListenerPlugin">
+    <service-properties>
+      <entry key="PluginType" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    </service-properties>
+  </service>
+
+  <bean id="metaverseKettleLifeCycle"
+        class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.MetaverseKettleLifecycleHandler" scope="singleton"/>
+  <bean id="metaverseKettleLifeCyclePlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
+    <property name="mainType" value="org.pentaho.di.core.lifecycle.KettleLifecycleListener"/>
+    <property name="name" value="MetaverseKettleLifecycleHandler"/>
+    <property name="ID" value="MetaverseKettleLifecycleHandler"/>
+    <property name="description" value=""/>
+    <property name="pluginTypeInterface" value="org.pentaho.di.core.plugins.KettleLifecyclePluginType"/>
+    <property name="category" value="Data Lineage"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="org.pentaho.di.core.lifecycle.KettleLifecycleListener"
+               value="metaverseKettleLifeCycle"/>
+      </map>
+    </property>
+  </bean>
+  <!-- Register the plugin as a service so Kettle can find it -->
+  <service id="metaverseKettleLifeCyclePluginService"
+           interface="org.pentaho.di.core.plugins.PluginInterface"
+           ref="metaverseKettleLifeCyclePlugin">
+    <service-properties>
+      <entry key="PluginType" value="org.pentaho.di.core.plugins.KettleLifecyclePluginType"/>
+    </service-properties>
+  </service>
 </blueprint>
