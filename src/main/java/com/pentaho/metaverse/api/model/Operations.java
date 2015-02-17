@@ -40,7 +40,7 @@ public class Operations extends HashMap<String, List<Operation>> {
 
   }
 
-  public List<Operation> getOperationByType( String operationType ) {
+  public List<Operation> getOperationsByType( String operationType ) {
     return get( operationType );
   }
 

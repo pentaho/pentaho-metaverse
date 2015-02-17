@@ -234,7 +234,7 @@ public class LineageClient implements ILineageClient {
                     operations.addOperation( DictionaryConst.PROPERTY_DATA_OPERATIONS,
                       new Operation( "data_ops", dataOps ) );
                   }
-                  stepFieldOps.add( new StepFieldOperations( stepName, fieldName, operations ) );
+                  stepFieldOps.add( 0, new StepFieldOperations( stepName, fieldName, operations ) );
                 }
                 pathSet.add( stepFieldOps );
               }

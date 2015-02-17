@@ -54,4 +54,9 @@ public class Operation {
   public void setName( String name ) {
     this.name = name;
   }
+
+  @Override
+  public String toString() {
+    return getName() + ": " + getDescription();
+  }
 }
