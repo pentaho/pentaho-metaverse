@@ -27,11 +27,17 @@ import org.junit.Test;
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * User: RFellows Date: 8/14/14
  */
 public class KettleAnalyzerUtilTest {
+
+  @Test
+  public void testDefaultConstructor() {
+    assertNotNull( new KettleAnalyzerUtil() );
+  }
 
   @Test
   public void testNormalizeFilePath() throws Exception {

@@ -56,8 +56,8 @@ public class OperationsTest {
     Operation operation3 = new Operation( "opName3", "opDesc3" );
     operations.addOperation( DictionaryConst.PROPERTY_DATA_OPERATIONS, operation3 );
 
-    List<Operation> metadataOperations = operations.getOperationByType( DictionaryConst.PROPERTY_OPERATIONS );
-    List<Operation> dataOperations = operations.getOperationByType( DictionaryConst.PROPERTY_DATA_OPERATIONS );
+    List<Operation> metadataOperations = operations.getOperationsByType( DictionaryConst.PROPERTY_OPERATIONS );
+    List<Operation> dataOperations = operations.getOperationsByType( DictionaryConst.PROPERTY_DATA_OPERATIONS );
     assertNotNull( metadataOperations );
     assertNotNull( dataOperations );
     assertEquals( 2, metadataOperations.size() );

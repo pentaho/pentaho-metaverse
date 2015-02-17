@@ -33,6 +33,7 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.trans.TransMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,6 +61,7 @@ public class LineageClientTest {
   public void testGetCreatorSteps() throws Exception {
     assertTrue( lineageClient.getCreatorSteps( (String) null, null, null ).isEmpty() );
     assertTrue( lineageClient.getCreatorSteps( "testTrans", null, null ).isEmpty() );
+    assertTrue( lineageClient.getCreatorSteps( mock( TransMeta.class ), null, null ).isEmpty() );
   }
 
   @Test
@@ -85,6 +87,11 @@ public class LineageClientTest {
     Vertex v = creatorFields.iterator().next();
     assertNotNull( v );
     assertEquals( v.getProperty( DictionaryConst.PROPERTY_NAME ), TEST_FIELD );
+  }
+
+  @Test
+  public void testGetOriginSteps() throws Exception {
+    assertTrue( lineageClient.getOriginSteps( mock( TransMeta.class ), null, null ).isEmpty() );
   }
 
   @Test
