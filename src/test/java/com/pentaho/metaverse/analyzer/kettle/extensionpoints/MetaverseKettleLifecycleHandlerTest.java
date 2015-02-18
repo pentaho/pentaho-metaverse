@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 public class MetaverseKettleLifecycleHandlerTest {
 
   @Test
-  public void testLoadExternalResourceConsumerMap() throws Exception {
+  public void testPluginAdded() throws Exception {
     PluginRegistry registry = PluginRegistry.getInstance();
     MetaverseKettleLifecycleHandler metaverseKettleLifecycleHandler = new MetaverseKettleLifecycleHandler();
 
@@ -48,6 +48,71 @@ public class MetaverseKettleLifecycleHandlerTest {
     registrar.init( registry );
     PluginRegistry.init();
 
+    // Call once to add plugin listener
+    metaverseKettleLifecycleHandler.onEnvironmentInit();
+
+    // Register a fake step plugin
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, createMockStepPlugin() );
+
+    // Register a fake job entry plugin
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, createMockJobEntryPlugin() );
+
+    // No-op, called for coverage
+    metaverseKettleLifecycleHandler.onEnvironmentShutdown();
+  }
+
+  @Test
+  public void testPluginRemoved() throws Exception {
+    PluginRegistry registry = PluginRegistry.getInstance();
+    MetaverseKettleLifecycleHandler metaverseKettleLifecycleHandler = new MetaverseKettleLifecycleHandler();
+
+    ExternalResourceConsumerPluginRegistrar registrar = new ExternalResourceConsumerPluginRegistrar();
+    registrar.init( registry );
+    PluginRegistry.init();
+
+    // Call once to add plugin listener
+    metaverseKettleLifecycleHandler.onEnvironmentInit();
+
+    // Register a fake step plugin
+    PluginInterface mockStepPlugin = createMockStepPlugin();
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockStepPlugin );
+
+    // Register a fake job entry plugin
+    PluginInterface mockJobEntryPlugin = createMockJobEntryPlugin();
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockJobEntryPlugin );
+
+    registry.removePlugin( ExternalResourceConsumerPluginType.class, mockStepPlugin );
+    registry.removePlugin( ExternalResourceConsumerPluginType.class, mockJobEntryPlugin );
+
+  }
+
+  @Test
+  public void testPluginChanged() throws Exception {
+    PluginRegistry registry = PluginRegistry.getInstance();
+    MetaverseKettleLifecycleHandler metaverseKettleLifecycleHandler = new MetaverseKettleLifecycleHandler();
+
+    ExternalResourceConsumerPluginRegistrar registrar = new ExternalResourceConsumerPluginRegistrar();
+    registrar.init( registry );
+    PluginRegistry.init();
+
+    // Call once to add plugin listener
+    metaverseKettleLifecycleHandler.onEnvironmentInit();
+
+    // Register a fake step plugin
+    PluginInterface mockStepPlugin = createMockStepPlugin();
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockStepPlugin );
+
+    // Register a fake job entry plugin
+    PluginInterface mockJobEntryPlugin = createMockJobEntryPlugin();
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockJobEntryPlugin );
+
+    // Re-register new versions of the plugin to get pluginChanged() invoked
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockStepPlugin );
+    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockJobEntryPlugin );
+
+  }
+
+  private PluginInterface createMockStepPlugin() {
     // Create a fake step consumer plugin to exercise the map building logic
     PluginInterface mockStepPlugin = mock( PluginInterface.class );
     when( mockStepPlugin.getIds() ).thenReturn( new String[]{ "testStepId" } );
@@ -56,9 +121,13 @@ public class MetaverseKettleLifecycleHandlerTest {
     Map<Class<?>, String> stepClassMap = new HashMap<Class<?>, String>();
     stepClassMap.put( IExternalResourceConsumer.class, stepConsumer.getClass().getName() );
     doReturn( IExternalResourceConsumer.class ).when( mockStepPlugin ).getMainType();
-    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockStepPlugin );
+    // Then add a class to the maps to get through plugin registration
+    when( mockStepPlugin.getClassMap() ).thenReturn( stepClassMap );
+    return mockStepPlugin;
+  }
 
-    // Create a fake step consumer plugin to exercise the map building logic
+  private PluginInterface createMockJobEntryPlugin() {
+    // Create a fake job entry consumer plugin to exercise the map building logic
     PluginInterface mockJobEntryPlugin = mock( PluginInterface.class );
     when( mockJobEntryPlugin.getIds() ).thenReturn( new String[]{ "testJobEntryId" } );
     when( mockJobEntryPlugin.getName() ).thenReturn( "testJobEntryName" );
@@ -66,23 +135,7 @@ public class MetaverseKettleLifecycleHandlerTest {
     Map<Class<?>, String> jobEntryClassMap = new HashMap<Class<?>, String>();
     jobEntryClassMap.put( IExternalResourceConsumer.class, jobEntryConsumer.getClass().getName() );
     doReturn( IExternalResourceConsumer.class ).when( mockJobEntryPlugin ).getMainType();
-    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockJobEntryPlugin );
-
-    // Call once to generate plugin exception
-    try {
-      metaverseKettleLifecycleHandler.onEnvironmentInit();
-      fail( "Should have generated a LifecycleException from a KettlePluginException" );
-    } catch ( LifecycleException le ) {
-      // We're good, we expected this
-    }
-
-    // Then add a class to the maps to get through plugin registration
-    when( mockStepPlugin.getClassMap() ).thenReturn( stepClassMap );
     when( mockJobEntryPlugin.getClassMap() ).thenReturn( jobEntryClassMap );
-
-    metaverseKettleLifecycleHandler.onEnvironmentInit();
-
-    // No-op, called for coverage
-    metaverseKettleLifecycleHandler.onEnvironmentShutdown();
+    return mockJobEntryPlugin;
   }
 }

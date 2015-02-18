@@ -38,8 +38,9 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -59,9 +60,9 @@ public class JobEntryExternalResourceConsumerListenerTest {
     jobEntryExtensionPoint.callExtensionPoint( null, jobExec );
 
     // Adda consumer
-    Map<Class<? extends JobEntryBase>, List<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap =
+    Map<Class<? extends JobEntryBase>, Queue<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap =
       ExternalResourceConsumerMap.getInstance().getJobEntryConsumerMap();
-    List<IJobEntryExternalResourceConsumer> consumers = new ArrayList<IJobEntryExternalResourceConsumer>();
+    Queue<IJobEntryExternalResourceConsumer> consumers = new ConcurrentLinkedQueue<IJobEntryExternalResourceConsumer>();
     jobEntryConsumerMap.put( jobEntryBase.getClass(), consumers );
     jobEntryExtensionPoint.callExtensionPoint( null, jobExec );
 

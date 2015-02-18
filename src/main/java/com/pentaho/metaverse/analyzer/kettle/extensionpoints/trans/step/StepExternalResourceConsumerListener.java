@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 @ExtensionPoint(
   description = "Step external resource listener",
@@ -66,7 +67,7 @@ public class StepExternalResourceConsumerListener implements ExtensionPointInter
         Class<?> metaClass = meta.getClass();
         if ( BaseStepMeta.class.isAssignableFrom( metaClass ) ) {
           @SuppressWarnings( "unchecked" )
-          List<IStepExternalResourceConsumer> stepConsumers =
+          Queue<IStepExternalResourceConsumer> stepConsumers =
             ExternalResourceConsumerMap.getInstance().getStepExternalResourceConsumers(
               (Class<? extends BaseStepMeta>) metaClass );
           if ( stepConsumers != null ) {

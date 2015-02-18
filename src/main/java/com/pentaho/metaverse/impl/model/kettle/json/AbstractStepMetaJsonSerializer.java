@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -189,12 +190,12 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
    * @throws JsonGenerationException
    */
   protected abstract void writeCustomProperties( T meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException, JsonGenerationException;
+    throws IOException;
 
 
   protected void writeExternalResources( T meta, JsonGenerator json, SerializerProvider serializerProvider )
     throws IOException, JsonGenerationException {
-    List<IStepExternalResourceConsumer> resourceConsumers =
+    Queue<IStepExternalResourceConsumer> resourceConsumers =
         getExternalResourceConsumerMap().getStepExternalResourceConsumers( meta.getClass() );
 
     json.writeArrayFieldStart( JSON_PROPERTY_EXTERNAL_RESOURCES );

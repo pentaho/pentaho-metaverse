@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 @ExtensionPoint(
   description = "Job entry external resource listener",
@@ -65,7 +66,7 @@ public class JobEntryExternalResourceConsumerListener implements ExtensionPointI
         Class<?> metaClass = meta.getClass();
         if ( JobEntryBase.class.isAssignableFrom( metaClass ) ) {
           @SuppressWarnings( "unchecked" )
-          List<IJobEntryExternalResourceConsumer> jobEntryConsumers =
+          Queue<IJobEntryExternalResourceConsumer> jobEntryConsumers =
             ExternalResourceConsumerMap.getInstance().getJobEntryExternalResourceConsumers(
               (Class<? extends JobEntryBase>) metaClass );
           if ( jobEntryConsumers != null ) {
