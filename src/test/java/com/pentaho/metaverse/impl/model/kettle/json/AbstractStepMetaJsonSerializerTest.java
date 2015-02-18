@@ -56,7 +56,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -73,8 +75,10 @@ public class AbstractStepMetaJsonSerializerTest {
 
   AbstractStepMetaJsonSerializer<BaseStepMeta> serializer;
   LineageRepository repo;
-  @Mock JsonGenerator json;
-  @Mock SerializerProvider provider;
+  @Mock
+  JsonGenerator json;
+  @Mock
+  SerializerProvider provider;
   BaseStepMeta spyMeta;
   StepMeta spyParent;
   TransMeta spyParentTrans;
@@ -208,7 +212,7 @@ public class AbstractStepMetaJsonSerializerTest {
   @Test
   public void testWriteExternalResources() throws Exception {
     ExternalResourceConsumerMap mockConsumerMap = mock( ExternalResourceConsumerMap.class );
-    List<IStepExternalResourceConsumer> consumers = new ArrayList<IStepExternalResourceConsumer>();
+    Queue<IStepExternalResourceConsumer> consumers = new ConcurrentLinkedQueue<IStepExternalResourceConsumer>();
     Set<IExternalResourceInfo> externalResources = new HashSet<IExternalResourceInfo>();
 
     IExternalResourceInfo info = mock( IExternalResourceInfo.class );

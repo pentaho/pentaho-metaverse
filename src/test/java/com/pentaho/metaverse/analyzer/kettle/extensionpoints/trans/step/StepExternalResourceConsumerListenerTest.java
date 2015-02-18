@@ -39,8 +39,9 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -62,9 +63,9 @@ public class StepExternalResourceConsumerListenerTest {
     stepCombi.stepMeta = mock( StepMeta.class );
 
     stepExtensionPoint.callExtensionPoint( null, stepCombi );
-    Map<Class<? extends BaseStepMeta>, List<IStepExternalResourceConsumer>> stepConsumerMap =
+    Map<Class<? extends BaseStepMeta>, Queue<IStepExternalResourceConsumer>> stepConsumerMap =
       ExternalResourceConsumerMap.getInstance().getStepConsumerMap();
-    List<IStepExternalResourceConsumer> consumers = new ArrayList<IStepExternalResourceConsumer>();
+    Queue<IStepExternalResourceConsumer> consumers = new ConcurrentLinkedQueue<IStepExternalResourceConsumer>();
     stepConsumerMap.put( bsm.getClass(), consumers );
     stepExtensionPoint.callExtensionPoint( null, stepCombi );
     IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );

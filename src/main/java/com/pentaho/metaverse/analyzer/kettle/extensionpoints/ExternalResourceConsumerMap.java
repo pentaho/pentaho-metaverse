@@ -24,10 +24,10 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * This class maintains a map of StepMeta classes to lists of ExternalResourceConsumers for the purposes
@@ -37,45 +37,46 @@ public class ExternalResourceConsumerMap {
 
   private static ExternalResourceConsumerMap INSTANCE = new ExternalResourceConsumerMap();
 
-  private final Map<Class<? extends BaseStepMeta>, List<IStepExternalResourceConsumer>> stepConsumerMap;
-  private final Map<Class<? extends JobEntryBase>, List<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap;
+  private final Map<Class<? extends BaseStepMeta>, Queue<IStepExternalResourceConsumer>> stepConsumerMap;
+
+  private final Map<Class<? extends JobEntryBase>, Queue<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap;
 
   private ExternalResourceConsumerMap() {
     stepConsumerMap =
-      new ConcurrentHashMap<Class<? extends BaseStepMeta>, List<IStepExternalResourceConsumer>>();
+      new ConcurrentHashMap<Class<? extends BaseStepMeta>, Queue<IStepExternalResourceConsumer>>();
     jobEntryConsumerMap =
-      new ConcurrentHashMap<Class<? extends JobEntryBase>, List<IJobEntryExternalResourceConsumer>>();
+      new ConcurrentHashMap<Class<? extends JobEntryBase>, Queue<IJobEntryExternalResourceConsumer>>();
   }
 
   public static ExternalResourceConsumerMap getInstance() {
     return INSTANCE;
   }
 
-  public List<IStepExternalResourceConsumer> getStepExternalResourceConsumers(
+  public synchronized Queue<IStepExternalResourceConsumer> getStepExternalResourceConsumers(
     Class<? extends BaseStepMeta> stepMetaClass ) {
-    List<IStepExternalResourceConsumer> consumers = stepConsumerMap.get( stepMetaClass );
+    Queue<IStepExternalResourceConsumer> consumers = stepConsumerMap.get( stepMetaClass );
     if ( consumers == null ) {
-      consumers = new ArrayList<IStepExternalResourceConsumer>();
+      consumers = new ConcurrentLinkedQueue<IStepExternalResourceConsumer>();
       stepConsumerMap.put( stepMetaClass, consumers );
     }
     return consumers;
   }
 
-  public List<IJobEntryExternalResourceConsumer> getJobEntryExternalResourceConsumers(
+  public synchronized Queue<IJobEntryExternalResourceConsumer> getJobEntryExternalResourceConsumers(
     Class<? extends JobEntryBase> jobMetaClass ) {
-    List<IJobEntryExternalResourceConsumer> consumers = jobEntryConsumerMap.get( jobMetaClass );
+    Queue<IJobEntryExternalResourceConsumer> consumers = jobEntryConsumerMap.get( jobMetaClass );
     if ( consumers == null ) {
-      consumers = new ArrayList<IJobEntryExternalResourceConsumer>();
+      consumers = new ConcurrentLinkedQueue<IJobEntryExternalResourceConsumer>();
       jobEntryConsumerMap.put( jobMetaClass, consumers );
     }
     return consumers;
   }
 
-  public Map<Class<? extends BaseStepMeta>, List<IStepExternalResourceConsumer>> getStepConsumerMap() {
+  public Map<Class<? extends BaseStepMeta>, Queue<IStepExternalResourceConsumer>> getStepConsumerMap() {
     return stepConsumerMap;
   }
 
-  public Map<Class<? extends JobEntryBase>, List<IJobEntryExternalResourceConsumer>> getJobEntryConsumerMap() {
+  public Map<Class<? extends JobEntryBase>, Queue<IJobEntryExternalResourceConsumer>> getJobEntryConsumerMap() {
     return jobEntryConsumerMap;
   }
 }

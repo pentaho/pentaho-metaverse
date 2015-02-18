@@ -28,24 +28,25 @@ import org.pentaho.di.core.lifecycle.KettleLifecycleListener;
 import org.pentaho.di.core.lifecycle.LifecycleException;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.plugins.PluginTypeListener;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * MetaverseKettleLifecycleHandler processes lifecycle events (startup, shutdown) in terms of managing the lineage
  * capabilities, such as creation of document controller(s), plugin map(s),
  */
 @KettleLifecyclePlugin( id = "MetaverseKettleLifecycleHandler", name = "MetaverseKettleLifecycleHandler" )
-public class MetaverseKettleLifecycleHandler implements KettleLifecycleListener {
+public class MetaverseKettleLifecycleHandler implements KettleLifecycleListener, PluginTypeListener {
 
   @Override
   public void onEnvironmentInit() throws LifecycleException {
-    // Populate the map of steps to external resource consumer plugins
-    loadExternalResourceConsumerMap();
+    // Set up a plugin listener to populate the map of steps to external resource consumer plugins
+    PluginRegistry.getInstance().addPluginListener( ExternalResourceConsumerPluginType.class, this );
   }
 
   @Override
@@ -53,38 +54,117 @@ public class MetaverseKettleLifecycleHandler implements KettleLifecycleListener 
     // noop
   }
 
-  protected void loadExternalResourceConsumerMap() throws LifecycleException {
+  @Override
+  public void pluginAdded( Object pluginInterface ) {
+
     try {
-      PluginRegistry registry = PluginRegistry.getInstance();
-      List<PluginInterface> consumerPlugins = registry.getPlugins( ExternalResourceConsumerPluginType.class );
-      for ( PluginInterface plugin : consumerPlugins ) {
-        Object o = registry.loadClass( plugin );
-        if ( o instanceof IStepExternalResourceConsumer ) {
-          IStepExternalResourceConsumer consumer = (IStepExternalResourceConsumer) o;
-          Class<? extends BaseStepMeta> stepMetaClass = consumer.getMetaClass();
-          Map<Class<? extends BaseStepMeta>, List<IStepExternalResourceConsumer>> stepConsumerMap =
-            ExternalResourceConsumerMap.getInstance().getStepConsumerMap();
-          List<IStepExternalResourceConsumer> stepMetaConsumers = stepConsumerMap.get( stepMetaClass );
-          if ( stepMetaConsumers == null ) {
-            stepMetaConsumers = new ArrayList<IStepExternalResourceConsumer>();
-            stepConsumerMap.put( stepMetaClass, stepMetaConsumers );
+      Object o = PluginRegistry.getInstance().loadClass( (PluginInterface) pluginInterface );
+      if ( o instanceof IStepExternalResourceConsumer ) {
+        IStepExternalResourceConsumer consumer = (IStepExternalResourceConsumer) o;
+        Class<? extends BaseStepMeta> stepMetaClass = consumer.getMetaClass();
+        Map<Class<? extends BaseStepMeta>, Queue<IStepExternalResourceConsumer>> stepConsumerMap =
+          ExternalResourceConsumerMap.getInstance().getStepConsumerMap();
+        Queue<IStepExternalResourceConsumer> stepMetaConsumers = stepConsumerMap.get( stepMetaClass );
+        if ( stepMetaConsumers == null ) {
+          stepMetaConsumers = new ConcurrentLinkedQueue<IStepExternalResourceConsumer>();
+          stepConsumerMap.put( stepMetaClass, stepMetaConsumers );
+        }
+        stepMetaConsumers.add( consumer );
+      } else if ( o instanceof IJobEntryExternalResourceConsumer ) {
+        IJobEntryExternalResourceConsumer consumer = (IJobEntryExternalResourceConsumer) o;
+        Class<? extends JobEntryBase> jobMetaClass = consumer.getMetaClass();
+        Map<Class<? extends JobEntryBase>, Queue<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap =
+          ExternalResourceConsumerMap.getInstance().getJobEntryConsumerMap();
+        Queue<IJobEntryExternalResourceConsumer> jobEntryMetaConsumers = jobEntryConsumerMap.get( jobMetaClass );
+        if ( jobEntryMetaConsumers == null ) {
+          jobEntryMetaConsumers = new ConcurrentLinkedQueue<IJobEntryExternalResourceConsumer>();
+          jobEntryConsumerMap.put( jobMetaClass, jobEntryMetaConsumers );
+        }
+        jobEntryMetaConsumers.add( consumer );
+      }
+    } catch ( KettlePluginException kpe ) {
+      // Ignore this one since we can't instantiate it
+      kpe.printStackTrace();
+    }
+  }
+
+  @Override
+  public void pluginRemoved( Object pluginInterface ) {
+    try {
+      // Create a new plugin instance here, but only to get the meta class and the plugin class. We'll use those to
+      // find the existing entry in the map to remove.
+      Object o = PluginRegistry.getInstance().loadClass( (PluginInterface) pluginInterface );
+      if ( o instanceof IStepExternalResourceConsumer ) {
+        IStepExternalResourceConsumer consumer = (IStepExternalResourceConsumer) o;
+        Class<? extends BaseStepMeta> stepMetaClass = consumer.getMetaClass();
+        Map<Class<? extends BaseStepMeta>, Queue<IStepExternalResourceConsumer>> stepConsumerMap =
+          ExternalResourceConsumerMap.getInstance().getStepConsumerMap();
+        Queue<IStepExternalResourceConsumer> stepMetaConsumers = stepConsumerMap.get( stepMetaClass );
+        if ( stepMetaConsumers != null ) {
+          for ( IStepExternalResourceConsumer stepMetaConsumer : stepMetaConsumers ) {
+            if ( stepMetaConsumer.getClass().equals( consumer.getClass() ) ) {
+              stepMetaConsumers.remove( stepMetaConsumer );
+            }
+          }
+        }
+
+      } else if ( o instanceof IJobEntryExternalResourceConsumer ) {
+        IJobEntryExternalResourceConsumer consumer = (IJobEntryExternalResourceConsumer) o;
+        Class<? extends JobEntryBase> jobMetaClass = consumer.getMetaClass();
+        Map<Class<? extends JobEntryBase>, Queue<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap =
+          ExternalResourceConsumerMap.getInstance().getJobEntryConsumerMap();
+        Queue<IJobEntryExternalResourceConsumer> jobEntryMetaConsumers = jobEntryConsumerMap.get( jobMetaClass );
+        if ( jobEntryMetaConsumers != null ) {
+          for ( IJobEntryExternalResourceConsumer jobEntryMetaConsumer : jobEntryMetaConsumers ) {
+            if ( jobEntryMetaConsumer.getClass().equals( consumer.getClass() ) ) {
+              jobEntryMetaConsumers.remove( jobEntryMetaConsumer );
+            }
+          }
+        }
+      }
+    } catch ( KettlePluginException kpe ) {
+      // Ignore this one since we can't instantiate it
+    }
+  }
+
+  @Override
+  public void pluginChanged( Object pluginInterface ) {
+    try {
+      // Create a new plugin instance here, we'll use it to get the meta class and the plugin instance if it exists.
+      // Then we remove any existing one and put this new instance in.
+      Object o = PluginRegistry.getInstance().loadClass( (PluginInterface) pluginInterface );
+      if ( o instanceof IStepExternalResourceConsumer ) {
+        IStepExternalResourceConsumer consumer = (IStepExternalResourceConsumer) o;
+        Class<? extends BaseStepMeta> stepMetaClass = consumer.getMetaClass();
+        Map<Class<? extends BaseStepMeta>, Queue<IStepExternalResourceConsumer>> stepConsumerMap =
+          ExternalResourceConsumerMap.getInstance().getStepConsumerMap();
+        Queue<IStepExternalResourceConsumer> stepMetaConsumers = stepConsumerMap.get( stepMetaClass );
+        if ( stepMetaConsumers != null ) {
+          for ( IStepExternalResourceConsumer stepMetaConsumer : stepMetaConsumers ) {
+            if ( stepMetaConsumer.getClass().equals( consumer.getClass() ) ) {
+              stepMetaConsumers.remove( stepMetaConsumer );
+            }
           }
           stepMetaConsumers.add( consumer );
-        } else if ( o instanceof IJobEntryExternalResourceConsumer ) {
-          IJobEntryExternalResourceConsumer consumer = (IJobEntryExternalResourceConsumer) o;
-          Class<? extends JobEntryBase> jobMetaClass = consumer.getMetaClass();
-          Map<Class<? extends JobEntryBase>, List<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap =
-            ExternalResourceConsumerMap.getInstance().getJobEntryConsumerMap();
-          List<IJobEntryExternalResourceConsumer> jobEntryMetaConsumers = jobEntryConsumerMap.get( jobMetaClass );
-          if ( jobEntryMetaConsumers == null ) {
-            jobEntryMetaConsumers = new ArrayList<IJobEntryExternalResourceConsumer>();
-            jobEntryConsumerMap.put( jobMetaClass, jobEntryMetaConsumers );
+        }
+
+      } else if ( o instanceof IJobEntryExternalResourceConsumer ) {
+        IJobEntryExternalResourceConsumer consumer = (IJobEntryExternalResourceConsumer) o;
+        Class<? extends JobEntryBase> jobMetaClass = consumer.getMetaClass();
+        Map<Class<? extends JobEntryBase>, Queue<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap =
+          ExternalResourceConsumerMap.getInstance().getJobEntryConsumerMap();
+        Queue<IJobEntryExternalResourceConsumer> jobEntryMetaConsumers = jobEntryConsumerMap.get( jobMetaClass );
+        if ( jobEntryMetaConsumers != null ) {
+          for ( IJobEntryExternalResourceConsumer jobEntryMetaConsumer : jobEntryMetaConsumers ) {
+            if ( jobEntryMetaConsumer.getClass().equals( consumer.getClass() ) ) {
+              jobEntryMetaConsumers.remove( jobEntryMetaConsumer );
+            }
           }
           jobEntryMetaConsumers.add( consumer );
         }
       }
     } catch ( KettlePluginException kpe ) {
-      throw new LifecycleException( kpe, true );
+      // Ignore this one since we can't instantiate it
     }
   }
 }
