@@ -23,9 +23,9 @@ package com.pentaho.metaverse.client;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.ILineageClient;
-import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.graph.LineageGraphMap;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
@@ -222,18 +222,9 @@ public class LineageClient implements ILineageClient {
                   Map<String, String> stepField = STEPFIELDOPS_PIPE_FUNC.compute( v );
                   String stepName = stepField.get( "stepName" );
                   String fieldName = stepField.get( "fieldName" );
-                  Operations operations = new Operations();
-                  // Add operations if there are any
-                  String ops = stepField.get( DictionaryConst.PROPERTY_OPERATIONS );
-                  if ( !Const.isEmpty( ops ) ) {
-                    operations.addOperation( DictionaryConst.PROPERTY_OPERATIONS,
-                      new Operation( "ops", ops ) );
-                  }
-                  String dataOps = stepField.get( DictionaryConst.PROPERTY_DATA_OPERATIONS );
-                  if ( !Const.isEmpty( dataOps ) ) {
-                    operations.addOperation( DictionaryConst.PROPERTY_DATA_OPERATIONS,
-                      new Operation( "data_ops", dataOps ) );
-                  }
+                  Operations operations = MetaverseUtil.convertOperationsStringToMap(
+                    (String) v.getProperty( DictionaryConst.PROPERTY_OPERATIONS ) );
+
                   stepFieldOps.add( 0, new StepFieldOperations( stepName, fieldName, operations ) );
                 }
                 pathSet.add( stepFieldOps );
@@ -492,15 +483,12 @@ public class LineageClient implements ILineageClient {
         (String) it.getProperty( DictionaryConst.PROPERTY_NAME )
       );
 
-      // Add (metadata) operations and data operations if there are any, otherwise don't set the property
+      // Add operations if there are any, otherwise don't set the property
       String operations = it.getProperty( DictionaryConst.PROPERTY_OPERATIONS );
       if ( !Const.isEmpty( operations ) ) {
-        stepFieldOpsMap.put( DictionaryConst.PROPERTY_OPERATIONS, operations );
+        stepFieldOpsMap.put( DictionaryConst.PROPERTY_METADATA_OPERATIONS, operations );
       }
-      String dataOperations = it.getProperty( DictionaryConst.PROPERTY_DATA_OPERATIONS );
-      if ( !Const.isEmpty( dataOperations ) ) {
-        stepFieldOpsMap.put( DictionaryConst.PROPERTY_DATA_OPERATIONS, dataOperations );
-      }
+
       return stepFieldOpsMap;
     }
   }

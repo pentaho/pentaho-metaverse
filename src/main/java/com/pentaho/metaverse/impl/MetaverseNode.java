@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -65,6 +65,7 @@ public class MetaverseNode implements IMetaverseNode {
    * @param v Vertex
    */
   public MetaverseNode( Vertex v ) {
+    this();
     this.v = v;
   }
 

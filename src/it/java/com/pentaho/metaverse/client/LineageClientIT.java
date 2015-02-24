@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -24,9 +24,10 @@ package com.pentaho.metaverse.client;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.IntegrationTestUtil;
+import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.model.Operation;
+import com.pentaho.metaverse.api.model.IOperation;
 import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.impl.DocumentController;
 import com.pentaho.metaverse.impl.Namespace;
@@ -265,22 +266,26 @@ public class LineageClientIT {
       Operations ops = last.getOperations();
       assertNotNull( ops );
       assertEquals( 1, ops.size() );
-      List<Operation> dataOps = ops.getOperationsByType( DictionaryConst.PROPERTY_DATA_OPERATIONS );
+      List<IOperation> dataOps = ops.get( ChangeType.DATA );
       assertNull( dataOps );
-      List<Operation> metadataOps = ops.getOperationsByType( DictionaryConst.PROPERTY_OPERATIONS );
+      List<IOperation> metadataOps = ops.get( ChangeType.METADATA );
       assertNotNull( metadataOps );
       assertEquals( 1, metadataOps.size() );
-      assertEquals( "ops", metadataOps.get( 0 ).getName() );
-      assertEquals( "{\"modified\":[\"name\"]}", metadataOps.get( 0 ).getDescription() );
+      IOperation metadataOp = metadataOps.get( 0 );
+      assertEquals( IOperation.METADATA_CATEGORY, metadataOp.getCategory() );
+      assertEquals( DictionaryConst.PROPERTY_MODIFIED, metadataOp.getName() );
+      assertEquals( "name", metadataOp.getDescription() );
 
       StepFieldOperations middle = operationPath.get( 1 );
       assertEquals( "Merge Join", middle.getStepName() );
       assertEquals( "COUNTRY_1", middle.getFieldName() );
-      metadataOps = ops.getOperationsByType( DictionaryConst.PROPERTY_OPERATIONS );
+      metadataOps = ops.get( ChangeType.METADATA );
       assertNotNull( metadataOps );
       assertEquals( 1, metadataOps.size() );
-      assertEquals( "ops", metadataOps.get( 0 ).getName() );
-      assertEquals( "{\"modified\":[\"name\"]}", metadataOps.get( 0 ).getDescription() );
+      metadataOp = metadataOps.get( 0 );
+      assertEquals( IOperation.METADATA_CATEGORY, metadataOp.getCategory() );
+      assertEquals( DictionaryConst.PROPERTY_MODIFIED, metadataOp.getName() );
+      assertEquals( "name", metadataOp.getDescription() );
 
       StepFieldOperations first = operationPath.get( 0 );
       assertEquals( "COUNTRY", first.getFieldName() );

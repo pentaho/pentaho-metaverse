@@ -1,4 +1,4 @@
-/*!
+/*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
@@ -21,28 +21,29 @@
  */
 package com.pentaho.metaverse.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-
 /**
- * Created by mburgess on 2/4/15.
+ * Created by mburgess on 2/24/15.
  */
-public class Operations extends EnumMap<ChangeType, List<IOperation>> {
+@JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = IInfo.JSON_PROPERTY_CLASS )
+public interface IOperation extends IInfo {
+  String JSON_PROPERTY_CATEGORY = "category";
+  String JSON_PROPERTY_TYPE = "type";
 
-  public Operations() {
-    super( ChangeType.class );
-  }
+  String METADATA_CATEGORY = "changeMetadata";
+  String MAPPING_CATEGORY = "mapping";
+  String CALC_CATEGORY = "calculation";
 
-  public void addOperation( ChangeType operationType, IOperation operation ) {
-    List<IOperation> operations = get( operationType );
-    if ( operations == null ) {
-      operations = new ArrayList<IOperation>();
-      put( operationType, operations );
-    }
-    operations.add( operation );
+  @JsonProperty( JSON_PROPERTY_CATEGORY )
+  String getCategory();
 
-  }
+  void setCategory( String category );
+
+  @JsonProperty( JSON_PROPERTY_TYPE )
+  ChangeType getType();
+
+  void setType( ChangeType type );
 }

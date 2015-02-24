@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -26,9 +26,11 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
+import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -59,7 +61,7 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
     final String targetField = valueMapperMeta.getTargetField() == null ? fieldToUse : valueMapperMeta.getTargetField();
 
     final IMetaverseNode sourceFieldNode = createNodeFromDescriptor(
-        getPrevStepFieldOriginDescriptor( descriptor, fieldToUse ) );
+      getPrevStepFieldOriginDescriptor( descriptor, fieldToUse ) );
 
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, sourceFieldNode );
 
@@ -74,11 +76,11 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
     // if no target field specified
     if ( overwritesSourceField ) {
       // add some data operation property to the source node
-      sourceFieldNode.setProperty( DictionaryConst.PROPERTY_DATA_OPERATIONS, changeRecord.toString() );
+      sourceFieldNode.setProperty( DictionaryConst.PROPERTY_OPERATIONS, changeRecord.toString() );
       metaverseBuilder.updateNode( sourceFieldNode );
     } else {
       final IComponentDescriptor desc = new MetaverseComponentDescriptor( targetField,
-          DictionaryConst.NODE_TYPE_TRANS_FIELD, descriptor.getNamespace() );
+        DictionaryConst.NODE_TYPE_TRANS_FIELD, descriptor.getNamespace() );
 
       // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
       RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
@@ -95,13 +97,18 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
   }
 
   protected ComponentDerivationRecord buildChangeRecord(
-      final String fieldName, final String[] sourceValues, final String[] targetValues ) {
+    final String fieldName, final String[] sourceValues, final String[] targetValues ) {
 
     final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( fieldName, ChangeType.DATA );
+    Set<String> metadataChangedFields = new HashSet<String>();
 
     for ( int i = 0; i < sourceValues.length; i++ ) {
-      changeRecord.addOperand( DictionaryConst.PROPERTY_TRANSFORMS, sourceValues[i] + " -> " + targetValues[i] );
+      metadataChangedFields.add( sourceValues[i] + " -> " + targetValues[i] );
     }
+    changeRecord.addOperation(
+      new Operation( Operation.MAPPING_CATEGORY, ChangeType.DATA,
+        DictionaryConst.PROPERTY_TRANSFORMS, StringUtils.join( metadataChangedFields, "," ) ) );
+
     return changeRecord;
   }
 

@@ -21,7 +21,12 @@
  */
 package com.pentaho.metaverse.util;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import com.pentaho.metaverse.api.IDocumentController;
+import com.pentaho.metaverse.api.model.IOperation;
+import com.pentaho.metaverse.api.model.Operation;
+import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -34,6 +39,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.blueprint.container.BlueprintContainer;
+import org.pentaho.di.core.Const;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
@@ -42,8 +48,8 @@ import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.MetaverseException;
 
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -154,5 +160,29 @@ public class MetaverseUtilTest {
     Graph graph = new TinkerGraph();
     Vertex v1 = graph.addVertex( 1 );
     MetaverseUtil.enhanceVertex( v1 );
+  }
+
+  @Test
+  public void testConvertOperationsStringToMap() {
+    // Test null string
+    assertNull( MetaverseUtil.convertOperationsStringToMap( null ) );
+    assertNull( MetaverseUtil.convertOperationsStringToMap( "" ) );
+    assertNull( MetaverseUtil.convertOperationsStringToMap( "{" ) );
+    assertNotNull( MetaverseUtil.convertOperationsStringToMap( "{}" ) );
+    Operations ops = MetaverseUtil.convertOperationsStringToMap(
+      "{\"metadataOperations\":[{\"category\":\"changeMetadata\",\"class\":"
+        + "\"com.pentaho.metaverse.api.model.Operation\",\"description\":\"name\","
+        + "\"name\":\"modified\",\"type\":\"METADATA\"}]}"
+    );
+    assertNotNull( ops );
+    assertNull( ops.get( ChangeType.DATA ) );
+    List<IOperation> metadataOps = ops.get( ChangeType.METADATA );
+    assertNotNull( metadataOps );
+    assertEquals( 1, metadataOps.size() );
+    IOperation op = metadataOps.get( 0 );
+    assertEquals( Operation.METADATA_CATEGORY, op.getCategory() );
+    assertEquals( DictionaryConst.PROPERTY_MODIFIED, op.getName() );
+    assertEquals( "name", op.getDescription() );
+
   }
 }

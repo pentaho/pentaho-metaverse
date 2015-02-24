@@ -22,16 +22,28 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.pentaho.dictionary.DictionaryConst;
 
 public enum ChangeType {
-  METADATA( "metadata" ),
-  DATA( "data" );
+  METADATA( DictionaryConst.PROPERTY_METADATA_OPERATIONS ),
+  DATA( DictionaryConst.PROPERTY_DATA_OPERATIONS );
 
   private final String name;
 
   private ChangeType( String name ) {
     this.name = name;
+  }
+
+  @JsonCreator
+  public static ChangeType forValue( String value ) {
+    for ( ChangeType val : values() ) {
+      if ( val.toString().equals( value ) ) {
+        return val;
+      }
+    }
+    return null;
   }
 
   @JsonValue
