@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -26,13 +26,14 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import com.pentaho.metaverse.messages.Messages;
+import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.core.row.value.ValueMetaFactory;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectMetadataChange;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
@@ -68,13 +69,13 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
    */
   @Override
   public IMetaverseNode analyze(
-      IComponentDescriptor descriptor, SelectValuesMeta selectValuesMeta ) throws MetaverseAnalyzerException {
+    IComponentDescriptor descriptor, SelectValuesMeta selectValuesMeta ) throws MetaverseAnalyzerException {
 
     // Do common analysis for all steps
-    IMetaverseNode node = super.analyze( descriptor, selectValuesMeta );
+    super.analyze( descriptor, selectValuesMeta );
 
-    IMetaverseNode fieldNode = null;
-    String inputFieldName = null;
+    IMetaverseNode fieldNode;
+    String inputFieldName;
 
     Set<ComponentDerivationRecord> changes = getChangeRecords( selectValuesMeta );
     for ( ComponentDerivationRecord change : changes ) {
@@ -108,9 +109,10 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
     }
     Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
 
-    String inputFieldName = null;
-    String outputFieldName = null;
-    ComponentDerivationRecord changeRecord = null;
+    String inputFieldName;
+    String outputFieldName;
+    ComponentDerivationRecord changeRecord;
+
 
     // Process the fields/tabs in the same order as the real step does
     if ( !Const.isEmpty( selectValuesMeta.getSelectName() ) ) {
@@ -120,28 +122,35 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
       int[] fieldPrecision = selectValuesMeta.getSelectPrecision();
 
       for ( int i = 0; i < fieldNames.length; i++ ) {
-        inputFieldName = fieldNames[ i ];
-        outputFieldName = fieldRenames[ i ];
+        inputFieldName = fieldNames[i];
+        outputFieldName = fieldRenames[i];
 
         changeRecord = new ComponentDerivationRecord( inputFieldName,
-            outputFieldName == null ? inputFieldName : outputFieldName, ChangeType.METADATA );
+          outputFieldName == null ? inputFieldName : outputFieldName, ChangeType.METADATA );
+
+        Set<String> metadataChangedFields = new HashSet<String>();
 
         // NOTE: We use equalsIgnoreCase instead of equals because that's how Select Values currently works
         if ( inputFieldName != null && outputFieldName != null && !inputFieldName
-            .equalsIgnoreCase( outputFieldName ) ) {
-          changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "name" );
+          .equalsIgnoreCase( outputFieldName ) ) {
+          metadataChangedFields.add( "name" );
         }
 
         // Check for changes in field length
-        if ( fieldLength != null && fieldLength[ i ] != NOT_CHANGED ) {
-          changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "length" );
+        if ( fieldLength != null && fieldLength[i] != NOT_CHANGED ) {
+          metadataChangedFields.add( "length" );
         }
 
         // Check for changes in field precision
-        if ( fieldPrecision != null && fieldPrecision[ i ] != NOT_CHANGED ) {
-          changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "precision" );
+        if ( fieldPrecision != null && fieldPrecision[i] != NOT_CHANGED ) {
+          metadataChangedFields.add( "precision" );
         }
 
+        if ( !metadataChangedFields.isEmpty() ) {
+          // Add all the changed metadata fields as a single operation
+          changeRecord.addOperation(
+            new Operation( DictionaryConst.PROPERTY_MODIFIED, StringUtils.join( metadataChangedFields, "," ) ) );
+        }
         changeRecords.add( changeRecord );
       }
     }
@@ -157,12 +166,14 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
           outputFieldName = metadataChange.getRename();
 
           changeRecord = new ComponentDerivationRecord( inputFieldName,
-              outputFieldName == null ? inputFieldName : outputFieldName, ChangeType.METADATA );
+            outputFieldName == null ? inputFieldName : outputFieldName, ChangeType.METADATA );
+
+          Set<String> metadataChangedFields = new HashSet<String>();
 
           // NOTE: We use equalsIgnoreCase instead of equals because that's how Select Values currently works
           if ( inputFieldName != null && outputFieldName != null && !inputFieldName
-              .equalsIgnoreCase( outputFieldName ) ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "name" );
+            .equalsIgnoreCase( outputFieldName ) ) {
+            metadataChangedFields.add( "name" );
           }
 
           // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
@@ -179,75 +190,81 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
             log.warn( Messages.getString( "WARNING.CannotDetermineFieldType", inputFieldName ) );
             continue;
           }
-          String kettleType = inputFieldValueMeta.getTypeDesc();
 
           // Check for changes in field type
           if ( inputFieldValueMeta.getType() != metadataChange.getType() ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "type" );
-            kettleType = ValueMetaFactory.getValueMetaName( metadataChange.getType() );
+            metadataChangedFields.add( "type" );
           }
           // Check for changes in field length
           if ( metadataChange.getLength() != NOT_CHANGED ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "length" );
+            metadataChangedFields.add( "length" );
           }
           // Check for changes in field precision
           if ( metadataChange.getPrecision() != NOT_CHANGED ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "precision" );
+            metadataChangedFields.add( "precision" );
           }
           // Check for changes in storage type (binary to string, e.g.)
           if ( ( metadataChange.getStorageType() != -1 )
-              && ( inputFieldValueMeta.getStorageType() != metadataChange.getStorageType() ) ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "storagetype" );
+            && ( inputFieldValueMeta.getStorageType() != metadataChange.getStorageType() ) ) {
+            metadataChangedFields.add( "storagetype" );
           }
           // Check for changes in conversion mask
           if ( ( metadataChange.getConversionMask() != null )
-              && ( inputFieldValueMeta.getConversionMask() == null
-              || !inputFieldValueMeta.getConversionMask().equals( metadataChange.getConversionMask() ) ) ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "conversionmask" );
+            && ( inputFieldValueMeta.getConversionMask() == null
+            || !inputFieldValueMeta.getConversionMask().equals( metadataChange.getConversionMask() ) ) ) {
+            metadataChangedFields.add( "conversionmask" );
           }
           // Check for changes in date format leniency
           if ( inputFieldValueMeta.isDateFormatLenient() != metadataChange.isDateFormatLenient() ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "dateformatlenient" );
+            metadataChangedFields.add( "dateformatlenient" );
           }
           // Check for changes in date format locale
           if ( ( metadataChange.getDateFormatLocale() != null )
-              && ( inputFieldValueMeta.getDateFormatLocale() == null
-              || !inputFieldValueMeta.getDateFormatLocale().equals( metadataChange.getDateFormatLocale() ) ) ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "datelocale" );
+            && ( inputFieldValueMeta.getDateFormatLocale() == null
+            || !inputFieldValueMeta.getDateFormatLocale().toString()
+            .equals( metadataChange.getDateFormatLocale() ) ) ) {
+            metadataChangedFields.add( "datelocale" );
           }
           // Check for changes in date format locale
           if ( ( metadataChange.getDateFormatTimeZone() != null )
-              && ( inputFieldValueMeta.getDateFormatTimeZone() == null
-              || !inputFieldValueMeta.getDateFormatTimeZone().equals( metadataChange.getDateFormatTimeZone() ) ) ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "datetimezone" );
+            && ( inputFieldValueMeta.getDateFormatTimeZone() == null
+            || !inputFieldValueMeta.getDateFormatTimeZone().toString()
+            .equals( metadataChange.getDateFormatTimeZone() ) ) ) {
+            metadataChangedFields.add( "datetimezone" );
           }
           // Check for changes in date format locale
           if ( inputFieldValueMeta.isLenientStringToNumber() != metadataChange.isLenientStringToNumber() ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "lenientnumberconversion" );
+            metadataChangedFields.add( "lenientnumberconversion" );
           }
           // Check for changes in encoding
           if ( ( metadataChange.getDateFormatTimeZone() != null )
-              && ( inputFieldValueMeta.getStringEncoding() == null
-              || !inputFieldValueMeta.getStringEncoding().equals( metadataChange.getDateFormatTimeZone() ) ) ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "encoding" );
+            && ( inputFieldValueMeta.getStringEncoding() == null
+            || !inputFieldValueMeta.getStringEncoding().equals( metadataChange.getDateFormatTimeZone() ) ) ) {
+            metadataChangedFields.add( "encoding" );
           }
           // Check for changes in encoding
           if ( ( metadataChange.getDecimalSymbol() != null )
-              && ( inputFieldValueMeta.getDecimalSymbol() == null
-              || !inputFieldValueMeta.getDecimalSymbol().equals( metadataChange.getDecimalSymbol() ) ) ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "decimalsymbol" );
+            && ( inputFieldValueMeta.getDecimalSymbol() == null
+            || !inputFieldValueMeta.getDecimalSymbol().equals( metadataChange.getDecimalSymbol() ) ) ) {
+            metadataChangedFields.add( "decimalsymbol" );
           }
           // Check for changes in encoding
           if ( ( metadataChange.getGroupingSymbol() != null )
-              && ( inputFieldValueMeta.getGroupingSymbol() == null
-              || !inputFieldValueMeta.getGroupingSymbol().equals( metadataChange.getGroupingSymbol() ) ) ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "groupsymbol" );
+            && ( inputFieldValueMeta.getGroupingSymbol() == null
+            || !inputFieldValueMeta.getGroupingSymbol().equals( metadataChange.getGroupingSymbol() ) ) ) {
+            metadataChangedFields.add( "groupsymbol" );
           }
           // Check for changes in encoding
           if ( ( metadataChange.getCurrencySymbol() != null )
-              && ( inputFieldValueMeta.getCurrencySymbol() == null
-              || !inputFieldValueMeta.getCurrencySymbol().equals( metadataChange.getCurrencySymbol() ) ) ) {
-            changeRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "currencysymbol" );
+            && ( inputFieldValueMeta.getCurrencySymbol() == null
+            || !inputFieldValueMeta.getCurrencySymbol().equals( metadataChange.getCurrencySymbol() ) ) ) {
+            metadataChangedFields.add( "currencysymbol" );
+          }
+
+          if ( !metadataChangedFields.isEmpty() ) {
+            // Add all the changed metadata fields as a single operation
+            changeRecord.addOperation(
+              new Operation( DictionaryConst.PROPERTY_MODIFIED, StringUtils.join( metadataChangedFields, "," ) ) );
           }
           changeRecords.add( changeRecord );
         }
@@ -293,11 +310,9 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
             break;
           }
         }
-
       }
     }
-    Set<IFieldMapping> fieldMappingSet = new HashSet<IFieldMapping>( fieldMappings );
-    return fieldMappingSet;
+    return new HashSet<IFieldMapping>( fieldMappings );
   }
 
   @Override

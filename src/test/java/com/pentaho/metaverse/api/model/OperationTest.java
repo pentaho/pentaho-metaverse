@@ -21,6 +21,7 @@
  */
 package com.pentaho.metaverse.api.model;
 
+import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,5 +53,28 @@ public class OperationTest {
   @Test
   public void testToString() {
     assertEquals( "operationName: operationDescription", operation.toString() );
+  }
+
+  @Test
+  public void testEquals() {
+    assertTrue( operation.equals( operation ) );
+    assertFalse( operation.equals( new Object() ) );
+
+    Operation operation2 = new Operation( "operationName", "operationDescription" );
+    assertTrue( operation.equals( operation2 ) );
+    operation2.setCategory( "Some other category" );
+    assertFalse( operation.equals( operation2 ) );
+
+    operation2 = new Operation( "operationName", "operationDescription" );
+    operation2.setDescription( "Some other description" );
+    assertFalse( operation.equals( operation2 ) );
+
+    operation2 = new Operation( "operationName", "operationDescription" );
+    operation2.setName( "Some other name" );
+    assertFalse( operation.equals( operation2 ) );
+
+    operation2 = new Operation( "operationName", "operationDescription" );
+    operation2.setType( ChangeType.DATA );
+    assertFalse( operation.equals( operation2 ) );
   }
 }

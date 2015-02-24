@@ -21,14 +21,13 @@
  */
 package com.pentaho.metaverse.api.model;
 
-import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
 
 public class OperationsTest {
   Operations operations;
@@ -42,7 +41,7 @@ public class OperationsTest {
   public void testAddOperation() throws Exception {
     assertTrue( operations.isEmpty() );
     Operation operation = new Operation( "opName", "opDesc" );
-    operations.addOperation( DictionaryConst.PROPERTY_OPERATIONS, operation );
+    operations.addOperation( ChangeType.METADATA, operation );
     assertEquals( 1, operations.size() );
 
   }
@@ -50,14 +49,14 @@ public class OperationsTest {
   @Test
   public void testGetOperationByType() throws Exception {
     Operation operation = new Operation( "opName", "opDesc" );
-    operations.addOperation( DictionaryConst.PROPERTY_OPERATIONS, operation );
+    operations.addOperation( ChangeType.METADATA, operation );
     Operation operation2 = new Operation( "opName2", "opDesc2" );
-    operations.addOperation( DictionaryConst.PROPERTY_OPERATIONS, operation2 );
+    operations.addOperation( ChangeType.METADATA, operation2 );
     Operation operation3 = new Operation( "opName3", "opDesc3" );
-    operations.addOperation( DictionaryConst.PROPERTY_DATA_OPERATIONS, operation3 );
+    operations.addOperation( ChangeType.DATA, operation3 );
 
-    List<Operation> metadataOperations = operations.getOperationsByType( DictionaryConst.PROPERTY_OPERATIONS );
-    List<Operation> dataOperations = operations.getOperationsByType( DictionaryConst.PROPERTY_DATA_OPERATIONS );
+    List<IOperation> metadataOperations = operations.get( ChangeType.METADATA );
+    List<IOperation> dataOperations = operations.get( ChangeType.DATA );
     assertNotNull( metadataOperations );
     assertNotNull( dataOperations );
     assertEquals( 2, metadataOperations.size() );

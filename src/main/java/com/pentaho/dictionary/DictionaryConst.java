@@ -96,7 +96,12 @@ public class DictionaryConst {
   /**
    * Property key for "metadataOperations"
    */
-  public static final String PROPERTY_OPERATIONS = "metadataOperations";
+  public static final String PROPERTY_OPERATIONS = "operations";
+
+  /**
+   * Property key for "metadataOperations"
+   */
+  public static final String PROPERTY_METADATA_OPERATIONS = "metadataOperations";
 
   /**
    * Property key for "dataOperations"

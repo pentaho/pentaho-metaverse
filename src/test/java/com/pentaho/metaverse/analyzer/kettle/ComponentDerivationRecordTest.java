@@ -1,5 +1,8 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.pentaho.metaverse.api.model.IOperation;
+import com.pentaho.metaverse.api.model.Operation;
+import com.pentaho.metaverse.api.model.Operations;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,107 +52,115 @@ public class ComponentDerivationRecordTest {
 
   @Test
   public void testGetOperations() throws Exception {
-    Map<String, List<String>> operations = record.getOperations();
+    Operations operations = record.getOperations();
     assertNotNull( operations );
     assertTrue( operations.isEmpty() );
   }
 
   @Test
-  public void testPutOperation() throws Exception {
-    Map<String, List<String>> operations = record.getOperations();
+  public void testAddOperation() throws Exception {
+    Operations operations = record.getOperations();
     assertNotNull( operations );
     assertTrue( operations.isEmpty() );
-    List<String> operands = Arrays.asList( "testOperand1", "testOperand2" );
-    record.putOperation( "testOperation", operands );
+    String operands = "testOperand1, testOperand2";
+    record.addOperation( new Operation( "testOperation", operands ) );
     operations = record.getOperations();
     assertNotNull( operations );
-    List<String> checkOperands = operations.get( "testOperation" );
-    assertNotNull( checkOperands );
-    assertEquals( 2, checkOperands.size() );
-    assertTrue( "testOperand1 not in operands!", checkOperands.contains( "testOperand1" ) );
-    assertTrue( "testOperand2 not in operands!", checkOperands.contains( "testOperand2" ) );
+    List<IOperation> checkOperations = operations.get( ChangeType.METADATA );
+    assertNotNull( checkOperations );
+    assertEquals( 1, checkOperations.size() );
+    IOperation checkOperation = checkOperations.get( 0 );
+    assertTrue( "testOperand1 not in operands!", checkOperation.getDescription().contains( "testOperand1" ) );
+    assertTrue( "testOperand2 not in operands!", checkOperation.getDescription().contains( "testOperand2" ) );
   }
 
   @Test
-  public void testPutOperationNull() throws Exception {
+  public void testAddOperationNull() throws Exception {
     record.operations = null;
 
-    List<String> operands = Arrays.asList( "testOperand1", "testOperand2" );
-    record.putOperation( "testOperation", operands );
-    Map<String, List<String>> operations = record.getOperations();
+    String operands = "testOperand1, testOperand2";
+    record.addOperation( new Operation( "testOperation", operands ) );
+    Operations operations = record.getOperations();
     assertNotNull( operations );
-    List<String> checkOperands = operations.get( "testOperation" );
-    assertNotNull( checkOperands );
-    assertEquals( 2, checkOperands.size() );
-    assertTrue( "testOperand1 not in operands!", checkOperands.contains( "testOperand1" ) );
-    assertTrue( "testOperand2 not in operands!", checkOperands.contains( "testOperand2" ) );
+    List<IOperation> checkOperations = operations.get( ChangeType.METADATA );
+    assertNotNull( checkOperations );
+    assertEquals( 1, checkOperations.size() );
+    IOperation checkOperation = checkOperations.get( 0 );
+    assertTrue( "testOperand1 not in operands!", checkOperation.getDescription().contains( "testOperand1" ) );
+    assertTrue( "testOperand2 not in operands!", checkOperation.getDescription().contains( "testOperand2" ) );
   }
 
   @Test
   public void testPutOperationNullOperation() throws Exception {
-    Map<String, List<String>> operations = record.getOperations();
+    Operations operations = record.getOperations();
     assertNotNull( operations );
     assertTrue( operations.isEmpty() );
-    List<String> operands = Arrays.asList( "testOperand1", "testOperand2" );
-    record.putOperation( null, operands );
+    record.addOperation( null );
+    String operands = "testOperand1, testOperand2";
+    record.addOperation( new Operation( null, operands ) );
     operations = record.getOperations();
     assertNotNull( operations );
-    List<String> checkOperands = operations.get( "testOperation" );
+    List<IOperation> checkOperands = operations.get( "testOperation" );
     assertNull( checkOperands );
   }
 
   @Test
   public void testPutOperationNullOperands() throws Exception {
-    Map<String, List<String>> operations = record.getOperations();
+    Operations operations = record.getOperations();
     assertNotNull( operations );
     assertTrue( operations.isEmpty() );
-    record.putOperation( "testOperation", null );
+    record.addOperation( new Operation( "testOperation", null ) );
     operations = record.getOperations();
     assertNotNull( operations );
-    List<String> checkOperands = operations.get( "testOperation" );
+    List<IOperation> checkOperands = operations.get( "testOperation" );
     assertNull( checkOperands );
   }
 
   @Test
   public void testAddOperand() throws Exception {
     record.operations = null;
-    record.addOperand( "testOperation", "testOperand" );
-    Map<String, List<String>> operations = record.getOperations();
+    record.addOperation( new Operation( "testOperation", "testOperand" ) );
+    Operations operations = record.getOperations();
     assertNotNull( operations );
-    List<String> checkOperands = operations.get( "testOperation" );
-    assertNotNull( checkOperands );
-    assertEquals( 1, checkOperands.size() );
-    assertTrue( "testOperand not in operands!", checkOperands.contains( "testOperand" ) );
+    List<IOperation> checkOperations = operations.get( ChangeType.METADATA );
+    assertNotNull( checkOperations );
+    assertEquals( 1, checkOperations.size() );
+    IOperation checkOperation = checkOperations.get( 0 );
+    assertTrue( "testOperand not in operands!", checkOperation.getDescription().contains( "testOperand" ) );
   }
 
   @Test
   public void testAddOperandNullOperand() throws Exception {
-    Map<String, List<String>> operations = record.getOperations();
+    Operations operations = record.getOperations();
     assertNotNull( operations );
     assertTrue( operations.isEmpty() );
-    record.addOperand( "testOperation", null );
-    List<String> checkOperands = record.getOperations().get( "testOperation" );
+    record.addOperation( new Operation( "testOperation", null ) );
+    List<IOperation> checkOperands = record.getOperations().get( "testOperation" );
     assertNull( checkOperands );
   }
 
   @Test
   public void testHasDelta() throws Exception {
-    Map<String, List<String>> operations = record.getOperations();
+    Operations operations = record.getOperations();
     assertNotNull( operations );
     assertTrue( operations.isEmpty() );
     assertFalse( "This record should not say it has been changed!", record.hasDelta() );
-    record.addOperand( "testOperation", "testOperand" );
+    record.addOperation( new Operation( "testOperation", "testOperand" ) );
     assertTrue( "This record should say it has been changed!", record.hasDelta() );
   }
 
   @Test
   public void testToString() throws Exception {
-    Map<String, List<String>> operations = record.getOperations();
+    Operations operations = record.getOperations();
     assertNotNull( operations );
     assertTrue( operations.isEmpty() );
     assertEquals( record.toString(), "{}" );
-    record.addOperand( "testOperation", "testOperand" );
-    assertEquals( record.toString(), "{\"testOperation\":[\"testOperand\"]}" );
+    record.addOperation( new Operation( "testOperation", "testOperand" ) );
+    assertEquals(
+      record.toString(),
+      "{\"metadataOperations\":[{\"category\":\"changeMetadata\",\"class\":"
+        + "\"com.pentaho.metaverse.api.model.Operation\",\"description\":"
+        + "\"testOperand\",\"name\":\"testOperation\",\"type\":\"METADATA\"}]}" );
   }
 
   @Test
@@ -157,6 +168,28 @@ public class ComponentDerivationRecordTest {
     record.operations = null;
     assertNotNull( record.getOperations() );
     assertTrue( record.getOperations().isEmpty() );
+  }
+
+  @Test
+  public void testEquals() {
+    assertTrue( record.equals( record ) );
+    assertFalse( record.equals( new Object() ) );
+
+    ComponentDerivationRecord record2 = new ComponentDerivationRecord( "myRecord" );
+    assertTrue( record.equals( record2 ) );
+
+    ComponentDerivationRecord record3 = new ComponentDerivationRecord( "originalRecord", "myRecord" );
+    assertFalse( record.equals( record3 ) );
+    record2.setChangeType( ChangeType.DATA );
+    assertFalse( record.equals( record2 ) );
+
+    record2 = new ComponentDerivationRecord( "myRecord" );
+    record2.setChangedEntityName( "Some other name" );
+    assertFalse( record.equals( record2 ) );
+
+    record2 = new ComponentDerivationRecord( "myRecord" );
+    record.addOperation( new Operation( "testOperation", "testOperand" ) );
+    assertFalse( record.equals( record2 ) );
   }
 
 }

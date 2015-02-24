@@ -24,7 +24,10 @@ package com.pentaho.metaverse.util;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
+import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import com.pentaho.metaverse.api.IDocumentController;
+import com.pentaho.metaverse.api.model.IOperation;
+import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.graph.LineageGraphCompletionService;
 import com.pentaho.metaverse.graph.LineageGraphMap;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
@@ -34,6 +37,8 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import flexjson.JSONDeserializer;
+import org.pentaho.di.core.Const;
 import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
@@ -42,6 +47,8 @@ import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.api.metaverse.MetaverseException;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
@@ -184,5 +191,23 @@ public class MetaverseUtil {
     if ( !localizedCat.startsWith( MESSAGE_FAILED_PREFIX ) ) {
       vertex.setProperty( DictionaryConst.PROPERTY_CATEGORY_LOCALIZED, localizedCat );
     }
+  }
+
+  public static Operations convertOperationsStringToMap( String operations ) {
+    Operations resultOps = null;
+    if ( !Const.isEmpty( operations ) ) {
+      try {
+        Map<String, List<IOperation>> rawOpsMap =
+          (Map<String, List<IOperation>>) new JSONDeserializer().deserialize( operations );
+        resultOps = new Operations();
+        for ( String key : rawOpsMap.keySet() ) {
+          resultOps.put( ChangeType.forValue( key ), rawOpsMap.get( key ) );
+        }
+      } catch ( Exception e ) {
+        resultOps = null;
+      }
+      //return new JSONDeserializer<Operations>().use(null, Operations.class).deserialize( operations );
+    }
+    return resultOps;
   }
 }

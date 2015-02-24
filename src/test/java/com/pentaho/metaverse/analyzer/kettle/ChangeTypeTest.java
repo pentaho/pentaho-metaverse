@@ -21,6 +21,7 @@
  */
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.pentaho.dictionary.DictionaryConst;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -29,7 +30,14 @@ public class ChangeTypeTest {
 
   @Test
   public void testToString() throws Exception {
-    assertEquals( "metadata", ChangeType.METADATA.toString() );
-    assertEquals( "data", ChangeType.DATA.toString() );
+    assertEquals( DictionaryConst.PROPERTY_METADATA_OPERATIONS, ChangeType.METADATA.toString() );
+    assertEquals( DictionaryConst.PROPERTY_DATA_OPERATIONS, ChangeType.DATA.toString() );
+  }
+
+  @Test
+  public void testForValue() {
+    assertEquals( ChangeType.METADATA, ChangeType.forValue( DictionaryConst.PROPERTY_METADATA_OPERATIONS ) );
+    assertEquals( ChangeType.DATA, ChangeType.forValue( DictionaryConst.PROPERTY_DATA_OPERATIONS ) );
+    assertNull( ChangeType.forValue( "Not a real value" ) );
   }
 }

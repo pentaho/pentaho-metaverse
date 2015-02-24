@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.pentaho.metaverse.api.model.Operation;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -65,15 +66,17 @@ public class CalculatorStepAnalyzer extends BaseStepAnalyzer<CalculatorMeta> {
   protected ComponentDerivationRecord buildChangeRecord( final CalculatorMetaFunction function ) {
 
     final ComponentDerivationRecord changeRecord =
-        new ComponentDerivationRecord( function.getFieldName(), ChangeType.DATA );
+      new ComponentDerivationRecord( function.getFieldName(), ChangeType.DATA );
     String fieldA = function.getFieldA();
     String fieldB = function.getFieldB();
     String fieldC = function.getFieldC();
     String inputFields =
-        ( fieldA != null ? fieldA + ", " : "" ) + ( fieldB != null ? fieldB + ", " : "" )
-            + ( fieldC != null ? fieldC + ", " : "" );
-    changeRecord.addOperand( DictionaryConst.PROPERTY_TRANSFORMS, inputFields + "using " + function.getCalcTypeDesc()
-        + " -> " + function.getFieldName() );
+      ( fieldA != null ? fieldA + ", " : "" ) + ( fieldB != null ? fieldB + ", " : "" )
+        + ( fieldC != null ? fieldC + ", " : "" );
+    changeRecord.addOperation(
+      new Operation( Operation.CALC_CATEGORY, ChangeType.DATA,
+        DictionaryConst.PROPERTY_TRANSFORMS, inputFields + "using " + function.getCalcTypeDesc()
+        + " -> " + function.getFieldName() ) );
 
     List<String> fields = new ArrayList<String>();
     fields.add( fieldA );
@@ -88,7 +91,7 @@ public class CalculatorStepAnalyzer extends BaseStepAnalyzer<CalculatorMeta> {
         ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( fieldName );
         if ( newFieldNode != null ) {
           newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta != null
-              ? inputFieldValueMeta.getTypeDesc() : fieldName + " unknown type" );
+            ? inputFieldValueMeta.getTypeDesc() : fieldName + " unknown type" );
           metaverseBuilder.addNode( newFieldNode );
           metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
           if ( function.isRemovedFromResult() ) {

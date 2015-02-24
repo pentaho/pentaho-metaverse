@@ -25,6 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.mergejoin;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.model.Operation;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -115,7 +116,7 @@ public class MergeJoinStepAnalyzer extends BaseStepAnalyzer<MergeJoinMeta> {
 
           IComponentDescriptor renamedFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
           ComponentDerivationRecord renameFieldRecord = new ComponentDerivationRecord( unsuffixName, fieldName );
-          renameFieldRecord.addOperand( DictionaryConst.PROPERTY_MODIFIED, "name" );
+          renameFieldRecord.addOperation( Operation.getRenameOperation() );
           IMetaverseNode renamedField = processFieldChangeRecord( renamedFieldDescriptor, originalField, renameFieldRecord );
           metaverseBuilder.addLink( contributingField, DictionaryConst.LINK_DERIVES, renamedField );
         }

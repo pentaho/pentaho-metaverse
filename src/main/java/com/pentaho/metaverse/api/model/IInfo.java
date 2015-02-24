@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -33,9 +33,11 @@ public interface IInfo {
 
   @JsonProperty( JSON_PROPERTY_NAME )
   public String getName();
+
   public void setName( String name );
 
   @JsonProperty( JSON_PROPERTY_DESCRIPTION )
   public String getDescription();
+
   public void setDescription( String description );
 }
