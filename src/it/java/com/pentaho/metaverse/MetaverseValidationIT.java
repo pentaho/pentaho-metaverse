@@ -35,6 +35,7 @@ import com.pentaho.metaverse.frames.DatasourceNode;
 import com.pentaho.metaverse.frames.ExcelInputStepNode;
 import com.pentaho.metaverse.frames.FieldNode;
 import com.pentaho.metaverse.frames.FramedMetaverseNode;
+import com.pentaho.metaverse.frames.GroupByStepNode;
 import com.pentaho.metaverse.frames.JobEntryNode;
 import com.pentaho.metaverse.frames.JobNode;
 import com.pentaho.metaverse.frames.LocatorNode;
@@ -813,6 +814,7 @@ public class MetaverseValidationIT {
     assertEquals( 2, nodeDeletes.size() );
   }
 
+  @Test
   public void testCsvFileInputStep() throws Exception {
     // this is testing a specific CsvFileInputStep instance
     CsvFileInputStepNode csvFileInputStepNode = root.getCsvFileInputStepNode();
@@ -844,6 +846,20 @@ public class MetaverseValidationIT {
     assertEquals( countFileFieldNode, countStreamFieldNode );
   }
 
+  @Test
+  public void testGroupByStep() throws Exception {
+    GroupByStepNode groupByStepNode = root.getGroupByStepNode();
+    assertNotNull( groupByStepNode );
+    
+    int countCreates = getIterableSize( groupByStepNode.getStreamFieldNodesCreates() );
+    int countDeletes = getIterableSize( groupByStepNode.getStreamFieldNodesDeletes() );
+    int countUses = getIterableSize( groupByStepNode.getStreamFieldNodesUses() );
+    
+    assertEquals( 2, countCreates );
+    assertEquals( 2, countDeletes );
+    assertEquals( 2, countUses );
+  }
+  
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {
     TransMeta tm = new TransMeta( transformationStepNode.getTransNode().getPath(), null, true, null, null );
     BaseStepMeta meta = null;

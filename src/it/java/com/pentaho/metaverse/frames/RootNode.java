@@ -99,4 +99,7 @@ public interface RootNode extends FramedMetaverseNode {
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Input'}.as('step').in('contains').has('name', T.eq, 'Excel input - filename from field').back('step')" )
   public ExcelInputStepNode getExcelInputFileNameFromFieldStepNode();
+  
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Group by'}.as('step').in('contains').has('name', T.eq, 'group_by').back('step')" )
+  public GroupByStepNode getGroupByStepNode();
 }

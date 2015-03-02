@@ -8,6 +8,7 @@ import com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAna
 import com.pentaho.metaverse.analyzer.kettle.step.calculator.CalculatorStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer
 import org.pentaho.platform.api.metaverse.*
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.client.*
@@ -131,6 +132,9 @@ i:{
     
     excelInputAnalyzer = new ExcelInputStepAnalyzer()
     excelInputAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+    
+    groupByAnalyzer = new GroupByStepAnalyzer()
+    groupByAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
     //**********************************************************************
 
   	ksap = new StepAnalyzerProvider()
