@@ -63,6 +63,7 @@
   <bean id="StreamLookupStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer"/>
   <bean id="CalculatorStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.calculator.CalculatorStepAnalyzer"/>
   <bean id="ExcelInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer"/>
+  <bean id="GroupByStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer"/>
   <bean id="IDatabaseConnectionAnalyzerProvider"
         class="com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzerProvider" scope="singleton">
     <property name="databaseConnectionAnalyzers">
@@ -104,6 +105,7 @@
         <ref component-id="StreamLookupStepAnalyzer"/>
         <ref component-id="CalculatorStepAnalyzer"/>
         <ref component-id="ExcelInputStepAnalyzer"/>
+        <ref component-id="GroupByStepAnalyzer"/>
       </set>
     </property>
   </bean>
