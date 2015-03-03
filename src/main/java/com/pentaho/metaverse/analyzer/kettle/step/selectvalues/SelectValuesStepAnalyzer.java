@@ -32,6 +32,7 @@ import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -82,7 +83,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
       inputFieldName = change.getOriginalEntityName();
       fieldNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, inputFieldName ) );
       // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
-      RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
+      RowMetaInterface rowMetaInterface = ( prevFields == null ) ? new RowMeta() : prevFields.get( prevStepNames[0] );
       ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( inputFieldName );
       if ( inputFieldValueMeta == null ) {
         throw new MetaverseAnalyzerException( "Cannot determine type of field: " + inputFieldName );
@@ -95,7 +96,6 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
       }
       metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
     }
-
     return rootNode;
   }
 
@@ -113,7 +113,6 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
     String outputFieldName;
     ComponentDerivationRecord changeRecord;
 
-
     // Process the fields/tabs in the same order as the real step does
     if ( !Const.isEmpty( selectValuesMeta.getSelectName() ) ) {
       String[] fieldNames = selectValuesMeta.getSelectName();
@@ -130,9 +129,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
 
         Set<String> metadataChangedFields = new HashSet<String>();
 
-        // NOTE: We use equalsIgnoreCase instead of equals because that's how Select Values currently works
-        if ( inputFieldName != null && outputFieldName != null && !inputFieldName
-          .equalsIgnoreCase( outputFieldName ) ) {
+        if ( inputFieldName != null && outputFieldName != null && !inputFieldName.equals( outputFieldName ) ) {
           metadataChangedFields.add( "name" );
         }
 

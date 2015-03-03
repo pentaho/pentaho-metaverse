@@ -29,7 +29,6 @@ import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.Operations;
 import flexjson.JSONSerializer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -125,12 +124,7 @@ public class ComponentDerivationRecord {
    */
   public void addOperation( Operation operation ) {
     if ( operation != null ) {
-      List<IOperation> typeOperations = getOperations( operation.getType() );
-      if ( typeOperations == null ) {
-        typeOperations = new ArrayList<IOperation>();
-        operations.put( operation.getType(), typeOperations );
-      }
-      typeOperations.add( operation );
+      getOperations().addOperation( operation.getType(), operation );
     }
   }
 

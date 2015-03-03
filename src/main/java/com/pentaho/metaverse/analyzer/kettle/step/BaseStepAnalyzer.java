@@ -41,6 +41,7 @@ import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.platform.api.metaverse.IAnalysisContext;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.INamespace;
@@ -189,17 +190,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
           for ( ValueMetaInterface outRowMeta : outRowValueMetas ) {
             if ( !fieldNameExistsInInput( outRowMeta.getName() ) ) {
               // This field didn't come into the step, so assume it has been created here
-              IComponentDescriptor fieldDescriptor =
-                new MetaverseComponentDescriptor( outRowMeta.getName(), DictionaryConst.NODE_TYPE_TRANS_FIELD,
-                  rootNode, descriptor.getContext() );
-
-              IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
-              newFieldNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, rootNode.getLogicalId() );
-              newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, outRowMeta.getTypeDesc() );
-              metaverseBuilder.addNode( newFieldNode );
-
-              // Add link to show that this step created the field
-              metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
+              createFieldNode( descriptor.getContext(), outRowMeta );
             }
             // no else clause: if we can't determine the fields, we can't do anything else
           }
@@ -209,6 +200,20 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
       // TODO Don't throw an exception here, just log the error and move on
       LOGGER.warn( Messages.getString( "WARNING.AddingNodesCreated" ), t );
     }
+  }
+
+  protected void createFieldNode( IAnalysisContext context, ValueMetaInterface fieldMeta ) {
+    IComponentDescriptor fieldDescriptor =
+      new MetaverseComponentDescriptor( fieldMeta.getName(), DictionaryConst.NODE_TYPE_TRANS_FIELD,
+        rootNode, context );
+
+    IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
+    newFieldNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, rootNode.getLogicalId() );
+    newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, fieldMeta.getTypeDesc() );
+    metaverseBuilder.addNode( newFieldNode );
+
+    // Add link to show that this step created the field
+    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
   }
 
   protected boolean fieldNameExistsInInput( String fieldName ) {
