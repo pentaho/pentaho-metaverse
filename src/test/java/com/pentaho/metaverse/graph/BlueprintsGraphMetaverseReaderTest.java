@@ -8,10 +8,12 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,6 +26,16 @@ import static org.junit.Assert.*;
 public class BlueprintsGraphMetaverseReaderTest {
 
   private Graph graph;
+
+  public static final String OUTPUT_FOLDER = "target/outputfiles/";
+
+  @BeforeClass
+  public static void beforeClass() {
+    File f = new File( OUTPUT_FOLDER );
+    if ( !f.exists() ) {
+      f.mkdirs();
+    }
+  }
 
   @Before
   public void init() {
@@ -40,10 +52,10 @@ public class BlueprintsGraphMetaverseReaderTest {
     assertNotNull( "Graph is null", graph );
 
     GraphMLWriter writerXml = new GraphMLWriter();
-    writerXml.outputGraph( graph, new FileOutputStream( "testGraphMetaverseReader.graphml" ) );
+    writerXml.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testGraphMetaverseReader.graphml" ) );
 
     GraphSONWriter writerJson = new GraphSONWriter();
-    writerJson.outputGraph( graph, new FileOutputStream( "testGraphMetaverseReader.graphjson" ) );
+    writerJson.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testGraphMetaverseReader.graphjson" ) );
 
     assertEquals( "Vertex count is wrong", 30, countVertices( graph ) );
     assertEquals( "Edge count is wrong", 42, countEdges( graph ) );
@@ -170,7 +182,7 @@ public class BlueprintsGraphMetaverseReaderTest {
     assertNotNull( "Graph is null", g );
 
     GraphMLWriter writer = new GraphMLWriter();
-    writer.outputGraph( graph, new FileOutputStream( "testGetGraph.graphml" ) );
+    writer.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testGetGraph.graphml" ) );
 
     g = metaverseReader.getGraph( "bogus" );
     assertNull( "Node is not null", g );
@@ -224,10 +236,10 @@ public class BlueprintsGraphMetaverseReaderTest {
     assertNotNull( "Node is null", graph );
 
     GraphMLWriter writer = new GraphMLWriter();
-    writer.outputGraph( graph, new FileOutputStream( "testSearch1.graphml" ) );
+    writer.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testSearch1.graphml" ) );
 
     GraphSONWriter writerJson = new GraphSONWriter();
-    writerJson.outputGraph( graph, new FileOutputStream( "testSearch1.json" ) );
+    writerJson.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testSearch1.json" ) );
 
     assertEquals( "Vertex count is wrong", 7, countVertices( graph ) );
     assertEquals( "Edge count is wrong", 6, countEdges( graph ) );
@@ -241,8 +253,8 @@ public class BlueprintsGraphMetaverseReaderTest {
     graph = metaverseReader.search( types, ids, true );
     assertNotNull( "Node is null", graph );
 
-    writer.outputGraph( graph, new FileOutputStream( "testSearch2.graphml" ) );
-    writerJson.outputGraph( graph, new FileOutputStream( "testSearch2.json" ) );
+    writer.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testSearch2.graphml" ) );
+    writerJson.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testSearch2.json" ) );
 
     assertEquals( "Vertex count is wrong", 8, countVertices( graph ) );
     assertEquals( "Edge count is wrong", 7, countEdges( graph ) );
@@ -254,8 +266,8 @@ public class BlueprintsGraphMetaverseReaderTest {
     graph = metaverseReader.search( types, ids, false );
     assertNotNull( "Node is null", graph );
 
-    writer.outputGraph( graph, new FileOutputStream( "testSearch3.graphml" ) );
-    writerJson.outputGraph( graph, new FileOutputStream( "testSearch3.json" ) );
+    writer.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testSearch3.graphml" ) );
+    writerJson.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testSearch3.json" ) );
 
     assertEquals( "Vertex count is wrong", 16, countVertices( graph ) );
     assertEquals( "Edge count is wrong", 21, countEdges( graph ) );

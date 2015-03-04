@@ -45,12 +45,24 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 
 /**
  * User: RFellows Date: 8/19/14
  */
 public class IntegrationTestUtil {
+
+  public static final String OUTPUT_FOLDER = "target/outputfiles/";
+
+  public static String getOutputPath( String fileName ) {
+    File f = new File( OUTPUT_FOLDER );
+    if ( !f.exists() ) {
+      f.mkdirs();
+    }
+
+    return OUTPUT_FOLDER + fileName;
+  }
 
   public static synchronized void initializePentahoSystem( String solutionPath ) throws MetaverseException {
     StandaloneApplicationContext appContext = new StandaloneApplicationContext( solutionPath, "" );

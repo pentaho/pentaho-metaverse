@@ -114,13 +114,13 @@ public class MetaverseBuilderIT {
     assertTrue( readerGraph.getEdges().iterator().hasNext() );
 
     // write out the graph so we can look at it
-    File exportFile = new File( "src/it/resources/testGraph.graphml" );
+    File exportFile = new File( IntegrationTestUtil.getOutputPath( "testGraph.graphml" ) );
     FileUtils.writeStringToFile( exportFile, reader.exportToXml(), "UTF-8" );
 
-    File exportJson = new File( "src/it/resources/testGraph.graphjson" );
+    File exportJson = new File( IntegrationTestUtil.getOutputPath( "testGraph.graphjson" ) );
     FileUtils.writeStringToFile( exportJson, reader.exportFormat( IMetaverseReader.FORMAT_JSON ), "UTF-8" );
 
-    File exportCsv = new File( "src/it/resources/testGraph.csv" );
+    File exportCsv = new File( IntegrationTestUtil.getOutputPath( "testGraph.csv" ) );
     FileUtils.writeStringToFile( exportCsv, reader.exportFormat( IMetaverseReader.FORMAT_CSV ), "UTF-8" );
 
   }

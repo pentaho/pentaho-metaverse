@@ -30,6 +30,7 @@ import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -60,6 +61,16 @@ public class FileSystemLocatorTest implements IDocumentListener {
   private List<IDocumentEvent> events;
 
   TestFileSystemLocator spyLocator;
+
+  public static final String OUTPUT_FOLDER = "target/outputfiles/";
+
+  @BeforeClass
+  public static void beforeClass() {
+    File f = new File( OUTPUT_FOLDER );
+    if ( !f.exists() ) {
+      f.mkdirs();
+    }
+  }
 
   /**
    * Initializes the kettle system
@@ -153,7 +164,7 @@ public class FileSystemLocatorTest implements IDocumentListener {
     assertNotNull( "Graph is null", graph );
 
     GraphMLWriter writer = new GraphMLWriter();
-    writer.outputGraph( graph, new FileOutputStream( "FileSystemLocatorTest.graphml" ) );
+    writer.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "FileSystemLocatorTest.graphml" ) );
 
   }
 
