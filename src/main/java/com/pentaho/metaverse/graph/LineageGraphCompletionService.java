@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -39,18 +39,16 @@ import java.util.concurrent.TimeUnit;
 
 public class LineageGraphCompletionService implements CompletionService<Graph> {
 
+  private static final LineageGraphCompletionService INSTANCE = new LineageGraphCompletionService();
+
   private ExecutorCompletionService<Graph> executionCompletionService;
   private Executor executor = Executors.newCachedThreadPool();
   private static final Logger log = LoggerFactory.getLogger( LineageGraphCompletionService.class );
   private Queue<Future<Graph>> queue = new ConcurrentLinkedQueue<Future<Graph>>();
 
 
-  private static class Holder {
-    private static final LineageGraphCompletionService INSTANCE = new LineageGraphCompletionService();
-  }
-
   public static LineageGraphCompletionService getInstance() {
-    return Holder.INSTANCE;
+    return INSTANCE;
   }
 
   private LineageGraphCompletionService() {

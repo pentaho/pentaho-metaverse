@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -24,6 +24,7 @@ package com.pentaho.metaverse.client;
 
 import com.google.common.collect.Sets;
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.graph.LineageGraphMap;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -34,12 +35,14 @@ import com.tinkerpop.pipes.branch.LoopPipe;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.platform.api.metaverse.MetaverseException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -55,13 +58,69 @@ public class LineageClientTest {
   public void setUp() throws Exception {
     lineageClient = new LineageClient();
     g = new TinkerGraph();
+    LineageGraphMap.getInstance().clear();
   }
 
   @Test
   public void testGetCreatorSteps() throws Exception {
     assertTrue( lineageClient.getCreatorSteps( (String) null, null, null ).isEmpty() );
     assertTrue( lineageClient.getCreatorSteps( "testTrans", null, null ).isEmpty() );
-    assertTrue( lineageClient.getCreatorSteps( mock( TransMeta.class ), null, null ).isEmpty() );
+    TransMeta mockTransMeta = mock( TransMeta.class );
+    assertTrue( lineageClient.getCreatorSteps( mockTransMeta, null, null ).isEmpty() );
+
+    // Not exactly a unit test, but fill the map so we can call more of our own code
+    when( mockTransMeta.getFilename() ).thenReturn( "testTrans" );
+    Future future = mock( Future.class );
+    when( future.get() ).thenReturn( g );
+    LineageGraphMap.getInstance().put( mockTransMeta, future );
+
+    Vertex step = g.addVertex( "1" );
+    step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
+    step.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    Vertex field = g.addVertex( "2" );
+    field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
+    Vertex targetStep = g.addVertex( "4" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
+
+    Map<String, Set<StepField>> creatorSteps =
+      lineageClient.getCreatorSteps( mockTransMeta, "targetStep", Arrays.asList( TEST_FIELD ) );
+    assertNotNull( creatorSteps );
+    assertEquals( 1, creatorSteps.size() );
+    Set<StepField> creatorFields = creatorSteps.get( TEST_FIELD );
+    assertNotNull( creatorFields );
+    assertEquals( 1, creatorFields.size() );
+    StepField stepField = creatorFields.iterator().next();
+    assertEquals( "testStep", stepField.getStepName() );
+    assertEquals( TEST_FIELD, stepField.getFieldName() );
+
+    when( mockTransMeta.getFilename() ).thenReturn( null );
+    when( mockTransMeta.getPathAndName() ).thenReturn( "testTrans" );
+
+    creatorSteps = lineageClient.getCreatorSteps( "testTrans", "targetStep", Arrays.asList( TEST_FIELD ) );
+    assertNotNull( creatorSteps );
+    assertEquals( 1, creatorSteps.size() );
+    creatorFields = creatorSteps.get( TEST_FIELD );
+    assertNotNull( creatorFields );
+    assertEquals( 1, creatorFields.size() );
+    assertEquals( "testStep", stepField.getStepName() );
+    assertEquals( TEST_FIELD, stepField.getFieldName() );
+  }
+
+  @Test( expected = MetaverseException.class )
+  public void testGetCreatorStepsWithException() throws Exception {
+
+    // First test getCreatorSteps() with the wrong TransMeta
+    lineageClient.getCreatorSteps( mock( TransMeta.class ), "targetStep", Arrays.asList( TEST_FIELD ) );
+
+    // Now set up for a MetaverseException
+    TransMeta mockTransMeta = mock( TransMeta.class );
+    when( mockTransMeta.getFilename() ).thenReturn( "testTrans" );
+    Future future = mock( Future.class );
+    LineageGraphMap.getInstance().put( mockTransMeta, future );
+    lineageClient.getCreatorSteps( mockTransMeta, "targetStep", Arrays.asList( TEST_FIELD ) );
   }
 
   @Test
@@ -78,7 +137,8 @@ public class LineageClientTest {
     targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
 
-    Map<String, Set<Vertex>> creatorFieldsMap = lineageClient.creatorFields( g, "targetStep", Arrays.asList( TEST_FIELD ) );
+    Map<String, Set<Vertex>> creatorFieldsMap =
+      lineageClient.creatorFields( g, "targetStep", Arrays.asList( TEST_FIELD ) );
     assertNotNull( creatorFieldsMap );
     assertEquals( 1, creatorFieldsMap.size() );
     Set<Vertex> creatorFields = creatorFieldsMap.get( TEST_FIELD );
@@ -91,7 +151,77 @@ public class LineageClientTest {
 
   @Test
   public void testGetOriginSteps() throws Exception {
-    assertTrue( lineageClient.getOriginSteps( mock( TransMeta.class ), null, null ).isEmpty() );
+    TransMeta mockTransMeta = mock( TransMeta.class );
+    assertTrue( lineageClient.getOriginSteps( mockTransMeta, null, null ).isEmpty() );
+
+    // Not exactly a unit test, but fill the map so we can call more of our own code
+    when( mockTransMeta.getFilename() ).thenReturn( "testTrans" );
+    Future future = mock( Future.class );
+    when( future.get() ).thenReturn( g );
+    LineageGraphMap.getInstance().put( mockTransMeta, future );
+
+    Vertex step = g.addVertex( "1" );
+    step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
+    step.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    Vertex field = g.addVertex( "2" );
+    field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
+    Vertex targetStep = g.addVertex( "4" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
+
+    Map<String, Set<StepField>> originSteps =
+      lineageClient.getOriginSteps( mockTransMeta, "targetStep", Arrays.asList( TEST_FIELD ) );
+  }
+
+  @Test( expected = MetaverseException.class )
+  public void testGetOriginStepsWithException() throws Exception {
+    TransMeta mockTransMeta = mock( TransMeta.class );
+    assertTrue( lineageClient.getOriginSteps( mockTransMeta, null, null ).isEmpty() );
+
+    when( mockTransMeta.getFilename() ).thenReturn( "testTrans" );
+    Future future = mock( Future.class );
+    LineageGraphMap.getInstance().put( mockTransMeta, future );
+    lineageClient.getOriginSteps( mockTransMeta, "targetStep", Arrays.asList( TEST_FIELD ) );
+  }
+
+  @Test
+  public void testGetOperationPaths() throws Exception {
+    TransMeta mockTransMeta = mock( TransMeta.class );
+    assertTrue( lineageClient.getOriginSteps( mockTransMeta, null, null ).isEmpty() );
+
+    // Not exactly a unit test, but fill the map so we can call more of our own code
+    when( mockTransMeta.getFilename() ).thenReturn( "testTrans" );
+    Future future = mock( Future.class );
+    when( future.get() ).thenReturn( g );
+    LineageGraphMap.getInstance().put( mockTransMeta, future );
+
+    Vertex step = g.addVertex( "1" );
+    step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
+    step.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    Vertex field = g.addVertex( "2" );
+    field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
+    Vertex targetStep = g.addVertex( "4" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
+
+    Map<String, Set<List<StepFieldOperations>>> operationPaths =
+      lineageClient.getOperationPaths( mockTransMeta, "targetStep", Arrays.asList( TEST_FIELD ) );
+  }
+
+  @Test( expected = MetaverseException.class )
+  public void testGetOperationPathsWithException() throws Exception {
+    TransMeta mockTransMeta = mock( TransMeta.class );
+    assertTrue( lineageClient.getOperationPaths( mockTransMeta, null, null ).isEmpty() );
+
+    when( mockTransMeta.getFilename() ).thenReturn( "testTrans" );
+    Future future = mock( Future.class );
+    when( future.get() ).thenThrow( Exception.class );
+    LineageGraphMap.getInstance().put( mockTransMeta, future );
+    lineageClient.getOperationPaths( mockTransMeta, "targetStep", Arrays.asList( TEST_FIELD ) );
   }
 
   @Test
@@ -133,6 +263,7 @@ public class LineageClientTest {
     GremlinPipeline pipe = lineageClient.getOriginStepsPipe( Sets.newHashSet( field ), false );
     assertNotNull( pipe );
     assertNotNull( pipe.toList() );
+    // TODO test other path in ifTheElse pipe
   }
 
   @Test

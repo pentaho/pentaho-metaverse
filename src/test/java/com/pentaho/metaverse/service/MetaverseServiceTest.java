@@ -39,6 +39,7 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -83,21 +84,27 @@ public class MetaverseServiceTest {
     service = new MetaverseService( mockReader, mockProvider );
 
     when( mockHeadersXml.getAcceptableMediaTypes() ).thenReturn(
-      new ArrayList<MediaType>() { {
-        add( MediaType.APPLICATION_XML_TYPE );
-      } }
+      new ArrayList<MediaType>() {
+        {
+          add( MediaType.APPLICATION_XML_TYPE );
+        }
+      }
     );
 
     when( mockHeadersJson.getAcceptableMediaTypes() ).thenReturn(
-      new ArrayList<MediaType>() { {
-        add( MediaType.APPLICATION_JSON_TYPE );
-      } }
+      new ArrayList<MediaType>() {
+        {
+          add( MediaType.APPLICATION_JSON_TYPE );
+        }
+      }
     );
 
     when( mockHeadersText.getAcceptableMediaTypes() ).thenReturn(
-      new ArrayList<MediaType>() { {
-        add( MediaType.TEXT_PLAIN_TYPE );
-      } }
+      new ArrayList<MediaType>() {
+        {
+          add( MediaType.TEXT_PLAIN_TYPE );
+        }
+      }
     );
   }
 
@@ -141,7 +148,7 @@ public class MetaverseServiceTest {
   }
 
   @Test
-  public void testExport_MultipleCalls()throws MetaverseLocatorException {
+  public void testExport_MultipleCalls() throws MetaverseLocatorException {
     when( mockReader.exportFormat( anyString() ) ).thenReturn( TEST_XML );
     when( mockProvider.getDocumentLocators() ).thenReturn( locators );
 
@@ -201,5 +208,33 @@ public class MetaverseServiceTest {
     assertEquals( "", response.getEntity().toString() );
   }
 
+  @Test
+  public void testPrepareMetaverse() {
+    service = new MetaverseService( mockReader, mockProvider );
+    service.prepareMetaverse();
+  }
 
+  @Test
+  public void testPrepareMetaverse_Exception() {
+    service = new MetaverseService( mockReader, mockProvider );
+    // Set up for exception
+    when( mockProvider.getDocumentLocators() ).thenThrow( MetaverseLocatorException.class );
+    service.prepareMetaverse();
+  }
+
+  @Test
+  public void testPrepareMetaverse_InterruptedException() {
+    service = new MetaverseService( mockReader, mockProvider );
+    // Set up for exception
+    when( mockProvider.getDocumentLocators() ).thenThrow( InterruptedException.class );
+    service.prepareMetaverse();
+  }
+
+  @Test
+  public void testPrepareMetaverse_ExecutionException() {
+    service = new MetaverseService( mockReader, mockProvider );
+    // Set up for exception
+    when( mockProvider.getDocumentLocators() ).thenThrow( ExecutionException.class );
+    service.prepareMetaverse();
+  }
 }
