@@ -160,4 +160,7 @@
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
 
+  <bean id="lineageClient" class="com.pentaho.metaverse.client.LineageClient" scope="singleton"/>
+  <service id="lineageClientService" interface="com.pentaho.metaverse.api.ILineageClient" ref="lineageClient"/>
+
 </blueprint>
