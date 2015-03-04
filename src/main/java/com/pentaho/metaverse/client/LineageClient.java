@@ -54,7 +54,7 @@ import java.util.concurrent.Future;
  */
 public class LineageClient implements ILineageClient {
 
-  protected static final int MAX_LOOPS = 10;
+  protected static final int MAX_LOOPS = 20;
 
   private static final StepFieldPipeFunction STEPFIELD_PIPE_FUNC = new StepFieldPipeFunction();
   private static final StepFieldOperationsPipeFunction STEPFIELDOPS_PIPE_FUNC = new StepFieldOperationsPipeFunction();

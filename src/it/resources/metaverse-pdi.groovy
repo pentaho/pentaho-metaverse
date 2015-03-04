@@ -43,44 +43,51 @@ import org.pentaho.di.ui.spoon.trans.*
 import org.pentaho.groovy.ui.spoon.*
 import org.pentaho.groovy.ui.spoon.repo.*
 
-i:{
+i:
+{
 
   try {
     c = Class.forName('com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint')
-    ExtensionPointPluginType.getInstance().registerCustom( c, "custom", "transRuntimeMetaverse", "TransformationStartThreads", "no description", null )
+    ExtensionPointPluginType.getInstance().registerCustom(c, "custom", "transRuntimeMetaverse", "TransformationStartThreads", "no description", null)
   }
-  catch(e) {
+  catch (e) {
     println 'Extension point(s) not loaded'
   }
+  // Check for KETTLE_PLUGIN_BASE_FOLDERS, default to ${user.home}/pdi-ee-6.0-SNAPSHOT/pdi-ee/data-integration/plugins
+  System.setProperty('KETTLE_PLUGIN_BASE_FOLDERS',
+    System.getProperty('KETTLE_PLUGIN_BASE_FOLDERS') ?:
+      "${System.getProperty('user.home')}/pdi-ee-6.0-SNAPSHOT/pdi-ee/data-integration/plugins")
 
-  PluginRegistry.addPluginType( ExtensionPointPluginType.getInstance() );
-  KettleEnvironment.init()
+  PluginRegistry.addPluginType(ExtensionPointPluginType.getInstance());
+  KettleEnvironment.init(false)
   Gremlin.load()
   // Add custom Gremlin steps for convenience
-  Gremlin.defineStep('steps',[Vertex,Pipe],
-          { name ->
-            _().has('type', DictionaryConst.NODE_TYPE_TRANS_STEP)
-          }
+  Gremlin.defineStep('steps', [Vertex, Pipe],
+    { name ->
+      _().has('type', DictionaryConst.NODE_TYPE_TRANS_STEP)
+    }
   )
-  Gremlin.defineStep('step',[Vertex,Pipe],
-          { name ->
-              _().steps().has('name', name)
-          }
+  Gremlin.defineStep('step', [Vertex, Pipe],
+    { name ->
+      _().steps().has('name', name)
+    }
   )
-  Gremlin.defineStep('myTrans',[Vertex,Pipe],
-          {
-            _().in.loop(1) {it.loops < 10} {it.object.type == 'Transformation'}
-          }
+  Gremlin.defineStep('myTrans', [Vertex, Pipe],
+    {
+      _().in.loop(1) { it.loops < 10 } { it.object.type == 'Transformation' }
+    }
   )
-  Gremlin.defineStep('creator',[Vertex,Pipe],
-          { field ->
-            _().in('hops_to').loop(1){it.loops<10}{it.object != null}.as('step').out('creates').has('name', field).back("step")
-          }
+  Gremlin.defineStep('creator', [Vertex, Pipe],
+    { field ->
+      _().in('hops_to').loop(1) { it.loops < 10 } {
+        it.object != null
+      }.as('step').out('creates').has('name', field).back("step")
+    }
   )
-  Gremlin.defineStep('origin', [Vertex,Pipe],
-          { transName, stepName ->
-            _().and( _().has("name", stepName), _().in("contains").and( _().has("name", transName), _().has("type", "Transformation") ) )
-          }
+  Gremlin.defineStep('origin', [Vertex, Pipe],
+    { transName, stepName ->
+      _().and(_().has("name", stepName), _().in("contains").and(_().has("name", transName), _().has("type", "Transformation")))
+    }
   )
   mtos = [:]
   mcs = MetaverseCompletionService.instance
@@ -88,96 +95,105 @@ i:{
   trans = [] as Trans[]
 
 
-  loadIntegrationTestObjects = { obj,shell ->
-  obj.with {
-  	g = new TinkerGraph()
-  	dc = new DocumentController()
-  	mb = new MetaverseBuilder(g)
-  	dc.setMetaverseBuilder(mb)
+  loadIntegrationTestObjects = { obj, shell ->
+    obj.with {
+      g = new TinkerGraph()
+      dc = new DocumentController()
+      mb = new MetaverseBuilder(g)
+      dc.setMetaverseBuilder(mb)
 
-    dba = new DatabaseConnectionAnalyzer()
-    dbap = new DatabaseConnectionAnalyzerProvider()
-    dbap.setDatabaseConnectionAnalyzers([dba] as Set)
+      dba = new DatabaseConnectionAnalyzer()
+      dbap = new DatabaseConnectionAnalyzerProvider()
+      dbap.setDatabaseConnectionAnalyzers([dba] as Set)
 
-    //**********************************************************************
-    // Set up the step analyzers
-  	tfia = new TextFileInputStepAnalyzer()
-  	tfia.setDatabaseConnectionAnalyzerProvider(dbap)
-    cfia = new CsvFileInputStepAnalyzer()
-    cfia.setDatabaseConnectionAnalyzerProvider(dbap)
+      //**********************************************************************
+      // Set up the step analyzers
+      tfia = new TextFileInputStepAnalyzer()
+      tfia.setDatabaseConnectionAnalyzerProvider(dbap)
+      cfia = new CsvFileInputStepAnalyzer()
+      cfia.setDatabaseConnectionAnalyzerProvider(dbap)
 
-  	tfoa = new TableOutputStepAnalyzer()
-  	tfoa.setDatabaseConnectionAnalyzerProvider(dbap)
+      tfoa = new TableOutputStepAnalyzer()
+      tfoa.setDatabaseConnectionAnalyzerProvider(dbap)
 
-    mergeJoinAnalyzer = new MergeJoinStepAnalyzer()
-    mergeJoinAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+      mergeJoinAnalyzer = new MergeJoinStepAnalyzer()
+      mergeJoinAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
 
-    numberRangeAnalyzer = new NumberRangeStepAnalyzer()
-    numberRangeAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+      numberRangeAnalyzer = new NumberRangeStepAnalyzer()
+      numberRangeAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
 
-    selectValuesAnalyzer = new SelectValuesStepAnalyzer()
-    selectValuesAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+      selectValuesAnalyzer = new SelectValuesStepAnalyzer()
+      selectValuesAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
 
-    tableInputAnalyzer = new TableInputStepAnalyzer()
-    tableInputAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+      tableInputAnalyzer = new TableInputStepAnalyzer()
+      tableInputAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
 
-    valueMapperAnalyzer = new ValueMapperStepAnalyzer()
-    valueMapperAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+      valueMapperAnalyzer = new ValueMapperStepAnalyzer()
+      valueMapperAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+
+      streamLookupAnalyzer = new StreamLookupStepAnalyzer()
+      streamLookupAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+
+      calculatorAnalyzer = new CalculatorStepAnalyzer()
+      calculatorAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+
+      excelInputAnalyzer = new ExcelInputStepAnalyzer()
+      excelInputAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
     
-    streamLookupAnalyzer = new StreamLookupStepAnalyzer()
-    streamLookupAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
-    
-    calculatorAnalyzer = new CalculatorStepAnalyzer()
-    calculatorAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
-    
-    excelInputAnalyzer = new ExcelInputStepAnalyzer()
-    excelInputAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
-    
-    groupByAnalyzer = new GroupByStepAnalyzer()
-    groupByAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
-    //**********************************************************************
+      groupByAnalyzer = new GroupByStepAnalyzer()
+      groupByAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+      //**********************************************************************
 
-  	ksap = new StepAnalyzerProvider()
-  	ksap.setStepAnalyzers([tfia, tfoa, cfia, mergeJoinAnalyzer, numberRangeAnalyzer, selectValuesAnalyzer, tableInputAnalyzer, valueMapperAnalyzer] as Set)
+      ksap = new StepAnalyzerProvider()
+      ksap.setStepAnalyzers(
+        [tfia, tfoa, cfia,
+         mergeJoinAnalyzer, numberRangeAnalyzer, selectValuesAnalyzer, tableInputAnalyzer, valueMapperAnalyzer,
+         streamLookupAnalyzer, calculatorAnalyzer, groupByAnalyzer, excelInputAnalyzer] as Set)
 
-  	ta = new TransformationAnalyzer()
-  	ta.setStepAnalyzerProvider(ksap)
+      ta = new TransformationAnalyzer()
+      ta.setStepAnalyzerProvider(ksap)
 
-  	ja = new JobAnalyzer()
-  	dc.setDocumentAnalyzers([ta,ja] as Set)
-  	
-    dl = new FileSystemLocator()
-  	dl.with {
-  		addDocumentListener(dc)
-  		setRepositoryId('FILE_SYSTEM_REPO')
-  		setMetaverseBuilder(dc)
-  		setRootFolder('src/it/resources/repo')
-  	}
-  	gw = new GraphMLWriter()
-  	gsonw = new GraphSONWriter()
-    g2 = new TinkerGraph()
-    gr = new GraphMLReader(g2)
+      ja = new JobAnalyzer()
+      dc.setDocumentAnalyzers([ta, ja] as Set)
+
+      dl = new FileSystemLocator()
+      dl.with {
+        addDocumentListener(dc)
+        setRepositoryId('FILE_SYSTEM_REPO')
+        setMetaverseBuilder(dc)
+        setRootFolder('src/it/resources/repo')
+      }
+      gw = new GraphMLWriter()
+      gsonw = new GraphSONWriter()
+      g2 = new TinkerGraph()
+      gr = new GraphMLReader(g2)
+    }
+
+    shell.g = obj.g
+    shell.g2 = obj.g2
+    shell.dc = obj.dc
+    shell.mb = obj.mb
+    shell.dl = obj.dl
+    shell.ta = obj.ta
+    shell.gw = obj.gw
+    shell.gr = obj.gr
+
+    MetaverseUtil.documentController = shell.dc
+
+    // Helper constants (to save typing)
+    shell.TRANS = DictionaryConst.NODE_TYPE_TRANS
+    shell.STEP = DictionaryConst.NODE_TYPE_TRANS_STEP
+    shell.JOB = DictionaryConst.NODE_TYPE_JOB
+    shell.JOBENTRY = DictionaryConst.NODE_TYPE_JOB_ENTRY
   }
-
-  shell.g = obj.g
-  shell.g2 = obj.g2
-  shell.dc = obj.dc
-  shell.mb = obj.mb
-  shell.dl = obj.dl
-  shell.ta = obj.ta
-  shell.gw = obj.gw
-  shell.gr = obj.gr
-
-  MetaverseUtil.documentController = shell.dc
-
-  // Helper constants (to save typing)
-  shell.TRANS = DictionaryConst.NODE_TYPE_TRANS
-  shell.STEP = DictionaryConst.NODE_TYPE_TRANS_STEP
-  shell.JOB = DictionaryConst.NODE_TYPE_JOB
-  shell.JOBENTRY = DictionaryConst.NODE_TYPE_JOB_ENTRY
-}
-  getPathFormatter    = { def x = [{"${it.name} (${it.type})"}]; 10.times {x << {"<-[ ${it.label} ]-"}; x<<{"${it.name} (${it.type})"}}; x.toArray() as Closure[]}
-  getRevPathFormatter = { def x = [{"${it.name} (${it.type})"}]; 10.times {x << {"-[ ${it.label} ]->"}; x<<{"${it.name} (${it.type})"}}; x.toArray() as Closure[]}
+  getPathFormatter = {
+    def x = [{ "${it.name} (${it.type})" }];
+    10.times { x << { "<-[ ${it.label} ]-" }; x << { "${it.name} (${it.type})" } }; x.toArray() as Closure[]
+  }
+  getRevPathFormatter = {
+    def x = [{ "${it.name} (${it.type})" }];
+    10.times { x << { "-[ ${it.label} ]->" }; x << { "${it.name} (${it.type})" } }; x.toArray() as Closure[]
+  }
 
   loadIT = {
     loadIntegrationTestObjects(mtos, this)
@@ -190,22 +206,36 @@ i:{
   }
 
   loadFolder = { folder ->
-    dl.rootFolder = folder
-    ( folder as File ).eachFileMatch(groovy.io.FileType.FILES, ~/.*\.ktr/) { ktr ->
-      ktr.withInputStream { i ->
+    file = (folder as File)
+    if (file.isDirectory()) {
+      dl.rootFolder = folder
+      file.eachFileMatch(groovy.io.FileType.FILES, ~/.*\.ktr/) { ktr ->
+        ktr.withInputStream { i ->
+          Variables vars = new Variables()
+          vars.setVariable("testTransParam3", "demo")
+          tm = new TransMeta(i, null, true, vars, null)
+          tm.filename = tm.name
+          Trans t = new Trans(tm, null, tm.name, folder, ktr.absolutePath)
+          t.setVariable("testTransParam3", "demo");
+          t.setVariable("Internal.Transformation.Filename.Directory", folder);
+          tm.setVariable("testTransParam3", "demo");
+          tm.setVariable("Internal.Transformation.Filename.Directory", folder);
+          trans += t
+        }
+      }
+    } else {
+      dl.rootFolder = file.parent
+      file.withInputStream { i ->
         Variables vars = new Variables()
-        vars.setVariable( "testTransParam3", "demo" )
-        tm = new TransMeta( i, null, true, vars, null )
+        tm = new TransMeta(i, null, true, vars, null)
         tm.filename = tm.name
-        Trans t = new Trans( tm, null, tm.name, folder, ktr.absolutePath )
-        t.setVariable( "testTransParam3", "demo" );
-        t.setVariable( "Internal.Transformation.Filename.Directory", folder);
-        tm.setVariable( "testTransParam3", "demo" );
-        tm.setVariable( "Internal.Transformation.Filename.Directory", folder);
+        Trans t = new Trans(tm, null, tm.name, folder, file.absolutePath)
+        t.setVariable("Internal.Transformation.Filename.Directory", folder);
+        tm.setVariable("Internal.Transformation.Filename.Directory", folder);
         trans += t
       }
     }
-    "loaded repo from ${folder}" 
+    "loaded repo from ${folder}"
   }
   loadDemo = {
     loadFolder 'src/it/resources/repo/demo'
@@ -223,23 +253,27 @@ i:{
     new File(fname).withInputStream { i -> gr.inputGraph(i) }
   }
 
+  saveGraph = { fname ->
+    new File(fname).withOutputStream { i -> gw.outputGraph(g, i) }
+  }
+
   lineageClient = { fname ->
     tm = new TransMeta(fname)
-    doc = MetaverseUtil.createDocument(new Namespace("SPOON"), tm, tm.filename, tm.name,'ktr',URLConnection.fileNameMap.getContentTypeFor( tm.filename ))
+    doc = MetaverseUtil.createDocument(new Namespace("SPOON"), tm, tm.filename, tm.name, 'ktr', URLConnection.fileNameMap.getContentTypeFor(tm.filename))
     MetaverseUtil.addLineageGraph(doc, graph = new TinkerGraph())
     new LineageClient()
   }
 
-  // Measures the number of seconds it takes to run the given closure 
+  // Measures the number of seconds it takes to run the given closure
   timeToRun = { closureToMeasure ->
     now = System.currentTimeMillis()
     closureToMeasure()
     then = System.currentTimeMillis()
-    "${(then-now) / 1000.0f} s"
+    "${(then - now) / 1000.0f} s"
   }
 
   ls = { dir ->
-    new File(dir ?:'.').list()
+    new File(dir ?: '.').list()
   }
 
 

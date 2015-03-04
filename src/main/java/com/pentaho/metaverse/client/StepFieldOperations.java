@@ -51,4 +51,15 @@ public class StepFieldOperations extends StepField {
   public void setOperations( Operations operations ) {
     this.operations = operations;
   }
+
+  public String toString() {
+    StringBuffer sb = new StringBuffer( "{ step:" );
+    sb.append( getStepName() );
+    sb.append( ", field:" );
+    sb.append( getFieldName() );
+    sb.append( ", operations: " );
+    sb.append( operations == null ? "{ none }" : operations );
+    sb.append( " }" );
+    return sb.toString();
+  }
 }

@@ -25,6 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.groupby;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.groupby.GroupByMeta;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
@@ -53,9 +54,11 @@ public class GroupByStepAnalyzer extends BaseStepAnalyzer<GroupByMeta> {
   public IMetaverseNode analyze( IComponentDescriptor descriptor, GroupByMeta groupByMeta )
     throws MetaverseAnalyzerException {
 
+    this.descriptor = descriptor;
+
     // Do common analysis for all steps
     super.analyze( descriptor, groupByMeta );
-    this.descriptor = descriptor;
+
     getChangeRecords( groupByMeta );
 
     return rootNode;
@@ -66,9 +69,18 @@ public class GroupByStepAnalyzer extends BaseStepAnalyzer<GroupByMeta> {
     throws MetaverseAnalyzerException {
     Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
     for ( int i = 0; i < groupByMeta.getSubjectField().length; i++ ) {
+
+      // If the aggregate field is the same name as a subject field, it is technically a new field but will not be
+      // created by the base step analyzer. We can do this naively by running through all aggregate fields, checking to
+      // see if its node already exists, and creating/adding it if it does not exist.
+      if ( stepFields != null ) {
+        ValueMetaInterface vmi = stepFields.searchValueMeta( groupByMeta.getAggregateField()[i] );
+        createFieldNode( descriptor.getContext(), vmi );
+      }
+
       ComponentDerivationRecord changeRecord =
-          buildChangeRecord( groupByMeta.getSubjectField()[i], groupByMeta.getAggregateField()[i], groupByMeta
-              .getAggregateType()[i] );
+        buildChangeRecord( groupByMeta.getSubjectField()[i], groupByMeta.getAggregateField()[i], groupByMeta
+          .getAggregateType()[i] );
       changeRecords.add( changeRecord );
     }
     return changeRecords;
@@ -77,10 +89,10 @@ public class GroupByStepAnalyzer extends BaseStepAnalyzer<GroupByMeta> {
   private ComponentDerivationRecord buildChangeRecord( String subjectField, String aggregateField, int aggregateType ) {
     final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( aggregateField, ChangeType.DATA );
     changeRecord.addOperation( new Operation( Operation.AGG_CATEGORY, ChangeType.DATA,
-        DictionaryConst.PROPERTY_TRANSFORMS, subjectField + " using " + GroupByMeta.getTypeDesc( aggregateType )
-            + " -> " + aggregateField ) );
+      DictionaryConst.PROPERTY_TRANSFORMS, subjectField + " using " + GroupByMeta.getTypeDesc( aggregateType )
+      + " -> " + aggregateField ) );
     IMetaverseNode subjectFieldNode =
-        createNodeFromDescriptor( this.getStepFieldOriginDescriptor( descriptor, subjectField ) );
+      createNodeFromDescriptor( this.getPrevStepFieldOriginDescriptor( descriptor, subjectField ) );
     processFieldChangeRecord( descriptor, subjectFieldNode, changeRecord );
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, subjectFieldNode );
 
