@@ -372,7 +372,6 @@
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${plugin.org.apache.maven.plugins.maven-pmd-plugin.version}</version>
         <configuration>
-          <linkXref>true</linkXref>
           <targetJdk>${target.jdk.version}</targetJdk>
           <rulesets>
             <ruleset>${pmd.rulesets.url}/basic.xml</ruleset>
@@ -484,7 +483,6 @@
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${plugin.org.apache.maven.plugins.maven-pmd-plugin.version}</version>
         <configuration>
-          <linkXref>true</linkXref>
           <targetJdk>${target.jdk.version}</targetJdk>
           <rulesets>
             <ruleset>${pmd.rulesets.url}/basic.xml</ruleset>

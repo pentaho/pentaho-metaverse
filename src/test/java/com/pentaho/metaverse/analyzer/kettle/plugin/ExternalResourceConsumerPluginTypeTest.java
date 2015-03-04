@@ -1,5 +1,6 @@
 package com.pentaho.metaverse.analyzer.kettle.plugin;
 
+import com.pentaho.metaverse.IntegrationTestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.plugins.KettleSelectiveParentFirstClassLoader;
@@ -103,7 +104,7 @@ public class ExternalResourceConsumerPluginTypeTest {
       new File( "." ).toURI().toURL(), this.getClass().getClassLoader() );
     assertTrue( ucl instanceof KettleSelectiveParentFirstClassLoader );
     // Create temp directory
-    File tmpDir = new File( "tmp/lib" );
+    File tmpDir = new File( IntegrationTestUtil.getOutputPath( "tmp/lib" ) );
     tmpDir.mkdirs();
     tmpDir.deleteOnExit();
     ucl = pluginType.createUrlClassLoader(

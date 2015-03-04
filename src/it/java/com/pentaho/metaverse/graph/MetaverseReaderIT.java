@@ -29,7 +29,6 @@ import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -79,6 +78,6 @@ public class MetaverseReaderIT {
     assertNotNull( g.getVertex( nodes.get( 0 ).getStringID() ) );
 
     GraphMLWriter writer = new GraphMLWriter();
-    writer.outputGraph( g, new FileOutputStream( "src/it/resources/searchOut.graphml" ) );
+    writer.outputGraph( g, new FileOutputStream( IntegrationTestUtil.getOutputPath( "searchOut.graphml" ) ) );
   }
 }

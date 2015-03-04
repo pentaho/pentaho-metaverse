@@ -190,18 +190,16 @@ public class JsonLineageIT {
     TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
 
     String json = mapper.writeValueAsString( tm );
-    File jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".json" );
+    File jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
 
     // now deserialize it
     TransMeta rehydrated = mapper.readValue( json, TransMeta.class );
 
-//    String ktr = rehydrated.getXML();
-//    FileUtils.writeStringToFile( new File( "src/it/resources/tmp/" + tm.getName() + ".after.ktr" ), ktr );
     assertEquals( tm.getName(), rehydrated.getName() );
 
     json = mapper.writeValueAsString( rehydrated );
-    jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".after.json" );
+    jsonOut = new File(IntegrationTestUtil.getOutputPath( tm.getName() + ".after.json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
   }
 
@@ -212,7 +210,7 @@ public class JsonLineageIT {
     TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
 
     String json = mapper.writeValueAsString( tm );
-    File jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".json" );
+    File jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
 
     // now deserialize it
@@ -221,7 +219,7 @@ public class JsonLineageIT {
     assertEquals( tm.getName(), rehydrated.getName() );
 
     json = mapper.writeValueAsString( rehydrated );
-    jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".after.json" );
+    jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".after.json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
   }
 
@@ -232,7 +230,7 @@ public class JsonLineageIT {
     TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
 
     String json = mapper.writeValueAsString( tm );
-    File jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".json" );
+    File jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
 
     // now deserialize it
@@ -241,7 +239,7 @@ public class JsonLineageIT {
     assertEquals( tm.getName(), rehydrated.getName() );
 
     json = mapper.writeValueAsString( rehydrated );
-    jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".after.json" );
+    jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".after.json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
   }
 
@@ -251,7 +249,7 @@ public class JsonLineageIT {
     JobMeta meta = new JobMeta( kjbPath, null );
 
     String json = mapper.writeValueAsString( meta );
-    File jsonOut = new File( "src/it/resources/tmp/" + meta.getName() + ".json" );
+    File jsonOut = new File( IntegrationTestUtil.getOutputPath( meta.getName() + ".json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
 
     // TODO: now deserialize it
@@ -265,7 +263,7 @@ public class JsonLineageIT {
     TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
 
     String json = mapper.writeValueAsString( tm );
-    File jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".json" );
+    File jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
 
     // now deserialize it
@@ -274,7 +272,7 @@ public class JsonLineageIT {
     assertEquals( tm.getName(), rehydrated.getName() );
 
     json = mapper.writeValueAsString( rehydrated );
-    jsonOut = new File( "src/it/resources/tmp/" + tm.getName() + ".after.json" );
+    jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".after.json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
   }
 }
