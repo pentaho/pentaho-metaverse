@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -429,20 +430,23 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
 
   @Override
   public Map<String, RowMetaInterface> getInputFields( T meta ) {
-    Map<String, RowMetaInterface> rowMeta = new HashMap<String, RowMetaInterface>();
+    Map<String, RowMetaInterface> rowMeta = null;
     try {
       validateState( null, meta );
     } catch ( MetaverseAnalyzerException e ) {
       // eat it
     }
-    try {
-      prevStepNames = parentTransMeta.getPrevStepNames( parentStepMeta );
-      RowMetaInterface rmi = parentTransMeta.getPrevStepFields( parentStepMeta );
-      if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
-        rowMeta.put( prevStepNames[0], rmi );
+    if ( parentTransMeta != null ) {
+      try {
+        rowMeta = new HashMap<String, RowMetaInterface>();
+        prevStepNames = parentTransMeta.getPrevStepNames( parentStepMeta );
+        RowMetaInterface rmi = parentTransMeta.getPrevStepFields( parentStepMeta );
+        if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
+          rowMeta.put( prevStepNames[0], rmi );
+        }
+      } catch ( KettleStepException e ) {
+        rowMeta = null;
       }
-    } catch ( KettleStepException e ) {
-      rowMeta = null;
     }
     return rowMeta;
   }
@@ -471,14 +475,19 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
     if ( prevFields == null ) {
       this.validateState( null, meta );
       loadInputAndOutputStreamFields( meta );
-      if ( prevFields == null ) {
-        // either not connected or there aren't any fields coming into the step so there are no mappings
-        return mappings;
-      }
     }
-    for ( RowMetaInterface rowMetaInterface : prevFields.values() ) {
-      for ( String field : rowMetaInterface.getFieldNames() ) {
-        mappings.add( new FieldMapping( field, field ) );
+    // Shouldn't be null now
+    if ( prevFields != null ) {
+      Collection<RowMetaInterface> prevFieldValues = prevFields.values();
+      if ( prevFieldValues != null ) {
+        for ( RowMetaInterface rowMetaInterface : prevFieldValues ) {
+          String[] fieldNames = rowMetaInterface.getFieldNames();
+          if ( fieldNames != null ) {
+            for ( String field : fieldNames ) {
+              mappings.add( new FieldMapping( field, field ) );
+            }
+          }
+        }
       }
     }
     return mappings;

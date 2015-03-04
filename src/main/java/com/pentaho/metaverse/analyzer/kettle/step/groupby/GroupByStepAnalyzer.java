@@ -78,6 +78,14 @@ public class GroupByStepAnalyzer extends BaseStepAnalyzer<GroupByMeta> {
         createFieldNode( descriptor.getContext(), vmi );
       }
 
+      // If the subject field name equals the aggregate field name, then the subject field is technically deleted and
+      // the new one is created in the above code, so add a "deletes" relationship from the step to the subject field.
+      if ( groupByMeta.getSubjectField()[i].equals( groupByMeta.getAggregateField()[i] ) ) {
+        IMetaverseNode subjectFieldNode = createNodeFromDescriptor(
+          this.getPrevStepFieldOriginDescriptor( descriptor, groupByMeta.getSubjectField()[i] ) );
+        metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_DELETES, subjectFieldNode );
+      }
+
       ComponentDerivationRecord changeRecord =
         buildChangeRecord( groupByMeta.getSubjectField()[i], groupByMeta.getAggregateField()[i], groupByMeta
           .getAggregateType()[i] );

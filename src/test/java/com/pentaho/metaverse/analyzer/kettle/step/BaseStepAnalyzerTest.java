@@ -55,10 +55,15 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -272,6 +277,30 @@ public class BaseStepAnalyzerTest {
   }
 
   @Test
+  public void testAddCreatedFieldNodesWithException() throws KettleStepException {
+    analyzer = new BaseStepAnalyzer() {
+
+      {
+        stepFields = mockStepFields;
+      }
+
+      @Override
+      protected boolean fieldNameExistsInInput( String fieldName ) {
+        throw new RuntimeException();
+      }
+
+      @Override
+      public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+        return null;
+      }
+    };
+    List<ValueMetaInterface> valueMetaList = new ArrayList<ValueMetaInterface>( 1 );
+    valueMetaList.add( mock( ValueMetaInterface.class ) );
+    when( mockStepFields.getValueMetaList() ).thenReturn( valueMetaList );
+    analyzer.addCreatedFieldNodes( mockDescriptor );
+  }
+
+  @Test
   public void testAddDeletedFieldLinksWithNoFields() throws KettleStepException {
     when( mockStepFields.getValueMetaList() ).thenReturn( null );
     analyzer.addDeletedFieldLinks( mockDescriptor );
@@ -327,7 +356,6 @@ public class BaseStepAnalyzerTest {
   public void testProcessChangeRecordNullDescriptor() {
     when( changeRecord.hasDelta() ).thenReturn( true );
     analyzer.processFieldChangeRecord( null, mock( IMetaverseNode.class ), changeRecord );
-//    verify( mockDescriptor, never() ).getChildNamespace( anyString(), anyString() );
   }
 
   @Test
@@ -338,6 +366,16 @@ public class BaseStepAnalyzerTest {
   @Test
   public void testGetPrevStepFieldOriginDescriptorNullDescriptor() {
     assertNull( analyzer.getPrevStepFieldOriginDescriptor( null, "Name" ) );
+    // Call protected version
+    assertNull( analyzer.getPrevStepFieldOriginDescriptor( null, "Name", mock( RowMetaInterface.class ) ) );
+    assertNull( analyzer.getPrevStepFieldOriginDescriptor( mock( IComponentDescriptor.class ), "Name", null ) );
+  }
+
+  @Test
+  public void testGetPrevStepFieldOriginDescriptor() {
+    when( mockPrevFields.getFieldNames() ).thenReturn( new String[]{ "field1", "field2" } );
+    analyzer.prevFields = Collections.singletonMap( "previous step name", mockPrevFields );
+    analyzer.getPrevStepFieldOriginDescriptor( mockDescriptor, "field1" );
   }
 
   @Test
@@ -348,6 +386,47 @@ public class BaseStepAnalyzerTest {
   @Test
   public void testGetFieldMappings() throws Exception {
     assertNull( analyzer.getFieldMappings( mockStepMeta ) );
+  }
+
+  @Test
+  public void testGetInputFieldsWithException() {
+    analyzer = new BaseStepAnalyzer() {
+
+      @Override
+      public void validateState( IComponentDescriptor descriptor, BaseStepMeta object ) throws MetaverseAnalyzerException {
+        throw new MetaverseAnalyzerException( "expected exception" );
+      }
+
+      @Override
+      public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+        return null;
+      }
+    };
+    assertNull( analyzer.getInputFields( null ) );
+  }
+
+  @Test
+  public void testGetOutputFieldsWithException() {
+    analyzer = new BaseStepAnalyzer() {
+
+      @Override
+      public void validateState( IComponentDescriptor descriptor, BaseStepMeta object ) throws MetaverseAnalyzerException {
+        throw new MetaverseAnalyzerException( "expected exception" );
+      }
+
+      @Override
+      public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+        return null;
+      }
+    };
+    assertNull( analyzer.getOutputFields( null ) );
+  }
+
+  @Test
+  public void testGetPassthruFieldMappings() throws Exception {
+    assertTrue( analyzer.getPassthruFieldMappings( mockStepMeta ).isEmpty() );
+    when( mockPrevFields.getFieldNames() ).thenReturn( new String[]{ "field1", "field2" } );
+    assertEquals( 2, analyzer.getPassthruFieldMappings( mockStepMeta ).size() );
   }
 
   @Test
