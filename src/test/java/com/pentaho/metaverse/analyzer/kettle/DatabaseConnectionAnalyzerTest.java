@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.step.StepDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -35,6 +36,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.platform.api.metaverse.IAnalysisContext;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
@@ -42,8 +45,11 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -65,6 +71,9 @@ public class DatabaseConnectionAnalyzerTest {
 
   @Mock
   private IComponentDescriptor mockDescriptor;
+
+  @Mock
+  private BaseStepMeta baseStepMeta;
 
   /**
    * @throws java.lang.Exception
@@ -89,7 +98,7 @@ public class DatabaseConnectionAnalyzerTest {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
 
-    dbConnectionAnalyzer = new DatabaseConnectionAnalyzer();
+    dbConnectionAnalyzer = new StepDatabaseConnectionAnalyzer();
     dbConnectionAnalyzer.setMetaverseBuilder( builder );
   }
 
@@ -151,4 +160,34 @@ public class DatabaseConnectionAnalyzerTest {
 
   }
 
+  @Test
+  public void testGetUsedConnections_nullUsedDatabaseMetas() throws Exception {
+    when( baseStepMeta.getUsedDatabaseConnections() ).thenReturn( null );
+    assertNull( dbConnectionAnalyzer.getUsedConnections( baseStepMeta ) );
+  }
+
+  @Test
+  public void testGetUsedConnections_nullBaseStepMeta() throws Exception {
+    assertNull( dbConnectionAnalyzer.getUsedConnections( null ) );
+  }
+
+  @Test
+  public void testGetUsedConnections() throws Exception {
+    DatabaseMeta dbMeta = mock( DatabaseMeta.class );
+    when( baseStepMeta.getUsedDatabaseConnections() ).thenReturn( new DatabaseMeta[]{ dbMeta } );
+    List<DatabaseMeta> dbMetaList = dbConnectionAnalyzer.getUsedConnections( baseStepMeta );
+    assertEquals( 1, dbMetaList.size() );
+    assertEquals( dbMeta, dbMetaList.get( 0 ) );
+  }
+
+  @Test
+  public void testBuildComponentDescriptor() throws Exception {
+    when( databaseMeta.getName() ).thenReturn( "connectionName" );
+    when( mockDescriptor.getNamespace() ).thenReturn( mock( INamespace.class) );
+    when( mockDescriptor.getContext() ).thenReturn( mock( IAnalysisContext.class ) );
+    IComponentDescriptor dbDesc = dbConnectionAnalyzer.buildComponentDescriptor( mockDescriptor, databaseMeta );
+    assertNotNull( dbDesc );
+    assertEquals( "connectionName", dbDesc.getName() );
+
+  }
 }

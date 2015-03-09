@@ -40,6 +40,7 @@ import com.pentaho.metaverse.frames.JobEntryNode;
 import com.pentaho.metaverse.frames.JobNode;
 import com.pentaho.metaverse.frames.LocatorNode;
 import com.pentaho.metaverse.frames.MergeJoinStepNode;
+import com.pentaho.metaverse.frames.MongoDbDatasourceNode;
 import com.pentaho.metaverse.frames.RootNode;
 import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import com.pentaho.metaverse.frames.StreamFieldNode;
@@ -89,7 +90,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -503,6 +503,22 @@ public class MetaverseValidationIT {
       assertNotNull( ds.getAccessTypeDesc() );
     }
     assertTrue( countDatasources > 0 );
+  }
+
+  @Test
+  public void testMongoDbConnections() throws Exception {
+    int countMongoConnections = getIterableSize( root.getMongoDbDatasourceNodes() );
+    for ( MongoDbDatasourceNode ds : root.getMongoDbDatasourceNodes() ) {
+      // make sure at least one step uses the connection
+      int countUsedSteps = getIterableSize( ds.getTransformationStepNodes() );
+      assertTrue( countUsedSteps > 0 );
+
+      assertEquals( DictionaryConst.NODE_TYPE_MONGODB_CONNECTION, ds.getEntity().getName() );
+      assertNotNull( ds.getName() );
+      assertNotNull( ds.getDatabaseName() );
+      assertNotNull( ds.getPort() );
+    }
+    assertTrue( countMongoConnections > 0 );
   }
 
   @Test

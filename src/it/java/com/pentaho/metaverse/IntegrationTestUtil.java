@@ -30,6 +30,12 @@ import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettlePluginException;
+import org.pentaho.di.core.plugins.Plugin;
+import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.plugins.StepPluginType;
+import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.mongodbinput.MongoDbInputMeta;
 import org.pentaho.platform.api.engine.IPentahoObjectFactory;
 import org.pentaho.platform.api.metaverse.IDocumentLocator;
 import org.pentaho.platform.api.metaverse.MetaverseException;
@@ -39,13 +45,13 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.core.system.StandaloneApplicationContext;
 import org.pentaho.platform.engine.core.system.StandaloneSession;
 import org.pentaho.platform.engine.core.system.objfac.StandaloneSpringPentahoObjectFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.io.FileSystemResource;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -64,7 +70,14 @@ public class IntegrationTestUtil {
     return OUTPUT_FOLDER + fileName;
   }
 
-  public static synchronized void initializePentahoSystem( String solutionPath ) throws MetaverseException {
+  public static synchronized void initializePentahoSystem( String solutionPath ) throws Exception {
+
+    // this setting is useful only for running the integration tests from within IntelliJ
+    // this same property is set for integration tests via the pom when running with mvn
+    String folderPaths = "target/spoon/plugins";
+    File f = new File( folderPaths );
+    System.setProperty( "KETTLE_PLUGIN_BASE_FOLDERS", f.getAbsolutePath() );
+
     StandaloneApplicationContext appContext = new StandaloneApplicationContext( solutionPath, "" );
     PentahoSystem.setSystemSettingsService( new PathBasedSystemSettings() );
     if ( solutionPath == null ) {
@@ -87,11 +100,35 @@ public class IntegrationTestUtil {
     PentahoSystem.init( appContext );
     PentahoSessionHolder.setSession( new StandaloneSession() );
 
+    registerKettlePlugins();
+
     try {
       KettleEnvironment.init();
     } catch ( KettleException e ) {
       e.printStackTrace();
     }
+  }
+
+  private static void registerKettlePlugins() throws KettlePluginException {
+    Map<Class<?>, String> mongoInputClassMap = new HashMap<Class<?>, String>( 1 );
+    mongoInputClassMap.put( StepMetaInterface.class, MongoDbInputMeta.class.getName() );
+    List<String> empty = Collections.emptyList();
+    Plugin mongodbInputPlugin = new Plugin(
+        new String[]{ "MongoDbInput" },
+        StepPluginType.class,
+        StepMetaInterface.class,
+        "Big Data",
+        "MongoDB Input",
+        null,
+        null,
+        false,
+        false,
+        mongoInputClassMap,
+        empty,
+        null,
+        null
+    );
+    PluginRegistry.getInstance().registerPlugin( StepPluginType.class, mongodbInputPlugin );
   }
 
   public static void shutdownPentahoSystem() {

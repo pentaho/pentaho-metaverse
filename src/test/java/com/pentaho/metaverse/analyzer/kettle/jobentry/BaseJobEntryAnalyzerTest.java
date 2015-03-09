@@ -25,6 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.jobentry;
 import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import edu.emory.mathcs.backport.java.util.Arrays;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -44,6 +45,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -153,32 +155,30 @@ public class BaseJobEntryAnalyzerTest {
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
-  public void addDatabaseConnectionNodesWithNullStep() throws MetaverseAnalyzerException {
-    analyzer.addDatabaseConnectionNodes( mockDescriptor );
+  public void addConnectionNodesWithNullStep() throws MetaverseAnalyzerException {
+    analyzer.addConnectionNodes( mockDescriptor );
   }
 
   @Test
-  public void testAddDatabaseConnectionNodesException() throws MetaverseAnalyzerException {
+  public void testAddConnectionNodesException() throws MetaverseAnalyzerException {
     analyzer.jobEntryInterface = mock( JobEntryInterface.class );
     when( mockDescriptor.getContext() ).thenThrow( Exception.class );
-    analyzer.addDatabaseConnectionNodes( mockDescriptor );
+    analyzer.addConnectionNodes( mockDescriptor );
   }
 
   @Test
-  public void addDatabaseConnectionNodes() throws MetaverseAnalyzerException {
+  public void addConnectionNodes() throws MetaverseAnalyzerException {
     DatabaseMeta[] dbs = new DatabaseMeta[] { mockDatabaseMeta };
-    when( mockJobEntryInterface.getUsedDatabaseConnections() ).thenReturn( dbs );
     analyzer.jobEntryInterface = mockJobEntryInterface;
-    //analyzer.addDatabaseConnectionNodes( mockDescriptor );
-    final Set<IDatabaseConnectionAnalyzer> dbAnalyzers = new HashSet<IDatabaseConnectionAnalyzer>( 1 ) {
-      {
-        DatabaseConnectionAnalyzer dbAnalyzer = new DatabaseConnectionAnalyzer();
-        dbAnalyzer.setMetaverseBuilder( mockBuilder );
-        add( dbAnalyzer );
-      }
-    };
-    when( analyzer.getDatabaseConnectionAnalyzers() ).thenReturn( dbAnalyzers );
-    analyzer.addDatabaseConnectionNodes( mockDescriptor );
+    //analyzer.addConnectionNodes( mockDescriptor );
+    DatabaseConnectionAnalyzer dbAnalyzer = new JobEntryDatabaseConnectionAnalyzer();
+    dbAnalyzer.setMetaverseBuilder( mockBuilder );
+
+    analyzer.setConnectionAnalyzer( dbAnalyzer );
+    when( analyzer.getConnectionAnalyzer() ).thenReturn( dbAnalyzer );
+    when( mockJobEntryInterface.getUsedDatabaseConnections() ).thenReturn( dbs );
+
+    analyzer.addConnectionNodes( mockDescriptor );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
