@@ -265,9 +265,24 @@ public class DictionaryConst {
   public static final String NODE_TYPE_JOB_ENTRY = "Job Entry";
 
   /**
+   * The node type for external connections
+   */
+  public static final String NODE_TYPE_EXTERNAL_CONNECTION = "External Connection";
+
+  /**
    * The node type for data sources, e.g. a database
    */
   public static final String NODE_TYPE_DATASOURCE = "Database Connection";
+
+  /**
+   * The node type for MongoDB connections
+   */
+  public static final String NODE_TYPE_MONGODB_CONNECTION = "MongoDB Connection";
+
+  /**
+   * The node type for MongoDB collections
+   */
+  public static final String NODE_TYPE_MONGODB_COLLECTION = "MongoDB Collection";
 
   /**
    * The node type for data tables

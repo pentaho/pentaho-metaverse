@@ -184,6 +184,11 @@ public class MetaverseBuilderTest {
 
   @Test
   public void testAddLink_existingLink() throws Exception {
+    // Retain current number of edges
+    int originalEdgeCount = 0;
+    for ( Edge e : graph.getEdges() ) {
+      originalEdgeCount++;
+    }
     MetaverseTransientNode node2 = new MetaverseTransientNode();
     node2.setStringID( "nodeToId" );
     node2.setName( "to name" );
@@ -197,12 +202,12 @@ public class MetaverseBuilderTest {
     // make sure the edge exits before we try to add it again
     assertNotNull( graph.getEdge( builder.getEdgeId( fromResult, link.getLabel(), toResult ) ) );
 
-    // make sure we only have 1
+    // make sure we only added 1
     int count = 0;
     for ( Edge e : graph.getEdges() ) {
       count++;
     }
-    assertEquals( 1, count );
+    assertEquals( originalEdgeCount + 1, count );
 
     // now lets add it again
     builder.addLink( link );
@@ -212,7 +217,7 @@ public class MetaverseBuilderTest {
     for ( Edge e : graph.getEdges() ) {
       count++;
     }
-    assertEquals( 1, count );
+    assertEquals( originalEdgeCount + 1, count );
 
   }
 
