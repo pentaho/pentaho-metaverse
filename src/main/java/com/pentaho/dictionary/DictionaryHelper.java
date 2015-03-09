@@ -143,17 +143,6 @@ public class DictionaryHelper {
     registerDataFlowLinkType( DictionaryConst.LINK_DERIVES );
     registerDataFlowLinkType( DictionaryConst.LINK_DEPENDENCYOF );
 
-    registerEntityType( DictionaryConst.NODE_TYPE_DATASOURCE );
-    registerEntityType( DictionaryConst.NODE_TYPE_DATA_TABLE );
-    registerEntityType( DictionaryConst.NODE_TYPE_DATA_COLUMN );
-    registerEntityType( DictionaryConst.NODE_TYPE_JOB );
-    registerEntityType( DictionaryConst.NODE_TYPE_JOB_ENTRY );
-    registerEntityType( DictionaryConst.NODE_TYPE_LOGICAL_MODEL );
-    registerEntityType( DictionaryConst.NODE_TYPE_TRANS );
-    registerEntityType( DictionaryConst.NODE_TYPE_TRANS_STEP );
-    registerEntityType( DictionaryConst.NODE_TYPE_TRANS_FIELD );
-    registerEntityType( DictionaryConst.NODE_TYPE_USER_CONTENT );
-
     categoryColorMap.put( DictionaryConst.CATEGORY_ABSTRACT, DictionaryConst.COLOR_ABSTRACT );
     categoryColorMap.put( DictionaryConst.CATEGORY_DATASOURCE, DictionaryConst.COLOR_DATASOURCE );
     categoryColorMap.put( DictionaryConst.CATEGORY_DOCUMENT, DictionaryConst.COLOR_DOCUMENT );

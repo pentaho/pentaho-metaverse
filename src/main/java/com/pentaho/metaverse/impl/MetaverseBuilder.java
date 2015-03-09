@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -60,6 +60,23 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    */
   public MetaverseBuilder( Graph graph ) {
     this.graph = graph;
+    registerStaticNodes();
+  }
+
+  protected void registerStaticNodes() {
+    addEntityType( DictionaryConst.NODE_TYPE_EXTERNAL_CONNECTION, null );
+    addEntityType( DictionaryConst.NODE_TYPE_DATASOURCE, DictionaryConst.NODE_TYPE_EXTERNAL_CONNECTION );
+    addEntityType( DictionaryConst.NODE_TYPE_DATA_TABLE, null );
+    addEntityType( DictionaryConst.NODE_TYPE_DATA_COLUMN, null );
+    addEntityType( DictionaryConst.NODE_TYPE_MONGODB_CONNECTION, DictionaryConst.NODE_TYPE_EXTERNAL_CONNECTION );
+    addEntityType( DictionaryConst.NODE_TYPE_MONGODB_COLLECTION, null );
+    addEntityType( DictionaryConst.NODE_TYPE_JOB, null );
+    addEntityType( DictionaryConst.NODE_TYPE_JOB_ENTRY, null );
+    addEntityType( DictionaryConst.NODE_TYPE_LOGICAL_MODEL, null );
+    addEntityType( DictionaryConst.NODE_TYPE_TRANS, null );
+    addEntityType( DictionaryConst.NODE_TYPE_TRANS_STEP, null );
+    addEntityType( DictionaryConst.NODE_TYPE_TRANS_FIELD, null );
+    addEntityType( DictionaryConst.NODE_TYPE_USER_CONTENT, null );
   }
 
   /**
@@ -154,10 +171,11 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     Vertex v = graph.addVertex( node.getStringID() );
 
     if ( DictionaryHelper.isEntityType( node.getType() ) ) {
-      Vertex entityType = addEntityType( node );
 
-      // add a link from the entity type to the new node
-      graph.addEdge( null, entityType, v, DictionaryConst.LINK_PARENT_CONCEPT );
+      // Add a link from the entity type to the node. Note the method called is addEntityType but we expect at this
+      // point that the entities have been added, the idea is to return the existing one. That's also why the second
+      // parameter is null, we don't know or care about the parent
+      graph.addEdge( null, addEntityType( node.getType(), null ), v, DictionaryConst.LINK_PARENT_CONCEPT );
     }
 
     return v;
@@ -166,21 +184,25 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
   /**
    * Adds an entity type node to the metaverse.
    *
-   * @param node the metaverse node containing the entity information
+   * @param entityName the String type of the entity
+   * @param parent     The String name of the parent entity
    */
-  protected Vertex addEntityType( IMetaverseNode node ) {
+  protected Vertex addEntityType( String entityName, String parent ) {
+    if ( graph == null ) {
+      return null;
+    }
 
     // the node is an entity, so link it to its entity type node
-    String nodeType = node.getType();
-    Vertex entityType = graph.getVertex( ENTITY_PREFIX + nodeType );
+    Vertex entityType = graph.getVertex( ENTITY_PREFIX + entityName );
     if ( entityType == null ) {
       // the entity type node does not exist, so create it
-      entityType = graph.addVertex( ENTITY_PREFIX + nodeType );
+      DictionaryHelper.registerEntityType( entityName );
+      entityType = graph.addVertex( ENTITY_PREFIX + entityName );
       entityType.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ENTITY );
-      entityType.setProperty( DictionaryConst.PROPERTY_NAME, nodeType );
+      entityType.setProperty( DictionaryConst.PROPERTY_NAME, entityName );
 
       // TODO move this to a map of types to strings or something
-      if ( nodeType.equals( DictionaryConst.NODE_TYPE_TRANS ) || nodeType.equals( DictionaryConst.NODE_TYPE_JOB ) ) {
+      if ( entityName.equals( DictionaryConst.NODE_TYPE_TRANS ) || entityName.equals( DictionaryConst.NODE_TYPE_JOB ) ) {
         entityType.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, "Pentaho Data Integration" );
       }
 
@@ -190,9 +212,14 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
         rootEntity = createRootEntity();
       }
 
-      // add the link from the root node to the entity type
-      addLink( rootEntity, DictionaryConst.LINK_PARENT_CONCEPT, entityType );
-
+      // Add and link the parent entity if specified, otherwise link to the root
+      if ( parent != null ) {
+        Vertex parentEntity = addEntityType( parent, null );
+        addLink( parentEntity, DictionaryConst.LINK_PARENT_CONCEPT, entityType );
+      } else {
+        // add the link from the root node to the entity type
+        addLink( rootEntity, DictionaryConst.LINK_PARENT_CONCEPT, entityType );
+      }
     }
     return entityType;
   }
@@ -201,17 +228,20 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * Creates the root entity for this metaverse.
    */
   protected Vertex createRootEntity() {
-    Vertex rootEntity = graph.addVertex( ENTITY_NODE_ID );
-    rootEntity.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ROOT_ENTITY );
-    rootEntity.setProperty( DictionaryConst.PROPERTY_NAME, "METAVERSE" );
 
-    // TODO get these properties from somewhere else
-    rootEntity.setProperty( "division", "Engineering" );
-    rootEntity.setProperty( "project", "Pentaho Data Lineage" );
-    rootEntity.setProperty( "description",
+    Vertex rootEntity = graph.getVertex( ENTITY_NODE_ID );
+    if ( rootEntity == null ) {
+      rootEntity = graph.addVertex( ENTITY_NODE_ID );
+      rootEntity.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ROOT_ENTITY );
+      rootEntity.setProperty( DictionaryConst.PROPERTY_NAME, "METAVERSE" );
+
+      // TODO get these properties from somewhere else
+      rootEntity.setProperty( "division", "Engineering" );
+      rootEntity.setProperty( "project", "Pentaho Data Lineage" );
+      rootEntity.setProperty( "description",
         "Data lineage is tracing the path that data has traveled upstream from its destination, through Pentaho "
-            + "systems and artifacts as well as external systems and artifacts." );
-
+          + "systems and artifacts as well as external systems and artifacts." );
+    }
     return rootEntity;
   }
 
@@ -322,7 +352,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
       // now remove any "virtual" nodes associated with the link
       if ( removeVirtualNodes ) {
-        Vertex[] fromAndTo = new Vertex[] { fromVertex, toVertex };
+        Vertex[] fromAndTo = new Vertex[]{ fromVertex, toVertex };
         for ( Vertex v : fromAndTo ) {
           if ( isVirtual( v ) ) {
             graph.removeVertex( v );
