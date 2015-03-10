@@ -26,7 +26,6 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.IConnectionAnalyzer;
-import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.Namespace;
@@ -100,13 +99,11 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
    */
   protected IMetaverseNode rootNode = null;
 
-  /**
-   * A reference to the database connection analyzer
-   */
-  protected IDatabaseConnectionAnalyzer dbConnectionAnalyzer = null;
-
   protected Map<String, IMetaverseNode> dbNodes = new HashMap<String, IMetaverseNode>();
 
+  /**
+   * A reference to the connection analyzer
+   */
   protected IConnectionAnalyzer<Object, T> connectionAnalyzer = null;
 
   /**

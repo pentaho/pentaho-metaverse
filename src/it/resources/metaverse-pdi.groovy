@@ -102,46 +102,35 @@ i:
       mb = new MetaverseBuilder(g)
       dc.setMetaverseBuilder(mb)
 
-      dba = new DatabaseConnectionAnalyzer()
-      dbap = new DatabaseConnectionAnalyzerProvider()
-      dbap.setDatabaseConnectionAnalyzers([dba] as Set)
-
+      stepDbAnalyzer = new StepDatabaseConnectionAnalyzer()
+      stepDbAnalyzer.setMetaverseBuilder(mb)
       //**********************************************************************
       // Set up the step analyzers
       tfia = new TextFileInputStepAnalyzer()
-      tfia.setDatabaseConnectionAnalyzerProvider(dbap)
       cfia = new CsvFileInputStepAnalyzer()
-      cfia.setDatabaseConnectionAnalyzerProvider(dbap)
 
       tfoa = new TableOutputStepAnalyzer()
-      tfoa.setDatabaseConnectionAnalyzerProvider(dbap)
+      tfoa.setConnectionAnalyzer(stepDbAnalyzer)
 
       mergeJoinAnalyzer = new MergeJoinStepAnalyzer()
-      mergeJoinAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
 
       numberRangeAnalyzer = new NumberRangeStepAnalyzer()
-      numberRangeAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
 
       selectValuesAnalyzer = new SelectValuesStepAnalyzer()
-      selectValuesAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
 
       tableInputAnalyzer = new TableInputStepAnalyzer()
-      tableInputAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+      tableInputAnalyzer.setConnectionAnalyzer(stepDbAnalyzer)
 
       valueMapperAnalyzer = new ValueMapperStepAnalyzer()
-      valueMapperAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
 
       streamLookupAnalyzer = new StreamLookupStepAnalyzer()
-      streamLookupAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
 
       calculatorAnalyzer = new CalculatorStepAnalyzer()
-      calculatorAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
 
       excelInputAnalyzer = new ExcelInputStepAnalyzer()
-      excelInputAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
-    
+
       groupByAnalyzer = new GroupByStepAnalyzer()
-      groupByAnalyzer.setDatabaseConnectionAnalyzerProvider(dbap)
+
       //**********************************************************************
 
       ksap = new StepAnalyzerProvider()
@@ -185,6 +174,8 @@ i:
     shell.STEP = DictionaryConst.NODE_TYPE_TRANS_STEP
     shell.JOB = DictionaryConst.NODE_TYPE_JOB
     shell.JOBENTRY = DictionaryConst.NODE_TYPE_JOB_ENTRY
+    shell.NAME = DictionaryConst.PROPERTY_NAME
+    shell.DERIVES = DictionaryConst.LINK_DERIVES
   }
   getPathFormatter = {
     def x = [{ "${it.name} (${it.type})" }];

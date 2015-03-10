@@ -24,13 +24,17 @@ package com.pentaho.metaverse.analyzer.kettle.step.mongodbinput;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.impl.Namespace;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.mongodbinput.MongoDbInputMeta;
+import org.pentaho.mongo.wrapper.field.MongoField;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,12 +48,54 @@ public class MongoDbInputStepAnalyzer extends BaseStepAnalyzer<MongoDbInputMeta>
   public IMetaverseNode analyze( IComponentDescriptor descriptor, MongoDbInputMeta meta )
     throws MetaverseAnalyzerException {
 
+    // Let base analyzer handle connections, created fields, etc.
     IMetaverseNode node = super.analyze( descriptor, meta );
 
-    // add properties to the node - the query in particular
-    node.setProperty( DictionaryConst.PROPERTY_QUERY, meta.getJsonQuery() );
-    node.setProperty( COLLECTION, meta.getCollection() );
+    // Create collection node
+    String collectionName = meta.getCollection();
+    node.setProperty( COLLECTION, collectionName );
+    IComponentDescriptor mongoCollectionDescriptor = new MetaverseComponentDescriptor(
+      collectionName,
+      DictionaryConst.NODE_TYPE_MONGODB_COLLECTION,
+      new Namespace( collectionName ),
+      descriptor.getContext() );
+    mongoCollectionDescriptor.setType( DictionaryConst.NODE_TYPE_MONGODB_COLLECTION );
+    IMetaverseNode mongoCollectionNode = createNodeFromDescriptor( mongoCollectionDescriptor );
 
+    metaverseBuilder.addNode( mongoCollectionNode );
+    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, mongoCollectionNode );
+
+    node.setProperty( "fullJSON", meta.getOutputJson() );
+    // If the output is the full JSON, we don't have to do any additional analysis
+    if ( !meta.getOutputJson() ) {
+      // add properties to the node - the query in particular
+      node.setProperty( DictionaryConst.PROPERTY_QUERY, meta.getJsonQuery() );
+
+      List<MongoField> mongoFields = meta.getMongoFields();
+      if ( mongoFields != null ) {
+        for ( MongoField mongoField : mongoFields ) {
+          // Create physical fields
+          IComponentDescriptor mongoFieldNodeDescriptor = new MetaverseComponentDescriptor(
+            mongoField.m_fieldName,
+            DictionaryConst.NODE_TYPE_DATA_COLUMN,
+            new Namespace( collectionName ),
+            descriptor.getContext() );
+          IMetaverseNode mongoFieldNode = createNodeFromDescriptor( mongoFieldNodeDescriptor );
+          mongoFieldNode.setProperty( "jsonPath", mongoField.m_fieldPath );
+
+          metaverseBuilder.addNode( mongoFieldNode );
+          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, mongoFieldNode );
+          metaverseBuilder.addLink( mongoCollectionNode, DictionaryConst.LINK_CONTAINS, mongoFieldNode );
+
+          // Get the stream field output from this step. It will have been created when we called super.analyze()
+          IComponentDescriptor transFieldDescriptor =
+            getStepFieldOriginDescriptor( descriptor, mongoFieldNode.getName() );
+          IMetaverseNode outNode = createNodeFromDescriptor( transFieldDescriptor );
+          metaverseBuilder.addLink( mongoFieldNode, DictionaryConst.LINK_POPULATES, outNode );
+        }
+      }
+
+    }
     return node;
   }
 
