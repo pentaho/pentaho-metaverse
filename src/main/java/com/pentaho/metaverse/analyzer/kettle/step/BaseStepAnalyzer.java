@@ -102,9 +102,9 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
   protected Map<String, IMetaverseNode> dbNodes = new HashMap<String, IMetaverseNode>();
 
   /**
-   * A reference to the connection analyzer
+   * A reference to a connection analyzer
    */
-  protected IConnectionAnalyzer<Object, T> connectionAnalyzer = null;
+  protected IConnectionAnalyzer connectionAnalyzer = null;
 
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
@@ -152,7 +152,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
     }
 
     if ( connectionAnalyzer != null ) {
-      List<? extends Object> connections = connectionAnalyzer.getUsedConnections( baseStepMeta );
+      List connections = connectionAnalyzer.getUsedConnections( baseStepMeta );
       for ( Object connection : connections ) {
         String connName = null;
         // see if the connection object has a getName method
@@ -165,7 +165,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
         try {
           IComponentDescriptor connDescriptor = connectionAnalyzer.buildComponentDescriptor( descriptor, connection );
           connName = connName == null ? descriptor.getName() : connName;
-          IMetaverseNode connNode = connectionAnalyzer.analyze( connDescriptor, connection );
+          IMetaverseNode connNode = (IMetaverseNode) connectionAnalyzer.analyze( connDescriptor, connection );
           dbNodes.put( connDescriptor.getName(), connNode );
           metaverseBuilder.addLink( connNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
         } catch ( Throwable t ) {
@@ -490,11 +490,11 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
     return mappings;
   }
 
-  public IConnectionAnalyzer<Object, T> getConnectionAnalyzer() {
+  public IConnectionAnalyzer getConnectionAnalyzer() {
     return connectionAnalyzer;
   }
 
-  public void setConnectionAnalyzer( IConnectionAnalyzer<Object, T> connectionAnalyzer ) {
+  public void setConnectionAnalyzer( IConnectionAnalyzer connectionAnalyzer ) {
     this.connectionAnalyzer = connectionAnalyzer;
   }
 
