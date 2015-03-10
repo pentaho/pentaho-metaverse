@@ -18,8 +18,12 @@ import java.util.List;
 public class MongoDbConnectionAnalyzer extends BaseKettleMetaverseComponent implements
     IConnectionAnalyzer<MongoDbMeta, MongoDbMeta> {
 
-  public static final String HOST_NAMES = "hostnames";
+  public static final String HOST_NAMES = "hostNames";
   public static final String DATABASE_NAME = "databaseName";
+  public static final String USE_ALL_REPLICA_SET_MEMBERS = "useAllReplicaSetMembers";
+  public static final String USE_KERBEROS_AUTHENTICATION = "useKerberosAuthentication";
+  public static final String CONNECTION_TIMEOUT = "connectionTimeout";
+  public static final String SOCKET_TIMEOUT = "socketTimeout";
 
   public static final ILogicalIdGenerator ID_GENERATOR = new MetaverseLogicalIdGenerator(
       HOST_NAMES,
@@ -38,11 +42,20 @@ public class MongoDbConnectionAnalyzer extends BaseKettleMetaverseComponent impl
     String port = mongoDbMeta.getPort();
     String hostNames = mongoDbMeta.getHostnames();
     String user = mongoDbMeta.getAuthenticationUser();
+    boolean useAllReplicaSetMembers = mongoDbMeta.getUseAllReplicaSetMembers();
+    boolean useKerberosAuthentication = mongoDbMeta.getUseKerberosAuthentication();
+    String connectTimeout = mongoDbMeta.getConnectTimeout();
+    String socketTimeout = mongoDbMeta.getSocketTimeout();
 
     datasourceNode.setProperty( HOST_NAMES, hostNames );
     datasourceNode.setProperty( DATABASE_NAME, database );
     datasourceNode.setProperty( DictionaryConst.PROPERTY_USER_NAME, user );
     datasourceNode.setProperty( DictionaryConst.PROPERTY_PORT, port );
+    datasourceNode.setProperty( USE_ALL_REPLICA_SET_MEMBERS, useAllReplicaSetMembers );
+    datasourceNode.setProperty( USE_KERBEROS_AUTHENTICATION, useKerberosAuthentication );
+    datasourceNode.setProperty( CONNECTION_TIMEOUT, connectTimeout );
+    datasourceNode.setProperty( SOCKET_TIMEOUT, socketTimeout );
+
     datasourceNode.setLogicalIdGenerator( getLogicalIdGenerator() );
 
     return datasourceNode;
