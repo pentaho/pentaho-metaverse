@@ -79,6 +79,7 @@
     <dependency.com.sun.jersey.jersey-client.version>1.16</dependency.com.sun.jersey.jersey-client.version>
     <dependency.com.tinkerpop.frames.version>2.5.0</dependency.com.tinkerpop.frames.version>
     <dependency.junit.junit.version>4.11</dependency.junit.junit.version>
+    <dependency.net.sourceforge.jexcelapi.version>2.6.12</dependency.net.sourceforge.jexcelapi.version>
     <dependency.org.mockito.mockito-all.version>1.9.5</dependency.org.mockito.mockito-all.version>
     <dependency.org.slf4j.slf4j-log4j12.version>1.7.7</dependency.org.slf4j.slf4j-log4j12.version>
     <dependency.org.springframework.spring-context.version>2.5.6</dependency.org.springframework.spring-context.version>
@@ -297,11 +298,17 @@
     </dependency>
 
     <dependency>
-      <groupId>commons-cli</groupId>
-      <artifactId>commons-cli</artifactId>
-      <version>${dependency.commons-cli.version}</version>
-      <scope>test</scope>
+        <groupId>commons-cli</groupId>
+        <artifactId>commons-cli</artifactId>
+        <version>${dependency.commons-cli.version}</version>
+        <scope>test</scope>
     </dependency>
+      
+    <dependency>
+		<groupId>net.sourceforge.jexcelapi</groupId>
+		<artifactId>jxl</artifactId>
+		<version>${dependency.net.sourceforge.jexcelapi.version}</version>
+	</dependency>
   </dependencies>
 
   <build>
