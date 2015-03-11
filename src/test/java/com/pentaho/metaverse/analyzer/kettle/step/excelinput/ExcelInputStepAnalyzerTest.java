@@ -66,7 +66,7 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 @RunWith( MockitoJUnitRunner.class )

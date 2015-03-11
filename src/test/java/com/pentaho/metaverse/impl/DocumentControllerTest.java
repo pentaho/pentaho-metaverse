@@ -7,16 +7,18 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.platform.api.metaverse.IAnalyzer;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IMetaverseLink;
 import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -28,7 +30,7 @@ import static org.mockito.Mockito.*;
 public class DocumentControllerTest {
 
   private DocumentController docController;
-  private Set<IDocumentAnalyzer> analyzers;
+  private List<IDocumentAnalyzer> analyzers;
 
   @Mock
   private IDocumentAnalyzer dummyAnalyzer;
@@ -67,7 +69,7 @@ public class DocumentControllerTest {
   }
 
   private void initAnalyzers() {
-    analyzers = new HashSet<IDocumentAnalyzer>();
+    analyzers = new ArrayList<IDocumentAnalyzer>();
     Set<String> supportedTypes1 = new HashSet<String>();
     supportedTypes1.add( "dummy" );
     when( dummyAnalyzer.getSupportedTypes() ).thenReturn( supportedTypes1 );
@@ -89,8 +91,30 @@ public class DocumentControllerTest {
   }
 
   @Test
+  public void testRemoveAnalyzer_multipleWithSameType() throws Exception {
+    List<IDocumentAnalyzer> analyzers = docController.getDocumentAnalyzers( "test" );
+    assertEquals( 1, analyzers.size() );
+
+    docController.removeAnalyzer( testAndDummyAnalyzer );
+
+    analyzers = docController.getDocumentAnalyzers( "test" );
+    assertNull( analyzers );
+  }
+
+  @Test
+  public void testRemoveAnalyzer() throws Exception {
+    List<IDocumentAnalyzer> analyzers = docController.getDocumentAnalyzers( "dummy" );
+    assertEquals( 2, analyzers.size() );
+
+    docController.removeAnalyzer( dummyAnalyzer );
+
+    analyzers = docController.getDocumentAnalyzers( "dummy" );
+    assertEquals( 1, analyzers.size() );
+  }
+
+  @Test
   public void testGetDocumentAnalyzers() {
-    Set<IDocumentAnalyzer> analyzers = docController.getAnalyzers();
+    List<IDocumentAnalyzer> analyzers = docController.getAnalyzers();
     assertEquals( this.analyzers.size(), analyzers.size() );
   }
 
@@ -104,7 +128,7 @@ public class DocumentControllerTest {
     Set<Class<?>> types = new HashSet<Class<?>>();
     types.add( IDocumentAnalyzer.class );
 
-    Set<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
+    List<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
     assertNotNull( documentAnalyzers );
     assertEquals( docController.getAnalyzers(), documentAnalyzers );
   }
@@ -115,7 +139,7 @@ public class DocumentControllerTest {
     types.add( IDocumentAnalyzer.class );
     types.add( IAnalyzer.class );
 
-    Set<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
+    List<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
     assertNull( documentAnalyzers );
   }
 
@@ -124,13 +148,13 @@ public class DocumentControllerTest {
     Set<Class<?>> types = new HashSet<Class<?>>();
     types.add( IAnalyzer.class );
 
-    Set<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
+    List<IDocumentAnalyzer> documentAnalyzers = docController.getAnalyzers( types );
     assertNull( documentAnalyzers );
   }
 
   @Test
   public void testGetDocumentAnalyzersForType() {
-    Set<IDocumentAnalyzer> analyzers = docController.getDocumentAnalyzers( "dummy" );
+    List<IDocumentAnalyzer> analyzers = docController.getDocumentAnalyzers( "dummy" );
     assertEquals( 2, analyzers.size() );
 
     analyzers = docController.getDocumentAnalyzers( "test" );

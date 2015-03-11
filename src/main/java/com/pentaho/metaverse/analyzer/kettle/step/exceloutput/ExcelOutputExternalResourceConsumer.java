@@ -41,7 +41,7 @@ import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.impl.model.ExternalResourceInfoFactory;
+import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 
 @ExternalResourceConsumer( id = "ExcelOutputExternalResourceConsumer", name = "ExcelOutputExternalResourceConsumer" )
 public class ExcelOutputExternalResourceConsumer extends BaseStepExternalResourceConsumer<ExcelOutput, ExcelOutputMeta> {

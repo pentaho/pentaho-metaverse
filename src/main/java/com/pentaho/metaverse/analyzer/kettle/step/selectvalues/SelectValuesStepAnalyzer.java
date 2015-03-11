@@ -28,7 +28,7 @@ import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
+import com.pentaho.metaverse.api.model.kettle.FieldMapping;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.Const;

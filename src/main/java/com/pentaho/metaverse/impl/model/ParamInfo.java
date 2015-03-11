@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.impl.model;
 
+import com.pentaho.metaverse.api.model.BaseInfo;
 import com.pentaho.metaverse.api.model.IParamInfo;
 
 public class ParamInfo extends BaseInfo implements IParamInfo<String> {

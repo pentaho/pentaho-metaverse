@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 
 /**
  * The TextFileOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the

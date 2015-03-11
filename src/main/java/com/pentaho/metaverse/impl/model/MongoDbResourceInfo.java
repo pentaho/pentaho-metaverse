@@ -1,6 +1,7 @@
 package com.pentaho.metaverse.impl.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pentaho.metaverse.api.model.BaseResourceInfo;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;

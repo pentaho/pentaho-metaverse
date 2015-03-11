@@ -19,12 +19,10 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.impl.model;
+package com.pentaho.metaverse.api.model;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
+import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.apache.commons.vfs.FileName;
 import org.apache.commons.vfs.FileObject;
@@ -34,17 +32,11 @@ import org.junit.Test;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.encryption.Encr;
-import org.pentaho.di.core.encryption.TwoWayPasswordEncoderInterface;
 import org.pentaho.di.core.encryption.TwoWayPasswordEncoderPluginType;
-import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.resource.ResourceEntry;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

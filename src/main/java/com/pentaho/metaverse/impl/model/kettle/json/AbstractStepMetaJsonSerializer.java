@@ -35,7 +35,7 @@ import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.impl.model.kettle.FieldInfo;
+import com.pentaho.metaverse.api.model.kettle.FieldInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.collections.MapUtils;
@@ -275,7 +275,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
     if ( provider != null ) {
       Set<Class<?>> types = new HashSet<Class<?>>();
       types.add( meta.getClass() );
-      Set<IStepAnalyzer> analyzers = provider.getAnalyzers( types );
+      List<IStepAnalyzer> analyzers = provider.getAnalyzers( types );
       if ( analyzers != null ) {
         for ( IStepAnalyzer analyzer : analyzers ) {
           // try to set up the analyzer with parent step & trans meta

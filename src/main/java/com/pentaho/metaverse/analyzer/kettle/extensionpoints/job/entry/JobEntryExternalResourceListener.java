@@ -25,7 +25,7 @@ import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IJobEntryExternalRe
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.impl.model.ExternalResourceInfoFactory;
+import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.ResultFile;
 import org.pentaho.di.job.Job;

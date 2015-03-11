@@ -20,9 +20,7 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model.kettle;
-
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+package com.pentaho.metaverse.api.model.kettle;
 
 /**
  * User: RFellows Date: 12/11/14

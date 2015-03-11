@@ -25,7 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -50,9 +50,11 @@ import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -187,8 +189,8 @@ public class JobAnalyzerTest {
   public void testAnalyzerWithEntriesGenericAnalyzer() throws MetaverseAnalyzerException {
 
     analyzer.setJobEntryAnalyzerProvider( jobEntryAnalyzerProvider );
-    final Set<IJobEntryAnalyzer> jobEntryAnalyzers = null;
-    when( jobEntryAnalyzerProvider.getAnalyzers( any( Set.class ) ) ).thenReturn( jobEntryAnalyzers );
+    final List<IJobEntryAnalyzer> jobEntryAnalyzers = null;
+    when( jobEntryAnalyzerProvider.getAnalyzers( any( Collection.class ) ) ).thenReturn( jobEntryAnalyzers );
     IMetaverseNode node = analyzer.analyze( descriptor, mockJobDoc );
     assertNotNull( node );
   }
@@ -198,7 +200,7 @@ public class JobAnalyzerTest {
 
     analyzer.setJobEntryAnalyzerProvider( jobEntryAnalyzerProvider );
     final Set<IJobEntryAnalyzer> jobEntryAnalyzers = null;
-    when( jobEntryAnalyzerProvider.getAnalyzers( any( Set.class ) ) ).thenReturn( new HashSet<IJobEntryAnalyzer>() {{
+    when( jobEntryAnalyzerProvider.getAnalyzers( any( Collection.class ) ) ).thenReturn( new ArrayList<IJobEntryAnalyzer>() {{
       add(
           mock( IJobEntryAnalyzer.class )
       );

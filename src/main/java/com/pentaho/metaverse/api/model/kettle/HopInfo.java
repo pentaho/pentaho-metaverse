@@ -20,9 +20,8 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model.kettle;
+package com.pentaho.metaverse.api.model.kettle;
 
-import com.pentaho.metaverse.api.model.kettle.IHopInfo;
 import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.trans.TransHopMeta;
 

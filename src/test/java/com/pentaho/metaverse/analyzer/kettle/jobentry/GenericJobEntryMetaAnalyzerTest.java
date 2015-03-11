@@ -2,7 +2,7 @@ package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

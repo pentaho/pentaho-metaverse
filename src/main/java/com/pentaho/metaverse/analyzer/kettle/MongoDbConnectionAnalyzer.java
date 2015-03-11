@@ -1,7 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.MetaverseLogicalIdGenerator;
 import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;

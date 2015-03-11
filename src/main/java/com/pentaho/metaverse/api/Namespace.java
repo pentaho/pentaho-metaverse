@@ -20,7 +20,7 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl;
+package com.pentaho.metaverse.api;
 
 
 import com.fasterxml.jackson.databind.JsonNode;

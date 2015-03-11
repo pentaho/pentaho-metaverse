@@ -26,7 +26,7 @@ import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * IDocumentController provides an interface for interacting with document controller instances. These instances are
@@ -39,5 +39,5 @@ public interface IDocumentController extends IDocumentAnalyzerProvider, IRequire
    *
    * @param documentAnalyzers the complete Set of IDocumentAnalyzers
    */
-  public void setDocumentAnalyzers( Set<IDocumentAnalyzer> documentAnalyzers );
+  public void setDocumentAnalyzers( List<IDocumentAnalyzer> documentAnalyzers );
 }

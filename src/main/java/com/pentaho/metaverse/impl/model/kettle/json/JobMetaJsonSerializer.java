@@ -24,7 +24,7 @@ package com.pentaho.metaverse.impl.model.kettle.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
-import com.pentaho.metaverse.impl.model.kettle.HopInfo;
+import com.pentaho.metaverse.api.model.kettle.HopInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleException;

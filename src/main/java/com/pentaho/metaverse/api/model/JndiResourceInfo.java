@@ -1,4 +1,4 @@
-/*!
+/*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
@@ -20,21 +20,29 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle;
+package com.pentaho.metaverse.api.model;
 
-import com.pentaho.metaverse.api.IAnalyzerProvider;
+import org.pentaho.di.core.database.DatabaseMeta;
 
-import java.util.Set;
+public class JndiResourceInfo extends BaseDatabaseResourceInfo implements IExternalResourceInfo {
 
-/**
- * IDatabaseConnectionAnalyzerProvider is a marker interface for providers of IDatabaseConnectionAnalyzer instances.
- */
-public interface IDatabaseConnectionAnalyzerProvider extends IAnalyzerProvider<IDatabaseConnectionAnalyzer> {
+  public static final String JNDI = "JNDI";
 
-  /**
-   * Sets the database connection analyzers for this provider
-   *
-   * @param analyzers the available database connection analyzers
-   */
-  void setDatabaseConnectionAnalyzers( Set<IDatabaseConnectionAnalyzer> analyzers );
+  @Override public String getType() {
+    return JNDI;
+  }
+
+  public JndiResourceInfo( DatabaseMeta databaseMeta ) {
+    super( databaseMeta );
+    if ( !getType().equals( databaseMeta.getAccessTypeDesc() ) ) {
+      throw new IllegalArgumentException( "DatabaseMeta is not JNDI, it is " + databaseMeta.getAccessTypeDesc() );
+    }
+  }
+
+  public JndiResourceInfo() {
+  }
+
+  public JndiResourceInfo( String name ) {
+    setName( name );
+  }
 }

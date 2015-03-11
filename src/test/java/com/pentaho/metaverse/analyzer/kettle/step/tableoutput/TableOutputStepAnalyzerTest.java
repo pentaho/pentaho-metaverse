@@ -24,7 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
 import org.junit.AfterClass;

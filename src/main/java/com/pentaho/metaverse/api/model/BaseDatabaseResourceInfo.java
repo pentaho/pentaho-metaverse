@@ -20,10 +20,9 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model;
+package com.pentaho.metaverse.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.database.DatabaseMeta;
 
 /**

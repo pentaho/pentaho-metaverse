@@ -20,30 +20,65 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model;
+package com.pentaho.metaverse.api.model.kettle;
 
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.database.DatabaseMeta;
+import com.pentaho.metaverse.api.model.BaseInfo;
+import org.pentaho.di.core.row.ValueMetaInterface;
 
-public class JndiResourceInfo extends BaseDatabaseResourceInfo implements IExternalResourceInfo {
+/**
+ * User: RFellows Date: 11/3/14
+ */
+public class FieldInfo extends BaseInfo implements IFieldInfo {
+  private String dataType;
+  private Integer precision;
+  private Integer length;
+  private String stepName;
 
-  public static final String JNDI = "JNDI";
-
-  @Override public String getType() {
-    return JNDI;
+  public FieldInfo() {
   }
 
-  public JndiResourceInfo( DatabaseMeta databaseMeta ) {
-    super( databaseMeta );
-    if ( !getType().equals( databaseMeta.getAccessTypeDesc() ) ) {
-      throw new IllegalArgumentException( "DatabaseMeta is not JNDI, it is " + databaseMeta.getAccessTypeDesc() );
-    }
+  public FieldInfo( ValueMetaInterface vmi ) {
+    setName( vmi.getName() );
+    setDescription( vmi.getComments() );
+    setDataType( vmi.getTypeDesc() );
+    setLength( vmi.getLength() );
+    setPrecision( vmi.getPrecision() );
+    setStepName( vmi.getOrigin() );
   }
 
-  public JndiResourceInfo() {
+  @Override
+  public String getDataType() {
+    return dataType;
   }
 
-  public JndiResourceInfo( String name ) {
-    setName( name );
+  @Override
+  public Integer getPrecision() {
+    return precision;
+  }
+
+  @Override
+  public Integer getLength() {
+    return length;
+  }
+
+  @Override
+  public String getStepName() {
+    return stepName;
+  }
+
+  public void setDataType( String dataType ) {
+    this.dataType = dataType;
+  }
+
+  public void setPrecision( Integer precision ) {
+    this.precision = precision;
+  }
+
+  public void setLength( Integer length ) {
+    this.length = length;
+  }
+
+  public void setStepName( String stepName ) {
+    this.stepName = stepName;
   }
 }

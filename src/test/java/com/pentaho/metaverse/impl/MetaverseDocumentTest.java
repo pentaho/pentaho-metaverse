@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.AnalysisContext;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

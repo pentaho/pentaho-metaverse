@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.impl.model;
 
+import com.pentaho.metaverse.api.model.BaseInfo;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionEngine;
 import com.pentaho.metaverse.api.model.IExecutionProfile;

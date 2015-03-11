@@ -25,7 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.impl.model.ExternalResourceInfoFactory;
+import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutput;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;

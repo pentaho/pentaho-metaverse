@@ -1,5 +1,6 @@
 package com.pentaho.metaverse.impl.model;
 
+import com.pentaho.metaverse.api.model.BaseInfo;
 import com.pentaho.metaverse.api.model.IVersionInfo;
 
 /**

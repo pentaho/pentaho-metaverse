@@ -24,7 +24,7 @@ package com.pentaho.metaverse.api;
 
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * The IDocumentAnalyzerProvider provides known IDocumentAnalyzers of the system
@@ -36,6 +36,6 @@ public interface IDocumentAnalyzerProvider extends IAnalyzerProvider<IDocumentAn
    * @param type Specific type of analyzers interested in
    * @return The document analyzers
    */
-  Set<IDocumentAnalyzer> getDocumentAnalyzers( String type );
+  List<IDocumentAnalyzer> getDocumentAnalyzers( String type );
 
 }

@@ -23,7 +23,7 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
-import com.pentaho.metaverse.impl.Namespace;
+import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.messages.Messages;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;

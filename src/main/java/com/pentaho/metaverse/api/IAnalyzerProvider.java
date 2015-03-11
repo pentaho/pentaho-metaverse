@@ -22,7 +22,8 @@
 
 package com.pentaho.metaverse.api;
 
-import java.util.Set;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 
@@ -37,7 +38,7 @@ public interface IAnalyzerProvider<T> {
    * 
    * @return The analyzers
    */
-  Set<T> getAnalyzers();
+  List<T> getAnalyzers();
 
   /**
    * Return the set of analyzers for this type for a given set of classes
@@ -45,6 +46,18 @@ public interface IAnalyzerProvider<T> {
    * @param types The set of classes to filter by
    * @return The analyzers
    */
-  Set<T> getAnalyzers( Set<Class<?>> types );
+  List<T> getAnalyzers( Collection<Class<?>> types );
+
+  /**
+   * Adds an analyzer to group of supported analyzers
+   * @param analyzer
+   */
+  void addAnalyzer( T analyzer );
+
+  /**
+   * Removes an analyzer from the group supported analyzers
+   * @param analyzer
+   */
+  void removeAnalyzer( T analyzer );
 
 }

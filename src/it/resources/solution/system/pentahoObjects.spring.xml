@@ -51,10 +51,10 @@
   <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="documentAnalyzers">
-      <set>
+      <list>
         <ref bean="TransformationAnalyzer"/>
         <ref bean="JobAnalyzer"/>
-      </set>
+      </list>
     </property>
   </bean>
 
@@ -62,10 +62,10 @@
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="metaverseObjectFactory" ref="IMetaverseObjectFactory"/>
     <property name="documentAnalyzers">
-      <set>
+      <list>
         <ref bean="TransformationAnalyzer"/>
         <ref bean="JobAnalyzer"/>
-      </set>
+      </list>
     </property>
   </bean>
 
@@ -73,7 +73,7 @@
         scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="stepAnalyzers">
-      <set>
+      <list>
         <ref bean="TableOutputStepAnalyzer"/>
         <!--<ref bean="TableInputStepAnalyzer"/>-->
         <ref bean="TextFileInputStepAnalyzer"/>
@@ -89,7 +89,7 @@
         <ref bean="ExcelInputStepAnalyzer"/>
         <ref bean="GroupByStepAnalyzer"/>
         <ref bean="ExcelOutputStepAnalyzer"/>
-      </set>
+      </list>
     </property>
   </bean>
 
@@ -97,9 +97,9 @@
       scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="jobEntryAnalyzers">
-        <set>
+        <list>
             <ref bean="TransJobEntryAnalyzer"/>
-        </set>
+        </list>
     </property>
   </bean>
 
