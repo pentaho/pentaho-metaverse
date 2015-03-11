@@ -44,6 +44,18 @@ public class MongoDbInputStepAnalyzer extends BaseStepAnalyzer<MongoDbInputMeta>
 
   public static final String COLLECTION = "collection";
 
+  // Query property names
+  public static final String AGG_PIPELINE = "isAggPipeline";
+  public static final String FIELDS_EXPRESSION = "fieldsExpression";
+
+  // Field property names
+  public static final String OUTPUT_JSON = "outputJson";
+  public static final String JSON_PATH = "jsonPath";
+  public static final String MINMAX_RANGE = "minMaxArrayRange";
+  public static final String OCCUR_RATIO = "occurRatio";
+  public static final String INDEXED_VALS = "indexedValues";
+  public static final String DISPARATE_TYPES = "disparateTypes";
+
   @Override
   public IMetaverseNode analyze( IComponentDescriptor descriptor, MongoDbInputMeta meta )
     throws MetaverseAnalyzerException {
@@ -65,23 +77,31 @@ public class MongoDbInputStepAnalyzer extends BaseStepAnalyzer<MongoDbInputMeta>
     metaverseBuilder.addNode( mongoCollectionNode );
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, mongoCollectionNode );
 
-    node.setProperty( "fullJSON", meta.getOutputJson() );
+    node.setProperty( OUTPUT_JSON, meta.getOutputJson() );
     // If the output is the full JSON, we don't have to do any additional analysis
     if ( !meta.getOutputJson() ) {
-      // add properties to the node - the query in particular
+      // add properties to the node - the query (and its characteristics) in particular
       node.setProperty( DictionaryConst.PROPERTY_QUERY, meta.getJsonQuery() );
+      node.setProperty( AGG_PIPELINE, meta.getQueryIsPipeline() );
+      node.setProperty( DictionaryConst.PROPERTY_EXECUTE_EACH_ROW, meta.getExecuteForEachIncomingRow() );
+      node.setProperty( FIELDS_EXPRESSION, meta.getFieldsName() );
 
+      // Process the fields (if specified)
       List<MongoField> mongoFields = meta.getMongoFields();
       if ( mongoFields != null ) {
         for ( MongoField mongoField : mongoFields ) {
-          // Create physical fields
+          // Create physical field nodes
           IComponentDescriptor mongoFieldNodeDescriptor = new MetaverseComponentDescriptor(
             mongoField.m_fieldName,
             DictionaryConst.NODE_TYPE_DATA_COLUMN,
             new Namespace( collectionName ),
             descriptor.getContext() );
           IMetaverseNode mongoFieldNode = createNodeFromDescriptor( mongoFieldNodeDescriptor );
-          mongoFieldNode.setProperty( "jsonPath", mongoField.m_fieldPath );
+          mongoFieldNode.setProperty( JSON_PATH, mongoField.m_fieldPath );
+          mongoFieldNode.setProperty( MINMAX_RANGE, mongoField.m_arrayIndexInfo );
+          mongoFieldNode.setProperty( OCCUR_RATIO, mongoField.m_occurenceFraction );
+          mongoFieldNode.setProperty( INDEXED_VALS, mongoField.m_indexedVals );
+          mongoFieldNode.setProperty( DISPARATE_TYPES, mongoField.m_disparateTypes );
 
           metaverseBuilder.addNode( mongoFieldNode );
           metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, mongoFieldNode );
