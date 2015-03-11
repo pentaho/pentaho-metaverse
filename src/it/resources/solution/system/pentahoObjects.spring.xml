@@ -44,7 +44,8 @@
   <bean id="MongoDbInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputStepAnalyzer">
     <property name="connectionAnalyzer" ref="mongoDbConnectionAnalyzer"/>
   </bean>
-
+  <bean id="ExcelOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer"/>
+  
   <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer" />
 
   <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
@@ -87,6 +88,7 @@
         <ref bean="CsvFileInputStepAnalyzer"/>
         <ref bean="ExcelInputStepAnalyzer"/>
         <ref bean="GroupByStepAnalyzer"/>
+        <ref bean="ExcelOutputStepAnalyzer"/>
       </set>
     </property>
   </bean>

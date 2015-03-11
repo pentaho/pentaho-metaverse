@@ -109,4 +109,6 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'MongoDB Connection' && it.object.name == name }" )
   public MongoDbDatasourceNode getMongoDbDatasourceNode( @GremlinParam( "name" ) String name );
 
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Output'}.as('step').in('contains').has('name', T.eq, 'excel_output').back('step')" )
+  public ExcelOutputStepNode getExcelOutputStepNode();
 }

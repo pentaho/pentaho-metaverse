@@ -22,6 +22,45 @@
 
 package com.pentaho.metaverse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
+import org.pentaho.di.trans.steps.exceloutput.ExcelField;
+import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
+import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
+import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
+import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
+
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import com.pentaho.metaverse.api.IDocumentController;
@@ -33,6 +72,7 @@ import com.pentaho.metaverse.frames.CalculatorStepNode;
 import com.pentaho.metaverse.frames.CsvFileInputStepNode;
 import com.pentaho.metaverse.frames.DatasourceNode;
 import com.pentaho.metaverse.frames.ExcelInputStepNode;
+import com.pentaho.metaverse.frames.ExcelOutputStepNode;
 import com.pentaho.metaverse.frames.FieldNode;
 import com.pentaho.metaverse.frames.FramedMetaverseNode;
 import com.pentaho.metaverse.frames.GroupByStepNode;
@@ -57,41 +97,6 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.job.entry.JobEntryCopy;
-import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
-import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
-import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
-import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
-import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
-import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
-import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.junit.Assert.*;
 
 /**
  * User: RFellows Date: 8/20/14
@@ -169,7 +174,7 @@ public class MetaverseValidationIT {
   @Test
   public void testEntity_FileSystemLocator() throws Exception {
     LocatorNode node =
-      (LocatorNode) framedGraph.getVertex( "{\"name\":\"FILE_SYSTEM_REPO\",\"type\":\"Locator\"}", LocatorNode.class );
+        (LocatorNode) framedGraph.getVertex( "{\"name\":\"FILE_SYSTEM_REPO\",\"type\":\"Locator\"}", LocatorNode.class );
     assertEquals( DictionaryConst.NODE_TYPE_LOCATOR, node.getType() );
     assertEquals( "FILE_SYSTEM_REPO", node.getName() );
     assertNotNull( node.getDescription() );
@@ -265,10 +270,10 @@ public class MetaverseValidationIT {
       }
 
       assertEquals( "Not all job entries are accounted for in the graph for Job [" + jobMeta.getName() + "]",
-        numJobEntries, matchCount );
+          numJobEntries, matchCount );
 
       assertEquals( "Incorrect number of job entries for in the graph for Job [" + jobMeta.getName() + "]",
-        numJobEntries, getIterableSize( jobNode.getJobEntryNodes() ) );
+          numJobEntries, getIterableSize( jobNode.getJobEntryNodes() ) );
 
       // it should be contained in a "Locator" node
       jobNode.getLocator();
@@ -295,10 +300,10 @@ public class MetaverseValidationIT {
       }
 
       assertEquals( "Not all transformation steps are modeled in the graph for [" + tm.getName() + "]", transMetaSteps
-        .size(), matchCount );
+          .size(), matchCount );
 
       assertEquals( "Incorrect number of Steps in the graph for transformation [" + tm.getName() + "]", transMetaSteps
-        .size(), stepCount );
+          .size(), stepCount );
 
     }
   }
@@ -315,7 +320,6 @@ public class MetaverseValidationIT {
     assertEquals( 4, countCreates );
     assertEquals( 3, countDeletes );
     assertEquals( "Select values", selectValues.getStepType() );
-
 
     // verify the nodes created by the step
     for ( StreamFieldNode node : selectValues.getStreamFieldNodesCreates() ) {
@@ -336,7 +340,6 @@ public class MetaverseValidationIT {
       for ( StreamFieldNode deriveNode : deriveNodes ) {
         assertNotNull( deriveNode );
       }
-
 
     }
 
@@ -395,7 +398,7 @@ public class MetaverseValidationIT {
 
     String filenameField = null;
     TransMeta tm =
-      new TransMeta( new FileInputStream( excelInputStepNode.getTransNode().getPath() ), null, true, null, null );
+        new TransMeta( new FileInputStream( excelInputStepNode.getTransNode().getPath() ), null, true, null, null );
     for ( StepMeta stepMeta : tm.getSteps() ) {
       if ( stepMeta.getName().equals( excelInputStepNode.getName() ) ) {
         ExcelInputMeta meta = (ExcelInputMeta) getBaseStepMetaFromStepMeta( stepMeta );
@@ -463,7 +466,7 @@ public class MetaverseValidationIT {
 
     String filenameField = null;
     TransMeta tm =
-      new TransMeta( new FileInputStream( textFileInputStepNode.getTransNode().getPath() ), null, true, null, null );
+        new TransMeta( new FileInputStream( textFileInputStepNode.getTransNode().getPath() ), null, true, null, null );
     for ( StepMeta stepMeta : tm.getSteps() ) {
       if ( stepMeta.getName().equals( textFileInputStepNode.getName() ) ) {
         TextFileInputMeta meta = (TextFileInputMeta) getBaseStepMetaFromStepMeta( stepMeta );
@@ -483,7 +486,7 @@ public class MetaverseValidationIT {
 
     for ( StreamFieldNode deletedFieldNode : deletedFieldNodes ) {
       assertEquals( "Should delete the stream field that defines the source files", filenameField, deletedFieldNode
-        .getName() );
+          .getName() );
     }
   }
 
@@ -548,15 +551,15 @@ public class MetaverseValidationIT {
     // they should all populate a db column
     for ( StreamFieldNode fieldNode : uses ) {
       assertNotNull( "Used field does not populate anything [" + fieldNode.getName() + "]", fieldNode
-        .getFieldPopulatedByMe() );
+          .getFieldPopulatedByMe() );
       assertEquals( "Stream Field [" + fieldNode.getName() + "] populates the wrong kind of node",
-        DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
+          DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
     }
 
     int countDbConnections = getIterableSize( tableOutputStepNode.getDatasources() );
     for ( DatabaseMeta dbMeta : meta.getUsedDatabaseConnections() ) {
       assertNotNull( "Datasource is not used but should be [" + dbMeta.getName() + "]", tableOutputStepNode
-        .getDatasource( dbMeta.getName() ) );
+          .getDatasource( dbMeta.getName() ) );
     }
     assertEquals( meta.getUsedDatabaseConnections().length, countDbConnections );
 
@@ -655,7 +658,7 @@ public class MetaverseValidationIT {
   @Test
   public void testTextFileOutputStepNode() throws Exception {
     TextFileOutputStepNode textFileOutputStepNode =
-      root.getTextFileOutputStepNode( "textFileOutput", "Text file output" );
+        root.getTextFileOutputStepNode( "textFileOutput", "Text file output" );
     TextFileOutputMeta meta = (TextFileOutputMeta) getStepMeta( textFileOutputStepNode );
     TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
     String[] fileNames = meta.getFiles( tm );
@@ -687,7 +690,7 @@ public class MetaverseValidationIT {
   @Test
   public void testTextFileOutputStepNode_FileFromStreamField() throws Exception {
     TextFileOutputStepNode textFileOutputStepNode =
-      root.getTextFileOutputStepNode( "textFileOutput", "Text file output - file from field" );
+        root.getTextFileOutputStepNode( "textFileOutput", "Text file output - file from field" );
 
     TextFileOutputMeta meta = (TextFileOutputMeta) getStepMeta( textFileOutputStepNode );
     TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
@@ -777,7 +780,6 @@ public class MetaverseValidationIT {
   @Test
   public void testCalculatorStepNode() throws Exception {
     CalculatorStepNode node = root.getCalculatorStepNode();
-    CalculatorMeta meta = (CalculatorMeta) getStepMeta( node );
 
     // Make sure we have the right number of links used, created and deleted.
     List<String> nodeUses = new ArrayList<String>();
@@ -866,16 +868,48 @@ public class MetaverseValidationIT {
   public void testGroupByStep() throws Exception {
     GroupByStepNode groupByStepNode = root.getGroupByStepNode();
     assertNotNull( groupByStepNode );
-    
+
     int countCreates = getIterableSize( groupByStepNode.getStreamFieldNodesCreates() );
     int countDeletes = getIterableSize( groupByStepNode.getStreamFieldNodesDeletes() );
     int countUses = getIterableSize( groupByStepNode.getStreamFieldNodesUses() );
-    
+
     assertEquals( 2, countCreates );
     assertEquals( 2, countDeletes );
     assertEquals( 2, countUses );
   }
-  
+
+  @Test
+  public void testExcelOutputStepNode() throws Exception {
+    ExcelOutputStepNode excelOutputStepNode = root.getExcelOutputStepNode();
+    assertNotNull( excelOutputStepNode );
+
+    ExcelOutputMeta meta = (ExcelOutputMeta) getStepMeta( excelOutputStepNode );
+    TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
+    String[] fileNames = meta.getFiles( tm );
+
+    RowMetaInterface incomingFields = tm.getStepFields( meta.getParentStepMeta() );
+    ExcelField[] outputFields = meta.getOutputFields();
+
+    // should write to one file
+    Iterable<FramedMetaverseNode> outputFiles = excelOutputStepNode.getOutputFiles();
+    assertEquals( fileNames.length, getIterableSize( outputFiles ) );
+    int i = 0;
+    for ( FramedMetaverseNode node : outputFiles ) {
+      assertEquals( fileNames[i++].replace( "file://", "" ), node.getName() );
+    }
+
+    Iterable<StreamFieldNode> usedFields = excelOutputStepNode.getStreamFieldNodesUses();
+    int usedFieldCount = getIterableSize( usedFields );
+    assertEquals( outputFields.length, usedFieldCount );
+    assertEquals( incomingFields.size(), usedFieldCount );
+
+    for ( StreamFieldNode usedField : usedFields ) {
+      ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
+      assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
+    }
+
+  }
+
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {
     TransMeta tm = new TransMeta( transformationStepNode.getTransNode().getPath(), null, true, null, null );
     BaseStepMeta meta = null;
