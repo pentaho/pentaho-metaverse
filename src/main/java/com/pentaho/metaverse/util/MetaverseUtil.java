@@ -31,7 +31,7 @@ import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.graph.LineageGraphCompletionService;
 import com.pentaho.metaverse.graph.LineageGraphMap;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.messages.Messages;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -48,7 +48,6 @@ import org.pentaho.platform.api.metaverse.MetaverseException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Future;
 
 
@@ -118,7 +117,7 @@ public class MetaverseUtil {
       IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
 
       docController.setMetaverseBuilder( metaverseBuilder );
-      Set<IDocumentAnalyzer> matchingAnalyzers = docController.getDocumentAnalyzers( "ktr" );
+      List<IDocumentAnalyzer> matchingAnalyzers = docController.getDocumentAnalyzers( "ktr" );
 
       if ( matchingAnalyzers != null ) {
         for ( final IDocumentAnalyzer analyzer : matchingAnalyzers ) {

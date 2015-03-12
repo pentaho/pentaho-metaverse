@@ -44,23 +44,50 @@
 
   <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.impl.MetaverseObjectFactory" scope="singleton"/>
 
+  <!-- Document Analyzers -->
   <bean id="TransformationAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer">
     <property name="stepAnalyzerProvider" ref="IStepAnalyzerProvider"/>
   </bean>
+  <service id="transformationAnalyzerService"
+           interface="org.pentaho.platform.api.metaverse.IDocumentAnalyzer"
+           ref="TransformationAnalyzer"/>
+
   <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer">
     <property name="jobEntryAnalyzerProvider" ref="IJobEntryAnalyzerProvider"/>
   </bean>
+  <service id="jobAnalyzerService"
+           interface="org.pentaho.platform.api.metaverse.IDocumentAnalyzer"
+           ref="JobAnalyzer"/>
 
+  <reference-list id="documentAnalyzersRefList"
+                  interface="org.pentaho.platform.api.metaverse.IDocumentAnalyzer"
+                  member-type="service-object"
+                  availability="optional">
+    <reference-listener ref="IDocumentController" bind-method="addAnalyzer" unbind-method="removeAnalyzer"/>
+  </reference-list>
+  <!-- END - Document Analyzers -->
+
+  <!-- Connection Analyzers -->
   <bean id="stepDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.StepDatabaseConnectionAnalyzer">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
+  <service id="stepDatabaseConnectionAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer"
+           ref="stepDatabaseConnectionAnalyzer"/>
+
   <bean id="jobEntryDatabaseConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryDatabaseConnectionAnalyzer">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
+  <service id="jobEntryDatabaseConnectionAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer"
+           ref="jobEntryDatabaseConnectionAnalyzer"/>
+
   <bean id="mongoDbConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.MongoDbConnectionAnalyzer">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
+  <!-- END - Connection Analyzers -->
 
+  <!-- Step Analyzers -->
   <bean id="TableOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer">
     <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
   </bean>
@@ -80,16 +107,86 @@
   </bean>
   <bean id="ExcelOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer"/>
 
+  <service id="tableOutputStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="TableOutputStepAnalyzer"/>
+
+  <service id="textFileInputStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="TextFileInputStepAnalyzer"/>
+
+  <service id="selectValuesStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="SelectValuesStepAnalyzer"/>
+
+  <service id="numberRangeStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="SelectValuesStepAnalyzer"/>
+
+  <service id="valueMapperStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="ValueMapperStepAnalyzer"/>
+
+  <service id="textFileOutputStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="TextFileOutputStepAnalyzer"/>
+
+  <service id="mergeJoinStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="MergeJoinStepAnalyzer"/>
+
+  <service id="streamLookupStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="StreamLookupStepAnalyzer"/>
+
+  <service id="calculatorStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="CalculatorStepAnalyzer"/>
+
+  <service id="excelInputStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="ExcelInputStepAnalyzer"/>
+
+  <service id="groupByStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="GroupByStepAnalyzer"/>
+
+  <service id="mongoDbInputStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="MongoDbInputStepAnalyzer"/>
+
+  <service id="excelOutputStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="ExcelOutputStepAnalyzer"/>
+
+  <reference-list id="stepAnalyzerRefList"
+                  interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+                  member-type="service-object"
+                  availability="optional">
+    <reference-listener ref="IStepAnalyzerProvider" bind-method="addAnalyzer" unbind-method="removeAnalyzer"/>
+  </reference-list>
+  <!-- END - Step Analyzers -->
+
+
+  <!-- Job Entry Analyzers -->
   <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer" />
-  
+
+  <service id="transJobEntryAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer"
+           ref="TransJobEntryAnalyzer"/>
+
+  <reference-list id="jobEntryAnalyzerRefList"
+                  interface="com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer"
+                  member-type="service-object"
+                  availability="optional">
+    <reference-listener ref="IJobEntryAnalyzerProvider" bind-method="addAnalyzer" unbind-method="removeAnalyzer"/>
+  </reference-list>
+  <!-- END - Job Entry Analyzers -->
+
+
   <bean id="IDocumentController" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
-    <property name="documentAnalyzers">
-      <set>
-        <ref component-id="TransformationAnalyzer"/>
-        <ref component-id="JobAnalyzer"/>
-      </set>
-    </property>
+    <property name="documentAnalyzers" ref="documentAnalyzersRefList"/>
   </bean>
 
   <!-- Make the doc controller available to the system -->
@@ -98,34 +195,13 @@
   <bean id="IStepAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
         scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
-    <property name="stepAnalyzers">
-      <set>
-        <ref component-id="TableOutputStepAnalyzer"/>
-        <!--<ref component-id="TableInputStepAnalyzer"/>-->
-        <ref component-id="TextFileInputStepAnalyzer"/>
-        <ref component-id="SelectValuesStepAnalyzer"/>
-        <ref component-id="NumberRangeStepAnalyzer"/>
-        <ref component-id="ValueMapperStepAnalyzer"/>
-        <ref component-id="TextFileOutputStepAnalyzer"/>
-        <ref component-id="MergeJoinStepAnalyzer"/>
-        <ref component-id="StreamLookupStepAnalyzer"/>
-        <ref component-id="CalculatorStepAnalyzer"/>
-        <ref component-id="ExcelInputStepAnalyzer"/>
-        <ref component-id="GroupByStepAnalyzer"/>
-        <ref component-id="MongoDbInputStepAnalyzer"/>
-        <ref component-id="ExcelOutputStepAnalyzer"/>
-      </set>
-    </property>
+    <property name="stepAnalyzers" ref="stepAnalyzerRefList"/>
   </bean>
 
   <bean id="IJobEntryAnalyzerProvider" class="com.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider"
         scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
-    <property name="jobEntryAnalyzers">
-      <set>
-        <ref component-id="TransJobEntryAnalyzer"/>
-      </set>
-    </property>
+    <property name="jobEntryAnalyzers" ref="jobEntryAnalyzerRefList"/>
   </bean>
 
 

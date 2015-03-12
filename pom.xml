@@ -338,7 +338,13 @@
               org.osgi.service.http,org.apache.felix.http.api,*
             </Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
-            <Export-Packages>com.pentaho.metaverse.api,com.pentaho.metaverse.api.model</Export-Packages>
+            <Export-Package>
+              com.pentaho.metaverse.api,
+              com.pentaho.metaverse.api.*,
+              com.pentaho.dictionary,
+              com.pentaho.metaverse.analyzer.kettle.*,
+              com.pentaho.metaverse.util,
+            </Export-Package>
             <Bundle-Activator>com.pentaho.metaverse.util.MetaverseBundleActivator</Bundle-Activator>
           </instructions>
         </configuration>

@@ -20,64 +20,70 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model.kettle;
+package com.pentaho.metaverse.api.model.kettle;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.trans.TransHopMeta;
-import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.core.row.ValueMetaInterface;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+
 
 /**
  * User: RFellows Date: 12/3/14
  */
 @RunWith( MockitoJUnitRunner.class )
-public class HopInfoTest {
+public class FieldInfoTest {
 
-  HopInfo hopInfo;
-  @Mock TransHopMeta hopMeta;
-  @Mock StepMeta fromStep;
-  @Mock StepMeta toStep;
+  FieldInfo fieldInfo;
+  @Mock ValueMetaInterface vmi;
 
   @Before
   public void setUp() throws Exception {
-    hopInfo = new HopInfo();
+    fieldInfo = new FieldInfo();
 
-    when( hopMeta.getFromStep() ).thenReturn( fromStep );
-    when( hopMeta.getToStep() ).thenReturn( toStep );
-    when( hopMeta.isEnabled() ).thenReturn( false );
-    when( fromStep.getName() ).thenReturn( "from" );
-    when( toStep.getName() ).thenReturn( "to" );
+    when( vmi.getName() ).thenReturn( "name" );
+    when( vmi.getComments() ).thenReturn( "description" );
+    when( vmi.getLength() ).thenReturn( 50 );
+    when( vmi.getPrecision() ).thenReturn( 3 );
+    when( vmi.getTypeDesc() ).thenReturn( "String" );
+
   }
 
   @Test
-  public void testConstructor_TransHopMeta() throws Exception {
-    hopInfo = new HopInfo( hopMeta );
-    assertEquals( fromStep.getName(), hopInfo.getFromStepName() );
-    assertEquals( toStep.getName(), hopInfo.getToStepName() );
-    assertFalse( hopInfo.isEnabled() );
+  public void testConstructor_ValueMetaInterface() throws Exception {
+    fieldInfo = new FieldInfo( vmi );
+    assertEquals( vmi.getLength(), fieldInfo.getLength().intValue() );
+    assertEquals( vmi.getPrecision(), fieldInfo.getPrecision().intValue() );
+    assertEquals( vmi.getName(), fieldInfo.getName() );
+    assertEquals( vmi.getTypeDesc(), fieldInfo.getDataType() );
+    assertEquals( vmi.getComments(), fieldInfo.getDescription() );
   }
 
   @Test
   public void testGettersSetters() throws Exception {
-    assertTrue( hopInfo.isEnabled() );
-    hopInfo.setEnabled( false );
-    assertFalse( hopInfo.isEnabled() );
+    assertEquals( null, fieldInfo.getDataType());
+    fieldInfo.setDataType( "String" );
+    assertEquals( "String", fieldInfo.getDataType() );
 
-    hopInfo.setFromStepName( "step from" );
-    assertEquals( "step from", hopInfo.getFromStepName() );
+    assertEquals( null, fieldInfo.getLength() );
+    fieldInfo.setLength( 45 );
+    assertEquals( Integer.valueOf( 45 ), fieldInfo.getLength() );
 
-    hopInfo.setToStepName( "step to" );
-    assertEquals( "step to", hopInfo.getToStepName() );
+    assertEquals( null, fieldInfo.getPrecision() );
+    fieldInfo.setPrecision( 4 );
+    assertEquals( Integer.valueOf( 4 ), fieldInfo.getPrecision() );
 
-    hopInfo.setType( "type" );
-    assertEquals( "type", hopInfo.getType() );
+    assertEquals( null, fieldInfo.getName() );
+    fieldInfo.setName( "Name" );
+    assertEquals( "Name", fieldInfo.getName() );
+
+    assertEquals( null, fieldInfo.getDescription() );
+    fieldInfo.setDescription( "Description" );
+    assertEquals( "Description", fieldInfo.getDescription() );
   }
 }

@@ -26,7 +26,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.IConnectionAnalyzer;
-import com.pentaho.metaverse.impl.AnalysisContext;
+import com.pentaho.metaverse.api.AnalysisContext;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -267,7 +267,7 @@ public class BaseStepAnalyzerTest {
 
     // make sure there is not a "derives" link added
     verify( mockBuilder, never() ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
   }
 
   @Test
@@ -369,7 +369,7 @@ public class BaseStepAnalyzerTest {
 
   @Test
   public void testGetPrevStepFieldOriginDescriptor() {
-    when( mockPrevFields.getFieldNames() ).thenReturn( new String[]{ "field1", "field2" } );
+    when( mockPrevFields.getFieldNames() ).thenReturn( new String[] { "field1", "field2" } );
     analyzer.prevFields = Collections.singletonMap( "previous step name", mockPrevFields );
     analyzer.getPrevStepFieldOriginDescriptor( mockDescriptor, "field1" );
   }

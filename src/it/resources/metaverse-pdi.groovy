@@ -137,13 +137,13 @@ i:
       ksap.setStepAnalyzers(
         [tfia, tfoa, cfia,
          mergeJoinAnalyzer, numberRangeAnalyzer, selectValuesAnalyzer, tableInputAnalyzer, valueMapperAnalyzer,
-         streamLookupAnalyzer, calculatorAnalyzer, groupByAnalyzer, excelInputAnalyzer] as Set)
+         streamLookupAnalyzer, calculatorAnalyzer, groupByAnalyzer, excelInputAnalyzer] as List)
 
       ta = new TransformationAnalyzer()
       ta.setStepAnalyzerProvider(ksap)
 
       ja = new JobAnalyzer()
-      dc.setDocumentAnalyzers([ta, ja] as Set)
+      dc.setDocumentAnalyzers([ta, ja] as List)
 
       dl = new FileSystemLocator()
       dl.with {

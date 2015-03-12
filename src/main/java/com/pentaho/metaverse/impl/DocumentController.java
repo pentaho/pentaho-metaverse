@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.metaverse.api.IDocumentController;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;
@@ -36,8 +37,11 @@ import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -60,7 +64,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
   /**
    * The analyzers.
    */
-  private Set<IDocumentAnalyzer> documentAnalyzers = new HashSet<IDocumentAnalyzer>();
+  private List<IDocumentAnalyzer> documentAnalyzers = new ArrayList<IDocumentAnalyzer>();
 
   /**
    * The analyzer type map.
@@ -130,7 +134,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
      * @see com.pentaho.metaverse.api.IDocumentAnalyzerProvider#getDocumentAnalyzers()
      */
   @Override
-  public Set<IDocumentAnalyzer> getAnalyzers() {
+  public List<IDocumentAnalyzer> getAnalyzers() {
     return documentAnalyzers;
   }
 
@@ -140,12 +144,16 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * @see com.pentaho.metaverse.api.IDocumentAnalyzerProvider#getDocumentAnalyzers(java.lang.String)
    */
   @Override
-  public Set<IDocumentAnalyzer> getDocumentAnalyzers( String type ) {
+  public List<IDocumentAnalyzer> getDocumentAnalyzers( String type ) {
     if ( type == null ) {
       return getAnalyzers();
     }
-
-    return analyzerTypeMap.get( type );
+    HashSet<IDocumentAnalyzer> documentAnalyzerHashSet = analyzerTypeMap.get( type );
+    List<IDocumentAnalyzer> docAnalyzers = null;
+    if ( documentAnalyzerHashSet != null ) {
+      docAnalyzers = new ArrayList<IDocumentAnalyzer>( documentAnalyzerHashSet );
+    }
+    return docAnalyzers;
   }
 
   /*
@@ -154,7 +162,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * @see com.pentaho.metaverse.api.IAnalyzerProvider#getAnalyzers(java.util.Set)
    */
   @Override
-  public Set<IDocumentAnalyzer> getAnalyzers( Set<Class<?>> types ) {
+  public List<IDocumentAnalyzer> getAnalyzers( Collection<Class<?>> types ) {
     if ( types == null || ( types.size() == 1 && types.contains( IDocumentAnalyzer.class ) ) ) {
       return getAnalyzers();
     }
@@ -164,10 +172,10 @@ public class DocumentController implements IDocumentController, IDocumentListene
   /**
    * Set the analyzers that are available in the system
    *
-   * @param documentAnalyzers the complete Set of IDocumentAnalyzers
+   * @param documentAnalyzers the complete List of IDocumentAnalyzers
    */
   @Override
-  public void setDocumentAnalyzers( Set<IDocumentAnalyzer> documentAnalyzers ) {
+  public void setDocumentAnalyzers( List<IDocumentAnalyzer> documentAnalyzers ) {
     this.documentAnalyzers = documentAnalyzers;
     // reset the analyzer type map
     loadAnalyzerTypeMap();
@@ -181,7 +189,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
    */
   @Override
   public void onEvent( IDocumentEvent event ) {
-    Set<IDocumentAnalyzer> matchingAnalyzers = getDocumentAnalyzers( event.getDocument().getExtension() );
+    List<IDocumentAnalyzer> matchingAnalyzers = getDocumentAnalyzers( event.getDocument().getExtension() );
     if ( matchingAnalyzers != null ) {
       for ( IDocumentAnalyzer analyzer : matchingAnalyzers ) {
         fireDocumentEvent( event, analyzer );
@@ -197,20 +205,50 @@ public class DocumentController implements IDocumentController, IDocumentListene
   protected void loadAnalyzerTypeMap() {
     analyzerTypeMap = new HashMap<String, HashSet<IDocumentAnalyzer>>();
     for ( IDocumentAnalyzer analyzer : documentAnalyzers ) {
-      Set<String> types = analyzer.getSupportedTypes();
-      analyzer.setMetaverseBuilder( this );
-      if ( types != null ) {
-        for ( String type : types ) {
-          HashSet<IDocumentAnalyzer> analyzerSet = null;
-          if ( analyzerTypeMap.containsKey( type ) ) {
-            // we already have someone that handles this type, add to the Set
-            analyzerSet = analyzerTypeMap.get( type );
-          } else {
-            // no one else (yet) handles this type, add it in
-            analyzerSet = new HashSet<IDocumentAnalyzer>();
+      addAnalyzer( analyzer );
+    }
+  }
+
+  @Override
+  public void addAnalyzer( IDocumentAnalyzer analyzer ) {
+    if ( !documentAnalyzers.contains( analyzer ) ) {
+      documentAnalyzers.add( analyzer );
+    }
+    Set<String> types = analyzer.getSupportedTypes();
+    analyzer.setMetaverseBuilder( this );
+    if ( types != null ) {
+      for ( String type : types ) {
+        HashSet<IDocumentAnalyzer> analyzerSet = null;
+        if ( analyzerTypeMap.containsKey( type ) ) {
+          // we already have someone that handles this type, add to the Set
+          analyzerSet = analyzerTypeMap.get( type );
+        } else {
+          // no one else (yet) handles this type, add it in
+          analyzerSet = new HashSet<IDocumentAnalyzer>();
+        }
+        analyzerSet.add( analyzer );
+        analyzerTypeMap.put( type, analyzerSet );
+      }
+    }
+  }
+
+  @Override
+  public void removeAnalyzer( IDocumentAnalyzer analyzer ) {
+    if ( documentAnalyzers.contains( analyzer ) ) {
+      documentAnalyzers.remove( analyzer );
+    }
+    Set<String> types = analyzer.getSupportedTypes();
+    analyzer.setMetaverseBuilder( this );
+    if ( types != null ) {
+      for ( String type : types ) {
+        HashSet<IDocumentAnalyzer> analyzerSet = null;
+        if ( analyzerTypeMap.containsKey( type ) ) {
+          // we have someone that handles this type, remove it from the set
+          analyzerSet = analyzerTypeMap.get( type );
+          analyzerSet.remove( analyzer );
+          if ( analyzerSet.size() == 0 ) {
+            analyzerTypeMap.remove( type );
           }
-          analyzerSet.add( analyzer );
-          analyzerTypeMap.put( type, analyzerSet );
         }
       }
     }

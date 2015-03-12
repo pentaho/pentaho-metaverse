@@ -1,10 +1,9 @@
-package com.pentaho.metaverse.impl.model;
+package com.pentaho.metaverse.api.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.mock;
+import com.pentaho.metaverse.impl.model.ExecutionData;
+import com.pentaho.metaverse.impl.model.ParamInfo;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,13 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.pentaho.metaverse.api.model.IArtifactMetadata;
-import com.pentaho.metaverse.api.model.IUserMetadata;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.api.model.IParamInfo;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 public class ExecutionDataTest {
   ExecutionData executionData;

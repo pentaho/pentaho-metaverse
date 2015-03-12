@@ -30,7 +30,7 @@ import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.model.IOperation;
 import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.impl.DocumentController;
-import com.pentaho.metaverse.impl.Namespace;
+import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;

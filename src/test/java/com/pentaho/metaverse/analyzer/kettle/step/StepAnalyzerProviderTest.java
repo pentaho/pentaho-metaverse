@@ -1,5 +1,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
+import com.google.common.collect.Lists;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,7 +11,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -44,7 +47,7 @@ public class StepAnalyzerProviderTest {
   @Test
   public void testGetAnalyzersNonEmpty() throws Exception {
     assertTrue( provider.getAnalyzers().isEmpty() );
-    Set<IStepAnalyzer> analyzerSet = new HashSet<IStepAnalyzer>() {{
+    List<IStepAnalyzer> analyzerSet = new ArrayList<IStepAnalyzer>() {{
       add( mockStepAnalyzer );
     }};
     provider.stepAnalyzers = analyzerSet;
@@ -60,7 +63,7 @@ public class StepAnalyzerProviderTest {
     // Return the tableOutputStepAnalyzerSet set if TableOutputMeta analyzers are requested
     provider.analyzerTypeMap.put( TableOutputMeta.class, tableOutputStepAnalyzerSet );
 
-    Set<IStepAnalyzer> analyzers = provider.getAnalyzers( new HashSet() {{
+    List<IStepAnalyzer> analyzers = provider.getAnalyzers( new ArrayList() {{
       add( BaseStepMeta.class );
       add( TableOutputMeta.class );
     }} );
@@ -84,7 +87,7 @@ public class StepAnalyzerProviderTest {
   public void testSetStepAnalyzers() throws Exception {
     assertNotNull( provider.stepAnalyzers );
     assertTrue( provider.stepAnalyzers.isEmpty() );
-    Set<IStepAnalyzer> analyzerSet = new HashSet<IStepAnalyzer>() {{
+    List<IStepAnalyzer> analyzerSet = new ArrayList<IStepAnalyzer>() {{
       add( mockStepAnalyzer );
     }};
     provider.setStepAnalyzers( analyzerSet );
@@ -102,7 +105,7 @@ public class StepAnalyzerProviderTest {
     IStepAnalyzer tableOutputStepAnalyzer2 = mock( IStepAnalyzer.class );
     when( tableOutputStepAnalyzer2.getSupportedSteps() ).thenReturn( Sets.newSet( TableOutputMeta.class ) );
 
-    provider.stepAnalyzers = Sets.newSet( baseStepAnalyzer, tableOutputStepAnalyzer, tableOutputStepAnalyzer2 );
+    provider.stepAnalyzers = Lists.newArrayList( baseStepAnalyzer, tableOutputStepAnalyzer, tableOutputStepAnalyzer2 );
 
     // Method under test
     provider.loadAnalyzerTypeMap();
@@ -114,5 +117,52 @@ public class StepAnalyzerProviderTest {
     Set<IStepAnalyzer> tableOutputStepAnalyzers = provider.analyzerTypeMap.get( TableOutputMeta.class );
     assertNotNull( tableOutputStepAnalyzers );
     assertEquals( tableOutputStepAnalyzers.size(), 2 );
+  }
+
+  @Test
+  public void testRemoveAnalyzer() throws Exception {
+    IStepAnalyzer baseStepAnalyzer = mock( IStepAnalyzer.class );
+    when( baseStepAnalyzer.getSupportedSteps() ).thenReturn( Sets.newSet( BaseStepMeta.class ) );
+
+    IStepAnalyzer tableOutputStepAnalyzer = mock( IStepAnalyzer.class );
+    when( tableOutputStepAnalyzer.getSupportedSteps() ).thenReturn( Sets.newSet( TableOutputMeta.class ) );
+
+    provider.setStepAnalyzers(
+        Lists.newArrayList( baseStepAnalyzer, tableOutputStepAnalyzer ) );
+
+    Set<IStepAnalyzer> tableOutputStepAnalyzers = provider.analyzerTypeMap.get( TableOutputMeta.class );
+    assertNotNull( tableOutputStepAnalyzers );
+    assertEquals( tableOutputStepAnalyzers.size(), 1 );
+
+    provider.removeAnalyzer( tableOutputStepAnalyzer );
+    tableOutputStepAnalyzers = provider.analyzerTypeMap.get( TableOutputMeta.class );
+    assertNull( tableOutputStepAnalyzers );
+
+  }
+
+  @Test
+  public void testRemoveAnalyzer_multipleWithTheSameType() throws Exception {
+    IStepAnalyzer baseStepAnalyzer = mock( IStepAnalyzer.class );
+    when( baseStepAnalyzer.getSupportedSteps() ).thenReturn( Sets.newSet( BaseStepMeta.class ) );
+
+    IStepAnalyzer tableOutputStepAnalyzer = mock( IStepAnalyzer.class );
+    when( tableOutputStepAnalyzer.getSupportedSteps() ).thenReturn( Sets.newSet( TableOutputMeta.class ) );
+
+    IStepAnalyzer tableOutputStepAnalyzer2 = mock( IStepAnalyzer.class );
+    when( tableOutputStepAnalyzer2.getSupportedSteps() ).thenReturn( Sets.newSet( TableOutputMeta.class ) );
+
+    provider.setStepAnalyzers(
+        Lists.newArrayList( baseStepAnalyzer, tableOutputStepAnalyzer, tableOutputStepAnalyzer2 ) );
+
+    Set<IStepAnalyzer> tableOutputStepAnalyzers = provider.analyzerTypeMap.get( TableOutputMeta.class );
+    assertNotNull( tableOutputStepAnalyzers );
+    assertEquals( tableOutputStepAnalyzers.size(), 2 );
+
+    provider.removeAnalyzer( tableOutputStepAnalyzer2 );
+    tableOutputStepAnalyzers = provider.analyzerTypeMap.get( TableOutputMeta.class );
+    assertNotNull( tableOutputStepAnalyzers );
+    assertEquals( tableOutputStepAnalyzers.size(), 1 );
+    assertEquals( tableOutputStepAnalyzer, tableOutputStepAnalyzers.iterator().next() );
+
   }
 }

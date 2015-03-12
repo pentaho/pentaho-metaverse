@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
-import com.pentaho.metaverse.impl.model.ExternalResourceInfoFactory;
+import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginRegistry;

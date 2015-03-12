@@ -24,7 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.jobentry.transjob;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.BaseJobEntryAnalyzer;
-import com.pentaho.metaverse.impl.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.trans.TransMeta;

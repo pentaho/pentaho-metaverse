@@ -25,7 +25,7 @@ package com.pentaho.metaverse.locator;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
-import com.pentaho.metaverse.impl.Namespace;
+import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.metaverse.IDocumentEvent;

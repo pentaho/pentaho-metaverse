@@ -20,43 +20,51 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model.kettle;
+package com.pentaho.metaverse.api.model;
 
-import org.junit.Test;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import static org.junit.Assert.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class FieldMappingTest {
+public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo {
 
-  FieldMapping mapping;
+  private String type;
+  private Boolean isInput = false;
 
-  @Test
-  public void testEmptyConstructor() throws Exception {
-    mapping = new FieldMapping();
-    assertNull( mapping.getSourceFieldName() );
-    assertNull( mapping.getTargetFieldName() );
+  private Map<Object, Object> attributes = new HashMap<Object, Object>();
+
+  @Override
+  public String getType() {
+    return type;
   }
 
-  @Test
-  public void testConstructor() throws Exception {
-    mapping = new FieldMapping( "from", "to" );
-    assertEquals( "from", mapping.getSourceFieldName() );
-    assertEquals( "to", mapping.getTargetFieldName() );
+  public void setType( String type ) {
+    this.type = type;
   }
 
-  @Test
-  public void testSetSourceFieldName() throws Exception {
-    mapping = new FieldMapping();
-    assertNull( mapping.getSourceFieldName() );
-    mapping.setSourceFieldName( "from" );
-    assertEquals( "from", mapping.getSourceFieldName() );
+  @Override
+  public boolean isInput() {
+    return isInput;
   }
 
-  @Test
-  public void testSetTargetFieldName() throws Exception {
-    mapping = new FieldMapping();
-    assertNull( mapping.getTargetFieldName() );
-    mapping.setTargetFieldName( "to" );
-    assertEquals( "to", mapping.getTargetFieldName() );
+  @JsonIgnore
+  @Override
+  public boolean isOutput() {
+    return !isInput;
   }
+
+  public void setInput( boolean isInput ) {
+    this.isInput = isInput;
+  }
+
+  @Override
+  public Map<Object, Object> getAttributes() {
+    return attributes;
+  }
+
+  public void putAttribute( Object key, Object value ) {
+    attributes.put( key, value );
+  }
+
 }

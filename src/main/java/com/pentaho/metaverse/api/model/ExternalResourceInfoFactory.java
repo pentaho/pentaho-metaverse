@@ -20,10 +20,9 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model;
+package com.pentaho.metaverse.api.model;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.resource.ResourceEntry;

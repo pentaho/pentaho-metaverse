@@ -90,6 +90,33 @@
     </service-properties>
   </service>
 
+  <!-- Excel Output plugin -->
+  <bean id="excelOutputERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputExternalResourceConsumer"/>
+  <bean id="excelOutputERCPlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
+    <property name="mainType" value="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"/>
+    <property name="name" value="ExcelInputExternalResourceConsumer"/>
+    <property name="ID" value="ExcelInputExternalResourceConsumer"/>
+    <property name="description" value=""/>
+    <property name="pluginTypeInterface" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
+    <property name="category" value="Data Lineage"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"
+               value="excelOutputERC"/>
+      </map>
+    </property>
+  </bean>
+
+  <!-- Register the plugin as a service so Kettle can find it -->
+  <service id="excelOutputERCPluginService"
+           interface="org.pentaho.di.core.plugins.PluginInterface"
+           ref="excelOutputERCPlugin">
+    <service-properties>
+      <entry key="PluginType" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
+    </service-properties>
+  </service>
+
   <!-- TableOutput external resource consumer -->
   <bean id="tableOutputERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer"/>

@@ -39,7 +39,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.blueprint.container.BlueprintContainer;
-import org.pentaho.di.core.Const;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
 import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
@@ -48,14 +47,11 @@ import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.MetaverseException;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
+import static org.mockito.Mockito.*;
 
 public class MetaverseUtilTest {
 
@@ -126,7 +122,7 @@ public class MetaverseUtilTest {
 
     IDocumentController documentController =
       mock( IDocumentController.class, withSettings().extraInterfaces( IRequiresMetaverseBuilder.class ) );
-    Set<IDocumentAnalyzer> analyzers = new HashSet<IDocumentAnalyzer>();
+    List<IDocumentAnalyzer> analyzers = new ArrayList<IDocumentAnalyzer>();
     when( documentController.getDocumentAnalyzers( Mockito.anyString() ) ).thenReturn( analyzers );
 
     MetaverseUtil.documentController = documentController;

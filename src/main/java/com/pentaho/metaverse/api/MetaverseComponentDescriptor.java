@@ -1,4 +1,4 @@
-package com.pentaho.metaverse.impl;
+package com.pentaho.metaverse.api;
 
 import com.pentaho.dictionary.DictionaryConst;
 import org.pentaho.platform.api.metaverse.IAnalysisContext;

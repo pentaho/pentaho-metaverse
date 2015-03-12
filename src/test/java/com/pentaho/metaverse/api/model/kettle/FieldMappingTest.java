@@ -20,51 +20,44 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl.model;
+package com.pentaho.metaverse.api.model.kettle;
 
-import com.pentaho.metaverse.api.model.IInfo;
+import org.junit.Test;
 
-public class BaseInfo implements IInfo {
-  private String name;
-  private String description;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
-  /**
-   * Returns the name of this artifact
-   *
-   * @return a string representing the name of this artifact
-   */
-  @Override
-  public String getName() {
-    return name;
+public class FieldMappingTest {
+
+  FieldMapping mapping;
+
+  @Test
+  public void testEmptyConstructor() throws Exception {
+    mapping = new FieldMapping();
+    assertNull( mapping.getSourceFieldName() );
+    assertNull( mapping.getTargetFieldName() );
   }
 
-  /**
-   * Returns a description of this artifact
-   *
-   * @return a string representing the description of this artifact
-   */
-  @Override
-  public String getDescription() {
-    return description;
+  @Test
+  public void testConstructor() throws Exception {
+    mapping = new FieldMapping( "from", "to" );
+    assertEquals( "from", mapping.getSourceFieldName() );
+    assertEquals( "to", mapping.getTargetFieldName() );
   }
 
-  /**
-   * Sets the name of this artifact
-   *
-   * @param name the name to set for the artifact
-   */
-  @Override
-  public void setName( String name ) {
-    this.name = name;
+  @Test
+  public void testSetSourceFieldName() throws Exception {
+    mapping = new FieldMapping();
+    assertNull( mapping.getSourceFieldName() );
+    mapping.setSourceFieldName( "from" );
+    assertEquals( "from", mapping.getSourceFieldName() );
   }
 
-  /**
-   * Sets the description of this artifact
-   *
-   * @param description the description to set for the artifact
-   */
-  @Override
-  public void setDescription( String description ) {
-    this.description = description;
+  @Test
+  public void testSetTargetFieldName() throws Exception {
+    mapping = new FieldMapping();
+    assertNull( mapping.getTargetFieldName() );
+    mapping.setTargetFieldName( "to" );
+    assertEquals( "to", mapping.getTargetFieldName() );
   }
 }

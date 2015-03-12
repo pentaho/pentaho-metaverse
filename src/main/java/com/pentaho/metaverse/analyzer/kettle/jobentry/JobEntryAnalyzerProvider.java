@@ -3,8 +3,11 @@ package com.pentaho.metaverse.analyzer.kettle.jobentry;
 import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
 import org.pentaho.di.job.entry.JobEntryInterface;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +19,7 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
   /**
    * The set of step analyzers.
    */
-  protected Set<IJobEntryAnalyzer> jobEntryAnalyzers = new HashSet<IJobEntryAnalyzer>();
+  protected List<IJobEntryAnalyzer> jobEntryAnalyzers = new ArrayList<IJobEntryAnalyzer>();
 
   /**
    * The analyzer type map associates step meta classes with analyzers for those classes
@@ -27,10 +30,10 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
   /**
    * Returns all registered step analyzers
    *
-   * @return a set of step analyzers
+   * @return a List of step analyzers
    */
   @Override
-  public Set<IJobEntryAnalyzer> getAnalyzers() {
+  public List<IJobEntryAnalyzer> getAnalyzers() {
     return jobEntryAnalyzers;
   }
 
@@ -40,8 +43,8 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
    * @param types a set of classes corresponding to step for which to retrieve the analyzers
    * @return a set of analyzers that can process the specified step
    */
-  @Override public Set<IJobEntryAnalyzer> getAnalyzers( Set<Class<?>> types ) {
-    Set<IJobEntryAnalyzer> stepAnalyzers = getAnalyzers();
+  @Override public List<IJobEntryAnalyzer> getAnalyzers( Collection<Class<?>> types ) {
+    List<IJobEntryAnalyzer> stepAnalyzers = getAnalyzers();
     if ( types != null ) {
       final Set<IJobEntryAnalyzer> specificStepAnalyzers = new HashSet<IJobEntryAnalyzer>();
       for ( Class<?> clazz : types ) {
@@ -49,7 +52,7 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
           specificStepAnalyzers.addAll( analyzerTypeMap.get( clazz ) );
         }
       }
-      stepAnalyzers = specificStepAnalyzers;
+      stepAnalyzers = new ArrayList<IJobEntryAnalyzer>( specificStepAnalyzers );
     }
     return stepAnalyzers;
   }
@@ -59,7 +62,7 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
    *
    * @param analyzers
    */
-  public void setJobEntryAnalyzers( Set<IJobEntryAnalyzer> analyzers ) {
+  public void setJobEntryAnalyzers( List<IJobEntryAnalyzer> analyzers ) {
     jobEntryAnalyzers = analyzers;
     loadAnalyzerTypeMap();
   }
@@ -71,23 +74,53 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
     analyzerTypeMap = new HashMap<Class<? extends JobEntryInterface>, Set<IJobEntryAnalyzer>>();
     if ( jobEntryAnalyzers != null ) {
       for ( IJobEntryAnalyzer analyzer : jobEntryAnalyzers ) {
-        Set<Class<? extends JobEntryInterface>> types = analyzer.getSupportedEntries();
-        analyzer.setMetaverseBuilder( metaverseBuilder );
-        if ( types != null ) {
-          for ( Class<? extends JobEntryInterface> type : types ) {
-            Set<IJobEntryAnalyzer> analyzerSet = null;
-            if ( analyzerTypeMap.containsKey( type ) ) {
-              // we already have someone that handles this type, add to the Set
-              analyzerSet = analyzerTypeMap.get( type );
-            } else {
-              // no one else (yet) handles this type, add it in
-              analyzerSet = new HashSet<IJobEntryAnalyzer>();
-            }
-            analyzerSet.add( analyzer );
-            analyzerTypeMap.put( type, analyzerSet );
+        addAnalyzer( analyzer );
+      }
+    }
+  }
+
+  @Override
+  public void addAnalyzer( IJobEntryAnalyzer analyzer ) {
+    if ( !jobEntryAnalyzers.contains( analyzer ) ) {
+      jobEntryAnalyzers.add( analyzer );
+    }
+    Set<Class<? extends JobEntryInterface>> types = analyzer.getSupportedEntries();
+    analyzer.setMetaverseBuilder( metaverseBuilder );
+    if ( types != null ) {
+      for ( Class<? extends JobEntryInterface> type : types ) {
+        Set<IJobEntryAnalyzer> analyzerSet = null;
+        if ( analyzerTypeMap.containsKey( type ) ) {
+          // we already have someone that handles this type, add to the Set
+          analyzerSet = analyzerTypeMap.get( type );
+        } else {
+          // no one else (yet) handles this type, add it in
+          analyzerSet = new HashSet<IJobEntryAnalyzer>();
+        }
+        analyzerSet.add( analyzer );
+        analyzerTypeMap.put( type, analyzerSet );
+      }
+    }
+  }
+
+  @Override
+  public void removeAnalyzer( IJobEntryAnalyzer analyzer ) {
+    if ( jobEntryAnalyzers.contains( analyzer ) ) {
+      jobEntryAnalyzers.remove( analyzer );
+    }
+    Set<Class<? extends JobEntryInterface>> types = analyzer.getSupportedEntries();
+    if ( types != null ) {
+      for ( Class<? extends JobEntryInterface> type : types ) {
+        Set<IJobEntryAnalyzer> analyzerSet = null;
+        if ( analyzerTypeMap.containsKey( type ) ) {
+          // we have someone that handles this type, remove it from the set
+          analyzerSet = analyzerTypeMap.get( type );
+          analyzerSet.remove( analyzer );
+          if ( analyzerSet.size() == 0 ) {
+            analyzerTypeMap.remove( type );
           }
         }
       }
     }
   }
+
 }

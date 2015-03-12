@@ -1,14 +1,9 @@
-package com.pentaho.metaverse.impl.model;
+package com.pentaho.metaverse.api.model;
 
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.apache.commons.vfs.FileName;
-import org.apache.commons.vfs.FileObject;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class BaseResourceInfoTest {
 

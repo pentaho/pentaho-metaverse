@@ -35,7 +35,7 @@ import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.api.model.kettle.IFieldInfo;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.impl.model.kettle.FieldMapping;
+import com.pentaho.metaverse.api.model.kettle.FieldMapping;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -251,7 +251,7 @@ public class AbstractStepMetaJsonSerializerTest {
   public void testGetStepFieldMapper() throws Exception {
     IStepAnalyzerProvider provider = mock( IStepAnalyzerProvider.class );
     IStepAnalyzer<DummyTransMeta> analyzer = mock( IStepAnalyzer.class, withSettings().extraInterfaces( IFieldLineageMetadataProvider.class ) );
-    Set<IStepAnalyzer> analyzers = new HashSet<IStepAnalyzer>( 1 );
+    List<IStepAnalyzer> analyzers = new ArrayList<IStepAnalyzer>( 1 );
     analyzers.add( analyzer );
     when( provider.getAnalyzers( any( Set.class ) ) ).thenReturn( analyzers );
 
