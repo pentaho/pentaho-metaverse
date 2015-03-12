@@ -27,6 +27,7 @@ import com.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.model.IOperation;
+import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.graph.LineageGraphCompletionService;
 import com.pentaho.metaverse.graph.LineageGraphMap;
@@ -194,8 +195,9 @@ public class MetaverseUtil {
     Operations resultOps = null;
     if ( !Const.isEmpty( operations ) ) {
       try {
-        Map<String, List<IOperation>> rawOpsMap =
-          (Map<String, List<IOperation>>) new JSONDeserializer().deserialize( operations );
+        Map<String, List<IOperation>> rawOpsMap = new JSONDeserializer<Map<String, List<IOperation>>>().
+          use( "values.values", Operation.class ).
+          deserialize( operations );
         resultOps = new Operations();
         for ( String key : rawOpsMap.keySet() ) {
           resultOps.put( ChangeType.forValue( key ), rawOpsMap.get( key ) );
