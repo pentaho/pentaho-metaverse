@@ -22,14 +22,12 @@
 
 package com.pentaho.metaverse;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.MetaverseKettleLifecycleHandler;
 import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
@@ -45,7 +43,6 @@ import com.pentaho.metaverse.impl.model.kettle.json.JobMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonDeserializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonSerializer;
-import com.pentaho.metaverse.util.MetaverseUtil;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;

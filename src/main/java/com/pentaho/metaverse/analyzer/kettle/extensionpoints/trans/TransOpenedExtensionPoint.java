@@ -34,7 +34,7 @@ import org.pentaho.platform.api.metaverse.MetaverseException;
  */
 @ExtensionPoint(
   description = "Transformation Lineage Graph creator",
-  extensionPointId = "TransAfterOpen",
+  extensionPointId = "TransformationMetaLoaded",
   id = "transOpenLineageGraph" )
 public class TransOpenedExtensionPoint implements ExtensionPointInterface {
 

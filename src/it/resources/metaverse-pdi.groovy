@@ -153,6 +153,7 @@ i:
         setRootFolder('src/it/resources/repo')
       }
       gw = new GraphMLWriter()
+      gson = new GraphSONReader()
       gsonw = new GraphSONWriter()
       g2 = new TinkerGraph()
       gr = new GraphMLReader(g2)
@@ -165,6 +166,8 @@ i:
     shell.dl = obj.dl
     shell.ta = obj.ta
     shell.gw = obj.gw
+    shell.gson = obj.gson
+    shell.gsonw = obj.gsonw
     shell.gr = obj.gr
 
     MetaverseUtil.documentController = shell.dc
