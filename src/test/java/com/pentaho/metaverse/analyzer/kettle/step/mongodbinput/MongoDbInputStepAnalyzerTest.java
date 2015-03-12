@@ -134,7 +134,7 @@ public class MongoDbInputStepAnalyzerTest {
     doReturn( true ).when( mongoDbInputMeta ).getOutputJson();
     node = analyzer.analyze( descriptor, mongoDbInputMeta );
     assertNotNull( node );
-    assertTrue( (Boolean) node.getProperty( "fullJSON" ) );
+    assertTrue( (Boolean) node.getProperty( MongoDbInputStepAnalyzer.OUTPUT_JSON ) );
   }
 
   @Test

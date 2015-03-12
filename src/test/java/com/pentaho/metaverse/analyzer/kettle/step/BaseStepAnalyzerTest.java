@@ -25,6 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
+import com.pentaho.metaverse.analyzer.kettle.IConnectionAnalyzer;
 import com.pentaho.metaverse.impl.AnalysisContext;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
@@ -266,7 +267,7 @@ public class BaseStepAnalyzerTest {
 
     // make sure there is not a "derives" link added
     verify( mockBuilder, never() ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
   }
 
   @Test
@@ -422,6 +423,14 @@ public class BaseStepAnalyzerTest {
     assertTrue( analyzer.getPassthruFieldMappings( mockStepMeta ).isEmpty() );
     when( mockPrevFields.getFieldNames() ).thenReturn( new String[]{ "field1", "field2" } );
     assertEquals( 2, analyzer.getPassthruFieldMappings( mockStepMeta ).size() );
+  }
+
+  @Test
+  public void testGetSetConnectionAnalyzer() throws Exception {
+    assertNull( analyzer.getConnectionAnalyzer() );
+    IConnectionAnalyzer connectionAnalyzer = mock( IConnectionAnalyzer.class );
+    analyzer.setConnectionAnalyzer( connectionAnalyzer );
+    assertEquals( connectionAnalyzer, analyzer.getConnectionAnalyzer() );
   }
 
   @Test

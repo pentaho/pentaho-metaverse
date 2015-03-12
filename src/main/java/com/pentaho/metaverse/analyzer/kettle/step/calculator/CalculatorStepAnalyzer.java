@@ -30,9 +30,7 @@ import java.util.Set;
 import com.pentaho.metaverse.api.model.Operation;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
 import org.pentaho.di.trans.steps.calculator.CalculatorMetaFunction;
 import org.pentaho.platform.api.metaverse.IComponentDescriptor;
@@ -115,15 +113,4 @@ public class CalculatorStepAnalyzer extends BaseStepAnalyzer<CalculatorMeta> {
     }
     return changeRecords;
   }
-
-  // ******** Start - Used to aid in unit testing **********
-  public void setParentTransMeta( TransMeta parentTransMeta ) {
-    this.parentTransMeta = parentTransMeta;
-  }
-
-  public void setParentStepMeta( StepMeta parentStepMeta ) {
-    this.parentStepMeta = parentStepMeta;
-  }
-  // ******** End - Used to aid in unit testing **********
-
 }
