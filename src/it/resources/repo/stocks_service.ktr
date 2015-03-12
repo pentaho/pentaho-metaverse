@@ -109,7 +109,7 @@
     <server/>
     <type>H2</type>
     <access>Native</access>
-    <database>&#x24;&#x7b;Internal.Transformation.Filename.Directory&#x7d;&#x2f;..&#x2f;Stocks</database>
+    <database>&#x24;&#x7b;Internal.Transformation.Filename.Directory&#x7d;&#x2f;Stocks</database>
     <port>-1</port>
     <username>sa</username>
     <password>Encrypted 2be98afc86aa7f2e4bb18bd63c99dbdde</password>

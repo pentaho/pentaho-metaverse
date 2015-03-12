@@ -59,6 +59,7 @@ i:
       "${System.getProperty('user.home')}/pdi-ee-6.0-SNAPSHOT/pdi-ee/data-integration/plugins")
 
   PluginRegistry.addPluginType(ExtensionPointPluginType.getInstance());
+  KettleClientEnvironment.instance.setClient( KettleClientEnvironment.ClientType.PAN );
   KettleEnvironment.init(false)
   Gremlin.load()
   // Add custom Gremlin steps for convenience
