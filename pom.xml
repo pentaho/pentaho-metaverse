@@ -341,7 +341,9 @@
             <Export-Package>
               com.pentaho.metaverse.api,
               com.pentaho.metaverse.api.*,
+              com.pentaho.metaverse.client,
               com.pentaho.dictionary,
+              com.pentaho.metaverse.analyzer.kettle,
               com.pentaho.metaverse.analyzer.kettle.*,
               com.pentaho.metaverse.util,
             </Export-Package>
