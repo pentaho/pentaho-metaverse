@@ -80,7 +80,7 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
       metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, keyNode );
 
       IMetaverseNode keyLookupNode =
-          createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, keyLookups[i] ) );
+        createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, keyLookups[i] ) );
       metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, keyLookupNode );
 
       // Bidirectional Join
@@ -129,7 +129,7 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
           try {
             rowMeta.put( prevStepName, parentTransMeta.getStepFields( prevStepName ) );
           } catch ( KettleStepException e ) {
-            LOGGER.warn( Messages.getString( "WARNING.CannotDetermineRowMeta" ) );
+            LOGGER.warn( Messages.getString( "WARNING.CannotDetermineRowMeta", prevStepName, e.toString() ) );
           }
         }
       }

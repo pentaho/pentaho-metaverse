@@ -78,7 +78,7 @@
   <bean id="MongoDbInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputStepAnalyzer">
     <property name="connectionAnalyzer" ref="mongoDbConnectionAnalyzer"/>
   </bean>
-  <bean id="ExcelOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.excelOutput.ExcelOutputStepAnalyzer"/>
+  <bean id="ExcelOutputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer"/>
 
   <bean id="TransJobEntryAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer" />
   

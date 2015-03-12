@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -43,7 +43,6 @@ import org.pentaho.platform.api.metaverse.IDocument;
 import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
 import org.pentaho.platform.api.metaverse.MetaverseException;
 
@@ -113,12 +112,12 @@ public class MetaverseUtil {
     // Right now we expect a single transformation analyzer in the system. If we need to support more,
     // the lineageGraphMap needs to map the TransMeta to a collection of Futures, etc.
     IDocumentController docController = MetaverseUtil.getDocumentController();
-    if ( docController != null && docController instanceof IRequiresMetaverseBuilder ) {
+    if ( docController != null ) {
 
       // Create a new builder, setting it on the DocumentController if possible
       IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
 
-      ( (IRequiresMetaverseBuilder) docController ).setMetaverseBuilder( metaverseBuilder );
+      docController.setMetaverseBuilder( metaverseBuilder );
       Set<IDocumentAnalyzer> matchingAnalyzers = docController.getDocumentAnalyzers( "ktr" );
 
       if ( matchingAnalyzers != null ) {
@@ -149,7 +148,6 @@ public class MetaverseUtil {
           // Save this Future, the client will call it when the analysis is needed
           LineageGraphMap.getInstance().put( document.getContent(), transAnalysis );
         }
-
       }
     }
   }

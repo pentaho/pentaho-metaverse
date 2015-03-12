@@ -30,6 +30,7 @@ import org.pentaho.platform.api.metaverse.IMetaverseNode;
 import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.INamespace;
 import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import org.pentaho.platform.api.metaverse.MetaverseException;
 
 import java.util.Collection;
 import java.util.Set;
@@ -116,6 +117,13 @@ public class CsvFileInputStepAnalyzerTest {
     verify( mockBuilder, times( 1 ) ).addLink(
       any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
 
+    // Try again but throw an exception
+    when( mockBuilder.addLink(
+      Mockito.any( IMetaverseNode.class ),
+      eq( DictionaryConst.LINK_READBY ),
+      Mockito.any( IMetaverseNode.class ) ) )
+      .thenThrow( MetaverseException.class );
+    csvFileInputStepAnalyzer.analyze( descriptor, mockCsvInputMeta );
   }
 
   @Test

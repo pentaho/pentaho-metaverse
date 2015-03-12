@@ -61,11 +61,11 @@ public class MongoDbInputStepAnalyzer extends BaseStepAnalyzer<MongoDbInputMeta>
     throws MetaverseAnalyzerException {
 
     // Let base analyzer handle connections, created fields, etc.
-    IMetaverseNode node = super.analyze( descriptor, meta );
+    super.analyze( descriptor, meta );
 
     // Create collection node
     String collectionName = meta.getCollection();
-    node.setProperty( COLLECTION, collectionName );
+    rootNode.setProperty( COLLECTION, collectionName );
     IComponentDescriptor mongoCollectionDescriptor = new MetaverseComponentDescriptor(
       collectionName,
       DictionaryConst.NODE_TYPE_MONGODB_COLLECTION,
@@ -77,14 +77,14 @@ public class MongoDbInputStepAnalyzer extends BaseStepAnalyzer<MongoDbInputMeta>
     metaverseBuilder.addNode( mongoCollectionNode );
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, mongoCollectionNode );
 
-    node.setProperty( OUTPUT_JSON, meta.getOutputJson() );
+    rootNode.setProperty( OUTPUT_JSON, meta.getOutputJson() );
     // If the output is the full JSON, we don't have to do any additional analysis
     if ( !meta.getOutputJson() ) {
       // add properties to the node - the query (and its characteristics) in particular
-      node.setProperty( DictionaryConst.PROPERTY_QUERY, meta.getJsonQuery() );
-      node.setProperty( AGG_PIPELINE, meta.getQueryIsPipeline() );
-      node.setProperty( DictionaryConst.PROPERTY_EXECUTE_EACH_ROW, meta.getExecuteForEachIncomingRow() );
-      node.setProperty( FIELDS_EXPRESSION, meta.getFieldsName() );
+      rootNode.setProperty( DictionaryConst.PROPERTY_QUERY, meta.getJsonQuery() );
+      rootNode.setProperty( AGG_PIPELINE, meta.getQueryIsPipeline() );
+      rootNode.setProperty( DictionaryConst.PROPERTY_EXECUTE_EACH_ROW, meta.getExecuteForEachIncomingRow() );
+      rootNode.setProperty( FIELDS_EXPRESSION, meta.getFieldsName() );
 
       // Process the fields (if specified)
       List<MongoField> mongoFields = meta.getMongoFields();
@@ -116,7 +116,7 @@ public class MongoDbInputStepAnalyzer extends BaseStepAnalyzer<MongoDbInputMeta>
       }
 
     }
-    return node;
+    return rootNode;
   }
 
   @Override
