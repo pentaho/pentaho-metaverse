@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="
+             http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+             ">
+
+
+  <!--
+    Grab a reference to the IDatabaseConnectionAnalyzer for steps provided by the core pentaho-metaverse-ee bundle.
+    This will be injected into our sample (TableInputStepAnalyzer)
+  -->
+  <reference id="stepDatabaseConnectionAnalyzerRef"
+             interface="com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer"
+             component-name="stepDatabaseConnectionAnalyzer"
+             availability="mandatory"/>
+
+  <!--
+    Declare our sample analyzer(TableInputStepAnalyzer) bean. Inject the stepDatabaseConnectionAnalyzer so it can
+    use the same on that the TableOutputStepAnalyzer uses.
+  -->
+  <bean id="tableInputStepAnalyzer" class="com.pentaho.metaverse.tableinput.TableInputStepAnalyzer">
+    <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzerRef"/>
+  </bean>
+
+  <!--
+    Define our analyzer as a service. This will allow it to be automatically added to the reference-list ultimately used
+    by the TransformationAnalyzer to determine if there is a custom analyzer for a particular BaseStepMeta impl
+    (TableInputMeta in this case).
+  -->
+  <service id="tableInputStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="tableInputStepAnalyzer"/>
+
+
+  <!-- Configure the TableInputExternalResourceConsumer as a plugin to Kettle via the pdi-osgi-bridge  -->
+  <bean id="tableInputERC" scope="singleton"
+        class="com.pentaho.metaverse.tableinput.TableInputExternalResourceConsumer"/>
+  <bean id="tableInputERCPlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
+    <property name="mainType" value="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"/>
+    <property name="name" value="TableInputExternalResourceConsumer"/>
+    <property name="ID" value="TableInputExternalResourceConsumer"/>
+    <property name="description" value=""/>
+    <property name="pluginTypeInterface" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
+    <property name="category" value="Data Lineage - Table Input Bundle"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"
+               value="tableInputERC"/>
+      </map>
+    </property>
+  </bean>
+
+  <!-- Register the plugin as a service so Kettle can find it -->
+  <service id="tableInputERCPluginService"
+           interface="org.pentaho.di.core.plugins.PluginInterface"
+           ref="tableInputERCPlugin">
+    <service-properties>
+      <entry key="PluginType" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
+    </service-properties>
+  </service>
+
+</blueprint>

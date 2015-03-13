@@ -313,19 +313,6 @@
         </configuration>
       </plugin>
 
-      <!-- Override here to allow "mvn checkstyle:checkstyle" to work against pentaho standards -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${plugin.org.apache.maven.plugins.maven-checkstyle-plugin.version}</version>
-        <configuration>
-          <configLocation>${checkstyle-config-url}</configLocation>
-          <propertiesLocation>${checkstyle-properties-url}</propertiesLocation>
-          <linkXRef>true</linkXRef>
-          <cacheFile></cacheFile>
-        </configuration>
-      </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
