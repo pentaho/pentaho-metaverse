@@ -48,6 +48,10 @@ public class MongoDbInputStepAnalyzer extends BaseStepAnalyzer<MongoDbInputMeta>
   public static final String AGG_PIPELINE = "isAggPipeline";
   public static final String FIELDS_EXPRESSION = "fieldsExpression";
 
+  // Tag Set / Read Preference property names
+  public static final String READ_PREF = "readPreference";
+  public static final String TAG_SETS = "tagSets";
+
   // Field property names
   public static final String OUTPUT_JSON = "outputJson";
   public static final String JSON_PATH = "jsonPath";
@@ -85,6 +89,14 @@ public class MongoDbInputStepAnalyzer extends BaseStepAnalyzer<MongoDbInputMeta>
       rootNode.setProperty( AGG_PIPELINE, meta.getQueryIsPipeline() );
       rootNode.setProperty( DictionaryConst.PROPERTY_EXECUTE_EACH_ROW, meta.getExecuteForEachIncomingRow() );
       rootNode.setProperty( FIELDS_EXPRESSION, meta.getFieldsName() );
+
+      // Add tag set and read preference information to the step node
+      rootNode.setProperty( READ_PREF, meta.getReadPreference() );
+      List<String> tagSets = meta.getReadPrefTagSets();
+      if ( tagSets != null ) {
+        // The string representation of the list is good enough for us. Each entry should already be in JSON format
+        rootNode.setProperty( TAG_SETS, tagSets.toString() );
+      }
 
       // Process the fields (if specified)
       List<MongoField> mongoFields = meta.getMongoFields();
