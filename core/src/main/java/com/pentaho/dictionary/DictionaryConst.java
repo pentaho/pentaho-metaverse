@@ -475,41 +475,41 @@ public class DictionaryConst {
   public static final String CONTEXT_DEFAULT = CONTEXT_STATIC;
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DEFAULT = new MetaverseLogicalIdGenerator( new String[] {
-      PROPERTY_NAMESPACE,
-      PROPERTY_TYPE,
-      PROPERTY_NAME,
+    PROPERTY_NAMESPACE,
+    PROPERTY_TYPE,
+    PROPERTY_NAME,
   } );
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_FILE = new MetaverseLogicalIdGenerator( new String[] {
-      PROPERTY_PATH,
-      PROPERTY_NAMESPACE
+    PROPERTY_PATH,
+    PROPERTY_NAMESPACE
   } );
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_JDBC = new MetaverseLogicalIdGenerator( new String[] {
-      PROPERTY_TYPE,
-      PROPERTY_HOST_NAME,
-      PROPERTY_USER_NAME,
-      PROPERTY_PORT,
-      "accessTypeDesc"
+    PROPERTY_TYPE,
+    PROPERTY_HOST_NAME,
+    PROPERTY_USER_NAME,
+    PROPERTY_PORT,
+    "accessTypeDesc"
   } );
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_JNDI = new MetaverseLogicalIdGenerator( new String[] {
-      PROPERTY_TYPE,
-      PROPERTY_NAME,
-      "accessTypeDesc"
+    PROPERTY_TYPE,
+    PROPERTY_NAME,
+    "accessTypeDesc"
   } );
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_LOCATOR = new MetaverseLogicalIdGenerator( new String[] {
-      PROPERTY_TYPE,
-      PROPERTY_NAME
+    PROPERTY_TYPE,
+    PROPERTY_NAME
   } );
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DOCUMENT =
-      new MetaverseLogicalIdGenerator( new String[] {
-          PROPERTY_TYPE,
-          PROPERTY_PATH,
-          PROPERTY_NAMESPACE
-      } );
+    new MetaverseLogicalIdGenerator( new String[] {
+      PROPERTY_TYPE,
+      PROPERTY_PATH,
+      PROPERTY_NAMESPACE
+    } );
 
   /**
    * Hides the constructor so that this class cannot be instanced

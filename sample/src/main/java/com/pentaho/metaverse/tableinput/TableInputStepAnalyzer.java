@@ -18,15 +18,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The TableInputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
- * other metaverse entities
+ * The TableInputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and other
+ * metaverse entities
  */
 public class TableInputStepAnalyzer extends BaseStepAnalyzer<TableInputMeta> {
   private Logger log = LoggerFactory.getLogger( TableInputStepAnalyzer.class );
 
   @Override
   public IMetaverseNode analyze( IComponentDescriptor descriptor, TableInputMeta tableFileInputMeta )
-      throws MetaverseAnalyzerException {
+    throws MetaverseAnalyzerException {
 
     // do the common analysis for all step
     super.analyze( descriptor, tableFileInputMeta );
@@ -38,10 +38,10 @@ public class TableInputStepAnalyzer extends BaseStepAnalyzer<TableInputMeta> {
       for ( ValueMetaInterface fieldMeta : stepFieldValueMetas ) {
         String fieldName = fieldMeta.getName();
         IComponentDescriptor dbColumnDescriptor = new MetaverseComponentDescriptor(
-            fieldName,
-            DictionaryConst.NODE_TYPE_DATA_COLUMN,
-            new Namespace( fieldName ),
-            descriptor.getContext() );
+          fieldName,
+          DictionaryConst.NODE_TYPE_DATA_COLUMN,
+          new Namespace( fieldName ),
+          descriptor.getContext() );
         IMetaverseNode dbColumnNode = createNodeFromDescriptor( dbColumnDescriptor );
         metaverseBuilder.addNode( dbColumnNode );
 
