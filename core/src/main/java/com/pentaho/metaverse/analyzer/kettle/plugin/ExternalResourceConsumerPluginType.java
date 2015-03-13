@@ -48,7 +48,7 @@ public final class ExternalResourceConsumerPluginType extends BasePluginType imp
 
   /* Use the parent classloader to load classes from this package when loading an ExternalResourceConsumer plugin */
   private static final String[] PLUGIN_PACKAGE_PATTERNS = {
-    "com\\.pentaho\\.metaverse\\.analyzer\\.kettle\\.plugin.*",
+      "com\\.pentaho\\.metaverse\\.analyzer\\.kettle\\.plugin.*",
   };
 
   private static final ExternalResourceConsumerPluginType instance = new ExternalResourceConsumerPluginType();
@@ -155,12 +155,12 @@ public final class ExternalResourceConsumerPluginType extends BasePluginType imp
       }
     } catch ( Exception e ) {
       LogChannel.GENERAL.logError(
-        "Unexpected error searching for jar files in lib/ folder next to '" + jarFileUrl + "'", e );
+          "Unexpected error searching for jar files in lib/ folder next to '" + jarFileUrl + "'", e );
     }
 
     urls.add( jarFileUrl );
 
     return new KettleSelectiveParentFirstClassLoader(
-      urls.toArray( new URL[urls.size()] ), classLoader, PLUGIN_PACKAGE_PATTERNS );
+        urls.toArray( new URL[ urls.size() ] ), classLoader, PLUGIN_PACKAGE_PATTERNS );
   }
 }

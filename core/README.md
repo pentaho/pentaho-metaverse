@@ -72,7 +72,7 @@ mvn install -Denv=prod
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
-
+      
       <properties>
         <env>dev</env>
       </properties>
@@ -85,21 +85,20 @@ mvn install -Denv=prod
 
 This project follows the standard maven project layout
 ```
-pentaho-metaverse-ee
-├── core
-│   ├── src
-│   │   ├── assembly               # artifact assembly definition and resources
-│   │   │   └── resources
-│   │   ├── it                     # integration test code and resources
-│   │   │   ├── java
-│   │   │   └── resources
-│   │   ├── main                   # main code and resources
-│   │   │   ├── java
-│   │   │   └── resources
-│   │   ├── site
-│   │   └── test                   # unit test code and resources
-│   │       ├── java
-│   │       └── resources
-│   └── target                     # generated stuff (compiled classes, reports, assembled artifacts, ...)
+core
+├── src
+│   ├── assembly               # artifact assembly definition and resources
+│   │   └── resources
+│   ├── it                     # integration test code and resources
+│   │   ├── java
+│   │   └── resources
+│   ├── main                   # main code and resources
+│   │   ├── java
+│   │   └── resources
+│   ├── site
+│   └── test                   # unit test code and resources
+│       ├── java
+│       └── resources
+└── target                     # generated stuff (compiled classes, reports, assembled artifacts, ...)
 ```
 
