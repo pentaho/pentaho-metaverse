@@ -201,7 +201,7 @@
   <bean id="transOpened" scope="singleton" class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransOpenedExtensionPoint"/>
   <bean id="transOpenedPlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
     <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
-    <property name="name" value="TransformationMetaLoaded"/>
+    <property name="name" value="TransAfterOpen"/>
     <property name="ID" value="transOpenLineageGraph"/>
     <property name="description" value="Creates a lineage graph for the transformation on open"/>
     <property name="pluginTypeInterface" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
