@@ -31,6 +31,8 @@ public class TableInputStepAnalyzer extends BaseStepAnalyzer<TableInputMeta> {
     // do the common analysis for all step
     super.analyze( descriptor, tableFileInputMeta );
 
+    rootNode.setProperty( "query", tableFileInputMeta.getSQL() );
+
     // NOTE: We are assuming for this POC that the column name matches the stream field name, meaning
     // the Table Input SQL script doesn't use aliases, aggregates, etc.
     if ( stepFields != null ) {
