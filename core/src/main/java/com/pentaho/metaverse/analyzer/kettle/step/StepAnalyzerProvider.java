@@ -103,7 +103,11 @@ public class StepAnalyzerProvider extends BaseKettleMetaverseComponent implement
   @Override
   public void removeAnalyzer( IStepAnalyzer analyzer ) {
     if ( stepAnalyzers.contains( analyzer ) ) {
-      stepAnalyzers.remove( analyzer );
+      try {
+        stepAnalyzers.remove( analyzer );
+      } catch ( UnsupportedOperationException e ) {
+        // reference-list doesn't support remove
+      }
     }
     Set<Class<? extends BaseStepMeta>> types = analyzer.getSupportedSteps();
     if ( types != null ) {

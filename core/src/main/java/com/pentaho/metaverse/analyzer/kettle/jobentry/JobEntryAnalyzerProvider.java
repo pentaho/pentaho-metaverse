@@ -105,7 +105,11 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
   @Override
   public void removeAnalyzer( IJobEntryAnalyzer analyzer ) {
     if ( jobEntryAnalyzers.contains( analyzer ) ) {
-      jobEntryAnalyzers.remove( analyzer );
+      try {
+        jobEntryAnalyzers.remove( analyzer );
+      } catch ( UnsupportedOperationException e ) {
+        // reference-list doesn't support remove
+      }
     }
     Set<Class<? extends JobEntryInterface>> types = analyzer.getSupportedEntries();
     if ( types != null ) {
