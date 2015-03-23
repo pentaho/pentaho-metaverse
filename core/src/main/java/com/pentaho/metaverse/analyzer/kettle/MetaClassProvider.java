@@ -19,10 +19,13 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
+package com.pentaho.metaverse.analyzer.kettle;
 
-import org.pentaho.di.job.entry.JobEntryBase;
+/**
+ * MetaClassProvider is a helper interface that allows the users to retrieve a "metadata class" associated with the
+ * implementation.
+ */
+public interface MetaClassProvider<T> {
 
-public interface IJobEntryExternalResourceConsumer<T extends JobEntryBase>
-  extends IExternalResourceConsumer<T> {
+  Class<T> getMetaClass();
 }

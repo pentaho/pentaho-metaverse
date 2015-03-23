@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -21,11 +21,12 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IJobEntryExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
+import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.util.MetaverseBeanUtil;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
@@ -36,10 +37,11 @@ import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
+import java.util.Set;
 
 @ExtensionPoint(
   description = "Job entry external resource listener",
@@ -47,6 +49,7 @@ import java.util.Queue;
   id = "jobEntryExternalResource" )
 public class JobEntryExternalResourceConsumerListener implements ExtensionPointInterface {
 
+  private IJobEntryExternalResourceConsumerProvider jobEntryConsumerProvider;
 
   /**
    * This method is called by the Kettle code when a job entry is about to start
@@ -58,6 +61,10 @@ public class JobEntryExternalResourceConsumerListener implements ExtensionPointI
    */
   @Override
   public void callExtensionPoint( LogChannelInterface log, Object object ) throws KettleException {
+    if ( jobEntryConsumerProvider == null ) {
+      jobEntryConsumerProvider = (IJobEntryExternalResourceConsumerProvider)
+        MetaverseBeanUtil.getInstance().get( "IJobEntryExternalResourceConsumerProvider" );
+    }
     JobExecutionExtension jobExec = (JobExecutionExtension) object;
     JobEntryCopy jobEntryCopy = jobExec.jobEntryCopy;
     if ( jobEntryCopy != null ) {
@@ -65,29 +72,33 @@ public class JobEntryExternalResourceConsumerListener implements ExtensionPointI
       if ( meta != null ) {
         Class<?> metaClass = meta.getClass();
         if ( JobEntryBase.class.isAssignableFrom( metaClass ) ) {
-          @SuppressWarnings( "unchecked" )
-          Queue<IJobEntryExternalResourceConsumer> jobEntryConsumers =
-            ExternalResourceConsumerMap.getInstance().getJobEntryExternalResourceConsumers(
-              (Class<? extends JobEntryBase>) metaClass );
-          if ( jobEntryConsumers != null ) {
-            for ( IJobEntryExternalResourceConsumer jobEntryConsumer : jobEntryConsumers ) {
-              // We might know enough at this point, so call the consumer
-              Collection<IExternalResourceInfo> resources = jobEntryConsumer.getResourcesFromMeta( meta );
-              addExternalResources( resources, meta );
-              // Add a JobEntryListener to collect external resource info after a job entry has finished
-              if ( jobExec.job != null && jobEntryConsumer.isDataDriven( meta ) ) {
-                // Add the consumer as a resource listener, this is done to override the default impl
-                if ( jobEntryConsumer instanceof JobEntryExternalResourceListener ) {
-                  jobExec.job.addJobEntryListener( (JobEntryExternalResourceListener) jobEntryConsumer );
-                } else {
-                  jobExec.job.addJobEntryListener( new JobEntryExternalResourceListener() );
+          if ( jobEntryConsumerProvider != null ) {
+            // Put the class into a collection and get the consumers that can process this class
+            Set<Class<?>> metaClassSet = new HashSet<Class<?>>( 1 );
+            metaClassSet.add( metaClass );
+
+            List<IJobEntryExternalResourceConsumer> jobEntryConsumers =
+              jobEntryConsumerProvider.getExternalResourceConsumers( metaClassSet );
+            if ( jobEntryConsumers != null ) {
+              for ( IJobEntryExternalResourceConsumer jobEntryConsumer : jobEntryConsumers ) {
+                // We might know enough at this point, so call the consumer
+                Collection<IExternalResourceInfo> resources = jobEntryConsumer.getResourcesFromMeta( meta );
+                addExternalResources( resources, meta );
+                // Add a JobEntryListener to collect external resource info after a job entry has finished
+                if ( jobExec.job != null && jobEntryConsumer.isDataDriven( meta ) ) {
+                  // Add the consumer as a resource listener, this is done to override the default impl
+                  if ( jobEntryConsumer instanceof JobEntryExternalResourceListener ) {
+                    jobExec.job.addJobEntryListener( (JobEntryExternalResourceListener) jobEntryConsumer );
+                  } else {
+                    jobExec.job.addJobEntryListener( new JobEntryExternalResourceListener() );
+                  }
                 }
               }
-            }
-          } else {
-            // Add a JobEntryListener to collect external resource info after a job entry has finished
-            if ( jobExec.job != null ) {
-              jobExec.job.addJobEntryListener( new JobEntryExternalResourceListener() );
+            } else {
+              // Add a JobEntryListener to collect external resource info after a job entry has finished
+              if ( jobExec.job != null ) {
+                jobExec.job.addJobEntryListener( new JobEntryExternalResourceListener() );
+              }
             }
           }
         }
@@ -111,5 +122,9 @@ public class JobEntryExternalResourceConsumerListener implements ExtensionPointI
         resourceMap.put( jobEntryName, externalResources );
       }
     }
+  }
+
+  public void setJobEntryExternalResourceConsumerProvider( IJobEntryExternalResourceConsumerProvider provider ) {
+    this.jobEntryConsumerProvider = provider;
   }
 }

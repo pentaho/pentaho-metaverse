@@ -19,40 +19,11 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
+package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
-import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.trans.step.BaseStep;
-import org.pentaho.di.trans.step.BaseStepMeta;
+import com.pentaho.metaverse.analyzer.kettle.IExternalResourceConsumer;
+import org.pentaho.di.job.entry.JobEntryBase;
 
-import java.util.Collection;
-
-/**
- * Helper class to provide an implementation of IStepExternalResourceConsumer for testing
- */
-public class StepExternalResourceConsumerStub implements IStepExternalResourceConsumer {
-
-  @Override
-  public boolean isDataDriven( Object meta ) {
-    return false;
-  }
-
-  @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( Object meta ) {
-    return null;
-  }
-
-  @Override
-  public Class<?> getMetaClass() {
-    return BaseStepMeta.class;
-  }
-
-  @Override
-  public Collection<IExternalResourceInfo> getResourcesFromRow(
-    BaseStep consumer, RowMetaInterface rowMeta, Object[] row ) {
-
-    return null;
-  }
+public interface IJobEntryExternalResourceConsumer<T extends JobEntryBase>
+  extends IExternalResourceConsumer<T> {
 }

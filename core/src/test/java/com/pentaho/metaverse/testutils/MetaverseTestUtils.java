@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -22,6 +22,8 @@
 
 package com.pentaho.metaverse.testutils;
 
+import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.impl.MetaverseObjectFactory;
 import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
@@ -48,5 +50,17 @@ public class MetaverseTestUtils {
     when( documentController.getMetaverseObjectFactory() ).thenReturn( getMetaverseObjectFactory() );
     when( documentController.getMetaverseBuilder() ).thenReturn( metaverseBuilder );
     return documentController;
+  }
+
+  public static IStepExternalResourceConsumerProvider getStepExternalResourceConsumerProvider() {
+    IStepExternalResourceConsumerProvider provider = mock( IStepExternalResourceConsumerProvider.class );
+    // TODO
+    return provider;
+  }
+
+  public static IJobEntryExternalResourceConsumerProvider getJobEntryExternalResourceConsumerProvider() {
+    IJobEntryExternalResourceConsumerProvider provider = mock( IJobEntryExternalResourceConsumerProvider.class );
+    // TODO
+    return provider;
   }
 }

@@ -21,7 +21,7 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IJobEntryExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.job.entry.JobEntryBase;
 

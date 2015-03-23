@@ -1,7 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
+import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.job.entry.JobEntryBase;
 
 import java.util.Collection;

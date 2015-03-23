@@ -24,7 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
-import com.pentaho.metaverse.analyzer.kettle.IConnectionAnalyzer;
+import com.pentaho.metaverse.api.IConnectionAnalyzer;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginRegistry;

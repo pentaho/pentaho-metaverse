@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step.textfileoutput;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.apache.commons.vfs.FileObject;
@@ -43,10 +42,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
-@ExternalResourceConsumer(
-  id = "TextFileOutputExternalResourceConsumer",
-  name = "TextFileOutputExternalResourceConsumer"
-)
 public class TextFileOutputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<TextFileOutput, TextFileOutputMeta> {
 

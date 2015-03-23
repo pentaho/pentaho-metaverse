@@ -24,6 +24,7 @@ package com.pentaho.metaverse.impl.model.kettle.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.api.model.BaseResourceInfo;
@@ -62,9 +63,12 @@ import static org.mockito.Mockito.*;
 public class TransMetaJsonSerializerTest {
 
   TransMetaJsonSerializer serializer;
-  @Mock TransMeta transMeta;
-  @Mock JsonGenerator json;
-  @Mock SerializerProvider provider;
+  @Mock
+  TransMeta transMeta;
+  @Mock
+  JsonGenerator json;
+  @Mock
+  SerializerProvider provider;
 
   @BeforeClass
   public static void init() throws KettleException {
@@ -78,6 +82,14 @@ public class TransMetaJsonSerializerTest {
 
     when( transMeta.getName() ).thenReturn( "TestTransName" );
     when( transMeta.getDescription() ).thenReturn( "Trans description" );
+  }
+
+  @Test
+  public void testConstructors() {
+    serializer = new TransMetaJsonSerializer( TransMeta.class );
+    serializer = new TransMetaJsonSerializer( TransMeta.class, true );
+    serializer = new TransMetaJsonSerializer( TypeFactory.defaultInstance().uncheckedSimpleType( TransMeta.class ) );
+
   }
 
   @Test
@@ -98,7 +110,7 @@ public class TransMetaJsonSerializerTest {
 
   @Test
   public void testSerializeParams() throws Exception {
-    String[] params = new String[] { "param1", "param2", "invalid" };
+    String[] params = new String[]{ "param1", "param2", "invalid" };
 
     when( transMeta.listParameters() ).thenReturn( params );
     when( transMeta.getParameterDescription( "param1" ) ).thenReturn( "paramDescription" );
@@ -116,7 +128,7 @@ public class TransMetaJsonSerializerTest {
 
   @Test
   public void testSerializeVariables() throws Exception {
-    List<String> vars = new ArrayList<String>(){{
+    List<String> vars = new ArrayList<String>() {{
       add( "var1" );
       add( "var2" );
       add( "no value" );
@@ -144,7 +156,7 @@ public class TransMetaJsonSerializerTest {
     DummyTransMeta spyDummy2 = spy( new DummyTransMeta() );
     DummyTransMeta spyDummy3 = spy( new DummyTransMeta() );
 
-    List<StepMeta> steps = new ArrayList<StepMeta>(){{
+    List<StepMeta> steps = new ArrayList<StepMeta>() {{
       add( spyStep1 );
       add( spyStep2 );
       add( spyStep3 );
@@ -156,7 +168,7 @@ public class TransMetaJsonSerializerTest {
     when( spyStep3.getStepMetaInterface() ).thenReturn( spyDummy3 );
 
     doThrow( new KettleException() ).when( spyDummy3 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
-        any( ObjectId.class ), any( ObjectId.class ) );
+      any( ObjectId.class ), any( ObjectId.class ) );
 
     serializer.serializeSteps( transMeta, json );
 
@@ -165,9 +177,9 @@ public class TransMetaJsonSerializerTest {
     verify( spyDummy1 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
       any( ObjectId.class ), any( ObjectId.class ) );
     verify( spyDummy2 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
-        any( ObjectId.class ), any( ObjectId.class ) );
+      any( ObjectId.class ), any( ObjectId.class ) );
     verify( spyDummy3 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
-        any( ObjectId.class ), any( ObjectId.class ) );
+      any( ObjectId.class ), any( ObjectId.class ) );
 
     // make sure we are writing out each step
     verify( json ).writeObject( spyDummy1 );
@@ -180,7 +192,7 @@ public class TransMetaJsonSerializerTest {
     final DatabaseMeta db1 = spy( new DatabaseMeta() );
     final DatabaseMeta db2 = spy( new DatabaseMeta() );
 
-    List<DatabaseMeta> dbs = new ArrayList<DatabaseMeta>(){{
+    List<DatabaseMeta> dbs = new ArrayList<DatabaseMeta>() {{
       add( db1 );
       add( db2 );
     }};

@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step.csvfileinput;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.di.core.Const;
@@ -38,10 +37,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-@ExternalResourceConsumer(
-  id = "CsvFileInputExternalResourceConsumer",
-  name = "CsvFileInputExternalResourceConsumer"
-)
 public class CsvFileInputExternalResourceConsumer extends BaseStepExternalResourceConsumer<CsvInput, CsvInputMeta> {
 
   @Override

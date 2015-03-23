@@ -1,5 +1,6 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
+import com.pentaho.metaverse.api.IConnectionAnalyzer;
 import org.pentaho.di.core.database.DatabaseMeta;
 
 /**

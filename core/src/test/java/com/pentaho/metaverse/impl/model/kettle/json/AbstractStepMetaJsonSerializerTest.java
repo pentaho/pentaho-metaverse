@@ -25,8 +25,8 @@ package com.pentaho.metaverse.impl.model.kettle.json;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.step.StepExternalResourceConsumerProvider;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
@@ -53,12 +53,11 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.dummytrans.DummyTransMeta;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -211,8 +210,8 @@ public class AbstractStepMetaJsonSerializerTest {
 
   @Test
   public void testWriteExternalResources() throws Exception {
-    ExternalResourceConsumerMap mockConsumerMap = mock( ExternalResourceConsumerMap.class );
-    Queue<IStepExternalResourceConsumer> consumers = new ConcurrentLinkedQueue<IStepExternalResourceConsumer>();
+    StepExternalResourceConsumerProvider mockConsumerMap = mock( StepExternalResourceConsumerProvider.class );
+    List<IStepExternalResourceConsumer> consumers = new ArrayList<IStepExternalResourceConsumer>();
     Set<IExternalResourceInfo> externalResources = new HashSet<IExternalResourceInfo>();
 
     IExternalResourceInfo info = mock( IExternalResourceInfo.class );
@@ -223,14 +222,13 @@ public class AbstractStepMetaJsonSerializerTest {
     consumers.add( consumer );
 
     Class<? extends BaseStepMeta> stepMetaClass = BaseStepMeta.class;
-    when( mockConsumerMap.getStepExternalResourceConsumers( any( stepMetaClass.getClass() ) ) ).thenReturn(
-      consumers );
+    when( mockConsumerMap.getExternalResourceConsumers( any( Collection.class ) ) ).thenReturn( consumers );
 
-    serializer.setExternalResourceConsumerMap( mockConsumerMap );
+    serializer.setStepExternalResourceConsumerProvider( mockConsumerMap );
 
     serializer.writeExternalResources( spyMeta, json, provider );
 
-    verify( mockConsumerMap ).getStepExternalResourceConsumers( any( stepMetaClass.getClass() ) );
+    verify( mockConsumerMap ).getExternalResourceConsumers( any( Collection.class ) );
     verify( json ).writeArrayFieldStart( AbstractStepMetaJsonSerializer.JSON_PROPERTY_EXTERNAL_RESOURCES );
     verify( consumer ).getResourcesFromMeta( anyObject() );
     verify( json, times( externalResources.size() ) ).writeObject( any( IExternalResourceInfo.class ) );

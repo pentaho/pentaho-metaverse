@@ -25,7 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.step;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.IConnectionAnalyzer;
+import com.pentaho.metaverse.api.IConnectionAnalyzer;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.api.Namespace;

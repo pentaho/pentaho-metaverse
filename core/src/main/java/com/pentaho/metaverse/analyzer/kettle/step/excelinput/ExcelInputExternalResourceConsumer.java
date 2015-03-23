@@ -39,14 +39,9 @@ import org.pentaho.di.trans.steps.excelinput.ExcelInput;
 import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 
-@ExternalResourceConsumer(
-  id = "ExcelInputExternalResourceConsumer",
-  name = "ExcelInputExternalResourceConsumer"
-)
 public class ExcelInputExternalResourceConsumer extends BaseStepExternalResourceConsumer<ExcelInput, ExcelInputMeta> {
 
   @Override

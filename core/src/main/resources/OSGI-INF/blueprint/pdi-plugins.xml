@@ -9,193 +9,6 @@
              http://cxf.apache.org/blueprint/core http://cxf.apache.org/schemas/blueprint/core.xsd
              ">
 
-  <!-- Register a new plugin type, ExternalResourceConsumer -->
-  <bean id="externalResourceConsumerPluginRegistrar" scope="singleton"
-        class="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar"/>
-  <bean id="externalResourceConsumerPluginRegistrarPlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
-    <property name="mainType" value="org.pentaho.di.core.plugins.PluginRegistryExtension"/>
-    <property name="name" value="ExternalResourceConsumerPlugin"/>
-    <property name="ID" value="ExternalResourceConsumerPlugin"/>
-    <property name="pluginTypeInterface" value="org.pentaho.di.core.plugins.PluginRegistryPluginType"/>
-    <property name="description" value=""/>
-    <property name="category" value="Data Lineage"/>
-    <property name="classToBeanMap">
-      <map>
-        <entry key="org.pentaho.di.core.plugins.PluginRegistryExtension"
-               value="externalResourceConsumerPluginRegistrar"/>
-      </map>
-    </property>
-  </bean>
-  <!-- Register the plugin as a service so Kettle can find it -->
-  <service id="externalResourceConsumerPluginRegistrarPluginService"
-           interface="org.pentaho.di.core.plugins.PluginInterface"
-           ref="externalResourceConsumerPluginRegistrarPlugin">
-    <service-properties>
-      <entry key="PluginType" value="org.pentaho.di.core.plugins.PluginRegistryPluginType"/>
-    </service-properties>
-  </service>
-
-  <!-- Configure individual resource consumers -->
-
-  <bean id="csvInputERC" scope="singleton"
-        class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
-  <bean id="csvInputERCPlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
-    <property name="mainType" value="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"/>
-    <property name="name" value="CsvFileInputExternalResourceConsumer"/>
-    <property name="ID" value="CsvFileInputExternalResourceConsumer"/>
-    <property name="description" value=""/>
-    <property name="pluginTypeInterface" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    <property name="category" value="Data Lineage"/>
-    <property name="classToBeanMap">
-      <map>
-        <entry key="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"
-             value="csvInputERC"/>
-      </map>
-    </property>
-  </bean>
-  
-  <!-- Register the plugin as a service so Kettle can find it -->
-  <service id="csvInputERCPluginService"
-           interface="org.pentaho.di.core.plugins.PluginInterface"
-           ref="csvInputERCPlugin">
-    <service-properties>
-      <entry key="PluginType" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    </service-properties>
-  </service>
-  
-  <!-- Excel Input plugin -->
-  <bean id="excelInputERC" scope="singleton"
-        class="com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputExternalResourceConsumer"/>
-  <bean id="excelInputERCPlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
-    <property name="mainType" value="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"/>
-    <property name="name" value="ExcelInputExternalResourceConsumer"/>
-    <property name="ID" value="ExcelInputExternalResourceConsumer"/>
-    <property name="description" value=""/>
-    <property name="pluginTypeInterface" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    <property name="category" value="Data Lineage"/>
-    <property name="classToBeanMap">
-      <map>
-        <entry key="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"
-             value="excelInputERC"/>
-      </map>
-    </property>
-  </bean>
-     
-  <!-- Register the plugin as a service so Kettle can find it -->
-  <service id="excelInputERCPluginService"
-           interface="org.pentaho.di.core.plugins.PluginInterface"
-           ref="excelInputERCPlugin">
-    <service-properties>
-      <entry key="PluginType" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    </service-properties>
-  </service>
-
-  <!-- Excel Output plugin -->
-  <bean id="excelOutputERC" scope="singleton"
-        class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputExternalResourceConsumer"/>
-  <bean id="excelOutputERCPlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
-    <property name="mainType" value="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"/>
-    <property name="name" value="ExcelInputExternalResourceConsumer"/>
-    <property name="ID" value="ExcelInputExternalResourceConsumer"/>
-    <property name="description" value=""/>
-    <property name="pluginTypeInterface" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    <property name="category" value="Data Lineage"/>
-    <property name="classToBeanMap">
-      <map>
-        <entry key="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"
-               value="excelOutputERC"/>
-      </map>
-    </property>
-  </bean>
-
-  <!-- Register the plugin as a service so Kettle can find it -->
-  <service id="excelOutputERCPluginService"
-           interface="org.pentaho.di.core.plugins.PluginInterface"
-           ref="excelOutputERCPlugin">
-    <service-properties>
-      <entry key="PluginType" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    </service-properties>
-  </service>
-
-  <!-- TableOutput external resource consumer -->
-  <bean id="tableOutputERC" scope="singleton"
-        class="com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer"/>
-  <bean id="tableOutputERCPlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
-    <property name="mainType" value="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"/>
-    <property name="name" value="TableOutputExternalResourceConsumer"/>
-    <property name="ID" value="TableOutputExternalResourceConsumer"/>
-    <property name="description" value=""/>
-    <property name="pluginTypeInterface" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    <property name="category" value="Data Lineage"/>
-    <property name="classToBeanMap">
-      <map>
-        <entry key="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"
-               value="tableOutputERC"/>
-      </map>
-    </property>
-  </bean>
-  <!-- Register the plugin as a service so Kettle can find it -->
-  <service id="tableOutputERCPluginService"
-           interface="org.pentaho.di.core.plugins.PluginInterface"
-           ref="tableOutputERCPlugin">
-    <service-properties>
-      <entry key="PluginType" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    </service-properties>
-  </service>
-
-  <!-- TextFileInput external resource consumer -->
-  <bean id="textFileInputERC" scope="singleton"
-        class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer"/>
-  <bean id="textFileInputERCPlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
-    <property name="mainType" value="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"/>
-    <property name="name" value="TextFileInputExternalResourceConsumer"/>
-    <property name="ID" value="TextFileInputExternalResourceConsumer"/>
-    <property name="description" value=""/>
-    <property name="pluginTypeInterface" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    <property name="category" value="Data Lineage"/>
-    <property name="classToBeanMap">
-      <map>
-        <entry key="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"
-               value="textFileInputERC"/>
-      </map>
-    </property>
-  </bean>
-  <!-- Register the plugin as a service so Kettle can find it -->
-  <service id="textFileInputERCPluginService"
-           interface="org.pentaho.di.core.plugins.PluginInterface"
-           ref="textFileInputERCPlugin">
-    <service-properties>
-      <entry key="PluginType" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    </service-properties>
-  </service>
-
-  <!-- TextFileOutput external resource consumer -->
-  <bean id="textFileOutputERC" scope="singleton"
-        class="com.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputExternalResourceConsumer"/>
-  <bean id="textFileOutputERCPlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
-    <property name="mainType" value="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"/>
-    <property name="name" value="TextFileOutputExternalResourceConsumer"/>
-    <property name="ID" value="TextFileOutputExternalResourceConsumer"/>
-    <property name="description" value=""/>
-    <property name="pluginTypeInterface" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    <property name="category" value="Data Lineage"/>
-    <property name="classToBeanMap">
-      <map>
-        <entry key="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"
-               value="textFileOutputERC"/>
-      </map>
-    </property>
-  </bean>
-  <!-- Register the plugin as a service so Kettle can find it -->
-  <service id="textFileOutputERCPluginService"
-           interface="org.pentaho.di.core.plugins.PluginInterface"
-           ref="textFileOutputERCPlugin">
-    <service-properties>
-      <entry key="PluginType" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    </service-properties>
-  </service>
-
-
   <!-- Extension Points -->
   <!-- TransOpened extension point -->
   <bean id="transOpened" scope="singleton" class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransOpenedExtensionPoint"/>
@@ -286,7 +99,9 @@
   <!-- StepExternalResourceConsumerListener extension point -->
   <bean id="stepExternalResourceConsumerListener"
         scope="singleton"
-        class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExternalResourceConsumerListener"/>
+        class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExternalResourceConsumerListener">
+    <property name="stepExternalResourceConsumerProvider" ref="IStepExternalResourceConsumerProvider"/>
+  </bean>
   <bean id="stepExternalResourceConsumerListenerPlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
     <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
     <property name="name" value="StepBeforeStart"/>
@@ -305,31 +120,6 @@
            ref="stepExternalResourceConsumerListenerPlugin">
     <service-properties>
       <entry key="PluginType" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
-    </service-properties>
-  </service>
-
-  <bean id="metaverseKettleLifeCycle"
-        class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.MetaverseKettleLifecycleHandler" scope="singleton"/>
-  <bean id="metaverseKettleLifeCyclePlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
-    <property name="mainType" value="org.pentaho.di.core.lifecycle.KettleLifecycleListener"/>
-    <property name="name" value="MetaverseKettleLifecycleHandler"/>
-    <property name="ID" value="MetaverseKettleLifecycleHandler"/>
-    <property name="description" value=""/>
-    <property name="pluginTypeInterface" value="org.pentaho.di.core.plugins.KettleLifecyclePluginType"/>
-    <property name="category" value="Data Lineage"/>
-    <property name="classToBeanMap">
-      <map>
-        <entry key="org.pentaho.di.core.lifecycle.KettleLifecycleListener"
-               value="metaverseKettleLifeCycle"/>
-      </map>
-    </property>
-  </bean>
-  <!-- Register the plugin as a service so Kettle can find it -->
-  <service id="metaverseKettleLifeCyclePluginService"
-           interface="org.pentaho.di.core.plugins.PluginInterface"
-           ref="metaverseKettleLifeCyclePlugin">
-    <service-properties>
-      <entry key="PluginType" value="org.pentaho.di.core.plugins.KettleLifecyclePluginType"/>
     </service-properties>
   </service>
 </blueprint>

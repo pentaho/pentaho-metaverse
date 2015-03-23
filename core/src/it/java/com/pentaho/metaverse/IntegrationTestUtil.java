@@ -89,7 +89,7 @@ public class IntegrationTestUtil {
 
       Thread.currentThread().setContextClassLoader( MetaverseUtil.class.getClassLoader() );
       IPentahoObjectFactory pentahoObjectFactory = new StandaloneSpringPentahoObjectFactory();
-      pentahoObjectFactory.init( solutionPath, PentahoSystem.getApplicationContext() );
+      pentahoObjectFactory.init( solutionPath,PentahoSystem.getApplicationContext() );
       PentahoSystem.registerObjectFactory( pentahoObjectFactory );
 
       // Restore context classloader
