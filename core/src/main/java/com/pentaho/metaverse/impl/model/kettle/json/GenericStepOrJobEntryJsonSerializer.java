@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -27,7 +27,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
+import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 
 import java.io.IOException;
@@ -42,7 +43,8 @@ public abstract class GenericStepOrJobEntryJsonSerializer<T> extends StdSerializ
   public static final String JSON_PROPERTY_EXTERNAL_RESOURCES = "externalResources";
 
   private LineageRepository lineageRepository;
-  private ExternalResourceConsumerMap map = ExternalResourceConsumerMap.getInstance();
+  private IStepExternalResourceConsumerProvider stepConsumerProvider;
+  private IJobEntryExternalResourceConsumerProvider jobEntryConsumerProvider;
 
   public GenericStepOrJobEntryJsonSerializer( Class<T> aClass ) {
     super( aClass );
@@ -64,12 +66,21 @@ public abstract class GenericStepOrJobEntryJsonSerializer<T> extends StdSerializ
     this.lineageRepository = repo;
   }
 
-  protected ExternalResourceConsumerMap getExternalResourceConsumerMap() {
-    return map;
+  public IStepExternalResourceConsumerProvider getStepExternalResourceConsumerProvider() {
+    return stepConsumerProvider;
   }
 
-  protected void setExternalResourceConsumerMap( ExternalResourceConsumerMap map ) {
-    this.map = map;
+  public void setStepExternalResourceConsumerProvider( IStepExternalResourceConsumerProvider stepConsumerProvider ) {
+    this.stepConsumerProvider = stepConsumerProvider;
+  }
+
+  public IJobEntryExternalResourceConsumerProvider getJobEntryExternalResourceConsumerProvider() {
+    return jobEntryConsumerProvider;
+  }
+
+  public void setJobEntryExternalResourceConsumerProvider(
+    IJobEntryExternalResourceConsumerProvider jobEntryConsumerProvider ) {
+    this.jobEntryConsumerProvider = jobEntryConsumerProvider;
   }
 
   @Override

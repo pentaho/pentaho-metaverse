@@ -1,4 +1,4 @@
-/*!
+/*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
@@ -19,23 +19,38 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
+
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.trans.step.BaseStep;
+import com.pentaho.metaverse.analyzer.kettle.step.StepExternalResourceConsumerProvider;
+import org.junit.Before;
+import org.junit.Test;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- * IStepExternalResourceConsumer is a helper interface used by ExternalResourceConsumer plugins that handle a single
- * PDI step type (see the parameterized type in declaration)
- *
- * @param <M> The type of step that will consume external resources
- */
-public interface IStepExternalResourceConsumer<S extends BaseStep, M extends BaseStepMeta>
-  extends IExternalResourceConsumer<M> {
+import static org.junit.Assert.*;
 
-  Collection<IExternalResourceInfo> getResourcesFromRow( S consumer, RowMetaInterface rowMeta, Object[] row );
+public class StepExternalResourceConsumerProviderTest {
+
+  StepExternalResourceConsumerProvider stepExternalResourceConsumerProvider;
+
+  @Before
+  public void setUp() throws Exception {
+    stepExternalResourceConsumerProvider = new StepExternalResourceConsumerProvider();
+  }
+
+  @Test
+  public void testGetInstance() throws Exception {
+    assertNotNull( stepExternalResourceConsumerProvider );
+  }
+
+  @Test
+  public void testGetStepExternalResourceConsumers() throws Exception {
+    Set<Class<?>> metaClassSet = new HashSet<Class<?>>( 1 );
+    metaClassSet.add( BaseStepMeta.class );
+    assertNotNull( stepExternalResourceConsumerProvider.getExternalResourceConsumers( metaClassSet ) );
+  }
+
 }

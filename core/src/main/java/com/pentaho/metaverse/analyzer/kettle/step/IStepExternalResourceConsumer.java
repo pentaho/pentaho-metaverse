@@ -19,19 +19,24 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
+import com.pentaho.metaverse.analyzer.kettle.IExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.trans.step.BaseStep;
+import org.pentaho.di.trans.step.BaseStepMeta;
 
 import java.util.Collection;
 
 /**
- * The IExternalResourceConsumer interface allows consumers of external resources to report the usages to those that
- * are interested.
+ * IStepExternalResourceConsumer is a helper interface used by ExternalResourceConsumer plugins that handle a single
+ * PDI step type (see the parameterized type in declaration)
+ *
+ * @param <M> The type of step that will consume external resources
  */
-public interface IExternalResourceConsumer<T> extends MetaClassProvider<T>, Cloneable {
+public interface IStepExternalResourceConsumer<S extends BaseStep, M extends BaseStepMeta>
+  extends IExternalResourceConsumer<M> {
 
-  boolean isDataDriven( T consumer );
-
-  Collection<IExternalResourceInfo> getResourcesFromMeta( T consumer );
+  Collection<IExternalResourceInfo> getResourcesFromRow( S consumer, RowMetaInterface rowMeta, Object[] row );
 }

@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -39,11 +39,9 @@ import org.pentaho.di.trans.steps.exceloutput.ExcelOutput;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 
-@ExternalResourceConsumer( id = "ExcelOutputExternalResourceConsumer", name = "ExcelOutputExternalResourceConsumer" )
 public class ExcelOutputExternalResourceConsumer extends BaseStepExternalResourceConsumer<ExcelOutput, ExcelOutputMeta> {
 
   @Override

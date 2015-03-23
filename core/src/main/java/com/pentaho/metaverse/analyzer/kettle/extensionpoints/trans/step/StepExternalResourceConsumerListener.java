@@ -21,11 +21,12 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
 
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.util.MetaverseBeanUtil;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
@@ -36,10 +37,11 @@ import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
+import java.util.Set;
 
 @ExtensionPoint(
   description = "Step external resource listener",
@@ -47,6 +49,7 @@ import java.util.Queue;
   id = "stepExternalResource" )
 public class StepExternalResourceConsumerListener implements ExtensionPointInterface {
 
+  private IStepExternalResourceConsumerProvider stepConsumerProvider;
 
   /**
    * This method is called by the Kettle code when a step is about to start
@@ -58,6 +61,10 @@ public class StepExternalResourceConsumerListener implements ExtensionPointInter
    */
   @Override
   public void callExtensionPoint( LogChannelInterface log, Object object ) throws KettleException {
+    if ( stepConsumerProvider == null ) {
+      stepConsumerProvider = (IStepExternalResourceConsumerProvider)
+        MetaverseBeanUtil.getInstance().get( "IStepExternalResourceConsumerProvider" );
+    }
     StepMetaDataCombi stepCombi = (StepMetaDataCombi) object;
     if ( stepCombi != null ) {
       StepMetaInterface meta = stepCombi.meta;
@@ -66,20 +73,24 @@ public class StepExternalResourceConsumerListener implements ExtensionPointInter
       if ( meta != null ) {
         Class<?> metaClass = meta.getClass();
         if ( BaseStepMeta.class.isAssignableFrom( metaClass ) ) {
-          @SuppressWarnings( "unchecked" )
-          Queue<IStepExternalResourceConsumer> stepConsumers =
-            ExternalResourceConsumerMap.getInstance().getStepExternalResourceConsumers(
-              (Class<? extends BaseStepMeta>) metaClass );
-          if ( stepConsumers != null ) {
-            for ( IStepExternalResourceConsumer stepConsumer : stepConsumers ) {
-              // We might know enough at this point, so call the consumer
-              Collection<IExternalResourceInfo> resources = stepConsumer.getResourcesFromMeta( meta );
-              addExternalResources( resources, step );
+          if ( stepConsumerProvider != null ) {
+            // Put the class into a collection and get the consumers that can process this class
+            Set<Class<?>> metaClassSet = new HashSet<Class<?>>( 1 );
+            metaClassSet.add( metaClass );
 
-              // Add a RowListener if the step is data-driven
-              if ( stepConsumer.isDataDriven( meta ) ) {
-                stepCombi.step.addRowListener(
-                  new StepExternalConsumerRowListener( stepConsumer, step ) );
+            List<IStepExternalResourceConsumer> stepConsumers =
+              stepConsumerProvider.getExternalResourceConsumers( metaClassSet );
+            if ( stepConsumers != null ) {
+              for ( IStepExternalResourceConsumer stepConsumer : stepConsumers ) {
+                // We might know enough at this point, so call the consumer
+                Collection<IExternalResourceInfo> resources = stepConsumer.getResourcesFromMeta( meta );
+                addExternalResources( resources, step );
+
+                // Add a RowListener if the step is data-driven
+                if ( stepConsumer.isDataDriven( meta ) ) {
+                  stepCombi.step.addRowListener(
+                    new StepExternalConsumerRowListener( stepConsumer, step ) );
+                }
               }
             }
           }
@@ -104,5 +115,9 @@ public class StepExternalResourceConsumerListener implements ExtensionPointInter
         resourceMap.put( stepName, externalResources );
       }
     }
+  }
+
+  public void setStepExternalResourceConsumerProvider( IStepExternalResourceConsumerProvider provider ) {
+    this.stepConsumerProvider = provider;
   }
 }

@@ -113,7 +113,6 @@ public class TextFileOutputStepAnalyzerTest {
     analyzer.setMetaverseBuilder( mockBuilder );
     descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
 
-    when( mockTextFileOutput.getStepMetaInterface() ).thenReturn( mockTextFileOutputMeta );
     when( mockTextFileOutput.getStepDataInterface() ).thenReturn( mockTextFileOutputData );
     when( mockTextFileOutput.getStepMeta() ).thenReturn( mockStepMeta );
     when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockTextFileOutputMeta );

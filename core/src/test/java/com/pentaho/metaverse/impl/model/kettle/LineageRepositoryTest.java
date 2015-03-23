@@ -79,7 +79,6 @@ public class LineageRepositoryTest {
 
     repo.stepFieldCache.put( stepId, stepFields );
     repo.stepAttributeCache.put( stepId, attrs );
-
   }
 
   @Test

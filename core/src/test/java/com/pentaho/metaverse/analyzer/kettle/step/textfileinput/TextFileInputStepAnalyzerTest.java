@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -71,6 +71,9 @@ public class TextFileInputStepAnalyzerTest {
   private TextFileInputMeta mockTextFileInputMeta;
 
   @Mock
+  private StepMeta mockStepMeta;
+
+  @Mock
   private TransMeta mockTransMeta;
 
   @Mock
@@ -98,6 +101,8 @@ public class TextFileInputStepAnalyzerTest {
     descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
 
     when( mockTextFileInput.getStepMetaInterface() ).thenReturn( mockTextFileInputMeta );
+    when( mockTextFileInput.getStepMeta() ).thenReturn( mockStepMeta );
+    when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockTextFileInputMeta );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )

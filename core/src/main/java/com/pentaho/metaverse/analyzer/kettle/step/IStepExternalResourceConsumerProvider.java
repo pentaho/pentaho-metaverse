@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -19,40 +19,14 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.trans.step.BaseStep;
-import org.pentaho.di.trans.step.BaseStepMeta;
+package com.pentaho.metaverse.analyzer.kettle.step;
 
-import java.util.Collection;
+import com.pentaho.metaverse.api.IExternalResourceConsumerProvider;
 
 /**
- * Helper class to provide an implementation of IStepExternalResourceConsumer for testing
+ * This is a marker interface for external resource consumer providers that provide StepExternalResourceConsumers.
  */
-public class StepExternalResourceConsumerStub implements IStepExternalResourceConsumer {
-
-  @Override
-  public boolean isDataDriven( Object meta ) {
-    return false;
-  }
-
-  @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( Object meta ) {
-    return null;
-  }
-
-  @Override
-  public Class<?> getMetaClass() {
-    return BaseStepMeta.class;
-  }
-
-  @Override
-  public Collection<IExternalResourceInfo> getResourcesFromRow(
-    BaseStep consumer, RowMetaInterface rowMeta, Object[] row ) {
-
-    return null;
-  }
+public interface IStepExternalResourceConsumerProvider extends
+  IExternalResourceConsumerProvider<IStepExternalResourceConsumer> {
 }

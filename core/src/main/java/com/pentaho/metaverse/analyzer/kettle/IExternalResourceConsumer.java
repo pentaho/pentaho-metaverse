@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -19,13 +19,19 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
+package com.pentaho.metaverse.analyzer.kettle;
+
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+
+import java.util.Collection;
 
 /**
- * MetaClassProvider is a helper interface that allows the users to retrieve a "metadata class" associated with the
- * implementation.
+ * The IExternalResourceConsumer interface allows consumers of external resources to report the usages to those that
+ * are interested.
  */
-public interface MetaClassProvider<T> {
+public interface IExternalResourceConsumer<T> extends MetaClassProvider<T>, Cloneable {
 
-  Class<T> getMetaClass();
+  boolean isDataDriven( T consumer );
+
+  Collection<IExternalResourceInfo> getResourcesFromMeta( T consumer );
 }

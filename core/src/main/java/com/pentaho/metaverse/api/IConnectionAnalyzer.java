@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -19,31 +19,24 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.plugin;
+package com.pentaho.metaverse.api;
 
-import org.pentaho.di.core.plugins.PluginRegistry;
-import org.pentaho.di.core.plugins.PluginRegistryExtension;
-import org.pentaho.di.core.plugins.PluginTypeInterface;
-import org.pentaho.di.core.plugins.RegistryPlugin;
 
-@RegistryPlugin(
-    id = "ExternalResourceConsumerPlugin",
-    name = "ExternalResourceConsumerPlugin",
-    description = "Registers plugins that report usage of external resources (files, e.g.)" )
-public class ExternalResourceConsumerPluginRegistrar implements PluginRegistryExtension {
+import org.pentaho.platform.api.metaverse.IAnalyzer;
+import org.pentaho.platform.api.metaverse.IComponentDescriptor;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
-  @Override
-  public String getPluginId( Class<? extends PluginTypeInterface> arg0, Object arg1 ) {
-    return null;
-  }
+import java.util.List;
 
-  @Override
-  public void init( PluginRegistry pluginRegistry ) {
-    PluginRegistry.addPluginType( ExternalResourceConsumerPluginType.getInstance() );
-  }
+/**
+ * Defines Analyzers responsible for handling external connections
+ * @param <T> Object (connection) type to analyze
+ * @param <S> Type of object to get the used connection objects from
+ */
+public interface IConnectionAnalyzer<T, S> extends IAnalyzer<IMetaverseNode, T> {
 
-  @Override
-  public void searchForType( PluginTypeInterface pluginTypeInterface ) {
-  }
+  public List<T> getUsedConnections( S meta );
+
+  public IComponentDescriptor buildComponentDescriptor( IComponentDescriptor parentDescriptor, T connection );
 
 }

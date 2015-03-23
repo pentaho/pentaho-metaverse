@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -21,12 +21,13 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IJobEntryExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryExternalResourceConsumerProvider;
+import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.pentaho.di.job.Job;
@@ -38,9 +39,9 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,6 +52,8 @@ public class JobEntryExternalResourceConsumerListenerTest {
   public void testCallJobEntryExtensionPoint() throws Exception {
     JobEntryExternalResourceConsumerListener jobEntryExtensionPoint =
       new JobEntryExternalResourceConsumerListener();
+    jobEntryExtensionPoint.setJobEntryExternalResourceConsumerProvider(
+      MetaverseTestUtils.getJobEntryExternalResourceConsumerProvider() );
     JobExecutionExtension jobExec = mock( JobExecutionExtension.class );
     JobEntryBase jobEntryBase = mock( JobEntryBase.class, withSettings().extraInterfaces( JobEntryInterface.class ) );
     JobEntryInterface jobEntryInterface = (JobEntryInterface) jobEntryBase;
@@ -60,11 +63,12 @@ public class JobEntryExternalResourceConsumerListenerTest {
     jobEntryExtensionPoint.callExtensionPoint( null, jobExec );
 
     // Adda consumer
-    Map<Class<? extends JobEntryBase>, Queue<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap =
-      ExternalResourceConsumerMap.getInstance().getJobEntryConsumerMap();
-    Queue<IJobEntryExternalResourceConsumer> consumers = new ConcurrentLinkedQueue<IJobEntryExternalResourceConsumer>();
+    Map<Class<? extends JobEntryBase>, Set<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap =
+      new JobEntryExternalResourceConsumerProvider().getJobEntryConsumerMap();
+    Set<IJobEntryExternalResourceConsumer> consumers = new HashSet<IJobEntryExternalResourceConsumer>();
     jobEntryConsumerMap.put( jobEntryBase.getClass(), consumers );
     jobEntryExtensionPoint.callExtensionPoint( null, jobExec );
+
 
     IJobEntryExternalResourceConsumer consumer = mock( IJobEntryExternalResourceConsumer.class );
     when( consumer.getResourcesFromMeta( Mockito.any() ) ).thenReturn( Collections.emptyList() );

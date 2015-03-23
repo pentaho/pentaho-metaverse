@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -19,32 +19,14 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.plugin;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
-@Documented
-@Retention( RetentionPolicy.RUNTIME )
-@Target( ElementType.TYPE )
-public @interface ExternalResourceConsumer {
-  String id();
+import com.pentaho.metaverse.api.IExternalResourceConsumerProvider;
 
-  String name() default "";
-
-  String description() default "";
-
-  String version() default "";
-
-  int category() default -1;
-
-  String categoryDescription() default "";
-
-  String i18nPackageName() default "";
-
-  String classLoaderGroup() default "";
-
+/**
+ * This is a marker interface for external resource consumer providers that provide JobEntryExternalResourceConsumers.
+ */
+public interface IJobEntryExternalResourceConsumerProvider extends
+  IExternalResourceConsumerProvider<IJobEntryExternalResourceConsumer> {
 }

@@ -28,10 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.MetaverseKettleLifecycleHandler;
-import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
-import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
+import com.pentaho.metaverse.analyzer.kettle.IExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer;
@@ -40,6 +37,7 @@ import com.pentaho.metaverse.impl.model.kettle.json.AbstractStepMetaJsonSerializ
 import com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.JobEntryBaseJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.JobMetaJsonSerializer;
+import com.pentaho.metaverse.impl.model.kettle.json.KettleObjectMapper;
 import com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonDeserializer;
 import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonSerializer;
@@ -56,6 +54,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +62,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 /**
@@ -70,109 +70,16 @@ import static org.mockito.Mockito.*;
  */
 public class JsonLineageIT {
 
-  private ObjectMapper mapper;
+  private KettleObjectMapper mapper;
 
   @BeforeClass
   public static void init() throws Exception {
     IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution/system/pentahoObjects.spring.xml" );
-
-    PluginRegistry registry = PluginRegistry.getInstance();
-    MetaverseKettleLifecycleHandler metaverseKettleLifecycleHandler = new MetaverseKettleLifecycleHandler();
-
-    ExternalResourceConsumerPluginRegistrar registrar = new ExternalResourceConsumerPluginRegistrar();
-    registrar.init( registry );
-    PluginRegistry.init();
-
-    TextFileInputExternalResourceConsumer tfiConsumer = new TextFileInputExternalResourceConsumer();
-    TableOutputExternalResourceConsumer toConsumer = new TableOutputExternalResourceConsumer();
-    CsvFileInputExternalResourceConsumer csviConsumer = new CsvFileInputExternalResourceConsumer();
-
-    // Create a fake plugin to exercise the map building logic for Text File Input
-    PluginInterface mockPlugin = mock( PluginInterface.class );
-    when( mockPlugin.getIds() ).thenReturn( new String[]{ "TextFileInputExternalResourceConsumer" } );
-    when( mockPlugin.getName() ).thenReturn( "TextFileInputExternalResourceConsumer" );
-    Map<Class<?>, String> classMap = new HashMap<Class<?>, String>();
-    classMap.put( IExternalResourceConsumer.class, tfiConsumer.getClass().getName() );
-
-    doReturn( IExternalResourceConsumer.class ).when( mockPlugin ).getMainType();
-    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockPlugin );
-
-    // Then add a class to the map to get through plugin registration
-    when( mockPlugin.getClassMap() ).thenReturn( classMap );
-
-    // Create a fake plugin to exercise the map building logic for Table Output
-    PluginInterface mockPlugin2 = mock( PluginInterface.class );
-    when( mockPlugin2.getIds() ).thenReturn( new String[]{ "TableOutputExternalResourceConsumer" } );
-    when( mockPlugin2.getName() ).thenReturn( "TableOutputExternalResourceConsumer" );
-    Map<Class<?>, String> classMap2 = new HashMap<Class<?>, String>();
-    classMap2.put( IExternalResourceConsumer.class, toConsumer.getClass().getName() );
-
-    doReturn( IExternalResourceConsumer.class ).when( mockPlugin2 ).getMainType();
-    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockPlugin2 );
-
-    // Then add a class to the map to get through plugin registration
-    when( mockPlugin2.getClassMap() ).thenReturn( classMap2 );
-
-    // Create a fake plugin to exercise the map building logic for CSV Input
-    PluginInterface mockPlugin3 = mock( PluginInterface.class );
-    when( mockPlugin3.getIds() ).thenReturn( new String[]{ "CsvFileInputExternalResourceConsumer" } );
-    when( mockPlugin3.getName() ).thenReturn( "CsvFileInputExternalResourceConsumer" );
-    Map<Class<?>, String> classMap3 = new HashMap<Class<?>, String>();
-    classMap3.put( IExternalResourceConsumer.class, csviConsumer.getClass().getName() );
-
-    doReturn( IExternalResourceConsumer.class ).when( mockPlugin3 ).getMainType();
-    registry.registerPlugin( ExternalResourceConsumerPluginType.class, mockPlugin3 );
-
-    // Then add a class to the map to get through plugin registration
-    when( mockPlugin3.getClassMap() ).thenReturn( classMap3 );
-
-    metaverseKettleLifecycleHandler.onEnvironmentInit();
-
   }
 
   @Before
   public void setUp() throws Exception {
-    mapper = new ObjectMapper();
-    mapper.enable( SerializationFeature.INDENT_OUTPUT );
-    mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );
-    mapper.enable( SerializationFeature.WRAP_EXCEPTIONS );
-
-    LineageRepository writeRepo = new LineageRepository();
-    LineageRepository readRepo = new LineageRepository();
-
-    SimpleModule transModule = new SimpleModule( "PDIModule", new Version( 1, 0, 0, null ) );
-    TransMetaJsonSerializer transMetaJsonSerializer = new TransMetaJsonSerializer( TransMeta.class );
-    transMetaJsonSerializer.setLineageRepository( writeRepo );
-    transModule.addSerializer( transMetaJsonSerializer );
-
-    JobMetaJsonSerializer jobMetaJsonSerializer = new JobMetaJsonSerializer( JobMeta.class );
-    jobMetaJsonSerializer.setLineageRepository( writeRepo );
-    transModule.addSerializer( jobMetaJsonSerializer );
-
-    BaseStepMetaJsonSerializer baseStepMetaJsonSerializer = new BaseStepMetaJsonSerializer( BaseStepMeta.class );
-    JobEntryBaseJsonSerializer jobEntryBaseJsonSerializer = new JobEntryBaseJsonSerializer(
-      JobEntryBase.class );
-
-    baseStepMetaJsonSerializer.setLineageRepository( writeRepo );
-    jobEntryBaseJsonSerializer.setLineageRepository( writeRepo );
-    transModule.addSerializer( baseStepMetaJsonSerializer );
-    transModule.addSerializer( jobEntryBaseJsonSerializer );
-
-    transModule.addSerializer( new TableOutputStepMetaJsonSerializer( TableOutputMeta.class, writeRepo ) );
-    transModule.addDeserializer( TransMeta.class, new TransMetaJsonDeserializer( TransMeta.class, readRepo ) );
-
-    transModule.addSerializer(
-      new AbstractStepMetaJsonSerializer<CsvInputMeta>( CsvInputMeta.class, writeRepo ) {
-        @Override
-        protected void writeCustomProperties(
-          CsvInputMeta meta, JsonGenerator json, SerializerProvider serializerProvider )
-          throws IOException {
-
-        }
-      }
-    );
-
-    mapper.registerModule( transModule );
+    mapper = PentahoSystem.get( KettleObjectMapper.class, "kettleObjectMapper", null );
   }
 
   @AfterClass
@@ -190,13 +97,17 @@ public class JsonLineageIT {
     File jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
 
+    // make sure that we got an external resource of file and DB type
+    assertTrue( json.contains( "\"@class\" : \"com.pentaho.metaverse.api.model.BaseResourceInfo\"" ) );
+    assertTrue( json.contains( "\"@class\" : \"com.pentaho.metaverse.api.model.JdbcResourceInfo\"" ) );
+
     // now deserialize it
     TransMeta rehydrated = mapper.readValue( json, TransMeta.class );
 
     assertEquals( tm.getName(), rehydrated.getName() );
 
     json = mapper.writeValueAsString( rehydrated );
-    jsonOut = new File(IntegrationTestUtil.getOutputPath( tm.getName() + ".after.json" ) );
+    jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".after.json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
   }
 

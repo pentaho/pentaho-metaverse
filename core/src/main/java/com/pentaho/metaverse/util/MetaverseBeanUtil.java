@@ -53,23 +53,27 @@ public class MetaverseBeanUtil {
 
   public Object get( String id ) {
     BlueprintContainer service = null;
-    try {
-      Bundle bundle = this.bundleContext.getBundle();
-
-      Collection<ServiceReference<BlueprintContainer>> serviceReferences =
-        bundleContext.getServiceReferences( BlueprintContainer.class,
-          "(osgi.blueprint.container.symbolicname=" + bundle.getSymbolicName() + ")" );
-      if ( serviceReferences.size() != 0 ) {
-        ServiceReference<BlueprintContainer> reference = serviceReferences.iterator().next();
-        service = bundleContext.getService( reference );
-      }
-    } catch ( InvalidSyntaxException e ) {
-      // No-op, service will be null
-    }
-    if ( service == null ) {
+    if ( bundleContext == null ) {
       return null;
+    } else {
+      try {
+        Bundle bundle = bundleContext.getBundle();
+
+        Collection<ServiceReference<BlueprintContainer>> serviceReferences =
+          bundleContext.getServiceReferences( BlueprintContainer.class,
+            "(osgi.blueprint.container.symbolicname=" + bundle.getSymbolicName() + ")" );
+        if ( serviceReferences.size() != 0 ) {
+          ServiceReference<BlueprintContainer> reference = serviceReferences.iterator().next();
+          service = bundleContext.getService( reference );
+        }
+      } catch ( InvalidSyntaxException e ) {
+        // No-op, service will be null
+      }
+      if ( service == null ) {
+        return null;
+      }
+      return service.getComponentInstance( id );
     }
-    return service.getComponentInstance( id );
   }
 
 }

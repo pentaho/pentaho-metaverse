@@ -1,6 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IConnectionAnalyzer;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.MetaverseLogicalIdGenerator;
 import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
@@ -16,7 +17,7 @@ import java.util.List;
  * User: RFellows Date: 3/6/15
  */
 public class MongoDbConnectionAnalyzer extends BaseKettleMetaverseComponent implements
-    IConnectionAnalyzer<MongoDbMeta, MongoDbMeta> {
+  IConnectionAnalyzer<MongoDbMeta, MongoDbMeta> {
 
   public static final String HOST_NAMES = "hostNames";
   public static final String DATABASE_NAME = "databaseName";

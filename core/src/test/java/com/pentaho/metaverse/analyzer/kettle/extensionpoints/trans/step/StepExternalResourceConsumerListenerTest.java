@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -21,12 +21,13 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
 
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.step.StepExternalResourceConsumerProvider;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.pentaho.di.trans.Trans;
@@ -39,9 +40,9 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,8 +55,9 @@ public class StepExternalResourceConsumerListenerTest {
 
   @Test
   public void testCallStepExtensionPoint() throws Exception {
-    StepExternalResourceConsumerListener stepExtensionPoint =
-      new StepExternalResourceConsumerListener();
+    StepExternalResourceConsumerListener stepExtensionPoint = new StepExternalResourceConsumerListener();
+    stepExtensionPoint.setStepExternalResourceConsumerProvider(
+      MetaverseTestUtils.getStepExternalResourceConsumerProvider() );
     StepMetaDataCombi stepCombi = mock( StepMetaDataCombi.class );
     BaseStepMeta bsm = mock( BaseStepMeta.class, withSettings().extraInterfaces( StepMetaInterface.class ) );
     stepCombi.meta = (StepMetaInterface) bsm;
@@ -63,9 +65,9 @@ public class StepExternalResourceConsumerListenerTest {
     stepCombi.stepMeta = mock( StepMeta.class );
 
     stepExtensionPoint.callExtensionPoint( null, stepCombi );
-    Map<Class<? extends BaseStepMeta>, Queue<IStepExternalResourceConsumer>> stepConsumerMap =
-      ExternalResourceConsumerMap.getInstance().getStepConsumerMap();
-    Queue<IStepExternalResourceConsumer> consumers = new ConcurrentLinkedQueue<IStepExternalResourceConsumer>();
+    Map<Class<? extends BaseStepMeta>, Set<IStepExternalResourceConsumer>> stepConsumerMap =
+      new StepExternalResourceConsumerProvider().getStepConsumerMap();
+    Set<IStepExternalResourceConsumer> consumers = new HashSet<IStepExternalResourceConsumer>();
     stepConsumerMap.put( bsm.getClass(), consumers );
     stepExtensionPoint.callExtensionPoint( null, stepCombi );
     IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );

@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -22,15 +22,12 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.ExternalResourceConsumerMap;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.MetaverseKettleLifecycleHandler;
+import com.pentaho.metaverse.IntegrationTestUtil;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry.JobEntryExternalResourceConsumerListener;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExternalResourceConsumerListener;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
-import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginRegistrar;
-import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType;
-import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +37,6 @@ import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.extension.ExtensionPointPluginType;
 import org.pentaho.di.core.extension.KettleExtensionPoint;
-import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
@@ -103,20 +99,8 @@ public class ExternalResourceConsumerIT {
 
   @BeforeClass
   public static void init() throws Exception {
-    PluginRegistry registry = PluginRegistry.getInstance();
-    MetaverseKettleLifecycleHandler metaverseKettleLifecycleHandler = new MetaverseKettleLifecycleHandler();
 
-    ExternalResourceConsumerPluginRegistrar registrar = new ExternalResourceConsumerPluginRegistrar();
-    registrar.init( registry );
-
-    ExternalResourceConsumerPluginType.getInstance().registerCustom(
-      TextFileInputExternalResourceConsumer.class,
-      "internal",
-      "TextFileInputExternalResourceConsumer",
-      "TextFileInputExternalResourceConsumer",
-      "TextFileInputExternalResourceConsumer",
-      null
-    );
+    IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution/system/pentahoObjects.spring.xml" );
 
     ExtensionPointPluginType.getInstance().registerCustom( TransformationRuntimeExtensionPoint.class,
       "custom", "transExecutionProfile", "TransformationStartThreads", "no description", null );
@@ -133,9 +117,13 @@ public class ExternalResourceConsumerIT {
       "custom", "jobEntryExternalResource", "JobBeforeJobEntryExecution", "no description", null );
 
 
-    KettleEnvironment.init();
+    KettleEnvironment.init( false );
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
-    metaverseKettleLifecycleHandler.onEnvironmentInit();
+  }
+
+  @AfterClass
+  public static void cleanUp() throws Exception {
+    IntegrationTestUtil.shutdownPentahoSystem();
   }
 
   @Test

@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -23,7 +23,6 @@
 package com.pentaho.metaverse.analyzer.kettle.step.textfileinput;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.apache.commons.vfs.FileObject;
@@ -42,10 +41,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
-@ExternalResourceConsumer(
-  id = "TextFileInputExternalResourceConsumer",
-  name = "TextFileInputExternalResourceConsumer"
-)
 public class TextFileInputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<TextFileInput, TextFileInputMeta> {
 
@@ -97,7 +92,11 @@ public class TextFileInputExternalResourceConsumer
   public Collection<IExternalResourceInfo> getResourcesFromRow(
     TextFileInput textFileInput, RowMetaInterface rowMeta, Object[] row ) {
     Collection<IExternalResourceInfo> resources = new LinkedList<IExternalResourceInfo>();
+    // For some reason the step doesn't return the StepMetaInterface directly, so go around it
     TextFileInputMeta meta = (TextFileInputMeta) textFileInput.getStepMetaInterface();
+    if ( meta == null ) {
+      meta = (TextFileInputMeta) textFileInput.getStepMeta().getStepMetaInterface();
+    }
 
     try {
       String filename = meta == null ? null : rowMeta.getString( row, meta.getAcceptingField(), null );

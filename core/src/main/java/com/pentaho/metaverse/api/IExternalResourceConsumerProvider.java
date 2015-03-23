@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -19,40 +19,44 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.trans.step.BaseStep;
-import org.pentaho.di.trans.step.BaseStepMeta;
+package com.pentaho.metaverse.api;
+
+import com.pentaho.metaverse.analyzer.kettle.IExternalResourceConsumer;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
- * Helper class to provide an implementation of IStepExternalResourceConsumer for testing
+ * 
  */
-public class StepExternalResourceConsumerStub implements IStepExternalResourceConsumer {
+public interface IExternalResourceConsumerProvider<T extends IExternalResourceConsumer> {
 
-  @Override
-  public boolean isDataDriven( Object meta ) {
-    return false;
-  }
+  /**
+   * Return the set of external resource consumers for this type
+   * 
+   * @return The analyzers
+   */
+  List<T> getExternalResourceConsumers();
 
-  @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( Object meta ) {
-    return null;
-  }
+  /**
+   * Return the set of external resource consumers for this type for a given set of classes
+   * 
+   * @param types The set of classes to filter by
+   * @return The external resource consumers
+   */
+  List<T> getExternalResourceConsumers( Collection<Class<?>> types );
 
-  @Override
-  public Class<?> getMetaClass() {
-    return BaseStepMeta.class;
-  }
+  /**
+   * Adds an external resource consumer to group of supported consumers
+   * @param externalResourceConsumer
+   */
+  void addExternalResourceConsumer( T externalResourceConsumer );
 
-  @Override
-  public Collection<IExternalResourceInfo> getResourcesFromRow(
-    BaseStep consumer, RowMetaInterface rowMeta, Object[] row ) {
+  /**
+   * Removes an externalResourceConsumer from the group of supported consumers
+   * @param externalResourceConsumer
+   */
+  void removeExternalResourceConsumer( T externalResourceConsumer );
 
-    return null;
-  }
 }

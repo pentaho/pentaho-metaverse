@@ -5,7 +5,6 @@
              http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
              ">
 
-
   <!--
     Grab a reference to the IDatabaseConnectionAnalyzer for steps provided by the core pentaho-metaverse-ee bundle.
     This will be injected into our sample (TableInputStepAnalyzer)
@@ -33,31 +32,11 @@
            ref="tableInputStepAnalyzer"/>
 
 
-  <!-- Configure the TableInputExternalResourceConsumer as a plugin to Kettle via the pdi-osgi-bridge  -->
+  <!-- Configure the TableInputExternalResourceConsumer and service  -->
   <bean id="tableInputERC" scope="singleton"
         class="com.pentaho.metaverse.tableinput.TableInputExternalResourceConsumer"/>
-  <bean id="tableInputERCPlugin" class="org.pentaho.di.osgi.OSGIPlugin" scope="singleton">
-    <property name="mainType" value="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"/>
-    <property name="name" value="TableInputExternalResourceConsumer"/>
-    <property name="ID" value="TableInputExternalResourceConsumer"/>
-    <property name="description" value=""/>
-    <property name="pluginTypeInterface" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    <property name="category" value="Data Lineage - Table Input Bundle"/>
-    <property name="classToBeanMap">
-      <map>
-        <entry key="com.pentaho.metaverse.analyzer.kettle.extensionpoints.IExternalResourceConsumer"
-               value="tableInputERC"/>
-      </map>
-    </property>
-  </bean>
-
-  <!-- Register the plugin as a service so Kettle can find it -->
-  <service id="tableInputERCPluginService"
-           interface="org.pentaho.di.core.plugins.PluginInterface"
-           ref="tableInputERCPlugin">
-    <service-properties>
-      <entry key="PluginType" value="com.pentaho.metaverse.analyzer.kettle.plugin.ExternalResourceConsumerPluginType"/>
-    </service-properties>
-  </service>
+  <service id="tableInputERCService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer"
+           ref="tableInputERC"/>
 
 </blueprint>

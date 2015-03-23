@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -26,12 +26,13 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IFieldLineageMetadataProvider;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
 import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
+import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
@@ -60,7 +61,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -86,11 +86,11 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
     setLineageRepository( repo );
   }
 
-  protected IStepAnalyzerProvider getStepAnalyzerProvider() {
+  public IStepAnalyzerProvider getStepAnalyzerProvider() {
     return stepAnalyzerProvider;
   }
 
-  protected void setStepAnalyzerProvider( IStepAnalyzerProvider stepAnalyzerProvider ) {
+  public void setStepAnalyzerProvider( IStepAnalyzerProvider stepAnalyzerProvider ) {
     this.stepAnalyzerProvider = stepAnalyzerProvider;
   }
 
@@ -134,7 +134,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
       }
     } catch ( MetaverseAnalyzerException e ) {
       LOGGER.warn( Messages.getString( "WARNING.Serialization.Step.WriteFieldMappings",
-          meta.getParentStepMeta().getName() ), e );
+        meta.getParentStepMeta().getName() ), e );
     }
 
     json.writeEndArray();
@@ -174,7 +174,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
       }
     } catch ( MetaverseAnalyzerException e ) {
       LOGGER.warn( Messages.getString( "WARNING.Serialization.Step.WriteFieldTransforms",
-          meta.getParentStepMeta().getName() ), e );
+        meta.getParentStepMeta().getName() ), e );
     }
 
     json.writeEndArray();
@@ -183,6 +183,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
 
   /**
    * Free-for-all. put anything specific to your StepMeta here.
+   *
    * @param meta
    * @param json
    * @param serializerProvider
@@ -195,8 +196,15 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
 
   protected void writeExternalResources( T meta, JsonGenerator json, SerializerProvider serializerProvider )
     throws IOException, JsonGenerationException {
-    Queue<IStepExternalResourceConsumer> resourceConsumers =
-        getExternalResourceConsumerMap().getStepExternalResourceConsumers( meta.getClass() );
+    Set<Class<?>> metaClassSet = new HashSet<Class<?>>( 1 );
+    metaClassSet.add( meta.getClass() );
+    IStepExternalResourceConsumerProvider stepExternalResourceConsumerProvider =
+      getStepExternalResourceConsumerProvider();
+
+    List<IStepExternalResourceConsumer> resourceConsumers = null;
+    if ( stepExternalResourceConsumerProvider != null ) {
+      resourceConsumers = stepExternalResourceConsumerProvider.getExternalResourceConsumers( metaClassSet );
+    }
 
     json.writeArrayFieldStart( JSON_PROPERTY_EXTERNAL_RESOURCES );
     if ( resourceConsumers != null ) {
@@ -231,7 +239,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
         writeFields( json, stepFields, JSON_PROPERTY_OUTPUT_FIELDS );
       } catch ( KettleStepException e ) {
         LOGGER.warn( Messages.getString( "WARNING.Serialization.Step.OutputFields",
-            parentStepMeta.getName() ), e );
+          parentStepMeta.getName() ), e );
       }
     }
   }
@@ -248,6 +256,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
     }
     json.writeEndArray();
   }
+
   protected void writeFields( JsonGenerator json, RowMetaInterface fields, String arrayObjectName ) throws IOException {
     List<RowMetaInterface> fieldMetaList = new ArrayList<RowMetaInterface>( 1 );
     fieldMetaList.add( fields );
