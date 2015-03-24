@@ -253,7 +253,7 @@
 
 
   <reference-list id="jobEntryExternalResourceConsumerRefList"
-                  interface="com.pentaho.metaverse.analyzer.kettle.step.IJobEntryExternalResourceConsumer"
+                  interface="com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer"
                   member-type="service-object"
                   availability="optional">
     <reference-listener ref="IJobEntryExternalResourceConsumerProvider"
