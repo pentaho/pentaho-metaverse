@@ -117,7 +117,11 @@ public class StepExternalResourceConsumerProvider implements IStepExternalResour
   @Override
   public void removeExternalResourceConsumer( IStepExternalResourceConsumer externalResourceConsumer ) {
     if ( stepConsumers.contains( externalResourceConsumer ) ) {
-      stepConsumers.remove( externalResourceConsumer );
+      try {
+        stepConsumers.remove( externalResourceConsumer );
+      } catch ( UnsupportedOperationException uoe ) {
+        // This comes from Blueprint for managed containers (which are read-only). Nothing to do in this case
+      }
     }
 
     Class<? extends BaseStepMeta> metaClass = externalResourceConsumer.getMetaClass();

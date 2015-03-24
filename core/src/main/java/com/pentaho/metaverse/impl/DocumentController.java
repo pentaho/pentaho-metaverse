@@ -235,7 +235,11 @@ public class DocumentController implements IDocumentController, IDocumentListene
   @Override
   public void removeAnalyzer( IDocumentAnalyzer analyzer ) {
     if ( documentAnalyzers.contains( analyzer ) ) {
-      documentAnalyzers.remove( analyzer );
+      try {
+        documentAnalyzers.remove( analyzer );
+      } catch ( UnsupportedOperationException uoe ) {
+        // This comes from Blueprint for managed containers (which are read-only). Nothing to do in this case
+      }
     }
     Set<String> types = analyzer.getSupportedTypes();
     analyzer.setMetaverseBuilder( this );

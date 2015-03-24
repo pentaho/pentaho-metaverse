@@ -51,6 +51,7 @@ public class JobEntryExternalResourceConsumerProvider implements IJobEntryExtern
 
   /**
    * Sets the external resource consumers for this provider
+   *
    * @param jobEntryConsumers the consumers to set for this provider
    */
   public void setExternalResourceConsumers( List<IJobEntryExternalResourceConsumer> jobEntryConsumers ) {
@@ -123,7 +124,11 @@ public class JobEntryExternalResourceConsumerProvider implements IJobEntryExtern
   @Override
   public void removeExternalResourceConsumer( IJobEntryExternalResourceConsumer externalResourceConsumer ) {
     if ( jobEntryExternalResourceConsumers.contains( externalResourceConsumer ) ) {
-      jobEntryExternalResourceConsumers.remove( externalResourceConsumer );
+      try {
+        jobEntryExternalResourceConsumers.remove( externalResourceConsumer );
+      } catch ( UnsupportedOperationException uoe ) {
+        // This comes from Blueprint for managed containers (which are read-only). Nothing to do in this case
+      }
     }
 
     Class<? extends JobEntryBase> metaClass = externalResourceConsumer.getMetaClass();
