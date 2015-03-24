@@ -131,14 +131,16 @@ public class JobEntryExternalResourceConsumerProvider implements IJobEntryExtern
       }
     }
 
-    Class<? extends JobEntryBase> metaClass = externalResourceConsumer.getMetaClass();
-    if ( metaClass != null ) {
-      Set<IJobEntryExternalResourceConsumer> consumerSet = null;
-      if ( jobEntryConsumerMap.containsKey( metaClass ) ) {
-        consumerSet = jobEntryConsumerMap.get( metaClass );
-        consumerSet.remove( externalResourceConsumer );
-        if ( consumerSet.isEmpty() ) {
-          jobEntryConsumerMap.remove( metaClass );
+    if ( externalResourceConsumer != null ) {
+      Class<? extends JobEntryBase> metaClass = externalResourceConsumer.getMetaClass();
+      if ( metaClass != null ) {
+        Set<IJobEntryExternalResourceConsumer> consumerSet = null;
+        if ( jobEntryConsumerMap.containsKey( metaClass ) ) {
+          consumerSet = jobEntryConsumerMap.get( metaClass );
+          consumerSet.remove( externalResourceConsumer );
+          if ( consumerSet.isEmpty() ) {
+            jobEntryConsumerMap.remove( metaClass );
+          }
         }
       }
     }

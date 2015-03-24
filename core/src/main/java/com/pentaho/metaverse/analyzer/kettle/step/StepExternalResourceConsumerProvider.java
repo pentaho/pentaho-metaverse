@@ -124,14 +124,16 @@ public class StepExternalResourceConsumerProvider implements IStepExternalResour
       }
     }
 
-    Class<? extends BaseStepMeta> metaClass = externalResourceConsumer.getMetaClass();
-    if ( metaClass != null ) {
-      Set<IStepExternalResourceConsumer> consumerSet = null;
-      if ( stepConsumerMap.containsKey( metaClass ) ) {
-        consumerSet = stepConsumerMap.get( metaClass );
-        consumerSet.remove( externalResourceConsumer );
-        if ( consumerSet.isEmpty() ) {
-          stepConsumerMap.remove( metaClass );
+    if ( externalResourceConsumer != null ) {
+      Class<? extends BaseStepMeta> metaClass = externalResourceConsumer.getMetaClass();
+      if ( metaClass != null ) {
+        Set<IStepExternalResourceConsumer> consumerSet = null;
+        if ( stepConsumerMap.containsKey( metaClass ) ) {
+          consumerSet = stepConsumerMap.get( metaClass );
+          consumerSet.remove( externalResourceConsumer );
+          if ( consumerSet.isEmpty() ) {
+            stepConsumerMap.remove( metaClass );
+          }
         }
       }
     }
