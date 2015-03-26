@@ -123,23 +123,7 @@ public class MetaverseUtil {
       if ( matchingAnalyzers != null ) {
         for ( final IDocumentAnalyzer analyzer : matchingAnalyzers ) {
 
-          Runnable analyzerRunner = new Runnable() {
-            @Override
-            public void run() {
-              try {
-
-                analyzer.analyze(
-                  new MetaverseComponentDescriptor(
-                    document.getName(),
-                    DictionaryConst.NODE_TYPE_TRANS,
-                    document.getNamespace() ),
-                  document
-                );
-              } catch ( MetaverseAnalyzerException mae ) {
-                throw new RuntimeException( Messages.getString( "ERROR.AnalyzingDocument", document.getNamespaceId() ), mae );
-              }
-            }
-          };
+          Runnable analyzerRunner = getAnalyzerRunner( analyzer, document );
 
           Graph g = ( graph != null ) ? graph : new TinkerGraph();
           Future<Graph> transAnalysis =
@@ -208,5 +192,25 @@ public class MetaverseUtil {
       //return new JSONDeserializer<Operations>().use(null, Operations.class).deserialize( operations );
     }
     return resultOps;
+  }
+
+  public static Runnable getAnalyzerRunner( final IDocumentAnalyzer analyzer, final IDocument document ) {
+    return new Runnable() {
+      @Override
+      public void run() {
+        try {
+
+          analyzer.analyze(
+            new MetaverseComponentDescriptor(
+              document.getName(),
+              DictionaryConst.NODE_TYPE_TRANS,
+              document.getNamespace() ),
+            document
+          );
+        } catch ( MetaverseAnalyzerException mae ) {
+          throw new RuntimeException( Messages.getString( "ERROR.AnalyzingDocument", document.getNamespaceId() ), mae );
+        }
+      }
+    };
   }
 }

@@ -10,7 +10,7 @@
              ">
 
   <!-- Configure our graph using the SynchronizedGraphFactory and a configuration file -->
-  <bean id="MetaverseGraphImpl" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open">
+  <bean id="MetaverseGraphImpl" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open" scope="prototype">
     <argument>
       <map>
         <entry key="blueprints.graph" value="com.tinkerpop.blueprints.impls.tg.TinkerGraph"/>
@@ -39,6 +39,10 @@
   </jaxrs:server>
 
   <bean id="IMetaverseBuilder" class="com.pentaho.metaverse.impl.MetaverseBuilder" scope="singleton">
+    <argument ref="MetaverseGraphImpl"/>
+  </bean>
+
+  <bean id="IMetaverseBuilderPrototype" class="com.pentaho.metaverse.impl.MetaverseBuilder" scope="prototype">
     <argument ref="MetaverseGraphImpl"/>
   </bean>
 

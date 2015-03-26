@@ -53,7 +53,9 @@
   </service>
 
   <!-- TransRuntime extension point -->
-  <bean id="transRuntime" scope="singleton" class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint"/>
+  <bean id="transRuntime" scope="singleton" class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint">
+    <property name="documentAnalyzer" ref="TransformationAnalyzer"/>
+  </bean>
   <bean id="transRuntimePlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
     <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
     <property name="name" value="TransformationStartThreads"/>

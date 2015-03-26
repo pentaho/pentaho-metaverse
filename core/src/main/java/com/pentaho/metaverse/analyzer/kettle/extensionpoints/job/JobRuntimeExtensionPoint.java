@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -23,14 +23,24 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransExtensionPointUtil;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
+import com.pentaho.metaverse.api.Namespace;
+import com.pentaho.metaverse.api.model.LineageHolder;
+import com.pentaho.metaverse.impl.MetaverseCompletionService;
+import com.pentaho.metaverse.util.MetaverseBeanUtil;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
@@ -48,6 +58,12 @@ import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.impl.model.ExecutionData;
 import com.pentaho.metaverse.impl.model.ExecutionProfile;
 import com.pentaho.metaverse.impl.model.ParamInfo;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.platform.api.metaverse.IDocument;
+import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
+import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import org.pentaho.platform.api.metaverse.INamespace;
 
 /**
  * An extension point to gather runtime data for an execution of a job into an ExecutionProfile object
@@ -58,10 +74,21 @@ import com.pentaho.metaverse.impl.model.ParamInfo;
   id = "jobRuntimeMetaverse" )
 public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements JobListener {
 
-  protected static Map<Job, IExecutionProfile> profileMap = new ConcurrentHashMap<Job, IExecutionProfile>();
+  private IDocumentAnalyzer documentAnalyzer;
 
-  public static Map<Job, IExecutionProfile> getProfileMap() {
-    return profileMap;
+  private static Map<Job, LineageHolder> lineageHolderMap = new ConcurrentHashMap<Job, LineageHolder>();
+
+  public static LineageHolder getLineageHolder( Job job ) {
+    LineageHolder holder = lineageHolderMap.get( job );
+    if ( holder == null ) {
+      holder = new LineageHolder();
+      lineageHolderMap.put( job, holder );
+    }
+    return holder;
+  }
+
+  public static void putLineageHolder( Job job, LineageHolder holder ) {
+    lineageHolderMap.put( job, holder );
   }
 
   /**
@@ -77,6 +104,40 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     // Job Started listeners get called after the extension point is invoked, so just add a job listener
     if ( o instanceof Job ) {
       Job job = ( (Job) o );
+
+      IMetaverseBuilder builder = getMetaverseBuilder( job );
+
+      // Analyze the current transformation
+      if ( documentAnalyzer != null ) {
+        documentAnalyzer.setMetaverseBuilder( builder );
+
+        // Create a document for the Trans TODO - fix this!
+        final String clientName = "PDI Engine";
+        final INamespace namespace = new Namespace( clientName );
+
+        final IMetaverseNode designNode = builder.getMetaverseObjectFactory()
+          .createNodeObject( clientName, clientName, DictionaryConst.NODE_TYPE_LOCATOR );
+        builder.addNode( designNode );
+
+        final JobMeta jobMeta = job.getJobMeta();
+
+        String id = getFilename( jobMeta );
+
+        IDocument metaverseDocument = builder.getMetaverseObjectFactory().createDocumentObject();
+
+        metaverseDocument.setNamespace( namespace );
+        metaverseDocument.setContent( jobMeta );
+        metaverseDocument.setStringID( id );
+        metaverseDocument.setName( jobMeta.getName() );
+        metaverseDocument.setExtension( "ktr" );
+        metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "trans.ktr" ) );
+        metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, id );
+        metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
+
+        Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
+
+        MetaverseCompletionService.getInstance().submit( analyzerRunner, id );
+      }
 
       // Add the job finished listener
       job.addJobListener( this );
@@ -141,9 +202,12 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         argList.addAll( Arrays.asList( args ) );
       }
 
-      // Save the execution profile for later
-      profileMap.put( job, executionProfile );
-      System.out.println( "Added job profile: " + job.getName() );
+      // Save the lineage objects for later
+      LineageHolder holder = getLineageHolder( job );
+      holder.setExecutionProfile( executionProfile );
+      holder.setMetaverseBuilder( builder );
+
+      // TODO log System.out.println( "Added job profile: " + job.getName() );
     }
   }
 
@@ -160,8 +224,21 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       return;
     }
 
+    // Get the current execution profile for this transformation
+    LineageHolder holder = getLineageHolder( job );
+    Future lineageTask = holder.getLineageTask();
+    if ( lineageTask != null ) {
+      try {
+        lineageTask.get();
+      } catch ( InterruptedException e ) {
+        e.printStackTrace(); // TODO logger?
+      } catch ( ExecutionException e ) {
+        e.printStackTrace(); // TODO logger?
+      }
+    }
+
     // Get the current execution profile for this job
-    IExecutionProfile executionProfile = profileMap.remove( job );
+    IExecutionProfile executionProfile = getLineageHolder( job ).getExecutionProfile();
     if ( executionProfile == null ) {
       // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
       // the same info, so populate a new ExecutionProfile using the current Trans
@@ -175,8 +252,13 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     if ( result != null ) {
       executionData.setFailureCount( result.getNrErrors() );
     }
+
+    // Add the execution profile information to the lineage graph
+    addRuntimeLineageInfo( holder );
+
+    // Export the lineage info (execution profile, lineage graph, etc.)
     try {
-      writeExecutionProfile( System.out, executionProfile );
+      writeLineageInfo( System.out, holder );
     } catch ( IOException e ) {
       throw new KettleException( e );
     }
@@ -251,6 +333,46 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     if ( filename == null && job.getJobMeta() != null ) {
       filename = job.getJobMeta().getName();
     }
+    if ( filename == null ) {
+      filename = "";
+    }
+    return filename;
+  }
+
+  protected IMetaverseBuilder getMetaverseBuilder( Job job ) {
+    if ( job != null ) {
+      if ( job.getParentJob() == null && job.getParentTrans() == null ) {
+        return (IMetaverseBuilder) MetaverseBeanUtil.getInstance().get( "IMetaverseBuilderPrototype" );
+      } else {
+        if ( job.getParentJob() != null ) {
+          // Get the builder for the job
+          return JobRuntimeExtensionPoint.getLineageHolder( job.getParentJob() ).getMetaverseBuilder();
+        } else {
+          return TransformationRuntimeExtensionPoint.getLineageHolder( job.getParentTrans() ).getMetaverseBuilder();
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Sets the document analyzer for this extension point
+   * @param analyzer The document analyzer for this extension point
+   */
+  public void setDocumentAnalyzer( IDocumentAnalyzer analyzer ) {
+    this.documentAnalyzer = analyzer;
+  }
+
+  /**
+   * Gets the document analyzer of this extension point
+   * @return IDocumentAnalyzer - The document analyzer for this extension point
+   */
+  public IDocumentAnalyzer getDocumentAnalyzer() {
+    return documentAnalyzer;
+  }
+
+  public static String getFilename( JobMeta jobMeta ) {
+    String filename = jobMeta.getFilename();
     if ( filename == null ) {
       filename = "";
     }

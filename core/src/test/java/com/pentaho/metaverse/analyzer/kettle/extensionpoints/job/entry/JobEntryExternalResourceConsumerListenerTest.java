@@ -93,7 +93,7 @@ public class JobEntryExternalResourceConsumerListenerTest {
     IExecutionProfile executionProfile = mock( IExecutionProfile.class );
     IExecutionData executionData = mock( IExecutionData.class );
     when( executionProfile.getExecutionData() ).thenReturn( executionData );
-    JobRuntimeExtensionPoint.getProfileMap().put( mockJob, executionProfile );
+    JobRuntimeExtensionPoint.getLineageHolder( mockJob).setExecutionProfile( executionProfile );
 
     Collection<IExternalResourceInfo> externalResources = new ArrayList<IExternalResourceInfo>();
     stepExtensionPoint.addExternalResources( externalResources, mockJobEntry );

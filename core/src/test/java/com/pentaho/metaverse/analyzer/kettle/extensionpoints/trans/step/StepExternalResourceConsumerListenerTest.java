@@ -27,6 +27,7 @@ import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.Transformatio
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -92,7 +93,9 @@ public class StepExternalResourceConsumerListenerTest {
     IExecutionProfile executionProfile = mock( IExecutionProfile.class );
     IExecutionData executionData = mock( IExecutionData.class );
     when( executionProfile.getExecutionData() ).thenReturn( executionData );
-    TransformationRuntimeExtensionPoint.getProfileMap().put( mockTrans, executionProfile );
+    LineageHolder holder = new LineageHolder();
+    holder.setExecutionProfile( executionProfile );
+    TransformationRuntimeExtensionPoint.putLineageHolder( mockTrans, holder );
 
     Collection<IExternalResourceInfo> externalResources = new ArrayList<IExternalResourceInfo>();
     stepExtensionPoint.addExternalResources( externalResources, mockStep );

@@ -36,7 +36,6 @@
     <dependency.org.codehaus.jackson.jackson-jaxrs.version>1.9.13</dependency.org.codehaus.jackson.jackson-jaxrs.version>
     <dependency.org.slf4j.slf4j-api.version>1.7.7</dependency.org.slf4j.slf4j-api.version>
     <dependency.org.springFramework.spring.version>2.5.6</dependency.org.springFramework.spring.version>
-    <dependency.pentaho.pentaho-platform-api.version>${project.version}</dependency.pentaho.pentaho-platform-api.version>
     <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
     <dependency.pentaho.pentaho-platform-repository.version>${project.version}</dependency.pentaho.pentaho-platform-repository.version>
     <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
@@ -131,13 +130,6 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring</artifactId>
       <version>${dependency.org.springFramework.spring.version}</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>pentaho-platform-api</artifactId>
-      <version>${dependency.pentaho.pentaho-platform-api.version}</version>
       <scope>compile</scope>
     </dependency>
 
