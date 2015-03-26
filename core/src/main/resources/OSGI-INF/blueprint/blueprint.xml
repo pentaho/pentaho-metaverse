@@ -123,6 +123,8 @@
   </bean>
   <bean id="ExcelOutputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer"/>
+  <bean id="SplitFieldsStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.splitfields.SplitFieldsStepAnalyzer"/>
 
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
@@ -175,6 +177,10 @@
   <service id="excelOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
            ref="ExcelOutputStepAnalyzer"/>
+
+  <service id="splitFieldsStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="SplitFieldsStepAnalyzer"/>
 
   <reference-list id="stepAnalyzerRefList"
                   interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"

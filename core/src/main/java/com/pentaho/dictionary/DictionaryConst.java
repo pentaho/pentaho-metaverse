@@ -196,6 +196,17 @@ public class DictionaryConst {
   public static final String PROPERTY_QUERY = "query";
 
   /**
+   * Property key to represent a string delimiter to parse tokens on;
+   */
+  public static final String PROPERTY_DELIMITER = "delimiter";
+
+  /**
+   * Property key to represent the string enclosure character(s)
+   */
+  public static final String PROPERTY_ENCLOSURE = "enclosure";
+
+
+  /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
    */
   public static final String LINK_EXECUTES = "executes";

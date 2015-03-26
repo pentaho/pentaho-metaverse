@@ -22,11 +22,6 @@
 
 package com.pentaho.metaverse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
@@ -35,6 +30,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import com.pentaho.metaverse.frames.SplitFieldsStepNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
@@ -53,6 +49,7 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
 import org.pentaho.di.trans.steps.exceloutput.ExcelField;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
+import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
@@ -97,6 +94,8 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
+
+import static org.junit.Assert.*;
 
 /**
  * User: RFellows Date: 8/20/14
@@ -303,7 +302,7 @@ public class MetaverseValidationIT {
           .size(), matchCount );
 
       assertEquals( "Incorrect number of Steps in the graph for transformation [" + tm.getName() + "]", transMetaSteps
-          .size(), stepCount );
+        .size(), stepCount );
 
     }
   }
@@ -907,6 +906,78 @@ public class MetaverseValidationIT {
       ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
       assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
     }
+
+  }
+
+  @Test
+  public void testSplitFieldsStepNode_normal() throws Exception {
+    SplitFieldsStepNode node = root.getSplitFieldsStepNodeByName( "Split Fields - name" );
+    assertNotNull( node );
+    FieldSplitterMeta meta = (FieldSplitterMeta) getStepMeta( node );
+    assertEquals( meta.getDelimiter(), node.getDelimiter() );
+    assertEquals( meta.getEnclosure(), node.getEnclosure() );
+
+    String[] outputFields = meta.getFieldName();
+    Iterable<StreamFieldNode> usedFields = node.getStreamFieldNodesUses();
+    int usedFieldCount = getIterableSize( usedFields );
+    Iterable<StreamFieldNode> deletedFields = node.getStreamFieldNodesDeletes();
+    int deletedFieldCount = getIterableSize( deletedFields );
+    Iterable<StreamFieldNode> createdFields = node.getStreamFieldNodesCreates();
+    int createdFieldCount = getIterableSize( createdFields );
+
+    assertEquals( 1, usedFieldCount );
+    assertEquals( 1, deletedFieldCount );
+    assertEquals( outputFields.length, createdFieldCount );
+
+    TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
+    RowMetaInterface stepFields = tm.getStepFields( meta.getParentStepMeta() );
+
+    // make sure the split field derives all of the output fields
+    for ( StreamFieldNode created : createdFields ) {
+      assertEquals( meta.getSplitField(), created.getFieldNodesThatDeriveMe().iterator().next().getName() );
+    }
+
+    // make sure the node that was deleted is the split field
+    assertEquals( meta.getSplitField(), deletedFields.iterator().next().getName() );
+
+    // make sure the node that was used is the split field
+    assertEquals( meta.getSplitField(), usedFields.iterator().next().getName() );
+
+  }
+
+  @Test
+  public void testSplitFieldsStepNode_reuseTheSplitFieldNameInOutputField() throws Exception {
+    SplitFieldsStepNode node = root.getSplitFieldsStepNodeByName( "Split Fields - team" );
+    assertNotNull( node );
+    FieldSplitterMeta meta = (FieldSplitterMeta) getStepMeta( node );
+    assertEquals( meta.getDelimiter(), node.getDelimiter() );
+    assertEquals( meta.getEnclosure(), node.getEnclosure() );
+
+    String[] outputFields = meta.getFieldName();
+    Iterable<StreamFieldNode> usedFields = node.getStreamFieldNodesUses();
+    int usedFieldCount = getIterableSize( usedFields );
+    Iterable<StreamFieldNode> deletedFields = node.getStreamFieldNodesDeletes();
+    int deletedFieldCount = getIterableSize( deletedFields );
+    Iterable<StreamFieldNode> createdFields = node.getStreamFieldNodesCreates();
+    int createdFieldCount = getIterableSize( createdFields );
+
+    assertEquals( 1, usedFieldCount );
+    assertEquals( 1, deletedFieldCount );
+    assertEquals( outputFields.length, createdFieldCount );
+
+    TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
+    RowMetaInterface stepFields = tm.getStepFields( meta.getParentStepMeta() );
+
+    // make sure the split field derives all of the output fields
+    for ( StreamFieldNode created : createdFields ) {
+      assertEquals( meta.getSplitField(), created.getFieldNodesThatDeriveMe().iterator().next().getName() );
+    }
+
+    // make sure the node that was deleted is the split field
+    assertEquals( meta.getSplitField(), deletedFields.iterator().next().getName() );
+
+    // make sure the node that was used is the split field
+    assertEquals( meta.getSplitField(), usedFields.iterator().next().getName() );
 
   }
 
