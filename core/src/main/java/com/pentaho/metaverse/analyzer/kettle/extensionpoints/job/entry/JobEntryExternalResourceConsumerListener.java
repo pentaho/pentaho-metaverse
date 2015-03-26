@@ -109,7 +109,8 @@ public class JobEntryExternalResourceConsumerListener implements ExtensionPointI
   protected void addExternalResources( Collection<IExternalResourceInfo> resources, JobEntryInterface jobEntry ) {
     if ( resources != null ) {
       // Add the resources to the execution profile
-      IExecutionProfile executionProfile = JobRuntimeExtensionPoint.getProfileMap().get( jobEntry.getParentJob() );
+      IExecutionProfile executionProfile =
+        JobRuntimeExtensionPoint.getLineageHolder( jobEntry.getParentJob() ).getExecutionProfile();
       if ( executionProfile != null ) {
         String jobEntryName = jobEntry.getName();
         Map<String, List<IExternalResourceInfo>> resourceMap =

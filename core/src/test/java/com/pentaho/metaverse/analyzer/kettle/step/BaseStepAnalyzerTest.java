@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -49,12 +49,12 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.ArrayList;
 import java.util.Collections;

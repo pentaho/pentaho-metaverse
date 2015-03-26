@@ -102,7 +102,8 @@ public class StepExternalResourceConsumerListener implements ExtensionPointInter
   protected void addExternalResources( Collection<IExternalResourceInfo> resources, StepInterface step ) {
     if ( resources != null ) {
       // Add the resources to the execution profile
-      IExecutionProfile executionProfile = TransformationRuntimeExtensionPoint.getProfileMap().get( step.getTrans() );
+      IExecutionProfile executionProfile =
+        TransformationRuntimeExtensionPoint.getLineageHolder( step.getTrans() ).getExecutionProfile();
       if ( executionProfile != null ) {
         String stepName = step.getStepname();
         Map<String, List<IExternalResourceInfo>> resourceMap =

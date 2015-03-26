@@ -22,8 +22,6 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IDocumentLocator;
-
 import java.util.Set;
 
 /**

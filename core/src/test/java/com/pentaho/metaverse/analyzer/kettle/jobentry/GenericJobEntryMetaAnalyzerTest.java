@@ -11,11 +11,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

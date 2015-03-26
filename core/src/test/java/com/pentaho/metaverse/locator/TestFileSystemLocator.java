@@ -1,6 +1,6 @@
 package com.pentaho.metaverse.locator;
 
-import org.pentaho.platform.api.metaverse.IDocumentListener;
+import com.pentaho.metaverse.api.IDocumentListener;
 
 import java.io.File;
 import java.util.List;

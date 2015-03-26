@@ -9,7 +9,7 @@ import com.pentaho.metaverse.analyzer.kettle.step.calculator.CalculatorStepAnaly
 import com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer
-import org.pentaho.platform.api.metaverse.*
+import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.client.*
 import com.pentaho.metaverse.graph.*

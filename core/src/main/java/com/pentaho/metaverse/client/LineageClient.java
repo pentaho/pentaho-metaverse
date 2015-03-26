@@ -34,7 +34,7 @@ import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.platform.api.metaverse.MetaverseException;
+import com.pentaho.metaverse.api.MetaverseException;
 
 import java.util.ArrayList;
 import java.util.Arrays;

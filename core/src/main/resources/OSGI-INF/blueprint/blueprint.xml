@@ -10,7 +10,7 @@
              ">
 
   <!-- Configure our graph using the SynchronizedGraphFactory and a configuration file -->
-  <bean id="MetaverseGraphImpl" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open">
+  <bean id="MetaverseGraphImpl" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open" scope="prototype">
     <argument>
       <map>
         <entry key="blueprints.graph" value="com.tinkerpop.blueprints.impls.tg.TinkerGraph"/>
@@ -42,6 +42,10 @@
     <argument ref="MetaverseGraphImpl"/>
   </bean>
 
+  <bean id="IMetaverseBuilderPrototype" class="com.pentaho.metaverse.impl.MetaverseBuilder" scope="prototype">
+    <argument ref="MetaverseGraphImpl"/>
+  </bean>
+
   <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.impl.MetaverseObjectFactory" scope="singleton"/>
 
   <!-- Document Analyzers -->
@@ -49,18 +53,18 @@
     <property name="stepAnalyzerProvider" ref="IStepAnalyzerProvider"/>
   </bean>
   <service id="transformationAnalyzerService"
-           interface="org.pentaho.platform.api.metaverse.IDocumentAnalyzer"
+           interface="com.pentaho.metaverse.api.IDocumentAnalyzer"
            ref="TransformationAnalyzer"/>
 
   <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer">
     <property name="jobEntryAnalyzerProvider" ref="IJobEntryAnalyzerProvider"/>
   </bean>
   <service id="jobAnalyzerService"
-           interface="org.pentaho.platform.api.metaverse.IDocumentAnalyzer"
+           interface="com.pentaho.metaverse.api.IDocumentAnalyzer"
            ref="JobAnalyzer"/>
 
   <reference-list id="documentAnalyzersRefList"
-                  interface="org.pentaho.platform.api.metaverse.IDocumentAnalyzer"
+                  interface="com.pentaho.metaverse.api.IDocumentAnalyzer"
                   member-type="service-object"
                   availability="optional">
     <reference-listener ref="IDocumentController" bind-method="addAnalyzer" unbind-method="removeAnalyzer"/>

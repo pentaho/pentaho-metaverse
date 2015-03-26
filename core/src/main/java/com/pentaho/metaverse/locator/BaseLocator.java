@@ -28,13 +28,13 @@ import com.pentaho.metaverse.impl.MetaverseCompletionService;
 import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.api.metaverse.IDocumentEvent;
-import org.pentaho.platform.api.metaverse.IDocumentListener;
-import org.pentaho.platform.api.metaverse.IDocumentLocator;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
+import com.pentaho.metaverse.api.IDocumentEvent;
+import com.pentaho.metaverse.api.IDocumentListener;
+import com.pentaho.metaverse.api.IDocumentLocator;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseLocatorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 
 /**
- * Base implementation for all @see org.pentaho.platform.api.metaverse.IDocumentLocator implementations
+ * Base implementation for all @see com.pentaho.metaverse.api.IDocumentLocator implementations
  *
  * @param <T> The type of this locator
  * @author jdixon
@@ -241,7 +241,7 @@ public abstract class BaseLocator<T> implements IDocumentLocator {
    * Starts a full scan by this locator.
    *
    * @param locatorRunner The locator runner to use
-   * @throws org.pentaho.platform.api.metaverse.MetaverseLocatorException
+   * @throws com.pentaho.metaverse.api.MetaverseLocatorException
    */
   protected void startScan( LocatorRunner<T> locatorRunner ) throws MetaverseLocatorException {
 

@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -60,7 +60,7 @@ public class JobEntryExternalResourceListener implements JobEntryListener {
 
   @Override
   public void afterExecution( Job job, JobEntryCopy jobEntryCopy, JobEntryInterface jobEntryInterface, Result result ) {
-    IExecutionProfile executionProfile = JobRuntimeExtensionPoint.getProfileMap().get( job );
+    IExecutionProfile executionProfile = JobRuntimeExtensionPoint.getLineageHolder( job ).getExecutionProfile();
     IExecutionData executionData = executionProfile.getExecutionData();
 
     // Get input files (aka Resource Dependencies)

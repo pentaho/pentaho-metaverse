@@ -28,8 +28,8 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.VertexQuery;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.IMetaverseNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,7 +72,7 @@ public class MetaverseNode implements IMetaverseNode {
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getName()
+   * @see com.pentaho.metaverse.api.IIdentifiable#getName()
    */
   @Override
   public String getName() {
@@ -82,7 +82,7 @@ public class MetaverseNode implements IMetaverseNode {
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getStringID()
+   * @see com.pentaho.metaverse.api.IIdentifiable#getStringID()
    */
   @Override
   public String getStringID() {
@@ -92,7 +92,7 @@ public class MetaverseNode implements IMetaverseNode {
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getType()
+   * @see com.pentaho.metaverse.api.IIdentifiable#getType()
    */
   @Override
   public String getType() {
@@ -102,7 +102,7 @@ public class MetaverseNode implements IMetaverseNode {
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#setName(java.lang.String)
+   * @see com.pentaho.metaverse.api.IIdentifiable#setName(java.lang.String)
    */
   @Override
   public void setName( String name ) {
@@ -113,7 +113,7 @@ public class MetaverseNode implements IMetaverseNode {
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#setType(java.lang.String)
+   * @see com.pentaho.metaverse.api.IIdentifiable#setType(java.lang.String)
    */
   @Override
   public void setType( String type ) {
@@ -126,7 +126,7 @@ public class MetaverseNode implements IMetaverseNode {
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IMetaverseNode#getPropertyKeys()
+   * @see com.pentaho.metaverse.api.IMetaverseNode#getPropertyKeys()
    */
   @Override
   public Set<String> getPropertyKeys() {
@@ -208,7 +208,7 @@ public class MetaverseNode implements IMetaverseNode {
   /*
      * (non-Javadoc)
      *
-     * @see org.pentaho.platform.api.metaverse.IMetaverseNode#setProperty(java.lang.String, java.lang.Object)
+     * @see com.pentaho.metaverse.api.IMetaverseNode#setProperty(java.lang.String, java.lang.Object)
      */
   @Override
   public void setProperty( String key, Object value ) {

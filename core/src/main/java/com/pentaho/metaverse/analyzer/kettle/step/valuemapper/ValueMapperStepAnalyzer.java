@@ -36,9 +36,9 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -142,7 +142,7 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
    *
    * @param meta The step metadata
    * @return a set of field mappings (input field -> output field)
-   * @throws org.pentaho.platform.api.metaverse.MetaverseAnalyzerException
+   * @throws com.pentaho.metaverse.api.MetaverseAnalyzerException
    */
   @Override
   public Set<IFieldMapping> getFieldMappings( ValueMapperMeta meta ) throws MetaverseAnalyzerException {

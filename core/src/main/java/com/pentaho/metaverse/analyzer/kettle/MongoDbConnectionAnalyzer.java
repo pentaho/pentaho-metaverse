@@ -5,10 +5,10 @@ import com.pentaho.metaverse.api.IConnectionAnalyzer;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.MetaverseLogicalIdGenerator;
 import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.ArrayList;
 import java.util.List;

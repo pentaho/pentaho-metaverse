@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -24,10 +24,12 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
 import com.pentaho.metaverse.api.model.IExecutionEngine;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
+import com.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.impl.model.ExecutionEngine;
 import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.version.BuildVersion;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -54,6 +56,10 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
     ExecutionProfileUtil.dumpExecutionProfile( out, executionProfile );
   }
 
+  public void writeLineageInfo( PrintStream out, LineageHolder holder ) throws IOException {
+    writeExecutionProfile( out, holder.getExecutionProfile() );
+  }
+
   /**
    * Populates and returns an IExecutionEngine object with the appropriate values
    *
@@ -65,5 +71,11 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
     executionEngine.setVersion( BuildVersion.getInstance().getVersion() );
     executionEngine.setDescription( EXECUTION_ENGINE_DESCRIPTION );
     return executionEngine;
+  }
+
+  public void addRuntimeLineageInfo( LineageHolder holder ) {
+    // TODO
+    IMetaverseBuilder builder = holder.getMetaverseBuilder();
+    IExecutionProfile profile = holder.getExecutionProfile();
   }
 }

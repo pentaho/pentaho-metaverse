@@ -23,12 +23,18 @@ package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
+import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
+import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.IParamInfo;
+import com.pentaho.metaverse.api.model.LineageHolder;
+import com.pentaho.metaverse.impl.MetaverseCompletionService;
 import com.pentaho.metaverse.impl.model.ExecutionData;
 import com.pentaho.metaverse.impl.model.ExecutionProfile;
 import com.pentaho.metaverse.impl.model.ParamInfo;
+import com.pentaho.metaverse.util.MetaverseBeanUtil;
+import com.pentaho.metaverse.util.MetaverseUtil;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
@@ -38,15 +44,23 @@ import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
+import com.pentaho.metaverse.api.IDocument;
+import com.pentaho.metaverse.api.IDocumentAnalyzer;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.INamespace;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * An extension point to gather runtime data for an execution of a transformation into an ExecutionProfile object
@@ -57,10 +71,21 @@ import java.util.concurrent.ConcurrentHashMap;
   id = "transRuntimeMetaverse" )
 public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements TransListener {
 
-  private static Map<Trans, IExecutionProfile> profileMap = new ConcurrentHashMap<Trans, IExecutionProfile>();
+  private IDocumentAnalyzer documentAnalyzer;
 
-  public static Map<Trans, IExecutionProfile> getProfileMap() {
-    return profileMap;
+  private static Map<Trans, LineageHolder> lineageHolderMap = new ConcurrentHashMap<Trans, LineageHolder>();
+
+  public static LineageHolder getLineageHolder( Trans t ) {
+    LineageHolder holder = lineageHolderMap.get( t );
+    if ( holder == null ) {
+      holder = new LineageHolder();
+      lineageHolderMap.put( t, holder );
+    }
+    return holder;
+  }
+
+  public static void putLineageHolder( Trans t, LineageHolder holder ) {
+    lineageHolderMap.put( t, holder );
   }
 
   /**
@@ -97,8 +122,46 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     ExecutionProfile executionProfile = new ExecutionProfile();
     populateExecutionProfile( executionProfile, trans );
 
-    // Save the execution profile for later
-    profileMap.put( trans, executionProfile );
+    IMetaverseBuilder builder = getMetaverseBuilder( trans );
+
+    // Analyze the current transformation
+    if ( documentAnalyzer != null ) {
+      documentAnalyzer.setMetaverseBuilder( builder );
+
+      // Create a document for the Trans TODO - fix this!
+      final String clientName = "PDI Engine";
+      final INamespace namespace = new Namespace( clientName );
+
+      final IMetaverseNode designNode = builder.getMetaverseObjectFactory()
+        .createNodeObject( clientName, clientName, DictionaryConst.NODE_TYPE_LOCATOR );
+      builder.addNode( designNode );
+
+      final TransMeta transMeta = trans.getTransMeta();
+
+      String id = TransExtensionPointUtil.getFilename( transMeta );
+
+      IDocument metaverseDocument = builder.getMetaverseObjectFactory().createDocumentObject();
+
+      metaverseDocument.setNamespace( namespace );
+      metaverseDocument.setContent( transMeta );
+      metaverseDocument.setStringID( id );
+      metaverseDocument.setName( transMeta.getName() );
+      metaverseDocument.setExtension( "ktr" );
+      metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "trans.ktr" ) );
+      metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, id );
+      metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
+
+      Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
+
+      MetaverseCompletionService.getInstance().submit( analyzerRunner, id );
+    }
+
+    // Save the lineage objects for later
+    LineageHolder holder = getLineageHolder( trans );
+    holder.setExecutionProfile( executionProfile );
+    holder.setMetaverseBuilder( builder );
+
+
   }
 
   protected void populateExecutionProfile( IExecutionProfile executionProfile, Trans trans ) {
@@ -154,7 +217,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
             trans.getParameterDefault( param ) );
           paramList.add( paramInfo );
         } catch ( UnknownParamException e ) {
-          e.printStackTrace();
+          e.printStackTrace(); // TODO logging?
         }
       }
     }
@@ -191,8 +254,20 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       return;
     }
 
+
     // Get the current execution profile for this transformation
-    IExecutionProfile executionProfile = profileMap.remove( trans );
+    LineageHolder holder = getLineageHolder( trans );
+    Future lineageTask = holder.getLineageTask();
+    if ( lineageTask != null ) {
+      try {
+        lineageTask.get();
+      } catch ( InterruptedException e ) {
+        e.printStackTrace(); // TODO logger?
+      } catch ( ExecutionException e ) {
+        e.printStackTrace(); // TODO logger?
+      }
+    }
+    IExecutionProfile executionProfile = holder.getExecutionProfile();
     if ( executionProfile == null ) {
       // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
       // the same info, so populate a new ExecutionProfile using the current Trans
@@ -206,10 +281,47 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     if ( result != null ) {
       executionData.setFailureCount( result.getNrErrors() );
     }
+
+    // Add the execution profile information to the lineage graph
+    addRuntimeLineageInfo( holder );
+
+    // Export the lineage info (execution profile, lineage graph, etc.)
     try {
-      writeExecutionProfile( System.out, executionProfile );
+      writeLineageInfo( System.out, holder );
     } catch ( IOException e ) {
       throw new KettleException( e );
     }
+  }
+
+  protected IMetaverseBuilder getMetaverseBuilder( Trans trans ) {
+    if ( trans != null ) {
+      if ( trans.getParentJob() == null && trans.getParentTrans() == null ) {
+        return (IMetaverseBuilder) MetaverseBeanUtil.getInstance().get( "IMetaverseBuilderPrototype" );
+      } else {
+        if ( trans.getParentJob() != null ) {
+          // Get the builder for the job
+          return JobRuntimeExtensionPoint.getLineageHolder( trans.getParentJob() ).getMetaverseBuilder();
+        } else {
+          return TransformationRuntimeExtensionPoint.getLineageHolder( trans.getParentTrans() ).getMetaverseBuilder();
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Sets the document analyzer for this extension point
+   * @param analyzer The document analyzer for this extension point
+   */
+  public void setDocumentAnalyzer( IDocumentAnalyzer analyzer ) {
+    this.documentAnalyzer = analyzer;
+  }
+
+  /**
+   * Gets the document analyzer of this extension point
+   * @return IDocumentAnalyzer - The document analyzer for this extension point
+   */
+  public IDocumentAnalyzer getDocumentAnalyzer() {
+    return documentAnalyzer;
   }
 }

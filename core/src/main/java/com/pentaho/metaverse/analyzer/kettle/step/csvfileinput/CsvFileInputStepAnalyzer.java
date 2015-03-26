@@ -29,10 +29,10 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
-import org.pentaho.platform.api.metaverse.MetaverseException;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.MetaverseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

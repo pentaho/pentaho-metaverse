@@ -50,7 +50,7 @@ import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

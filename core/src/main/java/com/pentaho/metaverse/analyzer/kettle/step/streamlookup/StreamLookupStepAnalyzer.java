@@ -35,9 +35,9 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.streamlookup.StreamLookupMeta;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

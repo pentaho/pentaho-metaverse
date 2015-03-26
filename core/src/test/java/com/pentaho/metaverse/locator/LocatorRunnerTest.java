@@ -31,13 +31,13 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.pentaho.platform.api.metaverse.IDocumentEvent;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IDocument;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
-import org.pentaho.platform.api.metaverse.MetaverseException;
+import com.pentaho.metaverse.api.IDocumentEvent;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IDocument;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.MetaverseException;
 
 import java.io.File;
 

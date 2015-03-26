@@ -32,7 +32,7 @@ import org.pentaho.di.www.CarteSingleton;
 import org.pentaho.di.www.SlaveServerConfig;
 import org.pentaho.di.www.TransformationMap;
 import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.api.metaverse.IDocumentListener;
+import com.pentaho.metaverse.api.IDocumentListener;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * A document locator for the DI repository @see org.pentaho.platform.api.metaverse.IDocumentLocator
+ * A document locator for the DI repository @see com.pentaho.metaverse.api.IDocumentLocator
  * @author jdixon
  *
  */

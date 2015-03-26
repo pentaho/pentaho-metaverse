@@ -28,9 +28,9 @@ import java.util.Set;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.groupby.GroupByMeta;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ChangeType;
@@ -48,7 +48,7 @@ public class GroupByStepAnalyzer extends BaseStepAnalyzer<GroupByMeta> {
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(IComponentDescriptor,java.lang.Object)
+   * @see com.pentaho.metaverse.api.IAnalyzer#analyze(IComponentDescriptor,java.lang.Object)
    */
   @Override
   public IMetaverseNode analyze( IComponentDescriptor descriptor, GroupByMeta groupByMeta )

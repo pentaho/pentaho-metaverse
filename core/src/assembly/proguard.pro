@@ -24,9 +24,5 @@
   public <methods>;
 }
 
--keep public class com.pentaho.metaverse.** implements org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder {
-  public <methods>;
-}
-
 -keep public class com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider {}
 -keep public class com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider {}

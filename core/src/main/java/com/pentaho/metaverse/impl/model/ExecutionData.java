@@ -45,7 +45,8 @@ public class ExecutionData implements IExecutionData {
   private String clientExecutor;
   private String loggingChannelId;
   private List<IParamInfo<String>> parameters = new ArrayList<IParamInfo<String>>();
-  private Map<String, List<IExternalResourceInfo>> externalResources = new HashMap<String, List<IExternalResourceInfo>>();
+  private Map<String, List<IExternalResourceInfo>> externalResources =
+    new HashMap<String, List<IExternalResourceInfo>>();
   private Map<Object, Object> variables = new Hashtable<Object, Object>();
   private List<Object> arguments = new ArrayList<Object>();
   private IArtifactMetadata artifactMetadata;

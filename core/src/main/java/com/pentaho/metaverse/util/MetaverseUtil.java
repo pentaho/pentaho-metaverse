@@ -40,12 +40,12 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import flexjson.JSONDeserializer;
 import org.pentaho.di.core.Const;
-import org.pentaho.platform.api.metaverse.IDocument;
-import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
-import org.pentaho.platform.api.metaverse.MetaverseException;
+import com.pentaho.metaverse.api.IDocument;
+import com.pentaho.metaverse.api.IDocumentAnalyzer;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.MetaverseException;
 
 import java.util.List;
 import java.util.Map;
@@ -123,23 +123,7 @@ public class MetaverseUtil {
       if ( matchingAnalyzers != null ) {
         for ( final IDocumentAnalyzer analyzer : matchingAnalyzers ) {
 
-          Runnable analyzerRunner = new Runnable() {
-            @Override
-            public void run() {
-              try {
-
-                analyzer.analyze(
-                  new MetaverseComponentDescriptor(
-                    document.getName(),
-                    DictionaryConst.NODE_TYPE_TRANS,
-                    document.getNamespace() ),
-                  document
-                );
-              } catch ( MetaverseAnalyzerException mae ) {
-                throw new RuntimeException( Messages.getString( "ERROR.AnalyzingDocument", document.getNamespaceId() ), mae );
-              }
-            }
-          };
+          Runnable analyzerRunner = getAnalyzerRunner( analyzer, document );
 
           Graph g = ( graph != null ) ? graph : new TinkerGraph();
           Future<Graph> transAnalysis =
@@ -208,5 +192,25 @@ public class MetaverseUtil {
       //return new JSONDeserializer<Operations>().use(null, Operations.class).deserialize( operations );
     }
     return resultOps;
+  }
+
+  public static Runnable getAnalyzerRunner( final IDocumentAnalyzer analyzer, final IDocument document ) {
+    return new Runnable() {
+      @Override
+      public void run() {
+        try {
+
+          analyzer.analyze(
+            new MetaverseComponentDescriptor(
+              document.getName(),
+              DictionaryConst.NODE_TYPE_TRANS,
+              document.getNamespace() ),
+            document
+          );
+        } catch ( MetaverseAnalyzerException mae ) {
+          throw new RuntimeException( Messages.getString( "ERROR.AnalyzingDocument", document.getNamespaceId() ), mae );
+        }
+      }
+    };
   }
 }

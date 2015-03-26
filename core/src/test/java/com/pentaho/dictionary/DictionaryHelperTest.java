@@ -25,7 +25,7 @@ package com.pentaho.dictionary;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.trans.Trans;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseNode;
 
 import java.util.HashSet;
 import java.util.Properties;

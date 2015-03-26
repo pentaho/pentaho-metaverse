@@ -23,7 +23,7 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import org.pentaho.platform.api.metaverse.IDocumentLocator;
+import com.pentaho.metaverse.api.IDocumentLocator;
 
 import java.util.HashSet;
 import java.util.Set;

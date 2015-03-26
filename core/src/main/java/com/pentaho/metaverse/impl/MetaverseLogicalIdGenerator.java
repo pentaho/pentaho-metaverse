@@ -23,8 +23,8 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryConst;
-import org.pentaho.platform.api.metaverse.IHasProperties;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.IHasProperties;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

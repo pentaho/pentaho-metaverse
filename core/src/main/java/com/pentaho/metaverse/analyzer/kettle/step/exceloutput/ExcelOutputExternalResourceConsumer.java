@@ -42,7 +42,8 @@ import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStep
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 
-public class ExcelOutputExternalResourceConsumer extends BaseStepExternalResourceConsumer<ExcelOutput, ExcelOutputMeta> {
+public class ExcelOutputExternalResourceConsumer
+  extends BaseStepExternalResourceConsumer<ExcelOutput, ExcelOutputMeta> {
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( ExcelOutputMeta meta ) {
@@ -63,8 +64,8 @@ public class ExcelOutputExternalResourceConsumer extends BaseStepExternalResourc
               if ( !Const.isEmpty( path ) ) {
                 try {
 
-                  IExternalResourceInfo resource =
-                      ExternalResourceInfoFactory.createFileResource( KettleVFS.getFileObject( path ), false );
+                  IExternalResourceInfo resource = ExternalResourceInfoFactory.createFileResource(
+                    KettleVFS.getFileObject( path ), false );
                   if ( resource != null ) {
                     resources.add( resource );
                   } else {
@@ -84,7 +85,7 @@ public class ExcelOutputExternalResourceConsumer extends BaseStepExternalResourc
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromRow( ExcelOutput excelOutput, RowMetaInterface rowMeta,
-      Object[] row ) {
+                                                                Object[] row ) {
     Collection<IExternalResourceInfo> resources = new LinkedList<IExternalResourceInfo>();
     // For some reason the step doesn't return the StepMetaInterface directly, so go around it
 

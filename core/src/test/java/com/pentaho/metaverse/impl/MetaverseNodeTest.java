@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
 
 import java.util.Date;
 import java.util.HashMap;

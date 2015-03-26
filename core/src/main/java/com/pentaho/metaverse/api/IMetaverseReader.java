@@ -24,8 +24,6 @@ package com.pentaho.metaverse.api;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Graph;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 import java.util.List;
 

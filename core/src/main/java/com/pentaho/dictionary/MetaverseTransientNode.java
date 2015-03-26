@@ -23,10 +23,10 @@
 package com.pentaho.dictionary;
 
 import com.pentaho.metaverse.impl.PropertiesHolder;
-import org.pentaho.platform.api.metaverse.IIdentifierModifiable;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import com.pentaho.metaverse.api.IIdentifierModifiable;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.IMetaverseLink;
+import com.pentaho.metaverse.api.IMetaverseNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +62,7 @@ public class MetaverseTransientNode extends PropertiesHolder implements IMetaver
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getName()
+   * @see com.pentaho.metaverse.api.IIdentifiable#getName()
    */
   @Override
   public String getName() {
@@ -72,7 +72,7 @@ public class MetaverseTransientNode extends PropertiesHolder implements IMetaver
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getStringID()
+   * @see com.pentaho.metaverse.api.IIdentifiable#getStringID()
    */
   @Override
   public String getStringID() {
@@ -82,7 +82,7 @@ public class MetaverseTransientNode extends PropertiesHolder implements IMetaver
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getType()
+   * @see com.pentaho.metaverse.api.IIdentifiable#getType()
    */
   @Override
   public String getType() {
@@ -92,7 +92,7 @@ public class MetaverseTransientNode extends PropertiesHolder implements IMetaver
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setName(java.lang.String)
+   * @see com.pentaho.metaverse.api.IIdentifiableWritable#setName(java.lang.String)
    */
   @Override
   public void setName( String name ) {
@@ -102,7 +102,7 @@ public class MetaverseTransientNode extends PropertiesHolder implements IMetaver
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setStringID(java.lang.String)
+   * @see com.pentaho.metaverse.api.IIdentifiableWritable#setStringID(java.lang.String)
    */
   @Override
   public void setStringID( String id ) {
@@ -112,7 +112,7 @@ public class MetaverseTransientNode extends PropertiesHolder implements IMetaver
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setType(java.lang.String)
+   * @see com.pentaho.metaverse.api.IIdentifiableWritable#setType(java.lang.String)
    */
   @Override
   public void setType( String type ) {

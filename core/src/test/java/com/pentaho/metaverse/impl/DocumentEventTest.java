@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.platform.api.metaverse.IDocument;
+import com.pentaho.metaverse.api.IDocument;
 
 import static org.junit.Assert.*;
 

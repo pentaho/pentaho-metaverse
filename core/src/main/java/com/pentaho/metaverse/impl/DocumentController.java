@@ -25,15 +25,16 @@ package com.pentaho.metaverse.impl;
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.messages.Messages;
-import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
-import org.pentaho.platform.api.metaverse.IDocumentEvent;
-import org.pentaho.platform.api.metaverse.IDocumentListener;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IDocumentAnalyzer;
+import com.pentaho.metaverse.api.IDocumentEvent;
+import com.pentaho.metaverse.api.IDocumentListener;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseLink;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.IRequiresMetaverseBuilder;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.tinkerpop.blueprints.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,6 +129,31 @@ public class DocumentController implements IDocumentController, IDocumentListene
     }
   }
 
+  /**
+   * Returns the underlying graph associated with this builder
+   *
+   * @return the backing Graph object
+   */
+  @Override
+  public Graph getGraph() {
+    if ( metaverseBuilder != null ) {
+      return metaverseBuilder.getGraph();
+    }
+    return null;
+  }
+
+  /**
+   * Sets the underlying graph for this builder
+   *
+   * @param graph the graph to set for the builder
+   */
+  @Override
+  public void setGraph( Graph graph ) {
+    if ( metaverseBuilder != null ) {
+      metaverseBuilder.setGraph( graph );
+    }
+  }
+
   /*
      * (non-Javadoc)
      *
@@ -185,7 +211,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * (non-Javadoc)
    * 
    * @see
-   * org.pentaho.platform.api.metaverse.IDocumentListener#onEvent(org.pentaho.platform.api.metaverse.IDocumentEvent)
+   * com.pentaho.metaverse.api.IDocumentListener#onEvent(com.pentaho.metaverse.api.IDocumentEvent)
    */
   @Override
   public void onEvent( IDocumentEvent event ) {
@@ -291,7 +317,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * (non-Javadoc)
    * 
    * @see
-   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#addNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
+   * com.pentaho.metaverse.api.IMetaverseBuilder#addNode(com.pentaho.metaverse.api.IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder addNode( IMetaverseNode iMetaverseNode ) {
@@ -302,7 +328,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * (non-Javadoc)
    * 
    * @see
-   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#addLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
+   * com.pentaho.metaverse.api.IMetaverseBuilder#addLink(com.pentaho.metaverse.api.IMetaverseLink)
    */
   @Override
   public IMetaverseBuilder addLink( IMetaverseLink iMetaverseLink ) {
@@ -313,7 +339,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * (non-Javadoc)
    * 
    * @see
-   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#deleteNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
+   * com.pentaho.metaverse.api.IMetaverseBuilder#deleteNode(com.pentaho.metaverse.api.IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder deleteNode( IMetaverseNode iMetaverseNode ) {
@@ -324,7 +350,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * (non-Javadoc)
    * 
    * @see
-   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#deleteLink(org.pentaho.platform.api.metaverse.IMetaverseLink)
+   * com.pentaho.metaverse.api.IMetaverseBuilder#deleteLink(com.pentaho.metaverse.api.IMetaverseLink)
    */
   @Override
   public IMetaverseBuilder deleteLink( IMetaverseLink iMetaverseLink ) {
@@ -335,7 +361,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * (non-Javadoc)
    * 
    * @see
-   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#updateNode(org.pentaho.platform.api.metaverse.IMetaverseNode)
+   * com.pentaho.metaverse.api.IMetaverseBuilder#updateNode(com.pentaho.metaverse.api.IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder updateNode( IMetaverseNode iMetaverseNode ) {
@@ -345,8 +371,8 @@ public class DocumentController implements IDocumentController, IDocumentListene
   /*
    * (non-Javadoc)
    * 
-   * @see org.pentaho.platform.api.metaverse.IMetaverseBuilder#
-   * updateLinkLabel(org.pentaho.platform.api.metaverse.IMetaverseLink , java.lang.String)
+   * @see com.pentaho.metaverse.api.IMetaverseBuilder#
+   * updateLinkLabel(com.pentaho.metaverse.api.IMetaverseLink , java.lang.String)
    */
   @Override
   public IMetaverseBuilder updateLinkLabel( IMetaverseLink iMetaverseLink, String newLabel ) {
@@ -357,8 +383,8 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * (non-Javadoc)
    * 
    * @see
-   * org.pentaho.platform.api.metaverse.IMetaverseBuilder#addLink(org.pentaho.platform.api.metaverse.IMetaverseNode,
-   * java.lang.String, org.pentaho.platform.api.metaverse.IMetaverseNode)
+   * com.pentaho.metaverse.api.IMetaverseBuilder#addLink(com.pentaho.metaverse.api.IMetaverseNode,
+   * java.lang.String, com.pentaho.metaverse.api.IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder addLink( IMetaverseNode fromNode, String label, IMetaverseNode toNode ) {

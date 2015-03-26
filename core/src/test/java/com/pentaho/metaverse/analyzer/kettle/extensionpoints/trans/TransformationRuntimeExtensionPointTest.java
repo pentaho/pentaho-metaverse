@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -35,6 +35,7 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -107,6 +108,7 @@ public class TransformationRuntimeExtensionPointTest {
   @Test
   public void testTransStarted() throws Exception {
     TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
+    when( ext.getMetaverseBuilder( Mockito.any( Trans.class ) ) ).thenReturn( mock( IMetaverseBuilder.class ) );
     ext.transStarted( null );
     verify( ext, never() ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );

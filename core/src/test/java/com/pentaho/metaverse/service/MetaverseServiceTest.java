@@ -30,8 +30,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.platform.api.metaverse.IDocumentLocator;
-import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
+import com.pentaho.metaverse.api.IDocumentLocator;
+import com.pentaho.metaverse.api.MetaverseLocatorException;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;

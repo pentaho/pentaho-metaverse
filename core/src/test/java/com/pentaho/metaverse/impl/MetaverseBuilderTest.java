@@ -10,10 +10,10 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
-import org.pentaho.platform.api.metaverse.IDocument;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.IDocument;
+import com.pentaho.metaverse.api.IMetaverseLink;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;

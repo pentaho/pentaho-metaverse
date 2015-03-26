@@ -25,9 +25,9 @@ package com.pentaho.metaverse.api;
 import com.pentaho.dictionary.DictionaryConst;
 import org.junit.Before;
 import org.junit.Test;
-import org.pentaho.platform.api.metaverse.IAnalysisContext;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.INamespace;
+import com.pentaho.metaverse.api.IAnalysisContext;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.INamespace;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;

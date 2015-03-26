@@ -10,12 +10,12 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
-import org.pentaho.platform.api.metaverse.IAnalysisContext;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.INamespace;
+import com.pentaho.metaverse.api.IAnalysisContext;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.INamespace;
 
 import java.util.List;
 
