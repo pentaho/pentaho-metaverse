@@ -26,7 +26,7 @@ import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.Map;
 import java.util.Set;

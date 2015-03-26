@@ -53,18 +53,18 @@
     <property name="stepAnalyzerProvider" ref="IStepAnalyzerProvider"/>
   </bean>
   <service id="transformationAnalyzerService"
-           interface="org.pentaho.platform.api.metaverse.IDocumentAnalyzer"
+           interface="com.pentaho.metaverse.api.IDocumentAnalyzer"
            ref="TransformationAnalyzer"/>
 
   <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer">
     <property name="jobEntryAnalyzerProvider" ref="IJobEntryAnalyzerProvider"/>
   </bean>
   <service id="jobAnalyzerService"
-           interface="org.pentaho.platform.api.metaverse.IDocumentAnalyzer"
+           interface="com.pentaho.metaverse.api.IDocumentAnalyzer"
            ref="JobAnalyzer"/>
 
   <reference-list id="documentAnalyzersRefList"
-                  interface="org.pentaho.platform.api.metaverse.IDocumentAnalyzer"
+                  interface="com.pentaho.metaverse.api.IDocumentAnalyzer"
                   member-type="service-object"
                   availability="optional">
     <reference-listener ref="IDocumentController" bind-method="addAnalyzer" unbind-method="removeAnalyzer"/>

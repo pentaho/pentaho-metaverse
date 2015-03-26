@@ -17,8 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
 
 /**
  * The IMetaverseBuilder is a Builder that creates and maintains a metaverse model, which contains nodes and links.
@@ -31,7 +29,7 @@ public interface IMetaverseBuilder {
    * @param node the node to add
    * @return the metaverse builder (for chaining)
    */
-  org.pentaho.platform.api.metaverse.IMetaverseBuilder addNode( org.pentaho.platform.api.metaverse.IMetaverseNode node );
+  IMetaverseBuilder addNode( IMetaverseNode node );
 
   /**
    * Adds the specified link to the model. If the link refers to nodes that do not yet exist in the model, then
@@ -40,7 +38,7 @@ public interface IMetaverseBuilder {
    * @param link the link to add
    * @return the metaverse builder (for chaining)
    */
-  org.pentaho.platform.api.metaverse.IMetaverseBuilder addLink( IMetaverseLink link );
+  IMetaverseBuilder addLink( IMetaverseLink link );
 
   /**
    * Adds the link.
@@ -50,7 +48,7 @@ public interface IMetaverseBuilder {
    * @param toNode   the to node
    * @return the i metaverse builder
    */
-  org.pentaho.platform.api.metaverse.IMetaverseBuilder addLink( org.pentaho.platform.api.metaverse.IMetaverseNode fromNode, String label, org.pentaho.platform.api.metaverse.IMetaverseNode toNode );
+  IMetaverseBuilder addLink( IMetaverseNode fromNode, String label, IMetaverseNode toNode );
 
   /**
    * Deletes the specified node from the metaverse model.
@@ -58,7 +56,7 @@ public interface IMetaverseBuilder {
    * @param node the node to remove
    * @return the metaverse builder (for chaining)
    */
-  org.pentaho.platform.api.metaverse.IMetaverseBuilder deleteNode( org.pentaho.platform.api.metaverse.IMetaverseNode node );
+  IMetaverseBuilder deleteNode( IMetaverseNode node );
 
   /**
    * Deletes the specified link from the metaverse model.
@@ -66,7 +64,7 @@ public interface IMetaverseBuilder {
    * @param link the link to remove
    * @return the metaverse builder (for chaining)
    */
-  org.pentaho.platform.api.metaverse.IMetaverseBuilder deleteLink( IMetaverseLink link );
+  IMetaverseBuilder deleteLink( IMetaverseLink link );
 
   /**
    * Updates the specified node to have the provided attributes.
@@ -74,7 +72,7 @@ public interface IMetaverseBuilder {
    * @param updatedNode the node with updated attributes
    * @return the metaverse builder (for chaining)
    */
-  org.pentaho.platform.api.metaverse.IMetaverseBuilder updateNode( IMetaverseNode updatedNode );
+  IMetaverseBuilder updateNode( IMetaverseNode updatedNode );
 
   /**
    * Updates the specified link to have the provided attributes.
@@ -83,7 +81,7 @@ public interface IMetaverseBuilder {
    * @param newLabel the new label
    * @return the metaverse builder (for chaining)
    */
-  org.pentaho.platform.api.metaverse.IMetaverseBuilder updateLinkLabel( IMetaverseLink link, String newLabel );
+  IMetaverseBuilder updateLinkLabel( IMetaverseLink link, String newLabel );
 
   /**
    * Returns a metaverse object factory for creating metaverse components (nodes, links, e.g.)

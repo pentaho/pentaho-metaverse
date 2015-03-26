@@ -26,10 +26,10 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 /**
  * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
@@ -41,7 +41,7 @@ public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseC
    * Analyzes a database connection for metadata.
    *
    * @param dbMeta the object
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(org.pentaho.platform.api.metaverse.IComponentDescriptor, java.lang.Object)
+   * @see com.pentaho.metaverse.api.IAnalyzer#analyze(com.pentaho.metaverse.api.IComponentDescriptor, java.lang.Object)
    */
   @Override
   public IMetaverseNode analyze( IComponentDescriptor descriptor, DatabaseMeta dbMeta )

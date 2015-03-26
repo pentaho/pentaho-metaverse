@@ -17,7 +17,7 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IDocumentEvent;
+import com.pentaho.metaverse.api.IDocumentEvent;
 
 /**
  * Listens for events fired from IDocumentLocator objects

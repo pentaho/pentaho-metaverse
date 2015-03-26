@@ -36,10 +36,10 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.platform.api.metaverse.IDocumentEvent;
-import org.pentaho.platform.api.metaverse.IDocumentListener;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
+import com.pentaho.metaverse.api.IDocumentEvent;
+import com.pentaho.metaverse.api.IDocumentListener;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.MetaverseLocatorException;
 
 import java.io.File;
 import java.io.FileOutputStream;

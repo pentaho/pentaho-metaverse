@@ -42,9 +42,9 @@ import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.api.metaverse.IDocumentEvent;
-import org.pentaho.platform.api.metaverse.IDocumentListener;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IDocumentEvent;
+import com.pentaho.metaverse.api.IDocumentListener;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 
 import java.util.ArrayList;

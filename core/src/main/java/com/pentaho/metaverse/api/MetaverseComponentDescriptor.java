@@ -1,11 +1,11 @@
 package com.pentaho.metaverse.api;
 
 import com.pentaho.dictionary.DictionaryConst;
-import org.pentaho.platform.api.metaverse.IAnalysisContext;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.INamespace;
+import com.pentaho.metaverse.api.IAnalysisContext;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.INamespace;
 
 /**
  * Created by mburgess on 8/12/14.

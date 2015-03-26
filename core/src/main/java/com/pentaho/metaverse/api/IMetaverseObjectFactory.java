@@ -17,8 +17,8 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseLink;
+import com.pentaho.metaverse.api.IMetaverseNode;
 
 import java.util.Map;
 
@@ -39,7 +39,7 @@ public interface IMetaverseObjectFactory {
    * @param id id of the new node
    * @return the new IMetaverseNode instance
    */
-  org.pentaho.platform.api.metaverse.IMetaverseNode createNodeObject( String id );
+  com.pentaho.metaverse.api.IMetaverseNode createNodeObject( String id );
 
   /**
    * Creates a new metaverse node and sets its name and type properties as well
@@ -48,7 +48,7 @@ public interface IMetaverseObjectFactory {
    * @param type type of the new node
    * @return
    */
-  org.pentaho.platform.api.metaverse.IMetaverseNode createNodeObject( String id, String name, String type );
+  com.pentaho.metaverse.api.IMetaverseNode createNodeObject( String id, String name, String type );
 
   /**
    * Creates a new metaverse node and sets its name and type properties as well.
@@ -58,7 +58,7 @@ public interface IMetaverseObjectFactory {
    * @param type type of the new node
    * @return
    */
-  org.pentaho.platform.api.metaverse.IMetaverseNode createNodeObject( INamespace namespace, String name, String type );
+  com.pentaho.metaverse.api.IMetaverseNode createNodeObject( INamespace namespace, String name, String type );
 
   /**
    * Creates a new metaverse node and sets its name and type properties as well

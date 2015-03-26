@@ -28,9 +28,9 @@ import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.api.model.kettle.FieldMapping;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.numberrange.NumberRangeMeta;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -44,7 +44,7 @@ public class NumberRangeStepAnalyzer extends BaseStepAnalyzer<NumberRangeMeta> {
   /**
    * Analyzes Number Range steps to determine the various operations performed on fields and their data
    *
-   * @see org.pentaho.platform.api.metaverse.IAnalyzer#analyze(org.pentaho.platform.api.metaverse.IComponentDescriptor, java.lang.Object)
+   * @see com.pentaho.metaverse.api.IAnalyzer#analyze(com.pentaho.metaverse.api.IComponentDescriptor, java.lang.Object)
    */
   @Override
   public IMetaverseNode analyze(
@@ -77,7 +77,7 @@ public class NumberRangeStepAnalyzer extends BaseStepAnalyzer<NumberRangeMeta> {
    *
    * @param meta The step metadata
    * @return a set of field mappings (input field -> output field)
-   * @throws org.pentaho.platform.api.metaverse.MetaverseAnalyzerException
+   * @throws com.pentaho.metaverse.api.MetaverseAnalyzerException
    */
   @Override
   public Set<IFieldMapping> getFieldMappings( NumberRangeMeta meta ) throws MetaverseAnalyzerException {

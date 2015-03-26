@@ -17,7 +17,7 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IIdentifiable;
+import com.pentaho.metaverse.api.IIdentifiable;
 
 /**
  * The IIdentifierModifiable interface augments the IIdentifiable interface by allowing for the changing of the unique

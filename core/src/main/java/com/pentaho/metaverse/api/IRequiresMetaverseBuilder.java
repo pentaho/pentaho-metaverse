@@ -17,7 +17,7 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
 
 /**
  * The IRequiresMetaverseBuilder contains helper methods for interfaces and classes that need a metaverse builder
@@ -30,7 +30,7 @@ public interface IRequiresMetaverseBuilder {
    *
    * @param builder the metaverse builder
    */
-  void setMetaverseBuilder( org.pentaho.platform.api.metaverse.IMetaverseBuilder builder );
+  void setMetaverseBuilder( com.pentaho.metaverse.api.IMetaverseBuilder builder );
 
   /**
    * Returns the metaverse builder used by analyzer(s) to create nodes and links in the metaverse

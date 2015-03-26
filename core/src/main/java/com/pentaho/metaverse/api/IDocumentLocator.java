@@ -17,10 +17,10 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IDocumentEvent;
-import org.pentaho.platform.api.metaverse.IDocumentListener;
-import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
+import com.pentaho.metaverse.api.IDocumentEvent;
+import com.pentaho.metaverse.api.IDocumentListener;
+import com.pentaho.metaverse.api.IRequiresMetaverseBuilder;
+import com.pentaho.metaverse.api.MetaverseLocatorException;
 
 import java.net.URI;
 

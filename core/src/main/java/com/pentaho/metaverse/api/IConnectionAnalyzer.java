@@ -22,9 +22,9 @@
 package com.pentaho.metaverse.api;
 
 
-import org.pentaho.platform.api.metaverse.IAnalyzer;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import com.pentaho.metaverse.api.IAnalyzer;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
 
 import java.util.List;
 

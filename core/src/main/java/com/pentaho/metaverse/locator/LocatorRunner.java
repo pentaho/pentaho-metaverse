@@ -26,8 +26,8 @@ import com.pentaho.metaverse.impl.DocumentEvent;
 import com.pentaho.metaverse.messages.Messages;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import org.apache.commons.io.FilenameUtils;
-import org.pentaho.platform.api.metaverse.IDocument;
-import org.pentaho.platform.api.metaverse.INamespace;
+import com.pentaho.metaverse.api.IDocument;
+import com.pentaho.metaverse.api.INamespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

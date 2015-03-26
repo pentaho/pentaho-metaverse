@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IDocumentAnalyzer;
+import com.pentaho.metaverse.api.IDocumentAnalyzer;
 
 import java.util.List;
 

@@ -1,8 +1,8 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import org.junit.Test;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.INamespace;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.INamespace;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

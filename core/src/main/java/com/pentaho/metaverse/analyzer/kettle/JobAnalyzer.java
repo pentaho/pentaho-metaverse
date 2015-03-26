@@ -37,11 +37,11 @@ import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IDocument;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.api.metaverse.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IDocument;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -246,7 +246,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
    * Returns a set of strings corresponding to which types of content are supported by this analyzer
    *
    * @return the supported types (as a set of Strings)
-   * @see org.pentaho.platform.api.metaverse.IDocumentAnalyzer#getSupportedTypes()
+   * @see com.pentaho.metaverse.api.IDocumentAnalyzer#getSupportedTypes()
    */
   @Override
   public Set<String> getSupportedTypes() {

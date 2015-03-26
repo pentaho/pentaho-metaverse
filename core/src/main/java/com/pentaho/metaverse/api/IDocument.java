@@ -17,9 +17,9 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IHasProperties;
-import org.pentaho.platform.api.metaverse.IIdentifierModifiable;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IHasProperties;
+import com.pentaho.metaverse.api.IIdentifierModifiable;
 
 /**
  * The IDocument interface represents a document in the metaverse.

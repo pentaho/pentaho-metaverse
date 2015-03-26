@@ -23,14 +23,14 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
-import org.pentaho.platform.api.metaverse.IComponentDescriptor;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.INamespace;
-import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.MetaverseException;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.IRequiresMetaverseBuilder;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.MetaverseException;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -52,7 +52,7 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
   /*
    * (non-Javadoc)
    *
-   * @see org.pentaho.platform.api.metaverse.IDocumentAnalyzer#setMetaverseBuilder(org.pentaho.platform.api.metaverse.
+   * @see com.pentaho.metaverse.api.IDocumentAnalyzer#setMetaverseBuilder(com.pentaho.metaverse.api.
    * IMetaverseBuilder)
    */
   @Override

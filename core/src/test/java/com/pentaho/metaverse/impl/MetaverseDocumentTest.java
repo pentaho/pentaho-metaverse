@@ -29,9 +29,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pentaho.platform.api.metaverse.IHasProperties;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.INamespace;
+import com.pentaho.metaverse.api.IHasProperties;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.INamespace;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;

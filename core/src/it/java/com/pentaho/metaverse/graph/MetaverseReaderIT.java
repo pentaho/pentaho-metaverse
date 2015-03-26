@@ -31,7 +31,7 @@ import com.tinkerpop.blueprints.Graph;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.FileOutputStream;

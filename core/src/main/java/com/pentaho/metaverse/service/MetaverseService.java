@@ -26,8 +26,8 @@ import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
 import com.pentaho.metaverse.messages.Messages;
-import org.pentaho.platform.api.metaverse.IDocumentLocator;
-import org.pentaho.platform.api.metaverse.MetaverseLocatorException;
+import com.pentaho.metaverse.api.IDocumentLocator;
+import com.pentaho.metaverse.api.MetaverseLocatorException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

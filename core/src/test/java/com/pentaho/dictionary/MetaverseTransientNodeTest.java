@@ -28,8 +28,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pentaho.platform.api.metaverse.IHasProperties;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.IHasProperties;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;

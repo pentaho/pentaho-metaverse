@@ -23,13 +23,13 @@
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryConst;
-import org.pentaho.platform.api.metaverse.IAnalysisContext;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.IDocument;
-import org.pentaho.platform.api.metaverse.INamespace;
+import com.pentaho.metaverse.api.IAnalysisContext;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.IDocument;
+import com.pentaho.metaverse.api.INamespace;
 
 /**
- * Implementation of an @see org.pentaho.platform.api.metaverse.IDocument
+ * Implementation of an @see com.pentaho.metaverse.api.IDocument
  *
  * @author jdixon
  */
@@ -54,7 +54,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
   private IAnalysisContext context;
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IDocument#getExtension()
+   * @see com.pentaho.metaverse.api.IDocument#getExtension()
    */
   @Override
   public String getExtension() {
@@ -62,7 +62,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IDocument#setExtension( String extension)
+   * @see com.pentaho.metaverse.api.IDocument#setExtension( String extension)
    */
   @Override
   public void setExtension( String extension ) {
@@ -70,7 +70,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IDocument#getMimeType()
+   * @see com.pentaho.metaverse.api.IDocument#getMimeType()
    */
   @Override
   public String getMimeType() {
@@ -78,7 +78,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IDocument#setMimeType( String mimeType )
+   * @see com.pentaho.metaverse.api.IDocument#setMimeType( String mimeType )
    */
   @Override
   public void setMimeType( String mimeType ) {
@@ -86,7 +86,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IDocument#getContent()
+   * @see com.pentaho.metaverse.api.IDocument#getContent()
    */
   @Override
   public Object getContent() {
@@ -104,7 +104,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setName(java.lang.String)
+   * @see com.pentaho.metaverse.api.IIdentifiableWritable#setName(java.lang.String)
    */
   @Override
   public void setName( String name ) {
@@ -112,7 +112,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IIdentifiableWritable#setType(java.lang.String)
+   * @see com.pentaho.metaverse.api.IIdentifiableWritable#setType(java.lang.String)
    */
   @Override
   public void setType( String type ) {
@@ -120,7 +120,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getName()
+   * @see com.pentaho.metaverse.api.IIdentifiable#getName()
    */
   @Override
   public String getName() {
@@ -128,7 +128,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getStringID()
+   * @see com.pentaho.metaverse.api.IIdentifiable#getStringID()
    */
   @Override
   public String getStringID() {
@@ -136,7 +136,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
   }
 
   /* (non-Javadoc)
-   * @see org.pentaho.platform.api.metaverse.IIdentifiable#getType()
+   * @see com.pentaho.metaverse.api.IIdentifiable#getType()
    */
   @Override
   public String getType() {
@@ -147,7 +147,7 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
    * Sets the string ID for this document.
    *
    * @param id the ID to set
-   * @see org.pentaho.platform.api.metaverse.IIdentifierModifiable#setStringID(java.lang.String)
+   * @see com.pentaho.metaverse.api.IIdentifierModifiable#setStringID(java.lang.String)
    */
   @Override
   public void setStringID( String id ) {

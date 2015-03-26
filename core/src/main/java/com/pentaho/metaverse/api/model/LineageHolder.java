@@ -22,8 +22,8 @@
 
 package com.pentaho.metaverse.api.model;
 
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IRequiresMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IRequiresMetaverseBuilder;
 
 import java.util.concurrent.Future;
 

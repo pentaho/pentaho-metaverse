@@ -40,7 +40,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.platform.api.metaverse.IDocument;
+import com.pentaho.metaverse.api.IDocument;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.net.URLConnection;

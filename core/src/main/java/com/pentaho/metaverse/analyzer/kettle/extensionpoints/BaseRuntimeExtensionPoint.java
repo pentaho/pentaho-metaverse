@@ -29,7 +29,7 @@ import com.pentaho.metaverse.impl.model.ExecutionEngine;
 import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.version.BuildVersion;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
 
 import java.io.IOException;
 import java.io.PrintStream;

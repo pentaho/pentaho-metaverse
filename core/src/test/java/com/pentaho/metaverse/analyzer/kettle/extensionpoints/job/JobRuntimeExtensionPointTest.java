@@ -53,7 +53,7 @@ import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
 
 import com.pentaho.metaverse.api.model.IExecutionProfile;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
 
 @RunWith( MockitoJUnitRunner.class )
 public class JobRuntimeExtensionPointTest {
@@ -103,10 +103,10 @@ public class JobRuntimeExtensionPointTest {
   public void testCallExtensionPoint() throws Exception {
     JobRuntimeExtensionPoint spyJobExtensionPoint = spy( jobExtensionPoint );
     when( spyJobExtensionPoint.getMetaverseBuilder( Mockito.any( Job.class ) ) ).thenReturn( mockBuilder );
-    jobExtensionPoint.callExtensionPoint( null, job );
+    spyJobExtensionPoint.callExtensionPoint( null, job );
     List<JobListener> listeners = job.getJobListeners();
     assertNotNull( listeners );
-    assertTrue( listeners.contains( jobExtensionPoint ) );
+    assertTrue( listeners.contains( spyJobExtensionPoint ) );
   }
 
   @Test

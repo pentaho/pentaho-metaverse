@@ -24,7 +24,7 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.vfs.KettleVFS;
-import org.pentaho.platform.api.metaverse.MetaverseException;
+import com.pentaho.metaverse.api.MetaverseException;
 
 import java.io.File;
 

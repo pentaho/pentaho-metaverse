@@ -17,9 +17,9 @@ public interface INamespace {
    *
    * @return the INamespace of the entity one level above the current
    */
-  public org.pentaho.platform.api.metaverse.INamespace getParentNamespace();
+  public com.pentaho.metaverse.api.INamespace getParentNamespace();
 
-  public org.pentaho.platform.api.metaverse.INamespace getSiblingNamespace( String name, String type );
+  public com.pentaho.metaverse.api.INamespace getSiblingNamespace( String name, String type );
 
 }
 

@@ -17,7 +17,7 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IAnalyzer;
+import com.pentaho.metaverse.api.IAnalyzer;
 
 import java.util.Set;
 

@@ -17,7 +17,7 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IHasProperties;
+import com.pentaho.metaverse.api.IHasProperties;
 
 import java.util.Set;
 

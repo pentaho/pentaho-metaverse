@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.impl;
 
-import org.pentaho.platform.api.metaverse.IHasProperties;
+import com.pentaho.metaverse.api.IHasProperties;
 
 import java.util.HashMap;
 import java.util.Map;

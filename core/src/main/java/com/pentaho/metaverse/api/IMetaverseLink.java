@@ -17,7 +17,7 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseNode;
 
 /**
  * The IMetaverseLink interface represents methods operating on a link (i.e. relationship) in the metaverse
@@ -29,14 +29,14 @@ public interface IMetaverseLink extends IMetaverseElement {
    *
    * @return the from node
    */
-  public org.pentaho.platform.api.metaverse.IMetaverseNode getFromNode();
+  public com.pentaho.metaverse.api.IMetaverseNode getFromNode();
 
   /**
    * Gets the to node.
    *
    * @return the to node
    */
-  public org.pentaho.platform.api.metaverse.IMetaverseNode getToNode();
+  public com.pentaho.metaverse.api.IMetaverseNode getToNode();
 
   /**
    * Gets the label.
@@ -50,7 +50,7 @@ public interface IMetaverseLink extends IMetaverseElement {
    *
    * @param fromNode the new from node
    */
-  public void setFromNode( org.pentaho.platform.api.metaverse.IMetaverseNode fromNode );
+  public void setFromNode( com.pentaho.metaverse.api.IMetaverseNode fromNode );
 
   /**
    * Sets the to node.

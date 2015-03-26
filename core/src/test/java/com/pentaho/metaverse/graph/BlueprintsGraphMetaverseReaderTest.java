@@ -10,8 +10,8 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseLink;
+import com.pentaho.metaverse.api.IMetaverseNode;
 
 import java.io.File;
 import java.io.FileOutputStream;

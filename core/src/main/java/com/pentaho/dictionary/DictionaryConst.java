@@ -23,7 +23,7 @@
 package com.pentaho.dictionary;
 
 import com.pentaho.metaverse.impl.MetaverseLogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
 
 /**
  * Constants used in the graph building and reading. All data flow links must be left to right (source to destination).

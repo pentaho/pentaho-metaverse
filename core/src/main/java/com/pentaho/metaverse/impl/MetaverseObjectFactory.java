@@ -25,12 +25,12 @@ package com.pentaho.metaverse.impl;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.MetaverseLink;
 import com.pentaho.dictionary.MetaverseTransientNode;
-import org.pentaho.platform.api.metaverse.IDocument;
-import org.pentaho.platform.api.metaverse.ILogicalIdGenerator;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.INamespace;
+import com.pentaho.metaverse.api.IDocument;
+import com.pentaho.metaverse.api.ILogicalIdGenerator;
+import com.pentaho.metaverse.api.IMetaverseLink;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.INamespace;
 
 import java.util.Map;
 import java.util.UUID;

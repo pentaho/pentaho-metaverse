@@ -35,7 +35,7 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
 
 import java.io.IOException;
 import java.io.PrintStream;

@@ -1,8 +1,8 @@
 package com.pentaho.dictionary;
 
 import com.pentaho.metaverse.impl.PropertiesHolder;
-import org.pentaho.platform.api.metaverse.IMetaverseLink;
-import org.pentaho.platform.api.metaverse.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseLink;
+import com.pentaho.metaverse.api.IMetaverseNode;
 
 /**
  * Metaverse Link

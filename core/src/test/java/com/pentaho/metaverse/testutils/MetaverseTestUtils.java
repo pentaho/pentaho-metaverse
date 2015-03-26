@@ -26,8 +26,8 @@ import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceC
 import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.impl.MetaverseObjectFactory;
-import org.pentaho.platform.api.metaverse.IMetaverseBuilder;
-import org.pentaho.platform.api.metaverse.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.IAnalysisContext;
+import com.pentaho.metaverse.api.IAnalysisContext;
 
 /**
  * AnalysisContext is a reference implementation of IAnalysisContext, providing mutators and accessors (i.e. getters

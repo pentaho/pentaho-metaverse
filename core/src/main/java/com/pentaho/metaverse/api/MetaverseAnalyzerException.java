@@ -17,7 +17,7 @@
 
 package com.pentaho.metaverse.api;
 
-import org.pentaho.platform.api.metaverse.MetaverseException;
+import com.pentaho.metaverse.api.MetaverseException;
 
 /**
  * The MetaverseAnalyzerException class represents an unexpected error that occurs during analysis.
