@@ -17,10 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IRequiresMetaverseBuilder;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-
 /**
  * The IAnalyzer interface provides methods for analyzing types of content (with a goal of integrating with the
  * metaverse)

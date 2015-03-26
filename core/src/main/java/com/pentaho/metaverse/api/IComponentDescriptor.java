@@ -17,10 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.IAnalysisContext;
-import com.pentaho.metaverse.api.IIdentifiable;
-import com.pentaho.metaverse.api.INamespace;
-
 /**
  * IComponentDescriptor is a contract for an object that can describe a metaverse component. For example, it
  * could contain name, type, and namespace information for a particular document. The metadata about the component and

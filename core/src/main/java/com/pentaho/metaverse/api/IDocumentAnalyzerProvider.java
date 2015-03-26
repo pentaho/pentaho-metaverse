@@ -22,8 +22,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.IDocumentAnalyzer;
-
 import java.util.List;
 
 /**

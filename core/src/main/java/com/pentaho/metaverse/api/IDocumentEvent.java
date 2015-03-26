@@ -17,8 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.IDocument;
-
 /**
  * The IDocumentEvent interface represents events that occur when metaverse documents are being processed,
  * such as create, read, update, delete.

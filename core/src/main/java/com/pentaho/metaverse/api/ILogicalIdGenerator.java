@@ -17,8 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.IHasProperties;
-
 import java.util.Set;
 
 public interface ILogicalIdGenerator {

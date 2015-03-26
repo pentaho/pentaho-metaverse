@@ -17,8 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.IIdentifiable;
-
 /**
  * The IMetaverseNode interface represents a node/vertex in the graph model of the metaverse.
  */

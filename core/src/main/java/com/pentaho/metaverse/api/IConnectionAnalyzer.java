@@ -22,10 +22,6 @@
 package com.pentaho.metaverse.api;
 
 
-import com.pentaho.metaverse.api.IAnalyzer;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-
 import java.util.List;
 
 /**

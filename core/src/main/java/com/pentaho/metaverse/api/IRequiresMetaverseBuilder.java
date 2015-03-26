@@ -17,8 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-
 /**
  * The IRequiresMetaverseBuilder contains helper methods for interfaces and classes that need a metaverse builder
  */

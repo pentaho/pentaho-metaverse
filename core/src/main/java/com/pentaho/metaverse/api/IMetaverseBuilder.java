@@ -18,6 +18,8 @@
 package com.pentaho.metaverse.api;
 
 
+import com.tinkerpop.blueprints.Graph;
+
 /**
  * The IMetaverseBuilder is a Builder that creates and maintains a metaverse model, which contains nodes and links.
  */
@@ -97,5 +99,17 @@ public interface IMetaverseBuilder {
    * @param metaverseObjectFactory the metaverse object factory to set
    */
   void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory );
+
+  /**
+   * Returns the underlying graph associated with this builder
+   * @return the backing Graph object
+   */
+  Graph getGraph();
+
+  /**
+   * Sets the underlying graph for this builder
+   * @param graph the graph to set for this builder
+   */
+  void setGraph( Graph graph );
 
 }

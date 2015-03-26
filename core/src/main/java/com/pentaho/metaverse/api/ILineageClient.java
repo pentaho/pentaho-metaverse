@@ -24,7 +24,6 @@ package com.pentaho.metaverse.api;
 import com.pentaho.metaverse.client.StepField;
 import com.pentaho.metaverse.client.StepFieldOperations;
 import org.pentaho.di.trans.TransMeta;
-import com.pentaho.metaverse.api.MetaverseException;
 
 import java.util.Collection;
 import java.util.List;

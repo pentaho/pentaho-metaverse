@@ -56,7 +56,7 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
     ExecutionProfileUtil.dumpExecutionProfile( out, executionProfile );
   }
 
-  public void writeLineageInfo( PrintStream out, LineageHolder holder) throws IOException {
+  public void writeLineageInfo( PrintStream out, LineageHolder holder ) throws IOException {
     writeExecutionProfile( out, holder.getExecutionProfile() );
   }
 

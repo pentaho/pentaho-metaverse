@@ -17,8 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.IHasProperties;
-
 /**
  * The IMetaverseElement interface provides a contract for methods common to metaverse elements (node, links, e.g.)
  * 

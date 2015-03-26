@@ -35,7 +35,8 @@ import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 /**
- * @author mburgess
+ * This is the reference implementation for IMetaverseBuilder, offering the ability to add nodes, links, etc. to an
+ * underlying graph
  */
 public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaverseBuilder {
 
@@ -45,7 +46,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
   private static final String SEPARATOR = "~";
 
-  private final Graph graph;
+  private Graph graph;
 
   /**
    * This is a possible delegate reference to a metaverse object factory. This builder is itself a
@@ -82,10 +83,20 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
   /**
    * Retrieves the underlying graph object for this metaverse.
    *
-   * @return
+   * @return the backing Graph object
    */
-  protected Graph getGraph() {
+  public Graph getGraph() {
     return graph;
+  }
+
+  /**
+   * Sets the underlying graph for this builder
+   *
+   * @param graph the graph to set for this builder
+   */
+  @Override
+  public void setGraph( Graph graph ) {
+    this.graph = graph;
   }
 
   /**

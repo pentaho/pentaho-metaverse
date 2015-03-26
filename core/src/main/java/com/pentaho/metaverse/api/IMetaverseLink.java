@@ -17,8 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.IMetaverseNode;
-
 /**
  * The IMetaverseLink interface represents methods operating on a link (i.e. relationship) in the metaverse
  */

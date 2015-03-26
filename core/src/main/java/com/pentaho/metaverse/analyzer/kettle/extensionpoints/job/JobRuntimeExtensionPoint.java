@@ -34,7 +34,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransExtensionPointUtil;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
 import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.api.model.LineageHolder;
@@ -58,7 +57,6 @@ import com.pentaho.metaverse.api.model.IParamInfo;
 import com.pentaho.metaverse.impl.model.ExecutionData;
 import com.pentaho.metaverse.impl.model.ExecutionProfile;
 import com.pentaho.metaverse.impl.model.ParamInfo;
-import org.pentaho.di.trans.TransMeta;
 import com.pentaho.metaverse.api.IDocument;
 import com.pentaho.metaverse.api.IDocumentAnalyzer;
 import com.pentaho.metaverse.api.IMetaverseBuilder;

@@ -17,8 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.MetaverseException;
-
 /**
  * The MetaverseLocatorException class represents an unexpected error that occurs during a
  * metaverse source repository scan.

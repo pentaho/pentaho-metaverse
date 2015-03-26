@@ -17,8 +17,6 @@
 
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.ILogicalIdGenerator;
-
 /**
  * The IIdentifiable interface provides commonly used methods for identifying entities, such as name, ID, type
  * 

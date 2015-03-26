@@ -34,6 +34,7 @@ import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import com.pentaho.metaverse.api.IRequiresMetaverseBuilder;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.tinkerpop.blueprints.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,6 +126,31 @@ public class DocumentController implements IDocumentController, IDocumentListene
   public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
     if ( metaverseBuilder != null ) {
       metaverseBuilder.setMetaverseObjectFactory( metaverseObjectFactory );
+    }
+  }
+
+  /**
+   * Returns the underlying graph associated with this builder
+   *
+   * @return the backing Graph object
+   */
+  @Override
+  public Graph getGraph() {
+    if ( metaverseBuilder != null ) {
+      return metaverseBuilder.getGraph();
+    }
+    return null;
+  }
+
+  /**
+   * Sets the underlying graph for this builder
+   *
+   * @param graph the graph to set for the builder
+   */
+  @Override
+  public void setGraph( Graph graph ) {
+    if ( metaverseBuilder != null ) {
+      metaverseBuilder.setGraph( graph );
     }
   }
 
