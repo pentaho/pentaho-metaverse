@@ -59,6 +59,8 @@
   </bean>
   <bean id="ExcelOutputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer"/>
+  <bean id="SplitFieldsStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.splitfields.SplitFieldsStepAnalyzer"/>
 
   <bean id="TransJobEntryAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer"/>
@@ -104,6 +106,7 @@
         <ref bean="ExcelInputStepAnalyzer"/>
         <ref bean="GroupByStepAnalyzer"/>
         <ref bean="ExcelOutputStepAnalyzer"/>
+        <ref bean="SplitFieldsStepAnalyzer"/>
       </list>
     </property>
   </bean>
