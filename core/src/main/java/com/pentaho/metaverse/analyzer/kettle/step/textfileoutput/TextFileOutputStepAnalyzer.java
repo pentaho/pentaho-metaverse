@@ -24,21 +24,24 @@ package com.pentaho.metaverse.analyzer.kettle.step.textfileoutput;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.MetaverseException;
+import org.apache.commons.lang.ArrayUtils;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -105,6 +108,21 @@ public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputM
 
   protected void addFieldNodesAndLinks( IComponentDescriptor descriptor, TextFileOutputMeta meta ) {
     TextFileField[] outputFields = meta.getOutputFields();
+    if ( ArrayUtils.isEmpty( outputFields ) ) {
+      // see if we have any stream fields, we can assume they are written to the file
+      List<TextFileField> txtFields = new ArrayList<TextFileField>();
+      if ( stepFields != null ) {
+        for ( ValueMetaInterface field : stepFields.getValueMetaList() ) {
+          TextFileField txtField =
+            new TextFileField( field.getName(), field.getType(), field.getDateFormat().toString(),
+              field.getLength(), field.getPrecision(), field.getCurrencySymbol(), field.getDecimalSymbol(),
+              field.getGroupingSymbol(), "" );
+          txtFields.add( txtField );
+        }
+      }
+      outputFields = txtFields.toArray( new TextFileField[]{} );
+    }
+
     for ( TextFileField outputField : outputFields ) {
       String fieldName = outputField.getName();
       IComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(

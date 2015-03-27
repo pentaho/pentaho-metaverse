@@ -35,6 +35,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaNumber;
@@ -132,12 +133,14 @@ public class NumberRangeStepAnalyzerTest {
   @Test
   public void testAnalyze_Fields() throws Exception {
 
-    when( mockTransMeta.getPrevStepFields( parentStepMeta ) ).thenReturn( mockInRowMetaInterface );
+    when( mockTransMeta.getPrevStepFields( eq( parentStepMeta), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      mockInRowMetaInterface );
     String[] prevFieldNames = { "prev step name" };
     when( mockTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( prevFieldNames );
     when( numberRangeMeta.getInputField() ).thenReturn( "inField" );
     when( numberRangeMeta.getOutputField() ).thenReturn( "outField" );
-    when( mockTransMeta.getStepFields( parentStepMeta ) ).thenReturn( mockOutRowMetaInterface );
+    when( mockTransMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      mockOutRowMetaInterface );
 
     final ValueMetaInterface vmiInField = new ValueMetaNumber( "inField" );
     vmiInField.setOrigin( "originStep" );
@@ -263,8 +266,10 @@ public class NumberRangeStepAnalyzerTest {
     // set up the input fields
     when( numberRangeMeta.getInputField() ).thenReturn( "field1" );
     when( numberRangeMeta.getOutputField() ).thenReturn( "field3" );
-    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockInRowMetaInterface );
-    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockOutRowMetaInterface );
+    when( mockTransMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      mockInRowMetaInterface );
+    when( mockTransMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      mockOutRowMetaInterface );
     when( mockOutRowMetaInterface.getFieldNames() ).thenReturn( outFields );
 
     Set<IFieldMapping> mappings = analyzer.getFieldMappings( numberRangeMeta );

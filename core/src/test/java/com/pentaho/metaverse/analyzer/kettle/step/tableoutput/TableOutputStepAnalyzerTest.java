@@ -23,8 +23,14 @@
 package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -37,6 +43,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -46,21 +53,15 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * @author mburgess
@@ -160,7 +161,8 @@ public class TableOutputStepAnalyzerTest {
     when( mockDatabaseMeta.getAccessTypeDesc() ).thenReturn( "Native" );
     when( mockTableOutputMeta.getDatabaseMeta() ).thenReturn( mockDatabaseMeta );
     when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
-    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockTransMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      mockRowMetaInterface );
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "test1", "test2" } );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
@@ -200,7 +202,8 @@ public class TableOutputStepAnalyzerTest {
     when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
     when( mockTableOutputMeta.getFieldStream() ).thenReturn(  new String[] { "test1", "test2" }  );
     when( mockTableOutputMeta.specifyFields() ).thenReturn( true );
-    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockTransMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      mockRowMetaInterface );
     when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
@@ -275,7 +278,8 @@ public class TableOutputStepAnalyzerTest {
     when( mockDatabaseMeta.getAccessTypeDesc() ).thenReturn( "Native" );
     when( mockTableOutputMeta.getDatabaseMeta() ).thenReturn( mockDatabaseMeta );
     when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
-    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockTransMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      mockRowMetaInterface );
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "test1", "test2" } );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 

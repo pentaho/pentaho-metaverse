@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -18,37 +18,13 @@
  * prohibited to anyone except those individuals and entities who have executed
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
+ *
  */
 
 package com.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
-
 /**
- * User: RFellows Date: 9/4/14
+ * Created by rfellows on 4/3/15.
  */
-public interface TransformationStepNode extends Concept {
-  @Property( "stepType" )
-  public String getStepType();
-
-  @Adjacency( label = "contains", direction = Direction.IN )
-  public TransformationNode getTransNode();
-
-  @Adjacency( label = "deletes", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesDeletes();
-
-  @Adjacency( label = "creates", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesCreates();
-
-  @Adjacency( label = "uses", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesUses();
-
-  @Adjacency( label = "hops_to", direction = Direction.OUT )
-  public Iterable<TransformationStepNode> getNextSteps();
-
-  @Adjacency( label = "hops_to", direction = Direction.IN )
-  public Iterable<TransformationStepNode> getPreviousSteps();
-
+public interface RowsToResultStepNode extends TransformationStepNode {
 }

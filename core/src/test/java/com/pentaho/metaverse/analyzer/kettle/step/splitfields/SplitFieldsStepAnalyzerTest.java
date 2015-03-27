@@ -36,6 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -109,8 +110,10 @@ public class SplitFieldsStepAnalyzerTest {
     when( outputRowMeta.getFieldNames() ).thenReturn( outputFields );
     when( outputRowMeta.searchValueMeta( any( String.class ) ) ).thenReturn( null );
 
-    when( parentTransMeta.getPrevStepFields( parentStepMeta ) ).thenReturn( inputRowMeta );
-    when( parentTransMeta.getStepFields( parentStepMeta ) ).thenReturn( outputRowMeta );
+    when( parentTransMeta.getPrevStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      inputRowMeta );
+    when( parentTransMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      outputRowMeta );
     when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
     when( fieldSplitterMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
 

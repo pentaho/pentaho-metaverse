@@ -25,11 +25,13 @@ package com.pentaho.metaverse.analyzer.kettle.step.mergejoin;
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -57,7 +59,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.class )
 public class MergeJoinStepAnalyzerTest {
 
   private MergeJoinStepAnalyzer analyzer;
@@ -119,9 +121,22 @@ public class MergeJoinStepAnalyzerTest {
     when( stepIoMeta.getInfoStreams() ).thenReturn( streams );
     when( stream1.getStepMeta() ).thenReturn( stepMeta1 );
     when( stream2.getStepMeta() ).thenReturn( stepMeta2 );
-    when( transMeta.getStepFields( stepMeta1 ) ).thenReturn( rowMeta1 );
-    when( transMeta.getStepFields( stepMeta2 ) ).thenReturn( rowMeta2 );
-    when( transMeta.getStepFields( parentStepMeta ) ).thenReturn( stepRowMeta );
+    when( transMeta.getStepFields( eq( stepMeta1 ), any( ProgressMonitorListener.class ) ) ).thenReturn( rowMeta1 );
+    when( transMeta.getStepFields( eq( stepMeta2 ), any( ProgressMonitorListener.class ) ) ).thenReturn( rowMeta2 );
+    when( transMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      stepRowMeta );
+
+    when( stepRowMeta.getFieldNames() ).thenReturn( (String[]) ArrayUtils.addAll( fields1, fields2 ) );
+
+    List<ValueMetaInterface> rowMeta1Fields = new ArrayList<ValueMetaInterface>( 2 );
+    rowMeta1Fields.add( leftField1 );
+    rowMeta1Fields.add( leftField2 );
+    when( rowMeta1.getValueMetaList() ).thenReturn( rowMeta1Fields );
+
+    List<ValueMetaInterface> rowMeta2Fields = new ArrayList<ValueMetaInterface>( 2 );
+    rowMeta1Fields.add( rightField1 );
+    rowMeta1Fields.add( rightField2 );
+    when( rowMeta2.getValueMetaList() ).thenReturn( rowMeta2Fields );
 
     analyzer = new MergeJoinStepAnalyzer();
     analyzer.setMetaverseBuilder( builder );
@@ -129,7 +144,7 @@ public class MergeJoinStepAnalyzerTest {
     descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
   }
 
-  @Test(expected = MetaverseAnalyzerException.class)
+  @Test( expected = MetaverseAnalyzerException.class )
   public void testNullAnalyze() throws MetaverseAnalyzerException {
     analyzer.analyze( descriptor, null );
   }

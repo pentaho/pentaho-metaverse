@@ -26,6 +26,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.model.Operation;
+import org.pentaho.di.core.ProgressNullMonitorListener;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -138,10 +139,14 @@ public class MergeJoinStepAnalyzer extends BaseStepAnalyzer<MergeJoinMeta> {
       rowMeta = new HashMap<String, RowMetaInterface>();
       try {
         StepMeta stepMeta1 = meta.getStepIOMeta().getInfoStreams().get( 0 ).getStepMeta();
-        leftStepFields = parentTransMeta.getStepFields( stepMeta1 );
+        ProgressNullMonitorListener progress = new ProgressNullMonitorListener();
+        leftStepFields = parentTransMeta.getStepFields( stepMeta1, progress );
+        progress.done();
 
+        progress = new ProgressNullMonitorListener();
         StepMeta stepMeta2 = meta.getStepIOMeta().getInfoStreams().get( 1 ).getStepMeta();
-        rightStepFields = parentTransMeta.getStepFields( stepMeta2 );
+        rightStepFields = parentTransMeta.getStepFields( stepMeta2, progress );
+        progress.done();
         rowMeta.put( stepMeta1.getName(), leftStepFields );
         rowMeta.put( stepMeta2.getName(), rightStepFields );
 
