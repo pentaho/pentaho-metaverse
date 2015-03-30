@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.pentaho.metaverse.frames.SplitFieldsStepNode;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
@@ -82,6 +83,7 @@ import com.pentaho.metaverse.frames.RootNode;
 import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import com.pentaho.metaverse.frames.StreamFieldNode;
 import com.pentaho.metaverse.frames.StreamLookupStepNode;
+import com.pentaho.metaverse.frames.StringOperationsStepNode;
 import com.pentaho.metaverse.frames.TableOutputStepNode;
 import com.pentaho.metaverse.frames.TextFileInputStepNode;
 import com.pentaho.metaverse.frames.TextFileOutputStepNode;
@@ -302,7 +304,7 @@ public class MetaverseValidationIT {
           .size(), matchCount );
 
       assertEquals( "Incorrect number of Steps in the graph for transformation [" + tm.getName() + "]", transMetaSteps
-        .size(), stepCount );
+          .size(), stepCount );
 
     }
   }
@@ -979,6 +981,31 @@ public class MetaverseValidationIT {
     // make sure the node that was used is the split field
     assertEquals( meta.getSplitField(), usedFields.iterator().next().getName() );
 
+  }
+
+  @Test
+  public void testStringOperationsStepNode() throws Exception {
+    StringOperationsStepNode node = root.getStringOperationsStepNode();
+
+    // Make sure we have the right number of links used, created and derived. Also,
+    // Ensure there is an entry in the operations for those fields that are derived.
+    assertEquals( 3, getIterableSize( node.getStreamFieldNodesUses() ) );
+
+    assertEquals( 1, getIterableSize( node.getStreamFieldNodesCreates() ) );
+
+    for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
+      assertEquals( 1, getIterableSize( sfn.getFieldNodesThatDeriveMe() ) );
+      for ( StreamFieldNode sfn1 : sfn.getFieldNodesDerivedFromMe() ) {
+        assertTrue( sfn1.getOperations() != null && sfn1.getOperations().length() > 0 );
+      }
+    }
+
+    StreamFieldNode createdNode = null;
+    for ( StreamFieldNode sfn : node.getStreamFieldNodesCreates() ) {
+      createdNode = sfn;
+    }
+
+    assertTrue( createdNode.getOperations() != null && createdNode.getOperations().length() > 0 );
   }
 
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {

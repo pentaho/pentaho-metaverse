@@ -9,6 +9,7 @@ import com.pentaho.metaverse.analyzer.kettle.step.calculator.CalculatorStepAnaly
 import com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.calculator.StringOperationsStepAnalyzer
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.client.*
@@ -131,6 +132,8 @@ i:
       excelInputAnalyzer = new ExcelInputStepAnalyzer()
 
       groupByAnalyzer = new GroupByStepAnalyzer()
+      
+      stringOperationsAnalyzer = new StringOperationsStepAnalyzer()
 
       //**********************************************************************
 
