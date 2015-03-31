@@ -128,6 +128,10 @@
 
   <bean id="StringOperationsStepAnalyzer" 
   		class="com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
+  
+  <bean id="StringsCutStepAnalyzer" 
+  		class="com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer"/>
+  
 
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
@@ -185,6 +189,9 @@
            interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
            ref="StringOperationsStepAnalyzer"/>
   
+  <service id="stringsCutStepAnalyzer"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="StringsCutStepAnalyzer"/>
 
   <service id="splitFieldsStepAnalyzerService"
            interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"

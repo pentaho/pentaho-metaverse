@@ -10,6 +10,8 @@ import com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepA
 import com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.calculator.StringOperationsStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer
+
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.client.*
@@ -134,6 +136,8 @@ i:
       groupByAnalyzer = new GroupByStepAnalyzer()
       
       stringOperationsAnalyzer = new StringOperationsStepAnalyzer()
+      
+      stringsCutAnalyzer = new StringsCutStepAnalyzer()
 
       //**********************************************************************
 
