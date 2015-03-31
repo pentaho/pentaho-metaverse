@@ -60,8 +60,7 @@ public class StringOperationsStepAnalyzer extends BaseStepAnalyzer<StringOperati
     return node;
   }
 
-  private ComponentDerivationRecord
-    buildChangeRecord( final StringOperationsMeta stringOperationsMeta, final int index ) {
+  private ComponentDerivationRecord buildChangeRecord( final StringOperationsMeta stringOperationsMeta, final int index ) {
     String fieldInString = stringOperationsMeta.getFieldInStream()[index];
     String fieldOutString = stringOperationsMeta.getFieldOutStream()[index];
     if ( fieldOutString == null || fieldOutString.length() < 1 ) {
@@ -106,7 +105,7 @@ public class StringOperationsStepAnalyzer extends BaseStepAnalyzer<StringOperati
           .getTypeDesc() : fieldInString + " unknown type" );
       metaverseBuilder.addNode( newFieldNode );
     } else {
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, newFieldNode );
+      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
     }
 
     return changeRecord;
