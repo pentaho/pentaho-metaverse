@@ -994,7 +994,6 @@ public class MetaverseValidationIT {
     assertEquals( 1, getIterableSize( node.getStreamFieldNodesCreates() ) );
 
     for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
-      assertEquals( 1, getIterableSize( sfn.getFieldNodesThatDeriveMe() ) );
       for ( StreamFieldNode sfn1 : sfn.getFieldNodesDerivedFromMe() ) {
         assertTrue( sfn1.getOperations() != null && sfn1.getOperations().length() > 0 );
       }
