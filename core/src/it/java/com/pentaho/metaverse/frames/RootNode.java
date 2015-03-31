@@ -114,4 +114,8 @@ public interface RootNode extends FramedMetaverseNode {
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == stepName}.as('step').in('contains').has('name', T.eq, 'splitFields').back('step')" )
   public SplitFieldsStepNode getSplitFieldsStepNodeByName( @GremlinParam( "stepName" ) String stepName );
+  
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'String operations'}.as('step').in('contains').has('name', T.eq, 'string_operations').back('step')" )
+  public StringOperationsStepNode getStringOperationsStepNode();
+
 }
