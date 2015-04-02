@@ -55,6 +55,7 @@
   <!-- TransRuntime extension point -->
   <bean id="transRuntime" scope="singleton" class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint">
     <property name="documentAnalyzer" ref="TransformationAnalyzer"/>
+    <property name="lineageWriter" ref="lineageWriter"/>
   </bean>
   <bean id="transRuntimePlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
     <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>

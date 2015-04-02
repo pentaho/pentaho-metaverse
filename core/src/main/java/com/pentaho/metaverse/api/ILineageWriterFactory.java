@@ -1,4 +1,4 @@
-/*
+/*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
@@ -19,31 +19,21 @@
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
  */
-
 package com.pentaho.metaverse.api;
 
-import com.pentaho.metaverse.api.model.LineageHolder;
-
-import java.io.IOException;
+import java.io.OutputStream;
 
 /**
- * ILineageWriter is a composite interface that offers methods for writing lineage objects such as graphs,
- * execution profiles, etc.
+ * Created by mburgess on 3/27/15.
  */
-public interface ILineageWriter {
+public interface ILineageWriterFactory<T> {
 
   /**
-   * Outputs an IExecutionProfile
-   * @param holder Context of the lineage related info
-   * @throws IOException
+   * Creates an output stream using the specified object of the parameterized type for configuration. For example a
+   * LoggerLineageWriterFactory could pass in a Logger, a FileLineageWriterFactory could pass in a File or String.
+   * @param configuration An object containing the configuration information to tell the factory how and what to create
+   *                      for an OutputStream
+   * @return a configured OutputStream object for use by an ILineageWriter instance
    */
-  void outputExecutionProfile( LineageHolder holder ) throws IOException;
-
-  /**
-   * Outputs a relationship graph that backs an IMetaverseBuilder
-   * @param holder Context of the lineage related info
-   * @throws IOException
-   */
-  void outputLineageGraph( LineageHolder holder ) throws IOException;
-
+  OutputStream createOutputStream( T configuration );
 }

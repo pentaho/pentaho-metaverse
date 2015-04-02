@@ -28,9 +28,13 @@ import com.pentaho.metaverse.api.IRequiresMetaverseBuilder;
 import java.util.concurrent.Future;
 
 /**
- * Created by mburgess on 3/25/15.
+ * LineageHolder contains objects needed by various utilities to perform lineage operations. These objects include an
+ * execution profile and a metaverse builder. The two can be combined or used separately to export execution profiles
+ * or graphs, respectively.
  */
 public class LineageHolder implements IRequiresMetaverseBuilder {
+
+  private String id;
 
   private IExecutionProfile executionProfile;
 
@@ -83,5 +87,16 @@ public class LineageHolder implements IRequiresMetaverseBuilder {
 
   public void setLineageTask( Future lineageTask ) {
     this.lineageTask = lineageTask;
+  }
+
+  public String getId() {
+    if ( id == null && executionProfile != null ) {
+      id = executionProfile.getPath();
+    }
+    return id;
+  }
+
+  public void setId( String id ) {
+    this.id = id;
   }
 }

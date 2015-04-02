@@ -3,14 +3,30 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns:jaxrs="http://cxf.apache.org/blueprint/jaxrs"
            xmlns:cxf="http://cxf.apache.org/blueprint/core"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
            xsi:schemaLocation="
              http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
              http://cxf.apache.org/blueprint/jaxrs http://cxf.apache.org/schemas/blueprint/jaxrs.xsd
              http://cxf.apache.org/blueprint/core http://cxf.apache.org/schemas/blueprint/core.xsd
              ">
 
+
+  <cm:property-placeholder persistent-id="pentaho.metaverse" update-strategy="reload" >
+    <cm:default-properties>
+      <cm:property name="lineage.execution.output.folder" value="./pentaho-lineage-output"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
   <!-- Configure our graph using the SynchronizedGraphFactory and a configuration file -->
-  <bean id="MetaverseGraphImpl" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open" scope="prototype">
+  <bean id="MetaverseGraphImpl" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open">
+    <argument>
+      <map>
+        <entry key="blueprints.graph" value="com.tinkerpop.blueprints.impls.tg.TinkerGraph"/>
+      </map>
+    </argument>
+  </bean>
+
+  <bean id="MetaverseGraphImplPrototype" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open" scope="prototype">
     <argument>
       <map>
         <entry key="blueprints.graph" value="com.tinkerpop.blueprints.impls.tg.TinkerGraph"/>
@@ -43,7 +59,7 @@
   </bean>
 
   <bean id="IMetaverseBuilderPrototype" class="com.pentaho.metaverse.impl.MetaverseBuilder" scope="prototype">
-    <argument ref="MetaverseGraphImpl"/>
+    <argument ref="MetaverseGraphImplPrototype"/>
   </bean>
 
   <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.impl.MetaverseObjectFactory" scope="singleton"/>
@@ -378,6 +394,16 @@
 
   <bean id="IMetaverseReader" class="com.pentaho.metaverse.graph.BlueprintsGraphMetaverseReader" scope="singleton">
     <argument ref="MetaverseGraphImpl"/>
+  </bean>
+
+  <!-- Lineage writers -->
+  <bean id="graphCsvWriter" class="com.pentaho.metaverse.graph.GraphCsvWriter"/>
+  <bean id="graphSONWriter" class="com.pentaho.metaverse.graph.GraphSONWriter"/>
+  <bean id="graphMLWriter" class="com.pentaho.metaverse.graph.GraphMLWriter"/>
+
+  <bean id="lineageWriter" class="com.pentaho.metaverse.impl.FileSystemLineageWriter" scope="prototype">
+    <property name="graphWriter" ref="graphMLWriter"/>
+    <property name="outputFolder" value="${lineage.execution.output.folder}"/>
   </bean>
 
   <!--
