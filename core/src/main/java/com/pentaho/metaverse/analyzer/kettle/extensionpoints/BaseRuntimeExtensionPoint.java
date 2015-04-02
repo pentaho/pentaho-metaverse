@@ -22,17 +22,16 @@
 
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
+import com.pentaho.metaverse.api.ILineageWriter;
 import com.pentaho.metaverse.api.model.IExecutionEngine;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.impl.model.ExecutionEngine;
-import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.version.BuildVersion;
 import com.pentaho.metaverse.api.IMetaverseBuilder;
 
 import java.io.IOException;
-import java.io.PrintStream;
 
 /**
  * A base class to provide common functionality among runtime extension points
@@ -44,20 +43,14 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
     "Pentaho data integration prepares and blends data to create a complete picture of your business "
       + "that drives actionable insights.";
 
-  /**
-   * Write the given execution profile to the output stream
-   *
-   * @param out              the output stream to which we write the profile
-   * @param executionProfile the execution profile to be output
-   * @throws IOException
-   */
-  public void writeExecutionProfile( PrintStream out, IExecutionProfile executionProfile ) throws IOException {
-    // TODO where to persist the execution profile?
-    ExecutionProfileUtil.dumpExecutionProfile( out, executionProfile );
-  }
+  protected ILineageWriter lineageWriter;
 
-  public void writeLineageInfo( PrintStream out, LineageHolder holder ) throws IOException {
-    writeExecutionProfile( out, holder.getExecutionProfile() );
+  public void writeLineageInfo( LineageHolder holder ) throws IOException {
+    if ( lineageWriter != null ) {
+      String id = holder.getExecutionProfile().getName();
+      lineageWriter.outputExecutionProfile( holder );
+      lineageWriter.outputLineageGraph( holder );
+    }
   }
 
   /**
@@ -65,6 +58,7 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
    *
    * @return information about the current execution engine
    */
+
   public static IExecutionEngine getExecutionEngineInfo() {
     IExecutionEngine executionEngine = new ExecutionEngine();
     executionEngine.setName( EXECUTION_ENGINE_NAME );
@@ -77,5 +71,23 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
     // TODO
     IMetaverseBuilder builder = holder.getMetaverseBuilder();
     IExecutionProfile profile = holder.getExecutionProfile();
+  }
+
+  /**
+   * Returns the lineage writer
+   *
+   * @return the ILineageWriter instance
+   */
+  public ILineageWriter getLineageWriter() {
+    return lineageWriter;
+  }
+
+  /**
+   * Sets the lineage writer for this object
+   *
+   * @param lineageWriter the ILineageWriter to set
+   */
+  public void setLineageWriter( ILineageWriter lineageWriter ) {
+    this.lineageWriter = lineageWriter;
   }
 }

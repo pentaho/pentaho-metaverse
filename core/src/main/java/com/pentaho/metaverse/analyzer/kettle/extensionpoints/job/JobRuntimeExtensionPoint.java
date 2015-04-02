@@ -256,7 +256,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
     // Export the lineage info (execution profile, lineage graph, etc.)
     try {
-      writeLineageInfo( System.out, holder );
+      writeLineageInfo( holder );
     } catch ( IOException e ) {
       throw new KettleException( e );
     }
@@ -355,6 +355,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
   /**
    * Sets the document analyzer for this extension point
+   *
    * @param analyzer The document analyzer for this extension point
    */
   public void setDocumentAnalyzer( IDocumentAnalyzer analyzer ) {
@@ -363,6 +364,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
   /**
    * Gets the document analyzer of this extension point
+   *
    * @return IDocumentAnalyzer - The document analyzer for this extension point
    */
   public IDocumentAnalyzer getDocumentAnalyzer() {

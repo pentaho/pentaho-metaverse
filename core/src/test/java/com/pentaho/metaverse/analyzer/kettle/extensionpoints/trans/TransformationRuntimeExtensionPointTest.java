@@ -22,8 +22,10 @@
 
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
+import com.pentaho.metaverse.api.ILineageWriter;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 
+import com.pentaho.metaverse.api.model.LineageHolder;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -70,6 +72,7 @@ public class TransformationRuntimeExtensionPointTest {
   TransformationRuntimeExtensionPoint transExtensionPoint;
   Trans trans;
   TransMeta transMeta;
+  ILineageWriter lineageWriter;
 
   @BeforeClass
   public static void setUpBeforeClass() throws KettleException {
@@ -80,6 +83,8 @@ public class TransformationRuntimeExtensionPointTest {
   @Before
   public void setUp() throws Exception {
     transExtensionPoint = new TransformationRuntimeExtensionPoint();
+    lineageWriter = mock( ILineageWriter.class );
+    transExtensionPoint.setLineageWriter( lineageWriter );
 
     transMeta = spy( new TransMeta() );
     transMeta.setName( TEST_TRANS_NAME );
@@ -138,8 +143,7 @@ public class TransformationRuntimeExtensionPointTest {
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
 
     // Test IOException handling during execution profile output
-    doThrow( new IOException() ).when( ext ).writeExecutionProfile(
-      Mockito.any( PrintStream.class ), Mockito.any( IExecutionProfile.class ) );
+    doThrow( new IOException() ).when( lineageWriter ).outputExecutionProfile( Mockito.any( LineageHolder.class ) );
     Exception ex = null;
     try {
       ext.transFinished( mockTrans );

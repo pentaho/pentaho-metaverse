@@ -41,6 +41,7 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
+import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
@@ -79,7 +80,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     LineageHolder holder = lineageHolderMap.get( t );
     if ( holder == null ) {
       holder = new LineageHolder();
-      lineageHolderMap.put( t, holder );
+      putLineageHolder( t, holder );
     }
     return holder;
   }
@@ -182,6 +183,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
     // Set artifact information (path, type, description, etc.)
     executionProfile.setPath( filePath );
+    executionProfile.setName( transMeta.getName() );
     executionProfile.setType( DictionaryConst.NODE_TYPE_TRANS );
     executionProfile.setDescription( transMeta.getDescription() );
 
@@ -254,7 +256,6 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       return;
     }
 
-
     // Get the current execution profile for this transformation
     LineageHolder holder = getLineageHolder( trans );
     Future lineageTask = holder.getLineageTask();
@@ -282,12 +283,29 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       executionData.setFailureCount( result.getNrErrors() );
     }
 
-    // Add the execution profile information to the lineage graph
-    addRuntimeLineageInfo( holder );
-
     // Export the lineage info (execution profile, lineage graph, etc.)
     try {
-      writeLineageInfo( System.out, holder );
+      if ( lineageWriter != null ) {
+        lineageWriter.outputExecutionProfile( holder );
+      }
+    } catch ( IOException e ) {
+      throw new KettleException( e );
+    }
+
+    // Only create a lineage graph for this trans if it has no parent. If it does, the parent will incorporate the
+    // lineage information into its own graph
+    try {
+      Job parentJob = trans.getParentJob();
+      Trans parentTrans = trans.getParentTrans();
+
+      if ( parentJob == null && parentTrans == null ) {
+        // Add the execution profile information to the lineage graph
+        addRuntimeLineageInfo( holder );
+
+        if ( lineageWriter != null ) {
+          lineageWriter.outputLineageGraph( holder );
+        }
+      }
     } catch ( IOException e ) {
       throw new KettleException( e );
     }
@@ -311,6 +329,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
   /**
    * Sets the document analyzer for this extension point
+   *
    * @param analyzer The document analyzer for this extension point
    */
   public void setDocumentAnalyzer( IDocumentAnalyzer analyzer ) {
@@ -319,6 +338,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
   /**
    * Gets the document analyzer of this extension point
+   *
    * @return IDocumentAnalyzer - The document analyzer for this extension point
    */
   public IDocumentAnalyzer getDocumentAnalyzer() {

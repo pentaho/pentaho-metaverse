@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.pentaho.metaverse.api.model.IExecutionData;
+import com.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -128,8 +129,7 @@ public class JobRuntimeExtensionPointTest {
       Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
 
     // Test IOException handling during execution profile output
-    doThrow( new IOException() ).when( ext ).writeExecutionProfile(
-      Mockito.any( PrintStream.class ), Mockito.any( IExecutionProfile.class ) );
+    doThrow( new IOException() ).when( ext ).writeLineageInfo( Mockito.any( LineageHolder.class ) );
     Exception ex = null;
     try {
       ext.jobFinished( mockJob );

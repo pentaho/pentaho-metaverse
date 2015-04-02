@@ -203,6 +203,15 @@
     <constructor-arg ref="MetaverseGraphImpl"/>
   </bean>
 
+  <!-- Lineage writers -->
+  <bean id="graphCsvWriter" class="com.pentaho.metaverse.graph.GraphCsvWriter"/>
+  <bean id="graphSONWriter" class="com.pentaho.metaverse.graph.GraphSONWriter"/>
+  <bean id="graphMLWriter" class="com.pentaho.metaverse.graph.GraphMLWriter"/>
+
+  <bean id="lineageWriter" class="com.pentaho.metaverse.impl.LineageWriter" scope="singleton">
+    <property name="graphWriter" ref="graphSONWriter"/>
+  </bean>
+
   <bean id="FileSystemLocator" class="com.pentaho.metaverse.locator.FileSystemLocator" scope="singleton">
     <constructor-arg>
       <list>

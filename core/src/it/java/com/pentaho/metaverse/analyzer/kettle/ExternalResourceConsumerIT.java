@@ -104,7 +104,6 @@ public class ExternalResourceConsumerIT {
 
     ExtensionPointPluginType.getInstance().registerCustom( TransformationRuntimeExtensionPoint.class,
       "custom", "transExecutionProfile", "TransformationStartThreads", "no description", null );
-
     ExtensionPointPluginType.getInstance().registerCustom( JobRuntimeExtensionPoint.class,
       "custom", "jobRuntimeMetaverse", "JobStart", "no description", null );
 
