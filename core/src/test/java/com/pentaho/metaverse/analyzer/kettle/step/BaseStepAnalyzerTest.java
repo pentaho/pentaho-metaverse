@@ -380,7 +380,7 @@ public class BaseStepAnalyzerTest {
   }
 
   @Test
-  public void testGetStepFieldOriginDescriptorNullDescriptor() {
+  public void testGetStepFieldOriginDescriptorNullDescriptor() throws Exception {
     assertNull( analyzer.getStepFieldOriginDescriptor( null, "Name" ) );
   }
 

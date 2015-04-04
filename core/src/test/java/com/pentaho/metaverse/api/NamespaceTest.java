@@ -33,11 +33,19 @@ import static org.junit.Assert.assertNull;
 public class NamespaceTest {
 
   @Test
-  public void testGetParentNamespace() throws Exception {
+  public void testGetParentNamespace_objectParent() throws Exception {
     Namespace ns = new Namespace( "{\"namespace\":{\"name\":\"FILE_SYSTEM_REPO\",\"type\":\"Locator\"}," +
       "\"path\":\"repo/Table Output - DataGrid to H2.ktr\",\"type\":\"Transformation\"}" );
 
     assertEquals( "{\"name\":\"FILE_SYSTEM_REPO\",\"type\":\"Locator\"}", ns.getParentNamespace().getNamespaceId() );
+  }
+
+  @Test
+  public void testGetParentNamespace_StringParent() throws Exception {
+    Namespace ns = new Namespace( "{\"namespace\":\"PDI Engine\"," +
+      "\"path\":\"repo/Table Output - DataGrid to H2.ktr\",\"type\":\"Transformation\"}" );
+
+    assertEquals( "PDI Engine", ns.getParentNamespace().getNamespaceId() );
   }
 
   @Test

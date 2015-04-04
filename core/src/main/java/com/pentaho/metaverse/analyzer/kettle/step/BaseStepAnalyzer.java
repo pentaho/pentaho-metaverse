@@ -328,21 +328,24 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
     return prevFieldDescriptor;
   }
 
-  protected IComponentDescriptor getStepFieldOriginDescriptor( IComponentDescriptor descriptor, String fieldName ) {
+  protected IComponentDescriptor getStepFieldOriginDescriptor( IComponentDescriptor descriptor, String fieldName )
+    throws MetaverseAnalyzerException {
+
     if ( descriptor == null || stepFields == null ) {
       return null;
     }
     ValueMetaInterface vmi = stepFields.searchValueMeta( fieldName );
     String origin = ( vmi == null ) ? fieldName : vmi.getOrigin();
 
-    // if we can't determine the origin, use the first previous step
+    // if we can't determine the origin, throw an exception
     if ( origin == null && !ArrayUtils.isEmpty( prevStepNames ) ) {
-      origin = prevStepNames[0];
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.NoOriginForField", fieldName ) );
     }
+
     IMetaverseNode tmpOriginNode =
       metaverseObjectFactory.createNodeObject( UUID.randomUUID().toString(), origin,
         DictionaryConst.NODE_TYPE_TRANS_STEP );
-    tmpOriginNode.setProperty( "namespace", rootNode.getProperty( "namespace" ) );
+    tmpOriginNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, rootNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
     INamespace stepFieldNamespace = new Namespace( tmpOriginNode.getLogicalId() );
 
     MetaverseComponentDescriptor d =

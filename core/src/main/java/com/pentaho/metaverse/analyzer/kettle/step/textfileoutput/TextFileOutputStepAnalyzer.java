@@ -92,8 +92,8 @@ public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputM
     }
   }
 
-  protected void addUsesLinkForStreamFileNameField( IComponentDescriptor descriptor,
-                                                    TextFileOutputMeta meta ) {
+  protected void addUsesLinkForStreamFileNameField( IComponentDescriptor descriptor, TextFileOutputMeta meta )
+    throws MetaverseAnalyzerException {
 
     RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
     ValueMetaInterface filenameField = rowMetaInterface.searchValueMeta( meta.getFileNameField() );
@@ -106,7 +106,9 @@ public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputM
     }
   }
 
-  protected void addFieldNodesAndLinks( IComponentDescriptor descriptor, TextFileOutputMeta meta ) {
+  protected void addFieldNodesAndLinks( IComponentDescriptor descriptor, TextFileOutputMeta meta )
+    throws MetaverseAnalyzerException {
+
     TextFileField[] outputFields = meta.getOutputFields();
     if ( ArrayUtils.isEmpty( outputFields ) ) {
       // see if we have any stream fields, we can assume they are written to the file

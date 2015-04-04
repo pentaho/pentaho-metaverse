@@ -240,16 +240,20 @@ public class TextFileOutputStepAnalyzerTest {
       @Override
       public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
+        ValueMetaString valueMetaString = null;
         if ( args[0] == "Field 1" ) {
-          return new ValueMetaString( "Field 1" );
+          valueMetaString = new ValueMetaString( "Field 1" );
+          valueMetaString.setOrigin( "origin" );
         }
         if ( args[0] == "Field 2" ) {
-          return new ValueMetaString( "Field 2" );
+          valueMetaString = new ValueMetaString( "Field 2" );
+          valueMetaString.setOrigin( "origin" );
         }
         if ( args[0] == "filename" ) {
-          return new ValueMetaString( "filename" );
+          valueMetaString = new ValueMetaString( "filename" );
+          valueMetaString.setOrigin( "origin" );
         }
-        return null;
+        return valueMetaString;
       }
     } );
 
