@@ -32,6 +32,7 @@ import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.api.model.kettle.FieldMapping;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.lang.ArrayUtils;
+import org.pentaho.di.core.ProgressNullMonitorListener;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
@@ -334,6 +335,10 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
     ValueMetaInterface vmi = stepFields.searchValueMeta( fieldName );
     String origin = ( vmi == null ) ? fieldName : vmi.getOrigin();
 
+    // if we can't determine the origin, use the first previous step
+    if ( origin == null && !ArrayUtils.isEmpty( prevStepNames ) ) {
+      origin = prevStepNames[0];
+    }
     IMetaverseNode tmpOriginNode =
       metaverseObjectFactory.createNodeObject( UUID.randomUUID().toString(), origin,
         DictionaryConst.NODE_TYPE_TRANS_STEP );
@@ -436,8 +441,10 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
     if ( parentTransMeta != null ) {
       try {
         rowMeta = new HashMap<String, RowMetaInterface>();
+        ProgressNullMonitorListener progressMonitor = new ProgressNullMonitorListener();
         prevStepNames = parentTransMeta.getPrevStepNames( parentStepMeta );
-        RowMetaInterface rmi = parentTransMeta.getPrevStepFields( parentStepMeta );
+        RowMetaInterface rmi = parentTransMeta.getPrevStepFields( parentStepMeta, progressMonitor );
+        progressMonitor.done();
         if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
           rowMeta.put( prevStepNames[0], rmi );
         }
@@ -458,7 +465,9 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
     }
     if ( parentTransMeta != null ) {
       try {
-        rmi = parentTransMeta.getStepFields( parentStepMeta );
+        ProgressNullMonitorListener progressMonitor = new ProgressNullMonitorListener();
+        rmi = parentTransMeta.getStepFields( parentStepMeta, progressMonitor );
+        progressMonitor.done();
       } catch ( KettleStepException e ) {
         rmi = null;
       }

@@ -56,7 +56,14 @@ public class Namespace implements INamespace {
         if ( namespaceNode == null ) {
           return null;
         }
-        String parent = namespaceNode.toString();
+        String parent;
+
+        if ( namespaceNode.isTextual() ) {
+          parent = namespaceNode.asText();
+        } else {
+          parent = namespaceNode.toString();
+        }
+
         return new Namespace( parent );
       } catch ( Exception e ) {
         return null;

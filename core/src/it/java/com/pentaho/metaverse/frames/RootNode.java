@@ -114,11 +114,17 @@ public interface RootNode extends FramedMetaverseNode {
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == stepName}.as('step').in('contains').has('name', T.eq, 'splitFields').back('step')" )
   public SplitFieldsStepNode getSplitFieldsStepNodeByName( @GremlinParam( "stepName" ) String stepName );
-  
+
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'String operations'}.as('step').in('contains').has('name', T.eq, 'string_operations').back('step')" )
   public StringOperationsStepNode getStringOperationsStepNode();
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Strings cut'}.as('step').in('contains').has('name', T.eq, 'strings_cut').back('step')" )
   public StringsCutStepNode getStringsCutStepNode();
 
+
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Transformation Executor'}.as('step').in('contains').has('name', T.eq, 'trans-executor-parent').back('step')" )
+  public TransExecutorStepNode getTransExecutorStepNode();
+
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Copy rows to result'}.as('step').in('contains').has('name', T.eq, 'trans-executor-child').back('step')" )
+  public RowsToResultStepNode getRowsToResultStepNode();
 }

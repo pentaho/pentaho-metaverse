@@ -22,8 +22,15 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
+import com.pentaho.metaverse.api.IDocument;
+import com.pentaho.metaverse.api.IDocumentAnalyzer;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseException;
 import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
@@ -45,13 +52,7 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
-import com.pentaho.metaverse.api.IDocument;
-import com.pentaho.metaverse.api.IDocumentAnalyzer;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.INamespace;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.sql.Timestamp;
@@ -149,7 +150,14 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       metaverseDocument.setName( transMeta.getName() );
       metaverseDocument.setExtension( "ktr" );
       metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "trans.ktr" ) );
-      metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, id );
+      String normalizedPath;
+      try {
+        normalizedPath = KettleAnalyzerUtil.normalizeFilePath( id );
+      } catch ( MetaverseException e ) {
+        normalizedPath = id;
+      }
+      metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAME, trans.getName() );
+      metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, normalizedPath );
       metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
 
       Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
@@ -176,7 +184,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
     String filePath = null;
     try {
-      filePath = new File( filename ).getCanonicalPath();
+      filePath = KettleAnalyzerUtil.normalizeFilePath( filename );
     } catch ( Exception e ) {
       // TODO ?
     }

@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -106,8 +107,10 @@ public class CalculatorStepAnalyzerTest {
     when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( new String[] { "height", "width" } );
     when( rowMeta1.getFieldNames() ).thenReturn( new String[] { "field1", "field2" } );
     when( rowMeta1.searchValueMeta( any( String.class ) ) ).thenReturn( null );
-    when( parentTransMeta.getPrevStepFields( parentStepMeta ) ).thenReturn( rowMeta1 );
-    when( parentTransMeta.getStepFields( parentStepMeta ) ).thenReturn( rowMeta1 );
+    when( parentTransMeta.getPrevStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      rowMeta1 );
+    when( parentTransMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      rowMeta1 );
     when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
     when( calculatorMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
     analyzer = new CalculatorStepAnalyzer();

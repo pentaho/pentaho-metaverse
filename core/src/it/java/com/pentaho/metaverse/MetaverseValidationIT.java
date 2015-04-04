@@ -22,16 +22,47 @@
 
 package com.pentaho.metaverse;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.ChangeType;
+import com.pentaho.metaverse.api.IDocumentController;
+import com.pentaho.metaverse.api.IDocumentLocatorProvider;
+import com.pentaho.metaverse.api.IMetaverseReader;
+import com.pentaho.metaverse.api.model.IOperation;
+import com.pentaho.metaverse.api.model.Operations;
+import com.pentaho.metaverse.frames.CalculatorStepNode;
+import com.pentaho.metaverse.frames.CsvFileInputStepNode;
+import com.pentaho.metaverse.frames.DatasourceNode;
+import com.pentaho.metaverse.frames.ExcelInputStepNode;
+import com.pentaho.metaverse.frames.ExcelOutputStepNode;
+import com.pentaho.metaverse.frames.FieldNode;
+import com.pentaho.metaverse.frames.FramedMetaverseNode;
+import com.pentaho.metaverse.frames.GroupByStepNode;
+import com.pentaho.metaverse.frames.JobEntryNode;
+import com.pentaho.metaverse.frames.JobNode;
+import com.pentaho.metaverse.frames.LocatorNode;
+import com.pentaho.metaverse.frames.MergeJoinStepNode;
+import com.pentaho.metaverse.frames.MongoDbDatasourceNode;
+import com.pentaho.metaverse.frames.RootNode;
+import com.pentaho.metaverse.frames.RowsToResultStepNode;
+import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import com.pentaho.metaverse.frames.SplitFieldsStepNode;
-
+import com.pentaho.metaverse.frames.StreamFieldNode;
+import com.pentaho.metaverse.frames.StreamLookupStepNode;
+import com.pentaho.metaverse.frames.StringOperationsStepNode;
+import com.pentaho.metaverse.frames.StringsCutStepNode;
+import com.pentaho.metaverse.frames.TableOutputStepNode;
+import com.pentaho.metaverse.frames.TextFileInputStepNode;
+import com.pentaho.metaverse.frames.TextFileOutputStepNode;
+import com.pentaho.metaverse.frames.TransExecutorStepNode;
+import com.pentaho.metaverse.frames.TransformationNode;
+import com.pentaho.metaverse.frames.TransformationStepNode;
+import com.pentaho.metaverse.frames.ValueMapperStepNode;
+import com.pentaho.metaverse.locator.FileSystemLocator;
+import com.pentaho.metaverse.util.MetaverseUtil;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
@@ -56,47 +87,16 @@ import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
+import org.pentaho.di.trans.steps.transexecutor.TransExecutorMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.ChangeType;
-import com.pentaho.metaverse.api.IDocumentController;
-import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.IMetaverseReader;
-import com.pentaho.metaverse.api.model.IOperation;
-import com.pentaho.metaverse.api.model.Operations;
-import com.pentaho.metaverse.frames.CalculatorStepNode;
-import com.pentaho.metaverse.frames.CsvFileInputStepNode;
-import com.pentaho.metaverse.frames.DatasourceNode;
-import com.pentaho.metaverse.frames.ExcelInputStepNode;
-import com.pentaho.metaverse.frames.ExcelOutputStepNode;
-import com.pentaho.metaverse.frames.FieldNode;
-import com.pentaho.metaverse.frames.FramedMetaverseNode;
-import com.pentaho.metaverse.frames.GroupByStepNode;
-import com.pentaho.metaverse.frames.JobEntryNode;
-import com.pentaho.metaverse.frames.JobNode;
-import com.pentaho.metaverse.frames.LocatorNode;
-import com.pentaho.metaverse.frames.MergeJoinStepNode;
-import com.pentaho.metaverse.frames.MongoDbDatasourceNode;
-import com.pentaho.metaverse.frames.RootNode;
-import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
-import com.pentaho.metaverse.frames.StreamFieldNode;
-import com.pentaho.metaverse.frames.StreamLookupStepNode;
-import com.pentaho.metaverse.frames.StringOperationsStepNode;
-import com.pentaho.metaverse.frames.StringsCutStepNode;
-import com.pentaho.metaverse.frames.TableOutputStepNode;
-import com.pentaho.metaverse.frames.TextFileInputStepNode;
-import com.pentaho.metaverse.frames.TextFileOutputStepNode;
-import com.pentaho.metaverse.frames.TransformationNode;
-import com.pentaho.metaverse.frames.TransformationStepNode;
-import com.pentaho.metaverse.frames.ValueMapperStepNode;
-import com.pentaho.metaverse.locator.FileSystemLocator;
-import com.pentaho.metaverse.util.MetaverseUtil;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -185,12 +185,7 @@ public class MetaverseValidationIT {
     int countDocuments = getIterableSize( node.getDocuments() );
 
     File folder = new File( ROOT_FOLDER );
-    int fileCount = folder.listFiles( new FilenameFilter() {
-      @Override
-      public boolean accept( File dir, String name ) {
-        return ( name.endsWith( ".ktr" ) || name.endsWith( ".kjb" ) );
-      }
-    } ).length;
+    int fileCount = FileUtils.listFiles( folder, new String[] { "ktr", "kjb" }, true ).size();
 
     assertEquals( fileCount, countDocuments );
   }
@@ -272,7 +267,7 @@ public class MetaverseValidationIT {
       }
 
       assertEquals( "Not all job entries are accounted for in the graph for Job [" + jobMeta.getName() + "]",
-          numJobEntries, matchCount );
+        numJobEntries, matchCount );
 
       assertEquals( "Incorrect number of job entries for in the graph for Job [" + jobMeta.getName() + "]",
           numJobEntries, getIterableSize( jobNode.getJobEntryNodes() ) );
@@ -1030,6 +1025,88 @@ public class MetaverseValidationIT {
     }
 
     assertTrue( createdNode.getOperations() != null && createdNode.getOperations().length() > 0 );
+  }
+
+  @Test
+  public void testTransExecutorStepNode() throws Exception {
+    TransExecutorStepNode transExecutorStepNode = root.getTransExecutorStepNode();
+    assertNotNull( transExecutorStepNode );
+
+    TransExecutorMeta meta = (TransExecutorMeta) getStepMeta( transExecutorStepNode );
+
+    assertEquals( meta.getParentStepMeta().getName(), transExecutorStepNode.getName() );
+    assertEquals( meta.getOutputRowsSourceStep(), transExecutorStepNode.getOutputRowsTargetStepName() );
+    assertEquals( meta.getResultFilesTargetStep(), transExecutorStepNode.getResultFilesTargetStepName() );
+    assertEquals( meta.getExecutionResultTargetStep(), transExecutorStepNode.getExecutionResultsTargetStepName() );
+
+    assertNotNull( transExecutorStepNode.getOutputStepByName( meta.getOutputRowsSourceStep() ) );
+    assertNotNull( transExecutorStepNode.getOutputStepByName( meta.getResultFilesTargetStep() ) );
+    assertNotNull( transExecutorStepNode.getOutputStepByName( meta.getExecutionResultTargetStep() ) );
+
+    RowMetaInterface incomingRow = meta.getParentStepMeta().getParentTransMeta().getPrevStepFields(
+      meta.getParentStepMeta() );
+    int incomingFieldCount = incomingRow.size();
+
+    Iterable<StreamFieldNode> streamFieldNodes = transExecutorStepNode.getStreamFieldNodesCreates();
+    int countCreatedStreamFieldNode = getIterableSize( streamFieldNodes );
+    List<String> outputFields = Arrays.asList( meta.getOutputRowsField() );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+      if ( outputFields.contains( streamFieldNode.getName() ) ) {
+        // this field came back to us from the sub trans via a result, lets make sure they link up
+        assertEquals( transExecutorStepNode.getTransToExecute(),
+          streamFieldNode.getFieldNodesThatDeriveMe().iterator().next().getStepThatCreatesMe().getTransNode() );
+      }
+    }
+
+    streamFieldNodes = transExecutorStepNode.getStreamFieldNodesDeletes();
+    int countDeletedStreamFieldNode = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+
+    assertNotNull( transExecutorStepNode.getTransToExecute() );
+
+    streamFieldNodes = transExecutorStepNode.getStreamFieldNodesUses();
+    int countUsedStreamFieldNode = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+
+      // these should link up to stream fields in the sub trans via the "get rows from result" step
+      for( StreamFieldNode derived : streamFieldNode.getFieldNodesDerivedFromMe() ) {
+        // the trans that is to be executed should contain the step that creates a field derived from the incoming field
+        assertEquals( transExecutorStepNode.getTransToExecute(), derived.getStepThatCreatesMe().getTransNode() );
+      }
+    }
+
+    assertEquals( incomingFieldCount , countUsedStreamFieldNode );
+    assertEquals( incomingFieldCount, countDeletedStreamFieldNode );
+
+  }
+
+  @Test
+  public void testRowsToResultStepNode() throws Exception {
+    RowsToResultStepNode rowsToResultStepNode = root.getRowsToResultStepNode();
+    assertNotNull( rowsToResultStepNode );
+
+    assertEquals( "Copy rows to result", rowsToResultStepNode.getStepType() );
+
+    Iterable<StreamFieldNode> streamFieldNodes = rowsToResultStepNode.getStreamFieldNodesCreates();
+    int countCreatedStreamFieldNode = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+      // each field created is derived from an incoming field named the same thing
+      assertEquals( streamFieldNode.getName(), streamFieldNode.getFieldNodesThatDeriveMe().iterator().next().getName() );
+    }
+
+    streamFieldNodes = rowsToResultStepNode.getStreamFieldNodesUses();
+    int countUsedStreamFieldNode = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+
+    // should create a field for each one it uses
+    assertEquals( countCreatedStreamFieldNode, countUsedStreamFieldNode );
   }
 
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {
