@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -18,37 +18,36 @@
  * prohibited to anyone except those individuals and entities who have executed
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
+ *
  */
 
 package com.pentaho.metaverse.frames;
 
+import com.pentaho.metaverse.analyzer.kettle.step.transexecutor.TransExecutorStepAnalyzer;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
+import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
 
 /**
- * User: RFellows Date: 9/4/14
+ * Created by rfellows on 4/3/15.
  */
-public interface TransformationStepNode extends Concept {
-  @Property( "stepType" )
-  public String getStepType();
+public interface TransExecutorStepNode extends TransformationStepNode {
 
-  @Adjacency( label = "contains", direction = Direction.IN )
-  public TransformationNode getTransNode();
+  @Adjacency( label = "executes", direction = Direction.OUT )
+  public TransformationNode getTransToExecute();
 
-  @Adjacency( label = "deletes", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesDeletes();
+  @Property( TransExecutorStepAnalyzer.EXECUTION_RESULTS_TARGET )
+  public String getExecutionResultsTargetStepName();
 
-  @Adjacency( label = "creates", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesCreates();
+  @Property( TransExecutorStepAnalyzer.OUTPUT_ROWS_TARGET )
+  public String getOutputRowsTargetStepName();
 
-  @Adjacency( label = "uses", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesUses();
+  @Property( TransExecutorStepAnalyzer.RESULT_FILES_TARGET )
+  public String getResultFilesTargetStepName();
 
-  @Adjacency( label = "hops_to", direction = Direction.OUT )
-  public Iterable<TransformationStepNode> getNextSteps();
-
-  @Adjacency( label = "hops_to", direction = Direction.IN )
-  public Iterable<TransformationStepNode> getPreviousSteps();
+  @GremlinGroovy( "it.out( 'hops_to' ).has( 'name', T.eq, outputStepName )" )
+  public TransformationStepNode getOutputStepByName( @GremlinParam( "outputStepName" ) String outputStepName );
 
 }

@@ -141,6 +141,10 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer"/>
   <bean id="SplitFieldsStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.splitfields.SplitFieldsStepAnalyzer"/>
+  <bean id="TransExecutorStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.transexecutor.TransExecutorStepAnalyzer"/>
+  <bean id="RowsToResultStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.rowstoresult.RowsToResultStepAnalyzer"/>
 
   <bean id="StringOperationsStepAnalyzer" 
   		class="com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
@@ -212,6 +216,14 @@
   <service id="splitFieldsStepAnalyzerService"
            interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
            ref="SplitFieldsStepAnalyzer"/>
+
+  <service id="transExecutorStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="TransExecutorStepAnalyzer"/>
+
+  <service id="rowsToResultStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="RowsToResultStepAnalyzer"/>
 
   <reference-list id="stepAnalyzerRefList"
                   interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"

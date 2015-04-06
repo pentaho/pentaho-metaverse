@@ -60,7 +60,9 @@ public class StringOperationsStepAnalyzer extends BaseStepAnalyzer<StringOperati
     return node;
   }
 
-  private ComponentDerivationRecord buildChangeRecord( final StringOperationsMeta stringOperationsMeta, final int index ) {
+  private ComponentDerivationRecord buildChangeRecord( final StringOperationsMeta stringOperationsMeta, final int index )
+    throws MetaverseAnalyzerException {
+
     String fieldInString = stringOperationsMeta.getFieldInStream()[index];
     String fieldOutString = stringOperationsMeta.getFieldOutStream()[index];
     if ( fieldOutString == null || fieldOutString.length() < 1 ) {

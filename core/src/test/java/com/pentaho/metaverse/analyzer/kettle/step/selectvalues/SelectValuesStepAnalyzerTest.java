@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaString;
@@ -35,7 +36,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.class )
 public class SelectValuesStepAnalyzerTest {
 
   private static final String DEFAULT_STEP_NAME = "testStep";
@@ -80,7 +81,7 @@ public class SelectValuesStepAnalyzerTest {
     descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
   }
 
-  @Test(expected = MetaverseAnalyzerException.class)
+  @Test( expected = MetaverseAnalyzerException.class )
   public void testNullAnalyze() throws MetaverseAnalyzerException {
 
     analyzer.analyze( descriptor, null );
@@ -113,7 +114,7 @@ public class SelectValuesStepAnalyzerTest {
     when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
     when( transMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
-    when(spyMeta.getStepID()).thenReturn( "Select values" );
+    when( spyMeta.getStepID() ).thenReturn( "Select values" );
 
     String[] fieldNames = { "field1", "field2" };
     String[] fieldRenames = { null, "field3" };
@@ -121,8 +122,9 @@ public class SelectValuesStepAnalyzerTest {
     // set up the input fields
     when( selectValuesMeta.getSelectName() ).thenReturn( fieldNames );
     when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
-    when( transMeta.getPrevStepFields( spyMeta ) ).thenReturn( prevRowMeta );
-    when( transMeta.getStepFields( spyMeta ) ).thenReturn( stepRowMeta );
+    when( transMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) )
+      .thenReturn( prevRowMeta );
+    when( transMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( stepRowMeta );
     when( stepRowMeta.getFieldNames() ).thenReturn( fieldNames );
     when( stepRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
@@ -182,8 +184,8 @@ public class SelectValuesStepAnalyzerTest {
     when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
     when( selectValuesMeta.getSelectPrecision() ).thenReturn( fieldPrecision );
     when( selectValuesMeta.getSelectLength() ).thenReturn( fieldLength );
-    when( transMeta.getPrevStepFields( spyMeta ) ).thenReturn( prevRowMeta );
-    when( transMeta.getStepFields( spyMeta ) ).thenReturn( stepRowMeta );
+    when( transMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( prevRowMeta );
+    when( transMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( stepRowMeta );
     when( stepRowMeta.searchValueMeta( anyString() ) ).thenReturn( null );
     when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
     when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
@@ -237,8 +239,8 @@ public class SelectValuesStepAnalyzerTest {
 
     // set up the input fields
     when( selectValuesMeta.getMeta() ).thenReturn( new SelectMetadataChange[] { testChange1, testChange2 } );
-    when( transMeta.getPrevStepFields( spyMeta ) ).thenReturn( prevRowMeta );
-    when( transMeta.getStepFields( spyMeta ) ).thenReturn( stepRowMeta );
+    when( transMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( prevRowMeta );
+    when( transMeta.getStepFields( eq( spyMeta), any( ProgressMonitorListener.class ) ) ).thenReturn( stepRowMeta );
     when( stepRowMeta.searchValueMeta( anyString() ) ).thenReturn( null );
     when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
     when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
@@ -295,8 +297,8 @@ public class SelectValuesStepAnalyzerTest {
     when( selectValuesMeta.getSelectName() ).thenReturn( fieldNames );
     when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
     when( selectValuesMeta.getMeta() ).thenReturn( new SelectMetadataChange[]{} );
-    when( transMeta.getPrevStepFields( spyMeta ) ).thenReturn( prevRowMeta );
-    when( transMeta.getStepFields( spyMeta ) ).thenReturn( stepRowMeta );
+    when( transMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( prevRowMeta );
+    when( transMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( stepRowMeta );
     when( stepRowMeta.getFieldNames() ).thenReturn( fieldNames );
     when( stepRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
@@ -363,8 +365,8 @@ public class SelectValuesStepAnalyzerTest {
     when( selectValuesMeta.getSelectName() ).thenReturn( fieldNames );
     when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
     when( selectValuesMeta.getMeta() ).thenReturn( changes );
-    when( transMeta.getPrevStepFields( spyMeta ) ).thenReturn( prevRowMeta );
-    when( transMeta.getStepFields( spyMeta ) ).thenReturn( stepRowMeta );
+    when( transMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( prevRowMeta );
+    when( transMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( stepRowMeta );
     when( stepRowMeta.getFieldNames() ).thenReturn( fieldNames );
     when( stepRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 

@@ -34,6 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -174,7 +175,8 @@ public class TextFileOutputStepAnalyzerTest {
 
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
 
-    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockTransMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      mockRowMetaInterface );
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "Field 1", "Field 2" } );
     when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
@@ -226,8 +228,10 @@ public class TextFileOutputStepAnalyzerTest {
 
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
 
-    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    when( mockTransMeta.getPrevStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockTransMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      mockRowMetaInterface );
+    when( mockTransMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
+      mockRowMetaInterface );
     when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[]{ "prev step name" } );
     String[] incomingFields = new String[]{ "Field 1", "Field 2", "filename" };
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( incomingFields );
@@ -236,16 +240,20 @@ public class TextFileOutputStepAnalyzerTest {
       @Override
       public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
+        ValueMetaString valueMetaString = null;
         if ( args[0] == "Field 1" ) {
-          return new ValueMetaString( "Field 1" );
+          valueMetaString = new ValueMetaString( "Field 1" );
+          valueMetaString.setOrigin( "origin" );
         }
         if ( args[0] == "Field 2" ) {
-          return new ValueMetaString( "Field 2" );
+          valueMetaString = new ValueMetaString( "Field 2" );
+          valueMetaString.setOrigin( "origin" );
         }
         if ( args[0] == "filename" ) {
-          return new ValueMetaString( "filename" );
+          valueMetaString = new ValueMetaString( "filename" );
+          valueMetaString.setOrigin( "origin" );
         }
-        return null;
+        return valueMetaString;
       }
     } );
 

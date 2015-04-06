@@ -54,4 +54,14 @@ public class MetaverseAnalyzerException extends MetaverseException {
   public MetaverseAnalyzerException( Throwable t ) {
     super( t );
   }
+
+  /**
+   * Instantiates a new metaverse analyzerexception with the specified message and an underlying exception
+   * @param message the message
+   * @param t the Throwable to wrap
+   */
+  public MetaverseAnalyzerException( String message, Throwable t ) {
+    super( message, t );
+  }
+
 }

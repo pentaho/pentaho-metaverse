@@ -38,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMeta;
@@ -156,9 +157,11 @@ public class BaseStepAnalyzerTest {
 
     String[] prevSteps = { "previous step name" };
 
-    when( analyzer.parentTransMeta.getPrevStepFields( analyzer.parentStepMeta ) ).thenReturn( mockPrevFields );
+    when( analyzer.parentTransMeta.getPrevStepFields( eq( analyzer.parentStepMeta ),
+      any( ProgressMonitorListener.class ) ) ).thenReturn( mockPrevFields );
     when( analyzer.parentTransMeta.getPrevStepNames( analyzer.parentStepMeta ) ).thenReturn( prevSteps );
-    when( analyzer.parentTransMeta.getStepFields( analyzer.parentStepMeta ) ).thenReturn( mockStepFields );
+    when( analyzer.parentTransMeta.getStepFields( eq( analyzer.parentStepMeta ),
+      any( ProgressMonitorListener.class ) ) ).thenReturn( mockStepFields );
   }
 
   /**
@@ -190,9 +193,10 @@ public class BaseStepAnalyzerTest {
 
   @Test
   public void testLoadInputAndOutputStreamFieldsWithException() throws KettleStepException {
-    when( analyzer.parentTransMeta.getPrevStepFields( analyzer.parentStepMeta ) )
-      .thenThrow( KettleStepException.class );
-    when( analyzer.parentTransMeta.getStepFields( analyzer.parentStepMeta ) ).thenThrow( KettleStepException.class );
+    when( analyzer.parentTransMeta.getPrevStepFields( eq( analyzer.parentStepMeta ),
+      any( ProgressMonitorListener.class ) ) ).thenThrow( KettleStepException.class );
+    when( analyzer.parentTransMeta.getStepFields( eq( analyzer.parentStepMeta ),
+      any( ProgressMonitorListener.class ) ) ).thenThrow( KettleStepException.class );
     analyzer.loadInputAndOutputStreamFields( mockStepMeta );
     assertNull( analyzer.prevFields );
     assertNull( analyzer.stepFields );
@@ -246,7 +250,8 @@ public class BaseStepAnalyzerTest {
     final ValueMetaInterface vmi = new ValueMetaInteger( "testInt" );
     vmi.setOrigin( "SomeoneElse" );
 
-    when( mockTransMeta.getPrevStepFields( mockStepMeta.getParentStepMeta() ) )
+    when( mockTransMeta.getPrevStepFields( eq( mockStepMeta.getParentStepMeta() ),
+      any( ProgressMonitorListener.class ) ) )
       .thenAnswer( new Answer<RowMetaInterface>() {
 
         @Override
@@ -375,7 +380,7 @@ public class BaseStepAnalyzerTest {
   }
 
   @Test
-  public void testGetStepFieldOriginDescriptorNullDescriptor() {
+  public void testGetStepFieldOriginDescriptorNullDescriptor() throws Exception {
     assertNull( analyzer.getStepFieldOriginDescriptor( null, "Name" ) );
   }
 
