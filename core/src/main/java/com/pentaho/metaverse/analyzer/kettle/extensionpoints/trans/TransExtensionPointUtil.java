@@ -81,6 +81,9 @@ public class TransExtensionPointUtil {
     String filename = transMeta.getFilename();
     if ( filename == null ) {
       filename = transMeta.getPathAndName();
+      if ( transMeta.getDefaultExtension() != null ) {
+        filename = filename + "." + transMeta.getDefaultExtension();
+      }
     }
     if ( filename == null ) {
       filename = "";
