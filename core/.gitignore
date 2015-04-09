@@ -12,3 +12,4 @@ SampleData*.db
 *test*.json
 *test*.graphjson
 testGraph.csv
+/src/it/resources/repo/validation/transformation-executor/*.txt

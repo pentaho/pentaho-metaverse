@@ -1,15 +1,17 @@
 import com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.rowstoresult.RowsToResultStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.transexecutor.TransExecutorStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.calculator.CalculatorStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.calculator.StringOperationsStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer
 
 import com.pentaho.metaverse.api.*
@@ -134,10 +136,14 @@ i:
       excelInputAnalyzer = new ExcelInputStepAnalyzer()
 
       groupByAnalyzer = new GroupByStepAnalyzer()
-      
+
       stringOperationsAnalyzer = new StringOperationsStepAnalyzer()
-      
+
       stringsCutAnalyzer = new StringsCutStepAnalyzer()
+
+      transExecutorAnalyzer = new TransExecutorStepAnalyzer()
+
+      rowsToResultAnalyzer = new RowsToResultStepAnalyzer()
 
       //**********************************************************************
 
@@ -145,7 +151,8 @@ i:
       ksap.setStepAnalyzers(
         [tfia, tfoa, cfia,
          mergeJoinAnalyzer, numberRangeAnalyzer, selectValuesAnalyzer, tableInputAnalyzer, valueMapperAnalyzer,
-         streamLookupAnalyzer, calculatorAnalyzer, groupByAnalyzer, excelInputAnalyzer] as List)
+         streamLookupAnalyzer, calculatorAnalyzer, groupByAnalyzer, excelInputAnalyzer, stringOperationsAnalyzer,
+         stringsCutAnalyzer, transExecutorAnalyzer, rowsToResultAnalyzer ] as List)
 
       ta = new TransformationAnalyzer()
       ta.setStepAnalyzerProvider(ksap)
