@@ -151,7 +151,8 @@
   
   <bean id="StringsCutStepAnalyzer" 
   		class="com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer"/>
-  
+  <bean id="CsvFileInputStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer"/>
 
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
@@ -224,6 +225,10 @@
   <service id="rowsToResultStepAnalyzerService"
            interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
            ref="RowsToResultStepAnalyzer"/>
+
+  <service id="csvFileInputStepAnalyzerService"
+           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           ref="CsvFileInputStepAnalyzer"/>
 
   <reference-list id="stepAnalyzerRefList"
                   interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
