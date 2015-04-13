@@ -22,28 +22,25 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.streamlookup;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.streamlookup.StreamLookupMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
-import com.pentaho.metaverse.messages.Messages;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta> {
@@ -72,9 +69,6 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
     values = streamLookupMeta.getValue();
     valueNames = streamLookupMeta.getValueName();
 
-    IMetaverseNode valueNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, values[0] ) );
-    IMetaverseNode valueName = createNodeFromDescriptor( getStepFieldOriginDescriptor( descriptor, valueNames[0] ) );
-
     for ( int i = 0; i < keyLookups.length; i++ ) {
       IMetaverseNode keyNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, keyStreams[i] ) );
       metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, keyNode );
@@ -84,39 +78,61 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
       metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, keyLookupNode );
 
       // Bidirectional Join
-      metaverseBuilder.addLink( keyLookupNode, DictionaryConst.LINK_JOINS, valueNode );
-      metaverseBuilder.addLink( valueNode, DictionaryConst.LINK_JOINS, keyLookupNode );
+      metaverseBuilder.addLink( keyLookupNode, DictionaryConst.LINK_JOINS, keyNode );
+      metaverseBuilder.addLink( keyNode, DictionaryConst.LINK_JOINS, keyLookupNode );
+
+    }
+
+    for ( int i = 0; i < valueNames.length; i++ ) {
+      String newFieldName = valueNames[ i ];
+
+      if ( newFieldNameExistsInMainInputStream( newFieldName ) ) {
+        // the new field name is going to be renamed with the _N naming convention to make it unique
+        RowMetaInterface outputFields = getOutputFields( streamLookupMeta );
+        for ( int renameIdx = 1; renameIdx <= valueNames.length; renameIdx++ ) {
+          ValueMetaInterface outField = outputFields.searchValueMeta( newFieldName + "_" + renameIdx );
+          if ( outField != null ) {
+            newFieldName = outField.getName();
+            break;
+          }
+        }
+      }
+
+      IMetaverseNode valueNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, values[i] ) );
+      IMetaverseNode valueName = createNodeFromDescriptor( getStepFieldOriginDescriptor( descriptor, newFieldName ) );
+
 
       // Derives
       metaverseBuilder.addLink( valueNode, DictionaryConst.LINK_DERIVES, valueName );
 
       // Link
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, valueName );
+      metaverseBuilder.addLink( node, DictionaryConst.LINK_CREATES, valueName );
+
     }
 
     return node;
   }
 
-  @Override
-  protected boolean fieldNameExistsInInput( String fieldName ) {
-    boolean result = super.fieldNameExistsInInput( fieldName );
-    if ( result ) {
-      return true;
+  protected boolean newFieldNameExistsInMainInputStream( String newFieldName ) {
+    if ( parentTransMeta != null ) {
+      String lookupStepName = baseStepMeta.getStepIOMeta().getInfoStreams().get( 0 ).getStepname();
+      String[] prevStepNames = parentTransMeta.getPrevStepNames( parentStepMeta );
+      for ( int i = 0; i < prevStepNames.length; i++ ) {
+        String prevStepName = prevStepNames[ i ];
+        if ( !prevStepName.equals( lookupStepName ) ) {
+          try {
+            RowMetaInterface stepFields = parentTransMeta.getStepFields( prevStepName );
+            if ( stepFields != null ) {
+              ValueMetaInterface valueMetaInterface = stepFields.searchValueMeta( newFieldName );
+              return valueMetaInterface != null;
+            }
+          } catch ( KettleStepException e ) {
+            LOGGER.warn( Messages.getString( "WARNING.CannotDetermineRowMeta", prevStepName, e.toString() ) );
+          }
+        }
+      }
     }
-    List<String> inputs = new ArrayList<String>();
-    if ( keyLookups != null ) {
-      inputs.addAll( Arrays.asList( keyLookups ) );
-    }
-    if ( keyStreams != null ) {
-      inputs.addAll( Arrays.asList( keyStreams ) );
-    }
-    if ( values != null ) {
-      inputs.addAll( Arrays.asList( values ) );
-    }
-    if ( valueNames != null ) {
-      inputs.addAll( Arrays.asList( valueNames ) );
-    }
-    return inputs.contains( fieldName );
+    return false;
   }
 
   @Override
@@ -124,7 +140,7 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
     Map<String, RowMetaInterface> rowMeta = super.getInputFields( meta );
 
     if ( parentTransMeta != null ) {
-      for ( String prevStepName : parentTransMeta.getStepNames() ) {
+      for ( String prevStepName : parentTransMeta.getPrevStepNames( parentStepMeta ) ) {
         if ( !rowMeta.containsKey( prevStepName ) ) {
           try {
             rowMeta.put( prevStepName, parentTransMeta.getStepFields( prevStepName ) );
@@ -138,22 +154,6 @@ public class StreamLookupStepAnalyzer extends BaseStepAnalyzer<StreamLookupMeta>
   }
 
   // ******** Start - Used to aid in unit testing **********
-  protected void setKeyLookups( String[] keyLookups ) {
-    this.keyLookups = keyLookups;
-  }
-
-  protected void setKeyStreams( String[] keyStreams ) {
-    this.keyStreams = keyStreams;
-  }
-
-  protected void setValues( String[] values ) {
-    this.values = values;
-  }
-
-  protected void setValueNames( String[] valueNames ) {
-    this.valueNames = valueNames;
-  }
-
   public void setParentTransMeta( TransMeta parentTransMeta ) {
     this.parentTransMeta = parentTransMeta;
   }

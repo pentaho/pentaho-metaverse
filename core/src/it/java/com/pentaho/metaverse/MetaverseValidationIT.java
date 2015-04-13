@@ -763,7 +763,11 @@ public class MetaverseValidationIT {
 
     List<String> expectations = new ArrayList<String>();
     expectations.add( "territory" );
-    expectations.add( "code" );
+    expectations.add( "country_ref" );
+
+    List<String> joins = new ArrayList<String>();
+    joins.add( "country_code" );
+    joins.add( "code" );
 
     Iterator<StreamFieldNode> iter1 = node.getStreamFieldNodesCreates().iterator();
     while ( iter1.hasNext() ) {
@@ -773,14 +777,21 @@ public class MetaverseValidationIT {
       while ( iter2.hasNext() ) {
         StreamFieldNode derivedFromNode = iter2.next();
         assertTrue( expectations.contains( derivedFromNode.getName() ) );
-        assertEquals( 1, getIterableSize( derivedFromNode.getFieldNodesThatJoinToMe() ) );
-        Iterator<StreamFieldNode> iter3 = derivedFromNode.getFieldNodesThatJoinToMe().iterator();
-        while ( iter3.hasNext() ) {
-          StreamFieldNode joinedNode = iter3.next();
-          assertTrue( expectations.contains( joinedNode.getName() ) );
-        }
       }
     }
+
+    iter1 = node.getStreamFieldNodesUses().iterator();
+    while ( iter1.hasNext() ) {
+      StreamFieldNode usesNode = iter1.next();
+      assertTrue( joins.contains( usesNode.getName() ) );
+      assertEquals( 1, getIterableSize( usesNode.getFieldNodesThatJoinToMe() ) );
+      Iterator<StreamFieldNode> iter3 = usesNode.getFieldNodesThatJoinToMe().iterator();
+      while ( iter3.hasNext() ) {
+        StreamFieldNode joinedNode = iter3.next();
+        assertTrue( joins.contains( joinedNode.getName() ) );
+      }
+    }
+
   }
 
   @Test
