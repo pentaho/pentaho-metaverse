@@ -35,6 +35,7 @@ import java.util.concurrent.Future;
 
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
+import com.pentaho.metaverse.api.AnalysisContext;
 import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
@@ -129,6 +130,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         metaverseDocument.setName( jobMeta.getName() );
         metaverseDocument.setExtension( "ktr" );
         metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "trans.ktr" ) );
+        metaverseDocument.setContext( new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
         metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, id );
         metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
 

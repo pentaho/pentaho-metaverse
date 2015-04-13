@@ -199,14 +199,14 @@ public class MetaverseUtil {
       @Override
       public void run() {
         try {
-
-          analyzer.analyze(
-            new MetaverseComponentDescriptor(
-              document.getName(),
-              DictionaryConst.NODE_TYPE_TRANS,
-              document.getNamespace() ),
-            document
-          );
+          MetaverseComponentDescriptor docDescriptor = new MetaverseComponentDescriptor(
+            document.getName(),
+            DictionaryConst.NODE_TYPE_TRANS,
+            document.getNamespace() );
+          if ( document.getContext() != null ) {
+            docDescriptor.setContext( document.getContext() );
+          }
+          analyzer.analyze( docDescriptor, document );
         } catch ( MetaverseAnalyzerException mae ) {
           throw new RuntimeException( Messages.getString( "ERROR.AnalyzingDocument", document.getNamespaceId() ), mae );
         }
