@@ -218,7 +218,7 @@
            interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
            ref="StringsCutStepAnalyzer"/>
 
-  <service id="stringsReplaceStepAnalyzer"
+  <service id="stringsReplaceStepAnalyzerService"
            interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
            ref="StringsReplaceStepAnalyzer"/>
            
