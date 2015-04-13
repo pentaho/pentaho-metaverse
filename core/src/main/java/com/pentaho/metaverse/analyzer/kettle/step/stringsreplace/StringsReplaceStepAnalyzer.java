@@ -43,6 +43,8 @@ import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.kettle.FieldMapping;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 public class StringsReplaceStepAnalyzer extends BaseStepAnalyzer<ReplaceStringMeta> {
   private IComponentDescriptor descriptor;
 
@@ -69,9 +71,9 @@ public class StringsReplaceStepAnalyzer extends BaseStepAnalyzer<ReplaceStringMe
 
     String fieldInString = stringsReplaceMeta.getFieldInStream()[index];
     String fieldOutString = stringsReplaceMeta.getFieldOutStream()[index];
-    if ( fieldInString.equals( fieldOutString ) ) {
+    if ( containsField( fieldOutString ) ) {
       Integer nameIdx = renameIndex.get( fieldOutString );
-      renameIndex.put( fieldOutString, ( nameIdx == null ? 1 : nameIdx++ ) );
+      renameIndex.put( fieldOutString, ( nameIdx == null ? 1 : nameIdx + 1 ) );
       fieldOutString += "_" + renameIndex.get( fieldOutString );
     }
     if ( fieldOutString == null || fieldOutString.length() < 1 ) {
@@ -96,8 +98,7 @@ public class StringsReplaceStepAnalyzer extends BaseStepAnalyzer<ReplaceStringMe
     ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( fieldInString );
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
     if ( fieldReplaceString != null && fieldReplaceString.length() > 0 ) {
-      IMetaverseNode replacementFieldNode =
-          createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, fieldReplaceString ) );
+      IMetaverseNode replacementFieldNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, fieldReplaceString ) );
       metaverseBuilder.addLink( replacementFieldNode, DictionaryConst.LINK_DERIVES, newFieldNode );
       metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, replacementFieldNode );
     }
@@ -146,4 +147,11 @@ public class StringsReplaceStepAnalyzer extends BaseStepAnalyzer<ReplaceStringMe
     return fieldMappings;
   }
 
+  private Boolean containsField( String field ) {
+    String[] fieldNames = null;
+    for ( String key : prevFields.keySet() ) {
+      fieldNames = prevFields.get( key ).getFieldNames();
+    }
+    return Arrays.asList( fieldNames ).contains( field );
+  }
 }

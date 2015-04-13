@@ -97,8 +97,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -1037,7 +1039,7 @@ public class MetaverseValidationIT {
     // Ensure there is an entry in the operations for those fields that are derived.
     assertEquals( 5, getIterableSize( node.getStreamFieldNodesUses() ) );
 
-    assertEquals( 4, getIterableSize( node.getStreamFieldNodesCreates() ) );
+    assertEquals( 6, getIterableSize( node.getStreamFieldNodesCreates() ) );
 
     assertEquals( 1, getIterableSize( node.getStreamFieldNodesDeletes() ) );
     for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
@@ -1046,12 +1048,20 @@ public class MetaverseValidationIT {
       }
     }
 
-    StreamFieldNode createdNode = null;
+    Map<String, Boolean> renameMap = new HashMap<String, Boolean>();
+    renameMap.put( "LastName_1", false );
+    renameMap.put( "LastName_2", false );
+    renameMap.put( "FirstName_1", false );
     for ( StreamFieldNode sfn : node.getStreamFieldNodesCreates() ) {
-      createdNode = sfn;
+      if ( renameMap.keySet().contains( sfn.getName() ) ) {
+        renameMap.put( sfn.getName(), true );
+      }
+      assertTrue( sfn.getOperations() != null && sfn.getOperations().length() > 0 );
     }
-
-    assertTrue( createdNode.getOperations() != null && createdNode.getOperations().length() > 0 );
+    
+    for (String key : renameMap.keySet() ) {
+      assertTrue( renameMap.get( key ));
+    }
   }
 
 
