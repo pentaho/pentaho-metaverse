@@ -84,6 +84,7 @@ import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
 import org.pentaho.di.trans.steps.exceloutput.ExcelField;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
 import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
+import org.pentaho.di.trans.steps.groupby.GroupByMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
@@ -874,13 +875,16 @@ public class MetaverseValidationIT {
     GroupByStepNode groupByStepNode = root.getGroupByStepNode();
     assertNotNull( groupByStepNode );
 
+    GroupByMeta meta = (GroupByMeta) getStepMeta( groupByStepNode );
+
     int countCreates = getIterableSize( groupByStepNode.getStreamFieldNodesCreates() );
     int countDeletes = getIterableSize( groupByStepNode.getStreamFieldNodesDeletes() );
     int countUses = getIterableSize( groupByStepNode.getStreamFieldNodesUses() );
 
     assertEquals( 2, countCreates );
     assertEquals( 2, countDeletes );
-    assertEquals( 2, countUses );
+    int expectedUsesLinksCount = meta.getSubjectField().length + meta.getGroupField().length;
+    assertEquals( expectedUsesLinksCount, countUses );
   }
 
   @Test

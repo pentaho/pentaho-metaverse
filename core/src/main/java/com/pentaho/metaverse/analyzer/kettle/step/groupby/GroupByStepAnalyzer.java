@@ -57,11 +57,24 @@ public class GroupByStepAnalyzer extends BaseStepAnalyzer<GroupByMeta> {
     this.descriptor = descriptor;
 
     // Do common analysis for all steps
-    super.analyze( descriptor, groupByMeta );
+    IMetaverseNode node = super.analyze( descriptor, groupByMeta );
+
+    // add "uses" links between the stream fields that are used to "group by"
+    addGroupByUsesLinks( node, groupByMeta );
 
     getChangeRecords( groupByMeta );
 
     return rootNode;
+  }
+
+  protected void addGroupByUsesLinks( IMetaverseNode node, GroupByMeta groupByMeta ) {
+    String[] groupFields = groupByMeta.getGroupField();
+    for ( int i = 0; i < groupFields.length; i++ ) {
+      String groupField = groupFields[ i ];
+      IComponentDescriptor prevDescriptor = getPrevStepFieldOriginDescriptor( descriptor, groupField );
+      IMetaverseNode groupFieldNode = createNodeFromDescriptor( prevDescriptor );
+      metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, groupFieldNode );
+    }
   }
 
   @Override
