@@ -20,7 +20,7 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step.stringoperations;
+package com.pentaho.metaverse.analyzer.kettle.step.stringsreplace;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -43,7 +43,7 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.steps.stringoperations.StringOperationsMeta;
+import org.pentaho.di.trans.steps.replacestring.ReplaceStringMeta;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.IComponentDescriptor;
@@ -56,15 +56,15 @@ import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 @RunWith( MockitoJUnitRunner.class )
-public class StringOperationsStepAnalyzerTest {
+public class StringsReplaceStepAnalyzerTest {
 
-  private StringOperationsStepAnalyzer analyzer;
+  private StringsReplaceStepAnalyzer analyzer;
   private static final String DEFAULT_STEP_NAME = "testStep";
 
   @Mock
   private IMetaverseBuilder builder;
   @Mock
-  private StringOperationsMeta stringOperationsMeta;
+  private ReplaceStringMeta stringsReplaceMeta;
   @Mock
   private INamespace namespace;
   @Mock
@@ -92,31 +92,14 @@ public class StringOperationsStepAnalyzerTest {
     when( parentTransMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( rowMeta1 );
     when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
 
-    when( stringOperationsMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
-    when( stringOperationsMeta.getFieldInStream() ).thenReturn( new String[] { "firstName", "middleName", "lastName" } );
-    when( stringOperationsMeta.getFieldOutStream() ).thenReturn( new String[] { "", "MN", "" } );
-    when( stringOperationsMeta.getTrimType() ).thenReturn(
-        new int[] { StringOperationsMeta.TRIM_BOTH, StringOperationsMeta.TRIM_NONE, StringOperationsMeta.TRIM_NONE } );
-    when( stringOperationsMeta.getLowerUpper() ).thenReturn(
-        new int[] { StringOperationsMeta.LOWER_UPPER_NONE, StringOperationsMeta.LOWER_UPPER_UPPER,
-          StringOperationsMeta.LOWER_UPPER_NONE } );
-    when( stringOperationsMeta.getInitCap() ).thenReturn(
-        new int[] { StringOperationsMeta.INIT_CAP_NO, StringOperationsMeta.INIT_CAP_NO,
-          StringOperationsMeta.INIT_CAP_YES } );
-    when( stringOperationsMeta.getDigits() ).thenReturn(
-        new int[] { StringOperationsMeta.DIGITS_NONE, StringOperationsMeta.DIGITS_NONE,
-          StringOperationsMeta.DIGITS_NONE } );
-    when( stringOperationsMeta.getMaskXML() ).thenReturn(
-        new int[] { StringOperationsMeta.MASK_NONE, StringOperationsMeta.MASK_NONE, StringOperationsMeta.MASK_NONE } );
-    when( stringOperationsMeta.getPaddingType() ).thenReturn(
-        new int[] { StringOperationsMeta.PADDING_NONE, StringOperationsMeta.PADDING_NONE,
-          StringOperationsMeta.PADDING_NONE } );
-    when( stringOperationsMeta.getPadChar() ).thenReturn( new String[] { "", "", "" } );
-    when( stringOperationsMeta.getPadLen() ).thenReturn( new String[] { "", "", "" } );
-    when( stringOperationsMeta.getRemoveSpecialCharacters() ).thenReturn(
-        new int[] { StringOperationsMeta.MASK_NONE, StringOperationsMeta.MASK_NONE, StringOperationsMeta.MASK_NONE } );
+    when( stringsReplaceMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
+    when( stringsReplaceMeta.getFieldInStream() ).thenReturn( new String[] { "firstName", "middleName", "lastName" } );
+    when( stringsReplaceMeta.getFieldOutStream() ).thenReturn( new String[] { "", "MN", "" } );
+    when( stringsReplaceMeta.getFieldReplaceByString() ).thenReturn( new String[] { "Tom", "Dick", "Harry" } );
+    when( stringsReplaceMeta.getReplaceString() ).thenReturn( new String[] { "Bill", "Steve", "Jeff" } );
+    
 
-    analyzer = new StringOperationsStepAnalyzer();
+    analyzer = new StringsReplaceStepAnalyzer();
     when( builder.getMetaverseObjectFactory() ).thenReturn( MetaverseTestUtils.getMetaverseObjectFactory() );
     analyzer.setMetaverseBuilder( builder );
 
@@ -131,8 +114,8 @@ public class StringOperationsStepAnalyzerTest {
   @Test
   public void testAnalyze() {
     try {
-      analyzer.analyze( descriptor, stringOperationsMeta );
-      Set<IFieldMapping> mappings = analyzer.getFieldMappings( stringOperationsMeta );
+      analyzer.analyze( descriptor, stringsReplaceMeta );
+      Set<IFieldMapping> mappings = analyzer.getFieldMappings( stringsReplaceMeta );
       assertEquals( 4, mappings.size() );
       boolean foundNonPassthrough = false;
       for ( IFieldMapping mapping : mappings ) {
@@ -144,19 +127,19 @@ public class StringOperationsStepAnalyzerTest {
     } catch ( MetaverseAnalyzerException e ) {
       e.printStackTrace();
     }
-    verify( builder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
+    verify( builder, times( 1 ) ).addNode( any( IMetaverseNode.class ) );
 
-    verify( builder, times( 3 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
+    verify( builder, times( 6 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
         any( IMetaverseNode.class ) );
 
   }
 
   @Test
   public void testGetSupportedSteps() throws Exception {
-    StringOperationsStepAnalyzer analyzer = new StringOperationsStepAnalyzer();
+    StringsReplaceStepAnalyzer analyzer = new StringsReplaceStepAnalyzer();
     Set<Class<? extends BaseStepMeta>> types = analyzer.getSupportedSteps();
     assertNotNull( types );
     assertEquals( types.size(), 1 );
-    assertTrue( types.contains( StringOperationsMeta.class ) );
+    assertTrue( types.contains( ReplaceStringMeta.class ) );
   }
 }
