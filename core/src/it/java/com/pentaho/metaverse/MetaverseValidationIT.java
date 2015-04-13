@@ -84,6 +84,7 @@ import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
 import org.pentaho.di.trans.steps.exceloutput.ExcelField;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
 import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
+import org.pentaho.di.trans.steps.groupby.GroupByMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
@@ -762,7 +763,11 @@ public class MetaverseValidationIT {
 
     List<String> expectations = new ArrayList<String>();
     expectations.add( "territory" );
-    expectations.add( "code" );
+    expectations.add( "country_ref" );
+
+    List<String> joins = new ArrayList<String>();
+    joins.add( "country_code" );
+    joins.add( "code" );
 
     Iterator<StreamFieldNode> iter1 = node.getStreamFieldNodesCreates().iterator();
     while ( iter1.hasNext() ) {
@@ -772,14 +777,21 @@ public class MetaverseValidationIT {
       while ( iter2.hasNext() ) {
         StreamFieldNode derivedFromNode = iter2.next();
         assertTrue( expectations.contains( derivedFromNode.getName() ) );
-        assertEquals( 1, getIterableSize( derivedFromNode.getFieldNodesThatJoinToMe() ) );
-        Iterator<StreamFieldNode> iter3 = derivedFromNode.getFieldNodesThatJoinToMe().iterator();
-        while ( iter3.hasNext() ) {
-          StreamFieldNode joinedNode = iter3.next();
-          assertTrue( expectations.contains( joinedNode.getName() ) );
-        }
       }
     }
+
+    iter1 = node.getStreamFieldNodesUses().iterator();
+    while ( iter1.hasNext() ) {
+      StreamFieldNode usesNode = iter1.next();
+      assertTrue( joins.contains( usesNode.getName() ) );
+      assertEquals( 1, getIterableSize( usesNode.getFieldNodesThatJoinToMe() ) );
+      Iterator<StreamFieldNode> iter3 = usesNode.getFieldNodesThatJoinToMe().iterator();
+      while ( iter3.hasNext() ) {
+        StreamFieldNode joinedNode = iter3.next();
+        assertTrue( joins.contains( joinedNode.getName() ) );
+      }
+    }
+
   }
 
   @Test
@@ -874,13 +886,16 @@ public class MetaverseValidationIT {
     GroupByStepNode groupByStepNode = root.getGroupByStepNode();
     assertNotNull( groupByStepNode );
 
+    GroupByMeta meta = (GroupByMeta) getStepMeta( groupByStepNode );
+
     int countCreates = getIterableSize( groupByStepNode.getStreamFieldNodesCreates() );
     int countDeletes = getIterableSize( groupByStepNode.getStreamFieldNodesDeletes() );
     int countUses = getIterableSize( groupByStepNode.getStreamFieldNodesUses() );
 
     assertEquals( 2, countCreates );
     assertEquals( 2, countDeletes );
-    assertEquals( 2, countUses );
+    int expectedUsesLinksCount = meta.getSubjectField().length + meta.getGroupField().length;
+    assertEquals( expectedUsesLinksCount, countUses );
   }
 
   @Test

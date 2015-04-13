@@ -74,6 +74,11 @@ public class GroupByStepAnalyzerTest {
   @Mock
   private RowMetaInterface rowMeta1;
 
+  String[] groupFields = new String[] { "country", "state" };
+  String[] mockSubjectFields = { "member", "donation" };
+  String[] mockAggregateFields = { "memberlist", "totalcity" };
+  int[] mockAggregateOperations = { 8, 1 };
+
   @Before
   public void setUp() throws Exception {
 
@@ -85,10 +90,8 @@ public class GroupByStepAnalyzerTest {
 
     when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
     when( groupByMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
+    when( groupByMeta.getGroupField() ).thenReturn( groupFields );
 
-    String[] mockSubjectFields = { "member", "donation" };
-    String[] mockAggregateFields = { "memberlist", "totalcity" };
-    int[] mockAggregateOperations = { 8, 1 };
     when( groupByMeta.getSubjectField() ).thenReturn( mockSubjectFields );
     when( groupByMeta.getAggregateField() ).thenReturn( mockAggregateFields );
     when( groupByMeta.getAggregateType() ).thenReturn( mockAggregateOperations );
@@ -114,8 +117,8 @@ public class GroupByStepAnalyzerTest {
     }
     verify( builder, times( 1 ) ).addNode( any( IMetaverseNode.class ) );
 
-    verify( builder, times( 2 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-        any( IMetaverseNode.class ) );
+    verify( builder, times( mockSubjectFields.length + groupFields.length ) ).addLink(
+      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
 
   }
 
