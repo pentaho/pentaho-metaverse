@@ -25,6 +25,7 @@ import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
+import com.pentaho.metaverse.api.AnalysisContext;
 import com.pentaho.metaverse.api.IDocument;
 import com.pentaho.metaverse.api.IDocumentAnalyzer;
 import com.pentaho.metaverse.api.IMetaverseBuilder;
@@ -150,6 +151,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       metaverseDocument.setName( transMeta.getName() );
       metaverseDocument.setExtension( "ktr" );
       metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "trans.ktr" ) );
+      metaverseDocument.setContext( new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
       String normalizedPath;
       try {
         normalizedPath = KettleAnalyzerUtil.normalizeFilePath( id );
