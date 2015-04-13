@@ -539,7 +539,11 @@ public class MetaverseValidationIT {
     // check the table that it writes to
     TableOutputMeta meta = (TableOutputMeta) getStepMeta( tableOutputStepNode );
     String tableName = meta.getTableName();
+    String schema = meta.getSchemaName();
+    boolean truncateTable = meta.truncateTable();
     assertEquals( tableName, tableOutputStepNode.getDatabaseTable().getName() );
+    assertEquals( schema, tableOutputStepNode.getSchema() );
+    assertEquals( truncateTable, tableOutputStepNode.isTruncateTable() );
 
     // check the fields used
     Iterable<StreamFieldNode> uses = tableOutputStepNode.getStreamFieldNodesUses();

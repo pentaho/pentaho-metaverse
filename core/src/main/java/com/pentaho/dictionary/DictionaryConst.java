@@ -205,6 +205,10 @@ public class DictionaryConst {
    */
   public static final String PROPERTY_ENCLOSURE = "enclosure";
 
+  /**
+   * Property key to represent a database schema
+   */
+  public static final String PROPERTY_SCHEMA = "schema";
 
   /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
@@ -521,6 +525,15 @@ public class DictionaryConst {
       PROPERTY_PATH,
       PROPERTY_NAMESPACE
     } );
+
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_TABLE =
+    new MetaverseLogicalIdGenerator( new String[] {
+      PROPERTY_NAMESPACE,
+      PROPERTY_TYPE,
+      PROPERTY_NAME,
+      PROPERTY_SCHEMA
+    } );
+
 
   /**
    * Hides the constructor so that this class cannot be instanced
