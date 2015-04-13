@@ -13,6 +13,7 @@ import com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnaly
 import com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer
 
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.api.*
@@ -140,6 +141,8 @@ i:
       stringOperationsAnalyzer = new StringOperationsStepAnalyzer()
 
       stringsCutAnalyzer = new StringsCutStepAnalyzer()
+      
+      stringsReplaceStepAnalyzer = new StringsReplaceStepAnalyzer()
 
       transExecutorAnalyzer = new TransExecutorStepAnalyzer()
 
