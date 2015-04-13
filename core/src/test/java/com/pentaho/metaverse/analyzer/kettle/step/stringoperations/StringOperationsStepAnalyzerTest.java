@@ -146,7 +146,7 @@ public class StringOperationsStepAnalyzerTest {
     }
     verify( builder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
 
-    verify( builder, times( 2 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
+    verify( builder, times( 3 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
         any( IMetaverseNode.class ) );
 
   }

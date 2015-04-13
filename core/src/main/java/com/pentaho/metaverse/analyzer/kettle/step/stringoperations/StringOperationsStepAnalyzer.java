@@ -60,8 +60,7 @@ public class StringOperationsStepAnalyzer extends BaseStepAnalyzer<StringOperati
     return node;
   }
 
-  private ComponentDerivationRecord buildChangeRecord( final StringOperationsMeta stringOperationsMeta, final int index )
-    throws MetaverseAnalyzerException {
+  private ComponentDerivationRecord buildChangeRecord( final StringOperationsMeta stringOperationsMeta, final int index ) throws MetaverseAnalyzerException {
 
     String fieldInString = stringOperationsMeta.getFieldInStream()[index];
     String fieldOutString = stringOperationsMeta.getFieldOutStream()[index];
@@ -102,14 +101,12 @@ public class StringOperationsStepAnalyzer extends BaseStepAnalyzer<StringOperati
     IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, changeRecord );
     RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
     ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( fieldInString );
+    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
     if ( !fieldOutString.equals( fieldInString ) ) {
       newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta != null ? inputFieldValueMeta
           .getTypeDesc() : fieldInString + " unknown type" );
       metaverseBuilder.addNode( newFieldNode );
-    } else {
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
     }
-
     return changeRecord;
   }
 
