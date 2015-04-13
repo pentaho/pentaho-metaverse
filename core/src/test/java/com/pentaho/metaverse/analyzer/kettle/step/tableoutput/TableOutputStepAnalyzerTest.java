@@ -196,6 +196,7 @@ public class TableOutputStepAnalyzerTest {
 
     // additional hydration needed to get test lines code coverage
     when( mockDatabaseMeta.getDatabaseName() ).thenReturn( "testDatabase" );
+    when( mockTableOutputMeta.getSchemaName() ).thenReturn( "testSchema" );
     when( mockDatabaseMeta.getName() ).thenReturn( "MyConnection" );
     when( mockDatabaseMeta.getAccessTypeDesc() ).thenReturn( "Native" );
     when( mockTableOutputMeta.getDatabaseMeta() ).thenReturn( mockDatabaseMeta );

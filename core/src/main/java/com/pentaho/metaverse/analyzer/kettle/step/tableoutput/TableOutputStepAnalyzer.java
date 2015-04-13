@@ -30,6 +30,7 @@ import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.api.model.kettle.FieldMapping;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import com.pentaho.metaverse.api.IComponentDescriptor;
@@ -47,11 +48,13 @@ import java.util.Set;
  */
 public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
 
+  public static final String TRUNCATE_TABLE = "truncateTable";
+
   /*
-   * (non-Javadoc)
-   * 
-   * @see com.pentaho.metaverse.api.IAnalyzer#analyze(IComponentDescriptor,java.lang.Object)
-   */
+       * (non-Javadoc)
+       *
+       * @see com.pentaho.metaverse.api.IAnalyzer#analyze(IComponentDescriptor,java.lang.Object)
+       */
   @Override
   public IMetaverseNode analyze( IComponentDescriptor descriptor, TableOutputMeta tableOutputMeta )
     throws MetaverseAnalyzerException {
@@ -62,6 +65,13 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
     String tableName = descriptor.getContext().getContextName().equals( DictionaryConst.CONTEXT_RUNTIME )
       ? parentTransMeta.environmentSubstitute( tableOutputMeta.getTableName() )
       : tableOutputMeta.getTableName();
+
+    String schema = descriptor.getContext().getContextName().equals( DictionaryConst.CONTEXT_RUNTIME )
+      ? parentTransMeta.environmentSubstitute( tableOutputMeta.getSchemaName() )
+      : tableOutputMeta.getSchemaName();
+
+    boolean truncate = tableOutputMeta.truncateTable();
+    node.setProperty( TRUNCATE_TABLE, Boolean.valueOf( truncate ) );
 
     String[] fieldNames = tableOutputMeta.getFieldStream();
     if ( ArrayUtils.isEmpty( fieldNames ) || !tableOutputMeta.specifyFields() ) {
@@ -89,6 +99,10 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
 
           IMetaverseNode tableNode = createNodeFromDescriptor( dbTableDescriptor );
           tableNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, dbn.getLogicalId() );
+          if ( !StringUtils.isEmpty( schema ) ) {
+            tableNode.setProperty( DictionaryConst.PROPERTY_SCHEMA, schema );
+          }
+          tableNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DB_TABLE );
 
           metaverseBuilder.addNode( tableNode );
 

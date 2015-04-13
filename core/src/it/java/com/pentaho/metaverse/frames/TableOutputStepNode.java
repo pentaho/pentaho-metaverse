@@ -22,8 +22,11 @@
 
 package com.pentaho.metaverse.frames;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
 
@@ -39,4 +42,10 @@ public interface TableOutputStepNode extends TransformationStepNode {
 
   @Adjacency( label = "writesto", direction = Direction.OUT )
   public DatabaseTableNode getDatabaseTable();
+
+  @Property( "schema" )
+  public String getSchema();
+
+  @Property( TableOutputStepAnalyzer.TRUNCATE_TABLE )
+  public Boolean isTruncateTable();
 }
