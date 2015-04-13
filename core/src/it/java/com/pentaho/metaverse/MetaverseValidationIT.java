@@ -50,6 +50,7 @@ import com.pentaho.metaverse.frames.StreamFieldNode;
 import com.pentaho.metaverse.frames.StreamLookupStepNode;
 import com.pentaho.metaverse.frames.StringOperationsStepNode;
 import com.pentaho.metaverse.frames.StringsCutStepNode;
+import com.pentaho.metaverse.frames.StringsReplaceStepNode;
 import com.pentaho.metaverse.frames.TableOutputStepNode;
 import com.pentaho.metaverse.frames.TextFileInputStepNode;
 import com.pentaho.metaverse.frames.TextFileOutputStepNode;
@@ -63,6 +64,7 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
@@ -95,8 +97,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -989,7 +993,7 @@ public class MetaverseValidationIT {
 
     // Make sure we have the right number of links used, created and derived. Also,
     // Ensure there is an entry in the operations for those fields that are derived.
-    assertEquals( 3, getIterableSize( node.getStreamFieldNodesUses() ) );
+    assertEquals( 4, getIterableSize( node.getStreamFieldNodesUses() ) );
 
     assertEquals( 1, getIterableSize( node.getStreamFieldNodesCreates() ) );
 
@@ -1030,6 +1034,40 @@ public class MetaverseValidationIT {
 
     assertTrue( createdNode.getOperations() != null && createdNode.getOperations().length() > 0 );
   }
+  
+  @Test
+  public void testStringsReplaceStepNode() throws Exception {
+    StringsReplaceStepNode node = root.getStringsReplaceStepNode();
+
+    // Make sure we have the right number of links used, created and derived. Also,
+    // Ensure there is an entry in the operations for those fields that are derived.
+    assertEquals( 5, getIterableSize( node.getStreamFieldNodesUses() ) );
+
+    assertEquals( 6, getIterableSize( node.getStreamFieldNodesCreates() ) );
+
+    assertEquals( 1, getIterableSize( node.getStreamFieldNodesDeletes() ) );
+    for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
+      for ( StreamFieldNode sfn1 : sfn.getFieldNodesDerivedFromMe() ) {
+        assertTrue( sfn1.getOperations() != null && sfn1.getOperations().length() > 0 );
+      }
+    }
+
+    Map<String, Boolean> renameMap = new HashMap<String, Boolean>();
+    renameMap.put( "LastName_1", false );
+    renameMap.put( "LastName_2", false );
+    renameMap.put( "FirstName_1", false );
+    for ( StreamFieldNode sfn : node.getStreamFieldNodesCreates() ) {
+      if ( renameMap.keySet().contains( sfn.getName() ) ) {
+        renameMap.put( sfn.getName(), true );
+      }
+      assertTrue( sfn.getOperations() != null && sfn.getOperations().length() > 0 );
+    }
+    
+    for (String key : renameMap.keySet() ) {
+      assertTrue( renameMap.get( key ));
+    }
+  }
+
 
   @Test
   public void testTransExecutorStepNode() throws Exception {
