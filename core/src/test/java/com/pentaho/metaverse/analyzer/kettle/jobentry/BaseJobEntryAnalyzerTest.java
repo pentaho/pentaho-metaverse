@@ -23,9 +23,12 @@
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import com.pentaho.metaverse.analyzer.kettle.DatabaseConnectionAnalyzer;
-import com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-import edu.emory.mathcs.backport.java.util.Arrays;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,14 +42,7 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertNotNull;

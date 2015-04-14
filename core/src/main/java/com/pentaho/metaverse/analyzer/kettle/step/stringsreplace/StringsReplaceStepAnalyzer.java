@@ -22,16 +22,6 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.stringsreplace;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.replacestring.ReplaceStringMeta;
-
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.ChangeType;
 import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
@@ -42,8 +32,16 @@ import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.kettle.FieldMapping;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.replacestring.ReplaceStringMeta;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class StringsReplaceStepAnalyzer extends BaseStepAnalyzer<ReplaceStringMeta> {
   private IComponentDescriptor descriptor;
