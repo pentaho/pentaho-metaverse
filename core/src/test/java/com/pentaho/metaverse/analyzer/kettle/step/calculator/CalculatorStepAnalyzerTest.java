@@ -134,7 +134,7 @@ public class CalculatorStepAnalyzerTest {
     }
     verify( builder, times( 5 ) ).addNode( any( IMetaverseNode.class ) );
 
-    verify( builder, times( 2 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
+    verify( builder, times( 6 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
         any( IMetaverseNode.class ) );
 
     verify( builder, times( 2 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DELETES ),

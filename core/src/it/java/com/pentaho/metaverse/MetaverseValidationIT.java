@@ -80,6 +80,8 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
+import org.pentaho.di.trans.steps.calculator.CalculatorMetaFunction;
 import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
 import org.pentaho.di.trans.steps.exceloutput.ExcelField;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
@@ -99,9 +101,11 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -798,6 +802,24 @@ public class MetaverseValidationIT {
   public void testCalculatorStepNode() throws Exception {
     CalculatorStepNode node = root.getCalculatorStepNode();
 
+    Set<String> usedFields = new HashSet<String>();
+    CalculatorMeta calculatorMeta = (CalculatorMeta) getStepMeta( node );
+    for ( CalculatorMetaFunction calculatorMetaFunction : calculatorMeta.getCalculation() ) {
+      String fieldName = calculatorMetaFunction.getFieldA();
+      if( !StringUtils.isEmpty( fieldName ) ) {
+        usedFields.add( fieldName );
+      }
+      fieldName = calculatorMetaFunction.getFieldB();
+      if( !StringUtils.isEmpty( fieldName ) ) {
+        usedFields.add( fieldName );
+      }
+      fieldName = calculatorMetaFunction.getFieldC();
+      if( !StringUtils.isEmpty( fieldName ) ) {
+        usedFields.add( fieldName );
+      }
+    }
+    int expectedUsedFieldCount = usedFields.size();
+
     // Make sure we have the right number of links used, created and deleted.
     List<String> nodeUses = new ArrayList<String>();
     for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
@@ -844,7 +866,7 @@ public class MetaverseValidationIT {
     assert ( Arrays.asList( fieldsThatDerive ).contains( "tempKelvin" ) );
     assert ( Arrays.asList( fieldsThatDerive ).contains( "tempRatio" ) );
 
-    assertEquals( 2, nodeUses.size() );
+    assertEquals( expectedUsedFieldCount, nodeUses.size() );
     assertEquals( 5, nodeCreates.size() );
     assertEquals( 2, nodeDeletes.size() );
   }

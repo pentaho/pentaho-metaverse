@@ -85,8 +85,13 @@ public class CalculatorStepAnalyzer extends BaseStepAnalyzer<CalculatorMeta> {
       if ( fieldName != null ) {
         IMetaverseNode fieldNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, fieldName ) );
         IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, changeRecord );
+
         RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
         ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( fieldName );
+        if ( inputFieldValueMeta != null ) {
+          // this field is not created by this step, but it is used by it. add the link
+          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
+        }
         if ( newFieldNode != null ) {
           newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta != null
             ? inputFieldValueMeta.getTypeDesc() : fieldName + " unknown type" );
