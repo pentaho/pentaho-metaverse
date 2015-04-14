@@ -25,11 +25,9 @@ package com.pentaho.metaverse.analyzer.kettle.step.calculator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.util.Set;
 
@@ -40,6 +38,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -104,9 +103,13 @@ public class CalculatorStepAnalyzerTest {
     when( function2.getFieldName() ).thenReturn( "triArea" );
 
     when( calculatorMeta.getCalculation() ).thenReturn( calcFunctions );
-    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( new String[] { "height", "width" } );
-    when( rowMeta1.getFieldNames() ).thenReturn( new String[] { "field1", "field2" } );
+    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( new String[] { "step1", "step2" } );
+    when( rowMeta1.getFieldNames() ).thenReturn( new String[] { "height", "width" } );
     when( rowMeta1.searchValueMeta( any( String.class ) ) ).thenReturn( null );
+    ValueMetaInterface heightValueMetaInterface = mock( ValueMetaInterface.class );
+    when( heightValueMetaInterface.getTypeDesc() ).thenReturn( "Integer" );
+    when( rowMeta1.searchValueMeta( "height" ) ).thenReturn( heightValueMetaInterface );
+    when( rowMeta1.searchValueMeta( "width" ) ).thenReturn( heightValueMetaInterface );
     when( parentTransMeta.getPrevStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
       rowMeta1 );
     when( parentTransMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
@@ -134,7 +137,7 @@ public class CalculatorStepAnalyzerTest {
     }
     verify( builder, times( 5 ) ).addNode( any( IMetaverseNode.class ) );
 
-    verify( builder, times( 6 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
+    verify( builder, times( 5 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
         any( IMetaverseNode.class ) );
 
     verify( builder, times( 2 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DELETES ),
