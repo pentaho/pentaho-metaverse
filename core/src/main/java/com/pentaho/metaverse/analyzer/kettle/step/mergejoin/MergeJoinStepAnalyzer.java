@@ -120,6 +120,8 @@ public class MergeJoinStepAnalyzer extends BaseStepAnalyzer<MergeJoinMeta> {
           renameFieldRecord.addOperation( Operation.getRenameOperation() );
           IMetaverseNode renamedField = processFieldChangeRecord( renamedFieldDescriptor, originalField, renameFieldRecord );
           metaverseBuilder.addLink( contributingField, DictionaryConst.LINK_DERIVES, renamedField );
+          // Technically we've deleted the original field
+          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_DELETES, originalField );
         }
       }
     }
