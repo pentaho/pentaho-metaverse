@@ -129,6 +129,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
     }
     rootNode.setProperty( "stepType", stepType );
     rootNode.setProperty( "copies", object.getParentStepMeta().getCopies() );
+    rootNode.setProperty( "_analyzer", this.getClass().getSimpleName() );
     metaverseBuilder.addNode( rootNode );
 
     // Add connection nodes
