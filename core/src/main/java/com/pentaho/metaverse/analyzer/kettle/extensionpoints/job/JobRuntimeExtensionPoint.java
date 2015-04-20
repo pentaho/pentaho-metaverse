@@ -177,7 +177,9 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       Map<Object, Object> variableMap = executionData.getVariables();
       for ( String var : vars ) {
         String value = job.getVariable( var );
-        variableMap.put( var, value );
+        if ( value != null ) {
+          variableMap.put( var, value );
+        }
       }
 
       // Store parameters
@@ -297,7 +299,9 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     Map<Object, Object> variableMap = executionData.getVariables();
     for ( String var : vars ) {
       String value = job.getVariable( var );
-      variableMap.put( var, value );
+      if ( value != null ) {
+        variableMap.put( var, value );
+      }
     }
 
     // Store parameters

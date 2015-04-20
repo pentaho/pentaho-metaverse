@@ -79,6 +79,7 @@ public class LineageClientTest {
     step.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     Vertex field = g.addVertex( "2" );
     field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    field.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_FIELD );
     g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
     Vertex targetStep = g.addVertex( "4" );
     targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
@@ -124,18 +125,70 @@ public class LineageClientTest {
   }
 
   @Test
-  public void testGetCreatorFields() {
+  public void testCreatorFields() {
 
     Vertex step = g.addVertex( "1" );
     step.setProperty( DictionaryConst.PROPERTY_NAME, "testStep" );
     step.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     Vertex field = g.addVertex( "2" );
     field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    field.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_FIELD );
     g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
     Vertex targetStep = g.addVertex( "4" );
     targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
     targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     g.addEdge( "5", step, targetStep, DictionaryConst.LINK_HOPSTO );
+
+    Map<String, Set<Vertex>> creatorFieldsMap =
+      lineageClient.creatorFields( g, "targetStep", Arrays.asList( TEST_FIELD ) );
+    assertNotNull( creatorFieldsMap );
+    assertEquals( 1, creatorFieldsMap.size() );
+    Set<Vertex> creatorFields = creatorFieldsMap.get( TEST_FIELD );
+    assertNotNull( creatorFields );
+    assertEquals( 1, creatorFields.size() );
+    Vertex v = creatorFields.iterator().next();
+    assertNotNull( v );
+    assertEquals( v.getProperty( DictionaryConst.PROPERTY_NAME ), TEST_FIELD );
+  }
+
+  @Test
+  public void testCreatorFieldsWithMerge() {
+    // First step and field (with the same name)
+    Vertex step1 = g.addVertex( "1" );
+    step1.setProperty( DictionaryConst.PROPERTY_NAME, "testStep1" );
+    step1.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    Vertex field1 = g.addVertex( "2" );
+    field1.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    field1.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_FIELD );
+    g.addEdge( "3", step1, field1, DictionaryConst.LINK_CREATES );
+
+    // Second step and field (with the same name)
+    Vertex step2 = g.addVertex( "4" );
+    step2.setProperty( DictionaryConst.PROPERTY_NAME, "testStep2" );
+    step2.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    Vertex field2 = g.addVertex( "5" );
+    field2.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    field2.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_FIELD );
+    g.addEdge( "6", step2, field2, DictionaryConst.LINK_CREATES );
+
+    // Merge step
+    Vertex mergeStep = g.addVertex( "7" );
+    mergeStep.setProperty( DictionaryConst.PROPERTY_NAME, "mergeStep" );
+    mergeStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    g.addEdge( "8", step1, mergeStep, DictionaryConst.LINK_HOPSTO );
+    g.addEdge( "9", step2, mergeStep, DictionaryConst.LINK_HOPSTO );
+    // Renamed field
+    Vertex renamedField2 = g.addVertex( "10" );
+    renamedField2.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD + "_1" );
+    renamedField2.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_FIELD );
+    g.addEdge( "11", mergeStep, renamedField2, DictionaryConst.LINK_CREATES );
+    g.addEdge( "12", mergeStep, field2, DictionaryConst.LINK_DELETES );
+    g.addEdge( "13", field2, renamedField2, DictionaryConst.LINK_DERIVES );
+
+    Vertex targetStep = g.addVertex( "14" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
+    targetStep.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+    g.addEdge( "15", mergeStep, targetStep, DictionaryConst.LINK_HOPSTO );
 
     Map<String, Set<Vertex>> creatorFieldsMap =
       lineageClient.creatorFields( g, "targetStep", Arrays.asList( TEST_FIELD ) );
@@ -231,6 +284,7 @@ public class LineageClientTest {
     step.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     Vertex field = g.addVertex( "2" );
     field.setProperty( DictionaryConst.PROPERTY_NAME, TEST_FIELD );
+    field.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_FIELD );
     g.addEdge( "3", step, field, DictionaryConst.LINK_CREATES );
     Vertex targetStep = g.addVertex( "4" );
     targetStep.setProperty( DictionaryConst.PROPERTY_NAME, "targetStep" );
@@ -287,24 +341,26 @@ public class LineageClientTest {
   }
 
   @Test
-  public void testNotNullAndNotDeriviativeLoop() {
+  public void testNotNullAndNotDerivativeLoop() {
     LoopPipe.LoopBundle bundle = mock( LoopPipe.LoopBundle.class );
     when( bundle.getObject() ).thenReturn( null );
-    LineageClient.NotNullAndNotDeriviativeLoop loopFunc = new LineageClient.NotNullAndNotDeriviativeLoop();
+    LineageClient.NotNullAndNotDerivativeLoop loopFunc = new LineageClient.NotNullAndNotDerivativeLoop();
     assertFalse( loopFunc.compute( bundle ) );
     Vertex v = mock( Vertex.class );
-    when( v.getEdges( Direction.IN, DictionaryConst.LINK_DERIVES ) ).thenReturn( new ArrayList<Edge>() );
+    when( v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES ) ).thenReturn( new ArrayList<Vertex>() );
     when( bundle.getObject() ).thenReturn( v );
     assertTrue( loopFunc.compute( bundle ) );
   }
 
   @Test
-  public void testHasDerivesLinks() {
+  public void testHasDerivesOrJoinsLinks() {
     Vertex v = mock( Vertex.class );
-    LineageClient.HasDerivesLink loopFunc = new LineageClient.HasDerivesLink();
-    when( v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES ) ).thenReturn( new ArrayList<Vertex>() );
+    LineageClient.HasDerivesOrJoinsLink loopFunc = new LineageClient.HasDerivesOrJoinsLink();
+    when( v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES, DictionaryConst.LINK_JOINS ) )
+      .thenReturn( new ArrayList<Vertex>() );
     assertFalse( loopFunc.compute( v ) );
-    when( v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES ) ).thenReturn( Arrays.asList( mock( Vertex.class ) ) );
+    when( v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES, DictionaryConst.LINK_JOINS ) )
+      .thenReturn( Arrays.asList( mock( Vertex.class ) ) );
     assertTrue( loopFunc.compute( v ) );
   }
 

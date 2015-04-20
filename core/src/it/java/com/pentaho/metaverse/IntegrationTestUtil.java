@@ -143,16 +143,12 @@ public class IntegrationTestUtil {
     IMetaverseReader reader = PentahoSystem.get( IMetaverseReader.class );
     Set<IDocumentLocator> locators = documentLocatorProvider.getDocumentLocators();
 
-    long freeMemAtInit = Runtime.getRuntime().freeMemory();
     MetaverseCompletionService mcs = MetaverseCompletionService.getInstance();
-    System.out.println( "freeMemAtInit = " + freeMemAtInit );
-    // build it
+    // Run a scan for each locator
     for ( IDocumentLocator locator : locators ) {
       locator.startScan();
     }
     mcs.waitTillEmpty();
-    long freeMemAtEnd = Runtime.getRuntime().freeMemory();
-    System.out.println( "MetaverseIT mem usage after waitTillEmpty() = " + ( freeMemAtInit - freeMemAtEnd ) );
 
     return reader.getMetaverse();
   }

@@ -291,14 +291,101 @@ public class LineageClient implements ILineageClient {
    * method.
    *
    * @param fieldNames the target fieldname for which to find the creating fields
-   * @return a GremlinPipeline which will determine the creating fields for the given target field
+   * @return a map which will determine the creating fields for the given target field
    */
   protected Map<String, Set<Vertex>> creatorFields(
-    Graph lineageGraph, String targetStepName, Collection<String> fieldNames ) {
+    Graph lineageGraph, final String targetStepName, Collection<String> fieldNames ) {
 
     final Map<String, Set<Vertex>> creatorFieldsMap = new HashMap<String, Set<Vertex>>();
 
-    GremlinPipeline<Vertex, Vertex> stepNodePipe =
+    if ( fieldNames != null ) {
+      // Go through each target field name individually. We use a map so as not to confuse which creator fields are
+      // associated with which target fields
+      // TODO maybe ConcurrentSkipListSet?
+      for ( final String targetFieldName : fieldNames ) {
+        // Need a final reference so we can access it from the pipeline
+        final Set<Vertex> creatorFields = new HashSet<Vertex>();
+        creatorFieldsMap.put( targetFieldName, creatorFields );
+
+        // Get all the nodes with the same name as the target field. We will prune these away using rules
+        GremlinPipeline<Vertex, Vertex> creatorPipe =
+          new GremlinPipeline<Vertex, Vertex>( lineageGraph )
+            .V( DictionaryConst.PROPERTY_NAME, targetFieldName )
+            .has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_FIELD )
+            .as( "x" ).cast( Vertex.class )
+
+            // Apply the pruning rules
+            .filter(
+              new PipeFunction<Vertex, Boolean>() {
+
+                @Override
+                public Boolean compute( Vertex v ) {
+
+                  GremlinPipeline<Vertex, Vertex> deletesPipe =
+                    new GremlinPipeline<Vertex, Vertex>( v ).in( DictionaryConst.LINK_DELETES );
+
+                  // If the field is not deleted, send it along the pipeline to see if its creator step reaches the
+                  // target step
+                  if ( !deletesPipe.hasNext() ) {
+                    return true;
+                  }
+
+                  // The field has been deleted. If it was deleted by the target step, then it can't be the one we're
+                  // looking for
+                  if ( deletesPipe.has( DictionaryConst.PROPERTY_NAME, targetFieldName ).hasNext() ) {
+                    return false;
+                  }
+
+                  // We have to regenerate the deletesPipe, the "has" pipe will mutate it :(
+                  deletesPipe = new GremlinPipeline<Vertex, Vertex>( v ).in( DictionaryConst.LINK_DELETES );
+
+                  // The field wasn't deleted by the target step. Let's make sure it wasn't deleted BEFORE the target
+                  // step. If it was, this isn't the vertex we're looking for :)  If it wasn't, then it must've been
+                  // deleted AFTER the target step, which we don't care about, so let it go through the pipeline.
+                  if ( !deletesPipe.in( DictionaryConst.LINK_HOPSTO )
+                    .loop( 1, new NumLoops<Vertex>( MAX_LOOPS ), new NotNullAndNameMatches( targetStepName ) )
+                    .hasNext() ) {
+                    return false;
+                  }
+
+                  // None of the pruning rules apply, so let this vertex go through the pipeline
+                  return true;
+                }
+              }
+            ).back( "x" ).cast( Vertex.class ).as( "createdFields" )
+            // Ok it gets even more confusing here. We're going to filter on only those nodes that are created by
+            // the target step. We will add each of them to the creatorFields list. But then we need to go back
+            // BEFORE the filter, and run all the nodes' creator steps through the "hops to" loop. We do that using
+            // the "optional" pipe. We'll technically be processing the aforementioned nodes twice, but since the
+            // loop will follow "hops to" links at least once, we will have "hopped past" the target step, and thus
+            // those nodes will not be emitted at the end of the pipeline.
+            .filter( new HasDirectLinkToNode( Direction.IN, DictionaryConst.LINK_CREATES, targetStepName ) )
+            .sideEffect(
+              new PipeFunction<Vertex, Vertex>() {
+                @Override
+                public Vertex compute( Vertex v ) {
+                  // We've found one of the nodes we're looking for, so add it to the map
+                  creatorFields.add( v );
+                  return v;
+                }
+              }
+            ).optional( "createdFields" )
+            .in( DictionaryConst.LINK_CREATES )
+            .out( DictionaryConst.LINK_HOPSTO )
+            .loop( 1,
+              new NumLoops<Vertex>( MAX_LOOPS ),
+              // {it.object != null}
+              new NoNullObjectsInLoop<Vertex>()
+            )
+            .has( DictionaryConst.PROPERTY_NAME, targetStepName ).back( "x" ).cast( Vertex.class );
+
+        while ( creatorPipe.hasNext() ) {
+          // These are the creator field nodes
+          creatorFields.add( creatorPipe.next() );
+        }
+      }
+
+    /*GremlinPipeline<Vertex, Vertex> stepNodePipe =
       new GremlinPipeline<Vertex, Vertex>( lineageGraph )
         .V( DictionaryConst.PROPERTY_NAME, targetStepName )
         .has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP ).cast( Vertex.class );
@@ -346,7 +433,7 @@ public class LineageClient implements ILineageClient {
             }
           }
         }
-      }
+      }*/
     }
     return creatorFieldsMap;
   }
@@ -361,15 +448,17 @@ public class LineageClient implements ILineageClient {
       // "derives" links, which means the search is over.
       .ifThenElse(
         // Does any field derive this one?
-        new HasDerivesLink(),
+        new HasDerivesOrJoinsLink(),
         new PipeFunction<Vertex, GremlinPipeline>() {
           @Override
           public GremlinPipeline compute( Vertex it ) {
             // Do a lookahead in the loop function to see if there's a "derives" link. If not, emit the node;
             //  if so, don't emit the node. The loop will have followed that derives link separately, so it will be
             //  processed by the loop logic until it has no more derives links, at which point it will be emitted.
-            GremlinPipeline basePipe = new GremlinPipeline( it ).in( DictionaryConst.LINK_DERIVES )
-              .loop( 1, new NumLoops( MAX_LOOPS ), new NotNullAndNotDeriviativeLoop() );
+            GremlinPipeline basePipe = new GremlinPipeline( it )
+              .in( DictionaryConst.LINK_DERIVES, DictionaryConst.LINK_JOINS )
+              .loop( 1, new NumLoops( MAX_LOOPS ), new NotNullAndNotDerivativeLoop() )
+              .dedup();
             if ( returnPaths ) {
               return basePipe.path();
             } else {
@@ -422,17 +511,51 @@ public class LineageClient implements ILineageClient {
     }
   }
 
+  protected static class NotNullLoop implements PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> {
+
+    @Override
+    public Boolean compute( LoopPipe.LoopBundle<Vertex> argument ) {
+      return argument != null && argument.getObject() != null;
+    }
+  }
+
   /**
    * This loop emit closure checks for non-null vertices and whether the vertex has an in-link of "derives". It emits
    * vertices that do not have incoming "derives" links, and is used to prune the paths returned during methods like
    * getOriginSteps.
    */
-  protected static class NotNullAndNotDeriviativeLoop implements PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> {
+  protected static class NotNullAndNotDerivativeLoop implements PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> {
     @Override
     public Boolean compute( LoopPipe.LoopBundle<Vertex> argument ) {
       Vertex v = argument.getObject();
       return ( v != null
-        && !v.getEdges( Direction.IN, DictionaryConst.LINK_DERIVES ).iterator().hasNext() );
+        && !v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES ).iterator().hasNext() );
+    }
+  }
+
+  /**
+   * This loop emit closure checks for non-null vertices whose name matches a specified value.
+   */
+  protected static class NotNullAndNameMatches extends NoNullObjectsInLoop<Vertex> {
+
+    String nameToMatch = "";
+
+    public NotNullAndNameMatches( String nameToMatch ) {
+      super();
+      this.nameToMatch = nameToMatch;
+    }
+
+    @Override
+    public Boolean compute( LoopPipe.LoopBundle<Vertex> argument ) {
+      if ( !super.compute( argument ) ) {
+        return false;
+      }
+      Vertex v = argument.getObject();
+      String vName = v.getProperty( DictionaryConst.PROPERTY_NAME );
+      if ( vName == null ) {
+        return ( nameToMatch == null );
+      }
+      return vName.equals( nameToMatch );
     }
   }
 
@@ -440,10 +563,57 @@ public class LineageClient implements ILineageClient {
    * This pipe function determines whether the given vertex has an in-link of "derives", meaning that some other
    * field(s) have contributed to the value and/or metadata of this field
    */
-  protected static class HasDerivesLink implements PipeFunction<Vertex, Boolean> {
+  protected static class HasDerivesOrJoinsLink implements PipeFunction<Vertex, Boolean> {
     @Override
     public Boolean compute( Vertex v ) {
-      return v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES ).iterator().hasNext();
+      return ( v != null
+        && v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES, DictionaryConst.LINK_JOINS )
+          .iterator().hasNext() );
+    }
+  }
+
+  /**
+   * This pipe function determines whether the given vertex has the desired name and type
+   */
+  protected static class HasNameAndType implements PipeFunction<Vertex, Boolean> {
+
+    private String targetName;
+    private String targetType;
+
+    public HasNameAndType( String targetName, String targetType ) {
+      this.targetName = targetName;
+      this.targetType = targetType;
+    }
+
+    @Override
+    public Boolean compute( Vertex v ) {
+      return ( v != null )
+        && v.getProperty( DictionaryConst.PROPERTY_TYPE ).equals( targetType )
+        && v.getProperty( DictionaryConst.PROPERTY_NAME ).equals( targetName );
+    }
+  }
+
+  /**
+   * This pipe function determines whether the given vertex has an edge with the specified name and direction, and that
+   * the vertex on the other end of the edge has the specified name
+   */
+  protected static class HasDirectLinkToNode implements PipeFunction<Vertex, Boolean> {
+
+    Direction edgeDirection;
+    String linkLabel;
+    String linkedNodeName;
+
+    public HasDirectLinkToNode( Direction edgeDirection, String linkLabel, String linkedNodeName ) {
+      this.edgeDirection = edgeDirection;
+      this.linkLabel = linkLabel;
+      this.linkedNodeName = linkedNodeName;
+    }
+
+    @Override
+    public Boolean compute( Vertex v ) {
+      return ( v != null )
+        && new GremlinPipeline<Vertex, Boolean>( v.getVertices( edgeDirection, linkLabel ) )
+          .has( DictionaryConst.PROPERTY_NAME, linkedNodeName ).hasNext();
     }
   }
 
