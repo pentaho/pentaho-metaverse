@@ -31,6 +31,8 @@ import com.pentaho.metaverse.api.INamespace;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import edu.emory.mathcs.backport.java.util.Arrays;
+import org.apache.commons.collections.SetUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +47,7 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -82,7 +85,7 @@ public class SplitFieldsStepAnalyzerTest {
   @Mock
   private ValueMetaInterface inField1;
 
-  private String[] outputFields = new String[] { "one", "two", "three" };
+  private String[] outputFields = new String[]{ "one", "two", "three" };
   public static final String SPLIT_FIELD = "SPLIT_ME";
 
   private List<ValueMetaInterface> inFields;
@@ -103,8 +106,8 @@ public class SplitFieldsStepAnalyzerTest {
 
     when( builder.getMetaverseObjectFactory() ).thenReturn( MetaverseTestUtils.getMetaverseObjectFactory() );
 
-    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( new String[] { "input" } );
-    when( inputRowMeta.getFieldNames() ).thenReturn( new String[] { SPLIT_FIELD } );
+    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( new String[]{ "input" } );
+    when( inputRowMeta.getFieldNames() ).thenReturn( new String[]{ SPLIT_FIELD } );
     when( inputRowMeta.searchValueMeta( any( String.class ) ) ).thenReturn( null );
     when( inputRowMeta.getValueMetaList() ).thenReturn( inFields );
     when( outputRowMeta.getFieldNames() ).thenReturn( outputFields );
@@ -157,7 +160,7 @@ public class SplitFieldsStepAnalyzerTest {
   @Test
   public void testAnalyze_reuseSplitFieldNameInOutputField() throws Exception {
     when( fieldSplitterMeta.getSplitField() ).thenReturn( "one" );
-    when( inputRowMeta.getFieldNames() ).thenReturn( new String[] { "one" } );
+    when( inputRowMeta.getFieldNames() ).thenReturn( new String[]{ "one" } );
 
     IMetaverseNode node = analyzer.analyze( descriptor, fieldSplitterMeta );
     assertNotNull( node );
@@ -187,12 +190,9 @@ public class SplitFieldsStepAnalyzerTest {
   public void testGetFieldMappings() throws Exception {
     Set<IFieldMapping> fieldMappings = analyzer.getFieldMappings( fieldSplitterMeta );
     assertEquals( outputFields.length, fieldMappings.size() );
-    int i = 0;
-    for ( IFieldMapping fieldMapping : fieldMappings ) {
-      assertEquals( SPLIT_FIELD, fieldMapping.getSourceFieldName() );
-      assertEquals( outputFields[i], fieldMapping.getTargetFieldName() );
-      i++;
-    }
+    Set<IFieldMapping> outputFieldsSet = new HashSet<IFieldMapping>();
+    outputFieldsSet.addAll( Arrays.asList( outputFields ) );
+    SetUtils.isEqualSet( fieldMappings, outputFieldsSet );
   }
 
   @Test

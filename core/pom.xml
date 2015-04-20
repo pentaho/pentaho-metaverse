@@ -261,6 +261,14 @@
 	  <groupId>net.sourceforge.jexcelapi</groupId>
 	  <artifactId>jxl</artifactId>
 	  <version>${dependency.net.sourceforge.jexcelapi.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-capability-manager</artifactId>
+      <version>6.0-SNAPSHOT</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

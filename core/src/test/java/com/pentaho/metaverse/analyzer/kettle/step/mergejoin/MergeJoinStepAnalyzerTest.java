@@ -65,25 +65,44 @@ public class MergeJoinStepAnalyzerTest {
   private MergeJoinStepAnalyzer analyzer;
   private static final String DEFAULT_STEP_NAME = "testStep";
 
-  @Mock private IMetaverseBuilder builder;
-  @Mock private MergeJoinMeta mergeJoinMeta;
-  @Mock private TransMeta transMeta;
-  @Mock private RowMetaInterface prevRowMeta;
-  @Mock private RowMetaInterface stepRowMeta;
-  @Mock private INamespace namespace;
-  @Mock private IComponentDescriptor descriptor;
-  @Mock private StepIOMetaInterface stepIoMeta;
-  @Mock private StreamInterface stream1;
-  @Mock private StreamInterface stream2;
-  @Mock private StepMeta parentStepMeta;
-  @Mock private StepMeta stepMeta1;
-  @Mock private StepMeta stepMeta2;
-  @Mock private RowMetaInterface rowMeta1;
-  @Mock private RowMetaInterface rowMeta2;
-  @Mock private ValueMetaInterface leftField1;
-  @Mock private ValueMetaInterface leftField2;
-  @Mock private ValueMetaInterface rightField1;
-  @Mock private ValueMetaInterface rightField2;
+  @Mock
+  private IMetaverseBuilder builder;
+  @Mock
+  private MergeJoinMeta mergeJoinMeta;
+  @Mock
+  private TransMeta transMeta;
+  @Mock
+  private RowMetaInterface prevRowMeta;
+  @Mock
+  private RowMetaInterface stepRowMeta;
+  @Mock
+  private INamespace namespace;
+  @Mock
+  private IComponentDescriptor descriptor;
+  @Mock
+  private StepIOMetaInterface stepIoMeta;
+  @Mock
+  private StreamInterface stream1;
+  @Mock
+  private StreamInterface stream2;
+  @Mock
+  private StepMeta parentStepMeta;
+  @Mock
+  private StepMeta stepMeta1;
+  @Mock
+  private StepMeta stepMeta2;
+  @Mock
+  private RowMetaInterface rowMeta1;
+  @Mock
+  private RowMetaInterface rowMeta2;
+  @Mock
+  private ValueMetaInterface leftField1;
+  @Mock
+  private ValueMetaInterface leftField2;
+  @Mock
+  private ValueMetaInterface rightField1;
+  @Mock
+  private ValueMetaInterface rightField2;
 
   private List<StreamInterface> streams;
   private List<ValueMetaInterface> outValueMetas;
@@ -157,10 +176,10 @@ public class MergeJoinStepAnalyzerTest {
 
     analyzer.analyze( descriptor, mergeJoinMeta );
     verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
 
     verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_JOINS), any( IMetaverseNode.class ) );
+      eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
 
   }
 
@@ -172,10 +191,10 @@ public class MergeJoinStepAnalyzerTest {
 
     analyzer.analyze( descriptor, mergeJoinMeta );
     verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
 
     verify( builder, times( fields1.length ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
+      eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
 
   }
 
@@ -187,10 +206,10 @@ public class MergeJoinStepAnalyzerTest {
 
     analyzer.analyze( descriptor, mergeJoinMeta );
     verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
 
     verify( builder, times( fields1.length ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
+      eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
 
   }
 
@@ -202,10 +221,10 @@ public class MergeJoinStepAnalyzerTest {
 
     analyzer.analyze( descriptor, mergeJoinMeta );
     verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
 
     verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
+      eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
 
   }
 
@@ -228,13 +247,13 @@ public class MergeJoinStepAnalyzerTest {
 
     analyzer.analyze( descriptor, mergeJoinMeta );
     verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
 
     verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_JOINS), any( IMetaverseNode.class ) );
+      eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
 
-    verify( builder, times( fields1.length + fields2.length) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+    verify( builder, times( fields1.length ) ).addLink( any( IMetaverseNode.class ),
+      eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
   }
 
   @Test

@@ -101,13 +101,13 @@ public class LineageClientIT {
   @Test
   public void testGetCreatorSteps() throws Exception {
 
-    Map<String, Set<StepField>> creatorSteps = client.getCreatorSteps( transMeta, "Select values", Arrays.asList( "COUNTRY_1" ) );
+    Map<String, Set<StepField>> creatorSteps =
+      client.getCreatorSteps( transMeta, "Select values", Arrays.asList( "COUNTRY_1" ) );
     assertNotNull( creatorSteps );
     assertEquals( 1, creatorSteps.size() );
     Set<StepField> creatorStepsSet = creatorSteps.get( "COUNTRY_1" );
     assertNotNull( creatorStepsSet );
-    assertEquals( 1, creatorStepsSet.size() );
-    assertEquals( "Merge Join", creatorStepsSet.iterator().next().getStepName() );
+    assertEquals( 0, creatorStepsSet.size() );
 
     creatorSteps = client.getCreatorSteps( transMeta, "Merge Join", Arrays.asList( "COUNTRY_1" ) );
     assertNotNull( creatorSteps );
@@ -122,44 +122,28 @@ public class LineageClientIT {
     assertEquals( 1, creatorSteps.size() );
     creatorStepsSet = creatorSteps.get( "COUNTRY" );
     assertNotNull( creatorStepsSet );
-    assertEquals( 2, creatorStepsSet.size() );
-    List<String> stepNames = new ArrayList<String>( 2 );
-    for ( StepField stepField : creatorStepsSet ) {
-      stepNames.add( stepField.getStepName() );
-    }
-    assertTrue( stepNames.contains( "Data Grid" ) );
-    assertTrue( stepNames.contains( "Table input" ) );
+    assertEquals( 0, creatorStepsSet.size() );
 
     creatorSteps = client.getCreatorSteps( transMeta, "Merge Join", Arrays.asList( "COUNTRY" ) );
     assertNotNull( creatorSteps );
     assertEquals( 1, creatorSteps.size() );
     creatorStepsSet = creatorSteps.get( "COUNTRY" );
     assertNotNull( creatorStepsSet );
-    assertEquals( 2, creatorStepsSet.size() );
-    stepNames = new ArrayList<String>( 2 );
-    for ( StepField stepField : creatorStepsSet ) {
-      stepNames.add( stepField.getStepName() );
-    }
-    assertTrue( stepNames.contains( "Data Grid" ) );
-    assertTrue( stepNames.contains( "Table input" ) );
+    assertEquals( 1, creatorStepsSet.size() );
+    assertTrue( creatorStepsSet.iterator().next().getStepName().equals( "Table input" ) );
 
-    creatorSteps = client.getCreatorSteps( transMeta, "Select values", Arrays.asList( "COUNTRY", "COUNTRY_1", "HELLO" ) );
+    creatorSteps = client.getCreatorSteps( transMeta, "Passthru", Arrays.asList( "COUNTRY", "COUNTRY_1", "HELLO" ) );
     assertNotNull( creatorSteps );
     assertEquals( 3, creatorSteps.size() );
     creatorStepsSet = creatorSteps.get( "COUNTRY" );
     assertNotNull( creatorStepsSet );
-    assertEquals( 2, creatorStepsSet.size() );
-    stepNames = new ArrayList<String>( 2 );
-    for ( StepField stepField : creatorStepsSet ) {
-      stepNames.add( stepField.getStepName() );
-    }
-    assertTrue( stepNames.contains( "Data Grid" ) );
-    assertTrue( stepNames.contains( "Table input" ) );
+    assertEquals( 1, creatorStepsSet.size() );
+    assertTrue( creatorStepsSet.iterator().next().getStepName().equals( "Table input" ) );
 
     creatorStepsSet = creatorSteps.get( "COUNTRY_1" );
     assertNotNull( creatorStepsSet );
     assertEquals( 1, creatorStepsSet.size() );
-    stepNames = new ArrayList<String>( 1 );
+    List<String> stepNames = new ArrayList<String>( 1 );
     for ( StepField stepField : creatorStepsSet ) {
       stepNames.add( stepField.getStepName() );
     }
@@ -167,12 +151,8 @@ public class LineageClientIT {
 
     creatorStepsSet = creatorSteps.get( "HELLO" );
     assertNotNull( creatorStepsSet );
-    assertEquals( 1, creatorStepsSet.size() );
-    stepNames = new ArrayList<String>( 1 );
-    for ( StepField stepField : creatorStepsSet ) {
-      stepNames.add( stepField.getStepName() );
-    }
-    assertTrue( stepNames.contains( "Select values" ) );
+    assertEquals( 0, creatorStepsSet.size() );
+
 
     // Test non-API version that takes a String filename for the transformation
     creatorSteps = client.getCreatorSteps( MERGE_JOIN_KTR_FILENAME, "Select values", Arrays.asList( "COUNTRY_1" ) );
@@ -180,8 +160,7 @@ public class LineageClientIT {
     assertEquals( 1, creatorSteps.size() );
     creatorStepsSet = creatorSteps.get( "COUNTRY_1" );
     assertNotNull( creatorStepsSet );
-    assertEquals( 1, creatorStepsSet.size() );
-    assertEquals( "Merge Join", creatorStepsSet.iterator().next().getStepName() );
+    assertEquals( 0, creatorStepsSet.size() );
   }
 
   @Test
@@ -192,11 +171,7 @@ public class LineageClientIT {
     assertEquals( 1, originSteps.size() );
     Set<StepField> originStepsSet = originSteps.get( "COUNTRY_1" );
     assertNotNull( originStepsSet );
-    assertEquals( 2, originStepsSet.size() );
-    // We're not sure which step will be in which order, but both fields are named COUNTRY
-    for ( StepField stepField : originStepsSet ) {
-      assertEquals( "COUNTRY", stepField.getFieldName() );
-    }
+    assertEquals( 0, originStepsSet.size() );
 
     originSteps = client.getOriginSteps( transMeta, "Merge Join", Arrays.asList( "COUNTRY_1" ) );
     assertNotNull( originSteps );
@@ -210,6 +185,13 @@ public class LineageClientIT {
     }
 
     originSteps = client.getOriginSteps( transMeta, "Select values", Arrays.asList( "COUNTRY" ) );
+    assertNotNull( originSteps );
+    assertEquals( 1, originSteps.size() );
+    originStepsSet = originSteps.get( "COUNTRY" );
+    assertNotNull( originStepsSet );
+    assertEquals( 0, originStepsSet.size() );
+
+    originSteps = client.getOriginSteps( transMeta, "Passthru", Arrays.asList( "COUNTRY" ) );
     assertNotNull( originSteps );
     assertEquals( 1, originSteps.size() );
     originStepsSet = originSteps.get( "COUNTRY" );
@@ -231,15 +213,34 @@ public class LineageClientIT {
       assertEquals( "COUNTRY", stepField.getFieldName() );
     }
 
-    originSteps = client.getOriginSteps( transMeta, "Select values", Arrays.asList( "COUNTRY", "COUNTRY_1", "HELLO" ) );
+    originSteps = client.getOriginSteps( transMeta, "Passthru", Arrays.asList( "COUNTRY", "COUNTRY_1" ) );
     assertNotNull( originSteps );
-    assertEquals( 3, originSteps.size() );
+    assertEquals( 2, originSteps.size() );
     for ( Set<StepField> originStepsSetValues : originSteps.values() ) {
       assertNotNull( originStepsSetValues );
       assertEquals( 2, originStepsSetValues.size() );
       // We're not sure which step will be in which order, but both fields are named COUNTRY
       for ( StepField stepField : originStepsSetValues ) {
         assertEquals( "COUNTRY", stepField.getFieldName() );
+      }
+    }
+
+    originSteps = client.getOriginSteps( transMeta, "Select values", Arrays.asList( "COUNTRY", "COUNTRY_1", "HELLO" ) );
+    assertNotNull( originSteps );
+    assertEquals( 3, originSteps.size() );
+    for ( String stepName : originSteps.keySet() ) {
+      // Only HELLO will return values
+      if ( stepName != "HELLO" ) {
+        assertEquals( 0, originSteps.get( stepName ).size() );
+
+      } else {
+        Set<StepField> originStepsSetValues = originSteps.get( stepName );
+        assertNotNull( originStepsSetValues );
+        assertEquals( 2, originStepsSetValues.size() );
+        // We're not sure which step will be in which order, but both fields are named COUNTRY
+        for ( StepField stepField : originStepsSetValues ) {
+          assertEquals( "COUNTRY", stepField.getFieldName() );
+        }
       }
     }
   }
@@ -257,10 +258,11 @@ public class LineageClientIT {
     assertEquals( 2, operationPaths.size() );
     for ( List<StepFieldOperations> operationPath : operationPaths ) {
       // Should be 3 nodes along each path
-      assertEquals( 3, operationPath.size() );
+      int pathLength = operationPath.size();
+      assertTrue( pathLength == 3 || pathLength == 4 );
 
       // The end and last nodes should be the same for both paths
-      StepFieldOperations last = operationPath.get( 2 );
+      StepFieldOperations last = operationPath.get( pathLength - 1 );
       assertEquals( "Select values", last.getStepName() );
       assertEquals( "HELLO", last.getFieldName() );
       Operations ops = last.getOperations();
@@ -276,7 +278,7 @@ public class LineageClientIT {
       assertEquals( DictionaryConst.PROPERTY_MODIFIED, metadataOp.getName() );
       assertEquals( "name", metadataOp.getDescription() );
 
-      StepFieldOperations middle = operationPath.get( 1 );
+      StepFieldOperations middle = operationPath.get( pathLength - 2 );
       assertEquals( "Merge Join", middle.getStepName() );
       assertEquals( "COUNTRY_1", middle.getFieldName() );
       metadataOps = ops.get( ChangeType.METADATA );
@@ -287,11 +289,18 @@ public class LineageClientIT {
       assertEquals( DictionaryConst.PROPERTY_MODIFIED, metadataOp.getName() );
       assertEquals( "name", metadataOp.getDescription() );
 
-      StepFieldOperations first = operationPath.get( 0 );
+      StepFieldOperations first = operationPath.get( pathLength - 3 );
       assertEquals( "COUNTRY", first.getFieldName() );
       // The step name is either "Table input" or "Data Grid"
       String firstStepName = first.getStepName();
       assertTrue( "Table input".equals( firstStepName ) || "Data Grid".equals( firstStepName ) );
+
+      if ( pathLength == 4 ) {
+        assertEquals( "COUNTRY", first.getFieldName() );
+        // The step name is either "Table input" or "Data Grid"
+        firstStepName = first.getStepName();
+        assertTrue( "Table input".equals( firstStepName ) || "Data Grid".equals( firstStepName ) );
+      }
     }
   }
 
