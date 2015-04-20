@@ -141,4 +141,19 @@ public class FileSystemLineageWriterTest {
     writer.setGraphWriter( graphWriter );
     assertNotNull( writer.getGraphOutputStream( holder ) );
   }
+
+  @Test
+  public void testIsWindows() throws Exception {
+    String os = System.getProperty( "os.name" ).toLowerCase();
+    boolean expected = os.contains( "win" );
+    assertEquals( expected, writer.isWindows() );
+  }
+
+  @Test
+  public void testReplaceColonInPath() throws Exception {
+    String path = "C:\\Users\\joe\\folder\\to\\use\\file.ktr";
+    String expected = "C\\Users\\joe\\folder\\to\\use\\file.ktr";
+    String replaced = writer.replaceColonInPath( path );
+    assertEquals( expected, replaced );
+  }
 }

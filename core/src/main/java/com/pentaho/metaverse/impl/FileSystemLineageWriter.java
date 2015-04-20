@@ -23,9 +23,11 @@
 
 package com.pentaho.metaverse.impl;
 
+import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
 import com.pentaho.metaverse.api.IGraphWriter;
 import com.pentaho.metaverse.api.ILineageWriter;
 import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.MetaverseException;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.graph.GraphMLWriter;
@@ -135,21 +137,33 @@ public class FileSystemLineageWriter implements ILineageWriter {
       if ( rootFolderExists ) {
         IExecutionProfile profile = holder.getExecutionProfile();
         String id = holder.getId() == null ? "unknown_artifact" : holder.getId();
-        String name = Const.NVL( profile.getName(), "unknown" );
-        File folder = new File( rootFolder, id );
-        if ( !folder.exists() ) {
-          folder.mkdirs();
-        } else if ( folder.isFile() ) {
-          // must be a folder
-          throw new IllegalStateException( "Output folder must be a folder, not a file. ["
-            + folder.getAbsolutePath() + "]" );
-        }
-        String timestampString = Long.toString( profile.getExecutionData().getStartTime().getTime() );
-
-        File file = new File( folder, timestampString + "_" + name + extension );
         try {
-          return new FileOutputStream( file );
-        } catch ( FileNotFoundException e ) {
+          id = KettleAnalyzerUtil.normalizeFilePath( id );
+
+          // strip off the colon from C:\path\to\file on windows
+          if ( isWindows() ) {
+            id = replaceColonInPath( id );
+          }
+
+          String name = Const.NVL( profile.getName(), "unknown" );
+          File folder = new File( rootFolder, id );
+          if ( !folder.exists() ) {
+            folder.mkdirs();
+          } else if ( folder.isFile() ) {
+            // must be a folder
+            throw new IllegalStateException( "Output folder must be a folder, not a file. ["
+              + folder.getAbsolutePath() + "]" );
+          }
+          String timestampString = Long.toString( profile.getExecutionData().getStartTime().getTime() );
+
+          File file = new File( folder, timestampString + "_" + name + extension );
+          try {
+            return new FileOutputStream( file );
+          } catch ( FileNotFoundException e ) {
+            e.printStackTrace();
+            return null;
+          }
+        } catch ( MetaverseException e ) {
           e.printStackTrace();
           return null;
         }
@@ -159,6 +173,22 @@ public class FileSystemLineageWriter implements ILineageWriter {
     } else {
       return null;
     }
+  }
+
+  protected String replaceColonInPath( String id ) {
+    String newPath = id;
+    if ( id.matches( "([A-Za-z]:.*)" ) ) {
+      newPath = id.replaceFirst( ":", "" );
+    }
+    return newPath;
+  }
+
+  protected boolean isWindows() {
+    return getOsName().indexOf( "win" ) >= 0;
+  }
+
+  protected String getOsName() {
+    return System.getProperty( "os.name" ).toLowerCase();
   }
 
   protected File getDateFolder( String parentDir, LineageHolder holder ) {
