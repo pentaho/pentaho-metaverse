@@ -24,6 +24,8 @@ package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.AnalysisContext;
+import com.pentaho.metaverse.api.MetaverseDocument;
+import com.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -131,7 +133,6 @@ public class MetaverseDocumentTest {
 
     ILogicalIdGenerator idGenerator = new MetaverseLogicalIdGenerator( "type", "zzz", "name" );
     myNode.setLogicalIdGenerator( idGenerator );
-    assertNotNull( myNode.logicalIdGenerator );
 
     // logical id should be sorted based on key
     assertEquals( "{\"name\":\"testName\",\"type\":\"testType\",\"zzz\":\"last\"}", myNode.getLogicalId() );

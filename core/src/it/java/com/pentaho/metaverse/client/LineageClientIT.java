@@ -24,9 +24,11 @@ package com.pentaho.metaverse.client;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.IntegrationTestUtil;
-import com.pentaho.metaverse.analyzer.kettle.ChangeType;
+import com.pentaho.metaverse.api.ChangeType;
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.StepFieldOperations;
 import com.pentaho.metaverse.api.model.IOperation;
 import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.impl.DocumentController;

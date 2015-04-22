@@ -23,9 +23,9 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer;
-import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.After;
 import org.junit.AfterClass;

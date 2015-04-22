@@ -40,7 +40,6 @@ import org.pentaho.di.trans.TransMeta;
 import com.pentaho.metaverse.api.IMetaverseBuilder;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Collections;
 import java.util.List;
 

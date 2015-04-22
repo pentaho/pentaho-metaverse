@@ -21,7 +21,7 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStep;

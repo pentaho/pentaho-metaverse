@@ -22,6 +22,8 @@
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
 import org.pentaho.di.job.entry.JobEntryBase;
 
 import java.util.ArrayList;

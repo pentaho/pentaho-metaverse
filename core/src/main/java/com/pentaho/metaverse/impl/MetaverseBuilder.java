@@ -24,6 +24,7 @@ package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
+import com.pentaho.metaverse.api.MetaverseObjectFactory;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;

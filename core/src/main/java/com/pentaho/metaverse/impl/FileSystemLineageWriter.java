@@ -23,11 +23,11 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.metaverse.analyzer.kettle.KettleAnalyzerUtil;
 import com.pentaho.metaverse.api.IGraphWriter;
 import com.pentaho.metaverse.api.ILineageWriter;
 import com.pentaho.metaverse.api.IMetaverseBuilder;
 import com.pentaho.metaverse.api.MetaverseException;
+import com.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.graph.GraphMLWriter;

@@ -25,6 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.excelinput;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.excelinput.ExcelInputField;
@@ -37,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 
 /**

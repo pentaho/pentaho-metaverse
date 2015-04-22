@@ -1,4 +1,4 @@
-/*!
+/*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
  * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
@@ -18,16 +18,17 @@
  * prohibited to anyone except those individuals and entities who have executed
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
+ *
  */
 
 package com.pentaho.metaverse.testutils;
 
-import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
-import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 import com.pentaho.metaverse.api.IDocumentController;
-import com.pentaho.metaverse.impl.MetaverseObjectFactory;
 import com.pentaho.metaverse.api.IMetaverseBuilder;
 import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.MetaverseObjectFactory;
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

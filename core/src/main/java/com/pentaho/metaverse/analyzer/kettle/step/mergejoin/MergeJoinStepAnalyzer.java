@@ -23,8 +23,8 @@
 package com.pentaho.metaverse.analyzer.kettle.step.mergejoin;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.model.Operation;
 import org.pentaho.di.core.ProgressNullMonitorListener;
 import org.pentaho.di.core.row.RowMetaInterface;

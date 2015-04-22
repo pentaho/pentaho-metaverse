@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step;
 
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;

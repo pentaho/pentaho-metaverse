@@ -11,17 +11,17 @@
     <constructor-arg ref="MetaverseGraphImpl"/>
   </bean>
 
-  <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.impl.MetaverseObjectFactory" scope="singleton"/>
+  <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.api.MetaverseObjectFactory" scope="singleton"/>
 
   <bean id="TransformationAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer"/>
   <bean id="JobAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.JobAnalyzer"/>
 
   <bean id="stepDatabaseConnectionAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.StepDatabaseConnectionAnalyzer">
+        class="com.pentaho.metaverse.api.analyzer.kettle.step.StepDatabaseConnectionAnalyzer">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
   <bean id="jobEntryDatabaseConnectionAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryDatabaseConnectionAnalyzer">
+        class="com.pentaho.metaverse.api.analyzer.kettle.jobentry.JobEntryDatabaseConnectionAnalyzer">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
   <bean id="mongoDbConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.MongoDbConnectionAnalyzer">

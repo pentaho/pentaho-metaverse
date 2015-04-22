@@ -27,8 +27,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
-import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 
 import java.io.IOException;

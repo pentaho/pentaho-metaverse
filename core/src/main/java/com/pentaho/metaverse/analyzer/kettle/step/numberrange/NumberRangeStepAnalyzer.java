@@ -23,7 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step.numberrange;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.api.model.kettle.FieldMapping;
 import org.pentaho.di.trans.step.BaseStepMeta;

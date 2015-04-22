@@ -24,9 +24,11 @@ package com.pentaho.metaverse.client;
 
 import com.google.common.collect.Sets;
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.MetaverseException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.StepFieldOperations;
 import com.pentaho.metaverse.graph.LineageGraphMap;
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
@@ -35,7 +37,6 @@ import com.tinkerpop.pipes.branch.LoopPipe;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.trans.TransMeta;
-import com.pentaho.metaverse.api.MetaverseException;
 
 import java.util.ArrayList;
 import java.util.Arrays;

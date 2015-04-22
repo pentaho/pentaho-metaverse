@@ -24,7 +24,7 @@ package com.pentaho.metaverse.util;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.DictionaryHelper;
-import com.pentaho.metaverse.analyzer.kettle.ChangeType;
+import com.pentaho.metaverse.api.ChangeType;
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.model.IOperation;
 import com.pentaho.metaverse.api.model.Operation;

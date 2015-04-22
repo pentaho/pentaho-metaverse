@@ -22,10 +22,10 @@
 
 package com.pentaho.metaverse.locator;
 
+import com.pentaho.metaverse.api.MetaverseDocument;
 import com.pentaho.metaverse.graph.GraphMLWriter;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
-import com.pentaho.metaverse.impl.MetaverseDocument;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
