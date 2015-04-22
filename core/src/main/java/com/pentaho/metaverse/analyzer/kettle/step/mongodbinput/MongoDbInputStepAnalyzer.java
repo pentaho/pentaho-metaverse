@@ -23,9 +23,9 @@
 package com.pentaho.metaverse.analyzer.kettle.step.mongodbinput;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.api.Namespace;
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.mongodbinput.MongoDbInputMeta;
 import org.pentaho.mongo.wrapper.field.MongoField;

@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.BaseJobEntryAnalyzer;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;

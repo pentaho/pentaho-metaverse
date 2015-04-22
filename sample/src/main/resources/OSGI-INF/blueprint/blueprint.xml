@@ -10,7 +10,7 @@
     This will be injected into our sample (TableInputStepAnalyzer)
   -->
   <reference id="stepDatabaseConnectionAnalyzerRef"
-             interface="com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer"
+             interface="com.pentaho.metaverse.api.analyzer.kettle.IDatabaseConnectionAnalyzer"
              component-name="stepDatabaseConnectionAnalyzer"
              availability="mandatory"/>
 
@@ -28,7 +28,7 @@
     (TableInputMeta in this case).
   -->
   <service id="tableInputStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="tableInputStepAnalyzer"/>
 
 
@@ -36,7 +36,7 @@
   <bean id="tableInputERC" scope="singleton"
         class="com.pentaho.metaverse.tableinput.TableInputExternalResourceConsumer"/>
   <service id="tableInputERCService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="tableInputERC"/>
 
 </blueprint>

@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.tableinput;
 
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.BaseStepExternalResourceConsumer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.database.DatabaseMeta;

@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.locator;
 
-import com.pentaho.metaverse.impl.MetaverseDocument;
+import com.pentaho.metaverse.api.MetaverseDocument;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

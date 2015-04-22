@@ -1,6 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import com.google.common.collect.Lists;
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

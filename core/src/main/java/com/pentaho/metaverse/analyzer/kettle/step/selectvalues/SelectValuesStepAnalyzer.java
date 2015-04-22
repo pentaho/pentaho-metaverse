@@ -23,9 +23,9 @@
 package com.pentaho.metaverse.analyzer.kettle.step.selectvalues;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.ChangeType;
-import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 import com.pentaho.metaverse.api.model.kettle.FieldMapping;

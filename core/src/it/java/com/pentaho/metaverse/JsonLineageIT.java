@@ -22,48 +22,20 @@
 
 package com.pentaho.metaverse;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.pentaho.metaverse.analyzer.kettle.IExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer;
-import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer;
-import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
-import com.pentaho.metaverse.impl.model.kettle.json.AbstractStepMetaJsonSerializer;
-import com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer;
-import com.pentaho.metaverse.impl.model.kettle.json.JobEntryBaseJsonSerializer;
-import com.pentaho.metaverse.impl.model.kettle.json.JobMetaJsonSerializer;
 import com.pentaho.metaverse.impl.model.kettle.json.KettleObjectMapper;
-import com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer;
-import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonDeserializer;
-import com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonSerializer;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pentaho.di.core.plugins.PluginInterface;
-import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
-import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
 
 /**
  * User: RFellows Date: 10/31/14

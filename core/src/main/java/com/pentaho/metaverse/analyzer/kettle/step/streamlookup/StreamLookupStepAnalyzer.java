@@ -23,10 +23,10 @@
 package com.pentaho.metaverse.analyzer.kettle.step.streamlookup;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;

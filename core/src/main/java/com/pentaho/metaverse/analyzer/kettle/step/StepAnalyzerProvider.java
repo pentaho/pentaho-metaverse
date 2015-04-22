@@ -1,6 +1,8 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
-import com.pentaho.metaverse.analyzer.kettle.BaseKettleMetaverseComponent;
+import com.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
 import java.util.ArrayList;

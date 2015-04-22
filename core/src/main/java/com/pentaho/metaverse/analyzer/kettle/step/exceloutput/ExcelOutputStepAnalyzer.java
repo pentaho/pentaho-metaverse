@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 
 /**

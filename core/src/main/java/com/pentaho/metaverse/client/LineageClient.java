@@ -23,6 +23,8 @@ package com.pentaho.metaverse.client;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.ILineageClient;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.StepFieldOperations;
 import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.graph.LineageGraphMap;
 import com.pentaho.metaverse.util.MetaverseUtil;

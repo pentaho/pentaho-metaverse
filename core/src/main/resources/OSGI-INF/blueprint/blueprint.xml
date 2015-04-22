@@ -62,7 +62,7 @@
     <argument ref="MetaverseGraphImplPrototype"/>
   </bean>
 
-  <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.impl.MetaverseObjectFactory" scope="singleton"/>
+  <bean id="IMetaverseObjectFactory" class="com.pentaho.metaverse.api.MetaverseObjectFactory" scope="singleton"/>
 
   <!-- Document Analyzers -->
   <bean id="TransformationAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer">
@@ -89,19 +89,19 @@
 
   <!-- Connection Analyzers -->
   <bean id="stepDatabaseConnectionAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.StepDatabaseConnectionAnalyzer">
+        class="com.pentaho.metaverse.api.analyzer.kettle.step.StepDatabaseConnectionAnalyzer">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
   <service id="stepDatabaseConnectionAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.IDatabaseConnectionAnalyzer"
            ref="stepDatabaseConnectionAnalyzer"/>
 
   <bean id="jobEntryDatabaseConnectionAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryDatabaseConnectionAnalyzer">
+        class="com.pentaho.metaverse.api.analyzer.kettle.jobentry.JobEntryDatabaseConnectionAnalyzer">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
   <service id="jobEntryDatabaseConnectionAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.IDatabaseConnectionAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.IDatabaseConnectionAnalyzer"
            ref="jobEntryDatabaseConnectionAnalyzer"/>
 
   <bean id="mongoDbConnectionAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.MongoDbConnectionAnalyzer">
@@ -159,87 +159,87 @@
   		class="com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer"/>
 
   <service id="tableOutputStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TableOutputStepAnalyzer"/>
 
   <service id="textFileInputStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TextFileInputStepAnalyzer"/>
 
   <service id="selectValuesStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="SelectValuesStepAnalyzer"/>
 
   <service id="numberRangeStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="SelectValuesStepAnalyzer"/>
 
   <service id="valueMapperStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="ValueMapperStepAnalyzer"/>
 
   <service id="textFileOutputStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TextFileOutputStepAnalyzer"/>
 
   <service id="mergeJoinStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="MergeJoinStepAnalyzer"/>
 
   <service id="streamLookupStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="StreamLookupStepAnalyzer"/>
 
   <service id="calculatorStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="CalculatorStepAnalyzer"/>
 
   <service id="excelInputStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="ExcelInputStepAnalyzer"/>
 
   <service id="groupByStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="GroupByStepAnalyzer"/>
 
   <service id="mongoDbInputStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="MongoDbInputStepAnalyzer"/>
 
   <service id="excelOutputStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="ExcelOutputStepAnalyzer"/>
            
   <service id="stringOperationsStepAnalyzer"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="StringOperationsStepAnalyzer"/>
   
   <service id="stringsCutStepAnalyzer"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="StringsCutStepAnalyzer"/>
 
   <service id="stringsReplaceStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="StringsReplaceStepAnalyzer"/>
            
   <service id="splitFieldsStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="SplitFieldsStepAnalyzer"/>
 
   <service id="transExecutorStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TransExecutorStepAnalyzer"/>
 
   <service id="rowsToResultStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="RowsToResultStepAnalyzer"/>
 
   <service id="csvFileInputStepAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="CsvFileInputStepAnalyzer"/>
 
   <reference-list id="stepAnalyzerRefList"
-                  interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+                  interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
                   member-type="service-object"
                   availability="optional">
     <reference-listener ref="IStepAnalyzerProvider" bind-method="addAnalyzer" unbind-method="removeAnalyzer"/>
@@ -252,11 +252,11 @@
         class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer"/>
 
   <service id="transJobEntryAnalyzerService"
-           interface="com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer"
            ref="TransJobEntryAnalyzer"/>
 
   <reference-list id="jobEntryAnalyzerRefList"
-                  interface="com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer"
+                  interface="com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer"
                   member-type="service-object"
                   availability="optional">
     <reference-listener ref="IJobEntryAnalyzerProvider" bind-method="addAnalyzer" unbind-method="removeAnalyzer"/>
@@ -279,31 +279,31 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
 
   <service id="tableOutputERCService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="tableOutputERC"/>
 
   <service id="textFileInputERCService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="textFileInputERC"/>
 
   <service id="textFileOutputERCService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="textFileOutputERC"/>
 
   <service id="excelInputERCService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="excelInputERC"/>
 
   <service id="excelOutputERCService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="excelOutputERC"/>
 
   <service id="csvInputERCService"
-           interface="com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="csvInputERC"/>
 
   <reference-list id="stepExternalResourceConsumerRefList"
-                  interface="com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer"
+                  interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
                   member-type="service-object"
                   availability="optional">
     <reference-listener ref="IStepExternalResourceConsumerProvider"
@@ -319,7 +319,7 @@
 
 
   <reference-list id="jobEntryExternalResourceConsumerRefList"
-                  interface="com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer"
+                  interface="com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer"
                   member-type="service-object"
                   availability="optional">
     <reference-listener ref="IJobEntryExternalResourceConsumerProvider"

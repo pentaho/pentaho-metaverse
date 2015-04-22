@@ -1,6 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
 import com.pentaho.metaverse.messages.Messages;
 import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IDocument;

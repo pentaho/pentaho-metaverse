@@ -24,11 +24,11 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
-import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzer;
-import com.pentaho.metaverse.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.api.Namespace;
-import com.pentaho.metaverse.impl.PropertiesHolder;
+import com.pentaho.metaverse.api.PropertiesHolder;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.parameters.UnknownParamException;

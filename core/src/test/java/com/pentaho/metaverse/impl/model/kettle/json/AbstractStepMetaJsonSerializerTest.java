@@ -24,13 +24,13 @@ package com.pentaho.metaverse.impl.model.kettle.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.pentaho.metaverse.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.analyzer.kettle.step.StepExternalResourceConsumerProvider;
-import com.pentaho.metaverse.analyzer.kettle.step.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
-import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer;
-import com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzerProvider;
-import com.pentaho.metaverse.analyzer.kettle.step.IFieldLineageMetadataProvider;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IFieldLineageMetadataProvider;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.api.model.kettle.IFieldInfo;

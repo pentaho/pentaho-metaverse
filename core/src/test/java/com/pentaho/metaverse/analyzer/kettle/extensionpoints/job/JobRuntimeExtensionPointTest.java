@@ -32,13 +32,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Collections;
 import java.util.List;
 
 import com.pentaho.metaverse.api.model.IExecutionData;
 import com.pentaho.metaverse.api.model.LineageHolder;
-import com.pentaho.metaverse.impl.MetaverseBuilder;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
