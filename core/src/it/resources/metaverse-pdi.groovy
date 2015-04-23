@@ -16,7 +16,7 @@ import com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnaly
 import com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer
 
 import com.pentaho.metaverse.api.*
-import com.pentaho.metaverse.api.*
+import com.pentaho.metaverse.api.analyzer.kettle.step.*
 import com.pentaho.metaverse.client.*
 import com.pentaho.metaverse.graph.*
 import com.pentaho.metaverse.impl.*
@@ -24,7 +24,6 @@ import com.pentaho.metaverse.locator.*
 import com.pentaho.metaverse.util.*
 import com.pentaho.metaverse.service.*
 import com.pentaho.metaverse.analyzer.kettle.*
-import com.pentaho.metaverse.analyzer.kettle.extensionpoints.*
 import com.pentaho.metaverse.analyzer.kettle.step.*
 import com.pentaho.metaverse.analyzer.kettle.jobentry.*
 import com.pentaho.dictionary.*
