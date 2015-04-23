@@ -69,7 +69,7 @@
   <bean id="StringOperationsStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
   <bean id="StringsCutStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer"/>
   <bean id="StringsReplaceStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer"/>
-  
+  <bean id="FixedFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer"/>
   <bean id="TransJobEntryAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer"/>
 
@@ -120,6 +120,7 @@
         <ref bean="StringsReplaceStepAnalyzer"/>
         <ref bean="TransExecutorStepAnalyzer"/>
         <ref bean="RowsToResultStepAnalyzer"/>
+        <ref bean="FixedFileInputStepAnalyzer"/>
       </list>
     </property>
   </bean>

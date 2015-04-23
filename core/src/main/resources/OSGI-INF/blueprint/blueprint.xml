@@ -158,6 +158,9 @@
   <bean id="StringsReplaceStepAnalyzer" 
   		class="com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer"/>
 
+  <bean id="FixedFileInputStepAnalyzer"
+  		class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer"/>
+  		
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TableOutputStepAnalyzer"/>
@@ -238,6 +241,10 @@
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="CsvFileInputStepAnalyzer"/>
 
+  <service id="fixedFileInputStepAnalyzerService"
+  		   interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+  		   ref="FixedFileInputStepAnalyzer"/>
+  		   
   <reference-list id="stepAnalyzerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
                   member-type="service-object"
