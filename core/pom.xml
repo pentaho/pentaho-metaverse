@@ -61,6 +61,13 @@
     <!-- NOTE: Maintain dependencies grouped together by scope (compile, runtime, provided, and test) and then ordered alphabetically by groupId and artifactId. -->
 
     <dependency>
+      <groupId>com.pentaho</groupId>
+      <artifactId>pentaho-metaverse-api</artifactId>
+      <version>${project.version}</version>
+      <type>bundle</type>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-frontend-jaxrs</artifactId>
       <version>${dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version}</version>
@@ -162,12 +169,6 @@
       <artifactId>org.osgi.compendium</artifactId>
       <version>${dependency.osgi.version}</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.pentaho</groupId>
-      <artifactId>pentaho-metaverse-api</artifactId>
-      <version>${project.version}</version>
-      <type>bundle</type>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -375,6 +376,11 @@
             <groupId>pentaho-kettle</groupId>
             <artifactId>kettle-ui-swt</artifactId>
             <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>com.pentaho</groupId>
+            <artifactId>pentaho-metaverse-api</artifactId>
+            <version>${project.version}</version>
           </dependency>
         </dependencies>
         <executions>
