@@ -242,7 +242,7 @@
            ref="CsvFileInputStepAnalyzer"/>
 
   <service id="fixedFileInputStepAnalyzerService"
-  		   interface="com.pentaho.metaverse.analyzer.kettle.step.IStepAnalyzer"
+  		   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
   		   ref="FixedFileInputStepAnalyzer"/>
   		   
   <reference-list id="stepAnalyzerRefList"
@@ -284,6 +284,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputExternalResourceConsumer"/>
   <bean id="csvInputERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
+  <bean id="fixedFileInputERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputExternalResourceConsumer"/>
 
   <service id="tableOutputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
@@ -308,6 +310,10 @@
   <service id="csvInputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="csvInputERC"/>
+           
+  <service id="fixedFileInputERCService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
+           ref="fixedFileInputERC"/>
 
   <reference-list id="stepExternalResourceConsumerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
