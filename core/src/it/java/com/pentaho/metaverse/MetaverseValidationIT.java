@@ -35,6 +35,7 @@ import com.pentaho.metaverse.frames.DatasourceNode;
 import com.pentaho.metaverse.frames.ExcelInputStepNode;
 import com.pentaho.metaverse.frames.ExcelOutputStepNode;
 import com.pentaho.metaverse.frames.FieldNode;
+import com.pentaho.metaverse.frames.FixedFileInputStepNode;
 import com.pentaho.metaverse.frames.FramedMetaverseNode;
 import com.pentaho.metaverse.frames.GroupByStepNode;
 import com.pentaho.metaverse.frames.JobEntryNode;
@@ -1186,6 +1187,34 @@ public class MetaverseValidationIT {
 
     // should create a field for each one it uses
     assertEquals( countCreatedStreamFieldNode, countUsedStreamFieldNode );
+  }
+
+  @Test
+  public void testFixedFileInputStep() throws Exception {
+    // this is testing a specific FixedFileInputStep instance
+    FixedFileInputStepNode fixedFileInputStepNode = root.getFixedFileInputStepNode();
+    assertNotNull( fixedFileInputStepNode );
+
+    Iterable<FramedMetaverseNode> inputFiles = fixedFileInputStepNode.getInputFiles();
+    int countInputFiles = getIterableSize( inputFiles );
+    assertEquals( 1, countInputFiles );
+    for ( FramedMetaverseNode inputFile : inputFiles ) {
+      assertTrue( inputFile.getName().endsWith( "Textfile input - fixed length sample data.txt" ) );
+    }
+
+    assertEquals( "Fixed file input", fixedFileInputStepNode.getStepType() );
+
+    int countFileFieldNode = getIterableSize( fixedFileInputStepNode.getFileFieldNodesUses() );
+
+    Iterable<StreamFieldNode> streamFieldNodes = fixedFileInputStepNode.getStreamFieldNodesCreates();
+    int countStreamFieldNode = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+
+    // we should create as many fields as we read in
+    assertEquals( countFileFieldNode, countStreamFieldNode );
+
   }
 
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {

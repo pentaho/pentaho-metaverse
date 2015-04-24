@@ -14,6 +14,7 @@ import com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer
 
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.api.analyzer.kettle.step.*
@@ -146,6 +147,8 @@ i:
       transExecutorAnalyzer = new TransExecutorStepAnalyzer()
 
       rowsToResultAnalyzer = new RowsToResultStepAnalyzer()
+      
+      fixedFileStepAnalyzer = new FixedFileInputStepAnalyzer()
 
       //**********************************************************************
 
@@ -154,7 +157,7 @@ i:
         [tfia, tfoa, cfia,
          mergeJoinAnalyzer, numberRangeAnalyzer, selectValuesAnalyzer, tableInputAnalyzer, valueMapperAnalyzer,
          streamLookupAnalyzer, calculatorAnalyzer, groupByAnalyzer, excelInputAnalyzer, stringOperationsAnalyzer,
-         stringsCutAnalyzer, transExecutorAnalyzer, rowsToResultAnalyzer ] as List)
+         stringsCutAnalyzer, stringsReplaceStepAnalyzer, transExecutorAnalyzer, rowsToResultAnalyzer, fixedFileStepAnalyzer ] as List)
 
       ta = new TransformationAnalyzer()
       ta.setStepAnalyzerProvider(ksap)

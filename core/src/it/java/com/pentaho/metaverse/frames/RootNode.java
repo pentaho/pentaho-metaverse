@@ -129,4 +129,8 @@ public interface RootNode extends FramedMetaverseNode {
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Copy rows to result'}.as('step').in('contains').has('name', T.eq, 'trans-executor-child').back('step')" )
   public RowsToResultStepNode getRowsToResultStepNode();
+  
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Fixed file input'}.as('step').in('contains').has('name', T.eq, 'fixed_file_input').back('step')" )
+  public FixedFileInputStepNode getFixedFileInputStepNode();
+
 }
