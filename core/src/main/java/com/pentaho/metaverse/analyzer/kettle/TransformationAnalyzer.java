@@ -102,7 +102,9 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       transMeta = (TransMeta) repoObject;
     }
 
-    transMeta.setFilename( document.getStringID() );
+    if ( transMeta.getRepository() == null ) {
+      transMeta.setFilename( document.getStringID() );
+    }
     Trans t = new Trans( transMeta );
     t.setInternalKettleVariables( transMeta );
 

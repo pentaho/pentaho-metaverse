@@ -54,6 +54,7 @@ import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.sql.Timestamp;
@@ -185,11 +186,17 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     }
 
     String filePath = null;
-    try {
-      filePath = KettleAnalyzerUtil.normalizeFilePath( filename );
-    } catch ( Exception e ) {
-      // TODO ?
+    if ( trans.getRepository() == null ) {
+      try {
+        filePath = KettleAnalyzerUtil.normalizeFilePath( filename );
+      } catch ( Exception e ) {
+        // TODO ?
+      }
+    } else {
+      String repoName = trans.getRepository().getName();
+      filePath = repoName == null ? filename : File.separator + repoName + filename;
     }
+
 
     // Set artifact information (path, type, description, etc.)
     executionProfile.setPath( filePath );
