@@ -26,8 +26,6 @@ package com.pentaho.metaverse.impl;
 import com.pentaho.metaverse.api.IGraphWriter;
 import com.pentaho.metaverse.api.ILineageWriter;
 import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.MetaverseException;
-import com.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import com.pentaho.metaverse.api.model.IExecutionProfile;
 import com.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.graph.GraphMLWriter;
@@ -138,7 +136,6 @@ public class FileSystemLineageWriter implements ILineageWriter {
         IExecutionProfile profile = holder.getExecutionProfile();
         String id = holder.getId() == null ? "unknown_artifact" : holder.getId();
         try {
-          id = KettleAnalyzerUtil.normalizeFilePath( id );
 
           // strip off the colon from C:\path\to\file on windows
           if ( isWindows() ) {
@@ -163,7 +160,7 @@ public class FileSystemLineageWriter implements ILineageWriter {
             e.printStackTrace();
             return null;
           }
-        } catch ( MetaverseException e ) {
+        } catch ( Exception e ) {
           e.printStackTrace();
           return null;
         }
