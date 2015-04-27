@@ -51,54 +51,32 @@ public class GetXMLDataStepAnalyzer extends BaseStepAnalyzer<GetXMLDataMeta> {
     throws MetaverseAnalyzerException {
 
     // do the common analysis for all step
-    IMetaverseNode node = super.analyze( descriptor, getXMLDataMeta );
+    IMetaverseNode stepNode = super.analyze( descriptor, getXMLDataMeta );
 
     // Add the XPath Loop to the step node
-    node.setProperty( "loopXPath", getXMLDataMeta.getLoopXPath() );
+    stepNode.setProperty( "loopXPath", getXMLDataMeta.getLoopXPath() );
 
-    // add the fields as nodes, add the links too
-    GetXMLDataField[] fields = getXMLDataMeta.getInputFields();
-    if ( fields != null ) {
-      for ( GetXMLDataField field : fields ) {
-        String fieldName = field.getName();
-        IComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
-          fieldName,
-          DictionaryConst.NODE_TYPE_FILE_FIELD,
-          descriptor.getNamespace(),
-          descriptor.getContext() );
-        IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
+    // Get some boolean flags from the meta for easier access
+    boolean isInFields = getXMLDataMeta.isInFields();
+    boolean isAFile = getXMLDataMeta.getIsAFile();
+    boolean isAUrl = getXMLDataMeta.isReadUrl();
 
-        // Add field properties like XPath
-        fieldNode.setProperty( "xpath", field.getXPath() );
-        fieldNode.setProperty( "element", field.getElementTypeCode() );
-        fieldNode.setProperty( "resultType", field.getResultTypeCode() );
-        fieldNode.setProperty( "repeat", field.isRepeated() );
-        metaverseBuilder.addNode( fieldNode );
-
-        // Get the stream field output from this step. It should've already been created when we called super.analyze()
-        IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
-        IMetaverseNode outNode = createNodeFromDescriptor( transFieldDescriptor );
-
-        metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outNode );
-
-        // add a link from the fileField to the text file input step node
-        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, fieldNode );
-      }
-    }
-
-    if ( getXMLDataMeta.isInFields() && getXMLDataMeta.getIsAFile() ) {
-      String acceptingFieldName = getXMLDataMeta.getXMLField();
-      IComponentDescriptor transFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor,
-        acceptingFieldName );
-      IMetaverseNode acceptingFieldNode = createNodeFromDescriptor( transFieldDescriptor );
-      acceptingFieldNode.setProperty( "url", getXMLDataMeta.isReadUrl() );
-
-      // add a link from the fileField to the text file input step node
-      metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, acceptingFieldNode );
+    // If we're getting the data from a field (whether the field contains a filename or actual XML), we need a
+    // "uses" link from the step to that field.
+    IComponentDescriptor inFieldDescriptor = null;
+    IMetaverseNode inFieldNode = null;
+    if ( isInFields ) {
+      String inField = getXMLDataMeta.getXMLField();
+      inFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor, inField );
+      inFieldNode = createNodeFromDescriptor( inFieldDescriptor );
+      // The step uses the specified field in order to get at the XML data
+      metaverseBuilder.addLink( stepNode, DictionaryConst.LINK_USES, inFieldNode );
     } else {
+      // We're not getting the data from a field, so get the list of static filenames in case we reach that processing.
+      // We only need to fetch them once, not for each field.
       String[] fileNames = parentTransMeta.environmentSubstitute( getXMLDataMeta.getFileName() );
 
-      // add a link from the file(s) being read to the step
+      // Add a link from the file(s) being read to the step
       if ( fileNames != null ) {
         for ( String fileName : fileNames ) {
           if ( !Const.isEmpty( fileName ) ) {
@@ -107,7 +85,7 @@ public class GetXMLDataStepAnalyzer extends BaseStepAnalyzer<GetXMLDataMeta> {
               IMetaverseNode xmlFileNode = createFileNode( fileName, descriptor );
               metaverseBuilder.addNode( xmlFileNode );
 
-              metaverseBuilder.addLink( xmlFileNode, DictionaryConst.LINK_READBY, node );
+              metaverseBuilder.addLink( xmlFileNode, DictionaryConst.LINK_READBY, stepNode );
             } catch ( MetaverseException e ) {
               log.error( e.getMessage(), e );
             }
@@ -116,7 +94,51 @@ public class GetXMLDataStepAnalyzer extends BaseStepAnalyzer<GetXMLDataMeta> {
       }
     }
 
-    return node;
+    // add the fields as nodes, add the links too
+    GetXMLDataField[] fields = getXMLDataMeta.getInputFields();
+    if ( fields != null ) {
+      for ( GetXMLDataField field : fields ) {
+        String fieldName = field.getName();
+
+        // Get the stream field output from this step. It should've already been created when we called super.analyze()
+        IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
+        IMetaverseNode outFieldNode = createNodeFromDescriptor( transFieldDescriptor );
+
+        // Add field properties like XPath
+        outFieldNode.setProperty( "xpath", Const.NVL( field.getXPath(), "" ) );
+        outFieldNode.setProperty( "element", Const.NVL( field.getElementTypeCode(), "" ) );
+        outFieldNode.setProperty( "resultType", Const.NVL( field.getResultTypeCode(), "" ) );
+        outFieldNode.setProperty( "repeat", field.isRepeated() );
+
+        // If the XML is not coming directly from a field value, then it is coming from a filename or URL,
+        // so create physical field nodes, file nodes, etc.
+        if ( !isInFields || isAFile || isAUrl ) {
+          IComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
+            fieldName,
+            DictionaryConst.NODE_TYPE_FILE_FIELD,
+            descriptor.getNamespace(),
+            descriptor.getContext() );
+
+          IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
+          metaverseBuilder.addNode( fieldNode );
+
+          // The file field populates the stream field
+          metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outFieldNode );
+          // The step uses the file field
+          metaverseBuilder.addLink( stepNode, DictionaryConst.LINK_USES, fieldNode );
+
+
+        } else {
+          // The XML is coming directly from a stream field, so represent that in the graph
+          if ( inFieldDescriptor != null ) {
+            // The incoming field node is used to derive the output field
+            metaverseBuilder.addLink( inFieldNode, DictionaryConst.LINK_DERIVES, outFieldNode );
+          }
+        }
+      }
+    }
+
+    return stepNode;
   }
 
   @Override
