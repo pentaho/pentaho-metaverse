@@ -37,6 +37,7 @@ import com.pentaho.metaverse.frames.ExcelOutputStepNode;
 import com.pentaho.metaverse.frames.FieldNode;
 import com.pentaho.metaverse.frames.FixedFileInputStepNode;
 import com.pentaho.metaverse.frames.FramedMetaverseNode;
+import com.pentaho.metaverse.frames.GetXMLDataStepNode;
 import com.pentaho.metaverse.frames.GroupByStepNode;
 import com.pentaho.metaverse.frames.JobEntryNode;
 import com.pentaho.metaverse.frames.JobNode;
@@ -310,7 +311,7 @@ public class MetaverseValidationIT {
           .size(), matchCount );
 
       assertEquals( "Incorrect number of Steps in the graph for transformation [" + tm.getName() + "]", transMetaSteps
-          .size(), stepCount );
+        .size(), stepCount );
 
     }
   }
@@ -1207,6 +1208,34 @@ public class MetaverseValidationIT {
     int countFileFieldNode = getIterableSize( fixedFileInputStepNode.getFileFieldNodesUses() );
 
     Iterable<StreamFieldNode> streamFieldNodes = fixedFileInputStepNode.getStreamFieldNodesCreates();
+    int countStreamFieldNode = getIterableSize( streamFieldNodes );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+
+    // we should create as many fields as we read in
+    assertEquals( countFileFieldNode, countStreamFieldNode );
+
+  }
+
+  @Test
+  public void testGetXMLDataStep() throws Exception {
+    // this is testing a specific GetXMLDataStep instance
+    GetXMLDataStepNode getXMLDataStepNode = root.getGetXMLDataStepNode();
+    assertNotNull( getXMLDataStepNode );
+
+    Iterable<FramedMetaverseNode> inputFiles = getXMLDataStepNode.getInputFiles();
+    int countInputFiles = getIterableSize( inputFiles );
+    assertEquals( 1, countInputFiles );
+    for ( FramedMetaverseNode inputFile : inputFiles ) {
+      assertTrue( inputFile.getName().endsWith( "XML - flat.xml" ) );
+    }
+
+    assertEquals( "Get data from XML", getXMLDataStepNode.getStepType() );
+
+    int countFileFieldNode = getIterableSize( getXMLDataStepNode.getFileFieldNodesUses() );
+
+    Iterable<StreamFieldNode> streamFieldNodes = getXMLDataStepNode.getStreamFieldNodesCreates();
     int countStreamFieldNode = getIterableSize( streamFieldNodes );
     for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
       assertNotNull( streamFieldNode.getKettleType() );

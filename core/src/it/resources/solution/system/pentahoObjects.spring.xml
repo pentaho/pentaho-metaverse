@@ -72,6 +72,8 @@
   <bean id="FixedFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer"/>
   <bean id="TransJobEntryAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer"/>
+  <bean id="GetXMLDataStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer"/>
 
   <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
@@ -121,6 +123,7 @@
         <ref bean="TransExecutorStepAnalyzer"/>
         <ref bean="RowsToResultStepAnalyzer"/>
         <ref bean="FixedFileInputStepAnalyzer"/>
+        <ref bean="GetXMLDataStepAnalyzer"/>
       </list>
     </property>
   </bean>
@@ -147,6 +150,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputExternalResourceConsumer"/>
   <bean id="csvInputERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
+  <bean id="getXMLDataERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataExternalResourceConsumer"/>
 
   <bean id="IStepExternalResourceConsumerProvider"
         class="com.pentaho.metaverse.analyzer.kettle.step.StepExternalResourceConsumerProvider"
@@ -159,6 +164,7 @@
         <ref bean="excelInputERC"/>
         <ref bean="excelOutputERC"/>
         <ref bean="csvInputERC"/>
+        <ref bean="getXMLDataERC"/>
       </list>
     </property>
 
@@ -167,39 +173,46 @@
   <bean id="lineageRepo" class="com.pentaho.metaverse.impl.model.kettle.LineageRepository" scope="singleton"/>
   <bean id="lineageReadRepo" class="com.pentaho.metaverse.impl.model.kettle.LineageRepository" scope="singleton"/>
 
-  <bean id="baseStepMetaJsonSerializer" class="com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer" scope="singleton">
+  <bean id="baseStepMetaJsonSerializer" class="com.pentaho.metaverse.impl.model.kettle.json.BaseStepMetaJsonSerializer"
+        scope="singleton">
     <constructor-arg value="org.pentaho.di.trans.step.BaseStepMeta" type="java.lang.Class"/>
     <constructor-arg ref="lineageRepo"/>
     <property name="stepAnalyzerProvider" ref="IStepAnalyzerProvider"/>
     <property name="stepExternalResourceConsumerProvider" ref="IStepExternalResourceConsumerProvider"/>
   </bean>
-  <bean id="tableOutputStepMetaJsonSerializer" class="com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer" scope="singleton">
+  <bean id="tableOutputStepMetaJsonSerializer"
+        class="com.pentaho.metaverse.impl.model.kettle.json.TableOutputStepMetaJsonSerializer" scope="singleton">
     <constructor-arg value="org.pentaho.di.trans.steps.tableoutput.TableOutputMeta" type="java.lang.Class"/>
     <constructor-arg ref="lineageRepo"/>
     <property name="stepAnalyzerProvider" ref="IStepAnalyzerProvider"/>
     <property name="stepExternalResourceConsumerProvider" ref="IStepExternalResourceConsumerProvider"/>
   </bean>
-  <bean id="transMetaJsonSerializer" class="com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonSerializer" scope="singleton">
+  <bean id="transMetaJsonSerializer" class="com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonSerializer"
+        scope="singleton">
     <constructor-arg value="org.pentaho.di.trans.TransMeta" type="java.lang.Class"/>
     <property name="lineageRepository" ref="lineageRepo"/>
   </bean>
 
 
-  <bean id="jobEntryBaseJsonSerializer" class="com.pentaho.metaverse.impl.model.kettle.json.JobEntryBaseJsonSerializer" scope="singleton">
+  <bean id="jobEntryBaseJsonSerializer" class="com.pentaho.metaverse.impl.model.kettle.json.JobEntryBaseJsonSerializer"
+        scope="singleton">
     <constructor-arg value="org.pentaho.di.job.entry.JobEntryBase" type="java.lang.Class"/>
     <property name="lineageRepository" ref="lineageRepo"/>
   </bean>
-  <bean id="jobMetaJsonSerializer" class="com.pentaho.metaverse.impl.model.kettle.json.JobMetaJsonSerializer" scope="singleton">
+  <bean id="jobMetaJsonSerializer" class="com.pentaho.metaverse.impl.model.kettle.json.JobMetaJsonSerializer"
+        scope="singleton">
     <constructor-arg value="org.pentaho.di.job.JobMeta" type="java.lang.Class"/>
     <property name="lineageRepository" ref="lineageRepo"/>
   </bean>
 
-  <bean id="transMetaJsonDeserializer" class="com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonDeserializer" scope="singleton">
+  <bean id="transMetaJsonDeserializer" class="com.pentaho.metaverse.impl.model.kettle.json.TransMetaJsonDeserializer"
+        scope="singleton">
     <constructor-arg value="org.pentaho.di.trans.TransMeta" type="java.lang.Class"/>
     <constructor-arg ref="lineageReadRepo"/>
   </bean>
 
-  <bean id="kettleObjectMapper" class="com.pentaho.metaverse.impl.model.kettle.json.KettleObjectMapper" scope="singleton">
+  <bean id="kettleObjectMapper" class="com.pentaho.metaverse.impl.model.kettle.json.KettleObjectMapper"
+        scope="singleton">
     <constructor-arg>
       <list>
         <ref bean="baseStepMetaJsonSerializer"/>
