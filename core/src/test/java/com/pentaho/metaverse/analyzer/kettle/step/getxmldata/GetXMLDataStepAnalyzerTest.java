@@ -35,6 +35,7 @@ import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -60,6 +61,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -115,6 +117,7 @@ public class GetXMLDataStepAnalyzerTest {
     when( mockGetXMLData.getStepMetaInterface() ).thenReturn( mockGetXMLDataMeta );
     when( mockGetXMLData.getStepMeta() ).thenReturn( mockStepMeta );
     when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockGetXMLDataMeta );
+
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
@@ -169,9 +172,10 @@ public class GetXMLDataStepAnalyzerTest {
     GetXMLDataField[] inputFields = new GetXMLDataField[]{ field1, field2 };
 
     when( mockGetXMLDataMeta.getInputFields() ).thenReturn( inputFields );
-    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockTransMeta.getStepFields( eq( spyMeta ), Mockito.any( ProgressMonitorListener.class ) ) )
+      .thenReturn( mockRowMetaInterface );
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "id", "name" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+    when( mockRowMetaInterface.searchValueMeta( anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
       @Override
       public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
@@ -227,26 +231,30 @@ public class GetXMLDataStepAnalyzerTest {
     GetXMLDataField[] inputFields = new GetXMLDataField[]{ field1, field2 };
 
     when( mockGetXMLDataMeta.getInputFields() ).thenReturn( inputFields );
-    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
+    when( mockTransMeta.getStepFields( eq( spyMeta ), Mockito.any( ProgressMonitorListener.class ) ) )
+      .thenReturn( mockRowMetaInterface );
     when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "id", "name" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+    when( mockRowMetaInterface.searchValueMeta( anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
       @Override
       public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
         Object[] args = invocation.getArguments();
+        ValueMetaInterface vmi = null;
         if ( args[0] == "id" ) {
-          return new ValueMetaString( "id" );
+          vmi = new ValueMetaString( "id" );
+          vmi.setOrigin( "test" );
         }
         if ( args[0] == "name" ) {
-          return new ValueMetaString( "name" );
+          vmi = new ValueMetaString( "name" );
+          vmi.setOrigin( "test" );
         }
-        return null;
+        return vmi;
       }
     } );
 
     RowMetaInterface mockPrevRowMeta = mock( RowMetaInterface.class );
     when( mockPrevRowMeta.getFieldNames() ).thenReturn( new String[]{ "inField" } );
-    when( mockPrevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+    when( mockPrevRowMeta.searchValueMeta( anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
 
       @Override
       public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
@@ -305,10 +313,12 @@ public class GetXMLDataStepAnalyzerTest {
 
     when( mockGetXMLDataMeta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockGetXMLDataMeta.getFileName() ).thenReturn( null );
+
+
     when( mockGetXMLDataMeta.isInFields() ).thenReturn( false );
     String[] filePaths = { "/path/to/file1", "/another/path/to/file2" };
     when( mockGetXMLDataMeta.getFileName() ).thenReturn( filePaths );
+    when( mockTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( filePaths );
 
     assertFalse( consumer.isDataDriven( mockGetXMLDataMeta ) );
     Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( mockGetXMLDataMeta );
@@ -320,13 +330,13 @@ public class GetXMLDataStepAnalyzerTest {
     when( mockGetXMLDataMeta.getIsAFile() ).thenReturn( true );
     assertTrue( consumer.isDataDriven( mockGetXMLDataMeta ) );
     assertTrue( consumer.getResourcesFromMeta( mockGetXMLDataMeta ).isEmpty() );
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), anyString(), anyString() ) )
       .thenReturn( "/path/to/row/file" );
     resources = consumer.getResourcesFromRow( mockGetXMLData, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), anyString(), anyString() ) )
       .thenThrow( KettleException.class );
     resources = consumer.getResourcesFromRow( mockGetXMLData, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertTrue( resources.isEmpty() );

@@ -106,9 +106,6 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'MongoDB Connection' }" )
   public Iterable<MongoDbDatasourceNode> getMongoDbDatasourceNodes();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'MongoDB Connection' && it.object.name == name }" )
-  public MongoDbDatasourceNode getMongoDbDatasourceNode( @GremlinParam( "name" ) String name );
-
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Output'}.as('step').in('contains').has('name', T.eq, 'excel_output').back('step')" )
   public ExcelOutputStepNode getExcelOutputStepNode();
 
@@ -129,11 +126,10 @@ public interface RootNode extends FramedMetaverseNode {
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Copy rows to result'}.as('step').in('contains').has('name', T.eq, 'trans-executor-child').back('step')" )
   public RowsToResultStepNode getRowsToResultStepNode();
-  
+
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Fixed file input'}.as('step').in('contains').has('name', T.eq, 'fixed_file_input').back('step')" )
   public FixedFileInputStepNode getFixedFileInputStepNode();
 
-
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Read data from XML'}.as('step').in('contains').has('name', T.eq, 'get_xml_data').back('step')" )
-  public GetXMLDataStepNode getGetXMLDataStepNode();
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == name}.as('step').in('contains').has('name', T.eq, 'get_xml_data').back('step')" )
+  public GetXMLDataStepNode getGetXMLDataStepNode( @GremlinParam( "name" ) String name );
 }

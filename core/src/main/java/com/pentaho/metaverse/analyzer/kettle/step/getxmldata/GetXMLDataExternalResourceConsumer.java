@@ -61,7 +61,7 @@ public class GetXMLDataExternalResourceConsumer
       if ( parentStepMeta != null ) {
         TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
         if ( parentTransMeta != null ) {
-          String[] paths = meta.getFileName();
+          String[] paths = parentTransMeta.environmentSubstitute( meta.getFileName() );
           if ( paths != null ) {
             resources = new ArrayList<IExternalResourceInfo>( paths.length );
 
