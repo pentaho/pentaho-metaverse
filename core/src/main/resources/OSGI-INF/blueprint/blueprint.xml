@@ -145,6 +145,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.transexecutor.TransExecutorStepAnalyzer"/>
   <bean id="RowsToResultStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.rowstoresult.RowsToResultStepAnalyzer"/>
+  <bean id="GetXMLDataStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer"/>
 
   <bean id="StringOperationsStepAnalyzer" 
   		class="com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
@@ -245,6 +247,10 @@
   		   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
   		   ref="FixedFileInputStepAnalyzer"/>
   		   
+  <service id="getXMLDataStepAnalyzerService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           ref="GetXMLDataStepAnalyzer"/>
+
   <reference-list id="stepAnalyzerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
                   member-type="service-object"
@@ -286,6 +292,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
   <bean id="fixedFileInputERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputExternalResourceConsumer"/>
+  <bean id="getXMLDataERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataExternalResourceConsumer"/>
 
   <service id="tableOutputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
@@ -310,10 +318,14 @@
   <service id="csvInputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="csvInputERC"/>
-           
+
   <service id="fixedFileInputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="fixedFileInputERC"/>
+
+  <service id="getXMLDataERCService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
+           ref="getXMLDataERC"/>
 
   <reference-list id="stepExternalResourceConsumerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"

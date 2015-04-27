@@ -175,4 +175,24 @@ public class JsonLineageIT {
     jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".after.json" ) );
     FileUtils.writeStringToFile( jsonOut, json );
   }
+
+  @Test
+  public void testGetXMLDataJsonSerialize() throws Exception {
+
+    String ktrPath = "src/it/resources/repo/validation/get_xml_data.ktr";
+    TransMeta tm = new TransMeta( ktrPath, null, true, null, null );
+
+    String json = mapper.writeValueAsString( tm );
+    File jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".json" ) );
+    FileUtils.writeStringToFile( jsonOut, json );
+
+    // now deserialize it
+    TransMeta rehydrated = mapper.readValue( json, TransMeta.class );
+
+    assertEquals( tm.getName(), rehydrated.getName() );
+
+    json = mapper.writeValueAsString( rehydrated );
+    jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".after.json" ) );
+    FileUtils.writeStringToFile( jsonOut, json );
+  }
 }

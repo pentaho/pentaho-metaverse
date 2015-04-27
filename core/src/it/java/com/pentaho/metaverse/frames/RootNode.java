@@ -87,7 +87,7 @@ public interface RootNode extends FramedMetaverseNode {
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Stream lookup'}.as('step').in('contains').has('name', T.eq, 'stream_lookup').back('step')" )
   public StreamLookupStepNode getStreamLookupStepNode();
-  
+
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Calculator'}.as('step').in('contains').has('name', T.eq, 'calculator').back('step')" )
   public CalculatorStepNode getCalculatorStepNode();
 
@@ -99,7 +99,7 @@ public interface RootNode extends FramedMetaverseNode {
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Input'}.as('step').in('contains').has('name', T.eq, 'Excel input - filename from field').back('step')" )
   public ExcelInputStepNode getExcelInputFileNameFromFieldStepNode();
-  
+
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Group by'}.as('step').in('contains').has('name', T.eq, 'group_by').back('step')" )
   public GroupByStepNode getGroupByStepNode();
 
@@ -133,4 +133,7 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Fixed file input'}.as('step').in('contains').has('name', T.eq, 'fixed_file_input').back('step')" )
   public FixedFileInputStepNode getFixedFileInputStepNode();
 
+
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Read data from XML'}.as('step').in('contains').has('name', T.eq, 'get_xml_data').back('step')" )
+  public GetXMLDataStepNode getGetXMLDataStepNode();
 }
