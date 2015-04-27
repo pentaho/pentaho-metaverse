@@ -24,8 +24,7 @@ package com.pentaho.metaverse.api.model.kettle;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class FieldMappingTest {
 
@@ -59,5 +58,25 @@ public class FieldMappingTest {
     assertNull( mapping.getTargetFieldName() );
     mapping.setTargetFieldName( "to" );
     assertEquals( "to", mapping.getTargetFieldName() );
+  }
+
+  @Test
+  public void testEquals() throws Exception {
+    mapping = new FieldMapping( "from", "to" );
+    assertTrue( mapping.equals( mapping ) );
+
+    assertFalse( mapping.equals( "string" ) );
+
+    FieldMapping anotherMapping = new FieldMapping( "source", "destination" );
+    assertFalse( mapping.equals( anotherMapping ) );
+
+    anotherMapping = new FieldMapping( "from", "destination" );
+    assertFalse( mapping.equals( anotherMapping ) );
+
+    anotherMapping = new FieldMapping( "source", "to" );
+    assertFalse( mapping.equals( anotherMapping ) );
+
+    FieldMapping equivMapping = new FieldMapping( "from", "to" );
+    assertTrue( mapping.equals( equivMapping ) );
   }
 }

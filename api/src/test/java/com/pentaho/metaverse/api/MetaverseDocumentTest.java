@@ -20,22 +20,17 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.impl;
+package com.pentaho.metaverse.api;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.AnalysisContext;
-import com.pentaho.metaverse.api.MetaverseDocument;
-import com.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.pentaho.metaverse.api.IHasProperties;
-import com.pentaho.metaverse.api.ILogicalIdGenerator;
-import com.pentaho.metaverse.api.INamespace;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
