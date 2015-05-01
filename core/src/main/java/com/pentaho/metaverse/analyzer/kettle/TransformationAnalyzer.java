@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -24,12 +24,14 @@ package com.pentaho.metaverse.analyzer.kettle;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
+import com.pentaho.metaverse.api.IMetaverseLink;
 import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
 import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.api.PropertiesHolder;
 import com.pentaho.metaverse.messages.Messages;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.parameters.UnknownParamException;
@@ -233,7 +235,28 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
           toStep.getName(),
           DictionaryConst.NODE_TYPE_TRANS_STEP );
 
-        metaverseBuilder.addLink( fromStepNode, DictionaryConst.LINK_HOPSTO, toStepNode );
+        // Create and decorate the link between the steps
+        IMetaverseLink link = metaverseObjectFactory.createLinkObject();
+        link.setFromNode( fromStepNode );
+        link.setLabel( DictionaryConst.LINK_HOPSTO );
+        link.setToNode( toStepNode );
+
+        // Is this hop enabled?
+        link.setProperty( DictionaryConst.PROPERTY_ENABLED, hop.isEnabled() );
+
+        // Add metadata about the type of stream (target, error, info) it is. Default to "target".
+        String linkType = "target";
+        if ( fromStep.isSendingErrorRowsToStep( toStep ) ) {
+          linkType = "error";
+        } else {
+          String[] infoStepnames = toStep.getStepMetaInterface().getStepIOMeta().getInfoStepnames();
+          // If the "from" step is the source of an info stream to the "to" step, it's an "info" hop
+          if ( Const.indexOfString( fromStep.getName(), infoStepnames ) >= 0 ) {
+            linkType = "info";
+          }
+        }
+        link.setProperty( DictionaryConst.PROPERTY_TYPE, linkType );
+        metaverseBuilder.addLink( link );
       }
     }
 

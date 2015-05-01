@@ -269,7 +269,7 @@ public class BaseStepAnalyzerTest {
 
     // make sure there is not a "derives" link added
     verify( mockBuilder, never() ).addLink(
-        any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
   }
 
   @Test
@@ -362,6 +362,17 @@ public class BaseStepAnalyzerTest {
   }
 
   @Test
+  public void testProcessChangeRecord() {
+    when( changeRecord.hasDelta() ).thenReturn( true );
+    when( changeRecord.getChangedEntityName() ).thenReturn( "myField" );
+    IMetaverseNode rootNode = mock( IMetaverseNode.class );
+    when( rootNode.getLogicalId() ).thenReturn( "{}" );
+    analyzer.rootNode = rootNode;
+
+    analyzer.processFieldChangeRecord( mockDescriptor, mock( IMetaverseNode.class ), changeRecord );
+  }
+
+  @Test
   public void testGetPrevStepFieldOriginDescriptorNullDescriptor() {
     assertNull( analyzer.getPrevStepFieldOriginDescriptor( null, "Name" ) );
     // Call protected version
@@ -371,7 +382,7 @@ public class BaseStepAnalyzerTest {
 
   @Test
   public void testGetPrevStepFieldOriginDescriptor() {
-    when( mockPrevFields.getFieldNames() ).thenReturn( new String[] { "field1", "field2" } );
+    when( mockPrevFields.getFieldNames() ).thenReturn( new String[]{ "field1", "field2" } );
     analyzer.prevFields = Collections.singletonMap( "previous step name", mockPrevFields );
     analyzer.getPrevStepFieldOriginDescriptor( mockDescriptor, "field1" );
   }
@@ -379,6 +390,16 @@ public class BaseStepAnalyzerTest {
   @Test
   public void testGetStepFieldOriginDescriptorNullDescriptor() throws Exception {
     assertNull( analyzer.getStepFieldOriginDescriptor( null, "Name" ) );
+  }
+
+  @Test
+  public void testGetStepFieldOriginDescriptor() throws Exception {
+    when( mockStepFields.getFieldNames() ).thenReturn( new String[]{ "field1", "field2" } );
+    analyzer.stepFields = mockStepFields;
+    IMetaverseNode rootNode = mock( IMetaverseNode.class );
+    when( rootNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) ).thenReturn( "{}" );
+    analyzer.rootNode = rootNode;
+    assertNotNull( analyzer.getStepFieldOriginDescriptor( mockDescriptor, "field1" ) );
   }
 
   @Test
@@ -438,5 +459,42 @@ public class BaseStepAnalyzerTest {
   @Test
   public void testGetSupportedSteps() {
     assertNull( analyzer.getSupportedSteps() );
+  }
+
+  @Test
+  public void testGetChangeRecords() throws Exception {
+    assertNull( analyzer.getChangeRecords( mockStepMeta ) );
+  }
+
+  @Test
+  public void testCreateFieldNode() {
+    IMetaverseNode rootNode = mock( IMetaverseNode.class );
+    when( rootNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) ).thenReturn( "{}" );
+    analyzer.rootNode = rootNode;
+
+    final ValueMetaInterface vmi = new ValueMetaInteger( "testInt" );
+    analyzer.createFieldNode( mockDescriptor.getContext(), vmi );
+  }
+
+  @Test
+  public void testFieldNameExistsInInput() {
+    when( mockPrevFields.getFieldNames() ).thenReturn( new String[]{ "field1" } );
+    when( mockPrevFields.searchValueMeta( anyString() ) ).thenAnswer(
+      new Answer<ValueMetaInterface>() {
+
+        @Override
+        public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
+          Object[] args = invocation.getArguments();
+          String fieldName = (String) args[0];
+          if ( "field1".equals( fieldName ) ) {
+            return new ValueMetaString( "field1" );
+          }
+          return null;
+        }
+      } );
+    analyzer.prevFields = Collections.singletonMap( "field1", mockPrevFields );
+
+    assertFalse( analyzer.fieldNameExistsInInput( "noField" ) );
+    assertTrue( analyzer.fieldNameExistsInInput( "field1" ) );
   }
 }

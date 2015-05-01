@@ -21,14 +21,18 @@
  */
 package com.pentaho.metaverse.api;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.MetaverseLink;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+@RunWith( MockitoJUnitRunner.class )
 public class MetaverseLinkTest {
 
   @Mock
@@ -49,6 +53,8 @@ public class MetaverseLinkTest {
   public void testGetLabel() {
     assertEquals( "uses", link.getLabel() );
     assertNull( emptyLink.getLabel() );
+    link.removeProperty( DictionaryConst.PROPERTY_LABEL );
+    assertNull( link.getLabel() );
   }
 
   @Test
