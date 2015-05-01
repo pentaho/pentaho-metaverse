@@ -120,7 +120,6 @@ public class TransformationRuntimeExtensionPointTest {
     ext.transStarted( trans );
     verify( ext, times( 1 ) ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
-    // TODO more asserts
   }
 
   @Test
@@ -140,25 +139,20 @@ public class TransformationRuntimeExtensionPointTest {
     ext.transFinished( mockTrans );
     verify( ext, times( 2 ) ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
-
-    // Test IOException handling during execution profile output
-    doThrow( new IOException() ).when( lineageWriter ).outputExecutionProfile( Mockito.any( LineageHolder.class ) );
-    Exception ex = null;
-    try {
-      ext.transFinished( mockTrans );
-    } catch ( Exception e ) {
-      ex = e;
-    }
-    assertNotNull( ex );
-    verify( ext, times( 3 ) ).populateExecutionProfile(
-      Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
-
-    // TODO more asserts
   }
 
   @Test
   public void testTransActive() {
     // Test transActive for coverage, it should do nothing
     transExtensionPoint.transActive( null );
+  }
+
+  @Test
+  public void testPreviewTrans() throws Exception {
+    TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
+    trans.setPreview( true );
+    ext.transStarted( trans );
+    verify( ext, never() ).populateExecutionProfile(
+      Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
   }
 }
