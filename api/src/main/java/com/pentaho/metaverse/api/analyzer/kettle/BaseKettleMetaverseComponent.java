@@ -79,19 +79,19 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
   }
 
   protected IMetaverseNode createNodeFromDescriptor(
-      IComponentDescriptor descriptor, ILogicalIdGenerator idGenerator ) {
+    IComponentDescriptor descriptor, ILogicalIdGenerator idGenerator ) {
 
     String uuid = UUID.randomUUID().toString();
 
     IMetaverseNode node = null;
     if ( descriptor != null ) {
       node = metaverseObjectFactory.createNodeObject(
-          uuid,
-          descriptor.getName(),
-          descriptor.getType() );
+        uuid,
+        descriptor.getName(),
+        descriptor.getType() );
 
       if ( idGenerator.getLogicalIdPropertyKeys().contains( DictionaryConst.PROPERTY_NAMESPACE )
-          && descriptor.getParentNamespace() != null ) {
+        && descriptor.getParentNamespace() != null ) {
         node.setProperty( DictionaryConst.PROPERTY_NAMESPACE, descriptor.getNamespace().getNamespaceId() );
       }
       node.setLogicalIdGenerator( idGenerator );
@@ -102,23 +102,23 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
   protected IMetaverseNode createFileNode( String fileName, IComponentDescriptor descriptor )
     throws MetaverseException {
 
-    String normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
+    String normalized;
     IMetaverseNode fileNode = null;
 
-    INamespace ns = descriptor.getNamespace();
-    INamespace parentNs = ns.getParentNamespace();
+    if ( fileName != null && descriptor != null ) {
+      normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
 
-    if ( descriptor != null ) {
+      INamespace ns = descriptor.getNamespace();
+      INamespace parentNs = ns.getParentNamespace();
 
       fileNode = metaverseObjectFactory.createNodeObject(
-          parentNs == null ? ns : parentNs,
-          normalized,
-          DictionaryConst.NODE_TYPE_FILE );
+        parentNs == null ? ns : parentNs,
+        normalized,
+        DictionaryConst.NODE_TYPE_FILE );
+
+      fileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
+      fileNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_FILE );
     }
-
-    fileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
-    fileNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_FILE );
-
     return fileNode;
   }
 

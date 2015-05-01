@@ -112,7 +112,6 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     // make sure the from and to nodes exist in the graph
     Vertex fromVertex = getVertexForNode( link.getFromNode() );
     Vertex toVertex = getVertexForNode( link.getToNode() );
-    String edgeId;
 
     // add the "from" vertex to the graph if it wasn't found
     if ( fromVertex == null ) {
@@ -132,7 +131,17 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     // update the to vertex properties from the toNode
     copyNodePropertiesToVertex( link.getToNode(), toVertex );
 
-    addLink( fromVertex, link.getLabel(), toVertex );
+    String label = link.getLabel();
+    String edgeId = getEdgeId( fromVertex, label, toVertex );
+    // only add the link if the edge doesn't already exist
+    Edge edge = graph.getEdge( edgeId );
+    if ( edge == null ) {
+      edge = graph.addEdge( edgeId, fromVertex, toVertex, label );
+      edge.setProperty( "text", label );
+    }
+
+    copyLinkPropertiesToEdge( link, edge );
+
     return this;
   }
 
@@ -290,6 +299,27 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
       }
     }
     node.setDirty( false );
+  }
+
+  /**
+   * Copies all properties from a link into the properties of an Edge
+   *
+   * @param link link with properties desired in an Edge
+   * @param e    Edge to set properties on
+   */
+  protected void copyLinkPropertiesToEdge( IMetaverseLink link, Edge e ) {
+    // set all of the properties, except the id and virtual (since that is an internally set prop)
+    if ( link != null && link.getPropertyKeys() != null && e != null ) {
+      for ( String propertyKey : link.getPropertyKeys() ) {
+        // Skip the "label" property, that's reserved
+        if ( !DictionaryConst.PROPERTY_LABEL.equals( propertyKey ) ) {
+          Object value = link.getProperty( propertyKey );
+          if ( value != null ) {
+            e.setProperty( propertyKey, value );
+          }
+        }
+      }
+    }
   }
 
   /**

@@ -1,3 +1,25 @@
+/*!
+ * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
+ *
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
+ *
+ * NOTICE: All information including source code contained herein is, and
+ * remains the sole property of Pentaho and its licensors. The intellectual
+ * and technical concepts contained herein are proprietary and confidential
+ * to, and are trade secrets of Pentaho and may be covered by U.S. and foreign
+ * patents, or patents in process, and are protected by trade secret and
+ * copyright laws. The receipt or possession of this source code and/or related
+ * information does not convey or imply any rights to reproduce, disclose or
+ * distribute its contents, or to manufacture, use, or sell anything that it
+ * may describe, in whole or in part. Any reproduction, modification, distribution,
+ * or public display of this information without the express written authorization
+ * from Pentaho is strictly prohibited and in violation of applicable laws and
+ * international treaties. Access to the source code contained herein is strictly
+ * prohibited to anyone except those individuals and entities who have executed
+ * confidentiality and non-disclosure agreements or other agreements with Pentaho,
+ * explicitly covering such access.
+ */
+
 package com.pentaho.metaverse.impl;
 
 import com.pentaho.dictionary.DictionaryConst;
@@ -39,8 +61,10 @@ public class MetaverseBuilderTest {
   }
 
   @Test
-  public void testGetGraph() {
+  public void testGetSetGraph() {
     assertEquals( graph, builder.getGraph() );
+    builder.setGraph( null );
+    assertNull( builder.getGraph() );
   }
 
   @Test
@@ -479,5 +503,45 @@ public class MetaverseBuilderTest {
   @Test
   public void testCreateRootEntity() {
     assertNotNull( builder.createRootEntity() );
+  }
+
+  @Test
+  public void testCopyLinkPropertiesToEdge() {
+    final String LABEL = "myLabel";
+
+    IMetaverseLink link = new MetaverseLink();
+    link.setLabel( "sourceLabel" );
+
+    // Create from/to nodes and an edge between them
+    Vertex fromNode = graph.addVertex( "from" );
+    Vertex toNode = graph.addVertex( "to" );
+
+    Edge edge = graph.addEdge( "myId", fromNode, toNode, LABEL );
+
+    // Call with null for branch coverage (and to prove no NPE occurs)
+    builder.copyLinkPropertiesToEdge( null, edge );
+    builder.copyLinkPropertiesToEdge( link, null );
+    // Call with empty list for branch coverage (and to prove no NPE occurs)
+    builder.copyLinkPropertiesToEdge( link, edge );
+
+    // Set some properties on the source link
+    link.setProperty( DictionaryConst.PROPERTY_LABEL, "sourceLabel" );
+    link.setProperty( DictionaryConst.PROPERTY_NAME, "sourceLink" );
+
+    // Set some properties on the target edge (including the reserved one "label")
+    edge.setProperty( DictionaryConst.PROPERTY_NAME, "myEdge" );
+    edge.setProperty( DictionaryConst.PROPERTY_TYPE, "relates to" );
+
+    // Invoke the method under test and see that the appropriate properties are set on the target edge
+    builder.copyLinkPropertiesToEdge( link, edge );
+    assertEquals( "sourceLink", edge.getProperty( DictionaryConst.PROPERTY_NAME ) );
+    assertEquals( "relates to", edge.getProperty( DictionaryConst.PROPERTY_TYPE ) );
+    // The label should not be overridden (Blueprints does not allow it)
+    assertEquals( LABEL, edge.getLabel() );
+
+    // The property "label" is not set on the edge by either setLabel() or the method under test
+    // It's a Blueprints thing
+    assertNull( edge.getProperty( DictionaryConst.PROPERTY_LABEL ) );
+
   }
 }

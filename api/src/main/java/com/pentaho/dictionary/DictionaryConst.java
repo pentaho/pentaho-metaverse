@@ -211,6 +211,16 @@ public class DictionaryConst {
   public static final String PROPERTY_SCHEMA = "schema";
 
   /**
+   * Property key to represent the label of an edge. This property is reserved by Blueprints
+   */
+  public static final String PROPERTY_LABEL = "label";
+
+  /**
+   * Property key to represent whether an entity is enabled or not (this is context-specific of course)
+   */
+  public static final String PROPERTY_ENABLED = "enabled";
+
+  /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
    */
   public static final String LINK_EXECUTES = "executes";

@@ -67,16 +67,16 @@ public class DictionaryHelperTest {
     props.put( DictionaryConst.PROPERTY_AUTHOR, "fred" );
     props.put( DictionaryConst.PROPERTY_LAST_MODIFIED, "2014-07-10 17:34:45" );
     IMetaverseNode transNode = DictionaryHelper.createMetaverseNode(
-        DictionaryConst.NODE_TYPE_TRANS + "~my transform.ktr",
-        "my transform", DictionaryConst.NODE_TYPE_TRANS, props );
+      DictionaryConst.NODE_TYPE_TRANS + "~my transform.ktr",
+      "my transform", DictionaryConst.NODE_TYPE_TRANS, props );
 
     IMetaverseNode stepNode = DictionaryHelper.addChildNode(
-        DictionaryConst.NODE_TYPE_TRANS_STEP + "~my transform.ktr~Table Input",
-        "Table Input", DictionaryConst.NODE_TYPE_TRANS_STEP, null, transNode, DictionaryConst.LINK_CONTAINS );
+      DictionaryConst.NODE_TYPE_TRANS_STEP + "~my transform.ktr~Table Input",
+      "Table Input", DictionaryConst.NODE_TYPE_TRANS_STEP, null, transNode, DictionaryConst.LINK_CONTAINS );
 
     IMetaverseNode fieldNode = DictionaryHelper.addChildNode(
-        DictionaryConst.NODE_TYPE_TRANS_FIELD + "~my transform.ktr~Table Input~Country",
-        "Country", DictionaryConst.NODE_TYPE_TRANS_FIELD, null, stepNode, DictionaryConst.LINK_CREATES );
+      DictionaryConst.NODE_TYPE_TRANS_FIELD + "~my transform.ktr~Table Input~Country",
+      "Country", DictionaryConst.NODE_TYPE_TRANS_FIELD, null, stepNode, DictionaryConst.LINK_CREATES );
 
     MetaverseTransientNode node1 = (MetaverseTransientNode) transNode;
     MetaverseTransientNode node2 = (MetaverseTransientNode) stepNode;
@@ -105,8 +105,25 @@ public class DictionaryHelperTest {
   @Test
   public void testCategoryColors() {
     assertEquals( "Color is wrong", DictionaryConst.COLOR_DATASOURCE,
-        DictionaryHelper.getColorForCategory( DictionaryConst.CATEGORY_DATASOURCE ) );
+      DictionaryHelper.getColorForCategory( DictionaryConst.CATEGORY_DATASOURCE ) );
     assertEquals( "Color is wrong", DictionaryConst.COLOR_OTHER, DictionaryHelper.getColorForCategory( "bogus" ) );
+  }
+
+  @Test
+  public void testRegisterEntityType() {
+    assertFalse( DictionaryHelper.ENTITY_NODE_TYPES.contains( "newEntityType" ) );
+    DictionaryHelper.registerEntityType( "newEntityType" );
+    assertTrue( DictionaryHelper.ENTITY_NODE_TYPES.contains( "newEntityType" ) );
+  }
+
+  @Test
+  public void testIsEntityType() {
+    DictionaryHelper.ENTITY_NODE_TYPES.remove( "newEntityType" );
+    assertFalse( DictionaryHelper.ENTITY_NODE_TYPES.contains( "noEntityType" ) );
+    DictionaryHelper.registerEntityType( "newEntityType" );
+    assertTrue( DictionaryHelper.ENTITY_NODE_TYPES.contains( "newEntityType" ) );
+    assertFalse( DictionaryHelper.isEntityType( "noEntityType" ) );
+    assertTrue( DictionaryHelper.isEntityType( "newEntityType" ) );
   }
 
 }

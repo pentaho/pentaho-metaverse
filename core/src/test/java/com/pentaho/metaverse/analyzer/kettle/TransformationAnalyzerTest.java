@@ -40,6 +40,8 @@ import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.trans.TransHopMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepIOMeta;
+import org.pentaho.di.trans.step.StepIOMetaInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.rowgenerator.RowGeneratorMeta;
@@ -138,9 +140,9 @@ public class TransformationAnalyzerTest {
     when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockGenRowsStepMeta );
     when( mockStepMeta.getParentTransMeta() ).thenReturn( mockContent );
 
-    when( mockContent.listVariables() ).thenReturn( new String[] { } );
+    when( mockContent.listVariables() ).thenReturn( new String[]{} );
     final String PARAM = "param1";
-    when( mockContent.listParameters() ).thenReturn( new String[] { PARAM } );
+    when( mockContent.listParameters() ).thenReturn( new String[]{ PARAM } );
     when( mockContent.nrSteps() ).thenReturn( 1 );
     when( mockContent.getStep( 0 ) ).thenReturn( mockStepMeta );
     when( mockContent.getParameterDefault( PARAM ) ).thenReturn( "default" );
@@ -186,8 +188,11 @@ public class TransformationAnalyzerTest {
 
     StepMeta mockToStepMeta = mock( StepMeta.class );
     when( mockToStepMeta.getStepMetaInterface() ).thenReturn( mockSelectValuesStepMeta );
-    when( mockToStepMeta.getParentTransMeta() ).thenReturn( mockContent );
+    StepIOMetaInterface stepIO = mock( StepIOMetaInterface.class );
+    when( stepIO.getInfoStepnames() ).thenReturn( new String[]{} );
+    when( mockSelectValuesStepMeta.getStepIOMeta() ).thenReturn( stepIO );
 
+    when( mockToStepMeta.getParentTransMeta() ).thenReturn( mockContent );
     when( mockContent.nrSteps() ).thenReturn( 2 );
     when( mockContent.getStep( 0 ) ).thenReturn( mockStepMeta );
     when( mockContent.getStep( 1 ) ).thenReturn( mockToStepMeta );
@@ -211,8 +216,8 @@ public class TransformationAnalyzerTest {
     IDocument newMockTransDoc = mock( IDocument.class );
     when( newMockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( newMockTransDoc.getContent() ).thenReturn(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
-            "<transformation>This is not a valid TransMeta doc!" );
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
+        "<transformation>This is not a valid TransMeta doc!" );
     analyzer.analyze( descriptor, newMockTransDoc );
   }
 
@@ -221,8 +226,8 @@ public class TransformationAnalyzerTest {
     IDocument newMockTransDoc = mock( IDocument.class );
     when( newMockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( newMockTransDoc.getContent() ).thenReturn(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><transformation><step><name>Load text from file</name>"
-            + "<type>LoadTextFromFile</type></step></transformation>" );
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?><transformation><step><name>Load text from file</name>"
+        + "<type>LoadTextFromFile</type></step></transformation>" );
 
     analyzer.analyze( descriptor, newMockTransDoc );
   }
