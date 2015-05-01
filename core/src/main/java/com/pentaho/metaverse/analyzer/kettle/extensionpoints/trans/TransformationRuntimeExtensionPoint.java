@@ -53,6 +53,8 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +76,8 @@ import java.util.concurrent.Future;
   extensionPointId = "TransformationStartThreads",
   id = "transRuntimeMetaverse" )
 public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements TransListener {
+
+  private static final Logger log = LoggerFactory.getLogger( TransformationRuntimeExtensionPoint.class );
 
   private IDocumentAnalyzer documentAnalyzer;
 
@@ -122,6 +126,12 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       return;
     }
 
+    // Only generate lineage/execution information for "real" transformations, not the preview or debug ones. Whether
+    // in Preview or Debug mode in Spoon, trans.isPreview() returns true, so just check that.
+    if ( trans.isPreview() ) {
+      return;
+    }
+
     // Create and populate an execution profile with what we know so far
     ExecutionProfile executionProfile = new ExecutionProfile();
     populateExecutionProfile( executionProfile, trans );
@@ -132,8 +142,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     if ( documentAnalyzer != null ) {
       documentAnalyzer.setMetaverseBuilder( builder );
 
-      // Create a document for the Trans TODO - fix this!
-      final String clientName = "PDI Engine";
+      // Create a document for the Trans
+      final String clientName = executionProfile.getExecutionEngine().getName();
       final INamespace namespace = new Namespace( clientName );
 
       final IMetaverseNode designNode = builder.getMetaverseObjectFactory()
@@ -190,7 +200,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       try {
         filePath = KettleAnalyzerUtil.normalizeFilePath( filename );
       } catch ( Exception e ) {
-        // TODO ?
+        log.error( "Couldn't normalize file path: " + filename, e );
       }
     } else {
       String repoName = trans.getRepository().getName();
@@ -236,7 +246,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
             trans.getParameterDefault( param ) );
           paramList.add( paramInfo );
         } catch ( UnknownParamException e ) {
-          e.printStackTrace(); // TODO logging?
+          log.error( "Couldn't find transformation parameter: " + param, e );
         }
       }
     }
@@ -280,9 +290,9 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       try {
         lineageTask.get();
       } catch ( InterruptedException e ) {
-        e.printStackTrace(); // TODO logger?
+        // Do nothing
       } catch ( ExecutionException e ) {
-        e.printStackTrace(); // TODO logger?
+        log.error( "Error during generation of lineage graph for " + trans.getName(), e );
       }
     }
     IExecutionProfile executionProfile = holder.getExecutionProfile();
@@ -306,7 +316,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         lineageWriter.outputExecutionProfile( holder );
       }
     } catch ( IOException e ) {
-      throw new KettleException( e );
+      log.error( "Error while writing out execution profile for " + trans.getName(), e );
     }
 
     // Only create a lineage graph for this trans if it has no parent. If it does, the parent will incorporate the
@@ -324,7 +334,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         }
       }
     } catch ( IOException e ) {
-      throw new KettleException( e );
+      log.error( "Error while writing out lineage graph for " + trans.getName(), e );
     }
   }
 
