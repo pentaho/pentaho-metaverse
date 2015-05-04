@@ -129,6 +129,11 @@ public class DictionaryConst {
   public static final String PROPERTY_DATA_OPERATIONS = "dataOperations";
 
   /**
+   * Property key for "dataFlowOperations"
+   */
+  public static final String PROPERTY_DATA_FLOW_OPERATIONS = "dataFlowOperations";
+
+  /**
    * Property key for "transforms"
    */
   public static final String PROPERTY_TRANSFORMS = "transforms";

@@ -18,38 +18,17 @@
  * prohibited to anyone except those individuals and entities who have executed
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
+ *
  */
 
-package com.pentaho.metaverse.api;
+package com.pentaho.metaverse.frames;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.pentaho.dictionary.DictionaryConst;
+import com.tinkerpop.frames.Property;
 
-public enum ChangeType {
-  METADATA( DictionaryConst.PROPERTY_METADATA_OPERATIONS ),
-  DATA( DictionaryConst.PROPERTY_DATA_OPERATIONS ),
-  DATA_FLOW( DictionaryConst.PROPERTY_DATA_FLOW_OPERATIONS );
+public interface FilterRowsStepNode extends TransformationStepNode {
 
-  private final String name;
-
-  private ChangeType( String name ) {
-    this.name = name;
-  }
-
-  @JsonCreator
-  public static ChangeType forValue( String value ) {
-    for ( ChangeType val : values() ) {
-      if ( val.toString().equals( value ) ) {
-        return val;
-      }
-    }
-    return null;
-  }
-
-  @JsonValue
-  public String toString() {
-    return name;
-  }
+  @Property( DictionaryConst.PROPERTY_OPERATIONS )
+  public String getOperations();
 
 }

@@ -23,7 +23,7 @@
     <pentaho.public.snapshot.repo>http://nexus.pentaho.org/content/repositories/private-snapshot/</pentaho.public.snapshot.repo>
     <platform.plugin.name>platform</platform.plugin.name>
     <pdi.plugin.name>pdi</pdi.plugin.name>
-    <target.jdk.version>1.6</target.jdk.version>
+    <target.jdk.version>1.7</target.jdk.version>
     <pmd.rulesets.url>https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/pmd/rulesets/java</pmd.rulesets.url>
 
     <!-- Compile dependencies -->
