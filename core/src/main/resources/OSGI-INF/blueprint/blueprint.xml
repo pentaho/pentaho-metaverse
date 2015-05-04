@@ -149,23 +149,27 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer"/>
 
   <bean id="StringOperationsStepAnalyzer" 
-  		class="com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
+  		  class="com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
   
   <bean id="StringsCutStepAnalyzer" 
-  		class="com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer"/>
+  		  class="com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer"/>
 
   <bean id="CsvFileInputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer"/>
   
   <bean id="StringsReplaceStepAnalyzer" 
-  		class="com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer"/>
+  		  class="com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer"/>
 
   <bean id="FixedFileInputStepAnalyzer"
-  		class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer"/>
+  		  class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer"/>
+
+  <bean id="FilterRowsStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.filterrows.FilterRowsStepAnalyzer"/>
 
   <bean id="XMLOutputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer"/>
-  		
+
+
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TableOutputStepAnalyzer"/>
@@ -253,6 +257,10 @@
   <service id="getXMLDataStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="GetXMLDataStepAnalyzer"/>
+
+  <service id="filterRowsStepAnalyzerService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           ref="FilterRowsStepAnalyzer"/>
 
   <service id="xmlOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"

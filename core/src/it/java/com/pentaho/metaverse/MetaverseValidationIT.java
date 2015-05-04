@@ -35,6 +35,7 @@ import com.pentaho.metaverse.frames.DatasourceNode;
 import com.pentaho.metaverse.frames.ExcelInputStepNode;
 import com.pentaho.metaverse.frames.ExcelOutputStepNode;
 import com.pentaho.metaverse.frames.FieldNode;
+import com.pentaho.metaverse.frames.FilterRowsStepNode;
 import com.pentaho.metaverse.frames.FixedFileInputStepNode;
 import com.pentaho.metaverse.frames.FramedMetaverseNode;
 import com.pentaho.metaverse.frames.GetXMLDataStepNode;
@@ -89,6 +90,7 @@ import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
 import org.pentaho.di.trans.steps.exceloutput.ExcelField;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
 import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
+import org.pentaho.di.trans.steps.filterrows.FilterRowsMeta;
 import org.pentaho.di.trans.steps.groupby.GroupByMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -1277,6 +1279,38 @@ public class MetaverseValidationIT {
       ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
       assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
     }
+  }
+
+  @Test
+  public void testFilterRowsStepNode() throws Exception {
+    FilterRowsStepNode node = root.getFilterRowsStepNode( "Filter rows" );
+    assertNotNull( node );
+    assertEquals( "Filter rows", node.getStepType() );
+
+    FilterRowsMeta meta = (FilterRowsMeta) getStepMeta( node );
+    Operations ops = MetaverseUtil.convertOperationsStringToMap( node.getOperations() );
+    assertEquals( 1, ops.get( ChangeType.DATA_FLOW ).size() );
+    assertEquals( meta.getCondition().toString(), ops.get( ChangeType.DATA_FLOW ).get(0).getDescription() );
+
+    // should not be any created nodes
+    Iterable<StreamFieldNode> streamFieldNodes = node.getStreamFieldNodesCreates();
+    int countCreatedStreamFieldNode = getIterableSize( streamFieldNodes );
+    assertEquals( 0, countCreatedStreamFieldNode );
+
+    // should not be any deleted nodes
+    streamFieldNodes = node.getStreamFieldNodesCreates();
+    int countDeletedStreamFieldNode = getIterableSize( streamFieldNodes );
+    assertEquals( 0, countDeletedStreamFieldNode );
+
+    // should use all of the fields that are used in the condition of the step
+    List<String> expectedUses = Arrays.asList( meta.getCondition().getUsedFields() );
+    streamFieldNodes = node.getStreamFieldNodesUses();
+    int countUsedStreamFieldNode = getIterableSize( streamFieldNodes );
+    assertEquals( expectedUses.size(), countUsedStreamFieldNode );
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertTrue( expectedUses.contains( streamFieldNode.getName() ) );
+    }
+
   }
 
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {
