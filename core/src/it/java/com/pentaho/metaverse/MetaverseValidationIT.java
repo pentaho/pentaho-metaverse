@@ -60,6 +60,7 @@ import com.pentaho.metaverse.frames.TransExecutorStepNode;
 import com.pentaho.metaverse.frames.TransformationNode;
 import com.pentaho.metaverse.frames.TransformationStepNode;
 import com.pentaho.metaverse.frames.ValueMapperStepNode;
+import com.pentaho.metaverse.frames.XMLOutputStepNode;
 import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
@@ -96,6 +97,8 @@ import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.pentaho.di.trans.steps.transexecutor.TransExecutorMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
+import org.pentaho.di.trans.steps.xmloutput.XMLField;
+import org.pentaho.di.trans.steps.xmloutput.XMLOutputMeta;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.File;
@@ -1243,7 +1246,37 @@ public class MetaverseValidationIT {
 
     // we should create as many fields as we read in
     assertEquals( countFileFieldNode, countStreamFieldNode );
+  }
 
+  @Test
+  public void testXMLOutputStepNode() throws Exception {
+    XMLOutputStepNode xmlOutputStepNode =
+      root.getXMLOutputStepNode( "xml_output", "XML Output" );
+    XMLOutputMeta meta = (XMLOutputMeta) getStepMeta( xmlOutputStepNode );
+    TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
+    String[] fileNames = meta.getFiles( tm );
+
+    RowMetaInterface incomingFields = tm.getStepFields( meta.getParentStepMeta() );
+    XMLField[] outputFields = meta.getOutputFields();
+
+    assertNotNull( xmlOutputStepNode );
+    // should write to one file
+    Iterable<FramedMetaverseNode> outputFiles = xmlOutputStepNode.getOutputFiles();
+    assertEquals( fileNames.length, getIterableSize( outputFiles ) );
+    int i = 0;
+    for ( FramedMetaverseNode node : outputFiles ) {
+      assertTrue( node.getName().endsWith( fileNames[i++].replace( "file://", "" ) ) );
+    }
+
+    Iterable<StreamFieldNode> usedFields = xmlOutputStepNode.getStreamFieldNodesUses();
+    int usedFieldCount = getIterableSize( usedFields );
+    assertEquals( outputFields.length, usedFieldCount );
+    assertEquals( incomingFields.size(), usedFieldCount );
+
+    for ( StreamFieldNode usedField : usedFields ) {
+      ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
+      assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
+    }
   }
 
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {

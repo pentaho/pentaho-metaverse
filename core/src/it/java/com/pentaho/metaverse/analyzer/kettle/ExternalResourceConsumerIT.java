@@ -82,6 +82,12 @@ public class ExternalResourceConsumerIT {
         }}
       },
       {
+        REPO_PATH + "/validation/xml_output.ktr",
+        new HashMap<String, String>() {{
+          put( "Internal.Transformation.Filename.Directory", REPO_PATH );
+        }}
+      },
+      {
         REPO_PATH + "/process all tables/Process all tables.kjb",
         new HashMap<String, String>() {{
           put( "Internal.Transformation.Filename.Directory", REPO_PATH + "/process all tables" );

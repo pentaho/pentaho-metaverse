@@ -74,6 +74,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer"/>
   <bean id="GetXMLDataStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer"/>
+  <bean id="XMLOutputStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer"/>
 
   <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
@@ -124,6 +126,7 @@
         <ref bean="RowsToResultStepAnalyzer"/>
         <ref bean="FixedFileInputStepAnalyzer"/>
         <ref bean="GetXMLDataStepAnalyzer"/>
+        <ref bean="XMLOutputStepAnalyzer"/>
       </list>
     </property>
   </bean>

@@ -162,6 +162,9 @@
 
   <bean id="FixedFileInputStepAnalyzer"
   		class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer"/>
+
+  <bean id="XMLOutputStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer"/>
   		
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
@@ -251,6 +254,10 @@
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="GetXMLDataStepAnalyzer"/>
 
+  <service id="xmlOutputStepAnalyzerService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           ref="XMLOutputStepAnalyzer"/>
+
   <reference-list id="stepAnalyzerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
                   member-type="service-object"
@@ -294,6 +301,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputExternalResourceConsumer"/>
   <bean id="getXMLDataERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataExternalResourceConsumer"/>
+  <bean id="xmlOutputERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputExternalResourceConsumer"/>
 
   <service id="tableOutputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
@@ -326,6 +335,10 @@
   <service id="getXMLDataERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="getXMLDataERC"/>
+
+  <service id="xmlOutputERCService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
+           ref="xmlOutputERC"/>
 
   <reference-list id="stepExternalResourceConsumerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
