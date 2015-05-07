@@ -22,11 +22,10 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step;
 
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.di.trans.step.BaseStepMeta;
 
 import java.util.Set;
 
@@ -34,22 +33,20 @@ import java.util.Set;
  * KettleGenericStepMetaAnalyzer provides a default implementation for analyzing PDI step
  * to gather metadata for the metaverse.
  */
-public class GenericStepMetaAnalyzer extends BaseStepAnalyzer<BaseStepMeta> {
-
-  /**
-   * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
-   *
-   * @see com.pentaho.metaverse.api.IAnalyzer#analyze(com.pentaho.metaverse.api.IComponentDescriptor,java.lang.Object)
-   */
-  @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, BaseStepMeta baseStepMeta )
-    throws MetaverseAnalyzerException {
-
-    return super.analyze( descriptor, baseStepMeta );
-  }
+public class GenericStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta> {
 
   @Override
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
     return null;
+  }
+
+  @Override
+  protected Set<StepField> getUsedFields( BaseStepMeta meta ) {
+    return null;
+  }
+
+  @Override
+  protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode ) {
+    // nothing custom to do here since it's the catch-all step analyzer
   }
 }

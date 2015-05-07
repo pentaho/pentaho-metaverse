@@ -22,28 +22,30 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.calculator;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import com.pentaho.metaverse.api.model.Operation;
+import org.apache.commons.lang.StringUtils;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
+import org.pentaho.di.trans.steps.calculator.CalculatorMetaFunction;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.pentaho.metaverse.api.model.Operation;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
-import org.pentaho.di.trans.steps.calculator.CalculatorMetaFunction;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+public class CalculatorStepAnalyzer extends StepAnalyzer<CalculatorMeta> {
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-
-public class CalculatorStepAnalyzer extends BaseStepAnalyzer<CalculatorMeta> {
-  private IComponentDescriptor descriptor;
+  @Override
+  protected void customAnalyze( CalculatorMeta meta, IMetaverseNode rootNode ) {
+    // nothing custom to be done. The other overrides provide all that is needed
+  }
 
   @Override
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
@@ -53,69 +55,73 @@ public class CalculatorStepAnalyzer extends BaseStepAnalyzer<CalculatorMeta> {
   }
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, CalculatorMeta calculatorMeta )
+  public Set<ComponentDerivationRecord> getChangeRecords( final CalculatorMeta calculatorMeta )
     throws MetaverseAnalyzerException {
-    IMetaverseNode node = super.analyze( descriptor, calculatorMeta );
-    this.descriptor = descriptor;
-    getChangeRecords( calculatorMeta );
-    return node;
+    Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
+    for ( CalculatorMetaFunction function : calculatorMeta.getCalculation() ) {
+      Set<ComponentDerivationRecord> changeRecord = buildChangeRecord( function );
+      changeRecords.addAll( changeRecord );
+    }
+    return changeRecords;
   }
 
-  protected ComponentDerivationRecord buildChangeRecord( final CalculatorMetaFunction function ) {
+  @Override
+  protected Set<StepField> getUsedFields( CalculatorMeta meta ) {
+    Set<StepField> usedFields = new HashSet<>();
 
-    final ComponentDerivationRecord changeRecord =
-      new ComponentDerivationRecord( function.getFieldName(), ChangeType.DATA );
+    for ( CalculatorMetaFunction function : meta.getCalculation() ) {
+      if ( StringUtils.isNotEmpty( function.getFieldA() ) ) {
+        usedFields.addAll( createStepFields( function.getFieldA(), getInputs() ) );
+      }
+      if ( StringUtils.isNotEmpty( function.getFieldB() ) ) {
+        usedFields.addAll( createStepFields( function.getFieldB(), getInputs() ) );
+      }
+      if ( StringUtils.isNotEmpty( function.getFieldC() ) ) {
+        usedFields.addAll( createStepFields( function.getFieldC(), getInputs() ) );
+      }
+    }
+
+    return usedFields;
+  }
+
+  protected Set<ComponentDerivationRecord> buildChangeRecord( final CalculatorMetaFunction function ) {
+
+    Set<ComponentDerivationRecord> changes = new HashSet<>();
+
     String fieldA = function.getFieldA();
     String fieldB = function.getFieldB();
     String fieldC = function.getFieldC();
     String inputFields =
       ( fieldA != null ? fieldA + ", " : "" ) + ( fieldB != null ? fieldB + ", " : "" )
         + ( fieldC != null ? fieldC + ", " : "" );
-    changeRecord.addOperation(
-      new Operation( Operation.CALC_CATEGORY, ChangeType.DATA,
-        DictionaryConst.PROPERTY_TRANSFORMS, inputFields + "using " + function.getCalcTypeDesc()
-        + " -> " + function.getFieldName() ) );
 
-    List<String> fields = new ArrayList<String>();
-    fields.add( fieldA );
-    fields.add( fieldB );
-    fields.add( fieldC );
-    for ( int i = 0; i < fields.size(); i++ ) {
-      String fieldName = fields.get( i );
-      if ( fieldName != null ) {
-        IMetaverseNode fieldNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, fieldName ) );
-        IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, changeRecord );
-
-        RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
-        ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( fieldName );
-        if ( inputFieldValueMeta != null ) {
-          // this field is not created by this step, but it is used by it. add the link
-          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
-        }
-        if ( newFieldNode != null ) {
-          newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta != null
-            ? inputFieldValueMeta.getTypeDesc() : fieldName + " unknown type" );
-          metaverseBuilder.addNode( newFieldNode );
-          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
-          if ( function.isRemovedFromResult() ) {
-            metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, newFieldNode );
-            metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_DELETES, newFieldNode );
-          }
-        }
-      }
+    List<String> fields = new ArrayList<>();
+    if ( fieldA != null ) {
+      fields.add( fieldA );
     }
 
-    return changeRecord;
+    if ( fieldB != null ) {
+      fields.add( fieldB );
+    }
+
+    if ( fieldC != null ) {
+      fields.add( fieldC );
+    }
+
+    for ( String field : fields ) {
+      final ComponentDerivationRecord changeRecord =
+        new ComponentDerivationRecord( field, function.getFieldName(), ChangeType.DATA );
+
+      changeRecord.addOperation(
+        new Operation( Operation.CALC_CATEGORY, ChangeType.DATA,
+          DictionaryConst.PROPERTY_TRANSFORMS, inputFields + "using " + function.getCalcTypeDesc()
+          + " -> " + function.getFieldName() ) );
+
+      changes.add( changeRecord );
+
+    }
+
+    return changes;
   }
 
-  @Override
-  public Set<ComponentDerivationRecord> getChangeRecords( final CalculatorMeta calculatorMeta )
-    throws MetaverseAnalyzerException {
-    Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
-    for ( CalculatorMetaFunction function : calculatorMeta.getCalculation() ) {
-      ComponentDerivationRecord changeRecord = buildChangeRecord( function );
-      changeRecords.add( changeRecord );
-    }
-    return changeRecords;
-  }
 }

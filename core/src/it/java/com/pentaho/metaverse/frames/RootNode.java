@@ -38,16 +38,16 @@ public interface RootNode extends FramedMetaverseNode {
   @Property( "project" )
   public String getProject();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 10}{it.object.type == 'Transformation'}.dedup" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Transformation'}.out().dedup" )
   public Iterable<TransformationNode> getTransformations();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 10}{it.object.type == 'Transformation' && it.object.name == name }.dedup" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Transformation'}.out(){it.object.name == name }.dedup" )
   public TransformationNode getTransformation( @GremlinParam( "name" ) String name );
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 10}{it.object.type == 'Job'}.dedup" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Job'}.out().dedup" )
   public Iterable<JobNode> getJobs();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 10}{it.object.type == 'Job' && it.object.name == name }.dedup" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Job'}.out(){ it.object.name == name }.dedup" )
   public JobNode getJob( @GremlinParam( "name" ) String name );
 
   @Adjacency( label = "", direction = Direction.IN )
@@ -65,7 +65,7 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Get Customers'}.as('step').in('contains').has('name', T.eq, 'Textfile input - filename from field').back('step')" )
   public TextFileInputStepNode getTextFileInputStepNode_filenameFromField();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Database Connection' }" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Database Connection'}.out()" )
   public Iterable<DatasourceNode> getDatasourceNodes();
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Database Connection' && it.object.name == name }" )
@@ -82,7 +82,7 @@ public interface RootNode extends FramedMetaverseNode {
     @GremlinParam( "transformationName" ) String transformationName,
     @GremlinParam( "stepName" ) String stepName );
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Merge Join'}.as('step').in('contains').has('name', T.eq, 'merge_join').back('step')" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 10}.has('type', T.eq, 'Transformation Step').out().has('name', T.eq, 'Merge Join').as('step').in('contains').has('name', T.eq, 'merge_join').back('step')" )
   public MergeJoinStepNode getMergeJoinStepNode();
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Stream lookup'}.as('step').in('contains').has('name', T.eq, 'stream_lookup').back('step')" )
@@ -103,7 +103,7 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Group by'}.as('step').in('contains').has('name', T.eq, 'group_by').back('step')" )
   public GroupByStepNode getGroupByStepNode();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'MongoDB Connection' }" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'MongoDB Connection' }.out()" )
   public Iterable<MongoDbDatasourceNode> getMongoDbDatasourceNodes();
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Output'}.as('step').in('contains').has('name', T.eq, 'excel_output').back('step')" )
@@ -121,10 +121,10 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Replace in string'}.as('step').in('contains').has('name', T.eq, 'strings_replace').back('step')" )
   public StringsReplaceStepNode getStringsReplaceStepNode();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Transformation Executor'}.as('step').in('contains').has('name', T.eq, 'trans-executor-parent').back('step')" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 2}{it.object.name == 'Transformation Step'}.out().has('name', T.eq, 'Transformation Executor').as('step').in('contains').has('name', T.eq, 'trans-executor-parent').back('step')" )
   public TransExecutorStepNode getTransExecutorStepNode();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Copy rows to result'}.as('step').in('contains').has('name', T.eq, 'trans-executor-child').back('step')" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 2}{it.object.name == 'Transformation Step'}.out().has('name', T.eq, 'Copy rows to result').as('step').in('contains').has('name', T.eq, 'trans-executor-child').back('step')" )
   public RowsToResultStepNode getRowsToResultStepNode();
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Fixed file input'}.as('step').in('contains').has('name', T.eq, 'fixed_file_input').back('step')" )

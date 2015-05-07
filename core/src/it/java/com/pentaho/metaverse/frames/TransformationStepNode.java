@@ -51,4 +51,9 @@ public interface TransformationStepNode extends Concept {
   @Adjacency( label = "hops_to", direction = Direction.IN )
   public Iterable<TransformationStepNode> getPreviousSteps();
 
+  @Adjacency( label = "inputs", direction = Direction.IN )
+  public Iterable<StreamFieldNode> getInputStreamFields();
+
+  @Adjacency( label = "outputs", direction = Direction.OUT )
+  public Iterable<StreamFieldNode> getOutputStreamFields();
 }

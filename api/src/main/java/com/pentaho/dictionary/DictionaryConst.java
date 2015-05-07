@@ -226,6 +226,11 @@ public class DictionaryConst {
   public static final String PROPERTY_ENABLED = "enabled";
 
   /**
+   * Property key to represent the target step that a stream field is intended for
+   */
+  public static final String PROPERTY_TARGET_STEP = "targetStep";
+
+  /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
    */
   public static final String LINK_EXECUTES = "executes";
@@ -297,6 +302,21 @@ public class DictionaryConst {
    * in outgoing field(s)
    */
   public static final String LINK_DERIVES = "derives";
+
+  /**
+   * Label for an "inputs" edge in the graph. any stream field that flows into a step, should use this link label
+   */
+  public static final String LINK_INPUTS = "inputs";
+
+  /**
+   * Label for an "outputs" edge in the graph. any stream field that flows out of a step, should use this link label
+   */
+  public static final String LINK_OUTPUTS = "outputs";
+
+  /**
+   * Label used to link nodes that are neither input or output but temporary within the context of a step
+   */
+  public static final String LINK_TRANSIENT = "transient";
 
   /**
    * The node type for document locator objects
@@ -509,6 +529,12 @@ public class DictionaryConst {
     PROPERTY_TYPE,
     PROPERTY_NAME,
   } );
+
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_TARGET_AWARE = new MetaverseLogicalIdGenerator( new String[] {
+    PROPERTY_NAMESPACE,
+    PROPERTY_TYPE,
+    PROPERTY_NAME,
+    PROPERTY_TARGET_STEP } );
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_FILE = new MetaverseLogicalIdGenerator( new String[] {
     PROPERTY_PATH,

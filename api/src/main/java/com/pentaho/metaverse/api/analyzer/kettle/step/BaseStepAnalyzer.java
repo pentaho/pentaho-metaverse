@@ -202,6 +202,7 @@ public abstract class BaseStepAnalyzer<T extends BaseStepMeta> extends BaseKettl
     }
   }
 
+  @Deprecated
   protected void createFieldNode( IAnalysisContext context, ValueMetaInterface fieldMeta ) {
     IComponentDescriptor fieldDescriptor =
       new MetaverseComponentDescriptor( fieldMeta.getName(), DictionaryConst.NODE_TYPE_TRANS_FIELD,

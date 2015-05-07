@@ -22,126 +22,91 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.calculator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
-
-import java.util.Set;
-
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.ProgressMonitorListener;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
 import org.pentaho.di.trans.steps.calculator.CalculatorMetaFunction;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @RunWith( MockitoJUnitRunner.class )
 public class CalculatorStepAnalyzerTest {
 
   private CalculatorStepAnalyzer analyzer;
-  private static final String DEFAULT_STEP_NAME = "testStep";
-  private CalculatorMetaFunction[] calcFunctions = new CalculatorMetaFunction[3];
-
   @Mock
   private CalculatorMetaFunction function1;
   @Mock
   private CalculatorMetaFunction function2;
   @Mock
-  private CalculatorMetaFunction function3;
-  @Mock
-  private IMetaverseBuilder builder;
-  @Mock
   private CalculatorMeta calculatorMeta;
-  @Mock
-  private INamespace namespace;
   @Mock
   private IComponentDescriptor descriptor;
   @Mock
-  private StepMeta parentStepMeta;
-  @Mock
-  private TransMeta parentTransMeta;
-  @Mock
-  private RowMetaInterface rowMeta1;
+  private IMetaverseNode node;
 
   @Before
   public void setUp() throws Exception {
+    analyzer = spy( new CalculatorStepAnalyzer() );
 
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
-
-    calcFunctions[0] = function1;
-    calcFunctions[1] = function2;
-    calcFunctions[2] = function3;
+    CalculatorMetaFunction[] calcFunctions = new CalculatorMetaFunction[] { function1, function2 };
     when( function1.getFieldA() ).thenReturn( "height" );
     when( function1.getFieldB() ).thenReturn( "width" );
     when( function1.getFieldName() ).thenReturn( "area" );
-    when( function1.isRemovedFromResult() ).thenReturn( true );
-    when( function2.getFieldA() ).thenReturn( "halfBase" );
-    when( function2.getFieldB() ).thenReturn( "height" );
-    when( function2.getFieldName() ).thenReturn( "triArea" );
+    when( function1.getCalcTypeDesc() ).thenReturn( "height * width = area" );
+
+    when( function2.getFieldA() ).thenReturn( "radius" );
+    when( function2.getFieldB() ).thenReturn( "pi" );
+    when( function2.getFieldC() ).thenReturn( "two" );
+    when( function2.getFieldName() ).thenReturn( "circumference" );
+    when( function2.getCalcTypeDesc() ).thenReturn( "two * pi * radius = circumference" );
 
     when( calculatorMeta.getCalculation() ).thenReturn( calcFunctions );
-    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( new String[] { "step1", "step2" } );
-    when( rowMeta1.getFieldNames() ).thenReturn( new String[] { "height", "width" } );
-    when( rowMeta1.searchValueMeta( any( String.class ) ) ).thenReturn( null );
-    ValueMetaInterface heightValueMetaInterface = mock( ValueMetaInterface.class );
-    when( heightValueMetaInterface.getTypeDesc() ).thenReturn( "Integer" );
-    when( rowMeta1.searchValueMeta( "height" ) ).thenReturn( heightValueMetaInterface );
-    when( rowMeta1.searchValueMeta( "width" ) ).thenReturn( heightValueMetaInterface );
-    when( parentTransMeta.getPrevStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      rowMeta1 );
-    when( parentTransMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      rowMeta1 );
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
-    when( calculatorMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
-    analyzer = new CalculatorStepAnalyzer();
-    when( builder.getMetaverseObjectFactory() ).thenReturn( MetaverseTestUtils.getMetaverseObjectFactory() );
-    analyzer.setMetaverseBuilder( builder );
-
-    descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
-    analyzer.analyze( descriptor, null );
   }
 
   @Test
-  public void testAnalyze() {
-    try {
-      analyzer.analyze( descriptor, calculatorMeta );
-    } catch ( MetaverseAnalyzerException e ) {
-      e.printStackTrace();
-    }
-    verify( builder, times( 5 ) ).addNode( any( IMetaverseNode.class ) );
+  public void testCustomAnalyze() throws Exception {
+    // no-op method, just call it to get the method covered
+    analyzer.customAnalyze( calculatorMeta, node );
+  }
 
-    verify( builder, times( 5 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-        any( IMetaverseNode.class ) );
+  @Test
+  public void testGetChangeRecords() throws Exception {
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( calculatorMeta );
 
-    verify( builder, times( 2 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DELETES ),
-        any( IMetaverseNode.class ) );
+    assertNotNull( changeRecords );
+    assertEquals( 5, changeRecords.size() );
+  }
+
+  @Test
+  public void testGetUsedFields() throws Exception {
+    StepNodes inputNodes = new StepNodes();
+    inputNodes.addNode( "input", "height", node );
+    inputNodes.addNode( "input", "width", node );
+    inputNodes.addNode( "input", "radius", node );
+    inputNodes.addNode( "input", "pi", node );
+    inputNodes.addNode( "input", "two", node );
+    inputNodes.addNode( "input", "NOT USED", node );
+
+    when( analyzer.getInputs() ).thenReturn( inputNodes );
+
+    Set<StepField> usedFields = analyzer.getUsedFields( calculatorMeta );
+
+    assertEquals( 5, usedFields.size() );
+
   }
 
   @Test

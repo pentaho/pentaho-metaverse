@@ -21,30 +21,58 @@
  *
  */
 
-package com.pentaho.metaverse.analyzer.kettle.step.rowstoresult;
+package com.pentaho.metaverse.analyzer.kettle.step.rowsfromresult;
 
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
+import org.pentaho.di.core.exception.KettleStepException;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.rowstoresult.RowsToResultMeta;
+import org.pentaho.di.trans.steps.rowsfromresult.RowsFromResultMeta;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by rfellows on 4/3/15.
+ * Created by rfellows on 5/13/15.
  */
-public class RowsToResultStepAnalyzer extends StepAnalyzer<RowsToResultMeta> {
+public class RowsFromResultStepAnalyzer extends StepAnalyzer<RowsFromResultMeta> {
 
   @Override
-  protected Set<StepField> getUsedFields( RowsToResultMeta meta ) {
+  protected StepNodes processInputs( RowsFromResultMeta meta ) {
+    StepNodes inputs = new StepNodes();
+
+    // get all input steps
+    String[] fieldNames = meta.getFieldname();
+
+    for ( int j = 0; j < fieldNames.length; j++ ) {
+      String fieldName = fieldNames[ j ];
+      RowMetaInterface rmi = null;
+      try {
+        rmi = parentTransMeta.getStepFields( parentStepMeta );
+        int type = rmi.getValueMeta( j ).getType();
+        IMetaverseNode prevFieldNode = createInputFieldNode( StepAnalyzer.NONE, fieldName, type );
+        getMetaverseBuilder().addLink( prevFieldNode, DictionaryConst.LINK_INPUTS, rootNode );
+        inputs.addNode( StepAnalyzer.NONE, fieldName, prevFieldNode );
+      } catch ( KettleStepException e ) {
+        // eat it
+      }
+    }
+    return inputs;
+  }
+
+
+  @Override
+  protected Set<StepField> getUsedFields( RowsFromResultMeta meta ) {
     return null;
   }
 
   @Override
-  protected void customAnalyze( RowsToResultMeta meta, IMetaverseNode rootNode )
+  protected void customAnalyze( RowsFromResultMeta meta, IMetaverseNode rootNode )
     throws MetaverseAnalyzerException {
     // nothing custom
   }
@@ -52,7 +80,7 @@ public class RowsToResultStepAnalyzer extends StepAnalyzer<RowsToResultMeta> {
   @Override
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
     Set<Class<? extends BaseStepMeta>> supportedSteps = new HashSet<Class<? extends BaseStepMeta>>( 1 );
-    supportedSteps.add( RowsToResultMeta.class );
+    supportedSteps.add( RowsFromResultMeta.class );
     return supportedSteps;
   }
 }

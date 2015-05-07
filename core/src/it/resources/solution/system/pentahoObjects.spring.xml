@@ -42,7 +42,9 @@
   <bean id="ValueMapperStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer"/>
   <bean id="TextFileOutputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="textFileOutputERC"/>
+  </bean>
   <bean id="MergeJoinStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer"/>
   <bean id="StreamLookupStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer"/>
@@ -65,6 +67,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.transexecutor.TransExecutorStepAnalyzer"/>
   <bean id="RowsToResultStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.rowstoresult.RowsToResultStepAnalyzer"/>
+  <bean id="RowsFromResultStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.rowsfromresult.RowsFromResultStepAnalyzer"/>
 
   <bean id="StringOperationsStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
   <bean id="StringsCutStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer"/>
@@ -133,6 +137,7 @@
         <ref bean="StringsReplaceStepAnalyzer"/>
         <ref bean="TransExecutorStepAnalyzer"/>
         <ref bean="RowsToResultStepAnalyzer"/>
+        <ref bean="RowsFromResultStepAnalyzer"/>
         <ref bean="FixedFileInputStepAnalyzer"/>
         <ref bean="GetXMLDataStepAnalyzer"/>
         <ref bean="FilterRowsStepAnalyzer"/>

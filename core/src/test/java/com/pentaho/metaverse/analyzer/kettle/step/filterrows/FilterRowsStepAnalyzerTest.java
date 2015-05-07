@@ -25,30 +25,23 @@ package com.pentaho.metaverse.analyzer.kettle.step.filterrows;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.Condition;
-import org.pentaho.di.core.ProgressMonitorListener;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.filterrows.FilterRowsMeta;
 
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
@@ -56,76 +49,60 @@ public class FilterRowsStepAnalyzerTest {
 
   private FilterRowsStepAnalyzer analyzer;
 
-  private static final String DEFAULT_STEP_NAME = "testStep";
-  @Mock
-  private IMetaverseBuilder builder;
-  @Mock
-  private INamespace namespace;
   @Mock
   private IComponentDescriptor descriptor;
   @Mock
-  private StepMeta parentStepMeta;
-  @Mock
-  private TransMeta parentTransMeta;
-  @Mock
-  private RowMetaInterface inputRowMeta;
-  @Mock
-  private RowMetaInterface outputRowMeta;
-
+  private IMetaverseNode node;
   @Mock
   private FilterRowsMeta meta;
   @Mock
   private Condition condition;
-  private String[] outputFields = new String[]{ "field", "two", "three" };
-  private String[] inputFields = new String[]{ "field", "two", "three" };
-  private String[] usedFields = new String[]{ "field" };
+
+  private String[] conditionFields = new String[]{ "height", "width" };
 
   @Before
   public void setUp() throws Exception {
-
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
-
-    when( builder.getMetaverseObjectFactory() ).thenReturn( MetaverseTestUtils.getMetaverseObjectFactory() );
-
-    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( new String[]{ "input" } );
-    when( inputRowMeta.getFieldNames() ).thenReturn( inputFields );
-    when( inputRowMeta.searchValueMeta( any( String.class ) ) ).thenReturn( null );
-    when( outputRowMeta.getFieldNames() ).thenReturn( outputFields );
-    when( outputRowMeta.searchValueMeta( any( String.class ) ) ).thenReturn( null );
-
-    when( parentTransMeta.getPrevStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      inputRowMeta );
-    when( parentTransMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      outputRowMeta );
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
-
-    when( meta.getParentStepMeta() ).thenReturn( parentStepMeta );
-
     when( meta.getCondition() ).thenReturn( condition );
-    when( condition.toString() ).thenReturn( "field=[1]" );
-    when( condition.getUsedFields() ).thenReturn( usedFields );
+    when( condition.getUsedFields() ).thenReturn( conditionFields );
 
-    analyzer = new FilterRowsStepAnalyzer();
-    analyzer.setMetaverseBuilder( builder );
+    analyzer = spy( new FilterRowsStepAnalyzer() );
+  }
 
-    descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
+  @Test
+  public void testGetUsedFields() throws Exception {
+    StepNodes inputNodes = new StepNodes();
+    inputNodes.addNode( "input", "height", node );
+    inputNodes.addNode( "input", "width", node );
+    inputNodes.addNode( "input", "radius", node );
+    inputNodes.addNode( "input", "pi", node );
+    inputNodes.addNode( "input", "two", node );
 
+    when( analyzer.getInputs() ).thenReturn( inputNodes );
+
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+    assertNotNull( usedFields );
+    assertEquals( conditionFields.length, usedFields.size() );
+  }
+
+  @Test
+  public void testGetUsedFields_nullCondition() throws Exception {
+    when( meta.getCondition() ).thenReturn( null );
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+    assertNotNull( usedFields );
+    assertEquals( 0, usedFields.size() );
   }
 
   @Test
   public void testCustomAnalyze() throws Exception {
-    IMetaverseNode node = analyzer.analyze( descriptor, meta );
-    assertNotNull( node );
+    analyzer.customAnalyze( meta, node );
+    verify( node ).setProperty( eq( DictionaryConst.PROPERTY_OPERATIONS ), anyString() );
+  }
 
-    verify( builder, times( usedFields.length ) ).addLink(
-      any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
-
+  @Test
+  public void testCustomAnalyze_nullCondition() throws Exception {
+    when( meta.getCondition() ).thenReturn( null );
+    analyzer.customAnalyze( meta, node );
+    verify( node, never() ).setProperty( eq( DictionaryConst.PROPERTY_OPERATIONS ), anyString() );
   }
 
   @Test

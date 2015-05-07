@@ -77,8 +77,10 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.job.JobMeta;
@@ -96,6 +98,7 @@ import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
 import org.pentaho.di.trans.steps.filterrows.FilterRowsMeta;
 import org.pentaho.di.trans.steps.groupby.GroupByMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
+import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
 import org.pentaho.di.trans.steps.rest.RestMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
@@ -334,11 +337,12 @@ public class MetaverseValidationIT {
     SelectValuesTransStepNode selectValues = root.getSelectValuesStepNode();
     assertNotNull( selectValues );
     int countUses = getIterableSize( selectValues.getStreamFieldNodesUses() );
-    int countCreates = getIterableSize( selectValues.getStreamFieldNodesCreates() );
-    int countDeletes = getIterableSize( selectValues.getStreamFieldNodesDeletes() );
-    assertEquals( 8, countUses );
-    assertEquals( 4, countCreates );
-    assertEquals( 3, countDeletes );
+    int countOutputs = getIterableSize( selectValues.getOutputStreamFields() );
+    int countInputs = getIterableSize( selectValues.getInputStreamFields() );
+    assertEquals( 9, countUses );
+    SelectValuesMeta meta = (SelectValuesMeta) getStepMeta( selectValues );
+    assertEquals( getExpectedOutputFieldCount( meta ), countOutputs );
+    assertEquals( 9, countInputs );
     assertEquals( "Select values", selectValues.getStepType() );
 
     // verify the nodes created by the step
@@ -687,8 +691,8 @@ public class MetaverseValidationIT {
     TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
     String[] fileNames = meta.getFiles( tm );
 
-    RowMetaInterface incomingFields = tm.getStepFields( meta.getParentStepMeta() );
-    TextFileField[] outputFields = meta.getOutputFields();
+    RowMetaInterface incomingFields = tm.getPrevStepFields( meta.getParentStepMeta() );
+    int outputFields = getExpectedOutputFieldCount( meta );
 
     assertNotNull( textFileOutputStepNode );
     // should write to one file
@@ -699,16 +703,20 @@ public class MetaverseValidationIT {
       assertEquals( fileNames[i++].replace( "file://", "" ), node.getName() );
     }
 
-    Iterable<StreamFieldNode> usedFields = textFileOutputStepNode.getStreamFieldNodesUses();
-    int usedFieldCount = getIterableSize( usedFields );
-    assertEquals( outputFields.length, usedFieldCount );
-    assertEquals( incomingFields.size() - 1, usedFieldCount );
+    Iterable<StreamFieldNode> outFields = textFileOutputStepNode.getOutputStreamFields();
+    int outFieldCount = getIterableSize( outFields );
+    // should have output stream nodes as well as file nodes
+    assertEquals( outputFields * 2, outFieldCount );
 
-    for ( StreamFieldNode usedField : usedFields ) {
-      ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
-      assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
+    int fileFieldCount = 0;
+    for ( StreamFieldNode outField : outFields ) {
+      if ( DictionaryConst.NODE_TYPE_FILE_FIELD.equals( outField.getType() ) ) {
+        ValueMetaInterface vmi = incomingFields.searchValueMeta( outField.getName() );
+        assertEquals( vmi.getName(), outField.getFieldPopulatesMe().getName() );
+        fileFieldCount++;
+      }
     }
-
+    assertEquals( fileFieldCount, outFieldCount / 2 );
   }
 
   @Test
@@ -719,8 +727,8 @@ public class MetaverseValidationIT {
     TextFileOutputMeta meta = (TextFileOutputMeta) getStepMeta( textFileOutputStepNode );
     TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
 
-    RowMetaInterface incomingFields = tm.getStepFields( meta.getParentStepMeta() );
-    TextFileField[] outputFields = meta.getOutputFields();
+    RowMetaInterface incomingFields = tm.getPrevStepFields( meta.getParentStepMeta() );
+    int outputFields = getExpectedOutputFieldCount( meta );
 
     assertNotNull( textFileOutputStepNode );
     // should write to one file
@@ -729,18 +737,22 @@ public class MetaverseValidationIT {
 
     Iterable<StreamFieldNode> usedFields = textFileOutputStepNode.getStreamFieldNodesUses();
     int usedFieldCount = getIterableSize( usedFields );
-    assertEquals( outputFields.length, usedFieldCount - 1 );
-    assertEquals( incomingFields.size(), usedFieldCount );
+    assertEquals( 1, usedFieldCount );
 
-    for ( StreamFieldNode usedField : usedFields ) {
-      ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
-      if ( usedField.getName().equals( meta.getFileNameField() ) ) {
-        // make sure he doesn't populate anything since we aren't writing it to the file
-        assertNull( usedField.getFieldPopulatedByMe() );
-      } else {
-        assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
+    Iterable<StreamFieldNode> outFields = textFileOutputStepNode.getOutputStreamFields();
+    int outFieldCount = getIterableSize( outFields );
+    // should have output stream nodes as well as file nodes
+    assertEquals( outputFields * 2, outFieldCount );
+
+    int fileFieldCount = 0;
+    for ( StreamFieldNode outField : outFields ) {
+      if ( DictionaryConst.NODE_TYPE_FILE_FIELD.equals( outField.getType() ) ) {
+        ValueMetaInterface vmi = incomingFields.searchValueMeta( outField.getName() );
+        assertEquals( vmi.getName(), outField.getFieldPopulatesMe().getName() );
+        fileFieldCount++;
       }
     }
+    assertEquals( fileFieldCount, outFieldCount / 2 );
 
   }
 
@@ -762,12 +774,12 @@ public class MetaverseValidationIT {
       assertTrue( usedField.getFieldNodesThatJoinToMe() != null );
     }
 
-    Iterable<StreamFieldNode> createdFields = node.getStreamFieldNodesCreates();
-    assertEquals( 2, getIterableSize( createdFields ) );
+    Iterable<StreamFieldNode> outputFields = node.getOutputStreamFields();
+    assertEquals( getExpectedOutputFieldCount( meta ), getIterableSize( outputFields ) );
 
-    for ( StreamFieldNode createdField : createdFields ) {
+    for ( StreamFieldNode outputField : outputFields ) {
       // these should have derives links
-      assertTrue( createdField.getFieldNodesThatDeriveMe() != null );
+      assertTrue( outputField.getFieldNodesThatDeriveMe() != null );
     }
 
   }
@@ -843,9 +855,9 @@ public class MetaverseValidationIT {
     StreamFieldNode area = null;
     StreamFieldNode kelvin = null;
     StreamFieldNode celsius = null;
-    List<String> nodeCreates = new ArrayList<String>();
-    for ( StreamFieldNode sfn : node.getStreamFieldNodesCreates() ) {
-      nodeCreates.add( sfn.getName() );
+    List<String> nodeOutputs = new ArrayList<String>();
+    for ( StreamFieldNode sfn : node.getOutputStreamFields() ) {
+      nodeOutputs.add( sfn.getName() );
       if ( sfn.getName().equals( "area" ) ) {
         area = sfn;
       } else if ( sfn.getName().equals( "celsius" ) ) {
@@ -863,13 +875,8 @@ public class MetaverseValidationIT {
       fieldsThatDerive[i++] = sfn.getName();
     }
 
-    assert ( Arrays.asList( fieldsThatDerive ).contains( "tempCelsius" ) );
-    assert ( Arrays.asList( fieldsThatDerive ).contains( "tempRatio" ) );
-
-    List<String> nodeDeletes = new ArrayList<String>();
-    for ( StreamFieldNode sfn : node.getStreamFieldNodesDeletes() ) {
-      nodeDeletes.add( sfn.getName() );
-    }
+    assertTrue( Arrays.asList( fieldsThatDerive ).contains( "tempCelsius" ) );
+    assertTrue( Arrays.asList( fieldsThatDerive ).contains( "tempRatio" ) );
 
     fieldsThatDerive = new String[2];
     i = 0;
@@ -877,12 +884,12 @@ public class MetaverseValidationIT {
       fieldsThatDerive[i++] = sfn.getName();
     }
 
-    assert ( Arrays.asList( fieldsThatDerive ).contains( "tempKelvin" ) );
-    assert ( Arrays.asList( fieldsThatDerive ).contains( "tempRatio" ) );
+    assertTrue( Arrays.asList( fieldsThatDerive ).contains( "tempKelvin" ) );
+    assertTrue( Arrays.asList( fieldsThatDerive ).contains( "tempRatio" ) );
 
     assertEquals( expectedUsedFieldCount, nodeUses.size() );
-    assertEquals( 5, nodeCreates.size() );
-    assertEquals( 2, nodeDeletes.size() );
+
+    assertEquals( getExpectedOutputFieldCount( calculatorMeta ), nodeOutputs.size() );
   }
 
   @Test
@@ -1140,15 +1147,15 @@ public class MetaverseValidationIT {
       meta.getParentStepMeta() );
     int incomingFieldCount = incomingRow.size();
 
-    Iterable<StreamFieldNode> streamFieldNodes = transExecutorStepNode.getStreamFieldNodesCreates();
-    int countCreatedStreamFieldNode = getIterableSize( streamFieldNodes );
+    Iterable<StreamFieldNode> streamFieldNodes = transExecutorStepNode.getOutputStreamFields();
+    int countOutputStreamFieldNode = getIterableSize( streamFieldNodes );
     List<String> outputFields = Arrays.asList( meta.getOutputRowsField() );
     for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
       assertNotNull( streamFieldNode.getKettleType() );
       if ( outputFields.contains( streamFieldNode.getName() ) ) {
         // this field came back to us from the sub trans via a result, lets make sure they link up
         assertEquals( transExecutorStepNode.getTransToExecute(),
-          streamFieldNode.getFieldNodesThatDeriveMe().iterator().next().getStepThatCreatesMe().getTransNode() );
+          streamFieldNode.getFieldNodesThatDeriveMe().iterator().next().getStepThatOutputsMe().getTransNode() );
       }
     }
 
@@ -1168,13 +1175,11 @@ public class MetaverseValidationIT {
       // these should link up to stream fields in the sub trans via the "get rows from result" step
       for ( StreamFieldNode derived : streamFieldNode.getFieldNodesDerivedFromMe() ) {
         // the trans that is to be executed should contain the step that creates a field derived from the incoming field
-        assertEquals( transExecutorStepNode.getTransToExecute(), derived.getStepThatCreatesMe().getTransNode() );
+        assertEquals( transExecutorStepNode.getTransToExecute(), derived.getStepThatInputsMe().getTransNode() );
       }
     }
 
     assertEquals( incomingFieldCount, countUsedStreamFieldNode );
-    assertEquals( incomingFieldCount, countDeletedStreamFieldNode );
-
   }
 
   @Test
@@ -1554,4 +1559,9 @@ public class MetaverseValidationIT {
     }
     return status;
   }
+
+  private int getExpectedOutputFieldCount( BaseStepMeta meta ) throws KettleStepException {
+    return meta.getParentStepMeta().getParentTransMeta().getStepFields( meta.getParentStepMeta() ).size();
+  }
+
 }

@@ -1,39 +1,28 @@
 package com.pentaho.metaverse.analyzer.kettle.step.selectvalues;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectMetadataChange;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
@@ -43,233 +32,140 @@ public class SelectValuesStepAnalyzerTest {
 
   private SelectValuesStepAnalyzer analyzer;
 
-  @Mock
-  private IMetaverseBuilder builder;
+  @Mock SelectValuesMeta selectValuesMeta;
+  @Mock RowMetaInterface rmi;
+  @Mock TransMeta parentTransMeta;
+  @Mock IMetaverseNode node;
 
-  @Mock
-  private SelectValuesMeta selectValuesMeta;
+  Map<String, RowMetaInterface> prevFields;
 
-  @Mock
-  private TransMeta transMeta;
-
-  @Mock
-  private RowMetaInterface prevRowMeta;
-
-  @Mock
-  private RowMetaInterface stepRowMeta;
-
-  @Mock
-  private INamespace namespace;
-
-  @Mock
-  IComponentDescriptor descriptor;
+  StepNodes inputs;
+  SelectMetadataChange testChange1;
+  SelectMetadataChange testChange2;
 
   @Before
   public void setUp() throws Exception {
-    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
-//    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-//    when( descriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
+    analyzer = spy( new SelectValuesStepAnalyzer() );
+    analyzer.setParentTransMeta( parentTransMeta );
+    analyzer.setBaseStepMeta( selectValuesMeta );
+    doNothing().when( analyzer).validateState( null, selectValuesMeta );
 
-    analyzer = new SelectValuesStepAnalyzer();
-    analyzer.setMetaverseBuilder( builder );
-    descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
-  }
+    prevFields = new HashMap<>();
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
+    prevFields.put( "previousStep", rmi );
 
-    analyzer.analyze( descriptor, null );
-  }
+    doReturn( prevFields ).when( analyzer ).getInputFields( selectValuesMeta );
+    doReturn( "select values" ).when( analyzer ).getStepName();
+    when( parentTransMeta.getPrevStepNames( analyzer.getStepName() ) ).thenReturn( new String[] { "previousStep" } );
 
-  @Test
-  public void testAnalyze_noFields() throws Exception {
+    inputs = new StepNodes();
+    inputs.addNode( "previousStep", "first", node );
+    inputs.addNode( "previousStep", "last", node );
+    inputs.addNode( "previousStep", "age", node );
+    inputs.addNode( "previousStep", "birthday", node );
 
-    StepMeta meta = new StepMeta( DEFAULT_STEP_NAME, selectValuesMeta );
-    StepMeta spyMeta = spy( meta );
+    doReturn( inputs ).when( analyzer ).getInputs();
 
-    when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
-
-    IMetaverseNode result = analyzer.analyze( descriptor, selectValuesMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    // make sure the step node is added
-    verify( builder, times(1) ).addNode( any( IMetaverseNode.class ) );
-
-  }
-
-  @Test
-  public void testAnalyze_SelectAlterFieldsRename() throws Exception {
-
-    StepMeta meta = new StepMeta( DEFAULT_STEP_NAME, selectValuesMeta );
-    StepMeta spyMeta = spy( meta );
-
-    when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
-    when( transMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
-    when( spyMeta.getStepID() ).thenReturn( "Select values" );
-
-    String[] fieldNames = { "field1", "field2" };
-    String[] fieldRenames = { null, "field3" };
-
-    // set up the input fields
-    when( selectValuesMeta.getSelectName() ).thenReturn( fieldNames );
-    when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
-    when( transMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) )
-      .thenReturn( prevRowMeta );
-    when( transMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( stepRowMeta );
-    when( stepRowMeta.getFieldNames() ).thenReturn( fieldNames );
-    when( stepRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "field1" )
-          return new ValueMetaString( "field1" );
-        if ( args[0] == "field2" )
-          return new ValueMetaString( "field2" );
-        return null;
-      }
-    } );
-    when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
-    when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "field1" )
-          return new ValueMetaString( "field1" );
-        if ( args[0] == "field2" )
-          return new ValueMetaString( "field2" );
-        return null;
-      }
-    } );
-
-    IMetaverseNode result = analyzer.analyze( descriptor, selectValuesMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-    assertEquals("Select values", result.getProperty( "stepType" ));
-
-    // we should have "derives" links from input nodes to output nodes
-    verify( builder, times( 1 ) )
-        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
-
-    // we should have no "deletes" links from input nodes to output nodes
-    verify( builder, never() )
-        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DELETES ), any( IMetaverseNode.class ) );
-  }
-
-  @Test
-  public void testAnalyze_SelectAlterFieldsMetadataChange() throws Exception {
-
-    StepMeta meta = new StepMeta( DEFAULT_STEP_NAME, selectValuesMeta );
-    StepMeta spyMeta = spy( meta );
-
-    when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
-    when( transMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
-
-    String[] fieldNames = { "field1", "field2" };
-    String[] fieldRenames = { null, null };
-    int[] fieldLength = { SelectValuesStepAnalyzer.NOT_CHANGED, 5 };
-    int[] fieldPrecision = { 2, SelectValuesStepAnalyzer.NOT_CHANGED };
-
-    // set up the input fields
-    when( selectValuesMeta.getSelectName() ).thenReturn( fieldNames );
-    when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
-    when( selectValuesMeta.getSelectPrecision() ).thenReturn( fieldPrecision );
-    when( selectValuesMeta.getSelectLength() ).thenReturn( fieldLength );
-    when( transMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( prevRowMeta );
-    when( transMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( stepRowMeta );
-    when( stepRowMeta.searchValueMeta( anyString() ) ).thenReturn( null );
-    when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
-    when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "field1" )
-          return new ValueMetaString( "field1" );
-        if ( args[0] == "field2" )
-          return new ValueMetaString( "field2" );
-        return null;
-      }
-    } );
-
-    IMetaverseNode result = analyzer.analyze( descriptor, selectValuesMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    // we should have "derives" links from input nodes to output nodes
-    verify( builder, times( 2 ) )
-        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
-
-  }
-
-  @Test
-  public void testAnalyze_MetadataChange() throws Exception {
-
-    StepMeta meta = new StepMeta( DEFAULT_STEP_NAME, selectValuesMeta );
-    StepMeta spyMeta = spy( meta );
-
-    when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
-    when( transMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
-
-    String[] fieldNames = { "field1", "field2" };
-
-    SelectMetadataChange testChange1 = new SelectMetadataChange( selectValuesMeta );
-    testChange1.setName( "field1" );
+    testChange1 = new SelectMetadataChange( selectValuesMeta );
+    testChange1.setName( "first" );
     testChange1.setCurrencySymbol( "~" );
     testChange1.setStorageType( ValueMetaInterface.STORAGE_TYPE_BINARY_STRING );
     testChange1.setDateFormatLocale( "en_UK" );
     testChange1.setGroupingSymbol( "..." );
 
-    SelectMetadataChange testChange2 = new SelectMetadataChange( selectValuesMeta );
-    testChange2.setName( "field2" );
-    testChange2.setRename( "field3" );
+    testChange2 = new SelectMetadataChange( selectValuesMeta );
+    testChange2.setName( "last" );
+    testChange2.setRename( "last name" );
     testChange2.setDateFormatLenient( true );
     testChange2.setConversionMask( "##.#" );
     testChange2.setDateFormatTimeZone( "YYYY-MM-DD" );
     testChange2.setDecimalSymbol( "," );
+  }
 
-    // set up the input fields
-    when( selectValuesMeta.getMeta() ).thenReturn( new SelectMetadataChange[] { testChange1, testChange2 } );
-    when( transMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( prevRowMeta );
-    when( transMeta.getStepFields( eq( spyMeta), any( ProgressMonitorListener.class ) ) ).thenReturn( stepRowMeta );
-    when( stepRowMeta.searchValueMeta( anyString() ) ).thenReturn( null );
-    when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
-    when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+  @Test
+  public void testGetChangeRecords_select() throws Exception {
 
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "field1" )
-          return new ValueMetaString( "field1" );
-        if ( args[0] == "field2" )
-          return new ValueMetaString( "field2" );
-        return null;
-      }
-    } );
+    String[] selectedNames = new String[] { "first", "last", "age" };
+    String[] selectedRenames = new String[] { null, null, "years on earth" };
+    int[] fieldLengths = new int[] { 60, SelectValuesStepAnalyzer.NOT_CHANGED, SelectValuesStepAnalyzer.NOT_CHANGED };
+    int[] fieldPrecisions = new int[] { SelectValuesStepAnalyzer.NOT_CHANGED, SelectValuesStepAnalyzer.NOT_CHANGED, 1 };
 
-    IMetaverseNode result = analyzer.analyze( descriptor, selectValuesMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
+    when( selectValuesMeta.getSelectName() ).thenReturn( selectedNames );
+    when( selectValuesMeta.getSelectRename() ).thenReturn( selectedRenames );
+    when( selectValuesMeta.getSelectLength() ).thenReturn( fieldLengths );
+    when( selectValuesMeta.getSelectPrecision() ).thenReturn( fieldPrecisions );
 
-    // we should have 2 "derives" links from input fields to output fields
-    verify( builder, times( 2 ) )
-        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( selectValuesMeta );
+    assertNotNull( changeRecords );
 
-    // we should have 2 "creates" links for the derived fields
-    verify( builder, times( 2 ) )
-        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_CREATES ), any( IMetaverseNode.class ) );
+    // all selected fields should have a change record
+    assertEquals( selectedNames.length, changeRecords.size() );
 
-    // we should have no "deletes" links from input nodes to output nodes
-    verify( builder, never() )
-        .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DELETES ), any( IMetaverseNode.class ) );
+  }
+
+  @Test
+  public void testGetChangeRecords_meta() throws Exception {
+    SelectMetadataChange[] metadataChanges = new SelectMetadataChange[] { testChange1, testChange2 };
+
+    when( selectValuesMeta.getMeta() ).thenReturn( metadataChanges );
+
+    ValueMetaInterface vmiFirst = mock( ValueMetaInterface.class );
+    ValueMetaInterface vmiLast = mock( ValueMetaInterface.class );
+    when( rmi.searchValueMeta( "first" ) ).thenReturn( vmiFirst );
+    when( rmi.searchValueMeta( "last" ) ).thenReturn( vmiLast );
+
+    when( vmiFirst.getName() ).thenReturn( "first" );
+    when( vmiFirst.getCurrencySymbol() ).thenReturn( "$" );
+    when( vmiFirst.getStorageType() ).thenReturn( ValueMetaInterface.STORAGE_TYPE_NORMAL );
+    when( vmiLast.getDateFormatLocale() ).thenReturn( Locale.US );
+    when( vmiLast.getGroupingSymbol() ).thenReturn( "," );
+
+    when( vmiLast.getName() ).thenReturn( "last" );
+    when( vmiLast.getConversionMask() ).thenReturn( "000.##" );
+    when( vmiLast.getDateFormatTimeZone() ).thenReturn( TimeZone.getDefault() );
+    when( vmiLast.getDecimalSymbol() ).thenReturn( "." );
+    when( vmiLast.isDateFormatLenient() ).thenReturn( false );
+
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( selectValuesMeta );
+    assertNotNull( changeRecords );
+    assertEquals( metadataChanges.length, changeRecords.size() );
+  }
+
+
+
+  @Test
+  public void testGetUsedFields_selectOnly() throws Exception {
+    String[] selectedNames = new String[] { "first", "last", "age" };
+    when( selectValuesMeta.getSelectName() ).thenReturn( selectedNames );
+    when( selectValuesMeta.getMeta() ).thenReturn( new SelectMetadataChange[0] );
+    Set<StepField> usedFields = analyzer.getUsedFields( selectValuesMeta );
+    assertNotNull( usedFields );
+    assertEquals( selectedNames.length, usedFields.size() );
+  }
+
+  @Test
+  public void testGetUsedFields_metaOnly() throws Exception {
+    String[] selectedNames = new String[0];
+    SelectMetadataChange[] changes = new SelectMetadataChange[] { testChange1, testChange2 };
+
+    when( selectValuesMeta.getSelectName() ).thenReturn( selectedNames );
+    when( selectValuesMeta.getMeta() ).thenReturn( changes );
+    Set<StepField> usedFields = analyzer.getUsedFields( selectValuesMeta );
+    assertNotNull( usedFields );
+    assertEquals( changes.length, usedFields.size() );
+  }
+
+  @Test
+  public void testGetUsedFields_selectAndMetaOverlap() throws Exception {
+    String[] selectedNames = new String[] { "first", "age" };
+    SelectMetadataChange[] changes = new SelectMetadataChange[] { testChange1, testChange2 };
+
+    when( selectValuesMeta.getSelectName() ).thenReturn( selectedNames );
+    when( selectValuesMeta.getMeta() ).thenReturn( changes );
+    Set<StepField> usedFields = analyzer.getUsedFields( selectValuesMeta );
+    assertNotNull( usedFields );
+    // both select and meta identify first as being used, select also uses age, meta also uses last
+    assertEquals( 3, usedFields.size() );
   }
 
   @Test
@@ -282,125 +178,81 @@ public class SelectValuesStepAnalyzerTest {
   }
 
   @Test
-  public void testGetFieldMappings_selectAndRename() throws Exception {
-    StepMeta meta = new StepMeta( DEFAULT_STEP_NAME, selectValuesMeta );
-    StepMeta spyMeta = spy( meta );
+  public void testIsPassthrough() throws Exception {
+    String[] deleted = new String[] { "first, last" };
+    String[] selected = new String[] { "age" };
+    SelectMetadataChange[] changed = new SelectMetadataChange[] { testChange1, testChange2 };
 
-    when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
-    when(spyMeta.getStepID()).thenReturn( "Select values" );
+    when( selectValuesMeta.getDeleteName() ).thenReturn( deleted );
+    when( selectValuesMeta.getSelectName() ).thenReturn( selected );
+    when( selectValuesMeta.getMeta() ).thenReturn( changed );
 
-    String[] fieldNames = { "field1", "field2" };
-    String[] fieldRenames = { null, "field3" };
+    StepField stepField = new StepField( "previousStep", "first" );
+    assertFalse( analyzer.isPassthrough( stepField ) );
 
-    // set up the input fields
-    when( selectValuesMeta.getSelectName() ).thenReturn( fieldNames );
-    when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
-    when( selectValuesMeta.getMeta() ).thenReturn( new SelectMetadataChange[]{} );
-    when( transMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( prevRowMeta );
-    when( transMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( stepRowMeta );
-    when( stepRowMeta.getFieldNames() ).thenReturn( fieldNames );
-    when( stepRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+    stepField.setFieldName( "last" );
+    assertFalse( analyzer.isPassthrough( stepField ) );
 
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "field1" )
-          return new ValueMetaString( "field1" );
-        if ( args[0] == "field2" )
-          return new ValueMetaString( "field2" );
-        return null;
-      }
-    } );
-    when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
-    when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+    stepField.setFieldName( "age" );
+    assertFalse( analyzer.isPassthrough( stepField ) );
 
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "field1" )
-          return new ValueMetaString( "field1" );
-        if ( args[0] == "field2" )
-          return new ValueMetaString( "field2" );
-        return null;
-      }
-    } );
-
-    Set<IFieldMapping> fieldMappings = analyzer.getFieldMappings( selectValuesMeta );
-    assertNotNull( fieldMappings );
-    assertEquals( 2, fieldMappings.size() );
-    for ( IFieldMapping fieldMapping : fieldMappings ) {
-      if( fieldMapping.getSourceFieldName().equalsIgnoreCase( "field1" ) ) {
-        assertEquals( "field1", fieldMapping.getTargetFieldName() );
-      } else {
-        assertEquals( "field3", fieldMapping.getTargetFieldName() );
-      }
-    }
+    // birthday should not be a passthrough, there are fields "selected"
+    stepField.setFieldName( "birthday" );
+    assertFalse( analyzer.isPassthrough( stepField ) );
   }
 
   @Test
-  public void testGetFieldMappings_selectAndRenamePlusMeta() throws Exception {
-    StepMeta meta = new StepMeta( DEFAULT_STEP_NAME, selectValuesMeta );
-    StepMeta spyMeta = spy( meta );
+  public void testIsPassthrough_onlyDelete() throws Exception {
+    String[] deleted = new String[] { "first", "last" };
+    String[] selected = new String[0];
+    SelectMetadataChange[] changed = new SelectMetadataChange[0];
 
-    when( selectValuesMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
-    when(spyMeta.getStepID()).thenReturn( "Select values" );
+    when( selectValuesMeta.getDeleteName() ).thenReturn( deleted );
+    when( selectValuesMeta.getSelectName() ).thenReturn( selected );
+    when( selectValuesMeta.getMeta() ).thenReturn( changed );
 
-    String[] fieldNames = { "field1", "field2" };
-    String[] fieldRenames = { null, "field3" };
-    String[] metaNames = { "field1" };
-    String[] metaRenames = { "column1" };
+    StepField stepField = new StepField( "previousStep", "first" );
+    // first was deleted, not a passthrough
+    assertFalse( analyzer.isPassthrough( stepField ) );
 
-    SelectMetadataChange[] changes = new SelectMetadataChange[2];
-    SelectMetadataChange c1 = mock( SelectMetadataChange.class );
-    SelectMetadataChange c2 = mock( SelectMetadataChange.class );
-    when( c1.getName() ).thenReturn( "field1" );
-    when( c1.getRename() ).thenReturn( "column1" );
-    when( c2.getName() ).thenReturn( "field2" );
-    when( c2.getRename() ).thenReturn( "column2" );
+    stepField.setFieldName( "last" );
+    // last was deleted, not a passthrough
+    assertFalse( analyzer.isPassthrough( stepField ) );
 
-    changes[0] = c1;
-    changes[1] = c2;
+    stepField.setFieldName( "age" );
+    // age was NOT deleted, it is a passthrough
+    assertTrue( analyzer.isPassthrough( stepField ) );
 
-    // set up the input fields
-    when( selectValuesMeta.getSelectName() ).thenReturn( fieldNames );
-    when( selectValuesMeta.getSelectRename() ).thenReturn( fieldRenames );
-    when( selectValuesMeta.getMeta() ).thenReturn( changes );
-    when( transMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( prevRowMeta );
-    when( transMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( stepRowMeta );
-    when( stepRowMeta.getFieldNames() ).thenReturn( fieldNames );
-    when( stepRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "field1" )
-          return new ValueMetaString( "field1" );
-        if ( args[0] == "field2" )
-          return new ValueMetaString( "field2" );
-        return null;
-      }
-    } );
-    when( prevRowMeta.getFieldNames() ).thenReturn( fieldNames );
-    when( prevRowMeta.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "field1" )
-          return new ValueMetaString( "field1" );
-        if ( args[0] == "field2" )
-          return new ValueMetaString( "field2" );
-        return null;
-      }
-    } );
-
-    Set<IFieldMapping> fieldMappings = analyzer.getFieldMappings( selectValuesMeta );
-    assertNotNull( fieldMappings );
-    assertEquals( 2, fieldMappings.size() );
-    for ( IFieldMapping fieldMapping : fieldMappings ) {
-      if( fieldMapping.getSourceFieldName().equalsIgnoreCase( "field1" ) ) {
-        assertEquals( "column1", fieldMapping.getTargetFieldName() );
-      } else {
-        assertEquals( "column2", fieldMapping.getTargetFieldName() );
-      }
-    }
+    stepField.setFieldName( "birthday" );
+    // birthday was NOT deleted, it is a passthrough
+    assertTrue( analyzer.isPassthrough( stepField ) );
   }
+
+  @Test
+  public void testIsPassthrough_deleteAndMeta() throws Exception {
+    String[] deleted = new String[] { "first", "age" };
+    String[] selected = new String[0];
+    SelectMetadataChange[] changed = new SelectMetadataChange[] { testChange1, testChange2 };
+
+    when( selectValuesMeta.getDeleteName() ).thenReturn( deleted );
+    when( selectValuesMeta.getSelectName() ).thenReturn( selected );
+    when( selectValuesMeta.getMeta() ).thenReturn( changed );
+
+    StepField stepField = new StepField( "previousStep", "first" );
+    // first was deleted, not a passthrough
+    assertFalse( analyzer.isPassthrough( stepField ) );
+
+    stepField.setFieldName( "last" );
+    // last not deleted but it is meta-modified, not a passthrough
+    assertFalse( analyzer.isPassthrough( stepField ) );
+
+    stepField.setFieldName( "age" );
+    // age was deleted, it is NOT passthrough
+    assertFalse( analyzer.isPassthrough( stepField ) );
+
+    stepField.setFieldName( "birthday" );
+    // birthday was NOT deleted and not meta-modified, it is a passthrough
+    assertTrue( analyzer.isPassthrough( stepField ) );
+  }
+
 }

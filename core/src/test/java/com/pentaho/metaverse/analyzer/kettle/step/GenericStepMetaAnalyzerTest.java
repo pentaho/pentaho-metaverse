@@ -22,37 +22,15 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step;
 
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-import org.junit.After;
-import org.junit.AfterClass;
+import com.pentaho.metaverse.api.IMetaverseNode;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.core.exception.KettleStepException;
-import org.pentaho.di.core.row.RowMeta;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.value.ValueMetaInteger;
-import org.pentaho.di.core.row.value.ValueMetaString;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.step.StepMetaInterface;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.when;
 
 /**
  * @author mburgess
@@ -63,123 +41,30 @@ public class GenericStepMetaAnalyzerTest {
   GenericStepMetaAnalyzer analyzer;
 
   @Mock
-  private IMetaverseBuilder mockBuilder;
-
-  private IMetaverseObjectFactory factory;
-
-  @Mock
-  TransMeta mockTransMeta;
-
-  @Mock
   private BaseStepMeta mockBaseStepMeta;
-
   @Mock
-  private StepMeta mockStepMeta;
-
-  @Mock
-  DatabaseMeta mockDatabaseMeta;
-
-  @Mock
-  StepMetaInterface mockStepMetaInterface;
-
-  @Mock
-  INamespace namespace;
-
-  @Mock
-  IComponentDescriptor mockDescriptor;
-
-  /**
-   * @throws java.lang.Exception
-   */
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
-
-  /**
-   * @throws java.lang.Exception
-   */
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
+  IMetaverseNode node;
 
   /**
    * @throws java.lang.Exception
    */
   @Before
   public void setUp() throws Exception {
-
-    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
-
     analyzer = new GenericStepMetaAnalyzer();
-    analyzer.setMetaverseBuilder( mockBuilder );
-    when(namespace.getParentNamespace() ).thenReturn( namespace );
-
-    // set random StepMetaInterface
-    when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockStepMetaInterface );
-    when( mockStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockBaseStepMeta.getParentStepMeta() ).thenReturn( mockStepMeta );
-  }
-
-  /**
-   * @throws java.lang.Exception
-   */
-  @After
-  public void tearDown() throws Exception {
-  }
-
-  @Test(expected = MetaverseAnalyzerException.class)
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
-
-    analyzer.analyze( null, null );
-  }
-
-  @Test
-  public void testAnalyze() throws MetaverseAnalyzerException {
-
-    IMetaverseNode node = analyzer.analyze( mockDescriptor, mockBaseStepMeta );
-    assertNotNull( node );
-
-  }
-
-  @Test
-  public void testAnalyzeWithDatabaseMeta() throws MetaverseAnalyzerException {
-
-    when( mockStepMetaInterface.getUsedDatabaseConnections() ).thenReturn( new DatabaseMeta[] { mockDatabaseMeta } );
-
-    IMetaverseNode node = analyzer.analyze( mockDescriptor, mockBaseStepMeta );
-    assertNotNull( node );
-
-  }
-
-  @Test(expected = MetaverseAnalyzerException.class)
-  public void testSetMetaverseBuilderNull() throws MetaverseAnalyzerException {
-
-    analyzer.setMetaverseBuilder( null );
-    analyzer.analyze( mockDescriptor, mockBaseStepMeta );
-
-  }
-
-  @Test
-  public void testAnalyzeWithNewFields() throws MetaverseAnalyzerException, KettleStepException {
-
-    when( mockTransMeta.getStepFields( mockStepMeta ) ).thenAnswer( new Answer<RowMetaInterface>() {
-
-      @Override
-      public RowMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        RowMeta rowMeta = new RowMeta();
-        rowMeta.addValueMeta( new ValueMetaInteger( "testInt" ) );
-        rowMeta.addValueMeta( new ValueMetaString( "testString" ) );
-        return rowMeta;
-      }
-    } );
-    IMetaverseNode node = analyzer.analyze( mockDescriptor, mockBaseStepMeta );
-    assertNotNull( node );
   }
 
   @Test
   public void testGetSupportedSteps() {
     assertNull( analyzer.getSupportedSteps() );
+  }
+
+  @Test
+  public void testGetUsedFields() throws Exception {
+    assertNull( analyzer.getUsedFields( mockBaseStepMeta ) );
+  }
+
+  @Test
+  public void testCustomAnalyze() throws Exception {
+    analyzer.customAnalyze( mockBaseStepMeta, node );
   }
 }
