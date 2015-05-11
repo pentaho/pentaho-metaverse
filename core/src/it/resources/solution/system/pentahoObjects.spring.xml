@@ -78,6 +78,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer"/>
   <bean id="FilterRowsStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.filterrows.FilterRowsStepAnalyzer"/>
+  <bean id="HTTPClientStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer"/>
 
   <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
@@ -130,6 +132,7 @@
         <ref bean="GetXMLDataStepAnalyzer"/>
         <ref bean="FilterRowsStepAnalyzer"/>
         <ref bean="XMLOutputStepAnalyzer"/>
+        <ref bean="HTTPClientStepAnalyzer"/>
       </list>
     </property>
   </bean>
@@ -158,6 +161,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
   <bean id="getXMLDataERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataExternalResourceConsumer"/>
+  <bean id="httpClientERC" scope="singleton"
+		class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientExternalResourceConsumer"/>
 
   <bean id="IStepExternalResourceConsumerProvider"
         class="com.pentaho.metaverse.analyzer.kettle.step.StepExternalResourceConsumerProvider"
@@ -171,6 +176,7 @@
         <ref bean="excelOutputERC"/>
         <ref bean="csvInputERC"/>
         <ref bean="getXMLDataERC"/>
+        <ref bean="httpClientERC"/>
       </list>
     </property>
 
