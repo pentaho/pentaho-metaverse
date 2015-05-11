@@ -169,7 +169,9 @@
   <bean id="XMLOutputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer"/>
 
-
+  <bean id="HTTPClientStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer"/>
+          		
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TableOutputStepAnalyzer"/>
@@ -266,6 +268,10 @@
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="XMLOutputStepAnalyzer"/>
 
+  <service id="httpClientStepAnalyzerService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           ref="HTTPClientStepAnalyzer"/>
+
   <reference-list id="stepAnalyzerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
                   member-type="service-object"
@@ -311,6 +317,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataExternalResourceConsumer"/>
   <bean id="xmlOutputERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputExternalResourceConsumer"/>
+  <bean id="httpClientERC" scope="singleton"
+		class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientExternalResourceConsumer"/>
 
   <service id="tableOutputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
@@ -347,6 +355,10 @@
   <service id="xmlOutputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="xmlOutputERC"/>
+
+  <service id="httpClientERCService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
+           ref="httpClientERC"/>
 
   <reference-list id="stepExternalResourceConsumerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"

@@ -28,8 +28,8 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.resource.ResourceEntry;
 
 /**
- * ExternalResourceInfoFactory provides a number of utility methods to create IExternalResourceInfo objects out of
- * other objects (such as DatabaseMeta, ResourceEntry, FileObject, etc.)
+ * ExternalResourceInfoFactory provides a number of utility methods to create IExternalResourceInfo objects out of other
+ * objects (such as DatabaseMeta, ResourceEntry, FileObject, etc.)
  */
 public class ExternalResourceInfoFactory {
 
@@ -95,6 +95,21 @@ public class ExternalResourceInfoFactory {
       resource.setName( fileObject.getName().getPath() );
       resource.setInput( isInput );
       resource.setType( DictionaryConst.NODE_TYPE_FILE );
+    }
+    return resource;
+  }
+
+  public static IExternalResourceInfo createURLResource( String url ) {
+    return createURLResource( url, DEFAULT_IS_INPUT );
+  }
+
+  public static IExternalResourceInfo createURLResource( String url, boolean isInput ) {
+    BaseResourceInfo resource = null;
+    if ( url != null ) {
+      resource = new BaseResourceInfo();
+      resource.setName( url );
+      resource.setInput( isInput );
+      resource.setType( DictionaryConst.NODE_TYPE_WEBSERVICE );
     }
     return resource;
   }
