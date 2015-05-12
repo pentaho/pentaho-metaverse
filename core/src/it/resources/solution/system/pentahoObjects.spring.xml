@@ -80,6 +80,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.filterrows.FilterRowsStepAnalyzer"/>
   <bean id="HTTPClientStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer"/>
+  <bean id="HTTPPostStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer"/>
 
   <bean id="RestClientStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer"/>
@@ -136,8 +138,8 @@
         <ref bean="FilterRowsStepAnalyzer"/>
         <ref bean="XMLOutputStepAnalyzer"/>
         <ref bean="HTTPClientStepAnalyzer"/>
-
         <ref bean="RestClientStepAnalyzer"/>
+        <ref bean="HTTPPostStepAnalyzer"/>
       </list>
     </property>
   </bean>
@@ -168,9 +170,11 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataExternalResourceConsumer"/>
   <bean id="httpClientERC" scope="singleton"
 		class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientExternalResourceConsumer"/>
-
   <bean id="restClientERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientExternalResourceConsumer"/>
+  <bean id="httpPostERC" scope="singleton"
+		class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostExternalResourceConsumer"/>
+
 
   <bean id="IStepExternalResourceConsumerProvider"
         class="com.pentaho.metaverse.analyzer.kettle.step.StepExternalResourceConsumerProvider"
@@ -185,8 +189,8 @@
         <ref bean="csvInputERC"/>
         <ref bean="getXMLDataERC"/>
         <ref bean="httpClientERC"/>
-
         <ref bean="restClientERC"/>
+        <ref bean="httpPostERC"/>
       </list>
     </property>
 

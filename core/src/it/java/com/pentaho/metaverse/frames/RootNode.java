@@ -142,6 +142,11 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'HTTP Client'}.as('step').in('contains').has('name', T.eq, 'HTTP_client - url from field').back('step')" )
   public HttpClientStepNode getHttpClientStepNode_urlFromField();
 
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'HTTP Post'}.as('step').in('contains').has('name', T.eq, 'HTTP_Post').back('step')" )
+  public HttpPostStepNode getHttpPostStepNode();
+
+  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'HTTP Post'}.as('step').in('contains').has('name', T.eq, 'HTTP_Post - url from field').back('step')" )
+  public HttpPostStepNode getHttpPostStepNode_urlFromField();
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == stepName}.as('step').in('contains').has('name', T.eq, transformationName).back('step')" )
   public XMLOutputStepNode getXMLOutputStepNode(

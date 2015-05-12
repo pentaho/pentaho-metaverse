@@ -41,6 +41,7 @@ import com.pentaho.metaverse.frames.FramedMetaverseNode;
 import com.pentaho.metaverse.frames.GetXMLDataStepNode;
 import com.pentaho.metaverse.frames.GroupByStepNode;
 import com.pentaho.metaverse.frames.HttpClientStepNode;
+import com.pentaho.metaverse.frames.HttpPostStepNode;
 import com.pentaho.metaverse.frames.JobEntryNode;
 import com.pentaho.metaverse.frames.JobNode;
 import com.pentaho.metaverse.frames.LocatorNode;
@@ -105,6 +106,7 @@ import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
 import org.pentaho.di.trans.steps.xmloutput.XMLField;
 import org.pentaho.di.trans.steps.xmloutput.XMLOutputMeta;
 import org.pentaho.di.trans.steps.http.HTTPMeta;
+import org.pentaho.di.trans.steps.httppost.HTTPPOSTMeta;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.File;
@@ -1443,6 +1445,61 @@ public class MetaverseValidationIT {
     assertEquals( createdFields.size(), getIterableSize( streamFieldNodesUses ) );
     for ( StreamFieldNode create : creates ) {
       assertTrue( createdFields.contains( create.getName() ) );
+    }
+  }
+
+  @Test
+  public void testHttpPostStep() throws Exception {
+    // this is testing a specific TextFileInputStep instance
+    HttpPostStepNode httpPostStepNode = root.getHttpPostStepNode();
+    assertNotNull( httpPostStepNode );
+
+    Iterable<FramedMetaverseNode> inputUrls = httpPostStepNode.getInputUrls();
+    int countUrls = getIterableSize( inputUrls );
+    assertEquals( 1, countUrls );
+    for ( FramedMetaverseNode inputUrl : inputUrls ) {
+      assertTrue( inputUrl.getName().endsWith( "/posts" ) );
+    }
+
+    assertEquals( "HTTP Post", httpPostStepNode.getStepType() );
+
+    Iterable<StreamFieldNode> streamFieldNodes = httpPostStepNode.getStreamFieldNodesCreates();
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+  }
+
+  @Test
+  public void testHTTPPostStep_UrlFromField() throws Exception {
+    // this is testing a specific TextFileInputStep instance
+    HttpPostStepNode httpPostStepNode = root.getHttpPostStepNode_urlFromField();
+    assertNotNull( httpPostStepNode );
+
+    // this HTTP Client gets it's files from an incoming stream field, there should be no files modeled statically
+    Iterable<FramedMetaverseNode> inputUrls = httpPostStepNode.getInputUrls();
+    int countInputUrls = getIterableSize( inputUrls );
+    assertEquals( 1, countInputUrls );
+
+    assertEquals( "HTTP Post", httpPostStepNode.getStepType() );
+
+    Iterable<StreamFieldNode> streamFieldNodes = httpPostStepNode.getStreamFieldNodesCreates();
+    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
+      assertNotNull( streamFieldNode.getKettleType() );
+    }
+
+    String urlField = null;
+    TransMeta tm =
+      new TransMeta( new FileInputStream( httpPostStepNode.getTransNode().getPath() ), null, true, null, null );
+    for ( StepMeta stepMeta : tm.getSteps() ) {
+      if ( stepMeta.getName().equals( httpPostStepNode.getName() ) ) {
+        HTTPPOSTMeta meta = (HTTPPOSTMeta) getBaseStepMetaFromStepMeta( stepMeta );
+        assertTrue( meta.isUrlInField() );
+        urlField = meta.getUrlField();
+        assertNotNull( urlField );
+
+        // this was the one we cared about...
+        break;
+      }
     }
   }
 

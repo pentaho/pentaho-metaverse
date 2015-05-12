@@ -16,6 +16,7 @@ import com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnaly
 import com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer
 import com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer
+import com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer
 
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.api.analyzer.kettle.step.*
@@ -153,6 +154,7 @@ i:
 
       httpClientStepAnalyzer = new HTTPClientStepAnalyzer()
       
+      httpPostStepAnalyzer = new HTTPPostStepAnalyzer()
       //**********************************************************************
 
       ksap = new StepAnalyzerProvider()
