@@ -251,7 +251,7 @@ public class HTTPClientStepAnalyzerTest {
     when( mockHTTPMeta.getUrl() ).thenReturn( "http://seylermartialarts.com" );
     when( mockHTTPMeta.isUrlInField() ).thenReturn( false );
 
-    assertFalse( consumer.isDataDriven( mockHTTPMeta ) );
+    assertTrue( consumer.isDataDriven( mockHTTPMeta ) );
     Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( mockHTTPMeta );
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );

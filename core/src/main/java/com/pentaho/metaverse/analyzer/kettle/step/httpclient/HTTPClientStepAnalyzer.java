@@ -22,22 +22,20 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.httpclient;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.http.HTTPMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.MetaverseException;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The HTTPClientStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and other
@@ -98,15 +96,13 @@ public class HTTPClientStepAnalyzer extends BaseStepAnalyzer<HTTPMeta> {
       if ( urls != null ) {
         for ( String url : urls ) {
           if ( !Const.isEmpty( url ) ) {
-            try {
-              // first add the node for the file
-              IMetaverseNode textFileNode = createFileNode( url, descriptor );
-              metaverseBuilder.addNode( textFileNode );
-
-              metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
-            } catch ( MetaverseException e ) {
-              log.error( e.getMessage(), e );
-            }
+            // first add the node for the file
+            IComponentDescriptor urlFieldDescriptor =
+              new MetaverseComponentDescriptor( url, DictionaryConst.NODE_TYPE_WEBSERVICE, descriptor.getNamespace(),
+                descriptor.getContext() );
+            IMetaverseNode fieldNode = createNodeFromDescriptor( urlFieldDescriptor );
+            metaverseBuilder.addNode( fieldNode );
+            metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_READBY, node );
           }
         }
       }
