@@ -312,7 +312,13 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
     // Export the lineage info (execution profile, lineage graph, etc.)
     try {
-      if ( lineageWriter != null ) {
+      if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+        // NOTE: This next call to clearOutput needs only to be done once before outputExecutionProfile and
+        // outputLineage graph. If the order of these calls changes somehow, make sure to move the call to
+        // clearOutput right before the first call to outputXYZ().
+        if ( "latest".equals( lineageWriter.getOutputStrategy() ) ) {
+          lineageWriter.cleanOutput( holder );
+        }
         lineageWriter.outputExecutionProfile( holder );
       }
     } catch ( IOException e ) {
@@ -329,7 +335,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         // Add the execution profile information to the lineage graph
         addRuntimeLineageInfo( holder );
 
-        if ( lineageWriter != null ) {
+        if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
           lineageWriter.outputLineageGraph( holder );
         }
       }
