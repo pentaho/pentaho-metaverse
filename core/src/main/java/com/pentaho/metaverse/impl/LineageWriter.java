@@ -38,6 +38,7 @@ public class LineageWriter implements ILineageWriter {
   private OutputStream profileOutputStream;
   private OutputStream graphOutputStream;
   private IGraphWriter graphWriter;
+  private String outputStrategy = DEFAULT_OUTPUT_STRATEGY;
 
   @Override
   public void outputExecutionProfile( LineageHolder holder ) throws IOException {
@@ -83,5 +84,36 @@ public class LineageWriter implements ILineageWriter {
   public void setGraphWriter( IGraphWriter graphWriter ) {
     this.graphWriter = graphWriter;
   }
+
+  /**
+   * Returns the output strategy (all, latest, none, etc.) as a string
+   *
+   * @return The String name of the output strategy
+   */
+  @Override
+  public String getOutputStrategy() {
+    return outputStrategy;
+  }
+
+  /**
+   * Sets the output strategy (all, latest, none) for this writer
+   *
+   * @param strategy The strategy to use when outputting lineage information
+   */
+  @Override
+  public void setOutputStrategy( String strategy ) {
+    this.outputStrategy = strategy;
+  }
+
+  /**
+   * Method called on the writer to do any cleanup of the output artifacts, folders, etc.
+   *
+   * @param holder Context of the lineage related info
+   */
+  @Override
+  public void cleanOutput( LineageHolder holder ) {
+    // Nothing to do here
+  }
+
 
 }

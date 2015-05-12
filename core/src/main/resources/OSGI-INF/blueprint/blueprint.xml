@@ -11,11 +11,14 @@
              ">
 
 
+  <!-- Put all properties (for user config of lineage) here -->
   <cm:property-placeholder persistent-id="pentaho.metaverse" update-strategy="reload" >
     <cm:default-properties>
       <cm:property name="lineage.execution.output.folder" value="./pentaho-lineage-output"/>
+      <cm:property name="lineage.execution.generation.strategy" value="none"/>
     </cm:default-properties>
   </cm:property-placeholder>
+
 
   <!-- Configure our graph using the SynchronizedGraphFactory and a configuration file -->
   <bean id="MetaverseGraphImpl" class="com.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open">
@@ -501,6 +504,7 @@
   <bean id="lineageWriter" class="com.pentaho.metaverse.impl.FileSystemLineageWriter" scope="prototype">
     <property name="graphWriter" ref="graphMLWriter"/>
     <property name="outputFolder" value="${lineage.execution.output.folder}"/>
+    <property name="outputStrategy" value="${lineage.execution.generation.strategy}"/>
   </bean>
 
   <!--

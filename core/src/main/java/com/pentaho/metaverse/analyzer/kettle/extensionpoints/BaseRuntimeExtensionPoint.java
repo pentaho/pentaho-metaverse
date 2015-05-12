@@ -47,9 +47,15 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
 
   public void writeLineageInfo( LineageHolder holder ) throws IOException {
     if ( lineageWriter != null ) {
-      String id = holder.getExecutionProfile().getName();
-      lineageWriter.outputExecutionProfile( holder );
-      lineageWriter.outputLineageGraph( holder );
+      String strategy = lineageWriter.getOutputStrategy();
+      if ( !"none".equals( strategy ) ) {
+        if ( "latest".equals( strategy ) ) {
+          lineageWriter.cleanOutput( holder );
+        }
+        String id = holder.getExecutionProfile().getName();
+        lineageWriter.outputExecutionProfile( holder );
+        lineageWriter.outputLineageGraph( holder );
+      }
     }
   }
 

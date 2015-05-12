@@ -31,7 +31,10 @@ import com.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.graph.GraphMLWriter;
 import com.pentaho.metaverse.graph.GraphSONWriter;
 import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;
+import org.apache.commons.io.FileUtils;
 import org.pentaho.di.core.Const;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,8 +51,12 @@ public class FileSystemLineageWriter implements ILineageWriter {
 
   public static final String DEFAULT_OUTPUT_FOLDER = ".";
 
+  private static final Logger log = LoggerFactory.getLogger( FileSystemLineageWriter.class );
+
+
   private IGraphWriter graphWriter = new GraphMLWriter();
   private String outputFolder = DEFAULT_OUTPUT_FOLDER;
+  private String outputStrategy = DEFAULT_OUTPUT_STRATEGY;
 
   protected static SimpleDateFormat dateFolderFormat = new SimpleDateFormat( "YYYYMMdd" );
 
@@ -65,8 +72,7 @@ public class FileSystemLineageWriter implements ILineageWriter {
         if ( fis != null ) {
           ExecutionProfileUtil.outputExecutionProfile( fis, profile );
         } else {
-          throw new IOException(
-            "No profile output stream associated with this LineageWriter" );
+          log.debug( "No profile output stream associated with this LineageWriter" );
         }
       }
     }
@@ -81,12 +87,9 @@ public class FileSystemLineageWriter implements ILineageWriter {
         if ( fis != null ) {
           graphWriter.outputGraph( builder.getGraph(), fis );
         } else {
-          throw new IOException(
-            "No graph output stream associated with this LineageWriter" );
+          log.debug( "No graph output stream associated with this LineageWriter" );
         }
-      } // TODO else {
-      // static graph
-      //}
+      }
     }
 
   }
@@ -111,6 +114,7 @@ public class FileSystemLineageWriter implements ILineageWriter {
 
   /**
    * Gets the output folder location for this writer
+   *
    * @return a String folder location
    */
   public String getOutputFolder() {
@@ -119,6 +123,7 @@ public class FileSystemLineageWriter implements ILineageWriter {
 
   /**
    * Sets the output folder for this writer
+   *
    * @param outputFolder The String output folder to write to
    */
   public void setOutputFolder( String outputFolder ) {
@@ -127,49 +132,60 @@ public class FileSystemLineageWriter implements ILineageWriter {
 
   protected OutputStream createOutputStream( LineageHolder holder, String extension ) {
     if ( holder != null ) {
-      File rootFolder = getDateFolder( outputFolder, holder );
-      boolean rootFolderExists = rootFolder.exists();
-      if ( !rootFolderExists ) {
-        rootFolderExists = rootFolder.mkdirs();
-      }
-      if ( rootFolderExists ) {
+      try {
         IExecutionProfile profile = holder.getExecutionProfile();
-        String id = holder.getId() == null ? "unknown_artifact" : holder.getId();
+        String timestampString = Long.toString( profile.getExecutionData().getStartTime().getTime() );
+        File destFolder = getOutputDirectoryAsFile( holder );
+        String name = Const.NVL( profile.getName(), "unknown" );
+        File file = new File( destFolder, timestampString + "_" + name + extension );
         try {
-
-          // strip off the colon from C:\path\to\file on windows
-          if ( isWindows() ) {
-            id = replaceColonInPath( id );
-          }
-
-          String name = Const.NVL( profile.getName(), "unknown" );
-          File folder = new File( rootFolder, id );
-          if ( !folder.exists() ) {
-            folder.mkdirs();
-          } else if ( folder.isFile() ) {
-            // must be a folder
-            throw new IllegalStateException( "Output folder must be a folder, not a file. ["
-              + folder.getAbsolutePath() + "]" );
-          }
-          String timestampString = Long.toString( profile.getExecutionData().getStartTime().getTime() );
-
-          File file = new File( folder, timestampString + "_" + name + extension );
-          try {
-            return new FileOutputStream( file );
-          } catch ( FileNotFoundException e ) {
-            e.printStackTrace();
-            return null;
-          }
-        } catch ( Exception e ) {
-          e.printStackTrace();
+          return new FileOutputStream( file );
+        } catch ( FileNotFoundException e ) {
+          log.error( "Couldn't find file: " + file.getAbsolutePath(), e );
           return null;
         }
-      } else {
+      } catch ( Exception e ) {
+        log.error( "Couldn't get output stream", e );
         return null;
       }
     } else {
       return null;
     }
+  }
+
+  protected File getOutputDirectoryAsFile( LineageHolder holder ) {
+    File rootFolder = getDateFolder( outputFolder, holder );
+    boolean rootFolderExists = rootFolder.exists();
+    if ( !rootFolderExists ) {
+      rootFolderExists = rootFolder.mkdirs();
+    }
+    if ( rootFolderExists ) {
+      IExecutionProfile profile = holder.getExecutionProfile();
+      String id = holder.getId() == null ? "unknown_artifact" : holder.getId();
+      try {
+        // strip off the colon from C:\path\to\file on windows
+        if ( isWindows() ) {
+          id = replaceColonInPath( id );
+        }
+
+        File folder = new File( rootFolder, id );
+        if ( !folder.exists() ) {
+          boolean result = folder.mkdirs();
+          if ( !result ) {
+            log.error( "Couldn't create folder: " + folder.getAbsolutePath() );
+          }
+        } else if ( folder.isFile() ) {
+          // must be a folder
+          throw new IllegalStateException( "Output folder must be a folder, not a file. ["
+            + folder.getAbsolutePath() + "]" );
+        }
+        return folder;
+      } catch ( Exception e ) {
+        log.error( "Couldn't create output file", e );
+        return null;
+      }
+    }
+    return null;
   }
 
   protected String replaceColonInPath( String id ) {
@@ -181,7 +197,7 @@ public class FileSystemLineageWriter implements ILineageWriter {
   }
 
   protected boolean isWindows() {
-    return getOsName().indexOf( "win" ) >= 0;
+    return getOsName().contains( "win" );
   }
 
   protected String getOsName() {
@@ -213,6 +229,43 @@ public class FileSystemLineageWriter implements ILineageWriter {
       ext = ".txt";
     }
     return createOutputStream( holder, ext );
+  }
+
+  /**
+   * Returns the output strategy (all, latest, none, etc.) as a string
+   *
+   * @return The String name of the output strategy
+   */
+  @Override
+  public String getOutputStrategy() {
+    return outputStrategy;
+  }
+
+  /**
+   * Sets the output strategy (all, latest, none) for this writer
+   *
+   * @param strategy The strategy to use when outputting lineage information
+   */
+  @Override
+  public void setOutputStrategy( String strategy ) {
+    this.outputStrategy = strategy;
+  }
+
+  /**
+   * Method called on the writer to do any cleanup of the output artifacts, folders, etc.
+   */
+  @Override
+  public void cleanOutput( LineageHolder holder ) {
+    String folderName = "unknown";
+    try {
+      File folder = getOutputDirectoryAsFile( holder );
+      if ( folder.exists() ) {
+        FileUtils.deleteDirectory( folder );
+      }
+      folderName = folder.getAbsolutePath();
+    } catch ( IOException ioe ) {
+      log.error( "Couldn't delete directory: " + folderName, ioe );
+    }
   }
 
 }
