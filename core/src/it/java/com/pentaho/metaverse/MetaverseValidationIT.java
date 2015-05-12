@@ -1272,7 +1272,7 @@ public class MetaverseValidationIT {
     assertEquals( fileNames.length, getIterableSize( outputFiles ) );
     int i = 0;
     for ( FramedMetaverseNode node : outputFiles ) {
-      assertTrue( node.getName().endsWith( fileNames[i++].replace( "file://", "" ) ) );
+      assertTrue( fileNames[i++].equals( node.getName() ) );
     }
 
     Iterable<StreamFieldNode> usedFields = xmlOutputStepNode.getStreamFieldNodesUses();
@@ -1295,7 +1295,7 @@ public class MetaverseValidationIT {
     FilterRowsMeta meta = (FilterRowsMeta) getStepMeta( node );
     Operations ops = MetaverseUtil.convertOperationsStringToMap( node.getOperations() );
     assertEquals( 1, ops.get( ChangeType.DATA_FLOW ).size() );
-    assertEquals( meta.getCondition().toString(), ops.get( ChangeType.DATA_FLOW ).get(0).getDescription() );
+    assertEquals( meta.getCondition().toString(), ops.get( ChangeType.DATA_FLOW ).get( 0 ).getDescription() );
 
     // should not be any created nodes
     Iterable<StreamFieldNode> streamFieldNodes = node.getStreamFieldNodesCreates();
