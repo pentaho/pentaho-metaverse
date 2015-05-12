@@ -68,7 +68,7 @@ public class ExternalResourceInfoFactory {
         resourceInfo.setType( DictionaryConst.NODE_TYPE_FILE );
         break;
       case URL:
-        resourceInfo.setType( DictionaryConst.NODE_TYPE_WEBSERVICE );
+        resourceInfo = (WebServiceResourceInfo) createURLResource( resourceEntry.getResource(), isInput );
         break;
       case CONNECTION:
       case DATABASENAME:
@@ -104,12 +104,11 @@ public class ExternalResourceInfoFactory {
   }
 
   public static IExternalResourceInfo createURLResource( String url, boolean isInput ) {
-    BaseResourceInfo resource = null;
+    WebServiceResourceInfo resource = null;
     if ( url != null ) {
-      resource = new BaseResourceInfo();
+      resource = new WebServiceResourceInfo();
       resource.setName( url );
       resource.setInput( isInput );
-      resource.setType( DictionaryConst.NODE_TYPE_WEBSERVICE );
     }
     return resource;
   }

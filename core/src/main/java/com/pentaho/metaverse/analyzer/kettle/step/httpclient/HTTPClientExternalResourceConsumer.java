@@ -22,42 +22,40 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.httpclient;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-
-import org.apache.commons.vfs.FileObject;
+import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
+import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.api.model.WebServiceResourceInfo;
+import org.apache.commons.lang.ArrayUtils;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.http.HTTP;
 import org.pentaho.di.trans.steps.http.HTTPMeta;
 
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 
 public class HTTPClientExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<HTTP, HTTPMeta> {
 
   @Override
   public boolean isDataDriven( HTTPMeta meta ) {
-    // We can safely assume that the StepMetaInterface object we get back is a TextFileInputMeta
-    return meta.isUrlInField();
+    // We can safely assume that this is always data driven
+    return true;
   }
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( HTTPMeta meta ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
-    // We only need to collect these resources if we're not data-driven and there are no used variables in the
-    // metadata relating to external files.
-    if ( !isDataDriven( meta ) /* TODO */ ) {
+    // We only need to collect these resources if we're not getting the url from a field
+    if ( !meta.isUrlInField()  ) {
       StepMeta parentStepMeta = meta.getParentStepMeta();
       if ( parentStepMeta != null ) {
         TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
@@ -69,7 +67,6 @@ public class HTTPClientExternalResourceConsumer
             for ( String url : urls ) {
               if ( !Const.isEmpty( url ) ) {
                 try {
-
                   IExternalResourceInfo resource = ExternalResourceInfoFactory
                     .createURLResource( url, true );
                   if ( resource != null ) {
@@ -91,24 +88,48 @@ public class HTTPClientExternalResourceConsumer
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromRow(
-    HTTP textFileInput, RowMetaInterface rowMeta, Object[] row ) {
+    HTTP httpClientInput, RowMetaInterface rowMeta, Object[] row ) {
     Collection<IExternalResourceInfo> resources = new LinkedList<IExternalResourceInfo>();
+
     // For some reason the step doesn't return the StepMetaInterface directly, so go around it
-    HTTPMeta meta = (HTTPMeta) textFileInput.getStepMetaInterface();
+    HTTPMeta meta = (HTTPMeta) httpClientInput.getStepMetaInterface();
     if ( meta == null ) {
-      meta = (HTTPMeta) textFileInput.getStepMeta().getStepMetaInterface();
+      meta = (HTTPMeta) httpClientInput.getStepMeta().getStepMetaInterface();
     }
+    if ( meta != null ) {
+      try {
+        String url;
+        if ( meta.isUrlInField() ) {
+          url = rowMeta.getString( row, meta.getUrlField(), null );
+        } else {
+          url = meta.getUrl();
+        }
+        if ( !Const.isEmpty( url ) ) {
+          WebServiceResourceInfo resourceInfo =
+            (WebServiceResourceInfo) ExternalResourceInfoFactory.createURLResource( url, true );
 
-    try {
-      String filename = meta == null ? null : rowMeta.getString( row, meta.getUrlField(), null );
-      if ( !Const.isEmpty( filename ) ) {
-        FileObject fileObject = KettleVFS.getFileObject( filename );
-        resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, true ) );
+          if ( ArrayUtils.isNotEmpty( meta.getHeaderField() ) ) {
+            for ( int i = 0; i < meta.getHeaderField().length; i++ ) {
+              String field = meta.getHeaderField()[ i ];
+              String label = meta.getHeaderParameter()[ i ];
+              resourceInfo.addHeader( label, rowMeta.getString( row, field, null ) );
+            }
+          }
+
+          if ( ArrayUtils.isNotEmpty( meta.getArgumentField() ) ) {
+            for ( int i = 0; i < meta.getArgumentField().length; i++ ) {
+              String field = meta.getArgumentField()[ i ];
+              String label = meta.getArgumentParameter()[ i ];
+              resourceInfo.addParameter( label, rowMeta.getString( row, field, null ) );
+            }
+          }
+
+          resources.add( resourceInfo );
+        }
+      } catch ( KettleException kve ) {
+        // TODO throw exception or ignore?
       }
-    } catch ( KettleException kve ) {
-      // TODO throw exception or ignore?
     }
-
     return resources;
   }
 

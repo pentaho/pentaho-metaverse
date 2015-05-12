@@ -46,6 +46,7 @@ import com.pentaho.metaverse.frames.JobNode;
 import com.pentaho.metaverse.frames.LocatorNode;
 import com.pentaho.metaverse.frames.MergeJoinStepNode;
 import com.pentaho.metaverse.frames.MongoDbDatasourceNode;
+import com.pentaho.metaverse.frames.RestClientStepNode;
 import com.pentaho.metaverse.frames.RootNode;
 import com.pentaho.metaverse.frames.RowsToResultStepNode;
 import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
@@ -94,6 +95,7 @@ import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
 import org.pentaho.di.trans.steps.filterrows.FilterRowsMeta;
 import org.pentaho.di.trans.steps.groupby.GroupByMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
+import org.pentaho.di.trans.steps.rest.RestMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
@@ -109,6 +111,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1367,6 +1370,79 @@ public class MetaverseValidationIT {
         // this was the one we cared about...
         break;
       }
+    }
+  }
+
+  @Test
+  public void testRestClientStepNode() throws Exception{
+    RestClientStepNode node = root.getRestClientStepNode( "REST Client" );
+    assertNotNull( node );
+    Iterable<FramedMetaverseNode> inputUrls = node.getInputUrls();
+    int countInputUrls = getIterableSize( inputUrls );
+    assertEquals( 1, countInputUrls );
+    assertEquals( "REST Client", node.getStepType() );
+
+    RestMeta stepMeta = (RestMeta) getStepMeta( node );
+    for ( FramedMetaverseNode inputUrl : inputUrls ) {
+      assertEquals( stepMeta.getUrl(), inputUrl.getName() );
+    }
+
+    // check the param  field is "used"
+    Iterable<StreamFieldNode> streamFieldNodesUses = node.getStreamFieldNodesUses();
+    assertEquals( 1, getIterableSize( streamFieldNodesUses ) );
+    for ( StreamFieldNode streamFieldNodesUse : streamFieldNodesUses ) {
+      assertEquals( stepMeta.getParameterField()[ 0 ], streamFieldNodesUse.getName() );
+    }
+
+    Iterable<StreamFieldNode> creates = node.getStreamFieldNodesCreates();
+    assertEquals( 1, getIterableSize( streamFieldNodesUses ) );
+    for ( StreamFieldNode create : creates ) {
+      assertEquals( stepMeta.getFieldName(), create.getName() );
+    }
+
+  }
+
+  @Test
+  public void testRestClientStepNode_urlFromField() throws Exception{
+    RestClientStepNode node = root.getRestClientStepNode( "REST Client - parameterized" );
+    assertNotNull( node );
+    Iterable<FramedMetaverseNode> inputUrls = node.getInputUrls();
+    int countInputUrls = getIterableSize( inputUrls );
+    assertEquals( 1, countInputUrls );
+    assertEquals( "REST Client", node.getStepType() );
+
+    RestMeta stepMeta = (RestMeta) getStepMeta( node );
+    for ( FramedMetaverseNode inputUrl : inputUrls ) {
+      assertEquals( stepMeta.getUrlField(), inputUrl.getName() );
+    }
+
+    Set<String> usedFields = new HashSet<>();
+    Collections.addAll( usedFields, stepMeta.getHeaderField() );
+    Collections.addAll( usedFields, stepMeta.getParameterField() );
+    if ( stepMeta.isUrlInField() ) {
+      usedFields.add( stepMeta.getUrlField() );
+    }
+    if ( stepMeta.isDynamicMethod() ) {
+      usedFields.add( stepMeta.getMethodFieldName() );
+    }
+    if ( StringUtils.isNotEmpty( stepMeta.getBodyField() ) ) {
+      usedFields.add( stepMeta.getBodyField() );
+    }
+
+    // check the param  field is "used"
+    Iterable<StreamFieldNode> streamFieldNodesUses = node.getStreamFieldNodesUses();
+    assertEquals( usedFields.size(), getIterableSize( streamFieldNodesUses ) );
+    for ( StreamFieldNode streamFieldNodesUse : streamFieldNodesUses ) {
+      assertTrue( usedFields.contains( streamFieldNodesUse.getName() ) );
+    }
+
+
+    Iterable<StreamFieldNode> creates = node.getStreamFieldNodesCreates();
+    Set<String> createdFields = new HashSet<>();
+    Collections.addAll( createdFields, new String[] { stepMeta.getFieldName(), stepMeta.getResultCodeFieldName(), stepMeta.getResponseTimeFieldName() } );
+    assertEquals( createdFields.size(), getIterableSize( streamFieldNodesUses ) );
+    for ( StreamFieldNode create : creates ) {
+      assertTrue( createdFields.contains( create.getName() ) );
     }
   }
 

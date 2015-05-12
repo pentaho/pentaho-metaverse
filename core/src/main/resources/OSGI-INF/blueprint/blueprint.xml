@@ -172,6 +172,9 @@
   <bean id="HTTPClientStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer"/>
           		
+  <bean id="RestClientStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer"/>
+
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TableOutputStepAnalyzer"/>
@@ -272,6 +275,10 @@
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="HTTPClientStepAnalyzer"/>
 
+  <service id="restClientStepAnalyzerService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           ref="RestClientStepAnalyzer"/>
+
   <reference-list id="stepAnalyzerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
                   member-type="service-object"
@@ -320,6 +327,9 @@
   <bean id="httpClientERC" scope="singleton"
 		class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientExternalResourceConsumer"/>
 
+  <bean id="restClientERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientExternalResourceConsumer"/>
+
   <service id="tableOutputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="tableOutputERC"/>
@@ -359,6 +369,10 @@
   <service id="httpClientERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="httpClientERC"/>
+
+  <service id="restClientERCService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
+           ref="restClientERC"/>
 
   <reference-list id="stepExternalResourceConsumerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
