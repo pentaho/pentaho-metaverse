@@ -70,6 +70,8 @@
   <created_date>2015&#x2f;05&#x2f;04 10&#x3a;18&#x3a;06.664</created_date>
   <modified_user>-</modified_user>
   <modified_date>2015&#x2f;05&#x2f;04 10&#x3a;18&#x3a;06.664</modified_date>
+    <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA&#x3d;</key_for_session_key>
+    <is_key_private>N</is_key_private>
   </info>
   <notepads>
   </notepads>
@@ -198,7 +200,7 @@
     <xml_main_element>Library</xml_main_element>
     <xml_repeat_element>Book</xml_repeat_element>
     <file>
-      <name>file</name>
+      <name>&#x24;&#x7b;java.io.tmpdir&#x7d;file</name>
       <extention>xml</extention>
       <servlet_output>N</servlet_output>
       <do_not_open_newfile_init>N</do_not_open_newfile_init>
