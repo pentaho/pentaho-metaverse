@@ -119,10 +119,10 @@ public class HTTPPostExternalResourceConsumer
             }
           }
 
-          if ( ArrayUtils.isNotEmpty( meta.getArgumentField() ) ) {
-            for ( int i = 0; i < meta.getArgumentField().length; i++ ) {
-              String field = meta.getArgumentField()[ i ];
-              String label = meta.getArgumentParameter()[ i ];
+          if ( ArrayUtils.isNotEmpty( meta.getQueryField() ) ) {
+            for ( int i = 0; i < meta.getQueryField().length; i++ ) {
+              String field = meta.getQueryField()[ i ];
+              String label = meta.getQueryParameter()[ i ];
               resourceInfo.addParameter( label, rowMeta.getString( row, field, null ) );
             }
           }
