@@ -74,6 +74,7 @@ public class BaseRuntimeExtensionPointTest {
     LineageWriter lineageWriter = new LineageWriter();
     lineageWriter.setProfileOutputStream( stringStream );
     lineageWriter.setGraphOutputStream( System.out );
+    lineageWriter.setOutputStrategy( "all" );
 
     lineageWriter.setGraphWriter( graphWriter );
 
