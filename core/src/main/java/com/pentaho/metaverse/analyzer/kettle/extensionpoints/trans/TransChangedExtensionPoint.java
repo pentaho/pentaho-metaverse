@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
+import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
@@ -52,7 +53,9 @@ public class TransChangedExtensionPoint implements ExtensionPointInterface {
       try {
         TransExtensionPointUtil.addLineageGraph( (TransMeta) object );
       } catch ( MetaverseException me ) {
-        throw new KettleException( me );
+        if ( log != null && log.isDebug() ) {
+          log.logDebug( Messages.getString( "ERROR.Graph.CouldNotCreate", me.getMessage() ) );
+        }
       }
     }
   }

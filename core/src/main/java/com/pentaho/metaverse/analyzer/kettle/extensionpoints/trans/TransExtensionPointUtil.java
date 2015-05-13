@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -50,6 +50,12 @@ public class TransExtensionPointUtil {
       throw new MetaverseException( Messages.getString( "ERROR.Document.IsNull" ) );
     }
 
+    // Don't analyze the transformation until it has been saved (i.e. has a filename)
+    if ( transMeta.getFilename() == null ) {
+      throw new MetaverseException( Messages.getString( "ERROR.Document.NotSaved" ) );
+    }
+
+    // Get the "natural" filename (repo-based if in repository, filesystem-based otherwise)
     String filename = getFilename( transMeta );
 
     final Graph graph = new TinkerGraph();
@@ -84,9 +90,6 @@ public class TransExtensionPointUtil {
       if ( transMeta.getDefaultExtension() != null ) {
         filename = filename + "." + transMeta.getDefaultExtension();
       }
-    }
-    if ( filename == null ) {
-      filename = "";
     }
     return filename;
   }
