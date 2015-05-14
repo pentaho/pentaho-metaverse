@@ -1274,7 +1274,7 @@ public class MetaverseValidationIT {
     assertEquals( fileNames.length, getIterableSize( outputFiles ) );
     int i = 0;
     for ( FramedMetaverseNode node : outputFiles ) {
-      assertTrue( fileNames[i++].equals( node.getName() ) );
+      assertTrue( fileNames[i++].endsWith( node.getName() ) );
     }
 
     Iterable<StreamFieldNode> usedFields = xmlOutputStepNode.getStreamFieldNodesUses();
