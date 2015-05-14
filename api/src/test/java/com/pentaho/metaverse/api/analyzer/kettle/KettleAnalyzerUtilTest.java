@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -22,9 +22,12 @@
 
 package com.pentaho.metaverse.api.analyzer.kettle;
 
+import org.apache.commons.vfs.FileObject;
 import org.junit.Test;
+import org.pentaho.di.core.vfs.KettleVFS;
 
 import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -41,9 +44,19 @@ public class KettleAnalyzerUtilTest {
 
   @Test
   public void testNormalizeFilePath() throws Exception {
-    File f = File.createTempFile( "This is a text file", ".txt" );
-    String input = f.getAbsolutePath();
-    String expected = f.getAbsolutePath();
+    String input;
+    String expected;
+    try {
+      File f = File.createTempFile( "This is a text file", ".txt" );
+      input = f.getAbsolutePath();
+      expected = f.getAbsolutePath();
+    } catch ( IOException ioe ) {
+      // If this didn't work, we're running on a system where we can't create files, like CI perhaps.
+      // In that case, use a RAM file. This test doesn't do much in that case, but it will pass.
+      FileObject f = KettleVFS.createTempFile( "This is a text file", ".txt", "ram://" );
+      input = f.getName().getPath();
+      expected = f.getName().getPath();
+    }
 
     String result = KettleAnalyzerUtil.normalizeFilePath( input );
     assertEquals( expected, result );
