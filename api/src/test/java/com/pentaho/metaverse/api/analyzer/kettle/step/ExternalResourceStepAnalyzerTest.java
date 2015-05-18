@@ -131,7 +131,7 @@ public class ExternalResourceStepAnalyzerTest {
     analyzer.customAnalyze( meta, node );
 
     verify( builder ).addNode( resourceNode );
-    verify( builder ).addLink( node, DictionaryConst.LINK_READBY, resourceNode );
+    verify( builder ).addLink( resourceNode, DictionaryConst.LINK_READBY, node );
   }
 
   @Test
@@ -144,6 +144,7 @@ public class ExternalResourceStepAnalyzerTest {
     IExternalResourceInfo resInfo = mock( IExternalResourceInfo.class );
     resources.add( resInfo );
     when( resInfo.isInput() ).thenReturn( false );
+    when( resInfo.isOutput() ).thenReturn( true );
 
     when( erc.getResourcesFromMeta( meta ) ).thenReturn( resources );
 
@@ -151,6 +152,19 @@ public class ExternalResourceStepAnalyzerTest {
 
     verify( builder ).addNode( resourceNode );
     verify( builder ).addLink( node, DictionaryConst.LINK_WRITESTO, resourceNode );
+  }
+
+  @Test
+  public void testGetInputRowMetaInterfaces_isInput() throws Exception {
+    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( null );
+
+    RowMetaInterface rowMetaInterface = mock( RowMetaInterface.class );
+    doReturn( rowMetaInterface ).when( analyzer ).getOutputFields( meta );
+    doReturn( true ).when( analyzer ).isInput();
+
+    Map<String, RowMetaInterface> rowMetaInterfaces = analyzer.getInputRowMetaInterfaces( meta );
+    assertNotNull( rowMetaInterfaces );
+    assertEquals( rowMetaInterface, rowMetaInterfaces.get( ExternalResourceStepAnalyzer.RESOURCE ) );
   }
 
   @Test
@@ -182,6 +196,31 @@ public class ExternalResourceStepAnalyzerTest {
     assertEquals( nextStepNames.length * 2, rowMetaInterfaces.size() );
     assertEquals( rowMetaInterface, rowMetaInterfaces.get( nextStepNames[ 0 ] ) );
     assertEquals( rowMetaInterface, rowMetaInterfaces.get( ExternalResourceStepAnalyzer.RESOURCE ) );
+  }
+
+  @Test
+  public void testCreateInputFieldNode_resource() throws Exception {
+    IAnalysisContext context = mock( IAnalysisContext.class );
+    doReturn( "thisStepName" ).when( analyzer ).getStepName();
+    analyzer.rootNode = node;
+    when( node.getLogicalId() ).thenReturn( "logical id" );
+    ValueMetaInterface vmi = new ValueMeta( "name", 1 );
+
+    IMetaverseNode inputFieldNode = analyzer.createInputFieldNode(
+      context,
+      vmi,
+      ExternalResourceStepAnalyzer.RESOURCE,
+      DictionaryConst.NODE_TYPE_TRANS_FIELD );
+
+    assertNotNull( inputFieldNode );
+
+    assertNotNull( inputFieldNode.getProperty( DictionaryConst.PROPERTY_KETTLE_TYPE ) );
+    assertEquals( "thisStepName", inputFieldNode.getProperty( DictionaryConst.PROPERTY_TARGET_STEP ) );
+    assertEquals( "INPUT_TYPE", inputFieldNode.getType() );
+
+    // the input node should be added by this step
+    verify( builder ).addNode( inputFieldNode );
+
   }
 
   @Test

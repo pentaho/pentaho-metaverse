@@ -2,185 +2,71 @@ package com.pentaho.metaverse.analyzer.kettle.step.csvfileinput;
 
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.INamespace;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.core.variables.VariableSpace;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.steps.csvinput.CsvInput;
 import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseException;
 
 import java.util.Collection;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
 public class CsvFileInputStepAnalyzerTest {
 
-  private CsvFileInputStepAnalyzer csvFileInputStepAnalyzer;
+  private CsvFileInputStepAnalyzer analyzer;
 
-  @Mock
-  private CsvInput mockCsvInput;
-
-  @Mock
-  private CsvInputMeta mockCsvInputMeta;
-
-  @Mock
-  private TransMeta mockTransMeta;
-
-  @Mock
-  private RowMetaInterface mockRowMetaInterface;
-
-  @Mock
-  private IMetaverseBuilder mockBuilder;
-
-  @Mock
-  private INamespace mockNamespace;
-
-  private IMetaverseObjectFactory mockFactory;
-
-  private IComponentDescriptor descriptor;
+  @Mock CsvInputMeta meta;
+  @Mock INamespace mockNamespace;
+  IComponentDescriptor descriptor;
 
   @Before
   public void setUp() throws Exception {
-
-    mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
     when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
-
-    csvFileInputStepAnalyzer = new CsvFileInputStepAnalyzer();
-    csvFileInputStepAnalyzer.setMetaverseBuilder( mockBuilder );
-    descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyze_nullInput() throws Exception {
-    csvFileInputStepAnalyzer.analyze( null, null );
+    descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
+    analyzer = spy( new CsvFileInputStepAnalyzer() );
+    analyzer.setDescriptor( descriptor );
+    analyzer.setObjectFactory( MetaverseTestUtils.getMetaverseObjectFactory() );
   }
 
   @Test
-  public void testAnalyze_noFields() throws Exception {
-
-    StepMeta meta = new StepMeta( "test", mockCsvInputMeta );
-    StepMeta spyMeta = spy( meta );
-
-    String[] fileNames = new String[]{ "MyTextInput.txt" };
-
-    when( mockTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( fileNames );
-    when( mockCsvInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockCsvInputMeta.getFilePaths( Mockito.any( VariableSpace.class ) ) ).thenReturn( fileNames );
-    when( mockCsvInput.getStepMetaInterface()).thenReturn( mockCsvInputMeta );
-
-    IMetaverseNode result = csvFileInputStepAnalyzer.analyze( descriptor, mockCsvInputMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    verify( mockCsvInputMeta, times( 1 ) ).getFilePaths( Mockito.any( VariableSpace.class ) );
-
-    // make sure the step node is added as well as the file node
-    verify( mockBuilder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
-
-    // make sure there is a "readby" link added
-    verify( mockBuilder, times( 1 ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
-
-    // Try again but throw an exception
-    when( mockBuilder.addLink(
-      Mockito.any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_READBY ),
-      Mockito.any( IMetaverseNode.class ) ) )
-      .thenThrow( MetaverseException.class );
-    csvFileInputStepAnalyzer.analyze( descriptor, mockCsvInputMeta );
+  public void testGetUsedFields() throws Exception {
+    assertNull( analyzer.getUsedFields( meta ) );
   }
 
   @Test
-  public void testAnalyze_Fields() throws Exception {
+  public void testGetResourceInputNodeType() throws Exception {
+    assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, analyzer.getResourceInputNodeType() );
+  }
 
-    StepMeta meta = new StepMeta( "test", mockCsvInputMeta );
-    StepMeta spyMeta = spy( meta );
+  @Test
+  public void testGetResourceOutputNodeType() throws Exception {
+    assertNull( analyzer.getResourceOutputNodeType() );
+  }
 
-    String[] fileNames = new String[]{ "MyTextInput.txt" };
+  @Test
+  public void testIsOutput() throws Exception {
+    assertFalse( analyzer.isOutput() );
+  }
 
-    when( mockTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( fileNames );
-    when( mockCsvInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockCsvInputMeta.getFilePaths( Mockito.any( VariableSpace.class ) ) ).thenReturn( fileNames );
-
-    // set up the input fields
-    TextFileInputField field1 = new TextFileInputField( "id", 0, 4 );
-    TextFileInputField field2 = new TextFileInputField( "name", 1, 30 );
-    TextFileInputField[] inputFields = new TextFileInputField[]{ field1, field2 };
-
-    when( mockCsvInputMeta.getInputFields() ).thenReturn( inputFields );
-    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "id", "name" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override
-      public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "id" ) {
-          return new ValueMetaString( "id" );
-        }
-        if ( args[0] == "name" ) {
-          return new ValueMetaString( "name" );
-        }
-        return null;
-      }
-    } );
-
-    IMetaverseNode result = csvFileInputStepAnalyzer.analyze( descriptor, mockCsvInputMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    verify( mockCsvInputMeta, times( 1 ) ).getFilePaths( Mockito.any( VariableSpace.class ) );
-
-    // make sure the step node, the file node, and the field nodes
-    verify( mockBuilder, times( 2 + inputFields.length ) ).addNode( any( IMetaverseNode.class ) );
-
-    // make sure there are "readby" and "uses" links added (file, and each field)
-    verify( mockBuilder, times( 1 ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
-    verify( mockBuilder, times( inputFields.length ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
-
-    // we should have "populates" links from input nodes to output nodes
-    verify( mockBuilder, times( inputFields.length ) )
-      .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
-
+  @Test
+  public void testIsInput() throws Exception {
+    assertTrue( analyzer.isInput() );
   }
 
   @Test
@@ -193,28 +79,11 @@ public class CsvFileInputStepAnalyzerTest {
   }
 
   @Test
-  public void testCsvInputExternalResourceConsumer() throws Exception {
-    CsvFileInputExternalResourceConsumer consumer = new CsvFileInputExternalResourceConsumer();
-
-    StepMeta meta = new StepMeta( "test", mockCsvInputMeta );
-    StepMeta spyMeta = spy( meta );
-
-    when( mockCsvInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    String[] filePaths = { "/path/to/file1", "/another/path/to/file2" };
-    when( mockCsvInputMeta.getFilePaths( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
-
-    assertFalse( consumer.isDataDriven( mockCsvInputMeta ) );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( mockCsvInputMeta );
-    assertFalse( resources.isEmpty() );
-    assertEquals( 2, resources.size() );
-
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
-      .thenThrow( KettleException.class );
-    resources = consumer.getResourcesFromRow( mockCsvInput, mockRowMetaInterface, new String[]{ "id", "name" } );
-    assertTrue( resources.isEmpty() );
-
-    assertEquals( CsvInputMeta.class, consumer.getMetaClass() );
+  public void testCreateResourceNode() throws Exception {
+    IExternalResourceInfo res = mock( IExternalResourceInfo.class );
+    when( res.getName() ).thenReturn( "file:///Users/home/tmp/xyz.ktr" );
+    IMetaverseNode resourceNode = analyzer.createResourceNode( res );
+    assertNotNull( resourceNode );
+    assertEquals( DictionaryConst.NODE_TYPE_FILE, resourceNode.getType() );
   }
-
 }
