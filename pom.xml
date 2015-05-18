@@ -64,6 +64,7 @@
     <dependency.com.fasterxml.jackson.core.version>2.2.3</dependency.com.fasterxml.jackson.core.version>
     <dependency.com.tinkerpop.blueprints.version>2.6.0</dependency.com.tinkerpop.blueprints.version>
     <dependency.commons-configuration.commons-configuration.version>1.9</dependency.commons-configuration.commons-configuration.version>
+    <dependency.commons-collections.commons-collections.version>3.2.1</dependency.commons-collections.commons-collections.version>
     <dependency.net.sf.flexjson.flexjson.version>2.1</dependency.net.sf.flexjson.flexjson.version>
     <dependency.org.slf4j.slf4j-api.version>1.7.7</dependency.org.slf4j.slf4j-api.version>
 
