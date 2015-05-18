@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> extends StepAnalyzer<T> {
@@ -54,10 +55,18 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
       for ( IExternalResourceInfo resource : resources ) {
 
         try {
-          String label = resource.isInput() ? DictionaryConst.LINK_READBY : DictionaryConst.LINK_WRITESTO;
-          IMetaverseNode fileNode = createResourceNode( resource );
-          getMetaverseBuilder().addNode( fileNode );
-          getMetaverseBuilder().addLink( node, label, fileNode );
+          if ( resource.isInput() ) {
+            String label = DictionaryConst.LINK_READBY;
+            IMetaverseNode fileNode = createResourceNode( resource );
+            getMetaverseBuilder().addNode( fileNode );
+            getMetaverseBuilder().addLink( fileNode, label, node );
+          }
+          if ( resource.isOutput() ) {
+            String label = DictionaryConst.LINK_WRITESTO;
+            IMetaverseNode fileNode = createResourceNode( resource );
+            getMetaverseBuilder().addNode( fileNode );
+            getMetaverseBuilder().addLink( node, label, fileNode );
+          }
         } catch ( MetaverseException e ) {
           LOGGER.error( e.getMessage(), e );
         }
@@ -65,6 +74,7 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
     }
   }
 
+  @Override
   protected Map<String, RowMetaInterface> getOutputRowMetaInterfaces( T meta ) {
     Map<String, RowMetaInterface> outputRows = super.getOutputRowMetaInterfaces( meta );
     if ( MapUtils.isNotEmpty( outputRows ) ) {
@@ -83,12 +93,42 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
   }
 
   @Override
+  protected Map<String, RowMetaInterface> getInputRowMetaInterfaces( T meta ) {
+    Map<String, RowMetaInterface> inputRows = super.getInputRowMetaInterfaces( meta );
+    if ( inputRows == null ) {
+      inputRows = new HashMap<>();
+    }
+    // assume that the output fields are defined in the step and are based on the resource inputs
+    if ( isInput() ) {
+      RowMetaInterface stepFields = getOutputFields( meta );
+      inputRows.put( RESOURCE, stepFields );
+    }
+    return inputRows;
+  }
+
+  @Override
   protected IMetaverseNode createOutputFieldNode( IAnalysisContext context, ValueMetaInterface fieldMeta,
                                                   String targetStepName, String nodeType ) {
 
     // if the targetStepName is 'resource' then this is HAS to be a resource field
     nodeType = RESOURCE.equals( targetStepName ) ? getResourceOutputNodeType() : nodeType;
     return super.createOutputFieldNode( context, fieldMeta, targetStepName, nodeType );
+  }
+
+  @Override
+  protected IMetaverseNode createInputFieldNode( IAnalysisContext context, ValueMetaInterface fieldMeta,
+                                                 String previousStepName, String nodeType ) {
+
+    // if the previousStepName is 'resource' then this is HAS to be a resource field
+    boolean isResource = RESOURCE.equals( previousStepName );
+    nodeType = isResource ? getResourceInputNodeType() : nodeType;
+    IMetaverseNode inputFieldNode = super.createInputFieldNode( context, fieldMeta, previousStepName, nodeType );
+    inputFieldNode.setType( nodeType );
+    if ( isResource ) {
+      // add the node so it's not virtual
+      getMetaverseBuilder().addNode( inputFieldNode );
+    }
+    return inputFieldNode;
   }
 
   public IStepExternalResourceConsumer getExternalResourceConsumer() {
@@ -115,4 +155,5 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
   public abstract String getResourceOutputNodeType();
   public abstract boolean isOutput();
   public abstract boolean isInput();
+
 }

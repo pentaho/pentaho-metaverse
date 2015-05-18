@@ -31,6 +31,7 @@ import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.rowsfromresult.RowsFromResultMeta;
 
@@ -55,7 +56,9 @@ public class RowsFromResultStepAnalyzer extends StepAnalyzer<RowsFromResultMeta>
       try {
         rmi = parentTransMeta.getStepFields( parentStepMeta );
         int type = rmi.getValueMeta( j ).getType();
-        IMetaverseNode prevFieldNode = createInputFieldNode( StepAnalyzer.NONE, fieldName, type );
+        ValueMetaInterface vmi = rmi.getValueMeta( j );
+        //        IMetaverseNode prevFieldNode = createInputFieldNode( StepAnalyzer.NONE, fieldName, type );
+        IMetaverseNode prevFieldNode = createInputFieldNode( descriptor.getContext(), vmi, StepAnalyzer.NONE, getInputNodeType() );
         getMetaverseBuilder().addLink( prevFieldNode, DictionaryConst.LINK_INPUTS, rootNode );
         inputs.addNode( StepAnalyzer.NONE, fieldName, prevFieldNode );
       } catch ( KettleStepException e ) {

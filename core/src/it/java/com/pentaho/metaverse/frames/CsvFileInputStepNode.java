@@ -31,7 +31,4 @@ import com.tinkerpop.frames.Adjacency;
 public interface CsvFileInputStepNode extends TransformationStepNode {
   @Adjacency( label = "isreadby", direction = Direction.IN )
   public Iterable<FramedMetaverseNode> getInputFiles();
-
-  @Adjacency( label = "uses", direction = Direction.OUT )
-  public Iterable<FileFieldNode> getFileFieldNodesUses();
 }

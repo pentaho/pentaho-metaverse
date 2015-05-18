@@ -164,8 +164,10 @@
   		  class="com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer"/>
 
   <bean id="CsvFileInputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer"/>
-  
+        class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="csvInputERC"/>
+  </bean>
+
   <bean id="StringsReplaceStepAnalyzer" 
   		  class="com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer"/>
 

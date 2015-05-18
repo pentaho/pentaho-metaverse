@@ -37,6 +37,7 @@ import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.api.model.Operation;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -506,8 +507,13 @@ public class StepAnalyzerTest {
 
     MetaverseTransientNode node = new MetaverseTransientNode( "node id" );
     doReturn( node ).when( analyzer ).createNodeFromDescriptor( any( IComponentDescriptor.class ) );
+    ValueMetaInterface vmi = new ValueMeta( "name", 1 );
 
-    IMetaverseNode inputFieldNode = analyzer.createInputFieldNode( "before", "name", 1 );
+    IMetaverseNode inputFieldNode = analyzer.createInputFieldNode(
+      descriptor.getContext(),
+      vmi,
+      "thisStepName",
+      DictionaryConst.NODE_TYPE_TRANS_FIELD );
     assertNotNull( inputFieldNode );
 
     assertNotNull( inputFieldNode.getProperty( DictionaryConst.PROPERTY_KETTLE_TYPE ) );
@@ -554,11 +560,11 @@ public class StepAnalyzerTest {
     String[] prevStepNames = new String[] { "prevStep", "prevStep2" };
     when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( prevStepNames );
 
-    Map<String, RowMetaInterface> outputRmis = new HashMap<>();
+    Map<String, RowMetaInterface> inputRmis = new HashMap<>();
     RowMetaInterface rowMetaInterface = mock( RowMetaInterface.class );
     RowMetaInterface rowMetaInterface2 = mock( RowMetaInterface.class );
-    outputRmis.put( "prevStep", rowMetaInterface );
-    outputRmis.put( "prevStep2", rowMetaInterface2 );
+    inputRmis.put( "prevStep", rowMetaInterface );
+    inputRmis.put( "prevStep2", rowMetaInterface2 );
     String[] inputFields1 = new String[]{ "name", "address", "email", "age" };
     String[] inputFields2 = new String[]{ "employeeNumber", "occupation" };
 
@@ -575,23 +581,12 @@ public class StepAnalyzerTest {
       vmis2.add( new ValueMeta( s ) );
     }
 
-    when( rowMetaInterface.getValueMeta( anyInt() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-      @Override public ValueMetaInterface answer( InvocationOnMock invocationOnMock ) throws Throwable {
-        Integer idx = (Integer) invocationOnMock.getArguments()[0];
-        return vmis.get( idx );
-      }
-    } );
-
-    when( rowMetaInterface2.getValueMeta( anyInt() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-      @Override public ValueMetaInterface answer( InvocationOnMock invocationOnMock ) throws Throwable {
-        Integer idx = (Integer) invocationOnMock.getArguments()[0];
-        return vmis2.get( idx );
-      }
-    } );
+    when( rowMetaInterface.getValueMetaList() ).thenReturn( vmis );
+    when( rowMetaInterface2.getValueMetaList() ).thenReturn( vmis2 );
 
     IMetaverseNode inputNode  = mock( IMetaverseNode.class );
-    doReturn( outputRmis ).when( analyzer ).getInputFields( baseStepMeta );
-    doReturn( inputNode ).when( analyzer ).createInputFieldNode( anyString(), anyString(), anyInt() );
+    doReturn( inputRmis ).when( analyzer ).getInputRowMetaInterfaces( baseStepMeta );
+    doReturn( inputNode ).when( analyzer ).createInputFieldNode( any( IAnalysisContext.class ), any( ValueMetaInterface.class ), anyString(), anyString() );
 
     StepNodes stepNodes = analyzer.processInputs( baseStepMeta );
     assertNotNull( stepNodes );

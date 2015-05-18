@@ -900,11 +900,9 @@ public class MetaverseValidationIT {
 
     Iterable<FramedMetaverseNode> inputFiles = csvFileInputStepNode.getInputFiles();
     int countInputFiles = getIterableSize( inputFiles );
-    int countCreates = getIterableSize( csvFileInputStepNode.getStreamFieldNodesCreates() );
-    int countDeletes = getIterableSize( csvFileInputStepNode.getStreamFieldNodesDeletes() );
+    int countOutputs = getIterableSize( csvFileInputStepNode.getOutputStreamFields() );
     assertEquals( 1, countInputFiles );
-    assertEquals( 10, countCreates );
-    assertEquals( 0, countDeletes );
+    assertEquals( 10, countOutputs );
 
     for ( FramedMetaverseNode inputFile : inputFiles ) {
       assertTrue( inputFile.getName().endsWith( "customers-100.txt" ) );
@@ -912,16 +910,17 @@ public class MetaverseValidationIT {
 
     assertEquals( "CSV file input", csvFileInputStepNode.getStepType() );
 
-    int countFileFieldNode = getIterableSize( csvFileInputStepNode.getFileFieldNodesUses() );
-
-    Iterable<StreamFieldNode> streamFieldNodes = csvFileInputStepNode.getStreamFieldNodesCreates();
-    int countStreamFieldNode = getIterableSize( streamFieldNodes );
-    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
-      assertNotNull( streamFieldNode.getKettleType() );
+    int fileFieldCount = 0;
+    Iterable<StreamFieldNode> outFields = csvFileInputStepNode.getOutputStreamFields();
+    for ( StreamFieldNode outField : outFields ) {
+      assertNotNull( outField.getKettleType() );
+      FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
+      assertNotNull( fieldPopulatesMe );
+      assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
+      assertEquals( csvFileInputStepNode, fieldPopulatesMe.getStepThatInputsMe() );
+      fileFieldCount++;
     }
-
-    // we should create as many fields as we read in
-    assertEquals( countFileFieldNode, countStreamFieldNode );
+    assertEquals( countOutputs, fileFieldCount );
   }
 
   @Test

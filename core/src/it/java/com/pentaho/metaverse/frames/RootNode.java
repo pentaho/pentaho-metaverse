@@ -82,7 +82,7 @@ public interface RootNode extends FramedMetaverseNode {
     @GremlinParam( "transformationName" ) String transformationName,
     @GremlinParam( "stepName" ) String stepName );
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 10}.has('type', T.eq, 'Transformation Step').out().has('name', T.eq, 'Merge Join').as('step').in('contains').has('name', T.eq, 'merge_join').back('step')" )
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'Merge Join').as('step').in('contains').has('name', T.eq, 'merge_join').back('step')" )
   public MergeJoinStepNode getMergeJoinStepNode();
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Stream lookup'}.as('step').in('contains').has('name', T.eq, 'stream_lookup').back('step')" )
@@ -91,7 +91,7 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Calculator'}.as('step').in('contains').has('name', T.eq, 'calculator').back('step')" )
   public CalculatorStepNode getCalculatorStepNode();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'CSV file input'}.as('step').in('contains').has('name', T.eq, 'CSV Input').back('step')" )
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'CSV file input').as('step').in('contains').has('name', T.eq, 'CSV Input').back('step')" )
   public CsvFileInputStepNode getCsvFileInputStepNode();
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Input'}.as('step').in('contains').has('name', T.eq, 'excel_input').back('step')" )

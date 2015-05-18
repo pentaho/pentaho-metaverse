@@ -281,11 +281,12 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
     return outputs;
   }
 
-  protected IMetaverseNode createInputFieldNode( String previousStepName, String fieldName, int fieldType ) {
-    IComponentDescriptor prevFieldDescriptor = getPrevFieldDescriptor( previousStepName, fieldName );
-    ValueMetaInterface vmi = new ValueMeta( fieldName, fieldType );
-    return createFieldNode( prevFieldDescriptor, vmi, getStepName(), false );
+  protected IMetaverseNode createInputFieldNode( IAnalysisContext context, ValueMetaInterface fieldMeta,
+                                                  String previousStepName, String nodeType ) {
+    IComponentDescriptor prevFieldDescriptor = getPrevFieldDescriptor( previousStepName, fieldMeta.getName() );
+    return createFieldNode( prevFieldDescriptor, fieldMeta, getStepName(), false );
   }
+
 
   protected IMetaverseNode createOutputFieldNode( IAnalysisContext context, ValueMetaInterface fieldMeta,
                                                   String targetStepName, String nodeType ) {
@@ -328,25 +329,29 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
     StepNodes inputs = new StepNodes();
 
     // get all input steps
-    String[] prevStepNames = parentTransMeta.getPrevStepNames( parentStepMeta );
+    Map<String, RowMetaInterface> inputRowMetaInterfaces = getInputRowMetaInterfaces( meta );
 
-    if ( ArrayUtils.isNotEmpty( prevStepNames ) ) {
-      Map<String, RowMetaInterface> inputFields = getInputFields( meta );
-      for ( int i = 0; i < prevStepNames.length; i++ ) {
-        String prevStepName = prevStepNames[ i ];
-        RowMetaInterface rmi = inputFields.get( prevStepName );
-        if ( rmi != null ) {
-          String[] fieldNames = rmi.getFieldNames();
-          for ( int j = 0; j < fieldNames.length; j++ ) {
-            String fieldName = fieldNames[ j ];
-            int type = rmi.getValueMeta( j ).getType();
-            IMetaverseNode prevFieldNode = createInputFieldNode( prevStepName, fieldName, type );
+    if ( MapUtils.isNotEmpty( inputRowMetaInterfaces ) ) {
+      for ( Map.Entry<String, RowMetaInterface> entry : inputRowMetaInterfaces.entrySet() ) {
+        String prevStepName = entry.getKey();
+        RowMetaInterface inputFields = entry.getValue();
+        if ( inputFields != null ) {
+          for ( ValueMetaInterface valueMetaInterface : inputFields.getValueMetaList() ) {
+
+            IMetaverseNode prevFieldNode = createInputFieldNode(
+              descriptor.getContext(),
+              valueMetaInterface,
+              prevStepName,
+              getInputNodeType() );
             getMetaverseBuilder().addLink( prevFieldNode, DictionaryConst.LINK_INPUTS, rootNode );
-            inputs.addNode( prevStepName, fieldName, prevFieldNode );
+            inputs.addNode( prevStepName, valueMetaInterface.getName(), prevFieldNode );
           }
+        } else {
+          LOGGER.warn( "No input fields found for step " + getStepName() );
         }
       }
     }
+
     return inputs;
   }
 
@@ -427,6 +432,12 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
     }
     return outputRows;
   }
+
+  protected Map<String, RowMetaInterface> getInputRowMetaInterfaces( T meta ) {
+    Map<String, RowMetaInterface> inputFields = getInputFields( meta );
+    return inputFields;
+  }
+
 
   protected IMetaverseObjectFactory getMetaverseObjectFactory() {
     return super.metaverseObjectFactory;
