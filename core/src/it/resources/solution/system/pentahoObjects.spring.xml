@@ -55,7 +55,9 @@
     <property name="externalResourceConsumer" ref="csvInputERC"/>
   </bean>
   <bean id="ExcelInputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="excelInputERC"/>
+  </bean>
   <bean id="GroupByStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer"/>
   <bean id="MongoDbInputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputStepAnalyzer">
