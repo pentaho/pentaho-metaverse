@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -45,6 +46,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -164,7 +166,37 @@ public class ExternalResourceStepAnalyzerTest {
 
     Map<String, RowMetaInterface> rowMetaInterfaces = analyzer.getInputRowMetaInterfaces( meta );
     assertNotNull( rowMetaInterfaces );
-    assertEquals( rowMetaInterface, rowMetaInterfaces.get( ExternalResourceStepAnalyzer.RESOURCE ) );
+  }
+
+  @Test
+  public void testGetInputRowMetaInterfaces_isInputAndIncomingNodes() throws Exception {
+    Map<String, RowMetaInterface> inputs = new HashMap<>();
+    RowMetaInterface inputRmi = mock( RowMetaInterface.class );
+
+    List<ValueMetaInterface> vmis = new ArrayList<>();
+    ValueMetaInterface vmi = new ValueMeta( "filename" );
+    vmis.add( vmi );
+
+    when( inputRmi.getValueMetaList() ).thenReturn( vmis );
+    inputs.put( "test", inputRmi );
+    doReturn( inputs ).when( analyzer ).getInputFields( meta );
+    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( null );
+
+    RowMetaInterface rowMetaInterface = new RowMeta();
+    rowMetaInterface.addValueMeta( vmi );
+    ValueMetaInterface vmi2 = new ValueMeta( "otherField" );
+    rowMetaInterface.addValueMeta( vmi2 );
+
+    doReturn( rowMetaInterface ).when( analyzer ).getOutputFields( meta );
+    doReturn( true ).when( analyzer ).isInput();
+
+    Map<String, RowMetaInterface> rowMetaInterfaces = analyzer.getInputRowMetaInterfaces( meta );
+    assertNotNull( rowMetaInterfaces );
+    assertEquals( 2, rowMetaInterfaces.size() );
+    RowMetaInterface metaInterface = rowMetaInterfaces.get( ExternalResourceStepAnalyzer.RESOURCE );
+    // the row meta interface should only have 1 value meta in it, and it should NOT be filename
+    assertEquals( 1, metaInterface.size() );
+    assertEquals( "otherField", metaInterface.getFieldNames()[0] );
   }
 
   @Test

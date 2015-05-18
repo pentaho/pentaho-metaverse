@@ -22,90 +22,28 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.excelinput;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import org.pentaho.di.core.Const;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.excelinput.ExcelInputField;
-import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import com.pentaho.metaverse.api.MetaverseException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.apache.commons.lang.StringUtils;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The ExcelInputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and other
  * metaverse entities
  */
-public class ExcelInputStepAnalyzer extends BaseStepAnalyzer<ExcelInputMeta> {
+public class ExcelInputStepAnalyzer extends ExternalResourceStepAnalyzer<ExcelInputMeta> {
   private Logger log = LoggerFactory.getLogger( ExcelInputStepAnalyzer.class );
-
-  @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, ExcelInputMeta excelInputMeta )
-    throws MetaverseAnalyzerException {
-
-    // do the common analysis for all step
-    IMetaverseNode node = super.analyze( descriptor, excelInputMeta );
-
-    // add the fields as nodes, add the links too
-    ExcelInputField[] fields = excelInputMeta.getField();
-    if ( fields != null ) {
-      for ( ExcelInputField field : fields ) {
-        String fieldName = field.getName();
-        IComponentDescriptor fileFieldDescriptor =
-            new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_FILE_FIELD, descriptor
-                .getNamespace(), descriptor.getContext() );
-        IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
-        metaverseBuilder.addNode( fieldNode );
-
-        // Get the stream field output from this step. It should've already been created when we called super.analyze()
-        IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
-        IMetaverseNode outNode = createNodeFromDescriptor( transFieldDescriptor );
-
-        metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outNode );
-
-        // add a link from the fileField to the text file input step node
-        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, fieldNode );
-      }
-    }
-
-    if ( excelInputMeta.isAcceptingFilenames() ) {
-      String acceptingFieldName = excelInputMeta.getAcceptingField();
-      IComponentDescriptor transFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor, acceptingFieldName );
-      IMetaverseNode acceptingFieldNode = createNodeFromDescriptor( transFieldDescriptor );
-
-      // add a link from the fileField to the excel file input step node
-      metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, acceptingFieldNode );
-    } else {
-      String[] fileNames = parentTransMeta.environmentSubstitute( excelInputMeta.getFileName() );
-
-      // add a link from the file(s) being read to the step
-      if ( fileNames != null ) {
-        for ( String fileName : fileNames ) {
-          if ( !Const.isEmpty( fileName ) ) {
-            try {
-              // first add the node for the file
-              IMetaverseNode excelFileNode = createFileNode( fileName, descriptor );
-              metaverseBuilder.addNode( excelFileNode );
-
-              metaverseBuilder.addLink( excelFileNode, DictionaryConst.LINK_READBY, node );
-            } catch ( MetaverseException e ) {
-              log.error( e.getMessage(), e );
-            }
-          }
-        }
-      }
-    }
-
-    return node;
-  }
 
   @Override
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
@@ -114,5 +52,45 @@ public class ExcelInputStepAnalyzer extends BaseStepAnalyzer<ExcelInputMeta> {
         add( ExcelInputMeta.class );
       }
     };
+  }
+
+  @Override
+  protected Set<StepField> getUsedFields( ExcelInputMeta meta ) {
+    Set<StepField> usedFields = new HashSet<>();
+    if ( meta.isAcceptingFilenames() && StringUtils.isNotEmpty( meta.getAcceptingStepName() ) ) {
+      StepField stepField = new StepField( meta.getAcceptingStepName(), meta.getAcceptingField() );
+      usedFields.add( stepField );
+    }
+    return usedFields;
+  }
+
+  @Override
+  public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
+    return createFileNode( resource.getName(), descriptor );
+  }
+
+  @Override
+  public String getResourceInputNodeType() {
+    return DictionaryConst.NODE_TYPE_FILE_FIELD;
+  }
+
+  @Override
+  public String getResourceOutputNodeType() {
+    return null;
+  }
+
+  @Override
+  public boolean isOutput() {
+    return false;
+  }
+
+  @Override
+  public boolean isInput() {
+    return true;
+  }
+
+  // used for unit testing
+  protected void setObjectFactory( IMetaverseObjectFactory factory ) {
+    this.metaverseObjectFactory = factory;
   }
 }

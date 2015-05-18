@@ -390,16 +390,23 @@ public class MetaverseValidationIT {
 
     assertEquals( "Microsoft Excel Input", excelInputStepNode.getStepType() );
 
-    int countFileFieldNode = getIterableSize( excelInputStepNode.getFileFieldNodesUses() );
+    int countUses = getIterableSize( excelInputStepNode.getFileFieldNodesUses() );
+    int countInputs = getIterableSize( excelInputStepNode.getInputStreamFields() );
 
-    Iterable<StreamFieldNode> streamFieldNodes = excelInputStepNode.getStreamFieldNodesCreates();
-    int countStreamFieldNode = getIterableSize( streamFieldNodes );
-    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
-      assertNotNull( streamFieldNode.getKettleType() );
+    assertEquals( 0, countUses );
+    int fileFieldCount = 0;
+    Iterable<StreamFieldNode> outFields = excelInputStepNode.getOutputStreamFields();
+    int countOutputs = getIterableSize( outFields );
+    for ( StreamFieldNode outField : outFields ) {
+      assertNotNull( outField.getKettleType() );
+      FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
+      assertNotNull( fieldPopulatesMe );
+      assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
+      assertEquals( excelInputStepNode, fieldPopulatesMe.getStepThatInputsMe() );
+      fileFieldCount++;
     }
-
-    // we should create as many fields as we read in
-    assertEquals( countFileFieldNode, countStreamFieldNode );
+    assertEquals( countInputs, fileFieldCount );
+    assertEquals( countOutputs, fileFieldCount );
 
   }
 
@@ -409,16 +416,27 @@ public class MetaverseValidationIT {
     ExcelInputStepNode excelInputStepNode = root.getExcelInputFileNameFromFieldStepNode();
     assertNotNull( excelInputStepNode );
 
-    int countUsesFieldNodes = getIterableSize( excelInputStepNode.getFileFieldNodesUses() );
+    int countUses = getIterableSize( excelInputStepNode.getFileFieldNodesUses() );
+    int countInputs = getIterableSize( excelInputStepNode.getInputStreamFields() );
 
-    Iterable<StreamFieldNode> streamFieldNodes = excelInputStepNode.getStreamFieldNodesCreates();
-    int countCreatesFieldNodes = getIterableSize( streamFieldNodes );
-    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
-      assertNotNull( streamFieldNode.getKettleType() );
+    assertEquals( 1, countUses );
+
+    int fileFieldCount = 0;
+    Iterable<StreamFieldNode> outFields = excelInputStepNode.getOutputStreamFields();
+    int countOutputs = getIterableSize( outFields );
+    for ( StreamFieldNode outField : outFields ) {
+      assertNotNull( outField.getKettleType() );
+      if ( !outField.getName().equals( "filename" ) ) {
+        FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
+        assertNotNull( fieldPopulatesMe );
+        assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
+        assertEquals( excelInputStepNode, fieldPopulatesMe.getStepThatInputsMe() );
+        fileFieldCount++;
+      }
     }
-
-    // we should create as many fields as we read in PLUS 1 for the incoming field that defines the files
-    assertEquals( countUsesFieldNodes - 1, countCreatesFieldNodes );
+    // we should have one more input than file fields since we are reading it off of the input stream
+    assertEquals( countInputs - 1, fileFieldCount );
+    assertEquals( countOutputs - 1, fileFieldCount );
 
     String filenameField = null;
     TransMeta tm =
@@ -429,7 +447,7 @@ public class MetaverseValidationIT {
         assertTrue( meta.isAcceptingFilenames() );
         filenameField = meta.getAcceptingField();
         assertNotNull( filenameField );
-
+        assertEquals( filenameField, excelInputStepNode.getFileFieldNodesUses().iterator().next().getName() );
         // this was the one we cared about...
         break;
       }
