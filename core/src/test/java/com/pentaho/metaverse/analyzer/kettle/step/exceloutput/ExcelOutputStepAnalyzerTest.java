@@ -22,20 +22,14 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.exceloutput;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collection;
-import java.util.Set;
-
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,172 +39,85 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.steps.exceloutput.ExcelField;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutput;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputData;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import java.util.Collection;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
 public class ExcelOutputStepAnalyzerTest {
 
   private ExcelOutputStepAnalyzer analyzer;
 
-  @Mock
-  private StepMeta mockStepMeta;
+  @Mock ExcelOutputMeta meta;
+  @Mock ExcelOutputData data;
+  @Mock ExcelOutput step;
+  @Mock IMetaverseNode node;
+  @Mock INamespace mockNamespace;
+  @Mock TransMeta transMeta;
+  @Mock RowMetaInterface rmi;
 
-  @Mock
-  private ExcelOutput mockExcelOutput;
-
-  @Mock
-  private ExcelOutputMeta mockExcelOutputMeta;
-
-  @Mock
-  private ExcelOutputData mockExcelOutputData;
-
-  @Mock
-  private TransMeta mockTransMeta;
-
-  @Mock
-  private RowMetaInterface mockRowMetaInterface;
-
-  @Mock
-  private IMetaverseBuilder mockBuilder;
-
-  @Mock
-  private INamespace mockNamespace;
-
-  @Mock
-  private ExcelField mockField1;
-
-  @Mock
-  private ExcelField mockField2;
-
-  private IMetaverseObjectFactory mockFactory;
-
-  private IComponentDescriptor descriptor;
+  IComponentDescriptor descriptor;
+  StepNodes inputs;
 
   @Before
   public void setUp() throws Exception {
-    mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
     when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
-
-    when( mockField1.getName() ).thenReturn( "Field 1" );
-    when( mockField2.getName() ).thenReturn( "Field 2" );
-
-    analyzer = new ExcelOutputStepAnalyzer();
-    analyzer.setMetaverseBuilder( mockBuilder );
     descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
 
-    when( mockExcelOutput.getStepMetaInterface() ).thenReturn( mockExcelOutputMeta );
-    when( mockExcelOutput.getStepDataInterface() ).thenReturn( mockExcelOutputData );
-    when( mockExcelOutput.getStepMeta() ).thenReturn( mockStepMeta );
-    when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockExcelOutputMeta );
-  }
+    analyzer = spy( new ExcelOutputStepAnalyzer() );
+    analyzer.setDescriptor( descriptor );
+    analyzer.setObjectFactory( MetaverseTestUtils.getMetaverseObjectFactory() );
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyze_nullInput() throws Exception {
-    analyzer.analyze( null, null );
-  }
-
-  @Test
-  public void testAnalyze_OutputSpecified() throws Exception {
-    StepMeta meta = new StepMeta( "test", mockExcelOutputMeta );
-    StepMeta spyMeta = spy( meta );
-
-    when( mockExcelOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( mockExcelOutputMeta.getFiles( any( VariableSpace.class ) ) ).thenReturn( new String[]{ "/tmp/out.xls" } );
-    when( mockExcelOutputMeta.getOutputFields() ).thenReturn( new ExcelField[]{ } );
-
-    when( mockBuilder.addNode( any( IMetaverseNode.class ) ) ).thenReturn( mockBuilder );
-    when( mockBuilder.addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_WRITESTO ), any( IMetaverseNode.class ) ) ).thenReturn( mockBuilder );
-
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-
-    IMetaverseNode result = analyzer.analyze( descriptor, mockExcelOutputMeta );
-
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    verify( mockBuilder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
-    verify( mockBuilder, times( 1 ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_WRITESTO ), any( IMetaverseNode.class ) );
-
-    verify( mockBuilder, times( 0 ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
-
-    verify( mockBuilder, times( 0 ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
-
+    inputs = new StepNodes();
+    inputs.addNode( "previousStep", "first", node );
+    inputs.addNode( "previousStep", "last", node );
+    inputs.addNode( "previousStep", "age", node );
+    inputs.addNode( "previousStep", "filename", node );
+    doReturn( inputs ).when( analyzer ).getInputs();
   }
 
   @Test
-  public void testAnalyze() throws Exception {
-    StepMeta meta = new StepMeta( "test", mockExcelOutputMeta );
-    StepMeta spyMeta = spy( meta );
+  public void testGetResourceInputNodeType() throws Exception {
+    assertNull( analyzer.getResourceInputNodeType() );
+  }
 
-    when( mockExcelOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( mockExcelOutputMeta.getFiles( any( VariableSpace.class ) ) ).thenReturn( new String[]{ "/tmp/out.txt" } );
+  @Test
+  public void testGetResourceOutputNodeType() throws Exception {
+    assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, analyzer.getResourceOutputNodeType() );
+  }
 
-    ExcelField[] fields = new ExcelField[]{ mockField1, mockField2 };
-    when( mockExcelOutputMeta.getOutputFields() ).thenReturn( fields );
+  @Test
+  public void testIsOutput() throws Exception {
+    assertTrue( analyzer.isOutput() );
+  }
 
-    when( mockBuilder.addNode( any( IMetaverseNode.class ) ) ).thenReturn( mockBuilder );
-    when( mockBuilder.addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_WRITESTO ), any( IMetaverseNode.class ) ) ).thenReturn( mockBuilder );
+  @Test
+  public void testIsInput() throws Exception {
+    assertFalse( analyzer.isInput() );
+  }
 
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+  @Test
+  public void testCreateResourceNode() throws Exception {
+    IExternalResourceInfo res = mock( IExternalResourceInfo.class );
+    when( res.getName() ).thenReturn( "file:///Users/home/tmp/xyz.ktr" );
+    IMetaverseNode resourceNode = analyzer.createResourceNode( res );
+    assertNotNull( resourceNode );
+    assertEquals( DictionaryConst.NODE_TYPE_FILE, resourceNode.getType() );
+  }
 
-    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "Field 1", "Field 2" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override
-      public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "Field 1" ) {
-          return new ValueMetaString( "Field 1" );
-        }
-        if ( args[0] == "Field 2" ) {
-          return new ValueMetaString( "Field 2" );
-        }
-        return null;
-      }
-    } );
-
-    IMetaverseNode result = analyzer.analyze( descriptor, mockExcelOutputMeta );
-
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    verify( mockBuilder, times( 2 + fields.length ) ).addNode( any( IMetaverseNode.class ) );
-    verify( mockBuilder, times( 1 ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_WRITESTO ), any( IMetaverseNode.class ) );
-
-    verify( mockBuilder, times( fields.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
-
-    verify( mockBuilder, times( fields.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
-
+  @Test
+  public void testGetUsedFields() throws Exception {
+    assertNull( analyzer.getUsedFields( meta ) );
   }
 
   @Test
@@ -226,39 +133,39 @@ public class ExcelOutputStepAnalyzerTest {
   public void testExcelOutputExternalResourceConsumer() throws Exception {
     ExcelOutputExternalResourceConsumer consumer = new ExcelOutputExternalResourceConsumer();
 
-    StepMeta meta = new StepMeta( "test", mockExcelOutputMeta );
+    StepMeta meta = new StepMeta( "test", this.meta );
     StepMeta spyMeta = spy( meta );
 
-    when( mockExcelOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockExcelOutputMeta.getFileName() ).thenReturn( null );
+    when( this.meta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( this.meta.getFileName() ).thenReturn( null );
     String[] filePaths = { "/path/to/file1", "/another/path/to/file2" };
-    when( mockExcelOutputMeta.getFiles( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
+    when( this.meta.getFiles( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
 
-    assertFalse( consumer.isDataDriven( mockExcelOutputMeta ) );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( mockExcelOutputMeta );
+    assertFalse( consumer.isDataDriven( this.meta ) );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( this.meta );
     assertFalse( resources.isEmpty() );
     assertEquals( 2, resources.size() );
 
 
-    when( mockExcelOutputMeta.getExtension() ).thenReturn( "xls" );
+    when( this.meta.getExtension() ).thenReturn( "xls" );
 
-    assertFalse( consumer.getResourcesFromMeta( mockExcelOutputMeta ).isEmpty() );
+    assertFalse( consumer.getResourcesFromMeta( this.meta ).isEmpty() );
 
-    mockExcelOutputData.realFilename = "/path/to/row/file";
-    when( mockExcelOutput.buildFilename() )
+    data.realFilename = "/path/to/row/file";
+    when( step.buildFilename() )
       .thenAnswer( new Answer<String>() {
         @Override
         public String answer( InvocationOnMock invocation ) throws Throwable {
-          return ( mockExcelOutputData.realFilename + ".xls" );
+          return ( data.realFilename + ".xls" );
         }
       } );
 
-    resources = consumer.getResourcesFromRow( mockExcelOutput, mockRowMetaInterface, new String[]{ "id", "name" } );
+    resources = consumer.getResourcesFromRow( step, rmi, new String[]{ "id", "name" } );
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
-    resources = consumer.getResourcesFromRow( mockExcelOutput, mockRowMetaInterface, new String[]{ "id", "name" } );
+    resources = consumer.getResourcesFromRow( step, rmi, new String[]{ "id", "name" } );
     assertFalse( resources.isEmpty() );
 
     assertEquals( ExcelOutputMeta.class, consumer.getMetaClass() );

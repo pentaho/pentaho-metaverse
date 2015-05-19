@@ -147,7 +147,9 @@
     <property name="connectionAnalyzer" ref="mongoDbConnectionAnalyzer"/>
   </bean>
   <bean id="ExcelOutputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="excelOutputERC"/>
+  </bean>
   <bean id="SplitFieldsStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.splitfields.SplitFieldsStepAnalyzer"/>
   <bean id="TransExecutorStepAnalyzer"
