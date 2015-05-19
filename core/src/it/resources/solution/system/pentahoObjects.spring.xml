@@ -79,7 +79,10 @@
   <bean id="StringOperationsStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
   <bean id="StringsCutStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer"/>
   <bean id="StringsReplaceStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer"/>
-  <bean id="FixedFileInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer"/>
+  <bean id="FixedFileInputStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="fixedFileInputERC"/>
+  </bean>
   <bean id="TransJobEntryAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer"/>
   <bean id="GetXMLDataStepAnalyzer"
@@ -180,11 +183,13 @@
   <bean id="getXMLDataERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataExternalResourceConsumer"/>
   <bean id="httpClientERC" scope="singleton"
-		class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientExternalResourceConsumer"/>
+		    class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientExternalResourceConsumer"/>
   <bean id="restClientERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientExternalResourceConsumer"/>
   <bean id="httpPostERC" scope="singleton"
-		class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostExternalResourceConsumer"/>
+		    class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostExternalResourceConsumer"/>
+  <bean id="fixedFileInputERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputExternalResourceConsumer"/>
 
 
   <bean id="IStepExternalResourceConsumerProvider"
@@ -202,6 +207,7 @@
         <ref bean="httpClientERC"/>
         <ref bean="restClientERC"/>
         <ref bean="httpPostERC"/>
+        <ref bean="fixedFileInputERC"/>
       </list>
     </property>
 
