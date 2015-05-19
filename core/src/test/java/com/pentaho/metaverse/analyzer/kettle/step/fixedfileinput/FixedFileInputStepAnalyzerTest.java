@@ -22,178 +22,78 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collection;
-import java.util.Set;
-
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.steps.fixedinput.FixedFileInputField;
 import org.pentaho.di.trans.steps.fixedinput.FixedInput;
 import org.pentaho.di.trans.steps.fixedinput.FixedInputMeta;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import java.util.Collection;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @RunWith( MockitoJUnitRunner.class )
 public class FixedFileInputStepAnalyzerTest {
 
-  private FixedFileInputStepAnalyzer fixedFileInputStepAnalyzer;
+  private FixedFileInputStepAnalyzer analyzer;
 
-  @Mock
-  private FixedInput mockFixedFileInput;
+  @Mock FixedInputMeta meta;
+  @Mock INamespace mockNamespace;
+  @Mock FixedInput input;
+  @Mock TransMeta transMeta;
+  @Mock RowMetaInterface rmi;
 
-  @Mock
-  private FixedInputMeta mockFixedFileInputMeta;
-
-  @Mock
-  private StepMeta mockStepMeta;
-
-  @Mock
-  private TransMeta mockTransMeta;
-
-  @Mock
-  private RowMetaInterface mockRowMetaInterface;
-
-  @Mock
-  private IMetaverseBuilder mockBuilder;
-
-  @Mock
-  private INamespace mockNamespace;
-
-  private IMetaverseObjectFactory mockFactory;
-
-  private IComponentDescriptor descriptor;
+  IComponentDescriptor descriptor;
 
   @Before
   public void setUp() throws Exception {
-
-    mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
     when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
-
-    fixedFileInputStepAnalyzer = new FixedFileInputStepAnalyzer();
-    fixedFileInputStepAnalyzer.setMetaverseBuilder( mockBuilder );
-    descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
-
-    when( mockFixedFileInput.getStepMetaInterface() ).thenReturn( mockFixedFileInputMeta );
-    when( mockFixedFileInput.getStepMeta() ).thenReturn( mockStepMeta );
-    when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockFixedFileInputMeta );
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyze_nullInput() throws Exception {
-    fixedFileInputStepAnalyzer.analyze( null, null );
+    descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
+    analyzer = spy( new FixedFileInputStepAnalyzer() );
+    analyzer.setDescriptor( descriptor );
+    analyzer.setObjectFactory( MetaverseTestUtils.getMetaverseObjectFactory() );
   }
 
   @Test
-  public void testAnalyze_noFields() throws Exception {
-
-    StepMeta meta = new StepMeta( "test", mockFixedFileInputMeta );
-    StepMeta spyMeta = spy( meta );
-
-    String[] fileNames = new String[]{ "MyTextInput.txt" };
-
-    when( mockTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( fileNames );
-    when( mockFixedFileInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockFixedFileInputMeta.getFilename() ).thenReturn( fileNames[0] );
-
-    IMetaverseNode result = fixedFileInputStepAnalyzer.analyze( descriptor, mockFixedFileInputMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    verify( mockFixedFileInputMeta, times( 1 ) ).getFilename();
-
-    // make sure the step node is added as well as the file node
-    verify( mockBuilder, times( 1 ) ).addNode( any( IMetaverseNode.class ) );
-
+  public void testGetUsedFields() throws Exception {
+    assertNull( analyzer.getUsedFields( meta ) );
   }
 
   @Test
-  public void testAnalyze_Fields() throws Exception {
+  public void testGetResourceInputNodeType() throws Exception {
+    assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, analyzer.getResourceInputNodeType() );
+  }
 
-    StepMeta meta = new StepMeta( "test", mockFixedFileInputMeta );
-    StepMeta spyMeta = spy( meta );
+  @Test
+  public void testGetResourceOutputNodeType() throws Exception {
+    assertNull( analyzer.getResourceOutputNodeType() );
+  }
 
-    String[] fileNames = new String[]{ "MyTextInput.txt" };
+  @Test
+  public void testIsOutput() throws Exception {
+    assertFalse( analyzer.isOutput() );
+  }
 
-    when( mockTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( fileNames );
-    when( mockFixedFileInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockFixedFileInputMeta.getFilename() ).thenReturn( fileNames[0] );
-
-    // set up the input fields
-    FixedFileInputField field1 = new FixedFileInputField();
-    FixedFileInputField field2 = new FixedFileInputField();
-    FixedFileInputField[] inputFields = new FixedFileInputField[]{ field1, field2 };
-
-    when( mockFixedFileInputMeta.getFieldDefinition() ).thenReturn( inputFields );
-    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "id", "name" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override
-      public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "id" ) {
-          return new ValueMetaString( "id" );
-        }
-        if ( args[0] == "name" ) {
-          return new ValueMetaString( "name" );
-        }
-        return null;
-      }
-    } );
-
-    IMetaverseNode result = fixedFileInputStepAnalyzer.analyze( descriptor, mockFixedFileInputMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    verify( mockFixedFileInputMeta, times( 1 ) ).getFilename();
-
-    // make sure the step node, the file node, and the field nodes
-    verify( mockBuilder, times( 3 ) ).addNode( any( IMetaverseNode.class ) );
-
-    // make sure there are "uses" links added (file, and each field)
-    verify( mockBuilder, times( inputFields.length ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
-
-    // we should have "populates" links from input nodes to output nodes
-    verify( mockBuilder, times( inputFields.length ) )
-      .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
-
+  @Test
+  public void testIsInput() throws Exception {
+    assertTrue( analyzer.isInput() );
   }
 
   @Test
@@ -206,22 +106,42 @@ public class FixedFileInputStepAnalyzerTest {
   }
 
   @Test
+  public void testFixedFileInputExternalResourceConsumer_nullFileName() throws Exception {
+    FixedFileInputExternalResourceConsumer consumer = new FixedFileInputExternalResourceConsumer();
+
+    StepMeta spyMeta = spy( new StepMeta( "test", meta ) );
+
+    when( meta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( meta.getFilename() ).thenReturn( null );
+    
+    assertFalse( consumer.isDataDriven( meta ) );
+    assertTrue( consumer.getResourcesFromMeta( meta ).isEmpty() );
+
+    when( rmi.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+      .thenThrow( KettleException.class );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromRow( input, rmi, new String[]{ "id", "name" } );
+    assertTrue( resources.isEmpty() );
+
+    assertEquals( FixedInputMeta.class, consumer.getMetaClass() );
+  }
+
+  @Test
   public void testFixedFileInputExternalResourceConsumer() throws Exception {
     FixedFileInputExternalResourceConsumer consumer = new FixedFileInputExternalResourceConsumer();
 
-    StepMeta meta = new StepMeta( "test", mockFixedFileInputMeta );
-    StepMeta spyMeta = spy( meta );
+    StepMeta spyMeta = spy( new StepMeta( "test", meta ) );
 
-    when( mockFixedFileInputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockFixedFileInputMeta.getFilename() ).thenReturn( null );
-    
-    assertFalse( consumer.isDataDriven( mockFixedFileInputMeta ) );
-    assertTrue( consumer.getResourcesFromMeta( mockFixedFileInputMeta ).isEmpty() );
+    when( meta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( meta.getFilename() ).thenReturn( "path/to/file.txt" );
 
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+    assertFalse( consumer.isDataDriven( meta ) );
+    assertFalse( consumer.getResourcesFromMeta( meta ).isEmpty() );
+
+    when( rmi.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenThrow( KettleException.class );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromRow( mockFixedFileInput, mockRowMetaInterface, new String[]{ "id", "name" } );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromRow( input, rmi, new String[]{ "id", "name" } );
     assertTrue( resources.isEmpty() );
 
     assertEquals( FixedInputMeta.class, consumer.getMetaClass() );

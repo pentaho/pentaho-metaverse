@@ -1245,16 +1245,20 @@ public class MetaverseValidationIT {
     assertEquals( "Fixed file input", fixedFileInputStepNode.getStepType() );
 
     int countFileFieldNode = getIterableSize( fixedFileInputStepNode.getFileFieldNodesUses() );
+    assertEquals( 0, countFileFieldNode );
 
-    Iterable<StreamFieldNode> streamFieldNodes = fixedFileInputStepNode.getStreamFieldNodesCreates();
-    int countStreamFieldNode = getIterableSize( streamFieldNodes );
-    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
-      assertNotNull( streamFieldNode.getKettleType() );
+    int countOutputs = getIterableSize( fixedFileInputStepNode.getOutputStreamFields() );
+    int fileFieldCount = 0;
+    Iterable<StreamFieldNode> outFields = fixedFileInputStepNode.getOutputStreamFields();
+    for ( StreamFieldNode outField : outFields ) {
+      assertNotNull( outField.getKettleType() );
+      FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
+      assertNotNull( fieldPopulatesMe );
+      assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
+      assertEquals( fixedFileInputStepNode, fieldPopulatesMe.getStepThatInputsMe() );
+      fileFieldCount++;
     }
-
-    // we should create as many fields as we read in
-    assertEquals( countFileFieldNode, countStreamFieldNode );
-
+    assertEquals( countOutputs, fileFieldCount );
   }
 
   @Test
