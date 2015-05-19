@@ -22,90 +22,52 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.exceloutput;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.pentaho.di.core.Const;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.exceloutput.ExcelField;
-import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import com.pentaho.metaverse.api.MetaverseException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The TextFileOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the
  * fields operated on by Text File Output steps.
  */
-public class ExcelOutputStepAnalyzer extends BaseStepAnalyzer<ExcelOutputMeta> {
+public class ExcelOutputStepAnalyzer extends ExternalResourceStepAnalyzer<ExcelOutputMeta> {
 
   private Logger log = LoggerFactory.getLogger( ExcelOutputStepAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, ExcelOutputMeta meta )
-    throws MetaverseAnalyzerException {
-
-    // do the common analysis...
-    super.analyze( descriptor, meta );
-
-    addFileNodeAndLink( descriptor, meta );
-    // TODO: handle runtime file splitting for every X number of rows.
-
-    addFieldNodesAndLinks( descriptor, meta );
-
-    return rootNode;
-
+  public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
+    return createFileNode( resource.getName(), descriptor );
   }
 
-  protected void addFileNodeAndLink( IComponentDescriptor descriptor, ExcelOutputMeta meta ) {
-    // get the file(s) that are being written to
-    String[] files = meta.getFiles( meta.getParentStepMeta().getParentTransMeta() );
-
-    if ( files != null ) {
-      // create node(s) form them
-      for ( String file : files ) {
-        if ( !Const.isEmpty( file ) ) {
-          try {
-            IMetaverseNode fileNode = createFileNode( file, descriptor );
-            metaverseBuilder.addNode( fileNode );
-            // add 'writesto' links to them from the rootNode
-            metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_WRITESTO, fileNode );
-          } catch ( MetaverseException e ) {
-            log.error( e.getMessage(), e );
-          }
-        }
-      }
-    }
+  @Override
+  public String getResourceInputNodeType() {
+    return null;
   }
 
-  protected void addFieldNodesAndLinks( IComponentDescriptor descriptor, ExcelOutputMeta meta ) {
-    ExcelField[] outputFields = meta.getOutputFields();
-    for ( ExcelField outputField : outputFields ) {
-      String fieldName = outputField.getName();
-      IComponentDescriptor fileFieldDescriptor =
-          new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_FILE_FIELD, descriptor, descriptor
-              .getContext() );
+  @Override
+  public String getResourceOutputNodeType() {
+    return DictionaryConst.NODE_TYPE_FILE_FIELD;
+  }
 
-      // create the file field nodes
-      IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
-      metaverseBuilder.addNode( fieldNode );
+  @Override
+  public boolean isOutput() {
+    return true;
+  }
 
-      IComponentDescriptor transFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor, fieldName );
-      IMetaverseNode transFieldNode = createNodeFromDescriptor( transFieldDescriptor );
-
-      // add 'populates' links from the stream fields to them
-      metaverseBuilder.addLink( transFieldNode, DictionaryConst.LINK_POPULATES, fieldNode );
-
-      // add the links for "uses" stream fields
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, transFieldNode );
-    }
+  @Override
+  public boolean isInput() {
+    return false;
   }
 
   @Override
@@ -116,4 +78,15 @@ public class ExcelOutputStepAnalyzer extends BaseStepAnalyzer<ExcelOutputMeta> {
       }
     };
   }
+
+  @Override
+  protected Set<StepField> getUsedFields( ExcelOutputMeta meta ) {
+    return null;
+  }
+
+  // used for unit testing
+  protected void setObjectFactory( IMetaverseObjectFactory factory ) {
+    this.metaverseObjectFactory = factory;
+  }
+
 }

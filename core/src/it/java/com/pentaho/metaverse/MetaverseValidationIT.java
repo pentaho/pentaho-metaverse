@@ -978,15 +978,20 @@ public class MetaverseValidationIT {
       assertEquals( fileNames[i++].replace( "file://", "" ), node.getName() );
     }
 
-    Iterable<StreamFieldNode> usedFields = excelOutputStepNode.getStreamFieldNodesUses();
-    int usedFieldCount = getIterableSize( usedFields );
-    assertEquals( outputFields.length, usedFieldCount );
-    assertEquals( incomingFields.size(), usedFieldCount );
+    Iterable<StreamFieldNode> outFields = excelOutputStepNode.getOutputStreamFields();
+    int outFieldCount = getIterableSize( outFields );
+    // should have output stream nodes as well as file nodes
+    assertEquals( outputFields.length * 2, outFieldCount );
 
-    for ( StreamFieldNode usedField : usedFields ) {
-      ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
-      assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
+    int fileFieldCount = 0;
+    for ( StreamFieldNode outField : outFields ) {
+      if ( DictionaryConst.NODE_TYPE_FILE_FIELD.equals( outField.getType() ) ) {
+        ValueMetaInterface vmi = incomingFields.searchValueMeta( outField.getName() );
+        assertEquals( vmi.getName(), outField.getFieldPopulatesMe().getName() );
+        fileFieldCount++;
+      }
     }
+    assertEquals( fileFieldCount, outFieldCount / 2 );
 
   }
 
