@@ -27,12 +27,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,20 +59,9 @@ import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 public class GroupByStepAnalyzerTest {
 
   private GroupByStepAnalyzer analyzer;
-  private static final String DEFAULT_STEP_NAME = "testStep";
+  @Mock
+  private GroupByMeta meta;
 
-  @Mock
-  private IMetaverseBuilder builder;
-  @Mock
-  private GroupByMeta groupByMeta;
-  @Mock
-  private INamespace namespace;
-  @Mock
-  private IComponentDescriptor descriptor;
-  @Mock
-  private StepMeta parentStepMeta;
-  @Mock
-  private TransMeta parentTransMeta;
   @Mock
   private RowMetaInterface rowMeta1;
 
@@ -82,44 +73,41 @@ public class GroupByStepAnalyzerTest {
   @Before
   public void setUp() throws Exception {
 
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
+    when( meta.getGroupField() ).thenReturn( groupFields );
 
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
-    when( groupByMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
-    when( groupByMeta.getGroupField() ).thenReturn( groupFields );
+    when( meta.getSubjectField() ).thenReturn( mockSubjectFields );
+    when( meta.getAggregateField() ).thenReturn( mockAggregateFields );
+    when( meta.getAggregateType() ).thenReturn( mockAggregateOperations );
 
-    when( groupByMeta.getSubjectField() ).thenReturn( mockSubjectFields );
-    when( groupByMeta.getAggregateField() ).thenReturn( mockAggregateFields );
-    when( groupByMeta.getAggregateType() ).thenReturn( mockAggregateOperations );
+    analyzer = spy( new GroupByStepAnalyzer() );
 
-    analyzer = new GroupByStepAnalyzer();
-    when( builder.getMetaverseObjectFactory() ).thenReturn( MetaverseTestUtils.getMetaverseObjectFactory() );
-    analyzer.setMetaverseBuilder( builder );
-
-    descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
-    analyzer.analyze( descriptor, null );
   }
 
   @Test
-  public void testAnalyze() {
-    try {
-      analyzer.analyze( descriptor, groupByMeta );
-    } catch ( MetaverseAnalyzerException e ) {
-      e.printStackTrace();
+  public void testGetChangeRecords() throws Exception {
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( meta );
+    assertEquals( 2, changeRecords.size() );
+    ComponentDerivationRecord next = changeRecords.iterator().next();
+    assertTrue( next.getOriginalEntityName().equals( "member" ) || next.getOriginalEntityName().equals( "donation" ) );
+    if ( next.getOriginalEntityName().equals( "member" ) ) {
+      assertEquals( "memberlist", next.getChangedEntityName() );
+    } else {
+      assertEquals( "totalcity", next.getChangedEntityName() );
     }
-    verify( builder, times( 1 ) ).addNode( any( IMetaverseNode.class ) );
+  }
 
-    verify( builder, times( mockSubjectFields.length + groupFields.length ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
-
+  @Test
+  public void testGetUsedFields() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    fields.add( new StepField( "prev", "member" ) );
+    fields.add( new StepField( "prev", "donation" ) );
+    fields.add( new StepField( "prev", "state" ) );
+    fields.add( new StepField( "prev", "country" ) );
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), any( StepNodes.class ) );
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+    int expectedUsedFieldCount = mockAggregateFields.length + mockSubjectFields.length;
+    assertEquals( expectedUsedFieldCount, usedFields.size() );
+    verify( analyzer, times( expectedUsedFieldCount ) ).createStepFields( anyString(), any( StepNodes.class ) );
   }
 
   @Test
@@ -129,5 +117,11 @@ public class GroupByStepAnalyzerTest {
     assertNotNull( types );
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( GroupByMeta.class ) );
+  }
+
+  @Test
+  public void testCustomAnalyze() throws Exception {
+    // only for code coverage
+    analyzer.customAnalyze( meta, mock( IMetaverseNode.class ) );
   }
 }

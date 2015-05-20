@@ -23,122 +23,47 @@
 package com.pentaho.metaverse.analyzer.kettle.step.getxmldata;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.api.MetaverseException;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.exception.KettleValueException;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.getxmldata.GetXMLDataField;
 import org.pentaho.di.trans.steps.getxmldata.GetXMLDataMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * The GetXMLDataStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
  * other metaverse entities
  */
-public class GetXMLDataStepAnalyzer extends BaseStepAnalyzer<GetXMLDataMeta> {
+public class GetXMLDataStepAnalyzer extends ExternalResourceStepAnalyzer<GetXMLDataMeta> {
   private Logger log = LoggerFactory.getLogger( GetXMLDataStepAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, GetXMLDataMeta getXMLDataMeta )
-    throws MetaverseAnalyzerException {
-
-    // do the common analysis for all step
-    IMetaverseNode stepNode = super.analyze( descriptor, getXMLDataMeta );
-
-    // Add the XPath Loop to the step node
-    stepNode.setProperty( "loopXPath", getXMLDataMeta.getLoopXPath() );
-
-    // Get some boolean flags from the meta for easier access
-    boolean isInFields = getXMLDataMeta.isInFields();
-    boolean isAFile = getXMLDataMeta.getIsAFile();
-    boolean isAUrl = getXMLDataMeta.isReadUrl();
-
-    // If we're getting the data from a field (whether the field contains a filename or actual XML), we need a
-    // "uses" link from the step to that field.
-    IComponentDescriptor inFieldDescriptor = null;
-    IMetaverseNode inFieldNode = null;
-    if ( isInFields ) {
-      String inField = getXMLDataMeta.getXMLField();
-      inFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor, inField );
-      inFieldNode = createNodeFromDescriptor( inFieldDescriptor );
-      // The step uses the specified field in order to get at the XML data
-      metaverseBuilder.addLink( stepNode, DictionaryConst.LINK_USES, inFieldNode );
-    } else {
-      // We're not getting the data from a field, so get the list of static filenames in case we reach that processing.
-      // We only need to fetch them once, not for each field.
-      String[] fileNames = parentTransMeta.environmentSubstitute( getXMLDataMeta.getFileName() );
-
-      // Add a link from the file(s) being read to the step
-      if ( fileNames != null ) {
-        for ( String fileName : fileNames ) {
-          if ( !Const.isEmpty( fileName ) ) {
-            try {
-              // first add the node for the file
-              IMetaverseNode xmlFileNode = createFileNode( fileName, descriptor );
-              metaverseBuilder.addNode( xmlFileNode );
-
-              metaverseBuilder.addLink( xmlFileNode, DictionaryConst.LINK_READBY, stepNode );
-            } catch ( MetaverseException e ) {
-              log.error( e.getMessage(), e );
-            }
-          }
-        }
-      }
+  protected Set<StepField> getUsedFields( GetXMLDataMeta meta ) {
+    Set<StepField> usedFields = new HashSet<>();
+    if ( meta.isInFields() ) {
+      Set<StepField> stepFields = createStepFields( meta.getXMLField(), getInputs() );
+      usedFields.addAll( stepFields );
     }
-
-    // add the fields as nodes, add the links too
-    GetXMLDataField[] fields = getXMLDataMeta.getInputFields();
-    if ( fields != null ) {
-      for ( GetXMLDataField field : fields ) {
-        String fieldName = field.getName();
-
-        // Get the stream field output from this step. It should've already been created when we called super.analyze()
-        IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
-        IMetaverseNode outFieldNode = createNodeFromDescriptor( transFieldDescriptor );
-
-        // Add field properties like XPath
-        outFieldNode.setProperty( "xpath", Const.NVL( field.getXPath(), "" ) );
-        outFieldNode.setProperty( "element", Const.NVL( field.getElementTypeCode(), "" ) );
-        outFieldNode.setProperty( "resultType", Const.NVL( field.getResultTypeCode(), "" ) );
-        outFieldNode.setProperty( "repeat", field.isRepeated() );
-
-        // If the XML is not coming directly from a field value, then it is coming from a filename or URL,
-        // so create physical field nodes, file nodes, etc.
-        if ( !isInFields || isAFile || isAUrl ) {
-          IComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
-            fieldName,
-            DictionaryConst.NODE_TYPE_FILE_FIELD,
-            descriptor.getNamespace(),
-            descriptor.getContext() );
-
-          IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
-          metaverseBuilder.addNode( fieldNode );
-
-          // The file field populates the stream field
-          metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outFieldNode );
-          // The step uses the file field
-          metaverseBuilder.addLink( stepNode, DictionaryConst.LINK_USES, fieldNode );
-
-
-        } else {
-          // The XML is coming directly from a stream field, so represent that in the graph
-          if ( inFieldDescriptor != null ) {
-            // The incoming field node is used to derive the output field
-            metaverseBuilder.addLink( inFieldNode, DictionaryConst.LINK_DERIVES, outFieldNode );
-          }
-        }
-      }
-    }
-
-    return stepNode;
+    return usedFields;
   }
 
   @Override
@@ -149,4 +74,132 @@ public class GetXMLDataStepAnalyzer extends BaseStepAnalyzer<GetXMLDataMeta> {
       }
     };
   }
+
+  @Override
+  protected IMetaverseNode createOutputFieldNode( IAnalysisContext context, ValueMetaInterface fieldMeta,
+                                                  String targetStepName, String nodeType ) {
+    IMetaverseNode fieldNode = super.createOutputFieldNode( context, fieldMeta, targetStepName, nodeType );
+    GetXMLDataField[] fields = baseStepMeta.getInputFields();
+    for ( GetXMLDataField field : fields ) {
+      if ( fieldMeta.getName().equals( field.getName() ) ) {
+        fieldNode.setProperty( "xpath", Const.NVL( field.getXPath(), "" ) );
+        fieldNode.setProperty( "element", Const.NVL( field.getElementTypeCode(), "" ) );
+        fieldNode.setProperty( "resultType", Const.NVL( field.getResultTypeCode(), "" ) );
+        fieldNode.setProperty( "repeat", field.isRepeated() );
+        break;
+      }
+    }
+    return fieldNode;
+  }
+
+  @Override
+  protected Map<String, RowMetaInterface> getInputRowMetaInterfaces( GetXMLDataMeta meta ) {
+    Map<String, RowMetaInterface> inputRows = getInputFields( meta );
+    if ( inputRows == null ) {
+      inputRows = new HashMap<>();
+    }
+    // Get some boolean flags from the meta for easier access
+    boolean isInFields = meta.isInFields();
+    boolean isAFile = meta.getIsAFile();
+    boolean isAUrl = meta.isReadUrl();
+
+    // only add resource fields if we are NOT getting the xml or file from a field
+    if ( !isInFields || isAFile || isAUrl ) {
+      RowMetaInterface stepFields = getOutputFields( meta );
+      RowMetaInterface clone = stepFields.clone();
+      // if there are previous steps providing data, we should remove them from the set of "resource" fields
+      for ( RowMetaInterface rowMetaInterface : inputRows.values() ) {
+        for ( ValueMetaInterface valueMetaInterface : rowMetaInterface.getValueMetaList() ) {
+          try {
+            clone.removeValueMeta( valueMetaInterface.getName() );
+          } catch ( KettleValueException e ) {
+            // could not find it in the output, skip it
+          }
+        }
+      }
+      inputRows.put( RESOURCE, clone );
+    }
+    return inputRows;
+  }
+
+  @Override
+  public Set<ComponentDerivationRecord> getChangeRecords( GetXMLDataMeta meta )
+    throws MetaverseAnalyzerException {
+    Set<ComponentDerivationRecord> changes = new HashSet<>();
+
+    boolean isInFields = meta.isInFields();
+    boolean isAFile = meta.getIsAFile();
+    boolean isAUrl = meta.isReadUrl();
+
+    // if we are getting xml from a field, we need to add the "derives" links from the xml to the output fields
+    if ( isInFields && !isAFile && !isAUrl ) {
+      GetXMLDataField[] fields = baseStepMeta.getInputFields();
+      if ( getInputs() != null ) {
+        Set<StepField> inputFields = getInputs().getFieldNames();
+
+        for ( StepField inputField : inputFields ) {
+          if ( inputField.getFieldName().equals( meta.getXMLField() ) ) {
+            // link this to all of the outputs that come from the xml
+            for ( GetXMLDataField field : fields ) {
+              ComponentDerivationRecord change = new ComponentDerivationRecord( meta.getXMLField(), field.getName() );
+              changes.add( change );
+            }
+            break;
+          }
+        }
+      }
+    }
+    return changes;
+  }
+
+  @Override
+  protected void customAnalyze( GetXMLDataMeta meta, IMetaverseNode node ) throws MetaverseAnalyzerException {
+    super.customAnalyze( meta, node );
+    // Add the XPath Loop to the step node
+    node.setProperty( "loopXPath", meta.getLoopXPath() );
+  }
+
+  @Override
+  public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
+    return createFileNode( resource.getName(), descriptor );
+  }
+
+  @Override
+  public String getResourceInputNodeType() {
+    return DictionaryConst.NODE_TYPE_FILE_FIELD;
+  }
+
+  @Override
+  public String getResourceOutputNodeType() {
+    return null;
+  }
+
+  @Override
+  public boolean isOutput() {
+    return false;
+  }
+
+  @Override
+  public boolean isInput() {
+    return true;
+  }
+
+  ///// used for unit testing
+  protected void setObjectFactory( IMetaverseObjectFactory factory ) {
+    this.metaverseObjectFactory = factory;
+  }
+  protected void setRootNode( IMetaverseNode node ) {
+    rootNode = node;
+  }
+  protected void setBaseStepMeta( GetXMLDataMeta meta ) {
+    baseStepMeta = meta;
+  }
+  protected void setParentTransMeta( TransMeta tm ) {
+    parentTransMeta = tm;
+  }
+  protected void setParentStepMeta( StepMeta sm ) {
+    parentStepMeta = sm;
+  }
+  ///// used for unit testing
+
 }

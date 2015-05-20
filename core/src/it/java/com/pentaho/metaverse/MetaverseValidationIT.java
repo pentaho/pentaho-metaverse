@@ -948,12 +948,8 @@ public class MetaverseValidationIT {
 
     GroupByMeta meta = (GroupByMeta) getStepMeta( groupByStepNode );
 
-    int countCreates = getIterableSize( groupByStepNode.getStreamFieldNodesCreates() );
-    int countDeletes = getIterableSize( groupByStepNode.getStreamFieldNodesDeletes() );
     int countUses = getIterableSize( groupByStepNode.getStreamFieldNodesUses() );
 
-    assertEquals( 2, countCreates );
-    assertEquals( 2, countDeletes );
     int expectedUsesLinksCount = meta.getSubjectField().length + meta.getGroupField().length;
     assertEquals( expectedUsesLinksCount, countUses );
   }
@@ -1277,15 +1273,22 @@ public class MetaverseValidationIT {
     assertEquals( "Get data from XML", getXMLDataStepNode.getStepType() );
 
     int countFileFieldNode = getIterableSize( getXMLDataStepNode.getFileFieldNodesUses() );
+    assertEquals( 0, countFileFieldNode );
 
-    Iterable<StreamFieldNode> streamFieldNodes = getXMLDataStepNode.getStreamFieldNodesCreates();
-    int countStreamFieldNode = getIterableSize( streamFieldNodes );
-    for ( StreamFieldNode streamFieldNode : streamFieldNodes ) {
-      assertNotNull( streamFieldNode.getKettleType() );
+    int countOutputs = getIterableSize( getXMLDataStepNode.getOutputStreamFields() );
+    int fileFieldCount = 0;
+    Iterable<StreamFieldNode> outFields = getXMLDataStepNode.getOutputStreamFields();
+    for ( StreamFieldNode outField : outFields ) {
+      assertNotNull( outField.getKettleType() );
+      FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
+      assertNotNull( fieldPopulatesMe );
+      assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
+      assertEquals( getXMLDataStepNode, fieldPopulatesMe.getStepThatInputsMe() );
+      fileFieldCount++;
     }
+    assertEquals( countOutputs, fileFieldCount );
 
-    // we should create as many fields as we read in
-    assertEquals( countFileFieldNode, countStreamFieldNode );
+
   }
 
   @Test

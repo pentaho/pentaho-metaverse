@@ -97,10 +97,11 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Input'}.as('step').in('contains').has('name', T.eq, 'excel_input').back('step')" )
   public ExcelInputStepNode getExcelInputStepNode();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Input'}.as('step').in('contains').has('name', T.eq, 'Excel input - filename from field').back('step')" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 10}{it.object.type == 'Transformation Step' && it.object.name == 'Microsoft Excel Input'}.as('step').in('contains').has('name', T.eq, 'Excel input - filename from field').back('step')" )
   public ExcelInputStepNode getExcelInputFileNameFromFieldStepNode();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Group by'}.as('step').in('contains').has('name', T.eq, 'group_by').back('step')" )
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'Group by').as('step').in('contains').has('name', T.eq, 'group_by').back('step')" )
+//  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == 'Group by'}.as('step').in('contains').has('name', T.eq, 'group_by').back('step')" )
   public GroupByStepNode getGroupByStepNode();
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'MongoDB Connection' }.out()" )
