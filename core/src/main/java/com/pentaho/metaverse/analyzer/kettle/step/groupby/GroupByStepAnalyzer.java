@@ -22,100 +22,45 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.groupby;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import com.pentaho.metaverse.api.model.Operation;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.groupby.GroupByMeta;
+
 import java.util.HashSet;
 import java.util.Set;
 
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.groupby.GroupByMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import com.pentaho.metaverse.api.model.Operation;
-
 /**
- * The SelectValuesStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the fields
- * operated on by Select Values steps.
+ * The GroupByStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the fields
+ * operated on by Group By steps.
  */
-public class GroupByStepAnalyzer extends BaseStepAnalyzer<GroupByMeta> {
-  private IComponentDescriptor descriptor;
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.pentaho.metaverse.api.IAnalyzer#analyze(IComponentDescriptor,java.lang.Object)
-   */
-  @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, GroupByMeta groupByMeta )
-    throws MetaverseAnalyzerException {
-
-    this.descriptor = descriptor;
-
-    // Do common analysis for all steps
-    IMetaverseNode node = super.analyze( descriptor, groupByMeta );
-
-    // add "uses" links between the stream fields that are used to "group by"
-    addGroupByUsesLinks( node, groupByMeta );
-
-    getChangeRecords( groupByMeta );
-
-    return rootNode;
-  }
-
-  protected void addGroupByUsesLinks( IMetaverseNode node, GroupByMeta groupByMeta ) {
-    String[] groupFields = groupByMeta.getGroupField();
-    for ( int i = 0; i < groupFields.length; i++ ) {
-      String groupField = groupFields[ i ];
-      IComponentDescriptor prevDescriptor = getPrevStepFieldOriginDescriptor( descriptor, groupField );
-      IMetaverseNode groupFieldNode = createNodeFromDescriptor( prevDescriptor );
-      metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, groupFieldNode );
-    }
-  }
+public class GroupByStepAnalyzer extends StepAnalyzer<GroupByMeta> {
 
   @Override
   public Set<ComponentDerivationRecord> getChangeRecords( final GroupByMeta groupByMeta )
     throws MetaverseAnalyzerException {
-    Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
+    Set<ComponentDerivationRecord> changeRecords = new HashSet<>();
     for ( int i = 0; i < groupByMeta.getSubjectField().length; i++ ) {
-
-      // If the aggregate field is the same name as a subject field, it is technically a new field but will not be
-      // created by the base step analyzer. We can do this naively by running through all aggregate fields, checking to
-      // see if its node already exists, and creating/adding it if it does not exist.
-      if ( stepFields != null ) {
-        ValueMetaInterface vmi = stepFields.searchValueMeta( groupByMeta.getAggregateField()[i] );
-        createFieldNode( descriptor.getContext(), vmi );
-      }
-
-      // If the subject field name equals the aggregate field name, then the subject field is technically deleted and
-      // the new one is created in the above code, so add a "deletes" relationship from the step to the subject field.
-      if ( groupByMeta.getSubjectField()[i].equals( groupByMeta.getAggregateField()[i] ) ) {
-        IMetaverseNode subjectFieldNode = createNodeFromDescriptor(
-          this.getPrevStepFieldOriginDescriptor( descriptor, groupByMeta.getSubjectField()[i] ) );
-        metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_DELETES, subjectFieldNode );
-      }
-
-      ComponentDerivationRecord changeRecord =
-        buildChangeRecord( groupByMeta.getSubjectField()[i], groupByMeta.getAggregateField()[i], groupByMeta
-          .getAggregateType()[i] );
+      ComponentDerivationRecord changeRecord = buildChangeRecord( groupByMeta.getSubjectField()[i],
+        groupByMeta.getAggregateField()[i],
+        groupByMeta.getAggregateType()[i] );
       changeRecords.add( changeRecord );
     }
     return changeRecords;
   }
 
   private ComponentDerivationRecord buildChangeRecord( String subjectField, String aggregateField, int aggregateType ) {
-    final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( aggregateField, ChangeType.DATA );
+    final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( subjectField,
+      aggregateField, ChangeType.DATA );
     changeRecord.addOperation( new Operation( Operation.AGG_CATEGORY, ChangeType.DATA,
       DictionaryConst.PROPERTY_TRANSFORMS, subjectField + " using " + GroupByMeta.getTypeDesc( aggregateType )
       + " -> " + aggregateField ) );
-    IMetaverseNode subjectFieldNode =
-      createNodeFromDescriptor( this.getPrevStepFieldOriginDescriptor( descriptor, subjectField ) );
-    processFieldChangeRecord( descriptor, subjectFieldNode, changeRecord );
-    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, subjectFieldNode );
 
     return changeRecord;
   }
@@ -127,5 +72,23 @@ public class GroupByStepAnalyzer extends BaseStepAnalyzer<GroupByMeta> {
         add( GroupByMeta.class );
       }
     };
+  }
+
+  @Override protected Set<StepField> getUsedFields( GroupByMeta meta ) {
+    Set<StepField> usedFields = new HashSet<>();
+    String[] groupFields = meta.getGroupField();
+    for ( String groupField : groupFields ) {
+      usedFields.addAll( createStepFields( groupField, getInputs() ) );
+    }
+    String[] subjectFields = meta.getSubjectField();
+    for ( String subjectField : subjectFields ) {
+      usedFields.addAll( createStepFields( subjectField, getInputs() ) );
+    }
+    return usedFields;
+  }
+
+  @Override protected void customAnalyze( GroupByMeta meta, IMetaverseNode rootNode )
+    throws MetaverseAnalyzerException {
+    // nothing custom to do
   }
 }

@@ -159,7 +159,9 @@
   <bean id="RowsFromResultStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.rowsfromresult.RowsFromResultStepAnalyzer"/>
   <bean id="GetXMLDataStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer">
+    <property name="externalResourceConsumer" ref="getXMLDataERC"/>
+  </bean>
 
   <bean id="StringOperationsStepAnalyzer" 
   		  class="com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
