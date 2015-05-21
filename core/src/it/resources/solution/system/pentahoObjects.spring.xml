@@ -99,7 +99,9 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer"/>
 
   <bean id="RestClientStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer">
+    <property name="externalResourceConsumer" ref="restClientERC"/>
+  </bean>
 
   <bean id="IDocumentListener" class="com.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>

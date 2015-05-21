@@ -1430,12 +1430,15 @@ public class MetaverseValidationIT {
       assertEquals( stepMeta.getParameterField()[ 0 ], streamFieldNodesUse.getName() );
     }
 
-    Iterable<StreamFieldNode> creates = node.getStreamFieldNodesCreates();
-    assertEquals( 1, getIterableSize( streamFieldNodesUses ) );
-    for ( StreamFieldNode create : creates ) {
-      assertEquals( stepMeta.getFieldName(), create.getName() );
-    }
+    Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
+    assertEquals( 4, getIterableSize( outputs ) );
 
+    Iterable<StreamFieldNode> inputs = node.getInputStreamFields();
+    assertEquals( 3, getIterableSize( inputs ) );
+    for ( StreamFieldNode in : inputs ) {
+      assertNotNull( in.getFieldNodesDerivedFromMe() );
+      assertEquals( in.getName(), in.getFieldNodesDerivedFromMe().iterator().next().getName() );
+    }
   }
 
   @Test
@@ -1443,8 +1446,6 @@ public class MetaverseValidationIT {
     RestClientStepNode node = root.getRestClientStepNode( "REST Client - parameterized" );
     assertNotNull( node );
     Iterable<FramedMetaverseNode> inputUrls = node.getInputUrls();
-    int countInputUrls = getIterableSize( inputUrls );
-    assertEquals( 1, countInputUrls );
     assertEquals( "REST Client", node.getStepType() );
 
     RestMeta stepMeta = (RestMeta) getStepMeta( node );
@@ -1473,13 +1474,9 @@ public class MetaverseValidationIT {
     }
 
 
-    Iterable<StreamFieldNode> creates = node.getStreamFieldNodesCreates();
-    Set<String> createdFields = new HashSet<>();
-    Collections.addAll( createdFields, new String[] { stepMeta.getFieldName(), stepMeta.getResultCodeFieldName(), stepMeta.getResponseTimeFieldName() } );
-    assertEquals( createdFields.size(), getIterableSize( streamFieldNodesUses ) );
-    for ( StreamFieldNode create : creates ) {
-      assertTrue( createdFields.contains( create.getName() ) );
-    }
+    Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
+    assertEquals( getExpectedOutputFieldCount( stepMeta ), getIterableSize( outputs ) );
+
   }
 
   @Test
