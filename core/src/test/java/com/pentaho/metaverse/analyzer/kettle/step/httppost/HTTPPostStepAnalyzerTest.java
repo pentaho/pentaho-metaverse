@@ -22,21 +22,23 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.httppost;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,165 +71,121 @@ import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 @RunWith( MockitoJUnitRunner.class )
 public class HTTPPostStepAnalyzerTest {
 
-  private HTTPPostStepAnalyzer httpPostStepAnalyzer;
+  private HTTPPostStepAnalyzer analyzer;
 
-  @Mock
-  private HTTPPOST mockHTTPPost;
+  @Mock HTTPPOST mockHTTPPost;
+  @Mock HTTPPOSTMeta meta;
+  @Mock StepNodes stepNodes;
+  @Mock INamespace mockNamespace;
 
-  @Mock
-  private HTTPPOSTMeta mockHTTPPostMeta;
+  IComponentDescriptor descriptor;
 
-  @Mock
-  private StepMeta mockStepMeta;
-
-  @Mock
-  private TransMeta mockTransMeta;
-
-  @Mock
-  private RowMetaInterface mockRowMetaInterface;
-
-  @Mock
-  private IMetaverseBuilder mockBuilder;
-
-  @Mock
-  private INamespace mockNamespace;
-
-  private IMetaverseObjectFactory mockFactory;
-
-  private IComponentDescriptor descriptor;
+  @Mock StepMeta mockStepMeta;
+  @Mock TransMeta mockTransMeta;
+  @Mock RowMetaInterface mockRowMetaInterface;
 
   @Before
   public void setUp() throws Exception {
 
-    mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
-    when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
+    analyzer = spy( new HTTPPostStepAnalyzer() );
+    descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
+    analyzer.setDescriptor( descriptor );
+    analyzer.setObjectFactory( MetaverseTestUtils.getMetaverseObjectFactory() );
 
-    httpPostStepAnalyzer = new HTTPPostStepAnalyzer();
-    httpPostStepAnalyzer.setMetaverseBuilder( mockBuilder );
-    descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
-
-    when( mockHTTPPost.getStepMetaInterface() ).thenReturn( mockHTTPPostMeta );
+    when( mockHTTPPost.getStepMetaInterface() ).thenReturn( meta );
     when( mockHTTPPost.getStepMeta() ).thenReturn( mockStepMeta );
-    when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockHTTPPostMeta );
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyze_nullInput() throws Exception {
-    httpPostStepAnalyzer.analyze( null, null );
+    when( mockStepMeta.getStepMetaInterface() ).thenReturn( meta );
   }
 
   @Test
-  public void testAnalyze_noParmsOrHeaders() throws Exception {
+  public void testGetUsedFields_urlInField() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.isUrlInField() ).thenReturn( true );
+    when( meta.getUrlField() ).thenReturn( "url" );
+    doReturn( stepNodes ).when( analyzer ).getInputs();
+    doReturn( fields ).when( analyzer ).createStepFields( "url", stepNodes );
 
-    StepMeta meta = new StepMeta( "test", mockHTTPPostMeta );
-    StepMeta spyMeta = spy( meta );
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
 
-    String urls = "http://seylermartialarts.com";
+    verify( analyzer ).createStepFields( "url", stepNodes );
+  }
 
-    when( mockHTTPPostMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockHTTPPostMeta.getUrl() ).thenReturn( urls );
+  @Test
+  public void testGetUsedFields_urlInFieldNoFieldSet() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.isUrlInField() ).thenReturn( true );
+    when( meta.getUrlField() ).thenReturn( null );
 
-    IMetaverseNode result = httpPostStepAnalyzer.analyze( descriptor, mockHTTPPostMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
 
-    verify( mockHTTPPostMeta, times( 1 ) ).getUrl();
+    verify( analyzer, never() ).createStepFields( anyString(), any( StepNodes.class ) );
+  }
 
-    // make sure the step node is added as well as the file node
-    verify( mockBuilder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
+  @Test
+  public void testGetUsedFields_getQueryField() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.getQueryField() ).thenReturn( new String[] { "param1", "param2" } );
+    doReturn( stepNodes ).when( analyzer ).getInputs();
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), eq( stepNodes ) );
 
-    // make sure there is a "readby" link added
-    verify( mockBuilder, times( 1 ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+
+    verify( analyzer ).createStepFields( "param1", stepNodes );
+    verify( analyzer ).createStepFields( "param2", stepNodes );
+  }
+
+  @Test
+  public void testGetUsedFields_getArgumentField() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.getArgumentField() ).thenReturn( new String[] { "header1", "header2" } );
+    doReturn( stepNodes ).when( analyzer ).getInputs();
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), eq( stepNodes ) );
+
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+
+    verify( analyzer ).createStepFields( "header1", stepNodes );
+    verify( analyzer ).createStepFields( "header2", stepNodes );
+  }
+
+  @Test
+  public void testGetInputRowMetaInterface() throws Exception {
+    Map<String, RowMetaInterface> inputs = new HashMap<>();
+    doReturn( inputs ).when( analyzer ).getInputFields( meta );
+
+    Map<String, RowMetaInterface> inputRowMetaInterfaces = analyzer.getInputRowMetaInterfaces( meta );
+    assertEquals( inputs, inputRowMetaInterfaces );
+  }
+
+  @Test
+  public void testCreateResourceNode() throws Exception {
+    IExternalResourceInfo res = mock( IExternalResourceInfo.class );
+    when( res.getName() ).thenReturn( "http://my.rest.url" );
+
+    IMetaverseNode resourceNode = analyzer.createResourceNode( res );
+    assertNotNull( resourceNode );
+    assertEquals( DictionaryConst.NODE_TYPE_WEBSERVICE, resourceNode.getType() );
+    assertEquals( "http://my.rest.url", resourceNode.getName() );
 
   }
 
   @Test
-  public void testAnalyze_paramsAndHeaders() throws Exception {
-
-    StepMeta meta = new StepMeta( "test", mockHTTPPostMeta );
-    StepMeta spyMeta = spy( meta );
-
-    String url = "http://seylermartialarts.com";
-
-    when( mockHTTPPostMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockHTTPPostMeta.getUrl() ).thenReturn( url );
-    when( mockHTTPPostMeta.getArgumentField() ).thenReturn( new String[]{ "Argument Field A", "Argument Field B" } );
-    when( mockHTTPPostMeta.getArgumentParameter() ).thenReturn( new String[]{ "Argument Param 1", "Argument Parameter 2" } );
-    when( mockHTTPPostMeta.getQueryField()).thenReturn( new String[]{ "Header Field 1", "Header Field 2" } );
-    when( mockHTTPPostMeta.getQueryParameter() ).thenReturn( new String[]{ "Header Param A", "Header Param B" } );
-    // set up the input fields
-    when( mockTransMeta.getStepFields( spyMeta ) ).thenReturn( mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "id", "name" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override
-      public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "id" ) {
-          return new ValueMetaString( "id" );
-        }
-        if ( args[0] == "name" ) {
-          return new ValueMetaString( "name" );
-        }
-        return null;
-      }
-    } );
-
-    IMetaverseNode result = httpPostStepAnalyzer.analyze( descriptor, mockHTTPPostMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    verify( mockHTTPPostMeta, times( 1 ) ).getUrl();
-
-    // make sure the step node, the file node, and the field nodes
-    verify( mockBuilder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
-
-    // make sure there are "readby" and "uses" links added (file, and each field)
-    verify( mockBuilder, times( 1 ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
-    verify( mockBuilder, times( 4 ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+  public void testGetResourceInputNodeType() throws Exception {
+    assertEquals( DictionaryConst.NODE_TYPE_WEBSERVICE, analyzer.getResourceInputNodeType() );
   }
 
   @Test
-  public void testAnalyze_UrlFromField() throws Exception {
+  public void testGetResourceOutputNodeType() throws Exception {
+    assertNull( analyzer.getResourceOutputNodeType() );
+  }
 
-    StepMeta meta = new StepMeta( "test", mockHTTPPostMeta );
-    StepMeta spyMeta = spy( meta );
+  @Test
+  public void testIsOutput() throws Exception {
+    assertFalse( analyzer.isOutput() );
+  }
 
-    when( mockHTTPPostMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockHTTPPostMeta.getUrl() ).thenReturn( null );
-    when( mockHTTPPostMeta.isUrlInField() ).thenReturn( true );
-    when( mockHTTPPostMeta.getUrl() ).thenReturn( "http://seylermartialarts" );
-    when( mockHTTPPostMeta.getArgumentField() ).thenReturn( new String[]{ "FieldA", "FieldB" } );
-    when( mockHTTPPostMeta.getArgumentParameter() ).thenReturn( new String[]{ "Param1", "Param2" } );
-    when( mockHTTPPostMeta.getQueryField() ).thenReturn( new String[]{ "Header Field 1", "Header Field 2" } );
-    when( mockHTTPPostMeta.getQueryParameter() ).thenReturn( new String[]{ "Header Param A", "Header Param B" } );
-    when( mockHTTPPostMeta.getUrlField() ).thenReturn( "Url Field" );
-
-    IMetaverseNode result = httpPostStepAnalyzer.analyze( descriptor, mockHTTPPostMeta );
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    verify( mockHTTPPostMeta, never() ).getUrl();
-    verify( mockHTTPPostMeta, times( 2 ) ).isUrlInField();
-    verify( mockHTTPPostMeta, times( 2 ) ).getUrlField();
-
-    // make sure the step node and the field nodes have been added, but NOT the incoming stream field
-    verify( mockBuilder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
-
-    // Verify there are no READBY links (usually from file to step)
-    verify( mockBuilder, times( 1 ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ), any( IMetaverseNode.class ) );
-
-    // make sure there "uses" links added (each field, and the filename stream field)
-    verify( mockBuilder, times( 5 ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+  @Test
+  public void testIsInput() throws Exception {
+    assertTrue( analyzer.isInput() );
   }
 
   @Test
@@ -243,23 +201,23 @@ public class HTTPPostStepAnalyzerTest {
   public void testHTTPPostExternalResourceConsumer() throws Exception {
     HTTPPostExternalResourceConsumer consumer = new HTTPPostExternalResourceConsumer();
 
-    StepMeta meta = new StepMeta( "test", mockHTTPPostMeta );
+    StepMeta meta = new StepMeta( "test", this.meta );
     StepMeta spyMeta = spy( meta );
 
-    when( mockHTTPPostMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( this.meta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockHTTPPostMeta.getUrl() ).thenReturn( "http://seylermartialarts.com" );
-    when( mockHTTPPostMeta.isUrlInField() ).thenReturn( false );
+    when( this.meta.getUrl() ).thenReturn( "http://seylermartialarts.com" );
+    when( this.meta.isUrlInField() ).thenReturn( false );
 
-    assertTrue( consumer.isDataDriven( mockHTTPPostMeta ) );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( mockHTTPPostMeta );
+    assertTrue( consumer.isDataDriven( this.meta ) );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( this.meta );
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
 
-    when( mockHTTPPostMeta.isUrlInField() ).thenReturn( true );
-    assertTrue( consumer.isDataDriven( mockHTTPPostMeta ) );
-    assertTrue( consumer.getResourcesFromMeta( mockHTTPPostMeta ).isEmpty() );
+    when( this.meta.isUrlInField() ).thenReturn( true );
+    assertTrue( consumer.isDataDriven( this.meta ) );
+    assertTrue( consumer.getResourcesFromMeta( this.meta ).isEmpty() );
     when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenReturn( "/path/to/row/file" );
     resources = consumer.getResourcesFromRow( mockHTTPPost, mockRowMetaInterface, new String[]{ "id", "name" } );

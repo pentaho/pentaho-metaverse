@@ -25,32 +25,30 @@ package com.pentaho.metaverse.analyzer.kettle.step.rest;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import com.pentaho.metaverse.api.INamespace;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.rest.RestMeta;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -62,150 +60,146 @@ public class RestClientStepAnalyzerTest {
 
   private RestClientStepAnalyzer analyzer;
 
-  @Mock
-  private RestMeta mockMeta;
+  @Mock RestMeta meta;
+  @Mock StepNodes stepNodes;
+  @Mock INamespace mockNamespace;
 
-  @Mock
-  private StepMeta mockStepMeta;
-
-  @Mock
-  private TransMeta mockTransMeta;
-
-  @Mock
-  private RowMetaInterface mockRowMetaInterface;
-
-  @Mock
-  private IMetaverseBuilder mockBuilder;
-
-  @Mock
-  private INamespace mockNamespace;
-
-  private IMetaverseObjectFactory mockFactory;
-
-  private IComponentDescriptor descriptor;
-
-  private String[] prevStepNames = new String[]{ "previousStep" };
-
-  @Mock
-  private RowMetaInterface prevStepFields;
-
-  @Mock
-  private ValueMetaInterface mockField;
+  IComponentDescriptor descriptor;
 
   @Before
   public void setUp() throws Exception {
-    mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
-    when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
-    when( mockMeta.getParentStepMeta() ).thenReturn( mockStepMeta );
-    when( mockStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockField.getOrigin() ).thenReturn( "previousStep" );
-    when( mockField.getName() ).thenReturn( "previousField" );
-
-    when( prevStepFields.searchValueMeta( anyString() ) ).thenReturn( mockField );
-    when( prevStepFields.getFieldNames() ).thenReturn( prevStepNames );
-
-    when( mockTransMeta.getPrevStepNames( mockStepMeta ) ).thenReturn( prevStepNames );
-    when( mockTransMeta.getPrevStepNames( anyString() ) ).thenReturn( prevStepNames );
-    when( mockTransMeta.getPrevStepFields( eq( mockStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( prevStepFields );
-
-    when( mockTransMeta.getStepFields( eq( mockStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( prevStepFields );
-
-    analyzer = new RestClientStepAnalyzer();
-    analyzer.setMetaverseBuilder( mockBuilder );
-
-    descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_JOB, mockNamespace );
+    analyzer = spy( new RestClientStepAnalyzer() );
+    descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
+    analyzer.setDescriptor( descriptor );
+    analyzer.setObjectFactory( MetaverseTestUtils.getMetaverseObjectFactory() );
 
   }
 
   @Test
-  public void testAnalyze_urlDefined() throws Exception {
-    when( mockMeta.isUrlInField() ).thenReturn( false );
-    when( mockTransMeta.environmentSubstitute( anyString() ) ).thenReturn( "http://my.rest.url" );
+  public void testGetUsedFields_urlInField() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.isUrlInField() ).thenReturn( true );
+    when( meta.getUrlField() ).thenReturn( "url" );
+    doReturn( stepNodes ).when( analyzer ).getInputs();
+    doReturn( fields ).when( analyzer ).createStepFields( "url", stepNodes );
 
-    IMetaverseNode node = analyzer.analyze( descriptor, mockMeta );
-    assertNotNull( node );
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
 
-    // should add the step node as well as the resource node
-    verify( mockBuilder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
-    verify( mockBuilder ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ),
-      any( IMetaverseNode.class ) );
+    verify( analyzer ).createStepFields( "url", stepNodes );
+  }
+
+  @Test
+  public void testGetUsedFields_urlInFieldNoFieldSet() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.isUrlInField() ).thenReturn( true );
+    when( meta.getUrlField() ).thenReturn( null );
+
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+
+    verify( analyzer, never() ).createStepFields( anyString(), any( StepNodes.class ) );
+  }
+
+  @Test
+  public void testGetUsedFields_methodInField() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.isDynamicMethod() ).thenReturn( true );
+    when( meta.getMethodFieldName() ).thenReturn( "method" );
+    doReturn( stepNodes ).when( analyzer ).getInputs();
+    doReturn( fields ).when( analyzer ).createStepFields( "method", stepNodes );
+
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+
+    verify( analyzer ).createStepFields( "method", stepNodes );
+  }
+
+  @Test
+  public void testGetUsedFields_methodInFieldNoFieldSet() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.isDynamicMethod() ).thenReturn( true );
+    when( meta.getMethodFieldName() ).thenReturn( null );
+
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+
+    verify( analyzer, never() ).createStepFields( anyString(), any( StepNodes.class ) );
+  }
+
+  @Test
+  public void testGetUsedFields_bodyInField() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.getBodyField() ).thenReturn( "body" );
+    doReturn( stepNodes ).when( analyzer ).getInputs();
+    doReturn( fields ).when( analyzer ).createStepFields( "body", stepNodes );
+
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+
+    verify( analyzer ).createStepFields( "body", stepNodes );
+  }
+
+  @Test
+  public void testGetUsedFields_parameterField() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.getParameterField() ).thenReturn( new String[] { "param1", "param2" } );
+    doReturn( stepNodes ).when( analyzer ).getInputs();
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), eq( stepNodes ) );
+
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+
+    verify( analyzer ).createStepFields( "param1", stepNodes );
+    verify( analyzer ).createStepFields( "param2", stepNodes );
+  }
+
+  @Test
+  public void testGetUsedFields_headerField() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    when( meta.getHeaderField() ).thenReturn( new String[] { "header1", "header2" } );
+    doReturn( stepNodes ).when( analyzer ).getInputs();
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), eq( stepNodes ) );
+
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+
+    verify( analyzer ).createStepFields( "header1", stepNodes );
+    verify( analyzer ).createStepFields( "header2", stepNodes );
+  }
+
+  @Test
+  public void testGetInputRowMetaInterface() throws Exception {
+    Map<String, RowMetaInterface> inputs = new HashMap<>();
+    doReturn( inputs ).when( analyzer ).getInputFields( meta );
+
+    Map<String, RowMetaInterface> inputRowMetaInterfaces = analyzer.getInputRowMetaInterfaces( meta );
+    assertEquals( inputs, inputRowMetaInterfaces );
+  }
+
+  @Test
+  public void testCreateResourceNode() throws Exception {
+    IExternalResourceInfo res = mock( IExternalResourceInfo.class );
+    when( res.getName() ).thenReturn( "http://my.rest.url" );
+
+    IMetaverseNode resourceNode = analyzer.createResourceNode( res );
+    assertNotNull( resourceNode );
+    assertEquals( DictionaryConst.NODE_TYPE_WEBSERVICE, resourceNode.getType() );
+    assertEquals( "http://my.rest.url", resourceNode.getName() );
 
   }
 
   @Test
-  public void testAnalyze_urlFromField() throws Exception {
-    when( mockMeta.isUrlInField() ).thenReturn( true );
-    when( mockMeta.getUrlField() ).thenReturn( "URL" );
-    when( mockTransMeta.environmentSubstitute( anyString() ) ).thenReturn( "http://my.rest.url" );
-
-    IMetaverseNode node = analyzer.analyze( descriptor, mockMeta );
-    assertNotNull( node );
-
-    // should add the step node as well as the resource node
-    verify( mockBuilder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
-    verify( mockBuilder ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_READBY ),
-      any( IMetaverseNode.class ) );
-    // it should use the field providing the url
-    verify( mockBuilder ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
+  public void testGetResourceInputNodeType() throws Exception {
+    assertEquals( DictionaryConst.NODE_TYPE_WEBSERVICE, analyzer.getResourceInputNodeType() );
   }
 
   @Test
-  public void testAnalyze_methodFromField() throws Exception {
-    when( mockMeta.isDynamicMethod() ).thenReturn( true );
-    when( mockMeta.getMethodFieldName() ).thenReturn( "METHOD" );
-
-    IMetaverseNode node = analyzer.analyze( descriptor, mockMeta );
-    assertNotNull( node );
-
-    // it should use the field providing the method
-    verify( mockBuilder ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
+  public void testGetResourceOutputNodeType() throws Exception {
+    assertNull( analyzer.getResourceOutputNodeType() );
   }
 
   @Test
-  public void testAnalyze_bodyFromField() throws Exception {
-    when( mockMeta.getBodyField() ).thenReturn( "BODY" );
-
-    IMetaverseNode node = analyzer.analyze( descriptor, mockMeta );
-    assertNotNull( node );
-
-    // it should use the field providing the body
-    verify( mockBuilder ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
+  public void testIsOutput() throws Exception {
+    assertFalse( analyzer.isOutput() );
   }
 
   @Test
-  public void testAnalyze_headersFromFields() throws Exception {
-    String[] headerNames = new String[]{ "header1", "header2", "header3" };
-    String[] headerFields = new String[] { "field1", "field2", "field3" };
-    when( mockMeta.getHeaderName() ).thenReturn( headerNames );
-    when( mockMeta.getHeaderField() ).thenReturn( headerFields );
-    IMetaverseNode node = analyzer.analyze( descriptor, mockMeta );
-    assertNotNull( node );
-
-    // it should use the field providing the body
-    verify( mockBuilder, times( headerFields.length ) ).addLink(
-      any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
-  }
-
-  @Test
-  public void testAnalyze_paramsFromFields() throws Exception {
-    String[] names = new String[]{ "param1", "param2", "param3" };
-    String[] fields = new String[] { "field1", "field2", "field3" };
-    when( mockMeta.getParameterName() ).thenReturn( names );
-    when( mockMeta.getParameterField() ).thenReturn( fields );
-    IMetaverseNode node = analyzer.analyze( descriptor, mockMeta );
-    assertNotNull( node );
-
-    // it should use the field providing the body
-    verify( mockBuilder, times( fields.length ) ).addLink(
-      any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
+  public void testIsInput() throws Exception {
+    assertTrue( analyzer.isInput() );
   }
 
   @Test

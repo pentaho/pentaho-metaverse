@@ -189,13 +189,19 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer"/>
 
   <bean id="HTTPClientStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer"/>
-          		
+        class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer">
+    <property name="externalResourceConsumer" ref="httpClientERC"/>
+  </bean>
+
   <bean id="RestClientStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer">
+    <property name="externalResourceConsumer" ref="restClientERC"/>
+  </bean>
 
   <bean id="HTTPPostStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer">
+    <property name="externalResourceConsumer" ref="httpPostERC"/>
+  </bean>
 
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"

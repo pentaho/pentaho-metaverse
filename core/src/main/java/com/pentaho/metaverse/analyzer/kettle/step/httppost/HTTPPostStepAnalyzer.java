@@ -22,100 +22,92 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.httppost;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.pentaho.di.core.Const;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.MetaverseException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.httppost.HTTPPOSTMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The HTTPPostStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and other
  * metaverse entities
  */
-public class HTTPPostStepAnalyzer extends BaseStepAnalyzer<HTTPPOSTMeta> {
+public class HTTPPostStepAnalyzer extends ExternalResourceStepAnalyzer<HTTPPOSTMeta> {
   private Logger log = LoggerFactory.getLogger( HTTPPostStepAnalyzer.class );
 
+
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, HTTPPOSTMeta httpMeta )
-    throws MetaverseAnalyzerException {
+  protected Set<StepField> getUsedFields( HTTPPOSTMeta stepMeta ) {
+    Set<StepField> usedFields = new HashSet<>();
 
-    // do the common analysis for all step
-    IMetaverseNode node = super.analyze( descriptor, httpMeta );
+    // add url field
+    if ( stepMeta.isUrlInField() && StringUtils.isNotEmpty( stepMeta.getUrlField() ) ) {
+      usedFields.addAll( createStepFields( stepMeta.getUrlField(), getInputs() ) );
+    }
 
-    // add the fields as nodes, add the links too
-    String[] fields = { httpMeta.getUrlField() };
-    if ( fields != null && fields.length > 0 && httpMeta.isUrlInField() ) {
-      for ( String field : fields ) {
-
-        IComponentDescriptor urlFieldDescriptor =
-            new MetaverseComponentDescriptor( field, DictionaryConst.NODE_TYPE_WEBSERVICE, descriptor.getNamespace(),
-                descriptor.getContext() );
-        IMetaverseNode fieldNode = createNodeFromDescriptor( urlFieldDescriptor );
-        metaverseBuilder.addNode( fieldNode );
-        metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_READBY, node );
+    // add parameters as used fields
+    String[] parameterFields = stepMeta.getQueryField();
+    if ( ArrayUtils.isNotEmpty( parameterFields ) ) {
+      for ( String paramField : parameterFields ) {
+        usedFields.addAll( createStepFields( paramField, getInputs() ) );
       }
     }
 
-    String[] argumentFields = httpMeta.getArgumentField();
-    if ( argumentFields != null ) {
-      for ( String argumentField : argumentFields ) {
-        IComponentDescriptor argumentFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor, argumentField );
-        IMetaverseNode argumentFieldNode = createNodeFromDescriptor( argumentFieldDescriptor );
-        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, argumentFieldNode );
-      }
-    }
-
-    String[] headerFields = httpMeta.getArgumentField();
-    if ( headerFields != null ) {
+    // add headers as used fields
+    String[] headerFields = stepMeta.getArgumentField();
+    if ( ArrayUtils.isNotEmpty( headerFields ) ) {
       for ( String headerField : headerFields ) {
-        IComponentDescriptor headerFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor, headerField );
-        IMetaverseNode headerFieldNode = createNodeFromDescriptor( headerFieldDescriptor );
-        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, headerFieldNode );
+        usedFields.addAll( createStepFields( headerField, getInputs() ) );
       }
     }
+    return usedFields;
+  }
+  @Override
+  protected Map<String, RowMetaInterface> getInputRowMetaInterfaces( HTTPPOSTMeta meta ) {
+    return getInputFields( meta );
+  }
 
-    if ( httpMeta.isUrlInField() ) {
-      String acceptingFieldName = httpMeta.getUrlField();
-      IComponentDescriptor transFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor, acceptingFieldName );
-      IMetaverseNode acceptingFieldNode = createNodeFromDescriptor( transFieldDescriptor );
-
-      // add a link from the fileField to the text file input step node
-      metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, acceptingFieldNode );
-    } else {
-      String[] urls = { httpMeta.getUrl() };
-
-      // add a link from the url being read to the step
-      if ( urls != null ) {
-        for ( String url : urls ) {
-          if ( !Const.isEmpty( url ) ) {
-            // first add the node for the file
-            IComponentDescriptor urlFieldDescriptor =
-                new MetaverseComponentDescriptor( url, DictionaryConst.NODE_TYPE_WEBSERVICE, descriptor.getNamespace(),
-                    descriptor.getContext() );
-            IMetaverseNode fieldNode = createNodeFromDescriptor( urlFieldDescriptor );
-            metaverseBuilder.addNode( fieldNode );
-            metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_READBY, node );
-          }
-        }
-      }
-    }
-
-    String[] argumentField = httpMeta.getArgumentField();
-    String[] argumentParameter = httpMeta.getArgumentParameter();
-    System.out.println( argumentField );
-    System.out.println( argumentParameter );
-
+  @Override public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
+    MetaverseComponentDescriptor componentDescriptor = new MetaverseComponentDescriptor(
+      resource.getName(), getResourceInputNodeType(), descriptor.getNamespace(), descriptor.getContext()
+    );
+    IMetaverseNode node = createNodeFromDescriptor( componentDescriptor );
     return node;
+  }
+
+  @Override public String getResourceInputNodeType() {
+    return DictionaryConst.NODE_TYPE_WEBSERVICE;
+  }
+
+  @Override public String getResourceOutputNodeType() {
+    return null;
+  }
+
+  @Override public boolean isOutput() {
+    return false;
+  }
+
+  @Override public boolean isInput() {
+    return true;
+  }
+
+  ////// used in unit testing
+  protected void setObjectFactory( IMetaverseObjectFactory objectFactory ) {
+    this.metaverseObjectFactory = objectFactory;
   }
 
   @Override
