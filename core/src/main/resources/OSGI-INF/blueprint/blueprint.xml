@@ -199,7 +199,9 @@
   </bean>
 
   <bean id="HTTPPostStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer">
+    <property name="externalResourceConsumer" ref="httpPostERC"/>
+  </bean>
 
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
