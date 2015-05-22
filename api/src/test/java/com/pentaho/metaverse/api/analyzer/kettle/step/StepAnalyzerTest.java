@@ -74,25 +74,38 @@ public class StepAnalyzerTest {
   StepNodes inputs;
   StepNodes outputs;
 
-  @Mock IMetaverseNode fieldNode;
-  @Mock IMetaverseNode rootNode;
-  @Mock IMetaverseBuilder builder;
-  @Mock BaseStepMeta baseStepMeta;
-  @Mock IComponentDescriptor descriptor;
-  @Mock IAnalysisContext context;
-  @Mock StepMeta parentStepMeta;
-  @Mock TransMeta parentTransMeta;
+  @Mock
+  IMetaverseNode fieldNode;
+  @Mock
+  IMetaverseNode rootNode;
+  @Mock
+  IMetaverseBuilder builder;
+  @Mock
+  BaseStepMeta baseStepMeta;
+  @Mock
+  IComponentDescriptor descriptor;
+  @Mock
+  IAnalysisContext context;
+  @Mock
+  StepMeta parentStepMeta;
+  @Mock
+  TransMeta parentTransMeta;
 
   @Before
   public void setUp() throws Exception {
     StepAnalyzer stepAnalyzer = new StepAnalyzer() {
-      @Override protected Set<StepField> getUsedFields( BaseStepMeta meta ) {
+      @Override
+      protected Set<StepField> getUsedFields( BaseStepMeta meta ) {
         return null;
       }
-      @Override protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode )
+
+      @Override
+      protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode )
         throws MetaverseAnalyzerException {
       }
-      @Override public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+
+      @Override
+      public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
         return null;
       }
     };
@@ -184,6 +197,7 @@ public class StepAnalyzerTest {
     assertTrue( CollectionUtils.isNotEmpty( changes ) );
     assertEquals( 2, changes.size() );
   }
+
   @Test
   public void testGetChanges_ExceptionGettingChangeRecords() throws Exception {
     ComponentDerivationRecord passthrough1 = mock( ComponentDerivationRecord.class );
@@ -291,8 +305,7 @@ public class StepAnalyzerTest {
     doReturn( outputs ).when( analyzer ).getOutputs();
     doReturn( inputs ).when( analyzer ).getInputs();
 
-    Operation operation = mock( Operation.class );
-    when( operation.getType() ).thenReturn( ChangeType.METADATA );
+    Operation operation = new Operation( "testOperation", "testOperation" );
 
     StepField original = new StepField( "previousStep", "address" );
     StepField changed = new StepField( "nextStep", "address" );
@@ -303,7 +316,7 @@ public class StepAnalyzerTest {
 
     analyzer.mapChange( spyCdr );
     // get operations to verify it is not null, then agains to toString it
-    verify( spyCdr, times( 2 ) ).getOperations();
+    verify( spyCdr, times( 1 ) ).getOperations();
     verify( analyzer ).linkChangeNodes( any( IMetaverseNode.class ), any( IMetaverseNode.class ) );
   }
 
@@ -427,7 +440,7 @@ public class StepAnalyzerTest {
   public void testGetPrevFieldDescriptor() throws Exception {
     IComponentDescriptor descriptor = analyzer.getPrevFieldDescriptor( "previousStep", "address" );
     assertNotNull( descriptor );
-    assertEquals( "address" , descriptor.getName() );
+    assertEquals( "address", descriptor.getName() );
     assertEquals( DictionaryConst.NODE_TYPE_TRANS_FIELD, descriptor.getType() );
     assertTrue( descriptor.getNamespace().getNamespaceId().contains( "previousStep" ) );
   }
@@ -557,7 +570,7 @@ public class StepAnalyzerTest {
 
   @Test
   public void testProcessInputs() throws Exception {
-    String[] prevStepNames = new String[] { "prevStep", "prevStep2" };
+    String[] prevStepNames = new String[]{ "prevStep", "prevStep2" };
     when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( prevStepNames );
 
     Map<String, RowMetaInterface> inputRmis = new HashMap<>();
@@ -584,7 +597,7 @@ public class StepAnalyzerTest {
     when( rowMetaInterface.getValueMetaList() ).thenReturn( vmis );
     when( rowMetaInterface2.getValueMetaList() ).thenReturn( vmis2 );
 
-    IMetaverseNode inputNode  = mock( IMetaverseNode.class );
+    IMetaverseNode inputNode = mock( IMetaverseNode.class );
     doReturn( inputRmis ).when( analyzer ).getInputRowMetaInterfaces( baseStepMeta );
     doReturn( inputNode ).when( analyzer ).createInputFieldNode( any( IAnalysisContext.class ), any( ValueMetaInterface.class ), anyString(), anyString() );
 
@@ -600,7 +613,7 @@ public class StepAnalyzerTest {
   public void testSimpleGetters() throws Exception {
     assertNull( analyzer.getInputs() );
     assertNull( analyzer.getOutputs() );
-    assertEquals( parentStepMeta.getName(),  analyzer.getStepName() );
+    assertEquals( parentStepMeta.getName(), analyzer.getStepName() );
   }
 
   @Test
@@ -619,7 +632,7 @@ public class StepAnalyzerTest {
 
   @Test
   public void testGetOutputRowMetaInterfaces() throws Exception {
-    String[] nextStepNames = new String[] { "nextStep1" };
+    String[] nextStepNames = new String[]{ "nextStep1" };
     when( parentTransMeta.getNextStepNames( parentStepMeta ) ).thenReturn( nextStepNames );
 
     RowMetaInterface rowMetaInterface = mock( RowMetaInterface.class );
@@ -628,12 +641,12 @@ public class StepAnalyzerTest {
     Map<String, RowMetaInterface> rowMetaInterfaces = analyzer.getOutputRowMetaInterfaces( baseStepMeta );
     assertNotNull( rowMetaInterfaces );
     assertEquals( nextStepNames.length, rowMetaInterfaces.size() );
-    assertEquals( rowMetaInterface, rowMetaInterfaces.get( nextStepNames[ 0 ] ) );
+    assertEquals( rowMetaInterface, rowMetaInterfaces.get( nextStepNames[0] ) );
   }
 
   @Test
   public void testGetOutputRowMetaInterfaces_multipleOutputSteps() throws Exception {
-    String[] nextStepNames = new String[] { "nextStep1", "nextStep2" };
+    String[] nextStepNames = new String[]{ "nextStep1", "nextStep2" };
     when( parentTransMeta.getNextStepNames( parentStepMeta ) ).thenReturn( nextStepNames );
 
     RowMetaInterface rowMetaInterface = mock( RowMetaInterface.class );
@@ -642,8 +655,8 @@ public class StepAnalyzerTest {
     Map<String, RowMetaInterface> rowMetaInterfaces = analyzer.getOutputRowMetaInterfaces( baseStepMeta );
     assertNotNull( rowMetaInterfaces );
     assertEquals( nextStepNames.length, rowMetaInterfaces.size() );
-    assertEquals( rowMetaInterface, rowMetaInterfaces.get( nextStepNames[ 0 ] ) );
-    assertEquals( rowMetaInterface, rowMetaInterfaces.get( nextStepNames[ 1 ] ) );
+    assertEquals( rowMetaInterface, rowMetaInterfaces.get( nextStepNames[0] ) );
+    assertEquals( rowMetaInterface, rowMetaInterfaces.get( nextStepNames[1] ) );
   }
 
   @Test

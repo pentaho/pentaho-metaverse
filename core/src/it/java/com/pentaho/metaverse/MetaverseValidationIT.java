@@ -28,6 +28,7 @@ import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
 import com.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.api.model.IOperation;
+import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.frames.CalculatorStepNode;
 import com.pentaho.metaverse.frames.CsvFileInputStepNode;
@@ -98,6 +99,7 @@ import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
 import org.pentaho.di.trans.steps.filterrows.FilterRowsMeta;
 import org.pentaho.di.trans.steps.groupby.GroupByMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
+import org.pentaho.di.trans.steps.numberrange.NumberRangeMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
 import org.pentaho.di.trans.steps.rest.RestMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -1417,7 +1419,7 @@ public class MetaverseValidationIT {
   }
 
   @Test
-  public void testRestClientStepNode() throws Exception{
+  public void testRestClientStepNode() throws Exception {
     RestClientStepNode node = root.getRestClientStepNode( "REST Client" );
     assertNotNull( node );
     Iterable<FramedMetaverseNode> inputUrls = node.getInputUrls();
@@ -1434,7 +1436,7 @@ public class MetaverseValidationIT {
     Iterable<StreamFieldNode> streamFieldNodesUses = node.getStreamFieldNodesUses();
     assertEquals( 1, getIterableSize( streamFieldNodesUses ) );
     for ( StreamFieldNode streamFieldNodesUse : streamFieldNodesUses ) {
-      assertEquals( stepMeta.getParameterField()[ 0 ], streamFieldNodesUse.getName() );
+      assertEquals( stepMeta.getParameterField()[0], streamFieldNodesUse.getName() );
     }
 
     Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
@@ -1449,7 +1451,7 @@ public class MetaverseValidationIT {
   }
 
   @Test
-  public void testRestClientStepNode_urlFromField() throws Exception{
+  public void testRestClientStepNode_urlFromField() throws Exception {
     RestClientStepNode node = root.getRestClientStepNode( "REST Client - parameterized" );
     assertNotNull( node );
     Iterable<FramedMetaverseNode> inputUrls = node.getInputUrls();
@@ -1545,6 +1547,53 @@ public class MetaverseValidationIT {
 
     Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
     assertEquals( getExpectedOutputFieldCount( stepMeta ), getIterableSize( outputs ) );
+  }
+
+  @Test
+  public void testNumberRangeStepNode_newField() throws Exception {
+    TransformationStepNode numberRangeStepNode = root.getStepNode( "number_range", "Number range" );
+
+    assertEquals( 1, getIterableSize( numberRangeStepNode.getStreamFieldNodesUses() ) );
+
+    StreamFieldNode usesNode = null;
+    for ( StreamFieldNode node : numberRangeStepNode.getStreamFieldNodesUses() ) {
+      usesNode = node;
+      break;
+    }
+
+    NumberRangeMeta meta = (NumberRangeMeta) getStepMeta( numberRangeStepNode );
+    assertEquals( meta.getInputField(), usesNode.getName() );
+    assertNull( usesNode.getOperations() );
+
+    Iterable<StreamFieldNode> outFields = numberRangeStepNode.getOutputStreamFields();
+    int countOutputs = getIterableSize( outFields );
+    assertEquals( 2, countOutputs );
+    for ( StreamFieldNode outField : outFields ) {
+      assertNotNull( outField.getKettleType() );
+      if ( outField.getName().equals( meta.getOutputField() ) ) {
+        Iterable<StreamFieldNode> fieldNodesThatDeriveMe = outField.getFieldNodesThatDeriveMe();
+        assertNotNull( fieldNodesThatDeriveMe );
+        int derivesCount = getIterableSize( outField.getFieldNodesThatDeriveMe() );
+        assertEquals( 1, derivesCount );
+        for ( FieldNode derives : outField.getFieldNodesThatDeriveMe() ) {
+          assertEquals( usesNode.getName(), derives.getName() );
+          assertEquals( usesNode.getType(), derives.getType() );
+        }
+
+        Operations ops = MetaverseUtil.convertOperationsStringToMap( outField.getOperations() );
+        List<IOperation> dataOps = ops.get( ChangeType.DATA );
+        assertNotNull( dataOps );
+        assertEquals( 3, dataOps.size() );
+        for ( IOperation dataOp : dataOps ) {
+          assertEquals( Operation.MAPPING_CATEGORY, dataOp.getCategory() );
+          assertEquals( DictionaryConst.PROPERTY_TRANSFORMS, dataOp.getName() );
+          assertTrue( dataOp.toString().contains( meta.getInputField() ) );
+        }
+
+        // there should not be any metadata operations
+        assertNull( ops.get( ChangeType.METADATA ) );
+      }
+    }
   }
 
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {

@@ -234,7 +234,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
       for ( IMetaverseNode inputNode : inputNodes ) {
         for ( IMetaverseNode outputNode : outputNodes ) {
           if ( change.getOperations().size() > 0 ) {
-            outputNode.setProperty( DictionaryConst.PROPERTY_OPERATIONS, change.getOperations().toString() );
+            outputNode.setProperty( DictionaryConst.PROPERTY_OPERATIONS, change.toString() );
           }
           linkChangeNodes( inputNode, outputNode );
         }

@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -23,68 +23,56 @@
 package com.pentaho.metaverse.analyzer.kettle.step.numberrange;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.api.model.kettle.FieldMapping;
+import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import com.pentaho.metaverse.api.model.Operation;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.numberrange.NumberRangeMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.di.trans.steps.numberrange.NumberRangeRule;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
- * The SelectValuesStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the
- * fields operated on by Select Values steps.
+ * The NumberRangeStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the
+ * fields operated on by Number Range steps.
  */
-public class NumberRangeStepAnalyzer extends BaseStepAnalyzer<NumberRangeMeta> {
+public class NumberRangeStepAnalyzer extends StepAnalyzer<NumberRangeMeta> {
 
-  /**
-   * Analyzes Number Range steps to determine the various operations performed on fields and their data
-   *
-   * @see com.pentaho.metaverse.api.IAnalyzer#analyze(com.pentaho.metaverse.api.IComponentDescriptor, java.lang.Object)
-   */
   @Override
-  public IMetaverseNode analyze(
-    IComponentDescriptor descriptor, NumberRangeMeta numberRangeMeta ) throws MetaverseAnalyzerException {
-
-    // Do common analysis for all steps
-    super.analyze( descriptor, numberRangeMeta );
-
-    String inputFieldName = numberRangeMeta.getInputField();
-    String outputFieldName = numberRangeMeta.getOutputField();
-
-    if ( inputFieldName != null && outputFieldName != null ) {
-      // We can't use our own descriptor here, we need to get the descriptor for the origin step
-      IMetaverseNode inputFieldNode =
-        createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, inputFieldName ) );
-
-      // Not sure if we need a new node or not, but the builder will take care of it, so just create a node
-      // so we can add the "derives" link
-      IComponentDescriptor outputFieldDescriptor = getStepFieldOriginDescriptor( descriptor, outputFieldName );
-      IMetaverseNode outputFieldNode = createNodeFromDescriptor( outputFieldDescriptor );
-
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, inputFieldNode );
-      metaverseBuilder.addLink( inputFieldNode, DictionaryConst.LINK_DERIVES, outputFieldNode );
-    }
-    return rootNode;
+  protected Set<StepField> getUsedFields( NumberRangeMeta meta ) {
+    Set<StepField> usedFields = new HashSet<>();
+    usedFields.addAll( createStepFields( meta.getInputField(), getInputs() ) );
+    return usedFields;
   }
 
-  /**
-   * Provide field mappings that occur in this step.
-   *
-   * @param meta The step metadata
-   * @return a set of field mappings (input field -> output field)
-   * @throws com.pentaho.metaverse.api.MetaverseAnalyzerException
-   */
   @Override
-  public Set<IFieldMapping> getFieldMappings( NumberRangeMeta meta ) throws MetaverseAnalyzerException {
-    Set<IFieldMapping> fieldMappings = new HashSet<IFieldMapping>();
-    fieldMappings.add( new FieldMapping( meta.getInputField(), meta.getOutputField() ) );
-    fieldMappings.addAll( getPassthruFieldMappings( meta ) );
-    return fieldMappings;
+  protected void customAnalyze( NumberRangeMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+
+  }
+
+  @Override
+  public Set<ComponentDerivationRecord> getChangeRecords( final NumberRangeMeta meta )
+    throws MetaverseAnalyzerException {
+    Set<ComponentDerivationRecord> changeRecords = new HashSet<>();
+    ComponentDerivationRecord changeRecord =
+      new ComponentDerivationRecord( meta.getInputField(), meta.getOutputField(), ChangeType.DATA );
+    List<NumberRangeRule> rules = meta.getRules();
+    if ( rules != null ) {
+      for ( NumberRangeRule rule : rules ) {
+        changeRecord.addOperation( new Operation( Operation.MAPPING_CATEGORY, ChangeType.DATA,
+          DictionaryConst.PROPERTY_TRANSFORMS,
+          rule.getLowerBound() + " <= " + meta.getInputField() + " <= " + rule.getUpperBound()
+            + " -> " + rule.getValue() ) );
+      }
+    }
+    changeRecords.add( changeRecord );
+    return changeRecords;
   }
 
   @Override
