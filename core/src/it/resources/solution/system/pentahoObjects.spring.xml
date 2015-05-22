@@ -34,7 +34,9 @@
   </bean>
   <!--<bean id="TableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableInputStepAnalyzer"/>-->
   <bean id="TextFileInputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="textFileInputERC"/>
+  </bean>
   <bean id="SelectValuesStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer"/>
   <bean id="NumberRangeStepAnalyzer"

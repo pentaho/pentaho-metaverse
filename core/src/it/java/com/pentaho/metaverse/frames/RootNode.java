@@ -64,11 +64,13 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'Select values').as('step').in('contains').has('name', T.eq, 'Populate Table From File').back('step')" )
   SelectValuesTransStepNode getSelectValuesStepNode();
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'Sacramento crime stats 2006 file').as('step').in('contains').has('name', T.eq, 'Populate Table From File').back('step')" )
-  TextFileInputStepNode getTextFileInputStepNode();
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq,  stepName).as('step').in('contains').has('name', T.eq, transformationName).back('step')" )
+  FileInputStepNode getFileInputStepNode(
+    @GremlinParam( "transformationName" ) String transformationName,
+    @GremlinParam( "stepName" ) String stepName );
 
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'Get Customers').as('step').in('contains').has('name', T.eq, 'Textfile input - filename from field').back('step')" )
-  TextFileInputStepNode getTextFileInputStepNode_filenameFromField();
+  FileInputStepNode getTextFileInputStepNode_filenameFromField();
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Database Connection'}.out()" )
   Iterable<DatasourceNode> getDatasourceNodes();
