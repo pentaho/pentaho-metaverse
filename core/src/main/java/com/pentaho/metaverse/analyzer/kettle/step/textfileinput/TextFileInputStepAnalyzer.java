@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -23,18 +23,14 @@
 package com.pentaho.metaverse.analyzer.kettle.step.textfileinput;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import org.pentaho.di.core.Const;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.MetaverseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -43,70 +39,16 @@ import java.util.Set;
  * The TextFileInputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
  * other metaverse entities
  */
-public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMeta> {
-  private Logger log = LoggerFactory.getLogger( TextFileInputStepAnalyzer.class );
+public class TextFileInputStepAnalyzer extends ExternalResourceStepAnalyzer<TextFileInputMeta> {
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, TextFileInputMeta textFileInputMeta )
-    throws MetaverseAnalyzerException {
-
-    // do the common analysis for all step
-    IMetaverseNode node = super.analyze( descriptor, textFileInputMeta );
-
-    // add the fields as nodes, add the links too
-    TextFileInputField[] fields = textFileInputMeta.getInputFields();
-    if ( fields != null ) {
-      for ( TextFileInputField field : fields ) {
-        String fieldName = field.getName();
-        IComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
-          fieldName,
-          DictionaryConst.NODE_TYPE_FILE_FIELD,
-          descriptor.getNamespace(),
-          descriptor.getContext() );
-        IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
-        metaverseBuilder.addNode( fieldNode );
-
-        // Get the stream field output from this step. It should've already been created when we called super.analyze()
-        IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
-        IMetaverseNode outNode = createNodeFromDescriptor( transFieldDescriptor );
-
-        metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outNode );
-
-        // add a link from the fileField to the text file input step node
-        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, fieldNode );
-      }
+  protected Set<StepField> getUsedFields( TextFileInputMeta meta ) {
+    Set<StepField> usedFields = new HashSet<>();
+    if ( meta.isAcceptingFilenames() && StringUtils.isNotEmpty( meta.getAcceptingStepName() ) ) {
+      StepField stepField = new StepField( meta.getAcceptingStepName(), meta.getAcceptingField() );
+      usedFields.add( stepField );
     }
-
-    if ( textFileInputMeta.isAcceptingFilenames() ) {
-      String acceptingFieldName = textFileInputMeta.getAcceptingField();
-      IComponentDescriptor transFieldDescriptor = getPrevStepFieldOriginDescriptor( descriptor,
-        acceptingFieldName );
-      IMetaverseNode acceptingFieldNode = createNodeFromDescriptor( transFieldDescriptor );
-
-      // add a link from the fileField to the text file input step node
-      metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, acceptingFieldNode );
-    } else {
-      String[] fileNames = parentTransMeta.environmentSubstitute( textFileInputMeta.getFileName() );
-
-      // add a link from the file(s) being read to the step
-      if ( fileNames != null ) {
-        for ( String fileName : fileNames ) {
-          if ( !Const.isEmpty( fileName ) ) {
-            try {
-              // first add the node for the file
-              IMetaverseNode textFileNode = createFileNode( fileName, descriptor );
-              metaverseBuilder.addNode( textFileNode );
-
-              metaverseBuilder.addLink( textFileNode, DictionaryConst.LINK_READBY, node );
-            } catch ( MetaverseException e ) {
-              log.error( e.getMessage(), e );
-            }
-          }
-        }
-      }
-    }
-
-    return node;
+    return usedFields;
   }
 
   @Override
@@ -116,5 +58,30 @@ public class TextFileInputStepAnalyzer extends BaseStepAnalyzer<TextFileInputMet
         add( TextFileInputMeta.class );
       }
     };
+  }
+
+  @Override
+  public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
+    return createFileNode( resource.getName(), descriptor );
+  }
+
+  @Override
+  public String getResourceInputNodeType() {
+    return DictionaryConst.NODE_TYPE_FILE_FIELD;
+  }
+
+  @Override
+  public String getResourceOutputNodeType() {
+    return null;
+  }
+
+  @Override
+  public boolean isOutput() {
+    return false;
+  }
+
+  @Override
+  public boolean isInput() {
+    return true;
   }
 }
