@@ -57,9 +57,9 @@ public class MongoDbConnectionAnalyzer extends BaseKettleMetaverseComponent impl
     datasourceNode.setProperty( USE_KERBEROS_AUTHENTICATION, useKerberosAuthentication );
     datasourceNode.setProperty( CONNECTION_TIMEOUT, connectTimeout );
     datasourceNode.setProperty( SOCKET_TIMEOUT, socketTimeout );
-
+    datasourceNode.setName( database );
+    datasourceNode.setType( DictionaryConst.NODE_TYPE_MONGODB_CONNECTION );
     datasourceNode.setLogicalIdGenerator( getLogicalIdGenerator() );
-
     return datasourceNode;
   }
 

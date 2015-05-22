@@ -32,7 +32,6 @@ import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -40,7 +39,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
@@ -48,10 +49,12 @@ import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.getxmldata.GetXMLData;
 import org.pentaho.di.trans.steps.getxmldata.GetXMLDataField;
 import org.pentaho.di.trans.steps.getxmldata.GetXMLDataMeta;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +77,8 @@ public class GetXMLDataStepAnalyzerTest {
   @Mock IMetaverseBuilder builder;
   @Mock TransMeta parentTransMeta;
   @Mock StepMeta parentStepMeta;
+  @Mock RowMetaInterface rmi;
+  @Mock GetXMLData data;
 
   IComponentDescriptor descriptor;
 
@@ -277,45 +282,44 @@ public class GetXMLDataStepAnalyzerTest {
     verify( node ).setProperty( "loopXPath", "file/xpath/name" );
   }
 
-  /*
+
   @Test
   public void testGetXMLDataExternalResourceConsumer() throws Exception {
     GetXMLDataExternalResourceConsumer consumer = new GetXMLDataExternalResourceConsumer();
 
-    StepMeta meta = new StepMeta( "test", mockGetXMLDataMeta );
-    StepMeta spyMeta = spy( meta );
+    StepMeta spyMeta = spy( new StepMeta( "test", meta ) );
 
-    when( mockGetXMLDataMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( meta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
+    when( data.getStepMetaInterface() ).thenReturn( meta );
 
-
-    when( mockGetXMLDataMeta.isInFields() ).thenReturn( false );
+    when( meta.isInFields() ).thenReturn( false );
     String[] filePaths = { "/path/to/file1", "/another/path/to/file2" };
-    when( mockGetXMLDataMeta.getFileName() ).thenReturn( filePaths );
-    when( mockTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( filePaths );
+    when( meta.getFileName() ).thenReturn( filePaths );
+    when( parentTransMeta.environmentSubstitute( any( String[].class ) ) ).thenReturn( filePaths );
 
-    assertFalse( consumer.isDataDriven( mockGetXMLDataMeta ) );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( mockGetXMLDataMeta );
+    assertFalse( consumer.isDataDriven( meta ) );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( meta );
     assertFalse( resources.isEmpty() );
     assertEquals( 2, resources.size() );
 
 
-    when( mockGetXMLDataMeta.isInFields() ).thenReturn( true );
-    when( mockGetXMLDataMeta.getIsAFile() ).thenReturn( true );
-    assertTrue( consumer.isDataDriven( mockGetXMLDataMeta ) );
-    assertTrue( consumer.getResourcesFromMeta( mockGetXMLDataMeta ).isEmpty() );
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), anyString(), anyString() ) )
+    when( meta.isInFields() ).thenReturn( true );
+    when( meta.getIsAFile() ).thenReturn( true );
+    assertTrue( consumer.isDataDriven( meta ) );
+    assertTrue( consumer.getResourcesFromMeta( meta ).isEmpty() );
+    when( rmi.getString( Mockito.any( Object[].class ), anyString(), anyString() ) )
       .thenReturn( "/path/to/row/file" );
-    resources = consumer.getResourcesFromRow( mockGetXMLData, mockRowMetaInterface, new String[]{ "id", "name" } );
+    resources = consumer.getResourcesFromRow( data, rmi, new String[]{ "id", "name" } );
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), anyString(), anyString() ) )
+    when( rmi.getString( Mockito.any( Object[].class ), anyString(), anyString() ) )
       .thenThrow( KettleException.class );
-    resources = consumer.getResourcesFromRow( mockGetXMLData, mockRowMetaInterface, new String[]{ "id", "name" } );
+    resources = consumer.getResourcesFromRow( data, rmi, new String[]{ "id", "name" } );
     assertTrue( resources.isEmpty() );
 
     assertEquals( GetXMLDataMeta.class, consumer.getMetaClass() );
   }
-*/
+
 }

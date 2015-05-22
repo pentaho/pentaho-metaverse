@@ -160,4 +160,6 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, stepName).as('step').in('contains').has('name', T.eq, 'rest_client').back('step')" )
   RestClientStepNode getRestClientStepNode( @GremlinParam( "stepName" ) String stepName );
 
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'MongoDB Input').as('step').in('contains').has('name', T.eq, 'mongo_input').back('step')" )
+  MongoDbInputStepNode getMongoDbInputStepNode();
 }
