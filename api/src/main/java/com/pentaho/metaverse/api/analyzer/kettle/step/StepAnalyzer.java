@@ -86,9 +86,6 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
     rootNode.setProperty( "_analyzer", this.getClass().getSimpleName() );
     metaverseBuilder.addNode( rootNode );
 
-    // Add connection nodes
-    addConnectionNodes( descriptor );
-
     inputs = processInputs( meta );
     outputs = processOutputs( meta );
 

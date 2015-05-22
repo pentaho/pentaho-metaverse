@@ -64,6 +64,7 @@
   <bean id="MongoDbInputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputStepAnalyzer">
     <property name="connectionAnalyzer" ref="mongoDbConnectionAnalyzer"/>
+    <property name="externalResourceConsumer" ref="mongoDbInputERC"/>
   </bean>
   <bean id="ExcelOutputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer">
@@ -200,6 +201,8 @@
 		    class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostExternalResourceConsumer"/>
   <bean id="fixedFileInputERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputExternalResourceConsumer"/>
+  <bean id="mongoDbInputERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputExternalResourceConsumer"/>
 
 
   <bean id="IStepExternalResourceConsumerProvider"

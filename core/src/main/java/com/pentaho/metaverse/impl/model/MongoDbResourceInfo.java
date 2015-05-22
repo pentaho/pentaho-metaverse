@@ -42,6 +42,7 @@ public class MongoDbResourceInfo extends BaseResourceInfo implements IExternalRe
   public static final String JSON_PROPERTY_SOCKET_TIMEOUT = "socketTimeout";
   public static final String JSON_PROPERTY_USE_ALL_REPLICA_SET_MEMBERS = "useAllReplicaSetMembers";
   public static final String JSON_PROPERTY_USE_KERBEROS_AUTHENTICATION = "useKerberosAuthentication";
+  public static final String JSON_PROPERTY_COLLECTION = "collection";
 
   private String database;
   private String port;
@@ -52,8 +53,10 @@ public class MongoDbResourceInfo extends BaseResourceInfo implements IExternalRe
   private boolean useKerberosAuthentication;
   private String connectTimeout;
   private String socketTimeout;
+  private String collection;
 
   public MongoDbResourceInfo( MongoDbMeta mongoDbMeta ) {
+    setName( mongoDbMeta.getDbName() );
     setDatabase( mongoDbMeta.getDbName() );
     setPort( mongoDbMeta.getPort() );
     setHostNames( mongoDbMeta.getHostnames() );
@@ -63,12 +66,17 @@ public class MongoDbResourceInfo extends BaseResourceInfo implements IExternalRe
     setUseKerberosAuthentication( mongoDbMeta.getUseKerberosAuthentication() );
     setConnectTimeout( mongoDbMeta.getConnectTimeout() );
     setSocketTimeout( mongoDbMeta.getSocketTimeout() );
+    setCollection( mongoDbMeta.getCollection() );
   }
 
   public MongoDbResourceInfo( String hostNames, String port, String database ) {
     setHostNames( hostNames );
     setPort( port );
     setDatabase( database );
+  }
+  @Override
+  public String getType() {
+    return "MongoDbResource";
   }
 
   @JsonProperty( JSON_PROPERTY_CONNECTION_TIMEOUT )
@@ -156,5 +164,14 @@ public class MongoDbResourceInfo extends BaseResourceInfo implements IExternalRe
   protected String getEncryptedPassword() {
     // Need "Encrypted prefix for decryptPasswordOptionallyEncrypted() to operate properly
     return Encr.PASSWORD_ENCRYPTED_PREFIX + Encr.encryptPassword( password );
+  }
+
+  @JsonProperty( JSON_PROPERTY_COLLECTION )
+  public String getCollection() {
+    return collection;
+  }
+
+  public void setCollection( String collection ) {
+    this.collection = collection;
   }
 }

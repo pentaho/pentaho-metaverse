@@ -47,7 +47,9 @@ import com.pentaho.metaverse.frames.JobEntryNode;
 import com.pentaho.metaverse.frames.JobNode;
 import com.pentaho.metaverse.frames.LocatorNode;
 import com.pentaho.metaverse.frames.MergeJoinStepNode;
+import com.pentaho.metaverse.frames.MongoConnectionNode;
 import com.pentaho.metaverse.frames.MongoDbDatasourceNode;
+import com.pentaho.metaverse.frames.MongoDbInputStepNode;
 import com.pentaho.metaverse.frames.RestClientStepNode;
 import com.pentaho.metaverse.frames.RootNode;
 import com.pentaho.metaverse.frames.RowsToResultStepNode;
@@ -97,6 +99,7 @@ import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
 import org.pentaho.di.trans.steps.filterrows.FilterRowsMeta;
 import org.pentaho.di.trans.steps.groupby.GroupByMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
+import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
 import org.pentaho.di.trans.steps.numberrange.NumberRangeMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
 import org.pentaho.di.trans.steps.rest.RestMeta;
@@ -344,8 +347,7 @@ public class MetaverseValidationIT {
     assertEquals( 9, countInputs );
     assertEquals( "Select values", selectValues.getStepType() );
 
-    // verify the nodes created by the step
-    for ( StreamFieldNode node : selectValues.getStreamFieldNodesCreates() ) {
+    for ( StreamFieldNode node : selectValues.getOutputStreamFields() ) {
       // check for operations
       if ( node.getOperations() != null ) {
         Operations ops = MetaverseUtil.convertOperationsStringToMap( node.getOperations() );
@@ -364,13 +366,6 @@ public class MetaverseValidationIT {
         assertNotNull( deriveNode );
       }
 
-    }
-
-    // verify fields deleted
-    for ( StreamFieldNode node : selectValues.getStreamFieldNodesDeletes() ) {
-      // check the created node is never used to "populate" anything
-      FieldNode populatedNode = node.getFieldPopulatedByMe();
-      assertNull( populatedNode );
     }
   }
 
@@ -867,12 +862,21 @@ public class MetaverseValidationIT {
     List<String> nodeOutputs = new ArrayList<String>();
     for ( StreamFieldNode sfn : node.getOutputStreamFields() ) {
       nodeOutputs.add( sfn.getName() );
+      Operations ops = MetaverseUtil.convertOperationsStringToMap( sfn.getOperations() );
       if ( sfn.getName().equals( "area" ) ) {
         area = sfn;
+        assertNotNull( ops.get( ChangeType.DATA ) );
+        assertEquals( Operation.CALC_CATEGORY, ops.get( ChangeType.DATA ).get( 0 ).getCategory() );
       } else if ( sfn.getName().equals( "celsius" ) ) {
         celsius = sfn;
+        assertNotNull( ops );
+        assertNotNull( ops.get( ChangeType.DATA ) );
+        assertEquals( Operation.CALC_CATEGORY, ops.get( ChangeType.DATA ).get( 0 ).getCategory() );
       } else if ( sfn.getName().equals( "kelvin" ) ) {
         kelvin = sfn;
+        assertNotNull( ops );
+        assertNotNull( ops.get( ChangeType.DATA ) );
+        assertEquals( Operation.CALC_CATEGORY, ops.get( ChangeType.DATA ).get( 0 ).getCategory() );
       }
     }
 
@@ -1571,6 +1575,35 @@ public class MetaverseValidationIT {
         assertNull( ops.get( ChangeType.METADATA ) );
       }
     }
+  }
+
+  @Test
+  public void testMongoDbInput() throws Exception {
+    MongoDbInputStepNode node = root.getMongoDbInputStepNode();
+    assertNotNull( node );
+    MongoDbMeta meta = (MongoDbMeta) getStepMeta( node );
+    assertEquals( meta.getCollection(), node.getCollection().getName() );
+    assertEquals( meta.getDbName(), node.getDatasource( meta.getDbName() ).getName() );
+
+    Iterable<StreamFieldNode> inputs = node.getInputStreamFields();
+    Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
+
+    assertEquals( getIterableSize( inputs ), getIterableSize( outputs ) );
+
+    for ( StreamFieldNode output : outputs ) {
+      assertEquals( output.getName(), output.getFieldPopulatesMe().getName() );
+    }
+
+    MongoConnectionNode datasource = node.getDatasource( meta.getDbName() );
+    assertEquals( meta.getHostnames(), datasource.getHost() );
+    assertEquals( meta.getPort(), datasource.getPort() );
+    assertEquals( meta.getAuthenticationUser(), datasource.getUserName() );
+    assertEquals( meta.getDbName(), datasource.getDatabaseName() );
+    assertEquals( DictionaryConst.NODE_TYPE_MONGODB_CONNECTION, datasource.getType() );
+
+    FramedMetaverseNode collection = node.getCollection();
+    assertEquals( meta.getCollection(), collection.getName() );
+    assertEquals( DictionaryConst.NODE_TYPE_MONGODB_COLLECTION, collection.getType() );
   }
 
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {
