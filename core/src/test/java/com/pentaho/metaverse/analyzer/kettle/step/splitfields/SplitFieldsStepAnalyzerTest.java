@@ -24,37 +24,29 @@
 package com.pentaho.metaverse.analyzer.kettle.step.splitfields;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.ChangeType;
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-import edu.emory.mathcs.backport.java.util.Arrays;
-import org.apache.commons.collections.SetUtils;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
+import com.pentaho.metaverse.api.model.IOperation;
+import com.pentaho.metaverse.api.model.Operations;
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.ProgressMonitorListener;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
@@ -62,137 +54,55 @@ public class SplitFieldsStepAnalyzerTest {
 
   private SplitFieldsStepAnalyzer analyzer;
 
-  private static final String DEFAULT_STEP_NAME = "testStep";
+  @Mock
+  private FieldSplitterMeta meta;
 
   @Mock
-  private IMetaverseBuilder builder;
-  @Mock
-  private INamespace namespace;
-  @Mock
-  private IComponentDescriptor descriptor;
-  @Mock
-  private StepMeta parentStepMeta;
-  @Mock
-  private TransMeta parentTransMeta;
-  @Mock
-  private RowMetaInterface inputRowMeta;
-  @Mock
-  private RowMetaInterface outputRowMeta;
+  IMetaverseNode node;
 
-  @Mock
-  private FieldSplitterMeta fieldSplitterMeta;
-
-  @Mock
-  private ValueMetaInterface inField1;
-
-  private String[] outputFields = new String[]{ "one", "two", "three" };
-  public static final String SPLIT_FIELD = "SPLIT_ME";
-
-  private List<ValueMetaInterface> inFields;
+  private final String[] outputFields = new String[]{ "one", "two", "three" };
 
   @Before
   public void setUp() throws Exception {
 
-    when( inField1.getName() ).thenReturn( SPLIT_FIELD );
+    when( meta.getDelimiter() ).thenReturn( "," );
+    when( meta.getEnclosure() ).thenReturn( "\"" );
+    when( meta.getSplitField() ).thenReturn( "splitField" );
+    when( meta.getFieldName() ).thenReturn( outputFields );
 
-    inFields = new ArrayList<ValueMetaInterface>();
-    inFields.add( inField1 );
-
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
-
-    when( builder.getMetaverseObjectFactory() ).thenReturn( MetaverseTestUtils.getMetaverseObjectFactory() );
-
-    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( new String[]{ "input" } );
-    when( inputRowMeta.getFieldNames() ).thenReturn( new String[]{ SPLIT_FIELD } );
-    when( inputRowMeta.searchValueMeta( any( String.class ) ) ).thenReturn( null );
-    when( inputRowMeta.getValueMetaList() ).thenReturn( inFields );
-    when( outputRowMeta.getFieldNames() ).thenReturn( outputFields );
-    when( outputRowMeta.searchValueMeta( any( String.class ) ) ).thenReturn( null );
-
-    when( parentTransMeta.getPrevStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      inputRowMeta );
-    when( parentTransMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      outputRowMeta );
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
-    when( fieldSplitterMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
-
-    when( fieldSplitterMeta.getDelimiter() ).thenReturn( "," );
-    when( fieldSplitterMeta.getEnclosure() ).thenReturn( "\"" );
-    when( fieldSplitterMeta.getSplitField() ).thenReturn( SPLIT_FIELD );
-
-    when( fieldSplitterMeta.getFieldName() ).thenReturn( outputFields );
-
-    analyzer = new SplitFieldsStepAnalyzer();
-    analyzer.setMetaverseBuilder( builder );
-
-    descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
+    analyzer = spy( new SplitFieldsStepAnalyzer() );
   }
 
   @Test
-  public void testAnalyze() throws Exception {
-    IMetaverseNode node = analyzer.analyze( descriptor, fieldSplitterMeta );
-    assertNotNull( node );
-    assertEquals( ",", node.getProperty( DictionaryConst.PROPERTY_DELIMITER ) );
-    assertEquals( "\"", node.getProperty( DictionaryConst.PROPERTY_ENCLOSURE ) );
-
-    // one uses link between the step node and the "split field" stream node
-    verify( builder, times( 1 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
-
-    // one node created for each output field as well as one for the step itself
-    verify( builder, times( outputFields.length + 1 ) ).addNode( any( IMetaverseNode.class ) );
-
-    // one deletes link of the original "split field" stream field
-    verify( builder, times( 1 ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DELETES ),
-      any( IMetaverseNode.class ) );
-
-    // one derives link for each output field
-    verify( builder, times( outputFields.length ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ),
-      any( IMetaverseNode.class ) );
+  public void testCustomAnalyze() throws Exception {
+    analyzer.customAnalyze( meta, node );
+    verify( node ).setProperty( eq( DictionaryConst.PROPERTY_DELIMITER ), anyString() );
+    verify( node ).setProperty( eq( DictionaryConst.PROPERTY_ENCLOSURE ), anyString() );
   }
 
   @Test
-  public void testAnalyze_reuseSplitFieldNameInOutputField() throws Exception {
-    when( fieldSplitterMeta.getSplitField() ).thenReturn( "one" );
-    when( inputRowMeta.getFieldNames() ).thenReturn( new String[]{ "one" } );
-
-    IMetaverseNode node = analyzer.analyze( descriptor, fieldSplitterMeta );
-    assertNotNull( node );
-    assertEquals( ",", node.getProperty( DictionaryConst.PROPERTY_DELIMITER ) );
-    assertEquals( "\"", node.getProperty( DictionaryConst.PROPERTY_ENCLOSURE ) );
-
-    // one uses link between the step node and the "split field" stream node
-    verify( builder, times( 1 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
-
-    // one node created for each output field as well as one for the step itself
-    verify( builder, times( outputFields.length + 1 ) ).addNode( any( IMetaverseNode.class ) );
-
-    // one deletes link of the original "split field" stream field
-    verify( builder, atLeast( 1 ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DELETES ),
-      any( IMetaverseNode.class ) );
-
-    // one derives link for each output field
-    verify( builder, times( outputFields.length ) ).addLink(
-      any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ),
-      any( IMetaverseNode.class ) );
+  public void testGetChangeRecords() throws Exception {
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( meta );
+    assertEquals( 3, changeRecords.size() );
+    for ( ComponentDerivationRecord changeRecord : changeRecords ) {
+      assertEquals( "splitField", changeRecord.getOriginalEntityName() );
+      assertTrue( ArrayUtils.contains( outputFields, changeRecord.getChangedEntityName() ) );
+      Operations operations = changeRecord.getOperations();
+      assertEquals( 1, operations.size() ); // Only data operations
+      List<IOperation> dataOperations = operations.get( ChangeType.DATA );
+      assertEquals( 1, dataOperations.size() );
+    }
   }
 
-
   @Test
-  public void testGetFieldMappings() throws Exception {
-    Set<IFieldMapping> fieldMappings = analyzer.getFieldMappings( fieldSplitterMeta );
-    assertEquals( outputFields.length, fieldMappings.size() );
-    Set<IFieldMapping> outputFieldsSet = new HashSet<IFieldMapping>();
-    outputFieldsSet.addAll( Arrays.asList( outputFields ) );
-    SetUtils.isEqualSet( fieldMappings, outputFieldsSet );
+  public void testGetUsedFields() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    fields.add( new StepField( "prev", "splitField" ) );
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), any( StepNodes.class ) );
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+    int expectedUsedFieldCount = 1;
+    assertEquals( expectedUsedFieldCount, usedFields.size() );
+    verify( analyzer, times( expectedUsedFieldCount ) ).createStepFields( anyString(), any( StepNodes.class ) );
   }
 
   @Test

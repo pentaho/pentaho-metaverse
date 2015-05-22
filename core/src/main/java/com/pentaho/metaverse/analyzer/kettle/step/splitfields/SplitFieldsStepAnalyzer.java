@@ -25,14 +25,13 @@ package com.pentaho.metaverse.analyzer.kettle.step.splitfields;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import com.pentaho.metaverse.api.model.Operation;
-import com.pentaho.metaverse.api.model.kettle.FieldMapping;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
 
@@ -42,22 +41,19 @@ import java.util.Set;
 /**
  * Step analyzer for Field Splitter step
  */
-public class SplitFieldsStepAnalyzer extends BaseStepAnalyzer<FieldSplitterMeta> {
-  private IComponentDescriptor descriptor;
+public class SplitFieldsStepAnalyzer extends StepAnalyzer<FieldSplitterMeta> {
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, FieldSplitterMeta meta )
-    throws MetaverseAnalyzerException {
+  protected Set<StepField> getUsedFields( FieldSplitterMeta meta ) {
+    Set<StepField> usedFields = new HashSet<>();
+    usedFields.addAll( createStepFields( meta.getSplitField(), getInputs() ) );
+    return usedFields;
+  }
 
-    IMetaverseNode node = super.analyze( descriptor, meta );
-
-    node.setProperty( DictionaryConst.PROPERTY_DELIMITER, meta.getDelimiter() );
-    node.setProperty( DictionaryConst.PROPERTY_ENCLOSURE, meta.getEnclosure() );
-    this.descriptor = descriptor;
-
-    getChangeRecords( meta );
-
-    return node;
+  @Override
+  protected void customAnalyze( FieldSplitterMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+    rootNode.setProperty( DictionaryConst.PROPERTY_DELIMITER, meta.getDelimiter() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_ENCLOSURE, meta.getEnclosure() );
   }
 
   @Override
@@ -66,60 +62,20 @@ public class SplitFieldsStepAnalyzer extends BaseStepAnalyzer<FieldSplitterMeta>
 
     String originalField = meta.getSplitField();
 
-    // We can't use our own descriptor here, we need to get the descriptor for the origin step
-    IMetaverseNode originalFieldNode =
-      createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, originalField ) );
-
-    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, originalFieldNode );
-
     Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
 
-    for ( int i = 0; i < meta.getFieldName().length; i++ ) {
-      String resultingField = meta.getFieldName()[i];
+    String[] fieldNames = meta.getFieldName();
 
-      // Not sure if we need a new node or not, but the builder will take care of it, so just create a node
-      // so we can add the "derives" link
-      IComponentDescriptor resultingFieldDescriptor = getStepFieldOriginDescriptor( descriptor, resultingField );
-      IMetaverseNode resultingFieldNode = createNodeFromDescriptor( resultingFieldDescriptor );
-
-      metaverseBuilder.addNode( resultingFieldNode );
-
-      ComponentDerivationRecord cdr = new ComponentDerivationRecord(
-        originalField,
-        meta.getFieldName()[i],
-        ChangeType.DATA );
-
-      cdr.addOperation( new Operation( Operation.MAPPING_CATEGORY, ChangeType.DATA, meta.getFieldName()[ i ],
-        "Token " + i + " of split string" ) );
-
-      // add the derives link and change record
-      processFieldChangeRecord( descriptor, originalFieldNode, cdr );
-
-      // if one of the resulting fields is named the same as the original field, be sure to add a created link
-      // and a deletes link to the original field
-      if ( originalField.equals( resultingField ) ) {
-        metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, resultingFieldNode );
-        metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_DELETES, originalFieldNode );
+    if ( !Const.isEmpty( fieldNames ) ) {
+      for ( int i = 0; i < meta.getFieldName().length; i++ ) {
+        ComponentDerivationRecord cdr = new ComponentDerivationRecord( originalField, fieldNames[i], ChangeType.DATA );
+        cdr.addOperation( new Operation( Operation.MAPPING_CATEGORY, ChangeType.DATA, fieldNames[i],
+          "Token " + i + " of split string" ) );
+        changeRecords.add( cdr );
       }
-
-      changeRecords.add( cdr );
     }
 
     return changeRecords;
-  }
-
-  @Override
-  public Set<IFieldMapping> getFieldMappings( FieldSplitterMeta meta ) throws MetaverseAnalyzerException {
-    Set<IFieldMapping> fieldMappings = new HashSet<IFieldMapping>();
-
-    String originalField = meta.getSplitField();
-    for ( int i = 0; i < meta.getFieldName().length; i++ ) {
-      String resultingField = meta.getFieldName()[ i ];
-      FieldMapping fieldMapping = new FieldMapping( originalField, resultingField );
-      fieldMappings.add( fieldMapping );
-    }
-
-    return fieldMappings;
   }
 
   @Override
