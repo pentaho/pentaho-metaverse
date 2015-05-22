@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -22,36 +22,23 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.valuemapper;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.model.kettle.FieldMapping;
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
+import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
+import com.pentaho.metaverse.api.model.IOperation;
+import com.pentaho.metaverse.api.model.Operations;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.pentaho.di.core.ProgressMonitorListener;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.core.row.value.ValueMetaNumber;
-import org.pentaho.di.core.row.value.ValueMetaString;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -59,175 +46,55 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.class )
 public class ValueMapperStepAnalyzerTest {
 
-  public static final String STEP_NAME = "ValueMapperTest";
   private ValueMapperStepAnalyzer analyzer = null;
 
   @Mock
-  private IComponentDescriptor descriptor;
-
+  private ValueMapperMeta meta;
   @Mock
-  private INamespace namespace;
-
-  @Mock
-  private ValueMapperMeta valueMapperMeta;
-
-  @Mock
-  private IMetaverseBuilder builder;
-
-  @Mock
-  private TransMeta transMeta;
-
-  @Mock
-  private RowMetaInterface prevRowMeta;
-
-  @Mock
-  ValueMetaInterface valueMetaInterfaceMock;
-
-  @Mock
-  private TransMeta mockTransMeta;
-
-  @Mock
-  private RowMetaInterface mockInRowMetaInterface;
-
-  @Mock
-  private RowMetaInterface mockOutRowMetaInterface;
+  IMetaverseNode node;
 
   @Before
   public void setUp() throws Exception {
-    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
 
-    when( valueMapperMeta.getFieldToUse() ).thenReturn( "Country" );
-    when( valueMapperMeta.getSourceValue() ).thenReturn( new String[] { "United States", "Canada" } );
-    when( valueMapperMeta.getTargetValue() ).thenReturn( new String[] { "USA", "CA" } );
+    when( meta.getFieldToUse() ).thenReturn( "Country" );
+    when( meta.getSourceValue() ).thenReturn( new String[]{ "United States", "Canada" } );
+    when( meta.getTargetValue() ).thenReturn( new String[]{ "USA", "CA" } );
 
-    analyzer = new ValueMapperStepAnalyzer();
-    analyzer.setMetaverseBuilder( builder );
-    descriptor = new MetaverseComponentDescriptor( STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
-  }
-
-  @Test(expected = MetaverseAnalyzerException.class)
-  public void testAnalyze_NullMeta() throws Exception {
-    analyzer.analyze( descriptor, null );
+    analyzer = spy( new ValueMapperStepAnalyzer() );
   }
 
   @Test
-  public void testAnalyze_noFields() throws Exception {
-    StepMeta stepMeta = new StepMeta( STEP_NAME, valueMapperMeta );
-    StepMeta spyStepMeta = spy( stepMeta );
-
-    when( valueMapperMeta.getParentStepMeta() ).thenReturn( spyStepMeta );
-    when( spyStepMeta.getParentTransMeta() ).thenReturn( transMeta );
-    when( transMeta.getPrevStepFields( eq( spyStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      prevRowMeta );
-    when( transMeta.getPrevStepNames( spyStepMeta ) ).thenReturn( new String[] { "prev step name" } );
-
-    IMetaverseNode node = analyzer.analyze( descriptor, valueMapperMeta );
-    assertNotNull( node );
-
-    assertEquals( stepMeta.getName(), node.getName() );
-
-    verify( builder ).addNode( any( IMetaverseNode.class ) );
+  public void testCustomAnalyze() throws Exception {
+    analyzer.customAnalyze( meta, node );
+    verify( node ).setProperty( eq( "defaultValue" ), anyString() );
   }
 
   @Test
-  public void testAnalyze_OverwiteExistingField() throws Exception {
-    StepMeta stepMeta = new StepMeta( STEP_NAME, valueMapperMeta );
-    StepMeta spyStepMeta = spy( stepMeta );
-
-    ValueMapperStepAnalyzer spyAnalyzer = spy( analyzer );
-
-    when( valueMapperMeta.getParentStepMeta() ).thenReturn( spyStepMeta );
-    when( spyStepMeta.getParentTransMeta() ).thenReturn( transMeta );
-
-    when( transMeta.getPrevStepFields( eq( spyStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      prevRowMeta );
-    when( transMeta.getPrevStepNames( spyStepMeta ) ).thenReturn( new String[] { "prev step name" } );
-
-    when( valueMapperMeta.getTargetField() ).thenReturn( null );
-
-    when( builder.addLink( any( IMetaverseNode.class ), anyString(), any( IMetaverseNode.class ) ) ).thenReturn( builder );
-
-    when( builder.updateNode( any( IMetaverseNode.class ) ) ).thenReturn( builder );
-
-    IMetaverseNode node = spyAnalyzer.analyze( descriptor, valueMapperMeta );
-    assertNotNull( node );
-
-    verify( builder, times( 1 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
-
-    verify( builder, times( 1 ) ).updateNode( any( IMetaverseNode.class ) );
-
-    // make sure that we didn't get into the handling of new field creation instead of overwriting the existing one
-    verify( builder, times( 0 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ),
-      any( IMetaverseNode.class ) );
+  public void testGetUsedFields() throws Exception {
+    Set<StepField> fields = new HashSet<>();
+    fields.add( new StepField( "prev", "inField" ) );
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), any( StepNodes.class ) );
+    Set<StepField> usedFields = analyzer.getUsedFields( meta );
+    int expectedUsedFieldCount = 1;
+    assertEquals( expectedUsedFieldCount, usedFields.size() );
+    verify( analyzer, times( expectedUsedFieldCount ) ).createStepFields( anyString(), any( StepNodes.class ) );
   }
 
   @Test
-  public void testAnalyze_WithTargetField() throws Exception {
-    StepMeta stepMeta = new StepMeta( STEP_NAME, valueMapperMeta );
-    StepMeta spyStepMeta = spy( stepMeta );
-
-    ValueMapperStepAnalyzer spyAnalyzer = spy( analyzer );
-
-    when( valueMapperMeta.getParentStepMeta() ).thenReturn( spyStepMeta );
-    when( spyStepMeta.getParentTransMeta() ).thenReturn( transMeta );
-
-    when( transMeta.getPrevStepFields( eq( spyStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      prevRowMeta );
-    when( transMeta.getPrevStepNames( spyStepMeta ) ).thenReturn( new String[] { "prev step name" } );
-    when( prevRowMeta.searchValueMeta( anyString() ) ).thenReturn( valueMetaInterfaceMock );
-
-    when( valueMapperMeta.getTargetField() ).thenReturn( "CTR" );
-
-    when( builder.addLink( any( IMetaverseNode.class ), anyString(), any( IMetaverseNode.class ) ) ).thenReturn( builder );
-
-    when( builder.updateNode( any( IMetaverseNode.class ) ) ).thenReturn( builder );
-
-    IMetaverseNode node = spyAnalyzer.analyze( descriptor, valueMapperMeta );
-    assertNotNull( node );
-
-    assertEquals( descriptor.getType(), node.getType() );
-    assertEquals( descriptor.getName(), node.getName() );
-
-    verify( builder, times( 1 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
-
-    verify( builder, times( 0 ) ).updateNode( any( IMetaverseNode.class ) );
-
-    verify( builder, times( 1 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ),
-      any( IMetaverseNode.class ) );
-  }
-
-  @Test(expected = MetaverseAnalyzerException.class)
-  public void testAnalyze_WithTargetField_NoInputFieldMeta() throws Exception {
-    StepMeta stepMeta = new StepMeta( STEP_NAME, valueMapperMeta );
-    StepMeta spyStepMeta = spy( stepMeta );
-
-    ValueMapperStepAnalyzer spyAnalyzer = spy( analyzer );
-
-    when( valueMapperMeta.getParentStepMeta() ).thenReturn( spyStepMeta );
-    when( spyStepMeta.getParentTransMeta() ).thenReturn( transMeta );
-
-    when( transMeta.getPrevStepFields( eq( spyStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      prevRowMeta );
-    when( transMeta.getPrevStepNames( spyStepMeta ) ).thenReturn( new String[] { "prev step name" } );
-
-    when( valueMapperMeta.getTargetField() ).thenReturn( "CTR" );
-
-    when( builder.addLink( any( IMetaverseNode.class ), anyString(), any( IMetaverseNode.class ) ) ).thenReturn( builder );
-
-    when( builder.updateNode( any( IMetaverseNode.class ) ) ).thenReturn( builder );
-
-    IMetaverseNode node = analyzer.analyze( descriptor, valueMapperMeta );
+  public void testGetChangeRecords() throws Exception {
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( meta );
+    assertEquals( 1, changeRecords.size() );
+    ComponentDerivationRecord changeRecord = changeRecords.iterator().next();
+    assertEquals( meta.getFieldToUse(), changeRecord.getOriginalEntityName() );
+    assertEquals( ( meta.getTargetField() == null ? meta.getFieldToUse() : meta.getTargetField() ),
+      changeRecord.getChangedEntityName() );
+    Operations operations = changeRecord.getOperations();
+    assertEquals( 1, operations.size() ); // Only data operations
+    List<IOperation> dataOperations = operations.get( ChangeType.DATA );
+    assertEquals( 2, dataOperations.size() );
   }
 
   @Test
@@ -236,81 +103,6 @@ public class ValueMapperStepAnalyzerTest {
     assertNotNull( types );
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( ValueMapperMeta.class ) );
-  }
-
-  @Test
-  public void testGetFieldMappings() throws Exception {
-    StepMeta meta = new StepMeta( "test", valueMapperMeta );
-    StepMeta spyMeta = spy( meta );
-
-    when( valueMapperMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( spyMeta.getStepID() ).thenReturn( "Select values" );
-
-    // set up the input fields
-    String[] inFields = { "field1", "field2" };
-    String[] outFields = { "field1", "field2", "field3" };
-    final ValueMetaInterface field1 = new ValueMetaNumber( "field1" );
-    field1.setOrigin( "originStep" );
-    final ValueMetaInterface field2 = new ValueMetaNumber( "field2" );
-    field1.setOrigin( "originStep" );
-    final ValueMetaInterface field3 = new ValueMetaString( "field3" );
-    field3.setOrigin( "test" );
-
-    when( mockInRowMetaInterface.getFieldNames() ).thenReturn( inFields );
-    when( mockInRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(
-      new Answer<ValueMetaInterface>() {
-
-        @Override
-        public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-          Object[] args = invocation.getArguments();
-          if ( args[0] == "field1" ) {
-            return field1;
-          } else if ( args[0] == "field2" ) {
-            return field2;
-          }
-          return null;
-        }
-      }
-    );
-
-    when( mockOutRowMetaInterface.getFieldNames() ).thenReturn( outFields );
-    when( mockOutRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer(
-      new Answer<ValueMetaInterface>() {
-
-        @Override
-        public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-          Object[] args = invocation.getArguments();
-          if ( args[0] == "field1" ) {
-            return field1;
-          } else if ( args[0] == "field2" ) {
-            return field2;
-          } else if ( args[0] == "field3" ) {
-            return field3;
-          }
-          return null;
-        }
-      }
-    );
-
-    // set up the input fields
-    when( valueMapperMeta.getFieldToUse() ).thenReturn( "field1" );
-    when( valueMapperMeta.getTargetField() ).thenReturn( "field3" );
-    when( mockTransMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      mockInRowMetaInterface );
-    when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
-    when( mockTransMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      mockOutRowMetaInterface );
-    when( mockOutRowMetaInterface.getFieldNames() ).thenReturn( outFields );
-
-    Set<IFieldMapping> mappings = analyzer.getFieldMappings( valueMapperMeta );
-
-    Set<IFieldMapping> goldenData = new HashSet<IFieldMapping>( 3 );
-    goldenData.add( new FieldMapping( "field1", "field1" ) );
-    goldenData.add( new FieldMapping( "field2", "field2" ) );
-    goldenData.add( new FieldMapping( "field1", "field3" ) );
-    assertTrue( mappings.containsAll( goldenData ) );
-    assertEquals( goldenData.size(), mappings.size() );
   }
 
 }

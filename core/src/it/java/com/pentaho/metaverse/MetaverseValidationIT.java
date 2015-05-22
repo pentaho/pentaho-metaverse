@@ -64,7 +64,6 @@ import com.pentaho.metaverse.frames.TextFileOutputStepNode;
 import com.pentaho.metaverse.frames.TransExecutorStepNode;
 import com.pentaho.metaverse.frames.TransformationNode;
 import com.pentaho.metaverse.frames.TransformationStepNode;
-import com.pentaho.metaverse.frames.ValueMapperStepNode;
 import com.pentaho.metaverse.frames.XMLOutputStepNode;
 import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.pentaho.metaverse.util.MetaverseUtil;
@@ -615,92 +614,82 @@ public class MetaverseValidationIT {
 
   @Test
   public void testValueMapperStepNode_overwrite() throws Exception {
-    ValueMapperStepNode valueMapperStepNode = root.getValueMapperStepNode( "Value Mapper - overwrite" );
+    TransformationStepNode valueMapperStepNode = root.getStepNode( "value_mapper", "Value Mapper - overwrite" );
 
     assertEquals( 1, getIterableSize( valueMapperStepNode.getStreamFieldNodesUses() ) );
-    assertEquals( 0, getIterableSize( valueMapperStepNode.getStreamFieldNodesCreates() ) );
-    assertEquals( 0, getIterableSize( valueMapperStepNode.getStreamFieldNodesDeletes() ) );
-    StreamFieldNode usesNode = null;
-    for ( StreamFieldNode node : valueMapperStepNode.getStreamFieldNodesUses() ) {
-      usesNode = node;
-      break;
-    }
+    StreamFieldNode usesNode = valueMapperStepNode.getStreamFieldNodesUses().iterator().next();
 
     ValueMapperMeta meta = (ValueMapperMeta) getStepMeta( valueMapperStepNode );
     assertEquals( meta.getFieldToUse(), usesNode.getName() );
-    Operations ops = MetaverseUtil.convertOperationsStringToMap( usesNode.getOperations() );
-    List<IOperation> dataOps = ops.get( ChangeType.DATA );
-    assertNotNull( dataOps );
-    assertEquals( 1, dataOps.size() );
-    IOperation dataOp = dataOps.get( 0 );
-    assertEquals( DictionaryConst.PROPERTY_TRANSFORMS, dataOp.getName() );
-    // build test string, should be comma-separated list of source -> target
-    int numTransforms = meta.getSourceValue().length;
-    List<String> transforms = new ArrayList<String>( numTransforms );
-    for ( int i = 0; i < numTransforms; i++ ) {
-      transforms.add( 0, meta.getSourceValue()[i] + " -> " + meta.getTargetValue()[i] );
+
+    Iterable<StreamFieldNode> inFields = valueMapperStepNode.getInputStreamFields();
+    int countInputs = getIterableSize( inFields );
+
+    Iterable<StreamFieldNode> outFields = valueMapperStepNode.getOutputStreamFields();
+    int countOutputs = getIterableSize( outFields );
+    assertEquals( countInputs, countOutputs );
+    for ( StreamFieldNode outField : outFields ) {
+      assertNotNull( outField.getKettleType() );
+      if ( outField.getName().equals( meta.getTargetField() ) ) {
+        Operations ops = MetaverseUtil.convertOperationsStringToMap( usesNode.getOperations() );
+        List<IOperation> dataOps = ops.get( ChangeType.DATA );
+        assertNotNull( dataOps );
+        assertEquals( meta.getSourceValue().length, dataOps.size() );
+        for ( int i = 0; i < dataOps.size(); i++ ) {
+          IOperation dataOp = dataOps.get( i );
+          assertEquals( DictionaryConst.PROPERTY_TRANSFORMS, dataOp.getName() );
+          assertEquals( dataOp.toString(), meta.getSourceValue()[i] + " -> " + meta.getTargetValue()[i] );
+        }
+        // there should not be any metadata operations
+        assertNull( ops.get( ChangeType.METADATA ) );
+      }
     }
-
-    assertEquals( dataOp.getDescription(), StringUtils.join( transforms, "," ) );
-
     int derivedCount = getIterableSize( usesNode.getFieldNodesDerivedFromMe() );
-    assertEquals( 0, derivedCount );
-
-    // there should not be any metadata operations
-    assertNull( ops.get( ChangeType.METADATA ) );
+    assertEquals( 1, derivedCount );
   }
 
   @Test
   public void testValueMapperStepNode_newField() throws Exception {
-    ValueMapperStepNode valueMapperStepNode = root.getValueMapperStepNode( "Value Mapper - new field" );
+    TransformationStepNode valueMapperStepNode = root.getStepNode( "value_mapper", "Value Mapper - new field" );
 
     assertEquals( 1, getIterableSize( valueMapperStepNode.getStreamFieldNodesUses() ) );
-    assertEquals( 1, getIterableSize( valueMapperStepNode.getStreamFieldNodesCreates() ) );
-    assertEquals( 0, getIterableSize( valueMapperStepNode.getStreamFieldNodesDeletes() ) );
-
-    StreamFieldNode usesNode = null;
-    for ( StreamFieldNode node : valueMapperStepNode.getStreamFieldNodesUses() ) {
-      usesNode = node;
-      break;
-    }
-
-    StreamFieldNode createsNode = null;
-    for ( StreamFieldNode node : valueMapperStepNode.getStreamFieldNodesCreates() ) {
-      createsNode = node;
-      break;
-    }
+    StreamFieldNode usesNode = valueMapperStepNode.getStreamFieldNodesUses().iterator().next();
 
     ValueMapperMeta meta = (ValueMapperMeta) getStepMeta( valueMapperStepNode );
     assertEquals( meta.getFieldToUse(), usesNode.getName() );
-    assertEquals( meta.getTargetField(), createsNode.getName() );
     assertNull( usesNode.getOperations() );
 
-    int derivesCount = getIterableSize( createsNode.getFieldNodesThatDeriveMe() );
-    assertEquals( 1, derivesCount );
+    Iterable<StreamFieldNode> inFields = valueMapperStepNode.getInputStreamFields();
+    int countInputs = getIterableSize( inFields );
 
-    for ( FieldNode derives : createsNode.getFieldNodesThatDeriveMe() ) {
-      assertEquals( usesNode.getName(), derives.getName() );
-      assertEquals( usesNode.getType(), derives.getType() );
+    Iterable<StreamFieldNode> outFields = valueMapperStepNode.getOutputStreamFields();
+    int countOutputs = getIterableSize( outFields );
+    assertEquals( countInputs + 1, countOutputs );
+    for ( StreamFieldNode outField : outFields ) {
+      assertNotNull( outField.getKettleType() );
+      if ( outField.getName().equals( meta.getTargetField() ) ) {
+        Iterable<StreamFieldNode> fieldNodesThatDeriveMe = outField.getFieldNodesThatDeriveMe();
+        assertNotNull( fieldNodesThatDeriveMe );
+        int derivesCount = getIterableSize( outField.getFieldNodesThatDeriveMe() );
+        assertEquals( 1, derivesCount );
+        for ( FieldNode derives : outField.getFieldNodesThatDeriveMe() ) {
+          assertEquals( usesNode.getName(), derives.getName() );
+          assertEquals( usesNode.getType(), derives.getType() );
+        }
+
+        Operations ops = MetaverseUtil.convertOperationsStringToMap( outField.getOperations() );
+        List<IOperation> dataOps = ops.get( ChangeType.DATA );
+        assertNotNull( dataOps );
+        assertEquals( 1, dataOps.size() );
+        for ( IOperation dataOp : dataOps ) {
+          assertEquals( Operation.MAPPING_CATEGORY, dataOp.getCategory() );
+          assertEquals( DictionaryConst.PROPERTY_TRANSFORMS, dataOp.getName() );
+        }
+
+        // there should not be any metadata operations
+        assertNull( ops.get( ChangeType.METADATA ) );
+      }
     }
-
-    Operations ops = MetaverseUtil.convertOperationsStringToMap( createsNode.getOperations() );
-
-    List<IOperation> dataOps = ops.get( ChangeType.DATA );
-    assertNotNull( dataOps );
-    assertEquals( 1, dataOps.size() );
-    IOperation dataOp = dataOps.get( 0 );
-    assertEquals( DictionaryConst.PROPERTY_TRANSFORMS, dataOp.getName() );
-    // build test string, should be comma-separated list of source -> target
-    int numTransforms = meta.getSourceValue().length;
-    List<String> transforms = new ArrayList<String>( numTransforms );
-    for ( int i = 0; i < numTransforms; i++ ) {
-      transforms.add( 0, meta.getSourceValue()[i] + " -> " + meta.getTargetValue()[i] );
-    }
-
-    assertEquals( dataOp.getDescription(), StringUtils.join( transforms, "," ) );
-
-    // there should not be any metadata operations
-    assertNull( ops.get( ChangeType.METADATA ) );
   }
 
   @Test
