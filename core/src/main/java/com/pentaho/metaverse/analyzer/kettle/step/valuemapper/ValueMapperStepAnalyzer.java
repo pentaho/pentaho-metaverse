@@ -24,19 +24,13 @@ package com.pentaho.metaverse.analyzer.kettle.step.valuemapper;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import com.pentaho.metaverse.api.model.Operation;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.model.kettle.FieldMapping;
 import org.apache.commons.lang.StringUtils;
-import org.pentaho.di.core.Const;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
@@ -48,68 +42,11 @@ import java.util.Set;
  * The ValueMapperStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the fields
  * operated on by Value Mapper steps.
  */
-public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
+public class ValueMapperStepAnalyzer extends StepAnalyzer<ValueMapperMeta> {
 
   @Override
-  public IMetaverseNode analyze( final IComponentDescriptor descriptor, final ValueMapperMeta valueMapperMeta )
-    throws MetaverseAnalyzerException {
-
-    final IMetaverseNode node = super.analyze( descriptor, valueMapperMeta );
-
-    final String fieldToUse = valueMapperMeta.getFieldToUse();
-    final boolean overwritesSourceField = Const.isEmpty( valueMapperMeta.getTargetField() );
-    final String targetField = valueMapperMeta.getTargetField() == null ? fieldToUse : valueMapperMeta.getTargetField();
-
-    final IMetaverseNode sourceFieldNode = createNodeFromDescriptor(
-      getPrevStepFieldOriginDescriptor( descriptor, fieldToUse ) );
-
-    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, sourceFieldNode );
-
-    final Set<ComponentDerivationRecord> changeRecords = getChangeRecords( valueMapperMeta );
-
-    ComponentDerivationRecord changeRecord = null;
-    for ( ComponentDerivationRecord cr : changeRecords ) {
-      changeRecord = cr;
-      break;
-    }
-
-    // if no target field specified
-    if ( overwritesSourceField ) {
-      // add some data operation property to the source node
-      sourceFieldNode.setProperty( DictionaryConst.PROPERTY_OPERATIONS, changeRecord.toString() );
-      metaverseBuilder.updateNode( sourceFieldNode );
-    } else {
-      final IComponentDescriptor desc = new MetaverseComponentDescriptor( targetField,
-        DictionaryConst.NODE_TYPE_TRANS_FIELD, descriptor.getNamespace() );
-
-      // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
-      RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
-      final ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( fieldToUse );
-      if ( inputFieldValueMeta == null ) {
-        throw new MetaverseAnalyzerException( "Cannot determine type of field: " + fieldToUse );
-      }
-
-      final IMetaverseNode targetFieldNode = processFieldChangeRecord( desc, sourceFieldNode, changeRecord );
-      targetFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta.getTypeDesc() );
-    }
-
-    return node;
-  }
-
-  protected ComponentDerivationRecord buildChangeRecord(
-    final String fieldName, final String[] sourceValues, final String[] targetValues ) {
-
-    final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( fieldName, ChangeType.DATA );
-    Set<String> metadataChangedFields = new HashSet<String>();
-
-    for ( int i = 0; i < sourceValues.length; i++ ) {
-      metadataChangedFields.add( sourceValues[i] + " -> " + targetValues[i] );
-    }
-    changeRecord.addOperation(
-      new Operation( Operation.MAPPING_CATEGORY, ChangeType.DATA,
-        DictionaryConst.PROPERTY_TRANSFORMS, StringUtils.join( metadataChangedFields, "," ) ) );
-
-    return changeRecord;
+  protected void customAnalyze( ValueMapperMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+    rootNode.setProperty( "defaultValue", meta.getNonMatchDefault() );
   }
 
   @Override
@@ -121,11 +58,27 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
     final String[] sourceValues = valueMapperMeta.getSourceValue();
     final String[] targetValues = valueMapperMeta.getTargetValue();
 
-    Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>( 1 );
-    final ComponentDerivationRecord changeRecord = buildChangeRecord( targetField, sourceValues, targetValues );
+    Set<ComponentDerivationRecord> changeRecords = new HashSet<>( 1 );
+    final ComponentDerivationRecord changeRecord =
+      new ComponentDerivationRecord( fieldToUse, targetField, ChangeType.DATA );
+
+    for ( int i = 0; i < sourceValues.length; i++ ) {
+      String mapping = sourceValues[i] + " -> " + targetValues[i];
+
+      changeRecord.addOperation(
+        new Operation( Operation.MAPPING_CATEGORY, ChangeType.DATA,
+          DictionaryConst.PROPERTY_TRANSFORMS, mapping ) );
+    }
 
     changeRecords.add( changeRecord );
     return changeRecords;
+  }
+
+  @Override
+  protected Set<StepField> getUsedFields( ValueMapperMeta meta ) {
+    Set<StepField> usedFields = new HashSet<>();
+    usedFields.addAll( createStepFields( meta.getFieldToUse(), getInputs() ) );
+    return usedFields;
   }
 
   @Override
@@ -135,21 +88,6 @@ public class ValueMapperStepAnalyzer extends BaseStepAnalyzer<ValueMapperMeta> {
         add( ValueMapperMeta.class );
       }
     };
-  }
-
-  /**
-   * Provide field mappings that occur in this step.
-   *
-   * @param meta The step metadata
-   * @return a set of field mappings (input field -> output field)
-   * @throws com.pentaho.metaverse.api.MetaverseAnalyzerException
-   */
-  @Override
-  public Set<IFieldMapping> getFieldMappings( ValueMapperMeta meta ) throws MetaverseAnalyzerException {
-    Set<IFieldMapping> fieldMappings = new HashSet<IFieldMapping>();
-    fieldMappings.add( new FieldMapping( meta.getFieldToUse(), meta.getTargetField() ) );
-    fieldMappings.addAll( getPassthruFieldMappings( meta ) );
-    return fieldMappings;
   }
 
 }
