@@ -57,7 +57,6 @@ import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import com.pentaho.metaverse.frames.SplitFieldsStepNode;
 import com.pentaho.metaverse.frames.StreamFieldNode;
 import com.pentaho.metaverse.frames.StreamLookupStepNode;
-import com.pentaho.metaverse.frames.StringsReplaceStepNode;
 import com.pentaho.metaverse.frames.TableOutputStepNode;
 import com.pentaho.metaverse.frames.FileInputStepNode;
 import com.pentaho.metaverse.frames.TextFileOutputStepNode;
@@ -118,11 +117,9 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -1086,34 +1083,25 @@ public class MetaverseValidationIT {
 
   @Test
   public void testStringsReplaceStepNode() throws Exception {
-    StringsReplaceStepNode node = root.getStringsReplaceStepNode();
+
+    TransformationStepNode node = root.getStepNode( "strings_replace", "Replace in string" );
 
     // Make sure we have the right number of links used, created and derived. Also,
     // Ensure there is an entry in the operations for those fields that are derived.
+    assertEquals( 5, getIterableSize( node.getInputStreamFields() ) );
     assertEquals( 5, getIterableSize( node.getStreamFieldNodesUses() ) );
+    assertEquals( 10, getIterableSize( node.getOutputStreamFields() ) );
 
-    assertEquals( 6, getIterableSize( node.getStreamFieldNodesCreates() ) );
-
-    assertEquals( 1, getIterableSize( node.getStreamFieldNodesDeletes() ) );
-    for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
-      for ( StreamFieldNode sfn1 : sfn.getFieldNodesDerivedFromMe() ) {
-        assertTrue( sfn1.getOperations() != null && sfn1.getOperations().length() > 0 );
+    for ( StreamFieldNode sfn : node.getOutputStreamFields() ) {
+      // The following are special cases for this test, they are passthrough fields
+      if ( sfn.getName().equals( "LastName" )
+        || sfn.getName().equals( "FirstName" )
+        || sfn.getName().equals( "NickName" )
+        || sfn.getName().equals( "Template" ) ) {
+        assertTrue( Const.isEmpty( sfn.getOperations() ) );
+      } else {
+        assertFalse( Const.isEmpty( sfn.getOperations() ) );
       }
-    }
-
-    Map<String, Boolean> renameMap = new HashMap<String, Boolean>();
-    renameMap.put( "LastName_1", false );
-    renameMap.put( "LastName_2", false );
-    renameMap.put( "FirstName_1", false );
-    for ( StreamFieldNode sfn : node.getStreamFieldNodesCreates() ) {
-      if ( renameMap.keySet().contains( sfn.getName() ) ) {
-        renameMap.put( sfn.getName(), true );
-      }
-      assertTrue( sfn.getOperations() != null && sfn.getOperations().length() > 0 );
-    }
-
-    for ( String key : renameMap.keySet() ) {
-      assertTrue( renameMap.get( key ) );
     }
   }
 
