@@ -1074,24 +1074,22 @@ public class MetaverseValidationIT {
   public void testStringsCutStepNode() throws Exception {
     StringsCutStepNode node = root.getStringsCutStepNode();
 
+    // Make sure that every node we use contains at least one derives from
+    // that contains an operation
+    for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
+      boolean operationFound = false;
+      for ( StreamFieldNode sfn1 : sfn.getFieldNodesDerivedFromMe() ) {
+        operationFound = sfn1.getOperations() != null && sfn1.getOperations().length() > 0;
+        if (operationFound) break;
+      }
+      assertTrue(operationFound);
+    }
+
     // Make sure we have the right number of links used, created and derived. Also,
     // Ensure there is an entry in the operations for those fields that are derived.
+    assertEquals( 3, getIterableSize( node.getInputStreamFields() ) );
     assertEquals( 3, getIterableSize( node.getStreamFieldNodesUses() ) );
-
-    assertEquals( 1, getIterableSize( node.getStreamFieldNodesCreates() ) );
-
-    for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
-      for ( StreamFieldNode sfn1 : sfn.getFieldNodesDerivedFromMe() ) {
-        assertTrue( sfn1.getOperations() != null && sfn1.getOperations().length() > 0 );
-      }
-    }
-
-    StreamFieldNode createdNode = null;
-    for ( StreamFieldNode sfn : node.getStreamFieldNodesCreates() ) {
-      createdNode = sfn;
-    }
-
-    assertTrue( createdNode.getOperations() != null && createdNode.getOperations().length() > 0 );
+    assertEquals( 4, getIterableSize( node.getOutputStreamFields()));
   }
 
   @Test

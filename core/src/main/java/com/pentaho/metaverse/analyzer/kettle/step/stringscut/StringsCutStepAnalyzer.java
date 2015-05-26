@@ -25,103 +25,61 @@ package com.pentaho.metaverse.analyzer.kettle.step.stringscut;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.stringcut.StringCutMeta;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.ChangeType;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import com.pentaho.metaverse.api.model.Operation;
-import com.pentaho.metaverse.api.model.kettle.FieldMapping;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 
-public class StringsCutStepAnalyzer extends BaseStepAnalyzer<StringCutMeta> {
-  private IComponentDescriptor descriptor;
+public class StringsCutStepAnalyzer extends StepAnalyzer<StringCutMeta> {
 
   @Override
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
-    Set<Class<? extends BaseStepMeta>> set = new HashSet<Class<? extends BaseStepMeta>>( 1 );
+    Set<Class<? extends BaseStepMeta>> set = new HashSet<>( 1 );
     set.add( StringCutMeta.class );
     return set;
   }
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, StringCutMeta stringsCutMeta )
-    throws MetaverseAnalyzerException {
-    IMetaverseNode node = super.analyze( descriptor, stringsCutMeta );
-    this.descriptor = descriptor;
-    getChangeRecords( stringsCutMeta );
-    return node;
-  }
+  public Set<ComponentDerivationRecord> getChangeRecords( StringCutMeta meta ) throws MetaverseAnalyzerException {
+    Set<ComponentDerivationRecord> changeRecords = new HashSet<>();
+    for ( int i = 0; i < meta.getFieldInStream().length; i++ ) {
+      String fieldInString = meta.getFieldInStream()[i];
+      String fieldOutString = meta.getFieldOutStream()[i];
+      if ( fieldOutString == null || fieldOutString.length() < 1 ) {
+        fieldOutString = fieldInString;
+      }
 
-  private ComponentDerivationRecord buildChangeRecord( final StringCutMeta stringsCutMeta, final int index )
-    throws MetaverseAnalyzerException {
-
-    String fieldInString = stringsCutMeta.getFieldInStream()[index];
-    String fieldOutString = stringsCutMeta.getFieldOutStream()[index];
-    if ( fieldOutString == null || fieldOutString.length() < 1 ) {
-      fieldOutString = fieldInString;
-    }
-    final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( fieldOutString, ChangeType.DATA );
-
-    String changeOperation = fieldInString + " -> [ substring [ ";
-    changeOperation += stringsCutMeta.getCutFrom()[index] + ", ";
-    changeOperation += stringsCutMeta.getCutTo()[index] + " ] ] -> ";
-    changeOperation += fieldOutString;
-
-    changeRecord.addOperation( new Operation( Operation.CALC_CATEGORY, ChangeType.DATA,
+      ComponentDerivationRecord changeRecord =
+        new ComponentDerivationRecord( fieldInString, fieldOutString, ChangeType.DATA );
+      String changeOperation =
+        fieldInString + " -> [ substring [ " + meta.getCutFrom()[i] + ", "
+          + meta.getCutTo()[i] + " ] ] -> " + fieldOutString;
+      changeRecord.addOperation( new Operation( Operation.CALC_CATEGORY, ChangeType.DATA,
         DictionaryConst.PROPERTY_TRANSFORMS, changeOperation ) );
-    IMetaverseNode fieldNode = createNodeFromDescriptor( getStepFieldOriginDescriptor( descriptor, fieldInString ) );
-    IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, changeRecord );
-    RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
-    ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( fieldInString );
-    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
-
-    if ( !fieldOutString.equals( fieldInString ) ) {
-      newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta != null ? inputFieldValueMeta
-          .getTypeDesc() : fieldInString + " unknown type" );
-      metaverseBuilder.addNode( newFieldNode );
-    }
-    return changeRecord;
-  }
-
-  @Override
-  public Set<ComponentDerivationRecord> getChangeRecords( final StringCutMeta stringsCutMeta )
-    throws MetaverseAnalyzerException {
-    Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
-    for ( int i = 0; i < stringsCutMeta.getFieldInStream().length; i++ ) {
-      ComponentDerivationRecord changeRecord = buildChangeRecord( stringsCutMeta, i );
       changeRecords.add( changeRecord );
     }
     return changeRecords;
   }
 
-  /**
-   * Provide field mappings that occur in this step.
-   *
-   * @param meta
-   *          The step metadata
-   * @return a set of field mappings (input field -> output field)
-   * @throws com.pentaho.metaverse.api.MetaverseAnalyzerException
-   */
   @Override
-  public Set<IFieldMapping> getFieldMappings( StringCutMeta meta ) throws MetaverseAnalyzerException {
-    Set<IFieldMapping> fieldMappings = new HashSet<IFieldMapping>();
-    for ( int i = 0; i < meta.getFieldInStream().length; i++ ) {
-      String fieldInString = meta.getFieldInStream()[i];
-      String fieldOutString = meta.getFieldOutStream()[i];
-      if ( fieldOutString != null && fieldOutString.length() > 0 ) {
-        fieldMappings.add( new FieldMapping( fieldInString, fieldOutString ) );
-      }
+  protected Set<StepField> getUsedFields( StringCutMeta meta ) {
+    HashSet<StepField> usedFields = new HashSet<>();
+    for ( String fieldInString : meta.getFieldInStream() ) {
+      usedFields.addAll( createStepFields( fieldInString, getInputs() ) );
     }
-    fieldMappings.addAll( getPassthruFieldMappings( meta ) );
-    return fieldMappings;
+    return usedFields;
+  }
+
+  @Override
+  protected void customAnalyze( StringCutMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+    // Nothing to do here
   }
 
 }

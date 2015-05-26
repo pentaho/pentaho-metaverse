@@ -24,15 +24,26 @@ package com.pentaho.metaverse.analyzer.kettle.step.stringscut;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,86 +63,57 @@ import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.INamespace;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 @RunWith( MockitoJUnitRunner.class )
 public class StringsCutStepAnalyzerTest {
 
   private StringsCutStepAnalyzer analyzer;
-  private static final String DEFAULT_STEP_NAME = "testStep";
 
   @Mock
-  private IMetaverseBuilder builder;
-  @Mock
   private StringCutMeta stringsCutMeta;
-  @Mock
-  private INamespace namespace;
-  @Mock
-  private IComponentDescriptor descriptor;
-  @Mock
-  private StepMeta parentStepMeta;
-  @Mock
-  private TransMeta parentTransMeta;
-  @Mock
-  private RowMetaInterface rowMeta1;
 
   @Before
   public void setUp() throws Exception {
 
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
+    when( stringsCutMeta.getFieldInStream() ).thenReturn( new String[]{ "firstName", "middleName", "lastName" } );
+    when( stringsCutMeta.getFieldOutStream() ).thenReturn( new String[]{ "", "MN", "" } );
+    when( stringsCutMeta.getCutFrom() ).thenReturn( new String[]{ "1", "2", "3" } );
+    when( stringsCutMeta.getCutTo() ).thenReturn( new String[]{ "4", "5", "6 " } );
 
-    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( new String[] { "prevStep" } );
-    when( rowMeta1.getFieldNames() ).thenReturn( new String[] { "firstName", "middleName", "lastName" } );
-    when( rowMeta1.searchValueMeta( any( String.class ) ) ).thenReturn( null );
-    when( parentTransMeta.getPrevStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( rowMeta1 );
-    when( parentTransMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( rowMeta1 );
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
+    analyzer = spy( new StringsCutStepAnalyzer() );
 
-    when( stringsCutMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
-    when( stringsCutMeta.getFieldInStream() ).thenReturn( new String[] { "firstName", "middleName", "lastName" } );
-    when( stringsCutMeta.getFieldOutStream() ).thenReturn( new String[] { "", "MN", "" } );
-    when( stringsCutMeta.getCutFrom() ).thenReturn( new String[] { "1", "2", "3" } );
-    when( stringsCutMeta.getCutTo() ).thenReturn(  new String[] { "4", "5", "6 "} );
-    
+    // Call customAnalyze() for coverage, it does nothing
+    analyzer.customAnalyze( stringsCutMeta, mock( IMetaverseNode.class ) );
 
-    analyzer = new StringsCutStepAnalyzer();
-    when( builder.getMetaverseObjectFactory() ).thenReturn( MetaverseTestUtils.getMetaverseObjectFactory() );
-    analyzer.setMetaverseBuilder( builder );
-
-    descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
-    analyzer.analyze( descriptor, null );
   }
 
   @Test
-  public void testAnalyze() {
-    try {
-      analyzer.analyze( descriptor, stringsCutMeta );
-      Set<IFieldMapping> mappings = analyzer.getFieldMappings( stringsCutMeta );
-      assertEquals( 4, mappings.size() );
-      boolean foundNonPassthrough = false;
-      for ( IFieldMapping mapping : mappings ) {
-        if ( !mapping.getSourceFieldName().equals( mapping.getTargetFieldName() ) ) {
-          foundNonPassthrough = true;
-        }
-      }
-      assertTrue( foundNonPassthrough );
-    } catch ( MetaverseAnalyzerException e ) {
-      e.printStackTrace();
+  public void testGetChangeRecords() throws Exception {
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( stringsCutMeta );
+    assertEquals( changeRecords.size(), 3 );
+    List<String> inFields = Arrays.asList( stringsCutMeta.getFieldInStream() );
+    for ( ComponentDerivationRecord change : changeRecords ) {
+      assertTrue( inFields.contains( change.getOriginalEntityName() ) );
+      assertEquals( 1, change.getOperations( ChangeType.DATA ).size() );
+      assertNull( change.getOperations( ChangeType.METADATA ) );
     }
-    verify( builder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
+  }
 
-    verify( builder, times( 3 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-        any( IMetaverseNode.class ) );
-
+  @Test
+  public void testGetUsedFields() {
+    Set<StepField> fields = new HashSet<>();
+    fields.add( new StepField( "prev", "firstName" ) );
+    fields.add( new StepField( "prev", "middleName" ) );
+    fields.add( new StepField( "prev", "lastName" ) );
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), any( StepNodes.class ) );
+    Set<StepField> usedFields = analyzer.getUsedFields( stringsCutMeta );
+    List<String> inFields = Arrays.asList( stringsCutMeta.getFieldInStream() );
+    // This test class uses all incoming fields
+    for ( StepField usedField : usedFields ) {
+      assertTrue( inFields.contains( usedField.getFieldName() ) );
+    }
   }
 
   @Test
