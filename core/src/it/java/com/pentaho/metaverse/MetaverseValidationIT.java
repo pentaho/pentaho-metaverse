@@ -57,7 +57,6 @@ import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import com.pentaho.metaverse.frames.SplitFieldsStepNode;
 import com.pentaho.metaverse.frames.StreamFieldNode;
 import com.pentaho.metaverse.frames.StreamLookupStepNode;
-import com.pentaho.metaverse.frames.StringOperationsStepNode;
 import com.pentaho.metaverse.frames.StringsCutStepNode;
 import com.pentaho.metaverse.frames.StringsReplaceStepNode;
 import com.pentaho.metaverse.frames.TableOutputStepNode;
@@ -80,6 +79,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -1048,26 +1048,21 @@ public class MetaverseValidationIT {
 
   @Test
   public void testStringOperationsStepNode() throws Exception {
-    StringOperationsStepNode node = root.getStringOperationsStepNode();
+    TransformationStepNode node = root.getStepNode( "string_operations", "String operations" );
 
-    // Make sure we have the right number of links used, created and derived. Also,
-    // Ensure there is an entry in the operations for those fields that are derived.
+    // Make sure we have the right number of links used
+    assertEquals( 4, getIterableSize( node.getInputStreamFields() ) );
     assertEquals( 4, getIterableSize( node.getStreamFieldNodesUses() ) );
+    assertEquals( 5, getIterableSize( node.getOutputStreamFields() ) );
 
-    assertEquals( 1, getIterableSize( node.getStreamFieldNodesCreates() ) );
-
-    for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
-      for ( StreamFieldNode sfn1 : sfn.getFieldNodesDerivedFromMe() ) {
-        assertTrue( sfn1.getOperations() != null && sfn1.getOperations().length() > 0 );
+    for ( StreamFieldNode sfn : node.getOutputStreamFields() ) {
+      // "Last Name" is a special case for this test, it is passthrough
+      if ( sfn.getName().equals( "Last Name" ) ) {
+        assertTrue( Const.isEmpty( sfn.getOperations() ) );
+      } else {
+        assertFalse( Const.isEmpty( sfn.getOperations() ) );
       }
     }
-
-    StreamFieldNode createdNode = null;
-    for ( StreamFieldNode sfn : node.getStreamFieldNodesCreates() ) {
-      createdNode = sfn;
-    }
-
-    assertTrue( createdNode.getOperations() != null && createdNode.getOperations().length() > 0 );
   }
 
   @Test
@@ -1080,16 +1075,18 @@ public class MetaverseValidationIT {
       boolean operationFound = false;
       for ( StreamFieldNode sfn1 : sfn.getFieldNodesDerivedFromMe() ) {
         operationFound = sfn1.getOperations() != null && sfn1.getOperations().length() > 0;
-        if (operationFound) break;
+        if ( operationFound ) {
+          break;
+        }
       }
-      assertTrue(operationFound);
+      assertTrue( operationFound );
     }
 
     // Make sure we have the right number of links used, created and derived. Also,
     // Ensure there is an entry in the operations for those fields that are derived.
     assertEquals( 3, getIterableSize( node.getInputStreamFields() ) );
     assertEquals( 3, getIterableSize( node.getStreamFieldNodesUses() ) );
-    assertEquals( 4, getIterableSize( node.getOutputStreamFields()));
+    assertEquals( 4, getIterableSize( node.getOutputStreamFields() ) );
   }
 
   @Test
