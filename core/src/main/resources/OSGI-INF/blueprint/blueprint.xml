@@ -116,6 +116,7 @@
   <bean id="TableOutputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer">
     <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
+    <property name="externalResourceConsumer" ref="tableOutputERC"/>
   </bean>
   <!--<bean id="TableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableInputStepAnalyzer"/>-->
   <bean id="TextFileInputStepAnalyzer"

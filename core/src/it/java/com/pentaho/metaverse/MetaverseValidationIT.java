@@ -32,6 +32,7 @@ import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.frames.CalculatorStepNode;
 import com.pentaho.metaverse.frames.CsvFileInputStepNode;
+import com.pentaho.metaverse.frames.DatabaseTableNode;
 import com.pentaho.metaverse.frames.DatasourceNode;
 import com.pentaho.metaverse.frames.ExcelInputStepNode;
 import com.pentaho.metaverse.frames.ExcelOutputStepNode;
@@ -571,35 +572,36 @@ public class MetaverseValidationIT {
   @Test
   public void testTableOutputStepNode() throws Exception {
     // this tests a specific step in a specific transform
-    TableOutputStepNode tableOutputStepNode = root.getTableOutputStepNode();
+    TableOutputStepNode node = root.getTableOutputStepNode();
 
     // check the table that it writes to
-    TableOutputMeta meta = (TableOutputMeta) getStepMeta( tableOutputStepNode );
+    TableOutputMeta meta = (TableOutputMeta) getStepMeta( node );
     String tableName = meta.getTableName();
     String schema = meta.getSchemaName();
     boolean truncateTable = meta.truncateTable();
-    assertEquals( tableName, tableOutputStepNode.getDatabaseTable().getName() );
-    assertEquals( schema, tableOutputStepNode.getSchema() );
-    assertEquals( truncateTable, tableOutputStepNode.isTruncateTable() );
+    DatabaseTableNode databaseTableNode = node.getDatabaseTable();
+    assertEquals( tableName, databaseTableNode.getName() );
+    assertEquals( schema, node.getSchema() );
+    assertEquals( truncateTable, node.isTruncateTable() );
 
-    // check the fields used
-    Iterable<StreamFieldNode> uses = tableOutputStepNode.getStreamFieldNodesUses();
-    int fieldsUsedCount = getIterableSize( uses );
-    assertEquals( meta.getFieldStream().length, fieldsUsedCount );
-    // they should all populate a db column
-    for ( StreamFieldNode fieldNode : uses ) {
-      assertNotNull( "Used field does not populate anything [" + fieldNode.getName() + "]", fieldNode
-        .getFieldPopulatedByMe() );
-      assertEquals( "Stream Field [" + fieldNode.getName() + "] populates the wrong kind of node",
-        DictionaryConst.NODE_TYPE_DATA_COLUMN, fieldNode.getFieldPopulatedByMe().getType() );
+    Iterable<StreamFieldNode> inputs = node.getInputStreamFields();
+    Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
+
+    assertEquals( getIterableSize( inputs ) * 2, getIterableSize( outputs ) );
+
+    for ( StreamFieldNode input : inputs ) {
+      assertEquals( input.getName(), input.getFieldPopulatedByMe().getName() );
     }
 
-    int countDbConnections = getIterableSize( tableOutputStepNode.getDatasources() );
-    for ( DatabaseMeta dbMeta : meta.getUsedDatabaseConnections() ) {
-      assertNotNull( "Datasource is not used but should be [" + dbMeta.getName() + "]", tableOutputStepNode
-        .getDatasource( dbMeta.getName() ) );
-    }
-    assertEquals( meta.getUsedDatabaseConnections().length, countDbConnections );
+    DatasourceNode datasource = node.getDatasource( meta.getDatabaseMeta().getName() );
+    assertEquals( meta.getDatabaseMeta().getHostname(), datasource.getHost() );
+    assertEquals( meta.getDatabaseMeta().getDatabasePortNumberString(), datasource.getPort() );
+    assertEquals( meta.getDatabaseMeta().getUsername(), datasource.getUserName() );
+    assertEquals( meta.getDatabaseMeta().getDatabaseName(), datasource.getDatabaseName() );
+    assertEquals( DictionaryConst.NODE_TYPE_DATASOURCE, datasource.getType() );
+
+    assertEquals( meta.getTableName(), databaseTableNode.getName() );
+    assertEquals( DictionaryConst.NODE_TYPE_DATA_TABLE, databaseTableNode.getType() );
 
   }
 

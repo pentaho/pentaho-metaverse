@@ -21,6 +21,9 @@
  */
 package com.pentaho.metaverse.api.analyzer.kettle.step;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.AnalysisContext;
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStep;
@@ -43,6 +46,11 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( M meta ) {
+    return getResourcesFromMeta( meta, new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
+  }
+
+  @Override
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( M consumer, IAnalysisContext context ) {
     return Collections.emptyList();
   }
 

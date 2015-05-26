@@ -60,6 +60,7 @@ public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseC
     }
 
     IMetaverseNode node = createNodeFromDescriptor( descriptor );
+    node.setType( DictionaryConst.NODE_TYPE_DATASOURCE );
 
     int accessType = dbMeta.getAccessType();
     node.setProperty( "accessType", accessType );
@@ -69,6 +70,8 @@ public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseC
 
     String databaseName = dbMeta.getDatabaseName();
     node.setProperty( "databaseName", databaseName );
+
+    node.setProperty( "name", dbMeta.getName() );
 
     String port = dbMeta.getDatabasePortNumberString();
     node.setProperty( DictionaryConst.PROPERTY_PORT, port );

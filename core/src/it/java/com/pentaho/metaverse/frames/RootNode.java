@@ -75,7 +75,7 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Database Connection'}.out()" )
   Iterable<DatasourceNode> getDatasourceNodes();
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Database Connection' && it.object.name == name }" )
+  @GremlinGroovy( "it.out.has('name', T.eq, 'External Connection').out.has('name', T.eq, 'Database Connection').out.has('name', T.eq, name)" )
   DatasourceNode getDatasourceNode( @GremlinParam( "name" ) String name );
 
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'Demo table crime stats output').as('step').in('contains').has('name', T.eq, 'Populate Table From File').back('step')" )

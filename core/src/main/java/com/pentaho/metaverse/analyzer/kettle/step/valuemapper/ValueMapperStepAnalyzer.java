@@ -24,15 +24,14 @@ package com.pentaho.metaverse.analyzer.kettle.step.valuemapper;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import com.pentaho.metaverse.api.model.Operation;
-import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.HashSet;
 import java.util.Set;

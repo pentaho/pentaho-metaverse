@@ -24,13 +24,16 @@ package com.pentaho.metaverse.analyzer.kettle.step.mongodbinput;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.analyzer.kettle.MongoDbConnectionAnalyzer;
 import com.pentaho.metaverse.api.IAnalysisContext;
+import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IConnectionAnalyzer;
-import com.pentaho.metaverse.api.Namespace;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.INamespace;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.impl.model.MongoDbResourceInfo;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
@@ -49,13 +52,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.mongodbinput.MongoDbInputMeta;
 import org.pentaho.mongo.wrapper.field.MongoField;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -146,7 +143,7 @@ public class MongoDbInputStepAnalyzerTest {
   }
 
   @Test
-  public void testCreateResourceNode() throws Exception {
+  public void testCreateTableNode() throws Exception {
     IConnectionAnalyzer connectionAnalyzer = mock( IConnectionAnalyzer.class );
 
     doReturn( connectionAnalyzer ).when( analyzer ).getConnectionAnalyzer();
@@ -156,13 +153,14 @@ public class MongoDbInputStepAnalyzerTest {
     MongoDbResourceInfo resourceInfo = mock( MongoDbResourceInfo.class );
     when( resourceInfo.getCollection() ).thenReturn( "myCollection" );
 
-    IMetaverseNode resourceNode = analyzer.createResourceNode( resourceInfo );
+    IMetaverseNode connectionNode = mock( IMetaverseNode.class );
+    doReturn( connectionNode ).when( analyzer ).getConnectionNode();
+    when( connectionNode.getLogicalId() ).thenReturn( "CONNECTION_ID" );
+
+    IMetaverseNode resourceNode = analyzer.createTableNode( resourceInfo );
     assertEquals( "myCollection", resourceNode.getProperty( MongoDbInputStepAnalyzer.COLLECTION ) );
     assertEquals( "myCollection", resourceNode.getName() );
-    verify( mockBuilder ).addNode( connNode );
-    verify( mockBuilder ).addLink( eq( connNode ), eq( DictionaryConst.LINK_DEPENDENCYOF ),
-      any( IMetaverseNode.class ) );
-
+    assertEquals( "CONNECTION_ID", resourceNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
   }
 
   @Test

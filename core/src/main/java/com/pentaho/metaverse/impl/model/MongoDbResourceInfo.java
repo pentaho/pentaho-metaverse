@@ -23,6 +23,9 @@
 package com.pentaho.metaverse.impl.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.AnalysisContext;
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.model.BaseResourceInfo;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.encryption.Encr;
@@ -56,17 +59,21 @@ public class MongoDbResourceInfo extends BaseResourceInfo implements IExternalRe
   private String collection;
 
   public MongoDbResourceInfo( MongoDbMeta mongoDbMeta ) {
-    setName( mongoDbMeta.getDbName() );
-    setDatabase( mongoDbMeta.getDbName() );
-    setPort( mongoDbMeta.getPort() );
-    setHostNames( mongoDbMeta.getHostnames() );
-    setUser( mongoDbMeta.getAuthenticationUser() );
-    setPassword( mongoDbMeta.getAuthenticationPassword() );
+    this( mongoDbMeta, new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
+  }
+
+  public MongoDbResourceInfo( MongoDbMeta mongoDbMeta, IAnalysisContext context ) {
+    setName( substituteIfNeeded( mongoDbMeta.getDbName(), mongoDbMeta, context ) );
+    setDatabase( substituteIfNeeded( mongoDbMeta.getDbName(), mongoDbMeta, context ) );
+    setPort( substituteIfNeeded( mongoDbMeta.getPort(), mongoDbMeta, context ) );
+    setHostNames( substituteIfNeeded( mongoDbMeta.getHostnames(), mongoDbMeta, context ) );
+    setUser( substituteIfNeeded( mongoDbMeta.getAuthenticationUser(), mongoDbMeta, context ) );
+    setPassword( substituteIfNeeded( mongoDbMeta.getAuthenticationPassword(), mongoDbMeta, context ) );
     setUseAllReplicaSetMembers( mongoDbMeta.getUseAllReplicaSetMembers() );
     setUseKerberosAuthentication( mongoDbMeta.getUseKerberosAuthentication() );
-    setConnectTimeout( mongoDbMeta.getConnectTimeout() );
-    setSocketTimeout( mongoDbMeta.getSocketTimeout() );
-    setCollection( mongoDbMeta.getCollection() );
+    setConnectTimeout( substituteIfNeeded( mongoDbMeta.getConnectTimeout(), mongoDbMeta, context ) );
+    setSocketTimeout( substituteIfNeeded( mongoDbMeta.getSocketTimeout(), mongoDbMeta, context ) );
+    setCollection( substituteIfNeeded( mongoDbMeta.getCollection(), mongoDbMeta, context ) );
   }
 
   public MongoDbResourceInfo( String hostNames, String port, String database ) {
@@ -74,6 +81,13 @@ public class MongoDbResourceInfo extends BaseResourceInfo implements IExternalRe
     setPort( port );
     setDatabase( database );
   }
+
+  private String substituteIfNeeded( String value, MongoDbMeta meta, IAnalysisContext context ) {
+    String ret = context.equals( DictionaryConst.CONTEXT_RUNTIME )
+      ? meta.getParentStepMeta().getParentTransMeta().environmentSubstitute( value ) : value;
+    return ret;
+  }
+
   @Override
   public String getType() {
     return "MongoDbResource";

@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.textfileoutput;
 
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
@@ -52,7 +53,7 @@ public class TextFileOutputExternalResourceConsumer
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( TextFileOutputMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( TextFileOutputMeta meta, IAnalysisContext context ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not data-driven and there are no used variables in the

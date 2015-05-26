@@ -27,9 +27,8 @@ import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.MetaverseException;
 import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ConnectionExternalResourceStepAnalyzer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.model.MongoDbResourceInfo;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -46,7 +45,7 @@ import java.util.Set;
 /**
  * Analyzes MongoDbInput Steps for lineage related information
  */
-public class MongoDbInputStepAnalyzer extends ExternalResourceStepAnalyzer<MongoDbInputMeta> {
+public class MongoDbInputStepAnalyzer extends ConnectionExternalResourceStepAnalyzer<MongoDbInputMeta> {
 
   public static final String COLLECTION = "collection";
 
@@ -92,7 +91,7 @@ public class MongoDbInputStepAnalyzer extends ExternalResourceStepAnalyzer<Mongo
 
   @Override
   protected IMetaverseNode createOutputFieldNode( IAnalysisContext context, ValueMetaInterface fieldMeta,
-                                                            String targetStepName, String nodeType ) {
+                                                  String targetStepName, String nodeType ) {
 
     IMetaverseNode mongoFieldNode = super.createOutputFieldNode( context, fieldMeta, targetStepName, nodeType );
     List<MongoField> mongoFields = baseStepMeta.getMongoFields();
@@ -117,28 +116,21 @@ public class MongoDbInputStepAnalyzer extends ExternalResourceStepAnalyzer<Mongo
 
   @Override
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
-    Set<Class<? extends BaseStepMeta>> supportedSteps = new HashSet<Class<? extends BaseStepMeta>>();
+    Set<Class<? extends BaseStepMeta>> supportedSteps = new HashSet<>();
     supportedSteps.add( MongoDbInputMeta.class );
     return supportedSteps;
   }
 
-  @Override public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
-    MetaverseComponentDescriptor componentDescriptor = null;
+  @Override protected IMetaverseNode createTableNode( IExternalResourceInfo resource )
+    throws MetaverseAnalyzerException {
     MongoDbResourceInfo resourceInfo = (MongoDbResourceInfo) resource;
 
-    IMetaverseNode connectionNode = (IMetaverseNode) getConnectionAnalyzer().analyze( descriptor, baseStepMeta );
-
-    // add a node for the connection itself
-    getMetaverseBuilder().addNode( connectionNode );
-    // link the connection to the step
-    getMetaverseBuilder().addLink( connectionNode, DictionaryConst.LINK_DEPENDENCYOF, rootNode );
-
     // create a node for the collection
-    componentDescriptor = new MetaverseComponentDescriptor(
+    MetaverseComponentDescriptor componentDescriptor = new MetaverseComponentDescriptor(
       resourceInfo.getCollection(),
       DictionaryConst.NODE_TYPE_MONGODB_COLLECTION,
-      connectionNode,
-      descriptor.getContext() );
+      getConnectionNode(),
+      getDescriptor().getContext() );
 
     // set the namespace to be the id of the connection node.
     IMetaverseNode node = createNodeFromDescriptor( componentDescriptor );
