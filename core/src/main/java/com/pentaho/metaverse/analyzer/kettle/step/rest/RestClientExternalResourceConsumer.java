@@ -23,6 +23,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.rest;
 
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
@@ -50,7 +51,7 @@ public class RestClientExternalResourceConsumer extends BaseStepExternalResource
   private Logger log = LoggerFactory.getLogger( RestClientExternalResourceConsumer.class );
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( RestMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( RestMeta meta, IAnalysisContext context ) {
 
     List<IExternalResourceInfo> resources = new ArrayList<>();
 

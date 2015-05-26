@@ -221,6 +221,11 @@ public class DictionaryConst {
   public static final String PROPERTY_LABEL = "label";
 
   /**
+   * Property key to represent a database table.
+   */
+  public static final String PROPERTY_TABLE = "table";
+
+  /**
    * Property key to represent whether an entity is enabled or not (this is context-specific of course)
    */
   public static final String PROPERTY_ENABLED = "enabled";

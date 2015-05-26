@@ -209,7 +209,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
         if ( CollectionUtils.isEmpty( inputNodes ) ) {
           // create a transient node for it
           ValueMetaInterface tmp = new ValueMeta( change.getOriginalEntityName() );
-          IMetaverseNode fieldNode = createOutputFieldNode( descriptor.getContext(), tmp, null, getTransientNodeType() );
+          IMetaverseNode fieldNode = createOutputFieldNode( getDescriptor().getContext(), tmp, null, getTransientNodeType() );
           // Add link to show that this step created this as a transient field
           getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_TRANSIENT, fieldNode );
           getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
@@ -220,7 +220,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
       if ( CollectionUtils.isEmpty( outputNodes ) ) {
         // create a transient node for it
         ValueMetaInterface tmp = new ValueMeta( change.getChangedEntityName() );
-        IMetaverseNode fieldNode = createOutputFieldNode( descriptor.getContext(), tmp, null, getTransientNodeType() );
+        IMetaverseNode fieldNode = createOutputFieldNode( getDescriptor().getContext(), tmp, null, getTransientNodeType() );
         // Add link to show that this step created this as a transient field
         getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_TRANSIENT, fieldNode );
         getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
@@ -262,7 +262,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
           for ( ValueMetaInterface valueMetaInterface : outputFields.getValueMetaList() ) {
 
             IMetaverseNode fieldNode = createOutputFieldNode(
-              descriptor.getContext(),
+              getDescriptor().getContext(),
               valueMetaInterface,
               nextStepName,
               getOutputNodeType() );
@@ -336,7 +336,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
           for ( ValueMetaInterface valueMetaInterface : inputFields.getValueMetaList() ) {
 
             IMetaverseNode prevFieldNode = createInputFieldNode(
-              descriptor.getContext(),
+              getDescriptor().getContext(),
               valueMetaInterface,
               prevStepName,
               getInputNodeType() );
@@ -370,7 +370,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
 
       prevFieldDescriptor =
         new MetaverseComponentDescriptor( fieldName, getInputNodeType(), stepFieldNamespace,
-          descriptor.getContext() );
+          getDescriptor().getContext() );
 
     }
     return prevFieldDescriptor;
@@ -390,6 +390,9 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseStepAnaly
 
   public void setDescriptor( IComponentDescriptor descriptor ) {
     this.descriptor = descriptor;
+  }
+  public IComponentDescriptor getDescriptor() {
+    return descriptor;
   }
 
   public Set<StepField> createStepFields( String fieldName, StepNodes stepNodes ) {

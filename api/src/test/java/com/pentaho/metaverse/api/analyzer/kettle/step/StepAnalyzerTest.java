@@ -680,7 +680,6 @@ public class StepAnalyzerTest {
     analyzer.setMetaverseBuilder( builder );
 
     doNothing().when( analyzer ).validateState( descriptor, baseStepMeta );
-    doNothing().when( analyzer ).addConnectionNodes( descriptor );
     doReturn( null ).when( analyzer ).processInputs( baseStepMeta );
     doReturn( null ).when( analyzer ).processOutputs( baseStepMeta );
 
@@ -710,7 +709,6 @@ public class StepAnalyzerTest {
     assertEquals( analyzer.getClass().getSimpleName(), analyzedNode.getProperty( "_analyzer" ) );
 
     verify( builder ).addNode( analyzedNode );
-    verify( analyzer ).addConnectionNodes( descriptor );
     verify( analyzer ).processInputs( baseStepMeta );
     verify( analyzer ).processOutputs( baseStepMeta );
     verify( analyzer ).getUsedFields( baseStepMeta );

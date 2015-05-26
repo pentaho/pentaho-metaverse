@@ -22,9 +22,11 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutput;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -36,17 +38,30 @@ import java.util.Set;
 
 public class TableOutputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<TableOutput, TableOutputMeta> {
+
   @Override
   public Class<TableOutputMeta> getMetaClass() {
     return TableOutputMeta.class;
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( TableOutputMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( TableOutputMeta meta, IAnalysisContext context ) {
     Set<IExternalResourceInfo> resources = new HashSet<IExternalResourceInfo>();
     DatabaseMeta dbMeta = meta.getDatabaseMeta();
     if ( dbMeta != null ) {
-      resources.add( ExternalResourceInfoFactory.createDatabaseResource( dbMeta ) );
+      IExternalResourceInfo databaseResource = ExternalResourceInfoFactory.createDatabaseResource( dbMeta, false );
+
+      String tableName = context.equals( DictionaryConst.CONTEXT_RUNTIME )
+        ? meta.getParentStepMeta().getParentTransMeta().environmentSubstitute( meta.getTableName() )
+        : meta.getTableName();
+
+      String schema = context.getContextName().equals( DictionaryConst.CONTEXT_RUNTIME )
+        ? meta.getParentStepMeta().getParentTransMeta().environmentSubstitute( meta.getSchemaName() )
+        : meta.getSchemaName();
+
+      databaseResource.getAttributes().put( DictionaryConst.PROPERTY_TABLE, tableName );
+      databaseResource.getAttributes().put( DictionaryConst.PROPERTY_SCHEMA, schema );
+      resources.add( databaseResource );
     }
     return resources;
   }

@@ -128,7 +128,7 @@ public class ExternalResourceStepAnalyzerTest {
     resources.add( resInfo );
     when( resInfo.isInput() ).thenReturn( true );
 
-    when( erc.getResourcesFromMeta( meta ) ).thenReturn( resources );
+    when( erc.getResourcesFromMeta( eq( meta ), any( IAnalysisContext.class ) ) ).thenReturn( resources );
 
     analyzer.customAnalyze( meta, node );
 
@@ -148,7 +148,7 @@ public class ExternalResourceStepAnalyzerTest {
     when( resInfo.isInput() ).thenReturn( false );
     when( resInfo.isOutput() ).thenReturn( true );
 
-    when( erc.getResourcesFromMeta( meta ) ).thenReturn( resources );
+    when( erc.getResourcesFromMeta( eq( meta ), any( IAnalysisContext.class ) ) ).thenReturn( resources );
 
     analyzer.customAnalyze( meta, node );
 

@@ -23,152 +23,74 @@
 package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.Namespace;
-import com.pentaho.metaverse.api.model.kettle.FieldMapping;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ConnectionExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.model.BaseDatabaseResourceInfo;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * The TableOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
  * other metaverse entities (such as physical fields and tables)
  */
-public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
+public class TableOutputStepAnalyzer extends ConnectionExternalResourceStepAnalyzer<TableOutputMeta> {
 
   public static final String TRUNCATE_TABLE = "truncateTable";
 
-  /*
-       * (non-Javadoc)
-       *
-       * @see com.pentaho.metaverse.api.IAnalyzer#analyze(IComponentDescriptor,java.lang.Object)
-       */
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, TableOutputMeta tableOutputMeta )
+  protected void customAnalyze( TableOutputMeta meta, IMetaverseNode node )
     throws MetaverseAnalyzerException {
-
-    // Do common analysis for all step
-    IMetaverseNode node = super.analyze( descriptor, tableOutputMeta );
-
-    String tableName = descriptor.getContext().getContextName().equals( DictionaryConst.CONTEXT_RUNTIME )
-      ? parentTransMeta.environmentSubstitute( tableOutputMeta.getTableName() )
-      : tableOutputMeta.getTableName();
-
-    String schema = descriptor.getContext().getContextName().equals( DictionaryConst.CONTEXT_RUNTIME )
-      ? parentTransMeta.environmentSubstitute( tableOutputMeta.getSchemaName() )
-      : tableOutputMeta.getSchemaName();
-
-    boolean truncate = tableOutputMeta.truncateTable();
+    super.customAnalyze( meta, node );
+    boolean truncate = meta.truncateTable();
     node.setProperty( TRUNCATE_TABLE, Boolean.valueOf( truncate ) );
-
-    String[] fieldNames = tableOutputMeta.getFieldStream();
-    if ( ArrayUtils.isEmpty( fieldNames ) || !tableOutputMeta.specifyFields() ) {
-      // If no incoming fields are specified, get them from the previous step
-      // NOTE: This check depends on the guarantee that super.loadInputAndOutputStreamFields() has been called.
-      //  it is not done again here for performance purposes. Currently it's being called during super.analyze()
-      if ( prevFields != null && !ArrayUtils.isEmpty( prevStepNames ) ) {
-        fieldNames = prevFields.get( prevStepNames[0] ).getFieldNames();
-      }
-    }
-
-    String[] dbFieldNames = tableOutputMeta.getFieldDatabase();
-
-    if ( tableName != null ) {
-
-      String dbConnectionName = tableOutputMeta.getDatabaseMeta().getName();
-
-      // the table is unique within the connection to it, that is it's namespace
-      if ( !MapUtils.isEmpty( getDatabaseNodes() ) ) {
-        IMetaverseNode dbn = getDatabaseNodes().get( dbConnectionName );
-        if ( dbn != null ) {
-          IComponentDescriptor dbTableDescriptor = new MetaverseComponentDescriptor(
-            tableName, DictionaryConst.NODE_TYPE_DATA_TABLE,
-            new Namespace( dbn.getLogicalId() ) );
-
-          IMetaverseNode tableNode = createNodeFromDescriptor( dbTableDescriptor );
-          tableNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, dbn.getLogicalId() );
-          if ( !StringUtils.isEmpty( schema ) ) {
-            tableNode.setProperty( DictionaryConst.PROPERTY_SCHEMA, schema );
-          }
-          tableNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DB_TABLE );
-
-          metaverseBuilder.addNode( tableNode );
-
-          metaverseBuilder.addLink( node, DictionaryConst.LINK_WRITESTO, tableNode );
-
-          if ( ArrayUtils.isEmpty( dbFieldNames ) || !tableOutputMeta.specifyFields() ) {
-            // If no field names are specified, then all the incoming fields are written out by name verbatim
-            dbFieldNames = fieldNames;
-          }
-
-          String tableLogicalId = tableNode.getLogicalId();
-
-          for ( int i = 0; i < fieldNames.length; i++ ) {
-            String fieldName = fieldNames[i];
-
-            // We can't use our own descriptor here, we need to get the descriptor for the origin step
-            IComponentDescriptor origin = getPrevStepFieldOriginDescriptor( descriptor, fieldName );
-
-            IMetaverseNode fieldNode = createNodeFromDescriptor(
-              new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD, origin ) );
-
-            fieldNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, origin.getNamespaceId() );
-
-            metaverseBuilder.addNode( fieldNode );
-
-            if ( dbFieldNames != null ) {
-
-              IComponentDescriptor dbColumnDescriptor = new MetaverseComponentDescriptor(
-                dbFieldNames[i],
-                DictionaryConst.NODE_TYPE_DATA_COLUMN,
-                new Namespace( tableLogicalId ),
-                descriptor.getContext() );
-              IMetaverseNode dbFieldNode = createNodeFromDescriptor( dbColumnDescriptor );
-
-              metaverseBuilder.addNode( dbFieldNode );
-              metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
-              metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, dbFieldNode );
-              metaverseBuilder.addLink( tableNode, DictionaryConst.LINK_CONTAINS, dbFieldNode );
-            }
-          }
-        }
-      }
-    }
-
-    return rootNode;
   }
 
-  protected Map<String, IMetaverseNode> getDatabaseNodes() {
-    return dbNodes;
+  @Override protected IMetaverseNode createTableNode( IExternalResourceInfo resource )
+    throws MetaverseAnalyzerException {
+    BaseDatabaseResourceInfo resourceInfo = (BaseDatabaseResourceInfo) resource;
+
+    Object obj = resourceInfo.getAttributes().get( DictionaryConst.PROPERTY_TABLE );
+    String tableName = obj == null ? null : obj.toString();
+    obj = resourceInfo.getAttributes().get( DictionaryConst.PROPERTY_SCHEMA );
+    String schema = obj == null ? null : obj.toString();
+
+    // create a node for the table
+    MetaverseComponentDescriptor componentDescriptor = new MetaverseComponentDescriptor(
+      tableName,
+      DictionaryConst.NODE_TYPE_DATA_TABLE,
+      getConnectionNode(),
+      getDescriptor().getContext() );
+
+    // set the namespace to be the id of the connection node.
+    IMetaverseNode tableNode = createNodeFromDescriptor( componentDescriptor );
+    tableNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, componentDescriptor.getNamespace().getNamespaceId() );
+    tableNode.setProperty( DictionaryConst.PROPERTY_TABLE, tableName );
+    tableNode.setProperty( DictionaryConst.PROPERTY_SCHEMA, schema );
+    tableNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DB_TABLE );
+    return tableNode;
   }
 
   @Override
-  public Set<IFieldMapping> getFieldMappings( TableOutputMeta meta ) throws MetaverseAnalyzerException {
-    Set<IFieldMapping> mappings = new LinkedHashSet<IFieldMapping>();
-    if ( meta.specifyFields() ) {
-      String[] streamFields = meta.getFieldStream();
-      String[] dbTableFields = meta.getFieldDatabase();
-      for ( int i = 0; i < dbTableFields.length; i++ ) {
-        String streamField = streamFields[i];
-        String tableField = dbTableFields[i];
-        mappings.add( new FieldMapping( streamField, tableField ) );
-      }
-    } else {
-      mappings.addAll( getPassthruFieldMappings( meta ) );
+  public IMetaverseNode getConnectionNode() throws MetaverseAnalyzerException {
+    if ( connectionNode == null ) {
+      connectionNode = (IMetaverseNode) getConnectionAnalyzer().analyze(
+        getDescriptor(), baseStepMeta.getDatabaseMeta() );
     }
-    return mappings;
+    return connectionNode;
+  }
+
+  @Override
+  protected Set<StepField> getUsedFields( TableOutputMeta meta ) {
+    return null;
   }
 
   @Override
@@ -178,5 +100,39 @@ public class TableOutputStepAnalyzer extends BaseStepAnalyzer<TableOutputMeta> {
         add( TableOutputMeta.class );
       }
     };
+  }
+
+  @Override
+  public String getResourceInputNodeType() {
+    return null;
+  }
+
+  @Override
+  public String getResourceOutputNodeType() {
+    return DictionaryConst.NODE_TYPE_DATA_COLUMN;
+  }
+
+  @Override
+  public boolean isOutput() {
+    return true;
+  }
+
+  @Override
+  public boolean isInput() {
+    return false;
+  }
+
+  ///////////// for unit testing
+  protected void setBaseStepMeta( TableOutputMeta meta ) {
+    baseStepMeta = meta;
+  }
+  protected void setRootNode( IMetaverseNode node ) {
+    rootNode = node;
+  }
+  protected void setParentTransMeta( TransMeta tm ) {
+    parentTransMeta = tm;
+  }
+  protected void setParentStepMeta( StepMeta sm ) {
+    parentStepMeta = sm;
   }
 }

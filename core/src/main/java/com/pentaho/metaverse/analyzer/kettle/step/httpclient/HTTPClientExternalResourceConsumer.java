@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.httpclient;
 
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
@@ -51,7 +52,7 @@ public class HTTPClientExternalResourceConsumer
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( HTTPMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( HTTPMeta meta, IAnalysisContext context ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not getting the url from a field

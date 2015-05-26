@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.Const;
@@ -46,7 +47,7 @@ public class ExcelOutputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<ExcelOutput, ExcelOutputMeta> {
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( ExcelOutputMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( ExcelOutputMeta meta, IAnalysisContext context ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not data-driven and there are no used variables in the

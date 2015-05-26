@@ -22,6 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.mongodbinput;
 
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.model.MongoDbResourceInfo;
@@ -41,7 +42,7 @@ public class MongoDbInputExternalResourceConsumer
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( MongoDbInputMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( MongoDbInputMeta meta, IAnalysisContext context ) {
     Set<IExternalResourceInfo> resources = new HashSet<IExternalResourceInfo>();
     MongoDbResourceInfo mongoDbResourceInfo = new MongoDbResourceInfo( meta );
     mongoDbResourceInfo.setInput( true );

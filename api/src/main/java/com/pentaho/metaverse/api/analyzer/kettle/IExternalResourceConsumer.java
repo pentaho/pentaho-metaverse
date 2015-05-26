@@ -21,6 +21,7 @@
  */
 package com.pentaho.metaverse.api.analyzer.kettle;
 
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 
 import java.util.Collection;
@@ -34,4 +35,5 @@ public interface IExternalResourceConsumer<T> extends MetaClassProvider<T>, Clon
   boolean isDataDriven( T consumer );
 
   Collection<IExternalResourceInfo> getResourcesFromMeta( T consumer );
+  Collection<IExternalResourceInfo> getResourcesFromMeta( T consumer, IAnalysisContext context );
 }

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
@@ -47,7 +48,7 @@ public class FixedFileInputExternalResourceConsumer extends BaseStepExternalReso
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( FixedInputMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( FixedInputMeta meta, IAnalysisContext context ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not data-driven and there are no used variables in the

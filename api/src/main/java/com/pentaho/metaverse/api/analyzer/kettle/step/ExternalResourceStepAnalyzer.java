@@ -52,21 +52,21 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
   protected void customAnalyze( T meta, IMetaverseNode node ) throws MetaverseAnalyzerException {
     // handle all of the external resources
     if ( getExternalResourceConsumer() != null ) {
-      Collection<IExternalResourceInfo> resources = getExternalResourceConsumer().getResourcesFromMeta( meta );
+      IAnalysisContext context = getDescriptor().getContext();
+      Collection<IExternalResourceInfo> resources = getExternalResourceConsumer().getResourcesFromMeta( meta, context );
       for ( IExternalResourceInfo resource : resources ) {
-
         try {
           if ( resource.isInput() ) {
             String label = DictionaryConst.LINK_READBY;
-            IMetaverseNode fileNode = createResourceNode( resource );
-            getMetaverseBuilder().addNode( fileNode );
-            getMetaverseBuilder().addLink( fileNode, label, node );
+            IMetaverseNode resourceNode = createResourceNode( resource );
+            getMetaverseBuilder().addNode( resourceNode );
+            getMetaverseBuilder().addLink( resourceNode, label, node );
           }
           if ( resource.isOutput() ) {
             String label = DictionaryConst.LINK_WRITESTO;
-            IMetaverseNode fileNode = createResourceNode( resource );
-            getMetaverseBuilder().addNode( fileNode );
-            getMetaverseBuilder().addLink( node, label, fileNode );
+            IMetaverseNode resourceNode = createResourceNode( resource );
+            getMetaverseBuilder().addNode( resourceNode );
+            getMetaverseBuilder().addLink( node, label, resourceNode );
           }
         } catch ( MetaverseException e ) {
           LOGGER.error( e.getMessage(), e );
