@@ -23,6 +23,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step.stringscut;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -114,6 +115,14 @@ public class StringsCutStepAnalyzerTest {
     for ( StepField usedField : usedFields ) {
       assertTrue( inFields.contains( usedField.getFieldName() ) );
     }
+  }
+
+  @Test
+  public void testIsPassthrough() throws Exception {
+    analyzer.setStepMeta( stringsCutMeta );
+    assertFalse( analyzer.isPassthrough( new StepField( "prev", "firstName" ) ) );
+    assertTrue( analyzer.isPassthrough( new StepField( "prev", "middleName" ) ) );
+    assertFalse( analyzer.isPassthrough( new StepField( "prev", "lastName" ) ) );
   }
 
   @Test
