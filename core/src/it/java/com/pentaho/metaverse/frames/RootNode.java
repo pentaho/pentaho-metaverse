@@ -116,9 +116,6 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, stepName).as('step').in('contains').has('name', T.eq, 'splitFields').back('step')" )
   SplitFieldsStepNode getSplitFieldsStepNodeByName( @GremlinParam( "stepName" ) String stepName );
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'Strings cut').as('step').in('contains').has('name', T.eq, 'strings_cut').back('step')" )
-  StringsCutStepNode getStringsCutStepNode();
-
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'Replace in string').as('step').in('contains').has('name', T.eq, 'strings_replace').back('step')" )
   StringsReplaceStepNode getStringsReplaceStepNode();
 

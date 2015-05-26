@@ -57,7 +57,6 @@ import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import com.pentaho.metaverse.frames.SplitFieldsStepNode;
 import com.pentaho.metaverse.frames.StreamFieldNode;
 import com.pentaho.metaverse.frames.StreamLookupStepNode;
-import com.pentaho.metaverse.frames.StringsCutStepNode;
 import com.pentaho.metaverse.frames.StringsReplaceStepNode;
 import com.pentaho.metaverse.frames.TableOutputStepNode;
 import com.pentaho.metaverse.frames.FileInputStepNode;
@@ -1067,26 +1066,22 @@ public class MetaverseValidationIT {
 
   @Test
   public void testStringsCutStepNode() throws Exception {
-    StringsCutStepNode node = root.getStringsCutStepNode();
-
-    // Make sure that every node we use contains at least one derives from
-    // that contains an operation
-    for ( StreamFieldNode sfn : node.getStreamFieldNodesUses() ) {
-      boolean operationFound = false;
-      for ( StreamFieldNode sfn1 : sfn.getFieldNodesDerivedFromMe() ) {
-        operationFound = sfn1.getOperations() != null && sfn1.getOperations().length() > 0;
-        if ( operationFound ) {
-          break;
-        }
-      }
-      assertTrue( operationFound );
-    }
+    TransformationStepNode node = root.getStepNode( "strings_cut", "Strings cut" );
 
     // Make sure we have the right number of links used, created and derived. Also,
     // Ensure there is an entry in the operations for those fields that are derived.
     assertEquals( 3, getIterableSize( node.getInputStreamFields() ) );
     assertEquals( 3, getIterableSize( node.getStreamFieldNodesUses() ) );
     assertEquals( 4, getIterableSize( node.getOutputStreamFields() ) );
+
+    for ( StreamFieldNode sfn : node.getOutputStreamFields() ) {
+      // "Last Name" is a special case for this test, it is passthrough
+      if ( sfn.getName().equals( "Middle Name" ) ) {
+        assertTrue( Const.isEmpty( sfn.getOperations() ) );
+      } else {
+        assertFalse( Const.isEmpty( sfn.getOperations() ) );
+      }
+    }
   }
 
   @Test

@@ -25,6 +25,7 @@ package com.pentaho.metaverse.analyzer.kettle.step.stringscut;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.stringcut.StringCutMeta;
 
@@ -77,9 +78,34 @@ public class StringsCutStepAnalyzer extends StepAnalyzer<StringCutMeta> {
     return usedFields;
   }
 
+  /**
+   * Determines if a field is considered a passthrough field or not. In this case, if we're not using the field, it's
+   * a passthrough. If we are using the field, then it is only a passthrough if we're renaming the field on which we
+   * perform the operation(s).
+   *
+   * @param originalFieldName The name of the incoming field
+   * @return true if this field is a passthrough (i.e. no operations are performed on it), false otherwise
+   */
+  @Override
+  protected boolean isPassthrough( StepField originalFieldName ) {
+    String[] inFields = baseStepMeta.getFieldInStream();
+    String origFieldName = originalFieldName.getFieldName();
+    for ( int i = 0; i < inFields.length; i++ ) {
+      if ( inFields[i].equals( origFieldName ) && Const.isEmpty( baseStepMeta.getFieldOutStream()[i] ) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @Override
   protected void customAnalyze( StringCutMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
     // Nothing to do here
   }
 
+  // ******** Start - Used to aid in unit testing **********
+  protected void setStepMeta( StringCutMeta meta ) {
+    this.baseStepMeta = meta;
+  }
+  // ******** End - Used to aid in unit testing **********
 }
