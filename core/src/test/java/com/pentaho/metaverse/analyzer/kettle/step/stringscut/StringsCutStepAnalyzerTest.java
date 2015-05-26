@@ -52,7 +52,7 @@ import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.INamespace;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 @RunWith( MockitoJUnitRunner.class )
@@ -115,25 +115,28 @@ public class StringsCutStepAnalyzerTest {
   public void testAnalyze() {
     try {
       analyzer.analyze( descriptor, stringsCutMeta );
-      Set<IFieldMapping> mappings = analyzer.getFieldMappings( stringsCutMeta );
-      assertEquals( 4, mappings.size() );
-      boolean foundNonPassthrough = false;
-      for ( IFieldMapping mapping : mappings ) {
-        if ( !mapping.getSourceFieldName().equals( mapping.getTargetFieldName() ) ) {
-          foundNonPassthrough = true;
-        }
-      }
-      assertTrue( foundNonPassthrough );
     } catch ( MetaverseAnalyzerException e ) {
       e.printStackTrace();
     }
-    verify( builder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
+    verify( builder, times( 1 ) ).addNode( any( IMetaverseNode.class ) );
 
-    verify( builder, times( 3 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
+    verify( builder, times( 8 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
         any( IMetaverseNode.class ) );
 
   }
 
+  @Test
+  public void testGetChangeRecords() {
+    try {
+      Set<ComponentDerivationRecord> deviations = analyzer.getChangeRecords( stringsCutMeta );
+      assertEquals( deviations.size(), 4);
+    } catch ( MetaverseAnalyzerException e ) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+  }
+  
   @Test
   public void testGetSupportedSteps() throws Exception {
     StringsCutStepAnalyzer analyzer = new StringsCutStepAnalyzer();
