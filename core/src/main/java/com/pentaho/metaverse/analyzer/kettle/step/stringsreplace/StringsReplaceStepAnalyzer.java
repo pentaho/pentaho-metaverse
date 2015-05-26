@@ -24,27 +24,22 @@ package com.pentaho.metaverse.analyzer.kettle.step.stringsreplace;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import com.pentaho.metaverse.api.model.Operation;
-import com.pentaho.metaverse.api.model.kettle.FieldMapping;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.replacestring.ReplaceStringMeta;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class StringsReplaceStepAnalyzer extends BaseStepAnalyzer<ReplaceStringMeta> {
-  private IComponentDescriptor descriptor;
+public class StringsReplaceStepAnalyzer extends StepAnalyzer<ReplaceStringMeta> {
 
   private Map<String, Integer> renameIndex = new HashMap<String, Integer>();
 
@@ -55,14 +50,6 @@ public class StringsReplaceStepAnalyzer extends BaseStepAnalyzer<ReplaceStringMe
     return set;
   }
 
-  @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, ReplaceStringMeta stringsReplaceMeta )
-    throws MetaverseAnalyzerException {
-    IMetaverseNode node = super.analyze( descriptor, stringsReplaceMeta );
-    this.descriptor = descriptor;
-    getChangeRecords( stringsReplaceMeta );
-    return node;
-  }
 
   private ComponentDerivationRecord buildChangeRecord( final ReplaceStringMeta stringsReplaceMeta, final int index )
     throws MetaverseAnalyzerException {
@@ -77,7 +64,8 @@ public class StringsReplaceStepAnalyzer extends BaseStepAnalyzer<ReplaceStringMe
     if ( fieldOutString == null || fieldOutString.length() < 1 ) {
       fieldOutString = fieldInString;
     }
-    final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( fieldOutString, ChangeType.DATA );
+    final ComponentDerivationRecord changeRecord =
+      new ComponentDerivationRecord( fieldInString, fieldOutString, ChangeType.DATA );
     final String fieldReplaceString = stringsReplaceMeta.getFieldReplaceByString()[index];
     String changeOperation = fieldInString + " -> [ replace [ ";
     changeOperation += stringsReplaceMeta.getReplaceString()[index] + " with ";
@@ -89,25 +77,8 @@ public class StringsReplaceStepAnalyzer extends BaseStepAnalyzer<ReplaceStringMe
     changeOperation += " ] ] -> " + fieldOutString;
 
     changeRecord.addOperation( new Operation( Operation.CALC_CATEGORY, ChangeType.DATA,
-        DictionaryConst.PROPERTY_TRANSFORMS, changeOperation ) );
-    IMetaverseNode fieldNode = createNodeFromDescriptor( getStepFieldOriginDescriptor( descriptor, fieldInString ) );
-    IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, changeRecord );
-    RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
-    ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( fieldInString );
-    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
-    if ( fieldReplaceString != null && fieldReplaceString.length() > 0 ) {
-      IMetaverseNode replacementFieldNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, fieldReplaceString ) );
-      metaverseBuilder.addLink( replacementFieldNode, DictionaryConst.LINK_DERIVES, newFieldNode );
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, replacementFieldNode );
-    }
+      DictionaryConst.PROPERTY_TRANSFORMS, changeOperation ) );
 
-    if ( !fieldOutString.equals( fieldInString ) ) {
-      newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta != null ? inputFieldValueMeta
-          .getTypeDesc() : fieldInString + " unknown type" );
-    } else {
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_DELETES, fieldNode );
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
-    }
     return changeRecord;
   }
 
@@ -124,32 +95,52 @@ public class StringsReplaceStepAnalyzer extends BaseStepAnalyzer<ReplaceStringMe
   }
 
   /**
-   * Provide field mappings that occur in this step.
+   * Determines if a field is considered a passthrough field or not. In this case, if we're not using the field, it's
+   * a passthrough. If we are using the field, then it is only a passthrough if we're renaming the field on which we
+   * perform the operation(s).
    *
-   * @param meta
-   *          The step metadata
-   * @return a set of field mappings (input field -> output field)
-   * @throws com.pentaho.metaverse.api.MetaverseAnalyzerException
+   * @param originalFieldName The name of the incoming field
+   * @return true if this field is a passthrough (i.e. no operations are performed on it), false otherwise
    */
   @Override
-  public Set<IFieldMapping> getFieldMappings( ReplaceStringMeta meta ) throws MetaverseAnalyzerException {
-    Set<IFieldMapping> fieldMappings = new HashSet<IFieldMapping>();
-    for ( int i = 0; i < meta.getFieldInStream().length; i++ ) {
-      String fieldInString = meta.getFieldInStream()[i];
-      String fieldOutString = meta.getFieldOutStream()[i];
-      if ( fieldOutString != null && fieldOutString.length() > 0 ) {
-        fieldMappings.add( new FieldMapping( fieldInString, fieldOutString ) );
+  protected boolean isPassthrough( StepField originalFieldName ) {
+    String[] inFields = baseStepMeta.getFieldInStream();
+    String origFieldName = originalFieldName.getFieldName();
+    for ( int i = 0; i < inFields.length; i++ ) {
+      if ( inFields[i].equals( origFieldName ) && Const.isEmpty( baseStepMeta.getFieldOutStream()[i] ) ) {
+        return false;
       }
     }
-    fieldMappings.addAll( getPassthruFieldMappings( meta ) );
-    return fieldMappings;
+    return true;
   }
 
-  private Boolean containsField( String field ) {
-    String[] fieldNames = null;
-    for ( String key : prevFields.keySet() ) {
-      fieldNames = prevFields.get( key ).getFieldNames();
+  @Override
+  protected Set<StepField> getUsedFields( ReplaceStringMeta meta ) {
+    HashSet<StepField> usedFields = new HashSet<>();
+    for ( String fieldInString : meta.getFieldInStream() ) {
+      usedFields.addAll( createStepFields( fieldInString, getInputs() ) );
     }
-    return Arrays.asList( fieldNames ).contains( field );
+    for ( String replaceByField : meta.getFieldReplaceByString() ) {
+      if ( !Const.isEmpty( replaceByField ) ) {
+        usedFields.addAll( createStepFields( replaceByField, getInputs() ) );
+      }
+    }
+    return usedFields;
   }
+
+  @Override
+  protected void customAnalyze( ReplaceStringMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+    // Nothing to do here
+  }
+
+  private boolean containsField( String field ) {
+    return ( !Const.isEmpty( field ) && !Const.isEmpty( getInputs().findNodes( field ) ) );
+  }
+
+  // ******** Start - Used to aid in unit testing **********
+  protected void setStepMeta( ReplaceStringMeta meta ) {
+    this.baseStepMeta = meta;
+  }
+  // ******** End - Used to aid in unit testing **********
+
 }
