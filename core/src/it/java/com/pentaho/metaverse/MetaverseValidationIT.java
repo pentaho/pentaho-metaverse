@@ -79,7 +79,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.di.core.Const;
-import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -790,37 +789,38 @@ public class MetaverseValidationIT {
   public void testStreamLookupStepNode() throws Exception {
     StreamLookupStepNode node = root.getStreamLookupStepNode();
 
-    assertEquals( 2, getIterableSize( node.getStreamFieldNodesUses() ) );
-    assertEquals( 1, getIterableSize( node.getStreamFieldNodesCreates() ) );
+    assertEquals( 6, getIterableSize( node.getInputStreamFields() ) );
+    assertEquals( 3, getIterableSize( node.getStreamFieldNodesUses() ) );
+    assertEquals( 5, getIterableSize( node.getOutputStreamFields() ) );
 
-    List<String> expectations = new ArrayList<String>();
+    List<String> expectations = new ArrayList<>();
     expectations.add( "territory" );
     expectations.add( "country_ref" );
 
-    List<String> joins = new ArrayList<String>();
-    joins.add( "country_code" );
-    joins.add( "code" );
-
-    Iterator<StreamFieldNode> iter1 = node.getStreamFieldNodesCreates().iterator();
+    Iterator<StreamFieldNode> iter1 = node.getOutputStreamFields().iterator();
     while ( iter1.hasNext() ) {
-      StreamFieldNode createdNode = iter1.next();
-      assertEquals( 1, getIterableSize( createdNode.getFieldNodesThatDeriveMe() ) );
-      Iterator<StreamFieldNode> iter2 = createdNode.getFieldNodesThatDeriveMe().iterator();
-      while ( iter2.hasNext() ) {
-        StreamFieldNode derivedFromNode = iter2.next();
-        assertTrue( expectations.contains( derivedFromNode.getName() ) );
+      StreamFieldNode outField = iter1.next();
+      if ( expectations.contains( outField.getName() ) ) {
+        assertEquals( 1, getIterableSize( outField.getFieldNodesThatDeriveMe() ) );
+        Iterator<StreamFieldNode> iter2 = outField.getFieldNodesThatDeriveMe().iterator();
+        while ( iter2.hasNext() ) {
+          StreamFieldNode derivedFromNode = iter2.next();
+          assertTrue( expectations.contains( derivedFromNode.getName() ) );
+        }
       }
     }
 
     iter1 = node.getStreamFieldNodesUses().iterator();
     while ( iter1.hasNext() ) {
       StreamFieldNode usesNode = iter1.next();
-      assertTrue( joins.contains( usesNode.getName() ) );
-      assertEquals( 1, getIterableSize( usesNode.getFieldNodesThatJoinToMe() ) );
-      Iterator<StreamFieldNode> iter3 = usesNode.getFieldNodesThatJoinToMe().iterator();
-      while ( iter3.hasNext() ) {
-        StreamFieldNode joinedNode = iter3.next();
-        assertTrue( joins.contains( joinedNode.getName() ) );
+      if ( usesNode.getName().equals( "country_code" ) || usesNode.getName().equals( "country_code" ) ) {
+        assertEquals( 1, getIterableSize( usesNode.getFieldNodesThatJoinToMe() ) );
+        StreamFieldNode joinField = usesNode.getFieldNodesThatJoinToMe().iterator().next();
+        if ( usesNode.getName().equals( "country_code" ) ) {
+          assertEquals( "code", joinField.getName() );
+        } else {
+          assertEquals( "country_code", joinField.getName() );
+        }
       }
     }
 

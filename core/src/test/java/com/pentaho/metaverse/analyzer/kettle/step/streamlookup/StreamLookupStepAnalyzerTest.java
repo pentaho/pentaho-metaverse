@@ -23,11 +23,11 @@
 package com.pentaho.metaverse.analyzer.kettle.step.streamlookup;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -35,12 +35,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -49,68 +55,76 @@ import org.pentaho.di.trans.step.StepIOMetaInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.errorhandling.StreamInterface;
 import org.pentaho.di.trans.steps.streamlookup.StreamLookupMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.class )
 public class StreamLookupStepAnalyzerTest {
 
   private StreamLookupStepAnalyzer analyzer;
-  private static final String DEFAULT_STEP_NAME = "testStep";
   private List<StreamInterface> streams;
   private List<ValueMetaInterface> outValueMetas;
 
-  String[] mockKeylookup = {"code"};
-  String[] mockKeystream = {"country_code"};
-  String[] mockValues = {"territory"};
-  String[] mockValueNames = {"country_ref"};
+  String[] mockKeylookup = { "code" };
+  String[] mockKeystream = { "country_code" };
+  String[] mockValues = { "territory" };
+  String[] mockValueNames = { "country_ref" };
 
-  @Mock private IMetaverseBuilder builder;
-  @Mock private StreamLookupMeta streamLookupMeta;
-  @Mock private TransMeta parentTransMeta;
-  @Mock private RowMetaInterface prevRowMeta;
-  @Mock private RowMetaInterface stepRowMeta;
-  @Mock private INamespace namespace;
-  @Mock private IComponentDescriptor descriptor;
-  @Mock private StepIOMetaInterface stepIoMeta;
-  @Mock private StreamInterface stream1;
-  @Mock private StreamInterface stream2;
-  @Mock private StepMeta parentStepMeta;
-  @Mock private StepMeta stepMeta1;
-  @Mock private StepMeta stepMeta2;
-  @Mock private RowMetaInterface rowMeta1;
-  @Mock private RowMetaInterface rowMeta2;
-  @Mock private ValueMetaInterface leftField1;
-  @Mock private ValueMetaInterface leftField2;
-  @Mock private ValueMetaInterface rightField1;
-  @Mock private ValueMetaInterface rightField2;
+  @Mock
+  private IMetaverseNode node;
+  @Mock
+  private IMetaverseNode mockFieldNode;
+  @Mock
+  private IMetaverseBuilder builder;
+  @Mock
+  private StreamLookupMeta streamLookupMeta;
+  @Mock
+  private TransMeta parentTransMeta;
+  @Mock
+  private RowMetaInterface prevRowMeta;
+  @Mock
+  private RowMetaInterface stepRowMeta;
+  @Mock
+  private StepIOMetaInterface stepIoMeta;
+  @Mock
+  private StreamInterface stream1;
+  @Mock
+  private StreamInterface stream2;
+  @Mock
+  private StepMeta parentStepMeta;
+  @Mock
+  private StepMeta stepMeta1;
+  @Mock
+  private StepMeta stepMeta2;
+  @Mock
+  private RowMetaInterface rowMeta1;
+  @Mock
+  private RowMetaInterface rowMeta2;
+  @Mock
+  private ValueMetaInterface leftField1;
+  @Mock
+  private ValueMetaInterface leftField2;
+  @Mock
+  private ValueMetaInterface rightField1;
+  @Mock
+  private ValueMetaInterface rightField2;
 
-  @Mock private RowMetaInterface step1RowMeta;
-  @Mock private RowMetaInterface step2RowMeta;
-  @Mock private RowMetaInterface outputRowMeta;
+  @Mock
+  private RowMetaInterface step1RowMeta;
+  @Mock
+  private RowMetaInterface step2RowMeta;
+  @Mock
+  private RowMetaInterface outputRowMeta;
+
+  StepNodes inputs;
 
   @Before
   public void setUp() throws Exception {
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
-    when( builder.getMetaverseObjectFactory() ).thenReturn( MetaverseTestUtils.getMetaverseObjectFactory() );
 
-    streams = new ArrayList<StreamInterface>( 2 );
+    streams = new ArrayList<>( 2 );
     streams.add( stream1 );
     streams.add( stream2 );
 
-    outValueMetas = new ArrayList<ValueMetaInterface>( 4 );
+    outValueMetas = new ArrayList<>( 4 );
     outValueMetas.add( leftField1 );
     outValueMetas.add( leftField2 );
     outValueMetas.add( rightField1 );
@@ -126,48 +140,76 @@ public class StreamLookupStepAnalyzerTest {
     when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
 
     when( stepIoMeta.getInfoStreams() ).thenReturn( streams );
-    when( stepMeta1.getName()).thenReturn( "step1" );
-    when( stepMeta2.getName()).thenReturn( "step2" );
+    when( stepMeta1.getName() ).thenReturn( "step1" );
+    when( stepMeta2.getName() ).thenReturn( "step2" );
     when( stream1.getStepMeta() ).thenReturn( stepMeta1 );
+    when( stream1.getStepname() ).thenReturn( "step1" );
     when( stream2.getStepMeta() ).thenReturn( stepMeta2 );
+    when( stream2.getStepname() ).thenReturn( "step2" );
     when( parentTransMeta.getStepFields( stepMeta1 ) ).thenReturn( rowMeta1 );
     when( parentTransMeta.getStepFields( stepMeta2 ) ).thenReturn( rowMeta2 );
     when( parentTransMeta.getStepFields( parentStepMeta ) ).thenReturn( stepRowMeta );
     when( parentTransMeta.getStepFields( "step1" ) ).thenReturn( step1RowMeta );
     when( parentTransMeta.getStepFields( "step2" ) ).thenReturn( step2RowMeta );
     when( step1RowMeta.searchValueMeta( anyString() ) ).thenReturn( mock( ValueMetaInterface.class ) );
-    when( step2RowMeta.searchValueMeta( anyString() ) ).thenReturn( mock( ValueMetaInterface.class ) );
-    String[] stepNames = {"step1", "step2"};
+    String[] stepNames = { "step1", "step2" };
     when( parentTransMeta.getPrevStepNames( any( StepMeta.class ) ) ).thenReturn( stepNames );
+    when( parentTransMeta.getPrevStepNames( anyString() ) ).thenReturn( stepNames );
 
-    analyzer = new StreamLookupStepAnalyzer();
+    analyzer = spy( new StreamLookupStepAnalyzer() );
+    analyzer.setParentStepMeta( parentStepMeta );
+    analyzer.setParentTransMeta( parentTransMeta );
     analyzer.setMetaverseBuilder( builder );
-    analyzer = spy( analyzer );
+
+    inputs = new StepNodes();
+    inputs.addNode( "step1", "Country", mockFieldNode );
+    inputs.addNode( "step2", "State", mockFieldNode );
+
+    when( analyzer.getInputs() ).thenReturn( inputs );
+
     when( analyzer.getOutputFields( any( StreamLookupMeta.class ) ) ).thenReturn( outputRowMeta );
     ValueMetaInterface searchFieldResult = mock( ValueMetaInterface.class );
     when( outputRowMeta.searchValueMeta( anyString() ) ).thenReturn( searchFieldResult );
     when( searchFieldResult.getOrigin() ).thenReturn( "step1" );
     when( searchFieldResult.getName() ).thenReturn( "country_code" );
-    descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
-  }
-
-  @Test(expected = MetaverseAnalyzerException.class)
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
-    analyzer.analyze( descriptor, null );
   }
 
   @Test
-  public void testAnalyze() throws Exception {
-    analyzer.analyze( descriptor, streamLookupMeta );
-    verify( builder, times( 2 ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+  public void testCustomAnalyze() throws Exception {
 
-    verify( builder, times( 2 ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
+    analyzer.customAnalyze( streamLookupMeta, node );
 
-    verify( builder, times( 1 ) ).addLink( any( IMetaverseNode.class ),
-        eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+    verify( builder, times( 2 * mockKeylookup.length ) ).addLink( any( IMetaverseNode.class ),
+      eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
+
   }
+
+  @Test
+  public void testGetChangeRecords() throws Exception {
+
+    analyzer.setStepMeta( streamLookupMeta );
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( streamLookupMeta );
+    assertNotNull( changeRecords );
+
+    assertEquals( 1, changeRecords.size() );
+    ComponentDerivationRecord cr = changeRecords.iterator().next();
+    assertEquals( ChangeType.METADATA, cr.getChangeType() );
+    assertEquals( 1, cr.getOperations().size() );
+  }
+
+  @Test
+  public void testGetUsedFields() throws Exception {
+
+    Set<StepField> usedFields = analyzer.getUsedFields( streamLookupMeta );
+    assertNotNull( usedFields );
+
+    assertEquals(
+      streamLookupMeta.getKeystream().length
+        + streamLookupMeta.getKeylookup().length
+        + streamLookupMeta.getValue().length,
+      usedFields.size() );
+  }
+
 
   @Test
   public void testGetInputFields() throws Exception {
@@ -176,6 +218,12 @@ public class StreamLookupStepAnalyzerTest {
     Map<String, RowMetaInterface> inputRowMeta = analyzer.getInputFields( streamLookupMeta );
     assertNotNull( inputRowMeta );
     assertEquals( 2, inputRowMeta.size() );
+  }
+
+  @Test
+  public void testNewFieldNameExistsInMainInputStream_nullParentTransMeta() {
+    analyzer.setParentTransMeta( null );
+    assertFalse( analyzer.newFieldNameExistsInMainInputStream( "" ) );
   }
 
   @Test
