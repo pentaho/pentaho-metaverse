@@ -43,6 +43,7 @@ import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.exceloutput.ExcelField;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutput;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputData;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
@@ -169,5 +170,26 @@ public class ExcelOutputStepAnalyzerTest {
     assertFalse( resources.isEmpty() );
 
     assertEquals( ExcelOutputMeta.class, consumer.getMetaClass() );
+  }
+
+  @Test
+  public void testGetOutputResourceFields() throws Exception {
+    ExcelField[] outputFields = new ExcelField[2];
+    ExcelField field1 = mock( ExcelField.class );
+    ExcelField field2 = mock( ExcelField.class );
+    outputFields[0] = field1;
+    outputFields[1] = field2;
+
+    when( field1.getName() ).thenReturn( "field1" );
+    when( field2.getName() ).thenReturn( "field2" );
+
+    when( meta.getOutputFields() ).thenReturn( outputFields );
+
+    Set<String> outputResourceFields = analyzer.getOutputResourceFields( meta );
+
+    assertEquals( outputFields.length, outputResourceFields.size() );
+    for ( ExcelField outputField : outputFields ) {
+      assertTrue( outputResourceFields.contains( outputField.getName() ) );
+    }
   }
 }

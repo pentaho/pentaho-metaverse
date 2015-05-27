@@ -30,6 +30,7 @@ import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.exceloutput.ExcelField;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +83,17 @@ public class ExcelOutputStepAnalyzer extends ExternalResourceStepAnalyzer<ExcelO
   @Override
   protected Set<StepField> getUsedFields( ExcelOutputMeta meta ) {
     return null;
+  }
+
+  @Override
+  public Set<String> getOutputResourceFields( ExcelOutputMeta meta ) {
+    Set<String> fields = new HashSet<>();
+    ExcelField[] outputFields = meta.getOutputFields();
+    for ( int i = 0; i < outputFields.length; i++ ) {
+      ExcelField outputField = outputFields[ i ];
+      fields.add( outputField.getName() );
+    }
+    return fields;
   }
 
   // used for unit testing

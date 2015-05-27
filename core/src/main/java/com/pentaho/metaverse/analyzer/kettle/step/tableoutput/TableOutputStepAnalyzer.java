@@ -27,15 +27,25 @@ import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.api.analyzer.kettle.step.ConnectionExternalResourceStepAnalyzer;
 import com.pentaho.metaverse.api.model.BaseDatabaseResourceInfo;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.apache.commons.lang.ArrayUtils;
+import org.pentaho.di.core.row.RowMeta;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMeta;
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -77,6 +87,60 @@ public class TableOutputStepAnalyzer extends ConnectionExternalResourceStepAnaly
     tableNode.setProperty( DictionaryConst.PROPERTY_SCHEMA, schema );
     tableNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DB_TABLE );
     return tableNode;
+  }
+
+  @Override
+  protected Map<String, RowMetaInterface> getOutputRowMetaInterfaces( TableOutputMeta meta ) {
+    String[] nextStepNames = parentTransMeta.getNextStepNames( parentStepMeta );
+    Map<String, RowMetaInterface> outputRows = new HashMap<>();
+    RowMetaInterface outputFields = getOutputFields( meta );
+
+    if ( outputFields != null && ArrayUtils.isEmpty( nextStepNames ) ) {
+      nextStepNames = new String[] { NONE };
+    }
+    for ( String stepName : nextStepNames ) {
+      outputRows.put( stepName, outputFields );
+    }
+
+    RowMetaInterface tableFields = new RowMeta();
+
+    Set<String> outFields = getOutputResourceFields( meta );
+    for ( String outField : outFields ) {
+      ValueMetaInterface vmi = new ValueMeta( outField );
+      tableFields.addValueMeta( vmi );
+    }
+    outputRows.put( RESOURCE, tableFields );
+
+    return outputRows;
+  }
+
+  @Override
+  public Set<String> getOutputResourceFields( TableOutputMeta meta ) {
+    Set<String> fields = new LinkedHashSet<>( Arrays.asList( meta.getFieldDatabase() ) );
+    return fields;
+  }
+
+  @Override
+  public Set<ComponentDerivationRecord> getChangeRecords( TableOutputMeta meta ) throws MetaverseAnalyzerException {
+    Set<ComponentDerivationRecord> changes = new HashSet<>();
+    String[] tableFields = meta.getFieldDatabase();
+    String[] streamFields = meta.getFieldStream();
+    if ( getInputs() != null ) {
+      Set<String> stepNames = getInputs().getStepNames();
+      for ( int i = 0; i < tableFields.length; i++ ) {
+        String tableField = tableFields[ i ];
+        String streamField = streamFields[ i ];
+        for ( String stepName : stepNames ) {
+          if ( !RESOURCE.equals( stepName ) ) {
+            StepField inputField = new StepField( stepName, streamField );
+            StepField outField = new StepField( RESOURCE, tableField );
+            ComponentDerivationRecord change = new ComponentDerivationRecord( inputField, outField );
+            changes.add( change );
+          }
+        }
+      }
+    }
+    return changes;
   }
 
   @Override

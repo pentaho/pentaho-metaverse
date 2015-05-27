@@ -37,6 +37,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 
 import java.util.Set;
@@ -127,6 +128,27 @@ public class TextFileOutputStepAnalyzerTest {
     assertNotNull( types );
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( TextFileOutputMeta.class ) );
+  }
+
+  @Test
+  public void testGetOutputResourceFields() throws Exception {
+    TextFileField[] outputFields = new TextFileField[2];
+    TextFileField field1 = mock( TextFileField.class );
+    TextFileField field2 = mock( TextFileField.class );
+    outputFields[0] = field1;
+    outputFields[1] = field2;
+
+    when( field1.getName() ).thenReturn( "field1" );
+    when( field2.getName() ).thenReturn( "field2" );
+
+    when( meta.getOutputFields() ).thenReturn( outputFields );
+
+    Set<String> outputResourceFields = analyzer.getOutputResourceFields( meta );
+
+    assertEquals( outputFields.length, outputResourceFields.size() );
+    for ( TextFileField outputField : outputFields ) {
+      assertTrue( outputResourceFields.contains( outputField.getName() ) );
+    }
   }
 
 }

@@ -30,6 +30,7 @@ import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,17 @@ public class TextFileOutputStepAnalyzer extends ExternalResourceStepAnalyzer<Tex
   @Override
   public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
     return createFileNode( resource.getName(), descriptor );
+  }
+
+  @Override
+  public Set<String> getOutputResourceFields( TextFileOutputMeta meta ) {
+    Set<String> fields = new HashSet<>();
+    TextFileField[] outputFields = meta.getOutputFields();
+    for ( int i = 0; i < outputFields.length; i++ ) {
+      TextFileField outputField = outputFields[ i ];
+      fields.add( outputField.getName() );
+    }
+    return fields;
   }
 
   // used for unit testing
