@@ -586,7 +586,7 @@ public class MetaverseValidationIT {
     Iterable<StreamFieldNode> inputs = node.getInputStreamFields();
     Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
 
-    assertEquals( getIterableSize( inputs ) * 2, getIterableSize( outputs ) );
+    assertEquals( getIterableSize( inputs ) + meta.getFieldDatabase().length, getIterableSize( outputs ) );
 
     for ( StreamFieldNode input : inputs ) {
       assertEquals( input.getName(), input.getFieldPopulatedByMe().getName() );
@@ -707,7 +707,7 @@ public class MetaverseValidationIT {
     Iterable<StreamFieldNode> outFields = textFileOutputStepNode.getOutputStreamFields();
     int outFieldCount = getIterableSize( outFields );
     // should have output stream nodes as well as file nodes
-    assertEquals( outputFields * 2, outFieldCount );
+    assertEquals( outputFields + meta.getOutputFields().length, outFieldCount );
 
     int fileFieldCount = 0;
     for ( StreamFieldNode outField : outFields ) {
@@ -743,7 +743,7 @@ public class MetaverseValidationIT {
     Iterable<StreamFieldNode> outFields = textFileOutputStepNode.getOutputStreamFields();
     int outFieldCount = getIterableSize( outFields );
     // should have output stream nodes as well as file nodes
-    assertEquals( outputFields * 2, outFieldCount );
+    assertEquals( outputFields + meta.getOutputFields().length, outFieldCount );
 
     int fileFieldCount = 0;
     for ( StreamFieldNode outField : outFields ) {
@@ -1271,18 +1271,25 @@ public class MetaverseValidationIT {
     assertEquals( fileNames.length, getIterableSize( outputFiles ) );
     int i = 0;
     for ( FramedMetaverseNode node : outputFiles ) {
-      assertTrue( fileNames[i++].endsWith( node.getName() ) );
+      assertTrue( fileNames[ i++ ].endsWith( node.getName() ) );
     }
 
-    Iterable<StreamFieldNode> usedFields = xmlOutputStepNode.getStreamFieldNodesUses();
-    int usedFieldCount = getIterableSize( usedFields );
-    assertEquals( outputFields.length, usedFieldCount );
-    assertEquals( incomingFields.size(), usedFieldCount );
+    Iterable<StreamFieldNode> outputs = xmlOutputStepNode.getOutputStreamFields();
+    int outFieldCount = getIterableSize( outputs );
+    assertEquals( incomingFields.getValueMetaList().size() + meta.getOutputFields().length, outFieldCount );
 
-    for ( StreamFieldNode usedField : usedFields ) {
-      ValueMetaInterface vmi = incomingFields.searchValueMeta( usedField.getName() );
-      assertEquals( vmi.getName(), usedField.getFieldPopulatedByMe().getName() );
+    for ( XMLField xmlField : meta.getOutputFields() ) {
+      boolean xmlFieldFound = false;
+      for ( StreamFieldNode output : outputs ) {
+        if ( output.getType().equals( DictionaryConst.NODE_TYPE_FILE_FIELD ) && output.getName().equals( xmlField.getFieldName() ) ) {
+          xmlFieldFound = true;
+          assertNotNull( output.getFieldPopulatesMe() );
+          break;
+        }
+      }
+      assertTrue("No graph node found for XMLField - " + xmlField.getFieldName(), xmlFieldFound );
     }
+
   }
 
   @Test

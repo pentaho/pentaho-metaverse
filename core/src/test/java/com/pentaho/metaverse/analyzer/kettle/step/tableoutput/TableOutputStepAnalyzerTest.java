@@ -24,7 +24,6 @@ package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputStepAnalyzer;
 import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IConnectionAnalyzer;
 import com.pentaho.metaverse.api.IMetaverseBuilder;
@@ -32,6 +31,9 @@ import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import com.pentaho.metaverse.api.INamespace;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import com.pentaho.metaverse.api.model.BaseDatabaseResourceInfo;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
@@ -39,6 +41,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -73,7 +76,7 @@ public class TableOutputStepAnalyzerTest {
   @Mock
   private StepMeta parentStepMeta;
   @Mock
-  private TransMeta mockTransMeta;
+  private TransMeta parentTransMeta;
 
   IComponentDescriptor descriptor;
 
@@ -86,7 +89,7 @@ public class TableOutputStepAnalyzerTest {
     analyzer.setMetaverseBuilder( mockBuilder );
     analyzer.setBaseStepMeta( meta );
     analyzer.setRootNode( node );
-    analyzer.setParentTransMeta( mockTransMeta );
+    analyzer.setParentTransMeta( parentTransMeta );
     analyzer.setParentStepMeta( parentStepMeta );
 
     when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
@@ -94,7 +97,7 @@ public class TableOutputStepAnalyzerTest {
     analyzer.setDescriptor( descriptor );
 
     when( meta.getParentStepMeta() ).thenReturn( parentStepMeta );
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
     when( parentStepMeta.getName() ).thenReturn( "test" );
     when( parentStepMeta.getStepID() ).thenReturn( "TableOutputStep" );
   }
@@ -215,5 +218,78 @@ public class TableOutputStepAnalyzerTest {
   @Test
   public void testGetUsedFields() throws Exception {
     assertNull( analyzer.getUsedFields( meta ) );
+  }
+
+  @Test
+  public void testGetOutputResourceFields() throws Exception {
+    String[] outputFields = new String[2];
+    outputFields[0] = "field1";
+    outputFields[1] = "field2";
+
+    when( meta.getFieldDatabase() ).thenReturn( outputFields );
+
+    Set<String> outputResourceFields = analyzer.getOutputResourceFields( meta );
+
+    assertEquals( outputFields.length, outputResourceFields.size() );
+    for ( String outputField : outputFields ) {
+      assertTrue( outputResourceFields.contains( outputField ) );
+    }
+  }
+
+  @Test
+  public void testGetChangeRecords() throws Exception {
+    String[] tableFields = new String[] { "field1", "field2" };
+    when( meta.getFieldDatabase() ).thenReturn( tableFields );
+
+    String[] streamFields = new String[] { "f1", "field2", "field3" };
+    when( meta.getFieldStream() ).thenReturn( streamFields );
+
+    StepNodes inputs = new StepNodes();
+    inputs.addNode( "prevStep", "f1", node );
+    inputs.addNode( "prevStep", "field2", node );
+    inputs.addNode( "prevStep", "field3", node );
+    inputs.addNode( ExternalResourceStepAnalyzer.RESOURCE, "field1", node );
+    inputs.addNode( ExternalResourceStepAnalyzer.RESOURCE, "field2", node );
+
+    doReturn( inputs ).when( analyzer ).getInputs();
+
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( meta );
+    assertNotNull( changeRecords );
+    assertEquals( tableFields.length, changeRecords.size() );
+
+    for ( ComponentDerivationRecord changeRecord : changeRecords ) {
+      if ( "f1".equals( changeRecord.getOriginalEntityName() ) ) {
+        assertEquals( "field1", changeRecord.getChangedEntityName() );
+      } else if ( "field2".equals( changeRecord.getOriginalEntityName() ) ) {
+        assertEquals( "field2", changeRecord.getChangedEntityName() );
+      } else {
+        fail( "We encountered a change record that shouldn't be here - " + changeRecord.toString() );
+      }
+    }
+
+  }
+
+  @Test
+  public void testGetOutputRowMetaInterfaces() throws Exception {
+    String[] nextStepNames = new String[] { "nextStep1" };
+    when( parentTransMeta.getNextStepNames( parentStepMeta ) ).thenReturn( nextStepNames );
+
+    RowMetaInterface rmi = mock( RowMetaInterface.class );
+    doReturn( rmi ).when( analyzer ).getOutputFields( meta );
+
+    String[] tableFields = new String[] { "field1", "field2" };
+    when( meta.getFieldDatabase() ).thenReturn( tableFields );
+
+    Map<String, RowMetaInterface> outputs = analyzer.getOutputRowMetaInterfaces( meta );
+    assertNotNull( outputs );
+
+    assertEquals( 2, outputs.size() );
+    RowMetaInterface resourceRow = outputs.get( ExternalResourceStepAnalyzer.RESOURCE );
+    assertNotNull( resourceRow );
+
+    for ( String tableField : tableFields ) {
+      assertNotNull( resourceRow.searchValueMeta( tableField ) );
+    }
+    assertEquals( rmi, outputs.get( "nextStep1" ) );
   }
 }

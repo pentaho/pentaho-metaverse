@@ -54,6 +54,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -218,16 +219,37 @@ public class ExternalResourceStepAnalyzerTest {
     String[] nextStepNames = new String[] { "nextStep1" };
     when( parentTransMeta.getNextStepNames( parentStepMeta ) ).thenReturn( nextStepNames );
 
+    List<ValueMetaInterface> valueMetas = new ArrayList<>();
+    valueMetas.add( new ValueMeta( "field1" ) );
+    valueMetas.add( new ValueMeta( "field2" ) );
+
     RowMetaInterface rowMetaInterface = mock( RowMetaInterface.class );
+    RowMetaInterface clone = mock( RowMetaInterface.class );
+    when( rowMetaInterface.getValueMetaList() ).thenReturn( valueMetas );
+    when( rowMetaInterface.clone() ).thenReturn( clone );
     doReturn( rowMetaInterface ).when( analyzer ).getOutputFields( meta );
     doReturn( true ).when( analyzer ).isOutput();
+
+    Set<String> resourceFields = new HashSet<>();
+    resourceFields.add( "field1" );
+    doReturn( resourceFields ).when( analyzer ).getOutputResourceFields( meta );
 
     Map<String, RowMetaInterface> rowMetaInterfaces = analyzer.getOutputRowMetaInterfaces( meta );
     assertNotNull( rowMetaInterfaces );
     // should have the normal rmi as well as the resource ones
     assertEquals( nextStepNames.length * 2, rowMetaInterfaces.size() );
     assertEquals( rowMetaInterface, rowMetaInterfaces.get( nextStepNames[ 0 ] ) );
-    assertEquals( rowMetaInterface, rowMetaInterfaces.get( ExternalResourceStepAnalyzer.RESOURCE ) );
+
+    // field 2 isn't one of the fields written to the resource, it should be removed from the cloned RowMetaInterface
+    verify( clone ).removeValueMeta( "field2" );
+    // field 1 is one of the fields written to the resource, it should not be removed from the cloned RowMetaInterface
+    verify( clone, never() ).removeValueMeta( "field1" );
+
+  }
+
+  @Test
+  public void testGetOutputResourceFields() throws Exception {
+    assertNull( analyzer.getOutputResourceFields( meta ) );
   }
 
   @Test

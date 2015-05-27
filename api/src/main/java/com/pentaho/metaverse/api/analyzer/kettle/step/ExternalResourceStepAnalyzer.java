@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> extends StepAnalyzer<T> {
 
@@ -82,10 +83,28 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
       // if this is an output step analyzer, we always need to write the resource fields out
       if ( isOutput() ) {
         RowMetaInterface out = null;
-        for ( RowMetaInterface rowMetaInterface : outputRows.values() ) {
-          out = rowMetaInterface;
-          break;
-        }
+        Set<String> outputResourceFields = getOutputResourceFields( meta );
+          for ( RowMetaInterface rowMetaInterface : outputRows.values() ) {
+            if ( outputResourceFields != null ) {
+              out = rowMetaInterface.clone();
+
+              // only add the fields that appear in the output of the step, not all fields that pass through
+              for ( ValueMetaInterface field : rowMetaInterface.getValueMetaList() ) {
+                if ( !outputResourceFields.contains( field.getName() ) ) {
+                  try {
+                    out.removeValueMeta( field.getName() );
+                  } catch ( KettleValueException e ) {
+                    // could not find it in the output, skip it
+                  }
+                }
+              }
+            } else {
+              // assume all fields are written
+              out = rowMetaInterface;
+            }
+            break;
+          }
+
         outputRows.put( RESOURCE, out );
       }
     }
@@ -149,6 +168,16 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
 
   public void setExternalResourceConsumer( IStepExternalResourceConsumer externalResourceConsumer ) {
     this.externalResourceConsumer = externalResourceConsumer;
+  }
+
+  /**
+   * Get the resource fields actually written to the external resource (file, table, ...). Return of null assumes
+   * that all fields that are reported when calling getStepFields are written. If that is NOT the case, override this
+   * method and return the field names that are actually written.
+   * @return
+   */
+  public Set<String> getOutputResourceFields( T meta ) {
+    return null;
   }
 
   @Override

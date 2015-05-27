@@ -94,7 +94,9 @@
     <property name="externalResourceConsumer" ref="getXMLDataERC"/>
   </bean>
   <bean id="XMLOutputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="xmlOutputERC"/>
+  </bean>
   <bean id="FilterRowsStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.filterrows.FilterRowsStepAnalyzer"/>
   <bean id="HTTPClientStepAnalyzer"
@@ -204,6 +206,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputExternalResourceConsumer"/>
   <bean id="mongoDbInputERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputExternalResourceConsumer"/>
+  <bean id="xmlOutputERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputExternalResourceConsumer"/>
 
 
   <bean id="IStepExternalResourceConsumerProvider"
@@ -222,6 +226,7 @@
         <ref bean="restClientERC"/>
         <ref bean="httpPostERC"/>
         <ref bean="fixedFileInputERC"/>
+        <ref bean="xmlOutputERC"/>
       </list>
     </property>
 
