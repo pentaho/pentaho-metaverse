@@ -223,7 +223,7 @@
 
   <service id="numberRangeStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
-           ref="SelectValuesStepAnalyzer"/>
+           ref="NumberRangeStepAnalyzer"/>
 
   <service id="valueMapperStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
