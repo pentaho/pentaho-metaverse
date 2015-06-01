@@ -23,33 +23,23 @@
 
 package com.pentaho.metaverse.api.analyzer.kettle.step;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.IAnalysisContext;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseObjectFactory;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.model.Operation;
-import org.apache.commons.collections.CollectionUtils;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMeta;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,8 +48,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.ProgressMonitorListener;
+import org.pentaho.di.core.exception.KettleStepException;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMeta;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
+
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.MetaverseTransientNode;
+import com.pentaho.metaverse.api.IAnalysisContext;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IConnectionAnalyzer;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.MetaverseObjectFactory;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.model.Operation;
 
 /**
  * Created by rfellows on 5/14/15.
@@ -74,6 +89,8 @@ public class StepAnalyzerTest {
   StepNodes inputs;
   StepNodes outputs;
 
+  @Mock
+  private IMetaverseBuilder mockBuilder;
   @Mock
   IMetaverseNode fieldNode;
   @Mock
@@ -90,9 +107,14 @@ public class StepAnalyzerTest {
   StepMeta parentStepMeta;
   @Mock
   TransMeta parentTransMeta;
-
+  @Mock
+  RowMetaInterface mockStepFields;
+  @Mock
+  IComponentDescriptor mockDescriptor;
+  
   @Before
   public void setUp() throws Exception {
+    
     StepAnalyzer stepAnalyzer = new StepAnalyzer() {
       @Override
       protected Set<StepField> getUsedFields( BaseStepMeta meta ) {
@@ -670,6 +692,117 @@ public class StepAnalyzerTest {
     assertNotNull( rowMetaInterfaces );
     assertEquals( 1, rowMetaInterfaces.size() );
     assertEquals( rowMetaInterface, rowMetaInterfaces.get( StepAnalyzer.NONE ) );
+  }
+
+  @Test
+  public void testGetFieldMappings() throws Exception {
+    assertNull( analyzer.getFieldMappings( baseStepMeta ) );
+  }
+
+  @Test
+  public void testGetInputFieldsWithException() {
+    analyzer = new StepAnalyzer() {
+
+      @Override
+      public void validateState( IComponentDescriptor descriptor, BaseStepMeta object ) throws MetaverseAnalyzerException {
+        throw new MetaverseAnalyzerException( "expected exception" );
+      }
+
+      @Override
+      public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+        return null;
+      }
+
+      @Override
+      protected Set getUsedFields( BaseStepMeta meta ) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+        // TODO Auto-generated method stub
+        
+      }
+    };
+    assertNull( analyzer.getInputFields( null ) );
+  }
+
+  @Test
+  public void testGetOutputFieldsWithException() {
+    analyzer = new StepAnalyzer() {
+
+      @Override
+      public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+        return null;
+      }
+
+      @Override
+      public Object analyze( IComponentDescriptor descriptor, Object object ) throws MetaverseAnalyzerException {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      protected Set getUsedFields( BaseStepMeta meta ) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+        // TODO Auto-generated method stub
+        
+      }
+    };
+    assertNull( analyzer.getOutputFields( null ) );
+  }
+
+  @Test
+  public void testGetSetConnectionAnalyzer() throws Exception {
+    assertNull( analyzer.getConnectionAnalyzer() );
+    IConnectionAnalyzer connectionAnalyzer = mock( IConnectionAnalyzer.class );
+    analyzer.setConnectionAnalyzer( connectionAnalyzer );
+    assertEquals( connectionAnalyzer, analyzer.getConnectionAnalyzer() );
+  }
+  
+  @Test
+  public void testGetChangeRecords() throws Exception {
+    assertNull( analyzer.getChangeRecords( baseStepMeta ) );
+  }
+
+  @Test
+  public void testLoadInputAndOutputStreamFields() throws KettleStepException {
+    analyzer.loadInputAndOutputStreamFields( baseStepMeta );
+    assertEquals( 0, analyzer.prevFields.size() );
+    assertNull( analyzer.stepFields );
+  }
+
+  @Test
+  public void testLoadInputAndOutputStreamFieldsWithException() throws KettleStepException {
+    when( analyzer.parentTransMeta.getPrevStepFields( eq( analyzer.parentStepMeta ),
+      any( ProgressMonitorListener.class ) ) ).thenThrow( KettleStepException.class );
+    when( analyzer.parentTransMeta.getStepFields( eq( analyzer.parentStepMeta ),
+      any( ProgressMonitorListener.class ) ) ).thenThrow( KettleStepException.class );
+    analyzer.loadInputAndOutputStreamFields( baseStepMeta );
+    assertEquals( 0, analyzer.prevFields.size() );
+    assertNull( analyzer.stepFields );
+  }
+
+  @Test
+  public void testGetStepFieldOriginDescriptorNullDescriptor() throws Exception {
+    assertNull( analyzer.getStepFieldOriginDescriptor( null, "Name" ) );
+  }
+
+  @Test
+  public void testGetStepFieldOriginDescriptor() throws Exception {
+    when( mockStepFields.getFieldNames() ).thenReturn( new String[]{ "field1", "field2" } );
+    analyzer.stepFields = mockStepFields;
+    IMetaverseNode rootNode = mock( IMetaverseNode.class );
+    when( rootNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) ).thenReturn( "{}" );
+    analyzer.rootNode = rootNode;
+    analyzer.setMetaverseObjectFactory( new MetaverseObjectFactory() );
+    assertNotNull( analyzer.getStepFieldOriginDescriptor( mockDescriptor, "field1" ) );
   }
 
   @Test

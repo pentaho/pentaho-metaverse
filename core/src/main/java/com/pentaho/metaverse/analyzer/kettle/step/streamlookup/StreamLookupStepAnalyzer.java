@@ -22,16 +22,10 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.streamlookup;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
-import com.pentaho.metaverse.api.model.Operation;
-import com.pentaho.metaverse.messages.Messages;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -42,14 +36,20 @@ import org.pentaho.di.trans.steps.streamlookup.StreamLookupMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import com.pentaho.metaverse.api.model.Operation;
+import com.pentaho.metaverse.messages.Messages;
 
 
 public class StreamLookupStepAnalyzer extends StepAnalyzer<StreamLookupMeta> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger( BaseStepAnalyzer.class );
+  private static final Logger LOGGER = LoggerFactory.getLogger( StepAnalyzer.class );
 
   protected String[] keyLookups;
   protected String[] keyStreams;

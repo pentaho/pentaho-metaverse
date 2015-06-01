@@ -22,23 +22,14 @@
 
 package com.pentaho.metaverse.impl.model.kettle.json;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
-import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import com.pentaho.metaverse.api.analyzer.kettle.step.IFieldLineageMetadataProvider;
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.api.model.IInfo;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.api.model.kettle.FieldInfo;
-import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
-import com.pentaho.metaverse.messages.Messages;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.collections.MapUtils;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.plugins.PluginRegistry;
@@ -50,18 +41,28 @@ import org.pentaho.di.repository.StringObjectId;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IFieldLineageMetadataProvider;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import com.pentaho.metaverse.api.model.IInfo;
+import com.pentaho.metaverse.api.model.kettle.FieldInfo;
+import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
+import com.pentaho.metaverse.messages.Messages;
 
 /**
  * User: RFellows Date: 11/17/14
@@ -288,8 +289,8 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
       if ( analyzers != null ) {
         for ( IStepAnalyzer analyzer : analyzers ) {
           // try to set up the analyzer with parent step & trans meta
-          if ( analyzer instanceof BaseStepAnalyzer ) {
-            BaseStepAnalyzer bsa = (BaseStepAnalyzer) analyzer;
+          if ( analyzer instanceof StepAnalyzer ) {
+            StepAnalyzer bsa = (StepAnalyzer) analyzer;
             try {
               bsa.validateState( null, meta );
               bsa.loadInputAndOutputStreamFields( meta );
