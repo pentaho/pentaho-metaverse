@@ -33,7 +33,12 @@
     <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
     <property name="externalResourceConsumer" ref="tableOutputERC"/>
   </bean>
-  <!--<bean id="TableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableInputStepAnalyzer"/>-->
+
+  <bean id="tableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.tableinput.TableInputStepAnalyzer">
+    <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
+    <property name="externalResourceConsumer" ref="tableInputERC"/>
+  </bean>
+
   <bean id="TextFileInputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer">
     <property name="externalResourceConsumer" ref="textFileInputERC"/>
@@ -140,7 +145,7 @@
     <property name="stepAnalyzers">
       <list>
         <ref bean="TableOutputStepAnalyzer"/>
-        <!--<ref bean="TableInputStepAnalyzer"/>-->
+        <ref bean="tableInputStepAnalyzer"/>
         <ref bean="TextFileInputStepAnalyzer"/>
         <ref bean="SelectValuesStepAnalyzer"/>
         <ref bean="NumberRangeStepAnalyzer"/>
@@ -208,7 +213,8 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputExternalResourceConsumer"/>
   <bean id="xmlOutputERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputExternalResourceConsumer"/>
-
+  <bean id="tableInputERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.tableinput.TableInputExternalResourceConsumer"/>
 
   <bean id="IStepExternalResourceConsumerProvider"
         class="com.pentaho.metaverse.analyzer.kettle.step.StepExternalResourceConsumerProvider"
@@ -227,6 +233,7 @@
         <ref bean="httpPostERC"/>
         <ref bean="fixedFileInputERC"/>
         <ref bean="xmlOutputERC"/>
+        <ref bean="tableInputERC"/>
       </list>
     </property>
 

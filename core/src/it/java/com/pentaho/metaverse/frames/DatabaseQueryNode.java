@@ -18,35 +18,26 @@
  * prohibited to anyone except those individuals and entities who have executed
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
+ *
  */
 
-package com.pentaho.metaverse.tableinput;
+package com.pentaho.metaverse.frames;
 
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.trans.steps.tableinput.TableInput;
-import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+/**
+ * Created by rfellows on 5/29/15.
+ */
+public interface DatabaseQueryNode extends FramedMetaverseNode {
+  @Adjacency( label = "isreadby", direction = Direction.OUT )
+  public Iterable<TransformationStepNode> getStepNodes();
 
-public class TableInputExternalResourceConsumer extends BaseStepExternalResourceConsumer<TableInput, TableInputMeta> {
-  @Override
-  public Class<TableInputMeta> getMetaClass() {
-    return TableInputMeta.class;
-  }
+  @Adjacency( label = "contains", direction = Direction.OUT )
+  public Iterable<DatabaseColumnNode> getDatabaseColumns();
 
-  @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( TableInputMeta meta ) {
+  @Property( "query" )
+  public String getQuery();
 
-    Set<IExternalResourceInfo> resources = new HashSet<IExternalResourceInfo>();
-    DatabaseMeta dbMeta = meta.getDatabaseMeta();
-    if ( dbMeta != null ) {
-      resources.add( ExternalResourceInfoFactory.createDatabaseResource( dbMeta ) );
-    }
-    return resources;
-  }
 }

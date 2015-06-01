@@ -74,7 +74,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   private StepNodes inputs;
   private StepNodes outputs;
   protected String[] prevStepNames = null;
-  
+
   /**
    * A reference to the step under analysis
    */
@@ -588,8 +588,8 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   * Loads the in/out fields for this step into member variables for use by the analyzer
   */
   public void loadInputAndOutputStreamFields( T meta ) {
-   prevFields = getInputFields( meta );
-   stepFields = getOutputFields( meta );
+    prevFields = getInputFields( meta );
+    stepFields = getOutputFields( meta );
   }
 
   protected IComponentDescriptor getStepFieldOriginDescriptor( IComponentDescriptor descriptor, String fieldName )

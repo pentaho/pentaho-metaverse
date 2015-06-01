@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -18,33 +18,38 @@
  * prohibited to anyone except those individuals and entities who have executed
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
+ *
  */
 
-package com.pentaho.metaverse.frames;
+package com.pentaho.metaverse.sample;
 
-import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.dummytrans.DummyTransMeta;
 
-/**
- * User: RFellows Date: 9/4/14
- */
-public interface TableOutputStepNode extends TransformationStepNode {
-  @Adjacency( label = "dependencyof", direction = Direction.IN )
-  public Iterable<DatasourceNode> getDatasources();
+import java.util.HashSet;
+import java.util.Set;
 
-  @GremlinGroovy( "it.in('dependencyof').has( 'name', T.eq, name )" )
-  public DatasourceNode getDatasource( @GremlinParam( "name") String name );
+public class DummyStepAnalyzer extends StepAnalyzer<DummyTransMeta> {
+  @Override
+  protected Set<StepField> getUsedFields( DummyTransMeta meta ) {
+    // no incoming fields are used by the Dummy step
+    return null;
+  }
 
-  @Adjacency( label = "writesto", direction = Direction.OUT )
-  public DatabaseTableNode getDatabaseTable();
+  @Override
+  protected void customAnalyze( DummyTransMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+    // add any custom properties or relationships here
+    rootNode.setProperty( "do_nothing", true );
+  }
 
-  @Property( "schema" )
-  public String getSchema();
-
-  @Property( TableOutputStepAnalyzer.TRUNCATE_TABLE )
-  public Boolean isTruncateTable();
+  @Override
+  public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+    Set<Class<? extends BaseStepMeta>> supportedSteps = new HashSet<>();
+    supportedSteps.add( DummyTransMeta.class );
+    return supportedSteps;
+  }
 }

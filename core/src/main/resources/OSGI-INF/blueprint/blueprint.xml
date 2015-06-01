@@ -118,7 +118,12 @@
     <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
     <property name="externalResourceConsumer" ref="tableOutputERC"/>
   </bean>
-  <!--<bean id="TableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableInputStepAnalyzer"/>-->
+
+  <bean id="tableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.tableinput.TableInputStepAnalyzer">
+    <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
+    <property name="externalResourceConsumer" ref="tableInputERC"/>
+  </bean>
+
   <bean id="TextFileInputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer">
     <property name="externalResourceConsumer" ref="textFileInputERC"/>
@@ -321,6 +326,10 @@
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="HTTPPostStepAnalyzer"/>
 
+  <service id="tableInputStepAnalyzerService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           ref="tableInputStepAnalyzer"/>
+
   <reference-list id="stepAnalyzerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
                   member-type="service-object"
@@ -374,6 +383,8 @@
 		class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostExternalResourceConsumer"/>
   <bean id="mongoDbInputERC" scope="singleton"
         class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputExternalResourceConsumer"/>
+  <bean id="tableInputERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.tableinput.TableInputExternalResourceConsumer"/>
 
   <service id="tableOutputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
@@ -426,6 +437,10 @@
   <service id="mongoDbInputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="mongoDbInputERC"/>
+
+  <service id="tableInputERCService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
+           ref="tableInputERC"/>
 
   <reference-list id="stepExternalResourceConsumerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"

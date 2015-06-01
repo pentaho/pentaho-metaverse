@@ -375,6 +375,11 @@ public class DictionaryConst {
   public static final String NODE_TYPE_DATA_TABLE = "Database Table";
 
   /**
+   * The node type for SQL Queries
+   */
+  public static final String NODE_TYPE_SQL_QUERY = "SQL Query";
+
+  /**
    * The node type for PDI transformation fields
    */
   public static final String NODE_TYPE_TRANS_FIELD = "Transformation Stream field";
@@ -580,6 +585,12 @@ public class DictionaryConst {
       PROPERTY_SCHEMA
     } );
 
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_QUERY =
+    new MetaverseLogicalIdGenerator( new String[] {
+      PROPERTY_NAMESPACE,
+      PROPERTY_TYPE,
+      PROPERTY_QUERY
+    } );
 
   /**
    * Hides the constructor so that this class cannot be instanced

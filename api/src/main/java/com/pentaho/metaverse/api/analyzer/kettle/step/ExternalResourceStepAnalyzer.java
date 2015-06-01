@@ -84,26 +84,26 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
       if ( isOutput() ) {
         RowMetaInterface out = null;
         Set<String> outputResourceFields = getOutputResourceFields( meta );
-          for ( RowMetaInterface rowMetaInterface : outputRows.values() ) {
-            if ( outputResourceFields != null ) {
-              out = rowMetaInterface.clone();
+        for ( RowMetaInterface rowMetaInterface : outputRows.values() ) {
+          if ( outputResourceFields != null ) {
+            out = rowMetaInterface.clone();
 
-              // only add the fields that appear in the output of the step, not all fields that pass through
-              for ( ValueMetaInterface field : rowMetaInterface.getValueMetaList() ) {
-                if ( !outputResourceFields.contains( field.getName() ) ) {
-                  try {
-                    out.removeValueMeta( field.getName() );
-                  } catch ( KettleValueException e ) {
-                    // could not find it in the output, skip it
-                  }
+            // only add the fields that appear in the output of the step, not all fields that pass through
+            for ( ValueMetaInterface field : rowMetaInterface.getValueMetaList() ) {
+              if ( !outputResourceFields.contains( field.getName() ) ) {
+                try {
+                  out.removeValueMeta( field.getName() );
+                } catch ( KettleValueException e ) {
+                  // could not find it in the output, skip it
                 }
               }
-            } else {
-              // assume all fields are written
-              out = rowMetaInterface;
             }
-            break;
+          } else {
+            // assume all fields are written
+            out = rowMetaInterface;
           }
+          break;
+        }
 
         outputRows.put( RESOURCE, out );
       }

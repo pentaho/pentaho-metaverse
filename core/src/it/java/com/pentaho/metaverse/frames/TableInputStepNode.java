@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -18,33 +18,27 @@
  * prohibited to anyone except those individuals and entities who have executed
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
+ *
  */
 
 package com.pentaho.metaverse.frames;
 
-import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
 
 /**
- * User: RFellows Date: 9/4/14
+ * Created by rfellows on 5/29/15.
  */
-public interface TableOutputStepNode extends TransformationStepNode {
+public interface TableInputStepNode extends TransformationStepNode {
   @Adjacency( label = "dependencyof", direction = Direction.IN )
   public Iterable<DatasourceNode> getDatasources();
 
   @GremlinGroovy( "it.in('dependencyof').has( 'name', T.eq, name )" )
   public DatasourceNode getDatasource( @GremlinParam( "name") String name );
 
-  @Adjacency( label = "writesto", direction = Direction.OUT )
-  public DatabaseTableNode getDatabaseTable();
+  @Adjacency( label = "isreadby", direction = Direction.IN )
+  public DatabaseQueryNode getDatabaseQueryNode();
 
-  @Property( "schema" )
-  public String getSchema();
-
-  @Property( TableOutputStepAnalyzer.TRUNCATE_TABLE )
-  public Boolean isTruncateTable();
 }

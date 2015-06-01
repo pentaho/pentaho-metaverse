@@ -32,6 +32,7 @@ import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.frames.CalculatorStepNode;
 import com.pentaho.metaverse.frames.CsvFileInputStepNode;
+import com.pentaho.metaverse.frames.DatabaseColumnNode;
 import com.pentaho.metaverse.frames.DatabaseTableNode;
 import com.pentaho.metaverse.frames.DatasourceNode;
 import com.pentaho.metaverse.frames.ExcelInputStepNode;
@@ -58,6 +59,7 @@ import com.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import com.pentaho.metaverse.frames.SplitFieldsStepNode;
 import com.pentaho.metaverse.frames.StreamFieldNode;
 import com.pentaho.metaverse.frames.StreamLookupStepNode;
+import com.pentaho.metaverse.frames.TableInputStepNode;
 import com.pentaho.metaverse.frames.TableOutputStepNode;
 import com.pentaho.metaverse.frames.FileInputStepNode;
 import com.pentaho.metaverse.frames.TextFileOutputStepNode;
@@ -101,6 +103,7 @@ import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
 import org.pentaho.di.trans.steps.numberrange.NumberRangeMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
 import org.pentaho.di.trans.steps.rest.RestMeta;
+import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
@@ -1591,6 +1594,21 @@ public class MetaverseValidationIT {
     FramedMetaverseNode collection = node.getCollection();
     assertEquals( meta.getCollection(), collection.getName() );
     assertEquals( DictionaryConst.NODE_TYPE_MONGODB_COLLECTION, collection.getType() );
+  }
+
+  @Test
+  public void testTableInput() throws Exception {
+    TableInputStepNode tableNode = root.getTableInputStepNode();
+    TableInputMeta meta = (TableInputMeta) getStepMeta( tableNode );
+    assertNotNull( tableNode );
+    assertNotNull( tableNode.getDatasource( meta.getDatabaseMeta().getName() ) );
+    assertNotNull( tableNode.getDatabaseQueryNode() );
+    assertEquals( meta.getSQL(), tableNode.getDatabaseQueryNode().getQuery() );
+
+    Iterable<StreamFieldNode> outputStreamFields = tableNode.getOutputStreamFields();
+    Iterable<DatabaseColumnNode> databaseColumns = tableNode.getDatabaseQueryNode().getDatabaseColumns();
+    assertEquals( getIterableSize( outputStreamFields ), getIterableSize( databaseColumns ) );
+
   }
 
   protected BaseStepMeta getStepMeta( TransformationStepNode transformationStepNode ) throws Exception {
