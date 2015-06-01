@@ -28,6 +28,7 @@ import com.pentaho.dictionary.MetaverseTransientNode;
 import com.pentaho.metaverse.api.ChangeType;
 import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IConnectionAnalyzer;
 import com.pentaho.metaverse.api.IMetaverseBuilder;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
@@ -35,6 +36,7 @@ import com.pentaho.metaverse.api.MetaverseObjectFactory;
 import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.api.model.Operation;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -670,6 +672,83 @@ public class StepAnalyzerTest {
     assertNotNull( rowMetaInterfaces );
     assertEquals( 1, rowMetaInterfaces.size() );
     assertEquals( rowMetaInterface, rowMetaInterfaces.get( StepAnalyzer.NONE ) );
+  }
+
+  @Test
+  public void testGetFieldMappings() throws Exception {
+    assertNull( analyzer.getFieldMappings( baseStepMeta ) );
+  }
+
+  @Test
+  public void testGetInputFieldsWithException() {
+    analyzer = new StepAnalyzer() {
+
+      @Override
+      public void validateState( IComponentDescriptor descriptor, BaseStepMeta object ) throws MetaverseAnalyzerException {
+        throw new MetaverseAnalyzerException( "expected exception" );
+      }
+
+      @Override
+      public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+        return null;
+      }
+
+      @Override
+      protected Set getUsedFields( BaseStepMeta meta ) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+        // TODO Auto-generated method stub
+        
+      }
+    };
+    assertNull( analyzer.getInputFields( null ) );
+  }
+
+  @Test
+  public void testGetOutputFieldsWithException() {
+    analyzer = new StepAnalyzer() {
+
+      @Override
+      public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+        return null;
+      }
+
+      @Override
+      public Object analyze( IComponentDescriptor descriptor, Object object ) throws MetaverseAnalyzerException {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      protected Set getUsedFields( BaseStepMeta meta ) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+        // TODO Auto-generated method stub
+        
+      }
+    };
+    assertNull( analyzer.getOutputFields( null ) );
+  }
+
+  @Test
+  public void testGetSetConnectionAnalyzer() throws Exception {
+    assertNull( analyzer.getConnectionAnalyzer() );
+    IConnectionAnalyzer connectionAnalyzer = mock( IConnectionAnalyzer.class );
+    analyzer.setConnectionAnalyzer( connectionAnalyzer );
+    assertEquals( connectionAnalyzer, analyzer.getConnectionAnalyzer() );
+  }
+  
+  @Test
+  public void testGetChangeRecords() throws Exception {
+    assertNull( analyzer.getChangeRecords( baseStepMeta ) );
   }
 
   @Test
