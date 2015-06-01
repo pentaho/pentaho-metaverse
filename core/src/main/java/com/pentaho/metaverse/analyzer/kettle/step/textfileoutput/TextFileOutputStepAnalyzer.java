@@ -23,129 +23,36 @@
 package com.pentaho.metaverse.analyzer.kettle.step.textfileoutput;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import com.pentaho.metaverse.api.MetaverseException;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import org.apache.commons.lang.ArrayUtils;
-import org.pentaho.di.core.Const;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
  * The TextFileOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the
  * fields operated on by Text File Output steps.
  */
-public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputMeta> {
+public class TextFileOutputStepAnalyzer extends ExternalResourceStepAnalyzer<TextFileOutputMeta> {
 
   private Logger log = LoggerFactory.getLogger( TextFileOutputStepAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, TextFileOutputMeta meta )
-    throws MetaverseAnalyzerException {
-
-    // do the common analysis...
-    super.analyze( descriptor, meta );
-
-    if ( !meta.isFileNameInField() ) {
-      addStaticFileNodeAndLink( descriptor, meta );
-    } else {
-      addUsesLinkForStreamFileNameField( descriptor, meta );
+  protected Set<StepField> getUsedFields( TextFileOutputMeta meta ) {
+    Set<StepField> usedFields = new HashSet<>();
+    if ( meta.isFileNameInField() ) {
+      usedFields.addAll( createStepFields( meta.getFileNameField(), getInputs() ) );
     }
-    // TODO: handle runtime file splitting for every X number of rows.
-    // TODO: handle runtime "Accepts filename from field" - row level, dynamic file metadata
-
-    addFieldNodesAndLinks( descriptor, meta );
-
-    return rootNode;
-
-  }
-
-  protected void addStaticFileNodeAndLink( IComponentDescriptor descriptor, TextFileOutputMeta meta ) {
-    // get the file(s) that are being written to
-    String[] files = meta.getFiles( meta.getParentStepMeta().getParentTransMeta() );
-
-    // create node(s) form them
-    for ( String file : files ) {
-      if ( !Const.isEmpty( file ) ) {
-        try {
-          IMetaverseNode fileNode = createFileNode( file, descriptor );
-          metaverseBuilder.addNode( fileNode );
-          // add 'writesto' links to them from the rootNode
-          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_WRITESTO, fileNode );
-        } catch ( MetaverseException e ) {
-          log.error( e.getMessage(), e );
-        }
-      }
-    }
-  }
-
-  protected void addUsesLinkForStreamFileNameField( IComponentDescriptor descriptor, TextFileOutputMeta meta )
-    throws MetaverseAnalyzerException {
-
-    RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
-    ValueMetaInterface filenameField = rowMetaInterface.searchValueMeta( meta.getFileNameField() );
-    if ( filenameField != null ) {
-      IComponentDescriptor fileStreamFieldDescriptor = getStepFieldOriginDescriptor( descriptor,
-        filenameField.getName() );
-      IMetaverseNode fileStreamFieldNode = createNodeFromDescriptor( fileStreamFieldDescriptor );
-      metaverseBuilder.addNode( fileStreamFieldNode );
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fileStreamFieldNode );
-    }
-  }
-
-  protected void addFieldNodesAndLinks( IComponentDescriptor descriptor, TextFileOutputMeta meta )
-    throws MetaverseAnalyzerException {
-
-    TextFileField[] outputFields = meta.getOutputFields();
-    if ( ArrayUtils.isEmpty( outputFields ) ) {
-      // see if we have any stream fields, we can assume they are written to the file
-      List<TextFileField> txtFields = new ArrayList<TextFileField>();
-      if ( stepFields != null ) {
-        for ( ValueMetaInterface field : stepFields.getValueMetaList() ) {
-          TextFileField txtField =
-            new TextFileField( field.getName(), field.getType(), field.getDateFormat().toString(),
-              field.getLength(), field.getPrecision(), field.getCurrencySymbol(), field.getDecimalSymbol(),
-              field.getGroupingSymbol(), "" );
-          txtFields.add( txtField );
-        }
-      }
-      outputFields = txtFields.toArray( new TextFileField[]{} );
-    }
-
-    for ( TextFileField outputField : outputFields ) {
-      String fieldName = outputField.getName();
-      IComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
-        fieldName,
-        DictionaryConst.NODE_TYPE_FILE_FIELD,
-        descriptor,
-        descriptor.getContext() );
-
-      // create the file field nodes
-      IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
-      metaverseBuilder.addNode( fieldNode );
-
-      IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
-      IMetaverseNode transFieldNode = createNodeFromDescriptor( transFieldDescriptor );
-
-      // add 'populates' links from the stream fields to them
-      metaverseBuilder.addLink( transFieldNode, DictionaryConst.LINK_POPULATES, fieldNode );
-
-      // add the links for "uses" stream fields
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, transFieldNode );
-    }
+    return usedFields;
   }
 
   @Override
@@ -156,4 +63,46 @@ public class TextFileOutputStepAnalyzer extends BaseStepAnalyzer<TextFileOutputM
       }
     };
   }
+
+  @Override
+  public String getResourceInputNodeType() {
+    return null;
+  }
+
+  @Override
+  public String getResourceOutputNodeType() {
+    return DictionaryConst.NODE_TYPE_FILE_FIELD;
+  }
+
+  @Override
+  public boolean isOutput() {
+    return true;
+  }
+
+  @Override
+  public boolean isInput() {
+    return false;
+  }
+
+  @Override
+  public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
+    return createFileNode( resource.getName(), descriptor );
+  }
+
+  @Override
+  public Set<String> getOutputResourceFields( TextFileOutputMeta meta ) {
+    Set<String> fields = new HashSet<>();
+    TextFileField[] outputFields = meta.getOutputFields();
+    for ( int i = 0; i < outputFields.length; i++ ) {
+      TextFileField outputField = outputFields[ i ];
+      fields.add( outputField.getName() );
+    }
+    return fields;
+  }
+
+  // used for unit testing
+  protected void setObjectFactory( IMetaverseObjectFactory factory ) {
+    this.metaverseObjectFactory = factory;
+  }
+
 }

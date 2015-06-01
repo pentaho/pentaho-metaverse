@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -22,9 +22,16 @@
 
 package com.pentaho.metaverse.frames;
 
-/**
- * User: RFellows Date: 9/17/14
- */
-public interface ValueMapperStepNode extends TransformationStepNode {
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
 
+/**
+ * User: RFellows Date: 9/4/14
+ */
+public interface FileInputStepNode extends TransformationStepNode {
+  @Adjacency( label = "isreadby", direction = Direction.IN )
+  Iterable<FramedMetaverseNode> getInputFiles();
+
+  @Adjacency( label = "uses", direction = Direction.OUT )
+  Iterable<FileFieldNode> getFileFieldNodesUses();
 }

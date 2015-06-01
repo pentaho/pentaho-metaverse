@@ -21,6 +21,9 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.AnalysisContext;
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.job.entry.JobEntryBase;
@@ -42,7 +45,11 @@ public abstract class BaseJobEntryExternalResourceConsumer<T extends JobEntryBas
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( T meta ) {
-    return Collections.emptyList();
+    return getResourcesFromMeta( meta, new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
   }
 
+  @Override
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( T consumer, IAnalysisContext context ) {
+    return Collections.emptyList();
+  }
 }

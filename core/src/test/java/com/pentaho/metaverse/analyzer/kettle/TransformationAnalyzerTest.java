@@ -146,6 +146,7 @@ public class TransformationAnalyzerTest {
     when( mockContent.nrSteps() ).thenReturn( 1 );
     when( mockContent.getStep( 0 ) ).thenReturn( mockStepMeta );
     when( mockContent.getParameterDefault( PARAM ) ).thenReturn( "default" );
+    when( mockContent.getNextStepNames( mockStepMeta ) ).thenReturn( new String[] {"previousStepName"} );
 
     descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, namespace );
 

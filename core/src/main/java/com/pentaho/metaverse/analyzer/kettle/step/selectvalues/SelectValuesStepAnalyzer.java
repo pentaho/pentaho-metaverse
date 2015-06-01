@@ -24,79 +24,64 @@ package com.pentaho.metaverse.analyzer.kettle.step.selectvalues;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import com.pentaho.metaverse.api.model.Operation;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.api.model.kettle.FieldMapping;
 import com.pentaho.metaverse.messages.Messages;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.Const;
-import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectMetadataChange;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
  * The SelectValuesStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the fields
  * operated on by Select Values steps.
  */
-public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta> {
+public class SelectValuesStepAnalyzer extends StepAnalyzer<SelectValuesMeta> {
 
   private static final Logger log = LoggerFactory.getLogger( SelectValuesStepAnalyzer.class );
-
 
   /**
    * This value is used by Select Values to indicate "no change" to a particular piece of metadata (precision, e.g.)
    */
   protected static final int NOT_CHANGED = -2;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.pentaho.metaverse.api.IAnalyzer#analyze(IComponentDescriptor,java.lang.Object)
-   */
   @Override
-  public IMetaverseNode analyze(
-    IComponentDescriptor descriptor, SelectValuesMeta selectValuesMeta ) throws MetaverseAnalyzerException {
+  protected void customAnalyze( SelectValuesMeta meta, IMetaverseNode rootNode ) {
+    // nothing custom to be done. The other overrides provide all that is needed
+  }
 
-    // Do common analysis for all steps
-    super.analyze( descriptor, selectValuesMeta );
-
-    IMetaverseNode fieldNode;
-    String inputFieldName;
-
-    Set<ComponentDerivationRecord> changes = getChangeRecords( selectValuesMeta );
-    for ( ComponentDerivationRecord change : changes ) {
-      inputFieldName = change.getOriginalEntityName();
-      fieldNode = createNodeFromDescriptor( getPrevStepFieldOriginDescriptor( descriptor, inputFieldName ) );
-      // Get the ValueMetaInterface for the input field, to determine if any of its metadata has changed
-      RowMetaInterface rowMetaInterface = ( prevFields == null ) ? new RowMeta() : prevFields.get( prevStepNames[0] );
-      ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( inputFieldName );
-      if ( inputFieldValueMeta == null ) {
-        throw new MetaverseAnalyzerException( "Cannot determine type of field: " + inputFieldName );
+  @Override
+  protected boolean isPassthrough( StepField originalFieldName ) {
+    // a field is considered a passthrough if:
+    //   there are no entries on the select tab AND the field is NOT on the deleted tab OR meta tab
+    if ( ArrayUtils.isEmpty( baseStepMeta.getSelectName() ) ) {
+      SelectMetadataChange[] changes = baseStepMeta.getMeta();
+      boolean isOnMetaTab = false;
+      for ( int i = 0; i < changes.length; i++ ) {
+        SelectMetadataChange change = changes[ i ];
+        if ( originalFieldName.getFieldName().equals( change.getName() ) ) {
+          isOnMetaTab = true;
+          break;
+        }
       }
-      IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, change );
-      if ( newFieldNode != null ) {
-        newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta.getTypeDesc() );
-        metaverseBuilder.addNode( newFieldNode );
-        metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_CREATES, newFieldNode );
-      }
-      metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
+      boolean isDeleted = ArrayUtils.contains( baseStepMeta.getDeleteName(), originalFieldName.getFieldName() );
+      return ( !( isOnMetaTab || isDeleted ) );
     }
-    return rootNode;
+    return false;
   }
 
   @Override
@@ -104,9 +89,6 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
     throws MetaverseAnalyzerException {
 
     validateState( null, selectValuesMeta );
-    if ( prevFields == null || stepFields == null ) {
-      loadInputAndOutputStreamFields( selectValuesMeta );
-    }
     Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
 
     String inputFieldName;
@@ -156,6 +138,7 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
     // super.analyze() will notice and created a "deleted" relationship for each
 
     if ( !Const.isEmpty( selectValuesMeta.getMeta() ) ) {
+      String[] prevStepNames = parentTransMeta.getPrevStepNames( getStepName() );
       SelectMetadataChange[] metadataChanges = selectValuesMeta.getMeta();
       if ( metadataChanges != null ) {
         for ( SelectMetadataChange metadataChange : metadataChanges ) {
@@ -182,7 +165,12 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
             }
           }
           RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
-          ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( inputFieldName );
+          ValueMetaInterface inputFieldValueMeta = null;
+          if ( rowMetaInterface == null ) {
+            log.warn( Messages.getString( "WARNING.CannotDetermineFieldType", inputFieldName ) );
+            continue;
+          }
+          inputFieldValueMeta = rowMetaInterface.searchValueMeta( inputFieldName );
           if ( inputFieldValueMeta == null ) {
             log.warn( Messages.getString( "WARNING.CannotDetermineFieldType", inputFieldName ) );
             continue;
@@ -271,53 +259,34 @@ public class SelectValuesStepAnalyzer extends BaseStepAnalyzer<SelectValuesMeta>
   }
 
   @Override
-  public Set<IFieldMapping> getFieldMappings( SelectValuesMeta selectValuesMeta ) throws MetaverseAnalyzerException {
-    validateState( null, selectValuesMeta );
-    if ( prevFields == null || stepFields == null ) {
-      loadInputAndOutputStreamFields( selectValuesMeta );
-    }
-    List<IFieldMapping> fieldMappings = new ArrayList<IFieldMapping>();
-
-    // Would love to use selectValuesMeta.getFieldnameLineage() here,
-    // but it only gives back info on fields that were renamed. We need all input fields to output fields
-
-    String[] inputs = selectValuesMeta.getSelectName();
-    String[] outputs = selectValuesMeta.getSelectRename();
-    for ( int i = 0; i < inputs.length; i++ ) {
-      String input = inputs[i];
-      String output = outputs[i];
-      FieldMapping fm = new FieldMapping( input, output );
-      if ( Const.isEmpty( output ) ) {
-        fm.setTargetFieldName( input );
-      }
-      fieldMappings.add( fm );
-    }
-
-    SelectMetadataChange[] metadataChanges = selectValuesMeta.getMeta();
-    for ( int i = 0; i < metadataChanges.length; i++ ) {
-      String input = metadataChanges[i].getName();
-      String output = metadataChanges[i].getRename();
-      if ( !Const.isEmpty( output ) ) {
-        FieldMapping fm = new FieldMapping( input, output );
-        for ( int j = 0; j < fieldMappings.size(); j++ ) {
-          IFieldMapping fieldMapping = fieldMappings.get( j );
-          if ( fieldMapping.getSourceFieldName().equalsIgnoreCase( input ) ) {
-            fieldMappings.remove( fieldMapping );
-            fieldMappings.add( j, fm );
-            break;
-          }
-        }
-      }
-    }
-    return new HashSet<IFieldMapping>( fieldMappings );
+  public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
+    Set<Class<? extends BaseStepMeta>> supported = new HashSet<>();
+    supported.add( SelectValuesMeta.class );
+    return supported;
   }
 
   @Override
-  public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
-    return new HashSet<Class<? extends BaseStepMeta>>() {
-      {
-        add( SelectValuesMeta.class );
-      }
-    };
+  protected Set<StepField> getUsedFields( SelectValuesMeta meta ) {
+    Set<StepField> usedFields = new HashSet<>();
+
+    String[] fieldNames = meta.getSelectName();
+    for ( String fieldName : fieldNames ) {
+      usedFields.addAll( createStepFields( fieldName, getInputs() ) );
+    }
+
+    SelectMetadataChange[] selectMetadataChanges = meta.getMeta();
+    for ( SelectMetadataChange selectMetadataChange : selectMetadataChanges ) {
+      usedFields.addAll( createStepFields( selectMetadataChange.getName(), getInputs() ) );
+    }
+
+    return usedFields;
+  }
+
+  ///// used for unit testing
+  protected void setParentTransMeta( TransMeta parentTransMeta ) {
+    this.parentTransMeta = parentTransMeta;
+  }
+  protected void setBaseStepMeta( SelectValuesMeta meta ) {
+    this.baseStepMeta = meta;
   }
 }

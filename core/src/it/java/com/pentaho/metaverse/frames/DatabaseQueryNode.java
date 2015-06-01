@@ -18,14 +18,26 @@
  * prohibited to anyone except those individuals and entities who have executed
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
+ *
  */
 
 package com.pentaho.metaverse.frames;
 
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
+
 /**
- * @author wseyler
- *
+ * Created by rfellows on 5/29/15.
  */
-public interface StringsReplaceStepNode extends TransformationStepNode {
+public interface DatabaseQueryNode extends FramedMetaverseNode {
+  @Adjacency( label = "isreadby", direction = Direction.OUT )
+  public Iterable<TransformationStepNode> getStepNodes();
+
+  @Adjacency( label = "contains", direction = Direction.OUT )
+  public Iterable<DatabaseColumnNode> getDatabaseColumns();
+
+  @Property( "query" )
+  public String getQuery();
 
 }

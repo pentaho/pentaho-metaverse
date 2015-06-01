@@ -24,6 +24,7 @@ package com.pentaho.metaverse.api.analyzer.kettle;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.model.IInfo;
 import com.pentaho.metaverse.api.model.IOperation;
 import com.pentaho.metaverse.api.model.Operation;
@@ -40,8 +41,9 @@ import java.util.List;
 @JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = IInfo.JSON_PROPERTY_CLASS )
 public class ComponentDerivationRecord {
 
-  protected String changedEntityName;
-  protected String originalEntityName;
+  protected StepField originalField;
+  protected StepField changedField;
+
   protected ChangeType changeType;
 
   protected Operations operations;
@@ -49,6 +51,21 @@ public class ComponentDerivationRecord {
   public ComponentDerivationRecord() {
     changeType = ChangeType.METADATA;
     operations = new Operations();
+    originalField = new StepField();
+    changedField = new StepField();
+  }
+
+  public ComponentDerivationRecord( StepField originalField, StepField changedField ) {
+    this();
+    this.originalField = originalField;
+    this.changedField = changedField;
+  }
+
+  public ComponentDerivationRecord( StepField originalField, StepField changedField, ChangeType changeType ) {
+    this();
+    this.originalField = originalField;
+    this.changedField = changedField;
+    this.changeType = changeType;
   }
 
   public ComponentDerivationRecord( String originalEntityName, String changedEntityName ) {
@@ -57,15 +74,15 @@ public class ComponentDerivationRecord {
 
   public ComponentDerivationRecord( String originalEntityName, String changedEntityName, ChangeType changeType ) {
     this();
-    this.changedEntityName = changedEntityName;
-    this.originalEntityName = originalEntityName;
+    this.originalField = new StepField( "", originalEntityName );
+    this.changedField = new StepField( "", changedEntityName );
     this.changeType = changeType;
   }
 
   public ComponentDerivationRecord( String changedEntityName, ChangeType changeType ) {
     this();
-    this.changedEntityName = changedEntityName;
-    this.originalEntityName = changedEntityName;
+    this.originalField = new StepField( "", changedEntityName );
+    this.changedField = new StepField( "", changedEntityName );
     this.changeType = changeType;
   }
 
@@ -82,19 +99,51 @@ public class ComponentDerivationRecord {
   }
 
   public String getChangedEntityName() {
-    return changedEntityName;
+    return changedField.getFieldName();
   }
 
   public void setChangedEntityName( String changedEntityName ) {
-    this.changedEntityName = changedEntityName;
+    changedField.setFieldName( changedEntityName );
   }
 
   public String getOriginalEntityName() {
-    return originalEntityName;
+    return originalField.getFieldName();
   }
 
   public void setOriginalEntityName( String originalEntityName ) {
-    this.originalEntityName = originalEntityName;
+    originalField.setFieldName( originalEntityName );
+  }
+
+  public String getOriginalEntityStepName() {
+    return originalField.getStepName();
+  }
+
+  public void setOriginalEntityStepName( String stepName ) {
+    originalField.setStepName( stepName );
+  }
+
+  public String getChangedEntityStepName() {
+    return changedField.getStepName();
+  }
+
+  public void setChangedEntityStepName( String stepName ) {
+    changedField.setStepName( stepName );
+  }
+
+  public StepField getOriginalField() {
+    return originalField;
+  }
+
+  public void setOriginalField( StepField originalField ) {
+    this.originalField = originalField;
+  }
+
+  public StepField getChangedField() {
+    return changedField;
+  }
+
+  public void setChangedField( StepField changedField ) {
+    this.changedField = changedField;
   }
 
   /**
@@ -139,8 +188,7 @@ public class ComponentDerivationRecord {
     return operations != null && !operations.isEmpty();
   }
 
-  @Override
-  public boolean equals( Object o ) {
+  @Override public boolean equals( Object o ) {
     if ( this == o ) {
       return true;
     }
@@ -150,31 +198,23 @@ public class ComponentDerivationRecord {
 
     ComponentDerivationRecord that = (ComponentDerivationRecord) o;
 
+    if ( originalField != null ? !originalField.equals( that.originalField ) : that.originalField != null ) {
+      return false;
+    }
+    if ( changedField != null ? !changedField.equals( that.changedField ) : that.changedField != null ) {
+      return false;
+    }
     if ( changeType != that.changeType ) {
       return false;
     }
-    if ( changedEntityName != null ? !changedEntityName.equals( that.changedEntityName ) : that.changedEntityName != null ) {
-      return false;
-    }
-    if ( operations != null ? !operations.equals( that.operations ) : that.operations != null ) {
-      return false;
-    }
-    if ( originalEntityName != null ? !originalEntityName.equals( that.originalEntityName ) : that.originalEntityName != null ) {
-      return false;
-    }
+    return !( operations != null ? !operations.equals( that.operations ) : that.operations != null );
 
-    if ( hashCode() != that.hashCode() ) {
-      return false;
-    }
-
-    return true;
   }
 
-  @Override
-  public int hashCode() {
-    int result = changedEntityName != null ? changedEntityName.hashCode() : 0;
-    result = 31 * result + ( originalEntityName != null ? originalEntityName.hashCode() : 0 );
-    result = 31 * result + changeType.hashCode();
+  @Override public int hashCode() {
+    int result = originalField != null ? originalField.hashCode() : 0;
+    result = 31 * result + ( changedField != null ? changedField.hashCode() : 0 );
+    result = 31 * result + ( changeType != null ? changeType.hashCode() : 0 );
     result = 31 * result + ( operations != null ? operations.hashCode() : 0 );
     return result;
   }

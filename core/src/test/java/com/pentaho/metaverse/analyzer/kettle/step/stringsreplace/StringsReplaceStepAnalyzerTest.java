@@ -23,115 +23,112 @@
 package com.pentaho.metaverse.analyzer.kettle.step.stringsreplace;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.ProgressMonitorListener;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.trans.TransMeta;
+import org.mockito.stubbing.Answer;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.replacestring.ReplaceStringMeta;
-
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 @RunWith( MockitoJUnitRunner.class )
 public class StringsReplaceStepAnalyzerTest {
 
   private StringsReplaceStepAnalyzer analyzer;
-  private static final String DEFAULT_STEP_NAME = "testStep";
 
   @Mock
-  private IMetaverseBuilder builder;
-  @Mock
   private ReplaceStringMeta stringsReplaceMeta;
-  @Mock
-  private INamespace namespace;
-  @Mock
-  private IComponentDescriptor descriptor;
-  @Mock
-  private StepMeta parentStepMeta;
-  @Mock
-  private TransMeta parentTransMeta;
-  @Mock
-  private RowMetaInterface rowMeta1;
+
+  Set<StepField> stepFields;
 
   @Before
   public void setUp() throws Exception {
 
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
+    when( stringsReplaceMeta.getFieldInStream() ).thenReturn( new String[]{ "firstName", "middleName", "lastName" } );
+    when( stringsReplaceMeta.getFieldOutStream() ).thenReturn( new String[]{ "", "MN", "lastName" } );
+    when( stringsReplaceMeta.getFieldReplaceByString() ).thenReturn( new String[]{ "Tom", "Dick", "Harry" } );
+    when( stringsReplaceMeta.getReplaceString() ).thenReturn( new String[]{ "Bill", "Steve", "Jeff" } );
 
-    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( new String[] { "prevStep" } );
-    when( rowMeta1.getFieldNames() ).thenReturn( new String[] { "firstName", "middleName", "lastName" } );
-    when( rowMeta1.searchValueMeta( any( String.class ) ) ).thenReturn( null );
-    when( parentTransMeta.getPrevStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( rowMeta1 );
-    when( parentTransMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( rowMeta1 );
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
+    analyzer = spy( new StringsReplaceStepAnalyzer() );
 
-    when( stringsReplaceMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
-    when( stringsReplaceMeta.getFieldInStream() ).thenReturn( new String[] { "firstName", "middleName", "lastName" } );
-    when( stringsReplaceMeta.getFieldOutStream() ).thenReturn( new String[] { "", "MN", "" } );
-    when( stringsReplaceMeta.getFieldReplaceByString() ).thenReturn( new String[] { "Tom", "Dick", "Harry" } );
-    when( stringsReplaceMeta.getReplaceString() ).thenReturn( new String[] { "Bill", "Steve", "Jeff" } );
-    
+    stepFields = new HashSet<>();
+    stepFields.add( new StepField( "prev", "firstName" ) );
+    stepFields.add( new StepField( "prev", "middleName" ) );
+    stepFields.add( new StepField( "prev", "lastName" ) );
+    StepNodes stepNodes = mock( StepNodes.class );
+    when( stepNodes.findNodes( anyString() ) ).thenAnswer( new Answer<List<IMetaverseNode>>() {
 
-    analyzer = new StringsReplaceStepAnalyzer();
-    when( builder.getMetaverseObjectFactory() ).thenReturn( MetaverseTestUtils.getMetaverseObjectFactory() );
-    analyzer.setMetaverseBuilder( builder );
+      @Override
+      public List<IMetaverseNode> answer( InvocationOnMock invocation ) throws Throwable {
+        Object[] args = invocation.getArguments();
+        List<IMetaverseNode> foundNodes = new ArrayList<>();
+        String fieldName = (String) args[0];
+        if ( fieldName.equals( "firstName" ) || fieldName.equals( "middleName" ) || fieldName.equals( "lastName" ) ) {
+          foundNodes.add( mock( IMetaverseNode.class ) );
+        }
+        return foundNodes;
+      }
+    } );
+    when( analyzer.getInputs() ).thenReturn( stepNodes );
+    doReturn( stepFields ).when( analyzer ).createStepFields( anyString(), any( StepNodes.class ) );
 
-    descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
-    analyzer.analyze( descriptor, null );
+    // Call customAnalyze() for coverage, it does nothing
+    analyzer.customAnalyze( stringsReplaceMeta, mock( IMetaverseNode.class ) );
   }
 
   @Test
-  public void testAnalyze() {
-    try {
-      analyzer.analyze( descriptor, stringsReplaceMeta );
-      Set<IFieldMapping> mappings = analyzer.getFieldMappings( stringsReplaceMeta );
-      assertEquals( 4, mappings.size() );
-      boolean foundNonPassthrough = false;
-      for ( IFieldMapping mapping : mappings ) {
-        if ( !mapping.getSourceFieldName().equals( mapping.getTargetFieldName() ) ) {
-          foundNonPassthrough = true;
-        }
-      }
-      assertTrue( foundNonPassthrough );
-    } catch ( MetaverseAnalyzerException e ) {
-      e.printStackTrace();
+  public void testGetChangeRecords() throws Exception {
+
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( stringsReplaceMeta );
+    assertEquals( changeRecords.size(), 3 );
+    List<String> inFields = Arrays.asList( stringsReplaceMeta.getFieldInStream() );
+    for ( ComponentDerivationRecord change : changeRecords ) {
+      assertTrue( inFields.contains( change.getOriginalEntityName() ) );
+      assertEquals( 1, change.getOperations( ChangeType.DATA ).size() );
+      assertNull( change.getOperations( ChangeType.METADATA ) );
     }
-    verify( builder, times( 1 ) ).addNode( any( IMetaverseNode.class ) );
+  }
 
-    verify( builder, times( 6 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-        any( IMetaverseNode.class ) );
+  @Test
+  public void testGetUsedFields() {
+    Set<StepField> usedFields = analyzer.getUsedFields( stringsReplaceMeta );
+    List<String> inFields = Arrays.asList( stringsReplaceMeta.getFieldInStream() );
+    // This test class uses all incoming fields
+    for ( StepField usedField : usedFields ) {
+      assertTrue( inFields.contains( usedField.getFieldName() ) );
+    }
+  }
 
+  @Test
+  public void testIsPassthrough() throws Exception {
+    analyzer.setStepMeta( stringsReplaceMeta );
+    assertFalse( analyzer.isPassthrough( new StepField( "prev", "firstName" ) ) );
+    assertTrue( analyzer.isPassthrough( new StepField( "prev", "middleName" ) ) );
+    assertTrue( analyzer.isPassthrough( new StepField( "prev", "lastName" ) ) );
   }
 
   @Test

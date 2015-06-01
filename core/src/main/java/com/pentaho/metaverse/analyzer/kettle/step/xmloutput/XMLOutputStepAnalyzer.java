@@ -23,14 +23,16 @@
 package com.pentaho.metaverse.analyzer.kettle.step.xmloutput;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.api.MetaverseException;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import org.pentaho.di.core.Const;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.xmloutput.XMLField;
 import org.pentaho.di.trans.steps.xmloutput.XMLOutputMeta;
 import org.slf4j.Logger;
@@ -43,75 +45,19 @@ import java.util.Set;
  * The XMLOutputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the
  * fields operated on by XML Output steps.
  */
-public class XMLOutputStepAnalyzer extends BaseStepAnalyzer<XMLOutputMeta> {
+public class XMLOutputStepAnalyzer extends ExternalResourceStepAnalyzer<XMLOutputMeta> {
 
   private Logger log = LoggerFactory.getLogger( XMLOutputStepAnalyzer.class );
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, XMLOutputMeta meta )
-    throws MetaverseAnalyzerException {
-
-    // do the common analysis...
-    super.analyze( descriptor, meta );
-
-    // Add custom properties, nodes, edges, etc.
-    rootNode.setProperty( "parentnode", meta.getMainElement() );
-    rootNode.setProperty( "rownode", meta.getRepeatElement() );
-
-    addStaticFileNodeAndLink( descriptor, meta );
-    addFieldNodesAndLinks( descriptor, meta );
-
-    return rootNode;
-
+  protected Set<StepField> getUsedFields( XMLOutputMeta meta ) {
+    return null;
   }
 
-  protected void addStaticFileNodeAndLink( IComponentDescriptor descriptor, XMLOutputMeta meta ) {
-    // get the file(s) that are being written to
-    String[] files = meta.getFiles( meta.getParentStepMeta().getParentTransMeta() );
-
-    // create node(s) form them
-    for ( String file : files ) {
-      if ( !Const.isEmpty( file ) ) {
-        try {
-          IMetaverseNode fileNode = createFileNode( file, descriptor );
-          metaverseBuilder.addNode( fileNode );
-          // add 'writesto' links to them from the rootNode
-          metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_WRITESTO, fileNode );
-        } catch ( MetaverseException e ) {
-          log.error( e.getMessage(), e );
-        }
-      }
-    }
-  }
-
-  protected void addFieldNodesAndLinks( IComponentDescriptor descriptor, XMLOutputMeta meta )
-    throws MetaverseAnalyzerException {
-
-    XMLField[] outputFields = meta.getOutputFields();
-    if ( !Const.isEmpty( outputFields ) ) {
-
-      for ( XMLField outputField : outputFields ) {
-        String fieldName = outputField.getFieldName();
-        IComponentDescriptor fileFieldDescriptor = new MetaverseComponentDescriptor(
-          fieldName,
-          DictionaryConst.NODE_TYPE_FILE_FIELD,
-          descriptor,
-          descriptor.getContext() );
-
-        // create the file field nodes
-        IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
-        metaverseBuilder.addNode( fieldNode );
-
-        IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
-        IMetaverseNode transFieldNode = createNodeFromDescriptor( transFieldDescriptor );
-
-        // add 'populates' links from the stream fields to them
-        metaverseBuilder.addLink( transFieldNode, DictionaryConst.LINK_POPULATES, fieldNode );
-
-        // add the links for "uses" stream fields
-        metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, transFieldNode );
-      }
-    }
+  @Override protected void customAnalyze( XMLOutputMeta meta, IMetaverseNode node ) throws MetaverseAnalyzerException {
+    super.customAnalyze( meta, node );
+    node.setProperty( "parentnode", meta.getMainElement() );
+    node.setProperty( "rownode", meta.getRepeatElement() );
   }
 
   @Override
@@ -121,5 +67,58 @@ public class XMLOutputStepAnalyzer extends BaseStepAnalyzer<XMLOutputMeta> {
         add( XMLOutputMeta.class );
       }
     };
+  }
+
+  @Override
+  public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
+    return createFileNode( resource.getName(), getDescriptor() );
+  }
+
+  @Override
+  public String getResourceInputNodeType() {
+    return null;
+  }
+
+  @Override
+  public String getResourceOutputNodeType() {
+    return DictionaryConst.NODE_TYPE_FILE_FIELD;
+  }
+
+  @Override
+  public boolean isOutput() {
+    return true;
+  }
+
+  @Override
+  public boolean isInput() {
+    return false;
+  }
+
+  @Override
+  public Set<String> getOutputResourceFields( XMLOutputMeta meta ) {
+    Set<String> fields = new HashSet<>();
+    XMLField[] outputFields = meta.getOutputFields();
+    for ( int i = 0; i < outputFields.length; i++ ) {
+      XMLField outputField = outputFields[ i ];
+      fields.add( outputField.getFieldName() );
+    }
+    return fields;
+  }
+
+  ///////////// for unit testing
+  protected void setBaseStepMeta( XMLOutputMeta meta ) {
+    baseStepMeta = meta;
+  }
+  protected void setRootNode( IMetaverseNode node ) {
+    rootNode = node;
+  }
+  protected void setParentTransMeta( TransMeta tm ) {
+    parentTransMeta = tm;
+  }
+  protected void setParentStepMeta( StepMeta sm ) {
+    parentStepMeta = sm;
+  }
+  protected void setObjectFactory( IMetaverseObjectFactory objectFactory ) {
+    this.metaverseObjectFactory = objectFactory;
   }
 }

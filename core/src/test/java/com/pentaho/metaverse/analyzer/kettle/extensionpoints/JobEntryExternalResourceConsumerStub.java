@@ -1,5 +1,6 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.job.entry.JobEntryBase;
@@ -18,6 +19,11 @@ public class JobEntryExternalResourceConsumerStub implements IJobEntryExternalRe
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( Object meta ) {
+    return null;
+  }
+
+  @Override
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Object consumer, IAnalysisContext context ) {
     return null;
   }
 

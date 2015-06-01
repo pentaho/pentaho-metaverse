@@ -22,75 +22,27 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.pentaho.di.core.Const;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import com.pentaho.metaverse.api.MetaverseException;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.fixedinput.FixedFileInputField;
 import org.pentaho.di.trans.steps.fixedinput.FixedInputMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.MetaverseException;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The CsvInputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and other
  * metaverse entities
  */
-public class FixedFileInputStepAnalyzer extends BaseStepAnalyzer<FixedInputMeta> {
+public class FixedFileInputStepAnalyzer extends ExternalResourceStepAnalyzer<FixedInputMeta> {
   private Logger log = LoggerFactory.getLogger( FixedFileInputStepAnalyzer.class );
-
-  @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, FixedInputMeta fixedFileInputMeta )
-    throws MetaverseAnalyzerException {
-
-    // do the common analysis for all step
-    IMetaverseNode node = super.analyze( descriptor, fixedFileInputMeta );
-
-    FixedFileInputField[] fields = fixedFileInputMeta.getFieldDefinition();
-    if ( fields != null ) {
-      for ( FixedFileInputField field : fields ) {
-        String fieldName = field.getName();
-        IComponentDescriptor fileFieldDescriptor =
-            new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_FILE_FIELD, descriptor
-                .getNamespace(), descriptor.getContext() );
-        IMetaverseNode fieldNode = createNodeFromDescriptor( fileFieldDescriptor );
-        metaverseBuilder.addNode( fieldNode );
-
-        // Get the stream field output from this step. It should've already been created when we called super.analyze()
-        IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, fieldName );
-        IMetaverseNode outNode = createNodeFromDescriptor( transFieldDescriptor );
-
-        metaverseBuilder.addLink( fieldNode, DictionaryConst.LINK_POPULATES, outNode );
-
-        // add a link from the fileField to the text file input step node
-        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, fieldNode );
-      }
-    }
-
-    // add a link from the file being read to the step
-    String fileName = parentTransMeta.environmentSubstitute( fixedFileInputMeta.getFilename() );
-    if ( !Const.isEmpty( fileName ) ) {
-      try {
-        // first add the node for the file
-        IMetaverseNode fixedFileNode = createFileNode( fileName, descriptor );
-        metaverseBuilder.addNode( fixedFileNode );
-
-        metaverseBuilder.addLink( fixedFileNode, DictionaryConst.LINK_READBY, node );
-      } catch ( MetaverseException e ) {
-        log.error( e.getMessage(), e );
-      }
-    }
-
-    return node;
-  }
 
   @Override
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
@@ -99,5 +51,33 @@ public class FixedFileInputStepAnalyzer extends BaseStepAnalyzer<FixedInputMeta>
         add( FixedInputMeta.class );
       }
     };
+  }
+
+  @Override public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
+    return createFileNode( resource.getName(), descriptor );
+  }
+
+  @Override public String getResourceInputNodeType() {
+    return DictionaryConst.NODE_TYPE_FILE_FIELD;
+  }
+
+  @Override public String getResourceOutputNodeType() {
+    return null;
+  }
+
+  @Override public boolean isOutput() {
+    return false;
+  }
+
+  @Override public boolean isInput() {
+    return true;
+  }
+
+  @Override protected Set<StepField> getUsedFields( FixedInputMeta meta ) {
+    return null;
+  }
+  // used for unit testing
+  protected void setObjectFactory( IMetaverseObjectFactory factory ) {
+    this.metaverseObjectFactory = factory;
   }
 }

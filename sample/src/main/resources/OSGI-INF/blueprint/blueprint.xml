@@ -5,38 +5,16 @@
              http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
              ">
 
-  <!--
-    Grab a reference to the IDatabaseConnectionAnalyzer for steps provided by the core pentaho-metaverse-ee bundle.
-    This will be injected into our sample (TableInputStepAnalyzer)
-  -->
-  <reference id="stepDatabaseConnectionAnalyzerRef"
-             interface="com.pentaho.metaverse.api.analyzer.kettle.IDatabaseConnectionAnalyzer"
-             component-name="stepDatabaseConnectionAnalyzer"
-             availability="mandatory"/>
-
-  <!--
-    Declare our sample analyzer(TableInputStepAnalyzer) bean. Inject the stepDatabaseConnectionAnalyzer so it can
-    use the same on that the TableOutputStepAnalyzer uses.
-  -->
-  <bean id="tableInputStepAnalyzer" class="com.pentaho.metaverse.tableinput.TableInputStepAnalyzer">
-    <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzerRef"/>
-  </bean>
+  <!-- Define a bean for our new step analyzer -->
+  <bean id="dummyStepAnalyzer" class="com.pentaho.metaverse.sample.DummyStepAnalyzer"/>
 
   <!--
     Define our analyzer as a service. This will allow it to be automatically added to the reference-list ultimately used
     by the TransformationAnalyzer to determine if there is a custom analyzer for a particular BaseStepMeta impl
-    (TableInputMeta in this case).
+    (DummyTransMeta in this case).
   -->
-  <service id="tableInputStepAnalyzerService"
+  <service id="dummyStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
-           ref="tableInputStepAnalyzer"/>
-
-
-  <!-- Configure the TableInputExternalResourceConsumer and service  -->
-  <bean id="tableInputERC" scope="singleton"
-        class="com.pentaho.metaverse.tableinput.TableInputExternalResourceConsumer"/>
-  <service id="tableInputERCService"
-           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
-           ref="tableInputERC"/>
+           ref="dummyStepAnalyzer"/>
 
 </blueprint>

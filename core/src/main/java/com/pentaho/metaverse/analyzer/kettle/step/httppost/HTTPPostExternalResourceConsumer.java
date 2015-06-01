@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
+import com.pentaho.metaverse.api.IAnalysisContext;
 import org.apache.commons.lang.ArrayUtils;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -52,7 +53,7 @@ public class HTTPPostExternalResourceConsumer
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( HTTPPOSTMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( HTTPPOSTMeta meta, IAnalysisContext context ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not data-driven and there are no used variables in the

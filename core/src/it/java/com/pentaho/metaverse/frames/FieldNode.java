@@ -46,9 +46,15 @@ public interface FieldNode extends Concept {
   @Adjacency( label = "creates", direction = Direction.IN )
   public TransformationStepNode getStepThatCreatesMe();
 
-  @Adjacency( label = "populates", direction = Direction.IN )
-  public TransformationStepNode getStepThatPopulatesMe();
+  @Adjacency( label = "outputs", direction = Direction.IN )
+  public TransformationStepNode getStepThatOutputsMe();
+
+  @Adjacency( label = "inputs", direction = Direction.OUT )
+  public TransformationStepNode getStepThatInputsMe();
 
   @Adjacency( label = "populates", direction = Direction.OUT )
   public FieldNode getFieldPopulatedByMe();
+
+  @Adjacency( label = "populates", direction = Direction.IN )
+  public FieldNode getFieldPopulatesMe();
 }

@@ -116,40 +116,61 @@
   <bean id="TableOutputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer">
     <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
+    <property name="externalResourceConsumer" ref="tableOutputERC"/>
   </bean>
-  <!--<bean id="TableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.TableInputStepAnalyzer"/>-->
+
+  <bean id="tableInputStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.tableinput.TableInputStepAnalyzer">
+    <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
+    <property name="externalResourceConsumer" ref="tableInputERC"/>
+  </bean>
+
   <bean id="TextFileInputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="textFileInputERC"/>
+  </bean>
   <bean id="SelectValuesStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer"/>
   <bean id="NumberRangeStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer"/>
   <bean id="ValueMapperStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer"/>
+
   <bean id="TextFileOutputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="textFileOutputERC"/>
+  </bean>
+
   <bean id="MergeJoinStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer"/>
   <bean id="StreamLookupStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer"/>
   <bean id="CalculatorStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.calculator.CalculatorStepAnalyzer"/>
   <bean id="ExcelInputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="excelInputERC"/>
+  </bean>
   <bean id="GroupByStepAnalyzer" class="com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer"/>
   <bean id="MongoDbInputStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputStepAnalyzer">
     <property name="connectionAnalyzer" ref="mongoDbConnectionAnalyzer"/>
+    <property name="externalResourceConsumer" ref="mongoDbInputERC"/>
   </bean>
   <bean id="ExcelOutputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="excelOutputERC"/>
+  </bean>
   <bean id="SplitFieldsStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.splitfields.SplitFieldsStepAnalyzer"/>
   <bean id="TransExecutorStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.transexecutor.TransExecutorStepAnalyzer"/>
   <bean id="RowsToResultStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.rowstoresult.RowsToResultStepAnalyzer"/>
+  <bean id="RowsFromResultStepAnalyzer"
+        class="com.pentaho.metaverse.analyzer.kettle.step.rowsfromresult.RowsFromResultStepAnalyzer"/>
   <bean id="GetXMLDataStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer">
+    <property name="externalResourceConsumer" ref="getXMLDataERC"/>
+  </bean>
 
   <bean id="StringOperationsStepAnalyzer" 
   		  class="com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
@@ -158,28 +179,40 @@
   		  class="com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer"/>
 
   <bean id="CsvFileInputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer"/>
-  
+        class="com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="csvInputERC"/>
+  </bean>
+
   <bean id="StringsReplaceStepAnalyzer" 
   		  class="com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer"/>
 
   <bean id="FixedFileInputStepAnalyzer"
-  		  class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer"/>
+  		  class="com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="fixedFileInputERC"/>
+  </bean>
 
   <bean id="FilterRowsStepAnalyzer"
         class="com.pentaho.metaverse.analyzer.kettle.step.filterrows.FilterRowsStepAnalyzer"/>
 
   <bean id="XMLOutputStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="xmlOutputERC"/>
+  </bean>
 
   <bean id="HTTPClientStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer"/>
-          		
+        class="com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer">
+    <property name="externalResourceConsumer" ref="httpClientERC"/>
+  </bean>
+
   <bean id="RestClientStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer">
+    <property name="externalResourceConsumer" ref="restClientERC"/>
+  </bean>
 
   <bean id="HTTPPostStepAnalyzer"
-        class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer"/>
+        class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer">
+    <property name="externalResourceConsumer" ref="httpPostERC"/>
+  </bean>
 
   <service id="tableOutputStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
@@ -195,7 +228,7 @@
 
   <service id="numberRangeStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
-           ref="SelectValuesStepAnalyzer"/>
+           ref="NumberRangeStepAnalyzer"/>
 
   <service id="valueMapperStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
@@ -257,6 +290,10 @@
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="RowsToResultStepAnalyzer"/>
 
+  <service id="rowsFromResultStepAnalyzerService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           ref="RowsFromResultStepAnalyzer"/>
+
   <service id="csvFileInputStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="CsvFileInputStepAnalyzer"/>
@@ -288,6 +325,10 @@
   <service id="httpPostStepAnalyzerService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="HTTPPostStepAnalyzer"/>
+
+  <service id="tableInputStepAnalyzerService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           ref="tableInputStepAnalyzer"/>
 
   <reference-list id="stepAnalyzerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
@@ -340,6 +381,10 @@
         class="com.pentaho.metaverse.analyzer.kettle.step.rest.RestClientExternalResourceConsumer"/>
   <bean id="httpPostERC" scope="singleton"
 		class="com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostExternalResourceConsumer"/>
+  <bean id="mongoDbInputERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputExternalResourceConsumer"/>
+  <bean id="tableInputERC" scope="singleton"
+        class="com.pentaho.metaverse.analyzer.kettle.step.tableinput.TableInputExternalResourceConsumer"/>
 
   <service id="tableOutputERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
@@ -388,6 +433,14 @@
   <service id="httpPostERCService"
            interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="httpPostERC"/>
+
+  <service id="mongoDbInputERCService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
+           ref="mongoDbInputERC"/>
+
+  <service id="tableInputERCService"
+           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
+           ref="tableInputERC"/>
 
   <reference-list id="stepExternalResourceConsumerRefList"
                   interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"

@@ -50,6 +50,7 @@ public interface IFieldLineageMetadataProvider<T extends BaseStepMeta> {
    * @return
    * @throws MetaverseAnalyzerException
    */
+  @Deprecated
   public Set<IFieldMapping> getFieldMappings( T meta ) throws MetaverseAnalyzerException;
 
   /**
@@ -64,6 +65,7 @@ public interface IFieldLineageMetadataProvider<T extends BaseStepMeta> {
    * @param meta
    * @return
    */
+  @Deprecated
   public RowMetaInterface getOutputFields( T meta );
 
 }

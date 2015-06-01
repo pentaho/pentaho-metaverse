@@ -26,121 +26,107 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.pentaho.metaverse.api.ChangeType;
+import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.stringoperations.StringOperationsMeta;
 
 import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.model.Operation;
-import com.pentaho.metaverse.api.model.kettle.FieldMapping;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 
-public class StringOperationsStepAnalyzer extends BaseStepAnalyzer<StringOperationsMeta> {
-  private IComponentDescriptor descriptor;
+public class StringOperationsStepAnalyzer extends StepAnalyzer<StringOperationsMeta> {
 
   @Override
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
-    Set<Class<? extends BaseStepMeta>> set = new HashSet<Class<? extends BaseStepMeta>>( 1 );
+    Set<Class<? extends BaseStepMeta>> set = new HashSet<>( 1 );
     set.add( StringOperationsMeta.class );
     return set;
   }
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, StringOperationsMeta stringOperationsMeta )
-    throws MetaverseAnalyzerException {
-    IMetaverseNode node = super.analyze( descriptor, stringOperationsMeta );
-    this.descriptor = descriptor;
-    getChangeRecords( stringOperationsMeta );
-    return node;
-  }
-
-  private ComponentDerivationRecord buildChangeRecord( final StringOperationsMeta stringOperationsMeta, final int index ) throws MetaverseAnalyzerException {
-
-    String fieldInString = stringOperationsMeta.getFieldInStream()[index];
-    String fieldOutString = stringOperationsMeta.getFieldOutStream()[index];
-    if ( fieldOutString == null || fieldOutString.length() < 1 ) {
-      fieldOutString = fieldInString;
-    }
-    final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( fieldOutString, ChangeType.DATA );
-    String trimTypeDescription = StringOperationsMeta.getTrimTypeDesc( stringOperationsMeta.getTrimType()[index] );
-    String lowerUpperDescription = StringOperationsMeta.getLowerUpperDesc( stringOperationsMeta.getLowerUpper()[index] );
-    String initCapDescription = StringOperationsMeta.getInitCapDesc( stringOperationsMeta.getInitCap()[index] );
-    String digitsDescription = StringOperationsMeta.getDigitsDesc( stringOperationsMeta.getDigits()[index] );
-    String maskXMLDescription = StringOperationsMeta.getMaskXMLDesc( stringOperationsMeta.getMaskXML()[index] );
-    String paddingDescription = StringOperationsMeta.getPaddingDesc( stringOperationsMeta.getPaddingType()[index] );
-    String specialCharactersDescription =
-        StringOperationsMeta.getRemoveSpecialCharactersDesc( stringOperationsMeta.getRemoveSpecialCharacters()[index] );
-
-    String changeOperation = fieldOutString;
-    changeOperation += " { trim = [ " + trimTypeDescription + " ] && ";
-    changeOperation += "lower/upper = [ " + lowerUpperDescription + " ] && ";
-    changeOperation +=
-        "padding = [ "
-            + paddingDescription
-            + ( stringOperationsMeta.getPaddingType()[index] == StringOperationsMeta.PADDING_NONE ? "" : ", "
-                + stringOperationsMeta.getPadChar()[index] ) + ", " + stringOperationsMeta.getPadLen()[index]
-            + " ] && ";
-    changeOperation += "cap = [ " + initCapDescription + " ] && ";
-    changeOperation += "maskXML = [ " + maskXMLDescription + " ] && ";
-    changeOperation += "digits = [ " + digitsDescription + " ] && ";
-    changeOperation += "remove = [ " + specialCharactersDescription + " ] } -> ";
-    changeOperation +=
-        ( stringOperationsMeta.getFieldOutStream()[index] == null
-            || stringOperationsMeta.getFieldOutStream()[index].length() < 1
-            ? stringOperationsMeta.getFieldInStream()[index] : stringOperationsMeta.getFieldOutStream()[index] );
-
-    changeRecord.addOperation( new Operation( Operation.CALC_CATEGORY, ChangeType.DATA,
-        DictionaryConst.PROPERTY_TRANSFORMS, changeOperation ) );
-    IMetaverseNode fieldNode = createNodeFromDescriptor( getStepFieldOriginDescriptor( descriptor, fieldInString ) );
-    IMetaverseNode newFieldNode = processFieldChangeRecord( descriptor, fieldNode, changeRecord );
-    RowMetaInterface rowMetaInterface = prevFields.get( prevStepNames[0] );
-    ValueMetaInterface inputFieldValueMeta = rowMetaInterface.searchValueMeta( fieldInString );
-    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
-    if ( !fieldOutString.equals( fieldInString ) ) {
-      newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, inputFieldValueMeta != null ? inputFieldValueMeta
-          .getTypeDesc() : fieldInString + " unknown type" );
-      metaverseBuilder.addNode( newFieldNode );
-    }
-    return changeRecord;
-  }
-
-  @Override
   public Set<ComponentDerivationRecord> getChangeRecords( final StringOperationsMeta stringOperationsMeta )
     throws MetaverseAnalyzerException {
-    Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
+    Set<ComponentDerivationRecord> changeRecords = new HashSet<>();
     for ( int i = 0; i < stringOperationsMeta.getFieldInStream().length; i++ ) {
-      ComponentDerivationRecord changeRecord = buildChangeRecord( stringOperationsMeta, i );
+      String fieldInString = stringOperationsMeta.getFieldInStream()[i];
+      String fieldOutString = stringOperationsMeta.getFieldOutStream()[i];
+      if ( Const.isEmpty( fieldOutString ) ) {
+        fieldOutString = fieldInString;
+      }
+      final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( fieldInString, fieldOutString, ChangeType.DATA );
+      String trimTypeDescription = StringOperationsMeta.getTrimTypeDesc( stringOperationsMeta.getTrimType()[i] );
+      String lowerUpperDescription = StringOperationsMeta.getLowerUpperDesc( stringOperationsMeta.getLowerUpper()[i] );
+      String initCapDescription = StringOperationsMeta.getInitCapDesc( stringOperationsMeta.getInitCap()[i] );
+      String digitsDescription = StringOperationsMeta.getDigitsDesc( stringOperationsMeta.getDigits()[i] );
+      String maskXMLDescription = StringOperationsMeta.getMaskXMLDesc( stringOperationsMeta.getMaskXML()[i] );
+      String paddingDescription = StringOperationsMeta.getPaddingDesc( stringOperationsMeta.getPaddingType()[i] );
+      String specialCharactersDescription =
+        StringOperationsMeta.getRemoveSpecialCharactersDesc( stringOperationsMeta.getRemoveSpecialCharacters()[i] );
+
+      String changeOperation = fieldOutString;
+      changeOperation += " { trim = [ " + trimTypeDescription + " ] && ";
+      changeOperation += "lower/upper = [ " + lowerUpperDescription + " ] && ";
+      changeOperation +=
+        "padding = [ "
+          + paddingDescription
+          + ( stringOperationsMeta.getPaddingType()[i] == StringOperationsMeta.PADDING_NONE ? "" : ", "
+          + stringOperationsMeta.getPadChar()[i] ) + ", " + stringOperationsMeta.getPadLen()[i]
+          + " ] && ";
+      changeOperation += "cap = [ " + initCapDescription + " ] && ";
+      changeOperation += "maskXML = [ " + maskXMLDescription + " ] && ";
+      changeOperation += "digits = [ " + digitsDescription + " ] && ";
+      changeOperation += "remove = [ " + specialCharactersDescription + " ] } -> ";
+      changeOperation += fieldOutString;
+
+      changeRecord.addOperation( new Operation( Operation.CALC_CATEGORY, ChangeType.DATA,
+        DictionaryConst.PROPERTY_TRANSFORMS, changeOperation ) );
       changeRecords.add( changeRecord );
     }
     return changeRecords;
   }
 
+  @Override
+  protected Set<StepField> getUsedFields( StringOperationsMeta meta ) {
+    HashSet<StepField> usedFields = new HashSet<>();
+    for ( String fieldInString : meta.getFieldInStream() ) {
+      usedFields.addAll( createStepFields( fieldInString, getInputs() ) );
+    }
+    return usedFields;
+  }
+
   /**
-   * Provide field mappings that occur in this step.
+   * Determines if a field is considered a passthrough field or not. In this case, if we're not using the field, it's
+   * a passthrough. If we are using the field, then it is only a passthrough if we're renaming the field on which we
+   * perform the operation(s).
    *
-   * @param meta
-   *          The step metadata
-   * @return a set of field mappings (input field -> output field)
-   * @throws com.pentaho.metaverse.api.MetaverseAnalyzerException
+   * @param originalFieldName The name of the incoming field
+   * @return true if this field is a passthrough (i.e. no operations are performed on it), false otherwise
    */
   @Override
-  public Set<IFieldMapping> getFieldMappings( StringOperationsMeta meta ) throws MetaverseAnalyzerException {
-    Set<IFieldMapping> fieldMappings = new HashSet<IFieldMapping>();
-    for ( int i = 0; i < meta.getFieldInStream().length; i++ ) {
-      String fieldInString = meta.getFieldInStream()[i];
-      String fieldOutString = meta.getFieldOutStream()[i];
-      if ( fieldOutString != null && fieldOutString.length() > 0 ) {
-        fieldMappings.add( new FieldMapping( fieldInString, fieldOutString ) );
+  protected boolean isPassthrough( StepField originalFieldName ) {
+    String[] inFields = baseStepMeta.getFieldInStream();
+    String origFieldName = originalFieldName.getFieldName();
+    for ( int i = 0; i < inFields.length; i++ ) {
+      if ( inFields[i].equals( origFieldName ) && Const.isEmpty( baseStepMeta.getFieldOutStream()[i] ) ) {
+        return false;
       }
     }
-    fieldMappings.addAll( getPassthruFieldMappings( meta ) );
-    return fieldMappings;
+    return true;
   }
+
+  @Override
+  protected void customAnalyze( StringOperationsMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+    // Nothing to do here
+  }
+
+  // ******** Start - Used to aid in unit testing **********
+  protected void setStepMeta( StringOperationsMeta meta ) {
+    this.baseStepMeta = meta;
+  }
+  // ******** End - Used to aid in unit testing **********
 
 }

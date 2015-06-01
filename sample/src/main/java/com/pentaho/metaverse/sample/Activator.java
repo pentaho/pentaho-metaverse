@@ -1,4 +1,4 @@
-package com.pentaho.metaverse.tableinput;
+package com.pentaho.metaverse.sample;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

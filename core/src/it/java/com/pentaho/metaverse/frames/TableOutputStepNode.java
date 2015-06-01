@@ -22,7 +22,6 @@
 
 package com.pentaho.metaverse.frames;
 
-import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;

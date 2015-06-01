@@ -20,8 +20,10 @@
  * explicitly covering such access.
  */
 
-package com.pentaho.metaverse.tableinput;
+package com.pentaho.metaverse.analyzer.kettle.step.tableinput;
 
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IAnalysisContext;
 import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import com.pentaho.metaverse.api.model.IExternalResourceInfo;
@@ -40,12 +42,20 @@ public class TableInputExternalResourceConsumer extends BaseStepExternalResource
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( TableInputMeta meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( TableInputMeta meta, IAnalysisContext context ) {
 
     Set<IExternalResourceInfo> resources = new HashSet<IExternalResourceInfo>();
     DatabaseMeta dbMeta = meta.getDatabaseMeta();
     if ( dbMeta != null ) {
-      resources.add( ExternalResourceInfoFactory.createDatabaseResource( dbMeta ) );
+      IExternalResourceInfo databaseResource = ExternalResourceInfoFactory.createDatabaseResource( dbMeta, true );
+
+      String query = context.equals( DictionaryConst.CONTEXT_RUNTIME )
+        ? meta.getParentStepMeta().getParentTransMeta().environmentSubstitute( meta.getSQL() )
+        : meta.getSQL();
+
+      databaseResource.getAttributes().put( DictionaryConst.PROPERTY_QUERY, query );
+
+      resources.add( databaseResource );
     }
     return resources;
   }

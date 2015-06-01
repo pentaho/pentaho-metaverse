@@ -23,32 +23,25 @@
 package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.MetaverseTransientNode;
 import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IConnectionAnalyzer;
 import com.pentaho.metaverse.api.IMetaverseBuilder;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
+import com.pentaho.metaverse.api.model.BaseDatabaseResourceInfo;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.pentaho.di.core.ProgressMonitorListener;
-import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -60,8 +53,9 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
 
 /**
  * @author mburgess
@@ -71,169 +65,41 @@ public class TableOutputStepAnalyzerTest {
 
   private TableOutputStepAnalyzer analyzer;
 
+  @Mock IMetaverseNode node;
+
   @Mock
   private IMetaverseBuilder mockBuilder;
-
   @Mock
-  private TableOutputMeta mockTableOutputMeta;
-
-  @Mock
-  private TransMeta mockTransMeta;
-
-  @Mock
-  private RowMetaInterface mockRowMetaInterface;
-
-  @Mock
-  DatabaseMeta mockDatabaseMeta;
-
+  private TableOutputMeta meta;
   @Mock
   private INamespace mockNamespace;
+  @Mock
+  private StepMeta parentStepMeta;
+  @Mock
+  private TransMeta parentTransMeta;
 
   IComponentDescriptor descriptor;
 
-  /**
-   * @throws java.lang.Exception
-   */
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
-
-  /**
-   * @throws java.lang.Exception
-   */
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
-
-  /**
-   * @throws java.lang.Exception
-   */
   @Before
   public void setUp() throws Exception {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
-    when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
-    when( mockNamespace.getNamespaceId() ).thenReturn( "namespaceID" );
-
-    analyzer = new TableOutputStepAnalyzer();
+    analyzer = spy( new TableOutputStepAnalyzer() );
+    analyzer.setConnectionAnalyzer( mock( IConnectionAnalyzer.class ) );
     analyzer.setMetaverseBuilder( mockBuilder );
-    descriptor = spy( new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, mockNamespace ) );
-    when( descriptor.getParentNamespace() ).thenReturn( mockNamespace );
-  }
+    analyzer.setBaseStepMeta( meta );
+    analyzer.setRootNode( node );
+    analyzer.setParentTransMeta( parentTransMeta );
+    analyzer.setParentStepMeta( parentStepMeta );
 
-  /**
-   * @throws java.lang.Exception
-   */
-  @After
-  public void tearDown() throws Exception {
-  }
+    when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
+    descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
+    analyzer.setDescriptor( descriptor );
 
-  @Test(expected = MetaverseAnalyzerException.class)
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
-
-    analyzer.analyze( descriptor, null );
-  }
-
-  @Test
-  public void testAnalyzeTableOutputMetaDehydrated() throws MetaverseAnalyzerException, KettleStepException {
-
-    StepMeta meta = new StepMeta( "test", mockTableOutputMeta );
-    StepMeta spyMeta = spy( meta );
-
-    // minimum mocking needed to not throw an exception
-    when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-
-    assertNotNull( analyzer.analyze( descriptor, mockTableOutputMeta ) );
-  }
-
-  @Test
-  public void testAnalyzeTableOutputMetaHydrated() throws MetaverseAnalyzerException, KettleStepException {
-
-    StepMeta meta = new StepMeta( "test", mockTableOutputMeta );
-    StepMeta spyMeta = spy( meta );
-
-    when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-
-    // additional hydration needed to get test lines code coverage
-    when( mockDatabaseMeta.getDatabaseName() ).thenReturn( "testDatabase" );
-    when( mockDatabaseMeta.getAccessTypeDesc() ).thenReturn( "Native" );
-    when( mockTableOutputMeta.getDatabaseMeta() ).thenReturn( mockDatabaseMeta );
-    when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
-    when( mockTransMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "test1", "test2" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "test1" )
-          return new ValueMetaString( "test1" );
-        if ( args[0] == "test2" )
-          return new ValueMetaString( "test2" );
-        return null;
-      }
-    } );
-
-    assertNotNull( analyzer.analyze( descriptor, mockTableOutputMeta ) );
-  }
-
-  @Test
-  public void testAnalyzeWithDbNodes() throws Exception {
-    StepMeta meta = new StepMeta( "test", mockTableOutputMeta );
-    StepMeta spyMeta = spy( meta );
-    TableOutputStepAnalyzer spy = spy( analyzer );
-
-    Map<String, IMetaverseNode> dbNodes = new HashMap<String, IMetaverseNode>();
-    IMetaverseNode dbNode = mock( IMetaverseNode.class );
-    dbNodes.put( "MyConnection", dbNode );
-
-    when( spy.getDatabaseNodes() ).thenReturn( dbNodes );
-
-    when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-
-    // additional hydration needed to get test lines code coverage
-    when( mockDatabaseMeta.getDatabaseName() ).thenReturn( "testDatabase" );
-    when( mockTableOutputMeta.getSchemaName() ).thenReturn( "testSchema" );
-    when( mockDatabaseMeta.getName() ).thenReturn( "MyConnection" );
-    when( mockDatabaseMeta.getAccessTypeDesc() ).thenReturn( "Native" );
-    when( mockTableOutputMeta.getDatabaseMeta() ).thenReturn( mockDatabaseMeta );
-    when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
-    when( mockTableOutputMeta.getFieldStream() ).thenReturn(  new String[] { "test1", "test2" }  );
-    when( mockTableOutputMeta.specifyFields() ).thenReturn( true );
-    when( mockTransMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      mockRowMetaInterface );
-    when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[] { "prev step name" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[ 0 ] == "test1" )
-          return new ValueMetaString( "test1" );
-        if ( args[ 0 ] == "test2" )
-          return new ValueMetaString( "test2" );
-        return null;
-      }
-    } );
-    assertNotNull( spy.analyze( descriptor, mockTableOutputMeta ) );
-
-  }
-
-  @Test
-  public void testAnalyzeWithNoDbNodes() throws Exception {
-    StepMeta meta = new StepMeta( "test", mockTableOutputMeta );
-    StepMeta spyMeta = spy( meta );
-    TableOutputStepAnalyzer spy = spy( analyzer );
-
-    when( spy.getDatabaseNodes() ).thenReturn( null );
-
-    when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-
-    assertNotNull( spy.analyze( descriptor, mockTableOutputMeta ) );
-
+    when( meta.getParentStepMeta() ).thenReturn( parentStepMeta );
+    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
+    when( parentStepMeta.getName() ).thenReturn( "test" );
+    when( parentStepMeta.getStepID() ).thenReturn( "TableOutputStep" );
   }
 
   @Test
@@ -246,60 +112,184 @@ public class TableOutputStepAnalyzerTest {
   }
 
   @Test
-  public void testGetFieldMappings() throws Exception {
-    String[] streamFields = { "name", "age", "date of birth" };
-    String[] tableFields = { "name", "age", "DOB" };
+  public void testCustomAnalyze() throws Exception {
+    when( meta.truncateTable() ).thenReturn( true );
+    IMetaverseNode node = new MetaverseTransientNode( "new node" );
+    analyzer.customAnalyze( meta, node );
+    assertNotNull( node );
 
-    when( mockTableOutputMeta.specifyFields() ).thenReturn( true );
-    when( mockTableOutputMeta.getFieldStream() ).thenReturn( streamFields );
-    when( mockTableOutputMeta.getFieldDatabase() ).thenReturn( tableFields );
+    assertTrue( (Boolean) node.getProperty( TableOutputStepAnalyzer.TRUNCATE_TABLE ) );
+  }
 
-    Set<IFieldMapping> mappings = analyzer.getFieldMappings( mockTableOutputMeta );
-    assertEquals( 3, mappings.size() );
-    for ( IFieldMapping mapping : mappings ) {
-      if ( mapping.getSourceFieldName().equalsIgnoreCase( "date of birth" ) ) {
-        assertEquals( "DOB", mapping.getTargetFieldName() );
-      } else {
-        // otherwise they are the same name
-        assertEquals( mapping.getSourceFieldName(), mapping.getTargetFieldName() );
-      }
+  @Test
+  public void testCreateTableNode() throws Exception {
+    IConnectionAnalyzer connectionAnalyzer = mock( IConnectionAnalyzer.class );
+
+    doReturn( connectionAnalyzer ).when( analyzer ).getConnectionAnalyzer();
+    IMetaverseNode connNode = mock( IMetaverseNode.class );
+    when( connectionAnalyzer.analyze( any( IComponentDescriptor.class ), anyObject() ) ).thenReturn( connNode );
+
+
+    BaseDatabaseResourceInfo resourceInfo = mock( BaseDatabaseResourceInfo.class );
+    Map<Object, Object> attributes = new HashMap<>();
+    attributes.put( DictionaryConst.PROPERTY_TABLE, "tableName" );
+    attributes.put( DictionaryConst.PROPERTY_SCHEMA, "schemaName" );
+    when( resourceInfo.getAttributes() ).thenReturn( attributes );
+
+    IMetaverseNode connectionNode = mock( IMetaverseNode.class );
+    doReturn( connectionNode ).when( analyzer ).getConnectionNode();
+    when( connectionNode.getLogicalId() ).thenReturn( "CONNECTION_ID" );
+
+    IMetaverseNode resourceNode = analyzer.createTableNode( resourceInfo );
+    assertEquals( "tableName", resourceNode.getProperty( DictionaryConst.PROPERTY_TABLE ) );
+    assertEquals( "tableName", resourceNode.getName() );
+    assertEquals( "schemaName", resourceNode.getProperty( DictionaryConst.PROPERTY_SCHEMA ) );
+    assertEquals( "CONNECTION_ID", resourceNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
+  }
+
+  @Test
+  public void testCreateTableNode_nullSchema() throws Exception {
+    IConnectionAnalyzer connectionAnalyzer = mock( IConnectionAnalyzer.class );
+
+    doReturn( connectionAnalyzer ).when( analyzer ).getConnectionAnalyzer();
+    IMetaverseNode connNode = mock( IMetaverseNode.class );
+    when( connectionAnalyzer.analyze( any( IComponentDescriptor.class ), anyObject() ) ).thenReturn( connNode );
+
+
+    BaseDatabaseResourceInfo resourceInfo = mock( BaseDatabaseResourceInfo.class );
+    Map<Object, Object> attributes = new HashMap<>();
+    attributes.put( DictionaryConst.PROPERTY_TABLE, "tableName" );
+    when( resourceInfo.getAttributes() ).thenReturn( attributes );
+
+    IMetaverseNode connectionNode = mock( IMetaverseNode.class );
+    doReturn( connectionNode ).when( analyzer ).getConnectionNode();
+    when( connectionNode.getLogicalId() ).thenReturn( "CONNECTION_ID" );
+
+    IMetaverseNode resourceNode = analyzer.createTableNode( resourceInfo );
+    assertEquals( "tableName", resourceNode.getProperty( DictionaryConst.PROPERTY_TABLE ) );
+    assertEquals( "tableName", resourceNode.getName() );
+    assertNull( resourceNode.getProperty( DictionaryConst.PROPERTY_SCHEMA ) );
+    assertEquals( "CONNECTION_ID", resourceNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
+  }
+
+  @Test
+  public void testCreateTableNode_nullTable() throws Exception {
+    IConnectionAnalyzer connectionAnalyzer = mock( IConnectionAnalyzer.class );
+
+    doReturn( connectionAnalyzer ).when( analyzer ).getConnectionAnalyzer();
+    IMetaverseNode connNode = mock( IMetaverseNode.class );
+    when( connectionAnalyzer.analyze( any( IComponentDescriptor.class ), anyObject() ) ).thenReturn( connNode );
+
+
+    BaseDatabaseResourceInfo resourceInfo = mock( BaseDatabaseResourceInfo.class );
+    Map<Object, Object> attributes = new HashMap<>();
+    when( resourceInfo.getAttributes() ).thenReturn( attributes );
+
+    IMetaverseNode connectionNode = mock( IMetaverseNode.class );
+    doReturn( connectionNode ).when( analyzer ).getConnectionNode();
+    when( connectionNode.getLogicalId() ).thenReturn( "CONNECTION_ID" );
+
+    IMetaverseNode resourceNode = analyzer.createTableNode( resourceInfo );
+    assertNull( resourceNode.getProperty( DictionaryConst.PROPERTY_TABLE ) );
+    assertNull( resourceNode.getProperty( DictionaryConst.PROPERTY_SCHEMA ) );
+    assertEquals( "CONNECTION_ID", resourceNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
+  }
+
+  @Test
+  public void testGetResourceInputNodeType() throws Exception {
+    assertNull( analyzer.getResourceInputNodeType() );
+  }
+
+  @Test
+  public void testGetResourceOutputNodeType() throws Exception {
+    assertEquals( DictionaryConst.NODE_TYPE_DATA_COLUMN, analyzer.getResourceOutputNodeType() );
+  }
+
+  @Test
+  public void testIsOutput() throws Exception {
+    assertTrue( analyzer.isOutput() );
+  }
+
+  @Test
+  public void testIsInput() throws Exception {
+    assertFalse( analyzer.isInput() );
+  }
+
+  @Test
+  public void testGetUsedFields() throws Exception {
+    assertNull( analyzer.getUsedFields( meta ) );
+  }
+
+  @Test
+  public void testGetOutputResourceFields() throws Exception {
+    String[] outputFields = new String[2];
+    outputFields[0] = "field1";
+    outputFields[1] = "field2";
+
+    when( meta.getFieldDatabase() ).thenReturn( outputFields );
+
+    Set<String> outputResourceFields = analyzer.getOutputResourceFields( meta );
+
+    assertEquals( outputFields.length, outputResourceFields.size() );
+    for ( String outputField : outputFields ) {
+      assertTrue( outputResourceFields.contains( outputField ) );
     }
   }
 
   @Test
-  public void testGetFieldMappings_fieldsNoSpecified() throws Exception {
-    StepMeta meta = new StepMeta( "test", mockTableOutputMeta );
-    StepMeta spyMeta = spy( meta );
+  public void testGetChangeRecords() throws Exception {
+    String[] tableFields = new String[] { "field1", "field2" };
+    when( meta.getFieldDatabase() ).thenReturn( tableFields );
 
-    when( mockTableOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockTransMeta.getPrevStepNames( spyMeta ) ).thenReturn( new String[]{"prev step name"} );
-    // additional hydration needed to get test lines code coverage
-    when( mockDatabaseMeta.getDatabaseName() ).thenReturn( "testDatabase" );
-    when( mockDatabaseMeta.getAccessTypeDesc() ).thenReturn( "Native" );
-    when( mockTableOutputMeta.getDatabaseMeta() ).thenReturn( mockDatabaseMeta );
-    when( mockTableOutputMeta.getTableName() ).thenReturn( "testTable" );
-    when( mockTransMeta.getPrevStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[] { "test1", "test2" } );
-    when( mockRowMetaInterface.searchValueMeta( Mockito.anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
+    String[] streamFields = new String[] { "f1", "field2", "field3" };
+    when( meta.getFieldStream() ).thenReturn( streamFields );
 
-      @Override public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "test1" )
-          return new ValueMetaString( "test1" );
-        if ( args[0] == "test2" )
-          return new ValueMetaString( "test2" );
-        return null;
+    StepNodes inputs = new StepNodes();
+    inputs.addNode( "prevStep", "f1", node );
+    inputs.addNode( "prevStep", "field2", node );
+    inputs.addNode( "prevStep", "field3", node );
+    inputs.addNode( ExternalResourceStepAnalyzer.RESOURCE, "field1", node );
+    inputs.addNode( ExternalResourceStepAnalyzer.RESOURCE, "field2", node );
+
+    doReturn( inputs ).when( analyzer ).getInputs();
+
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( meta );
+    assertNotNull( changeRecords );
+    assertEquals( tableFields.length, changeRecords.size() );
+
+    for ( ComponentDerivationRecord changeRecord : changeRecords ) {
+      if ( "f1".equals( changeRecord.getOriginalEntityName() ) ) {
+        assertEquals( "field1", changeRecord.getChangedEntityName() );
+      } else if ( "field2".equals( changeRecord.getOriginalEntityName() ) ) {
+        assertEquals( "field2", changeRecord.getChangedEntityName() );
+      } else {
+        fail( "We encountered a change record that shouldn't be here - " + changeRecord.toString() );
       }
-    } );
-
-    when( mockTableOutputMeta.specifyFields() ).thenReturn( false );
-
-    Set<IFieldMapping> mappings = analyzer.getFieldMappings( mockTableOutputMeta );
-    assertEquals( 2, mappings.size() );
-    for ( IFieldMapping mapping : mappings ) {
-      assertEquals( mapping.getSourceFieldName(), mapping.getTargetFieldName() );
     }
+
+  }
+
+  @Test
+  public void testGetOutputRowMetaInterfaces() throws Exception {
+    String[] nextStepNames = new String[] { "nextStep1" };
+    when( parentTransMeta.getNextStepNames( parentStepMeta ) ).thenReturn( nextStepNames );
+
+    RowMetaInterface rmi = mock( RowMetaInterface.class );
+    doReturn( rmi ).when( analyzer ).getOutputFields( meta );
+
+    String[] tableFields = new String[] { "field1", "field2" };
+    when( meta.getFieldDatabase() ).thenReturn( tableFields );
+
+    Map<String, RowMetaInterface> outputs = analyzer.getOutputRowMetaInterfaces( meta );
+    assertNotNull( outputs );
+
+    assertEquals( 2, outputs.size() );
+    RowMetaInterface resourceRow = outputs.get( ExternalResourceStepAnalyzer.RESOURCE );
+    assertNotNull( resourceRow );
+
+    for ( String tableField : tableFields ) {
+      assertNotNull( resourceRow.searchValueMeta( tableField ) );
+    }
+    assertEquals( rmi, outputs.get( "nextStep1" ) );
   }
 }

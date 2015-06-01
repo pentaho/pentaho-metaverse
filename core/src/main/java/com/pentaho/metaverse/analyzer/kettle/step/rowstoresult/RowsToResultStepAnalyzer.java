@@ -23,15 +23,10 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.rowstoresult;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepAnalyzer;
-import org.apache.commons.collections.CollectionUtils;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.rowstoresult.RowsToResultMeta;
 
@@ -41,43 +36,17 @@ import java.util.Set;
 /**
  * Created by rfellows on 4/3/15.
  */
-public class RowsToResultStepAnalyzer extends BaseStepAnalyzer<RowsToResultMeta> {
-
-  public static final String RESULT_ROW_FIELD = "resultRowField";
+public class RowsToResultStepAnalyzer extends StepAnalyzer<RowsToResultMeta> {
 
   @Override
-  public IMetaverseNode analyze( IComponentDescriptor descriptor, RowsToResultMeta meta )
+  protected Set<StepField> getUsedFields( RowsToResultMeta meta ) {
+    return null;
+  }
+
+  @Override
+  protected void customAnalyze( RowsToResultMeta meta, IMetaverseNode rootNode )
     throws MetaverseAnalyzerException {
-
-    IMetaverseNode node = super.analyze( descriptor, meta );
-
-    // add the stream fields that this creates on the result and link it to the incoming field.
-    RowMetaInterface rowMetaInterface = getOutputFields( meta );
-    if ( rowMetaInterface != null && !CollectionUtils.isEmpty( rowMetaInterface.getValueMetaList() ) ) {
-      for ( ValueMetaInterface vmi : rowMetaInterface.getValueMetaList() ) {
-
-        IComponentDescriptor desc = new MetaverseComponentDescriptor(
-          vmi.getName(),
-          DictionaryConst.NODE_TYPE_TRANS_FIELD,
-          node,
-          descriptor.getContext() );
-
-        IMetaverseNode createdNode = createNodeFromDescriptor( desc );
-        node.setProperty( RESULT_ROW_FIELD, true );
-        createdNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, vmi.getTypeDesc() );
-        metaverseBuilder.addNode( createdNode );
-
-        IComponentDescriptor transFieldDescriptor = getStepFieldOriginDescriptor( descriptor, vmi.getName() );
-        IMetaverseNode transFieldNode = createNodeFromDescriptor( transFieldDescriptor );
-
-        metaverseBuilder.addLink( node, DictionaryConst.LINK_CREATES, createdNode );
-        metaverseBuilder.addLink( transFieldNode, DictionaryConst.LINK_DERIVES, createdNode );
-        metaverseBuilder.addLink( node, DictionaryConst.LINK_USES, transFieldNode );
-      }
-    } else {
-      throw new MetaverseAnalyzerException( "No output fields detected for RowsToResultMeta - " + meta.getName() );
-    }
-    return node;
+    // nothing custom
   }
 
   @Override

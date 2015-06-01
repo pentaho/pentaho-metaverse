@@ -56,17 +56,12 @@ import org.pentaho.di.trans.steps.xmloutput.XMLOutputMeta;
 import java.util.Collection;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 @RunWith( MockitoJUnitRunner.class )
 public class XMLOutputStepAnalyzerTest {
@@ -74,146 +69,61 @@ public class XMLOutputStepAnalyzerTest {
   private XMLOutputStepAnalyzer analyzer;
 
   @Mock
-  private StepMeta mockStepMeta;
-
-  @Mock
   private XMLOutput mockXMLOutput;
 
   @Mock
-  private XMLOutputMeta mockXMLOutputMeta;
+  private XMLOutputMeta meta;
 
   @Mock
-  private XMLOutputData mockXMLOutputData;
+  private XMLOutputData data;
 
+  @Mock
+  IMetaverseNode node;
+  @Mock
+  IMetaverseBuilder mockBuilder;
+  @Mock
+  private INamespace mockNamespace;
+  @Mock
+  private StepMeta parentStepMeta;
   @Mock
   private TransMeta mockTransMeta;
 
-  @Mock
-  private RowMetaInterface mockRowMetaInterface;
+  IComponentDescriptor descriptor;
 
-  @Mock
-  private IMetaverseBuilder mockBuilder;
-
-  @Mock
-  private INamespace mockNamespace;
-
-  @Mock
-  private XMLField mockField1;
-
-  @Mock
-  private XMLField mockField2;
-
-  private IMetaverseObjectFactory mockFactory;
-
-  private IComponentDescriptor descriptor;
 
   @Before
   public void setUp() throws Exception {
-    mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
-    when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
-
-    when( mockField1.getFieldName() ).thenReturn( "Field 1" );
-    when( mockField2.getFieldName() ).thenReturn( "Field 2" );
-
-    analyzer = new XMLOutputStepAnalyzer();
+    analyzer = spy( new XMLOutputStepAnalyzer() );
     analyzer.setMetaverseBuilder( mockBuilder );
+    analyzer.setBaseStepMeta( meta );
+    analyzer.setRootNode( node );
+    analyzer.setParentTransMeta( mockTransMeta );
+    analyzer.setParentStepMeta( parentStepMeta );
+
     descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
+    analyzer.setDescriptor( descriptor );
+    analyzer.setObjectFactory( MetaverseTestUtils.getMetaverseObjectFactory() );
 
-    when( mockXMLOutput.getStepDataInterface() ).thenReturn( mockXMLOutputData );
-    when( mockXMLOutput.getStepMeta() ).thenReturn( mockStepMeta );
-    when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockXMLOutputMeta );
-  }
+    when( mockXMLOutput.getStepDataInterface() ).thenReturn( data );
+    when( mockXMLOutput.getStepMeta() ).thenReturn( parentStepMeta );
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyze_nullInput() throws Exception {
-    analyzer.analyze( null, null );
-  }
-
-  @Test
-  public void testAnalyze_NoFields() throws Exception {
-    StepMeta meta = new StepMeta( "test", mockXMLOutputMeta );
-    StepMeta spyMeta = spy( meta );
-
-    when( mockXMLOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( mockXMLOutputMeta.getFiles( any( VariableSpace.class ) ) ).thenReturn( new String[]{ "/tmp/out.txt" } );
-    when( mockXMLOutputMeta.getOutputFields() ).thenReturn( new XMLField[]{} );
-
-    when( mockBuilder.addNode( any( IMetaverseNode.class ) ) ).thenReturn( mockBuilder );
-    when( mockBuilder.addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_WRITESTO ), any( IMetaverseNode.class ) ) ).thenReturn( mockBuilder );
-
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-
-    IMetaverseNode result = analyzer.analyze( descriptor, mockXMLOutputMeta );
-
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    verify( mockBuilder, times( 2 ) ).addNode( any( IMetaverseNode.class ) );
-    verify( mockBuilder, times( 1 ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_WRITESTO ), any( IMetaverseNode.class ) );
-
-    verify( mockBuilder, times( 0 ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
-
-    verify( mockBuilder, times( 0 ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
-
+    when( meta.getParentStepMeta() ).thenReturn( parentStepMeta );
+    when( parentStepMeta.getStepMetaInterface() ).thenReturn( meta );
+    when( parentStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( parentStepMeta.getName() ).thenReturn( "test" );
+    when( parentStepMeta.getStepID() ).thenReturn( "XmlOutputStep" );
   }
 
   @Test
-  public void testAnalyze() throws Exception {
-    StepMeta meta = new StepMeta( "test", mockXMLOutputMeta );
-    StepMeta spyMeta = spy( meta );
+  public void testCustomAnalyze() throws Exception {
+    when( meta.getMainElement() ).thenReturn( "main" );
+    when( meta.getRepeatElement() ).thenReturn( "repeat" );
+    analyzer.customAnalyze( meta, node );
 
-    when( mockXMLOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( mockXMLOutputMeta.getFiles( any( VariableSpace.class ) ) ).thenReturn( new String[]{ "/tmp/out.txt" } );
-
-    XMLField[] fields = new XMLField[]{ mockField1, mockField2 };
-    when( mockXMLOutputMeta.getOutputFields() ).thenReturn( fields );
-
-    when( mockBuilder.addNode( any( IMetaverseNode.class ) ) ).thenReturn( mockBuilder );
-    when( mockBuilder.addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_WRITESTO ), any( IMetaverseNode.class ) ) ).thenReturn( mockBuilder );
-
-    when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-
-    when( mockTransMeta.getStepFields( eq( spyMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      mockRowMetaInterface );
-    when( mockRowMetaInterface.getFieldNames() ).thenReturn( new String[]{ "Field 1", "Field 2" } );
-    when( mockRowMetaInterface.searchValueMeta( anyString() ) ).thenAnswer( new Answer<ValueMetaInterface>() {
-
-      @Override
-      public ValueMetaInterface answer( InvocationOnMock invocation ) throws Throwable {
-        Object[] args = invocation.getArguments();
-        if ( args[0] == "Field 1" ) {
-          return new ValueMetaString( "Field 1" );
-        }
-        if ( args[0] == "Field 2" ) {
-          return new ValueMetaString( "Field 2" );
-        }
-        return null;
-      }
-    } );
-
-    IMetaverseNode result = analyzer.analyze( descriptor, mockXMLOutputMeta );
-
-    assertNotNull( result );
-    assertEquals( meta.getName(), result.getName() );
-
-    verify( mockBuilder, times( 2 + fields.length ) ).addNode( any( IMetaverseNode.class ) );
-    verify( mockBuilder, times( 1 ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_WRITESTO ), any( IMetaverseNode.class ) );
-
-    verify( mockBuilder, times( fields.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_POPULATES ), any( IMetaverseNode.class ) );
-
-    verify( mockBuilder, times( fields.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+    verify( node ).setProperty( "parentnode", "main" );
+    verify( node ).setProperty( "rownode", "repeat" );
 
   }
-
 
   @Test
   public void testGetSupportedSteps() {
@@ -225,27 +135,80 @@ public class XMLOutputStepAnalyzerTest {
   }
 
   @Test
+  public void testGetOutputResourceFields() throws Exception {
+    XMLField[] outputFields = new XMLField[2];
+    XMLField field1 = mock( XMLField.class );
+    XMLField field2 = mock( XMLField.class );
+    outputFields[0] = field1;
+    outputFields[1] = field2;
+
+    when( field1.getFieldName() ).thenReturn( "field1" );
+    when( field2.getFieldName() ).thenReturn( "field2" );
+
+    when( meta.getOutputFields() ).thenReturn( outputFields );
+
+    Set<String> outputResourceFields = analyzer.getOutputResourceFields( meta );
+
+    assertEquals( outputFields.length, outputResourceFields.size() );
+    for ( XMLField outputField : outputFields ) {
+      assertTrue( outputResourceFields.contains( outputField.getFieldName() ) );
+    }
+  }
+
+  @Test
   public void testXMLOutputExternalResourceConsumer() throws Exception {
     XMLOutputExternalResourceConsumer consumer = new XMLOutputExternalResourceConsumer();
 
-    StepMeta meta = new StepMeta( "test", mockXMLOutputMeta );
+    StepMeta meta = new StepMeta( "test", this.meta );
     StepMeta spyMeta = spy( meta );
 
-    when( mockXMLOutputMeta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( this.meta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
-    when( mockXMLOutputMeta.getFileName() ).thenReturn( null );
+    when( this.meta.getFileName() ).thenReturn( null );
     String[] filePaths = { "/path/to/file1", "/another/path/to/file2" };
-    when( mockXMLOutputMeta.getFiles( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
+    when( this.meta.getFiles( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
 
-    assertFalse( consumer.isDataDriven( mockXMLOutputMeta ) );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( mockXMLOutputMeta );
+    assertFalse( consumer.isDataDriven( this.meta ) );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( this.meta );
     assertFalse( resources.isEmpty() );
     assertEquals( 2, resources.size() );
 
-    when( mockXMLOutputMeta.getExtension() ).thenReturn( "txt" );
+    when( this.meta.getExtension() ).thenReturn( "txt" );
 
     assertEquals( XMLOutputMeta.class, consumer.getMetaClass() );
   }
 
+  @Test
+  public void testCreateResourceNode() throws Exception {
+    IExternalResourceInfo res = mock( IExternalResourceInfo.class );
+    when( res.getName() ).thenReturn( "file:///Users/home/tmp/xyz.xml" );
+    IMetaverseNode resourceNode = analyzer.createResourceNode( res );
+    assertNotNull( resourceNode );
+    assertEquals( DictionaryConst.NODE_TYPE_FILE, resourceNode.getType() );
+  }
+  @Test
+  public void testGetResourceInputNodeType() throws Exception {
+    assertNull( analyzer.getResourceInputNodeType() );
+  }
+
+  @Test
+  public void testGetResourceOutputNodeType() throws Exception {
+    assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, analyzer.getResourceOutputNodeType() );
+  }
+
+  @Test
+  public void testIsOutput() throws Exception {
+    assertTrue( analyzer.isOutput() );
+  }
+
+  @Test
+  public void testIsInput() throws Exception {
+    assertFalse( analyzer.isInput() );
+  }
+
+  @Test
+  public void testGetUsedFields() throws Exception {
+    assertNull( analyzer.getUsedFields( meta ) );
+  }
 }
 

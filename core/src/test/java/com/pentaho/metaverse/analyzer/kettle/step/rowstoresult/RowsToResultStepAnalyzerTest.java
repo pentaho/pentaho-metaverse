@@ -23,33 +23,18 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.rowstoresult;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.AnalysisContext;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.rowstoresult.RowsToResultMeta;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Created by rfellows on 4/3/15.
@@ -57,86 +42,25 @@ import static org.mockito.Mockito.*;
 @RunWith( MockitoJUnitRunner.class )
 public class RowsToResultStepAnalyzerTest {
 
-  protected RowsToResultStepAnalyzer _analyzer;
   protected RowsToResultStepAnalyzer analyzer;
 
-  @Mock
-  protected RowsToResultMeta meta;
-  @Mock
-  protected IMetaverseBuilder builder;
-  @Mock
-  protected INamespace namespace;
-  @Mock
-  protected INamespace parentNamespace;
-  @Mock
-  protected IComponentDescriptor descriptor;
-  @Mock
-  protected StepMeta parentStepMeta;
-  @Mock
-  protected TransMeta parentTransMeta;
-  @Mock
-  protected TransMeta transMeta;
-  @Mock
-  protected RowMetaInterface outputFields;
+  @Mock RowsToResultMeta meta;
+  @Mock IMetaverseNode node;
 
   @Before
   public void setUp() throws Exception {
-
-    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
-
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getContext() ).thenReturn( new AnalysisContext( DictionaryConst.CONTEXT_DEFAULT, null ) );
-
-    when( meta.getParentStepMeta() ).thenReturn( parentStepMeta );
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( transMeta );
-    when( parentStepMeta.getName() ).thenReturn( "parentStepMeta" );
-
-    _analyzer = new RowsToResultStepAnalyzer();
-    _analyzer.setMetaverseBuilder( builder );
-    analyzer = spy( _analyzer );
-
-    doReturn( outputFields ).when( analyzer ).getOutputFields( meta );
-    List<ValueMetaInterface> fields = new ArrayList<ValueMetaInterface>();
-    ValueMetaInterface field1 = mock( ValueMetaInterface.class );
-    ValueMetaInterface field2 = mock( ValueMetaInterface.class );
-    when( field1.getName() ).thenReturn( "one" );
-    when( field2.getName() ).thenReturn( "two" );
-    when( field1.getTypeDesc() ).thenReturn( "String" );
-    when( field2.getTypeDesc() ).thenReturn( "String" );
-    fields.add( field1 );
-    fields.add( field2 );
-    when( outputFields.getValueMetaList() ).thenReturn( fields );
+    analyzer = new RowsToResultStepAnalyzer();
   }
 
   @Test
-  public void testAnalyze() throws Exception {
-    analyzer.analyze( descriptor, meta );
-    verify( builder, atLeast( 2 ) ).addNode( any( IMetaverseNode.class ) );
-    verify( builder, atLeast( 2 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_CREATES ),
-      any( IMetaverseNode.class ) );
-    verify( builder, times( 2 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ),
-      any( IMetaverseNode.class ) );
-    verify( builder, times( 2 ) ).addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_USES ),
-      any( IMetaverseNode.class ) );
+  public void testGetUsedFields() throws Exception {
+    assertNull( analyzer.getUsedFields( meta ) );
   }
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyze_noOutputRowMetaInterface() throws Exception {
-    doReturn( null ).when( analyzer ).getOutputFields( meta );
-
-    analyzer.analyze( descriptor, meta );
-  }
-
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testAnalyze_noValueMetasInRowMetaInterface() throws Exception {
-    when( outputFields.getValueMetaList() ).thenReturn( null );
-
-    analyzer.analyze( descriptor, meta );
+  @Test
+  public void testCustomAnalyze() throws Exception {
+    // no custom logic, just call it for code coverage
+    analyzer.customAnalyze( meta, node );
   }
 
   @Test

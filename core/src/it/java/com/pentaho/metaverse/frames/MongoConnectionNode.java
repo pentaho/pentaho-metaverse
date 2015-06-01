@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -18,20 +18,25 @@
  * prohibited to anyone except those individuals and entities who have executed
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
+ *
  */
 
 package com.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 
 /**
- * User: RFellows Date: 9/4/14
+ * Created by rfellows on 5/22/15.
  */
-public interface TextFileInputStepNode extends TransformationStepNode {
-  @Adjacency( label = "isreadby", direction = Direction.IN )
-  public Iterable<FramedMetaverseNode> getInputFiles();
-
-  @Adjacency( label = "uses", direction = Direction.OUT )
-  public Iterable<FileFieldNode> getFileFieldNodesUses();
+public interface MongoConnectionNode extends Concept {
+  @Property( "port" )
+  public String getPort();
+  @Property( "hostNames" )
+  public String getHost();
+  @Property( "userName" )
+  public String getUserName();
+  @Property( "password" )
+  public String getPassword();
+  @Property( "databaseName" )
+  public String getDatabaseName();
 }

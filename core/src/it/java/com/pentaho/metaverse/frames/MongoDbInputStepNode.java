@@ -18,14 +18,27 @@
  * prohibited to anyone except those individuals and entities who have executed
  * confidentiality and non-disclosure agreements or other agreements with Pentaho,
  * explicitly covering such access.
+ *
  */
 
 package com.pentaho.metaverse.frames;
 
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
+import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
+
 /**
- * @author wseyler
- *
+ * Created by rfellows on 5/22/15.
  */
-public interface StringsCutStepNode extends TransformationStepNode {
+public interface MongoDbInputStepNode extends TransformationStepNode {
+  @Adjacency( label = "dependencyof", direction = Direction.IN )
+  public Iterable<MongoConnectionNode> getDatasources();
+
+  @GremlinGroovy( "it.in('dependencyof').has( 'name', T.eq, name )" )
+  public MongoConnectionNode getDatasource( @GremlinParam( "name") String name );
+
+  @Adjacency( label = "isreadby", direction = Direction.IN )
+  public FramedMetaverseNode getCollection();
 
 }

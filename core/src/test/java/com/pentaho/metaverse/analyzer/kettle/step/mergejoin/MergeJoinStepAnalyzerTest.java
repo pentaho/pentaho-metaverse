@@ -23,7 +23,12 @@
 package com.pentaho.metaverse.analyzer.kettle.step.mergejoin;
 
 import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.ChangeType;
 import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import com.pentaho.metaverse.api.StepField;
+import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
+import com.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
@@ -48,6 +53,8 @@ import com.pentaho.metaverse.api.INamespace;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,9 +62,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
 public class MergeJoinStepAnalyzerTest {
@@ -65,148 +70,86 @@ public class MergeJoinStepAnalyzerTest {
   private MergeJoinStepAnalyzer analyzer;
   private static final String DEFAULT_STEP_NAME = "testStep";
 
-  @Mock
-  private IMetaverseBuilder builder;
-  @Mock
-  private MergeJoinMeta mergeJoinMeta;
-  @Mock
-  private TransMeta transMeta;
-  @Mock
-  private RowMetaInterface prevRowMeta;
-  @Mock
-  private RowMetaInterface stepRowMeta;
-  @Mock
-  private INamespace namespace;
-  @Mock
-  private IComponentDescriptor descriptor;
-  @Mock
-  private StepIOMetaInterface stepIoMeta;
-  @Mock
-  private StreamInterface stream1;
-  @Mock
-  private StreamInterface stream2;
-  @Mock
-  private StepMeta parentStepMeta;
-  @Mock
-  private StepMeta stepMeta1;
-  @Mock
-  private StepMeta stepMeta2;
-  @Mock
-  private RowMetaInterface rowMeta1;
-  @Mock
-  private RowMetaInterface rowMeta2;
-  @Mock
-  private ValueMetaInterface leftField1;
-  @Mock
-  private ValueMetaInterface leftField2;
-  @Mock
-  private ValueMetaInterface rightField1;
-  @Mock
-  private ValueMetaInterface rightField2;
+  @Mock IMetaverseNode node;
+  @Mock IMetaverseNode mockFieldNode;
+  @Mock MergeJoinMeta mergeJoinMeta;
+  @Mock TransMeta parentTransMeta;
+  @Mock StepMeta parentStepMeta;
+  @Mock IMetaverseBuilder builder;
+  @Mock StepIOMetaInterface ioMetaInterface;
 
-  private List<StreamInterface> streams;
-  private List<ValueMetaInterface> outValueMetas;
-
-  private String[] fields1 = { "Country", "State" };
-  private String[] fields2 = { "CTR", "ST" };
+  StepNodes inputs;
+  StepNodes outputs;
+  String[] fields1;
+  String[] fields2;
 
   @Before
   public void setUp() throws Exception {
-    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
-    when( builder.getMetaverseObjectFactory() ).thenReturn( factory );
-    //    when( namespace.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
-    when( namespace.getNamespaceId() ).thenReturn( "namespace" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    //    when( descriptor.getChildNamespace( anyString(), anyString() ) ).thenReturn( namespace );
-    when( descriptor.getParentNamespace() ).thenReturn( namespace );
-    when( descriptor.getNamespaceId() ).thenReturn( "namespace" );
 
-    streams = new ArrayList<StreamInterface>( 2 );
-    streams.add( stream1 );
-    streams.add( stream2 );
-
-    outValueMetas = new ArrayList<ValueMetaInterface>( 4 );
-    outValueMetas.add( leftField1 );
-    outValueMetas.add( leftField2 );
-    outValueMetas.add( rightField1 );
-    outValueMetas.add( rightField2 );
-
-    when( mergeJoinMeta.getStepIOMeta() ).thenReturn( stepIoMeta );
     when( mergeJoinMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
+    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
 
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( transMeta );
-
-    when( stepIoMeta.getInfoStreams() ).thenReturn( streams );
-    when( stream1.getStepMeta() ).thenReturn( stepMeta1 );
-    when( stream2.getStepMeta() ).thenReturn( stepMeta2 );
-    when( transMeta.getStepFields( eq( stepMeta1 ), any( ProgressMonitorListener.class ) ) ).thenReturn( rowMeta1 );
-    when( transMeta.getStepFields( eq( stepMeta2 ), any( ProgressMonitorListener.class ) ) ).thenReturn( rowMeta2 );
-    when( transMeta.getStepFields( eq( parentStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn(
-      stepRowMeta );
-
-    when( stepRowMeta.getFieldNames() ).thenReturn( (String[]) ArrayUtils.addAll( fields1, fields2 ) );
-
-    List<ValueMetaInterface> rowMeta1Fields = new ArrayList<ValueMetaInterface>( 2 );
-    rowMeta1Fields.add( leftField1 );
-    rowMeta1Fields.add( leftField2 );
-    when( rowMeta1.getValueMetaList() ).thenReturn( rowMeta1Fields );
-
-    List<ValueMetaInterface> rowMeta2Fields = new ArrayList<ValueMetaInterface>( 2 );
-    rowMeta1Fields.add( rightField1 );
-    rowMeta1Fields.add( rightField2 );
-    when( rowMeta2.getValueMetaList() ).thenReturn( rowMeta2Fields );
-
-    analyzer = new MergeJoinStepAnalyzer();
+    analyzer = spy( new MergeJoinStepAnalyzer() );
+    analyzer.setParentStepMeta( parentStepMeta );
+    analyzer.setParentTransMeta( parentTransMeta );
     analyzer.setMetaverseBuilder( builder );
 
-    descriptor = new MetaverseComponentDescriptor( DEFAULT_STEP_NAME, DictionaryConst.NODE_TYPE_TRANS, namespace );
-  }
+    inputs = new StepNodes();
+    inputs.addNode( "leftStep", "Country", mockFieldNode );
+    inputs.addNode( "leftStep", "State", mockFieldNode );
+    inputs.addNode( "rightStep", "CTR", mockFieldNode );
+    inputs.addNode( "rightStep", "ST", mockFieldNode );
 
-  @Test( expected = MetaverseAnalyzerException.class )
-  public void testNullAnalyze() throws MetaverseAnalyzerException {
-    analyzer.analyze( descriptor, null );
+    when( analyzer.getInputs() ).thenReturn( inputs );
+
+    fields1 = inputs.getFieldNames( "leftStep" ).toArray( new String[] {} );
+    fields2 = inputs.getFieldNames( "rightStep" ).toArray( new String[] {} );
+
+    // add some more fields that won't be part of the join keys
+    inputs.addNode( "leftStep", "value", mockFieldNode );
+    inputs.addNode( "rightStep", "value", mockFieldNode );
+
+    when( parentTransMeta.getPrevStepNames( analyzer.getStepName() ) ).thenReturn(
+      inputs.getStepNames().toArray( new String[] {} ) );
+
+    when( mergeJoinMeta.getKeyFields1() ).thenReturn( fields1 );
+    when( mergeJoinMeta.getKeyFields2() ).thenReturn( fields2 );
+
+    outputs = new StepNodes();
+    outputs.addNode( "out", "Country", mockFieldNode );
+    outputs.addNode( "out", "State", mockFieldNode );
+    outputs.addNode( "out", "CTR", mockFieldNode );
+    outputs.addNode( "out", "ST", mockFieldNode );
+    outputs.addNode( "out", "value", mockFieldNode );
+    outputs.addNode( "out", "value_1", mockFieldNode );
+
+    when( analyzer.getOutputs() ).thenReturn( outputs );
   }
 
   @Test
-  public void testAnalyze_inner() throws Exception {
-    when( mergeJoinMeta.getKeyFields1() ).thenReturn( fields1 );
-    when( mergeJoinMeta.getKeyFields2() ).thenReturn( fields2 );
+  public void testCustomAnalyze_InnerJoin() throws Exception {
+
     when( mergeJoinMeta.getJoinType() ).thenReturn( "INNER" );
+    analyzer.customAnalyze( mergeJoinMeta, node );
 
-    analyzer.analyze( descriptor, mergeJoinMeta );
-    verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_TYPE, "INNER" );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_FIELDS_LEFT, Arrays.asList( fields1 ) );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_FIELDS_RIGHT, Arrays.asList( fields2 ) );
 
-    verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
+    verify( builder, times( 2 * fields1.length ) ).addLink( any( IMetaverseNode.class ),
       eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
 
   }
 
   @Test
-  public void testAnalyze_rightOuter() throws Exception {
-    when( mergeJoinMeta.getKeyFields1() ).thenReturn( fields1 );
-    when( mergeJoinMeta.getKeyFields2() ).thenReturn( fields2 );
-    when( mergeJoinMeta.getJoinType() ).thenReturn( "RIGHT OUTER" );
+  public void testCustomAnalyze_LeftJoin() throws Exception {
 
-    analyzer.analyze( descriptor, mergeJoinMeta );
-    verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
-
-    verify( builder, times( fields1.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
-
-  }
-
-  @Test
-  public void testAnalyze_leftOuter() throws Exception {
-    when( mergeJoinMeta.getKeyFields1() ).thenReturn( fields1 );
-    when( mergeJoinMeta.getKeyFields2() ).thenReturn( fields2 );
     when( mergeJoinMeta.getJoinType() ).thenReturn( "LEFT OUTER" );
+    analyzer.customAnalyze( mergeJoinMeta, node );
 
-    analyzer.analyze( descriptor, mergeJoinMeta );
-    verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_TYPE, "LEFT OUTER" );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_FIELDS_LEFT, Arrays.asList( fields1 ) );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_FIELDS_RIGHT, Arrays.asList( fields2 ) );
 
     verify( builder, times( fields1.length ) ).addLink( any( IMetaverseNode.class ),
       eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
@@ -214,68 +157,111 @@ public class MergeJoinStepAnalyzerTest {
   }
 
   @Test
-  public void testAnalyze_fullOuter() throws Exception {
-    when( mergeJoinMeta.getKeyFields1() ).thenReturn( fields1 );
-    when( mergeJoinMeta.getKeyFields2() ).thenReturn( fields2 );
+  public void testCustomAnalyze_RightJoin() throws Exception {
+
+    when( mergeJoinMeta.getJoinType() ).thenReturn( "RIGHT OUTER" );
+    analyzer.customAnalyze( mergeJoinMeta, node );
+
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_TYPE, "RIGHT OUTER" );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_FIELDS_LEFT, Arrays.asList( fields1 ) );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_FIELDS_RIGHT, Arrays.asList( fields2 ) );
+
+    verify( builder, times( fields1.length ) ).addLink( any( IMetaverseNode.class ),
+      eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
+
+  }
+
+  @Test
+  public void testCustomAnalyze_FullOuterJoin() throws Exception {
+
     when( mergeJoinMeta.getJoinType() ).thenReturn( "FULL OUTER" );
+    analyzer.customAnalyze( mergeJoinMeta, node );
 
-    analyzer.analyze( descriptor, mergeJoinMeta );
-    verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_TYPE, "FULL OUTER" );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_FIELDS_LEFT, Arrays.asList( fields1 ) );
+    verify( node ).setProperty( DictionaryConst.PROPERTY_JOIN_FIELDS_RIGHT, Arrays.asList( fields2 ) );
 
-    verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
+    verify( builder, times( 2 * fields1.length ) ).addLink( any( IMetaverseNode.class ),
       eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
 
   }
 
   @Test
-  public void testAnalyze_duplicateKeyFieldNames() throws Exception {
-    when( mergeJoinMeta.getKeyFields1() ).thenReturn( fields1 );
-    when( mergeJoinMeta.getKeyFields2() ).thenReturn( fields1 );
-    when( mergeJoinMeta.getJoinType() ).thenReturn( "INNER" );
-    when( leftField1.getName() ).thenReturn( fields1[0] );
-    when( leftField2.getName() ).thenReturn( fields1[1] );
-    when( rightField1.getName() ).thenReturn( fields1[0] + "_1" );
-    when( rightField2.getName() ).thenReturn( fields1[1] + "_2" );
+  public void testGetChangeRecords() throws Exception {
 
-    when( rowMeta1.searchValueMeta( fields1[0] ) ).thenReturn( leftField1 );
-    when( rowMeta1.searchValueMeta( fields1[1] ) ).thenReturn( leftField2 );
-    when( rowMeta2.searchValueMeta( fields1[0] ) ).thenReturn( leftField1 );
-    when( rowMeta2.searchValueMeta( fields1[1] ) ).thenReturn( leftField2 );
+    Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( mergeJoinMeta );
+    assertNotNull( changeRecords );
 
-    when( stepRowMeta.getValueMetaList() ).thenReturn( outValueMetas );
+    assertEquals( 1, changeRecords.size() );
+    ComponentDerivationRecord cr = changeRecords.iterator().next();
+    assertEquals( ChangeType.METADATA, cr.getChangeType() );
+    assertEquals( 1, cr.getOperations().size() );
+  }
 
-    analyzer.analyze( descriptor, mergeJoinMeta );
-    verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_USES ), any( IMetaverseNode.class ) );
+  @Test
+  public void testGetUsedFields() throws Exception {
 
-    verify( builder, times( fields1.length + fields2.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
+    Set<StepField> usedFields = analyzer.getUsedFields( mergeJoinMeta );
+    assertNotNull( usedFields );
 
-    verify( builder, times( fields1.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
+    assertEquals( fields1.length + fields2.length, usedFields.size() );
   }
 
   @Test
   public void testGetInputFields() throws Exception {
-    analyzer.setParentTransMeta( transMeta );
-    analyzer.setBaseStepMeta( mergeJoinMeta );
-    analyzer.setParentStepMeta( parentStepMeta );
-    when( stepMeta1.getName() ).thenReturn( "step1" );
-    when( stepMeta2.getName() ).thenReturn( "step2" );
-    Map<String, RowMetaInterface> inputRowMeta = analyzer.getInputFields( mergeJoinMeta );
-    assertNotNull( inputRowMeta );
-    assertEquals( 2, inputRowMeta.size() );
+
+    doNothing().when( analyzer ).validateState( null, mergeJoinMeta );
+
+    when( mergeJoinMeta.getStepIOMeta() ).thenReturn( ioMetaInterface );
+    List<StreamInterface> infoStreams = mock( List.class );
+    when( ioMetaInterface.getInfoStreams() ).thenReturn( infoStreams );
+    StreamInterface leftStream = mock( StreamInterface.class );
+    StreamInterface rightStream = mock( StreamInterface.class );
+    when( infoStreams.get( 0 ) ).thenReturn( leftStream );
+    when( infoStreams.get( 1 ) ).thenReturn( rightStream );
+    StepMeta leftStepMeta = mock ( StepMeta.class );
+    StepMeta rightStepMeta = mock ( StepMeta.class );
+    when( leftStream.getStepMeta() ).thenReturn( leftStepMeta );
+    when( rightStream.getStepMeta() ).thenReturn( rightStepMeta );
+    RowMetaInterface leftRmi = mock( RowMetaInterface.class );
+    RowMetaInterface rightRmi = mock( RowMetaInterface.class );
+
+    when( parentTransMeta.getStepFields(
+      eq( leftStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( leftRmi );
+    when( parentTransMeta.getStepFields(
+      eq( rightStepMeta ), any( ProgressMonitorListener.class ) ) ).thenReturn( rightRmi );
+    when( leftStepMeta.getName() ).thenReturn( "left" );
+    when( rightStepMeta.getName() ).thenReturn( "right" );
+
+    Map<String, RowMetaInterface> inputFields = analyzer.getInputFields( mergeJoinMeta );
+    assertNotNull( inputFields );
+
+    assertEquals( 2, inputFields.size() );
+    assertTrue( inputFields.containsKey( "left" ) );
+    assertTrue( inputFields.containsKey( "right" ) );
+
+    assertEquals( leftRmi, inputFields.get( "left" ) );
+    assertEquals( rightRmi, inputFields.get( "right" ) );
+
   }
 
   @Test
-  public void testGetOutputFields() throws Exception {
-    analyzer.setParentTransMeta( transMeta );
-    analyzer.setBaseStepMeta( mergeJoinMeta );
-    analyzer.setParentStepMeta( parentStepMeta );
+  public void testIsPassthrough_leftSideField() throws Exception {
+    StepField passthroughField = new StepField( "leftStep", "value" );
+    assertTrue( analyzer.isPassthrough( passthroughField ) );
+  }
 
-    RowMetaInterface outputFields = analyzer.getOutputFields( mergeJoinMeta );
-    assertNotNull( outputFields );
+  @Test
+  public void testIsPassthrough_rightSideField() throws Exception {
+    StepField passthroughField = new StepField( "rightStep", "ST" );
+    assertTrue( analyzer.isPassthrough( passthroughField ) );
+  }
+
+  @Test
+  public void testIsPassthrough_rightSideFieldRenamed() throws Exception {
+    // the right side value field gets renamed to value_1, so this one is not a passthrough
+    StepField passthroughField = new StepField( "rightStep", "value" );
+    assertFalse( analyzer.isPassthrough( passthroughField ) );
   }
 
   @Test

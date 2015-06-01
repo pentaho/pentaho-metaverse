@@ -63,6 +63,7 @@
     <partitionschemas>
     </partitionschemas>
     <slaveservers>
+         <slaveserver><name>carte</name><hostname>127.0.0.1</hostname><port>8081</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>N</master><sslMode>N</sslMode></slaveserver>
     </slaveservers>
     <clusterschemas>
     </clusterschemas>
@@ -170,11 +171,22 @@
         <precision>-1</precision>
         <set_empty_string>N</set_empty_string>
       </field>
+      <field>
+        <name>unused</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <set_empty_string>N</set_empty_string>
+      </field>
     </fields>
     <data>
-      <line> <item>Matt Burgess</item><item>Bacon for Dummies</item><item>3</item> </line>
-      <line> <item>Rob Fellows</item><item>Geo Dashboarding in Pentaho</item><item>1</item> </line>
-      <line> <item>Willam Seyler</item><item>Learn Karate in 2500 Easy Steps</item><item>2</item> </line>
+      <line> <item>Matt Burgess</item><item>Bacon for Dummies</item><item>3</item><item>x</item> </line>
+      <line> <item>Rob Fellows</item><item>Geo Dashboarding in Pentaho</item><item>1</item><item>x</item> </line>
+      <line> <item>Willam Seyler</item><item>Learn Karate in 2500 Easy Steps</item><item>2</item><item>x</item> </line>
     </data>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
