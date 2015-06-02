@@ -328,13 +328,6 @@ public class TransExecutorStepAnalyzerTest {
   }
 
   @Test
-  public void testAddResultRowsFields_noOutputRowsSourceStep() throws Exception {
-    when( meta.getOutputRowsSourceStep() ).thenReturn( null );
-    verify( builder, never() )
-      .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_CREATES ), any( IMetaverseNode.class ) );
-  }
-
-  @Test
   public void testConnectToSubTransInputFields() throws Exception {
     IMetaverseNode childTransNode = mock( IMetaverseNode.class );
     IMetaverseNode outNode = mock( IMetaverseNode.class );

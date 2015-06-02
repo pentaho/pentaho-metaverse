@@ -1,7 +1,7 @@
 /*
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -24,11 +24,9 @@ package com.pentaho.dictionary;
 
 import com.pentaho.metaverse.api.IMetaverseNode;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -40,11 +38,6 @@ import java.util.Set;
  */
 @SuppressWarnings( "rawtypes" )
 public class DictionaryHelper {
-
-  /**
-   * The separator to use in id generation.
-   */
-  public static final String SEPARATOR = "~";
 
   /**
    * The set of structural link types
@@ -61,7 +54,6 @@ public class DictionaryHelper {
    */
   public static final Set<String> DATAFLOW_LINK_TYPES = new HashSet<String>();
 
-  private static List<Class> classList = new ArrayList<Class>();
   private static Map<String, String> categoryColorMap = new HashMap<String, String>();
   private static Map<String, String> typeCategoryMap = new HashMap<String, String>();
 
@@ -132,8 +124,6 @@ public class DictionaryHelper {
   static {
     registerStructuralLinkType( DictionaryConst.LINK_EXECUTES );
     registerStructuralLinkType( DictionaryConst.LINK_CONTAINS );
-    registerStructuralLinkType( DictionaryConst.LINK_CREATES );
-    registerStructuralLinkType( DictionaryConst.LINK_DELETES );
     registerStructuralLinkType( DictionaryConst.LINK_DEFINES );
     registerStructuralLinkType( DictionaryConst.LINK_PARENT_CONCEPT );
 
