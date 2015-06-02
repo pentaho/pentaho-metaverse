@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -23,16 +23,11 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
-import com.pentaho.metaverse.api.model.kettle.IFieldMapping;
 
-import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,25 +49,5 @@ public class GenericStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta> {
   @Override
   protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode ) {
     // nothing custom to do here since it's the catch-all step analyzer
-  }
-
-  @Override
-  public Set<ComponentDerivationRecord> getChangeRecords( BaseStepMeta meta ) throws MetaverseAnalyzerException {
-    return null;
-  }
-
-  @Override
-  public Set<IFieldMapping> getFieldMappings( BaseStepMeta meta ) throws MetaverseAnalyzerException {
-    return null;
-  }
-
-  @Override
-  public Map<String, RowMetaInterface> getInputFields( BaseStepMeta meta ) {
-    return null;
-  }
-
-  @Override
-  public RowMetaInterface getOutputFields( BaseStepMeta meta ) {
-    return null;
   }
 }
