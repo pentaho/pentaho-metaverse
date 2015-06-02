@@ -37,13 +37,13 @@ public class DictionaryHelperTest {
 
   @Before
   public void init() {
-    Set<Class> classes = new HashSet<Class>();
+    Set<Class> classes = new HashSet<>();
     classes.add( Trans.class );
-    Set<String> types = new HashSet<String>();
+    Set<String> types = new HashSet<>();
     types.add( DictionaryConst.NODE_TYPE_TRANS );
-    classes = new HashSet<Class>();
+    classes = new HashSet<>();
     classes.add( Object.class );
-    types = new HashSet<String>();
+    types = new HashSet<>();
     types.add( DictionaryConst.NODE_TYPE_TRANS_STEP );
     types.add( DictionaryConst.NODE_TYPE_TRANS_FIELD );
     types.add( DictionaryConst.NODE_TYPE_JOB );
@@ -74,13 +74,8 @@ public class DictionaryHelperTest {
       DictionaryConst.NODE_TYPE_TRANS_STEP + "~my transform.ktr~Table Input",
       "Table Input", DictionaryConst.NODE_TYPE_TRANS_STEP, null, transNode, DictionaryConst.LINK_CONTAINS );
 
-    IMetaverseNode fieldNode = DictionaryHelper.addChildNode(
-      DictionaryConst.NODE_TYPE_TRANS_FIELD + "~my transform.ktr~Table Input~Country",
-      "Country", DictionaryConst.NODE_TYPE_TRANS_FIELD, null, stepNode, DictionaryConst.LINK_CREATES );
-
     MetaverseTransientNode node1 = (MetaverseTransientNode) transNode;
     MetaverseTransientNode node2 = (MetaverseTransientNode) stepNode;
-    MetaverseTransientNode node3 = (MetaverseTransientNode) fieldNode;
 
     assertNotNull( "Links is null", node1.getLinks() );
     assertEquals( "Links count is wrong", 1, node1.getLinks().size() );

@@ -288,16 +288,6 @@ public class DictionaryConst {
   public static final String LINK_DEPENDENCYOF = "dependencyof";
 
   /**
-   * Label for an "creates" edge in the graph, e.g. a transformation step creates a transformation field
-   */
-  public static final String LINK_CREATES = "creates";
-
-  /**
-   * Label for an "deletes" edge in the graph, e.g. a select values step can remove a field from the stream
-   */
-  public static final String LINK_DELETES = "deletes";
-
-  /**
    * Label for an "hops" edge in the graph, e.g. a step sends data to another step via a "hop"
    */
   public static final String LINK_HOPSTO = "hops_to";

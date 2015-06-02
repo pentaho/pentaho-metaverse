@@ -1,3 +1,24 @@
+/*!
+ * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
+ *
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
+ *
+ * NOTICE: All information including source code contained herein is, and
+ * remains the sole property of Pentaho and its licensors. The intellectual
+ * and technical concepts contained herein are proprietary and confidential
+ * to, and are trade secrets of Pentaho and may be covered by U.S. and foreign
+ * patents, or patents in process, and are protected by trade secret and
+ * copyright laws. The receipt or possession of this source code and/or related
+ * information does not convey or imply any rights to reproduce, disclose or
+ * distribute its contents, or to manufacture, use, or sell anything that it
+ * may describe, in whole or in part. Any reproduction, modification, distribution,
+ * or public display of this information without the express written authorization
+ * from Pentaho is strictly prohibited and in violation of applicable laws and
+ * international treaties. Access to the source code contained herein is strictly
+ * prohibited to anyone except those individuals and entities who have executed
+ * confidentiality and non-disclosure agreements or other agreements with Pentaho,
+ * explicitly covering such access.
+ */
 package com.pentaho.metaverse.graph;
 
 import com.pentaho.dictionary.DictionaryConst;
@@ -58,7 +79,7 @@ public class BlueprintsGraphMetaverseReaderTest {
     writerJson.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testGraphMetaverseReader.graphjson" ) );
 
     assertEquals( "Vertex count is wrong", 30, countVertices( graph ) );
-    assertEquals( "Edge count is wrong", 42, countEdges( graph ) );
+    assertEquals( "Edge count is wrong", 35, countEdges( graph ) );
   }
 
   @Test
@@ -241,8 +262,8 @@ public class BlueprintsGraphMetaverseReaderTest {
     GraphSONWriter writerJson = new GraphSONWriter();
     writerJson.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testSearch1.json" ) );
 
-    assertEquals( "Vertex count is wrong", 7, countVertices( graph ) );
-    assertEquals( "Edge count is wrong", 6, countEdges( graph ) );
+    assertEquals( "Vertex count is wrong", 9, countVertices( graph ) );
+    assertEquals( "Edge count is wrong", 8, countEdges( graph ) );
 
     // search for files and tables connected to datasource1.table1.field1
     types = new ArrayList<String>();
@@ -260,8 +281,8 @@ public class BlueprintsGraphMetaverseReaderTest {
     assertEquals( "Edge count is wrong", 7, countEdges( graph ) );
 
     // search for everything connected to datasource1.table2.field2
-    types = new ArrayList<String>();
-    ids = new ArrayList<String>();
+    types = new ArrayList<>();
+    ids = new ArrayList<>();
     ids.add( "datasource1.table2.field1" );
     graph = metaverseReader.search( types, ids, false );
     assertNotNull( "Node is null", graph );
@@ -269,8 +290,8 @@ public class BlueprintsGraphMetaverseReaderTest {
     writer.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testSearch3.graphml" ) );
     writerJson.outputGraph( graph, new FileOutputStream( OUTPUT_FOLDER + "testSearch3.json" ) );
 
-    assertEquals( "Vertex count is wrong", 16, countVertices( graph ) );
-    assertEquals( "Edge count is wrong", 21, countEdges( graph ) );
+    assertEquals( "Vertex count is wrong", 14, countVertices( graph ) );
+    assertEquals( "Edge count is wrong", 15, countEdges( graph ) );
 
   }
 
@@ -339,11 +360,8 @@ public class BlueprintsGraphMetaverseReaderTest {
     graph.addEdge( null, textFile, trans1Step1, DictionaryConst.LINK_READBY );
     graph.addEdge( null, textFile, textField1, DictionaryConst.LINK_CONTAINS );
     graph.addEdge( null, textFile, textField2, DictionaryConst.LINK_CONTAINS );
-    graph.addEdge( null, trans1Step1, trans1Field1, DictionaryConst.LINK_CREATES );
-    graph.addEdge( null, trans1Step1, trans1Field2, DictionaryConst.LINK_CREATES );
     graph.addEdge( null, textField1, trans1Field1, DictionaryConst.LINK_POPULATES );
     graph.addEdge( null, textField2, trans1Field2, DictionaryConst.LINK_POPULATES );
-    graph.addEdge( null, trans1Step2, trans1Field3, DictionaryConst.LINK_CREATES );
     graph.addEdge( null, trans1Step3, table1, DictionaryConst.LINK_WRITESTO );
     graph.addEdge( null, datasource1, table1, DictionaryConst.LINK_CONTAINS );
     graph.addEdge( null, table1, table1field1, DictionaryConst.LINK_CONTAINS );
@@ -357,13 +375,9 @@ public class BlueprintsGraphMetaverseReaderTest {
     graph.addEdge( null, trans2, trans2Step2, DictionaryConst.LINK_EXECUTES );
     graph.addEdge( null, trans2, trans2Step3, DictionaryConst.LINK_EXECUTES );
     graph.addEdge( null, table1, trans2Step1, DictionaryConst.LINK_READBY );
-    graph.addEdge( null, trans2Step1, trans2Field1, DictionaryConst.LINK_CREATES );
-    graph.addEdge( null, trans2Step1, trans2Field2, DictionaryConst.LINK_CREATES );
-    graph.addEdge( null, trans2Step1, trans2Field3, DictionaryConst.LINK_CREATES );
     graph.addEdge( null, table1field1, trans2Field1, DictionaryConst.LINK_POPULATES );
     graph.addEdge( null, table1field2, trans2Field2, DictionaryConst.LINK_POPULATES );
     graph.addEdge( null, table1field3, trans2Field3, DictionaryConst.LINK_POPULATES );
-    graph.addEdge( null, trans2Step2, trans2Field4, DictionaryConst.LINK_CREATES );
     graph.addEdge( null, trans2Step3, table2, DictionaryConst.LINK_WRITESTO );
     graph.addEdge( null, datasource1, table2, DictionaryConst.LINK_CONTAINS );
     graph.addEdge( null, table2, table2field1, DictionaryConst.LINK_CONTAINS );

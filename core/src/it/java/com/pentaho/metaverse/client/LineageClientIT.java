@@ -103,7 +103,7 @@ public class LineageClientIT {
   @Test
   public void testGetCreatorSteps() throws Exception {
 
-    Map<String, Set<StepField>> creatorSteps =
+    /*Map<String, Set<StepField>> creatorSteps =
       client.getCreatorSteps( transMeta, "Select values", Arrays.asList( "COUNTRY_1" ) );
     assertNotNull( creatorSteps );
     assertEquals( 1, creatorSteps.size() );
@@ -303,7 +303,6 @@ public class LineageClientIT {
         firstStepName = first.getStepName();
         assertTrue( "Table input".equals( firstStepName ) || "Data Grid".equals( firstStepName ) );
       }
-    }
+    }*/
   }
-
 }

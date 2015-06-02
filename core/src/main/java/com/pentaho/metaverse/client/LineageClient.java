@@ -1,7 +1,7 @@
 /*!
  * PENTAHO CORPORATION PROPRIETARY AND CONFIDENTIAL
  *
- * Copyright 2002 - 2014 Pentaho Corporation (Pentaho). All rights reserved.
+ * Copyright 2002 - 2015 Pentaho Corporation (Pentaho). All rights reserved.
  *
  * NOTICE: All information including source code contained herein is, and
  * remains the sole property of Pentaho and its licensors. The intellectual
@@ -254,7 +254,7 @@ public class LineageClient implements ILineageClient {
     Map<String, Set<StepField>> creatorStepsMap = new HashMap<String, Set<StepField>>();
 
     // Call creatorFields, then follow the "creates" link back to the step nodes
-    Map<String, Set<Vertex>> creatorFieldNodes = creatorFields( lineageGraph, targetStepName, fieldNames );
+   /* Map<String, Set<Vertex>> creatorFieldNodes = creatorFields( lineageGraph, targetStepName, fieldNames );
     for ( String targetField : creatorFieldNodes.keySet() ) {
 
       GremlinPipeline creatorStepsPipe =
@@ -281,7 +281,7 @@ public class LineageClient implements ILineageClient {
         creatorStepsSet.add( new StepField( stepFields.get( 1 ), stepFields.get( 0 ) ) );
       }
     }
-
+*/
     return creatorStepsMap;
   }
 
@@ -300,7 +300,7 @@ public class LineageClient implements ILineageClient {
 
     final Map<String, Set<Vertex>> creatorFieldsMap = new HashMap<String, Set<Vertex>>();
 
-    if ( fieldNames != null ) {
+    /*if ( fieldNames != null ) {
       // Go through each target field name individually. We use a map so as not to confuse which creator fields are
       // associated with which target fields
       // TODO maybe ConcurrentSkipListSet?
@@ -435,8 +435,8 @@ public class LineageClient implements ILineageClient {
             }
           }
         }
-      }*/
-    }
+      }
+    }*/
     return creatorFieldsMap;
   }
 
@@ -570,7 +570,7 @@ public class LineageClient implements ILineageClient {
     public Boolean compute( Vertex v ) {
       return ( v != null
         && v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES, DictionaryConst.LINK_JOINS )
-          .iterator().hasNext() );
+        .iterator().hasNext() );
     }
   }
 
@@ -615,7 +615,7 @@ public class LineageClient implements ILineageClient {
     public Boolean compute( Vertex v ) {
       return ( v != null )
         && new GremlinPipeline<Vertex, Boolean>( v.getVertices( edgeDirection, linkLabel ) )
-          .has( DictionaryConst.PROPERTY_NAME, linkedNodeName ).hasNext();
+        .has( DictionaryConst.PROPERTY_NAME, linkedNodeName ).hasNext();
     }
   }
 
@@ -629,7 +629,7 @@ public class LineageClient implements ILineageClient {
     public List<String> compute( Vertex it ) {
       return Arrays.asList(
         it.getProperty( DictionaryConst.PROPERTY_NAME ).toString(),
-        it.getVertices( Direction.IN, DictionaryConst.LINK_CREATES )
+        it.getVertices( Direction.IN )
           .iterator().next().getProperty( DictionaryConst.PROPERTY_NAME ).toString() );
     }
   }
@@ -646,7 +646,7 @@ public class LineageClient implements ILineageClient {
 
       stepFieldOpsMap.put(
         "stepName",
-        (String) it.getVertices( Direction.IN, DictionaryConst.LINK_CREATES )
+        (String) it.getVertices( Direction.IN )
           .iterator().next().getProperty( DictionaryConst.PROPERTY_NAME )
       );
 
