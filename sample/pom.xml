@@ -30,7 +30,8 @@
       <groupId>com.pentaho</groupId>
       <artifactId>pentaho-metaverse-api</artifactId>
       <version>${project.version}</version>
-      <type>bundle</type>
+      <scope>provided</scope>
+      <type>jar</type>
     </dependency>
 
     <dependency>
