@@ -65,7 +65,26 @@
       <groupId>com.pentaho</groupId>
       <artifactId>pentaho-metaverse-api</artifactId>
       <version>${project.version}</version>
-      <type>bundle</type>
+      <scope>provided</scope>
+      <type>jar</type>
+    </dependency>
+
+    <dependency>
+      <groupId>com.tinkerpop.blueprints</groupId>
+      <artifactId>blueprints-core</artifactId>
+      <version>${dependency.com.tinkerpop.blueprints.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!--
+      tinkerpop blueprints uses commons-configuration, but brings in an older non-osgi version.
+      so we force a higher version that is more compatible
+    -->
+    <dependency>
+      <groupId>commons-configuration</groupId>
+      <artifactId>commons-configuration</artifactId>
+      <version>${dependency.commons-configuration.commons-configuration.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -81,27 +100,10 @@
       <version>${dependency.com.google.guava.guava.version}</version>
     </dependency>
 
-    <!--
-      tinkerpop blueprints uses commons-configuration, but brings in an older non-osgi version.
-      so we force a higher version that is more compatible
-    -->
-    <dependency>
-      <groupId>commons-configuration</groupId>
-      <artifactId>commons-configuration</artifactId>
-      <version>${dependency.commons-configuration.commons-configuration.version}</version>
-    </dependency>
-
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${dependency.commons-io.commons-io.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.tinkerpop.blueprints</groupId>
-      <artifactId>blueprints-core</artifactId>
-      <version>${dependency.com.tinkerpop.blueprints.version}</version>
-      <scope>compile</scope>
     </dependency>
 
     <dependency>
@@ -313,7 +315,12 @@
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>
             <Import-Package>
-              org.osgi.service.http,org.apache.felix.http.api,*
+              org.osgi.service.http,
+              org.apache.felix.http.api,
+              com.pentaho.dictionary,
+              com.pentaho.metaverse.api,
+              com.pentaho.metaverse.api.*,
+              *
             </Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
             <Export-Package>
