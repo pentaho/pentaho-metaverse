@@ -27,6 +27,7 @@ import com.pentaho.metaverse.IntegrationTestUtil;
 import com.pentaho.metaverse.api.ChangeType;
 import com.pentaho.metaverse.api.IDocumentController;
 import com.pentaho.metaverse.api.IDocumentLocatorProvider;
+import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.StepFieldOperations;
 import com.pentaho.metaverse.api.model.IOperation;
 import com.pentaho.metaverse.api.model.Operations;
@@ -194,6 +195,53 @@ public class LineageClientIT {
         // The step name is either "Table input" or "Data Grid"
         firstStepName = first.getStepName();
         assertTrue( "Table input".equals( firstStepName ) || "Data Grid".equals( firstStepName ) );
+      }
+    }
+  }
+  @Test
+  public void testGetOriginSteps() throws Exception {
+    Set<StepField> originStepsSet;
+    Map<String, Set<StepField>> originSteps;
+
+    originSteps = client.getOriginSteps( transMeta, "Select values", Arrays.asList( "HELLO" ) );
+    assertNotNull( originSteps );
+    assertEquals( 1, originSteps.size() );
+    originStepsSet = originSteps.get( "HELLO" );
+    assertNotNull( originStepsSet );
+    assertEquals( 2, originStepsSet.size() );
+    // We're not sure which step will be in which order, but both fields are named COUNTRY
+    for ( StepField stepField : originStepsSet ) {
+      assertEquals( "COUNTRY", stepField.getFieldName() );
+    }
+
+    originSteps = client.getOriginSteps( transMeta, "Passthru", Arrays.asList( "COUNTRY", "COUNTRY_1" ) );
+    assertNotNull( originSteps );
+    assertEquals( 2, originSteps.size() );
+    for ( Set<StepField> originStepsSetValues : originSteps.values() ) {
+      assertNotNull( originStepsSetValues );
+      assertEquals( 2, originStepsSetValues.size() );
+      // We're not sure which step will be in which order, but both fields are named COUNTRY
+      for ( StepField stepField : originStepsSetValues ) {
+        assertEquals( "COUNTRY", stepField.getFieldName() );
+      }
+    }
+
+    originSteps = client.getOriginSteps( transMeta, "Select values", Arrays.asList( "COUNTRY", "COUNTRY_1", "HELLO" ) );
+    assertNotNull( originSteps );
+    assertEquals( 1, originSteps.size() );
+    for ( String stepName : originSteps.keySet() ) {
+      // Only HELLO will return values
+      if ( !"HELLO".equals( stepName ) ) {
+        assertEquals( 0, originSteps.get( stepName ).size() );
+
+      } else {
+        Set<StepField> originStepsSetValues = originSteps.get( stepName );
+        assertNotNull( originStepsSetValues );
+        assertEquals( 2, originStepsSetValues.size() );
+        // We're not sure which step will be in which order, but both fields are named COUNTRY
+        for ( StepField stepField : originStepsSetValues ) {
+          assertEquals( "COUNTRY", stepField.getFieldName() );
+        }
       }
     }
   }
