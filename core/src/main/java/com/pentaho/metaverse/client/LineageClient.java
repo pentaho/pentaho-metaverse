@@ -60,6 +60,64 @@ public class LineageClient implements ILineageClient {
   private static final StepFieldOperationsPipeFunction STEPFIELDOPS_PIPE_FUNC = new StepFieldOperationsPipeFunction();
 
   /**
+   * Finds the step(s) in the given transformation that created the given field, with respect to the given target step.
+   * This means if a field has been renamed or derived from another field from another step, then the lineage graph
+   * is traversed back from the target step to determine which steps contributed to the field in the target step.
+   * This differs from getCreatorSteps() as the lineage graph traversal will not stop with a "creates" relationship;
+   * rather, this method will traverse other relationships ("uses", "derives", e.g.) to find the actual origin fields
+   * that comprise the final field in the target step.
+   *
+   * @param transMeta      a reference to a transformation's metadata
+   * @param targetStepName the target step name associated with the given field names
+   * @param fieldNames     a collection of field names associated with the target step, for which to find the step(s)
+   *                       and field(s) that contributed to those fields
+   * @return a map from target field name to step-field objects, where each step has created a field with
+   * the returned name, and that field has contributed in some way to the specified target field.
+   * @throws MetaverseException if an error occurred while finding the origin steps
+   */
+  @Override
+  public Map<String, Set<StepField>> getOriginSteps( TransMeta transMeta, String targetStepName,
+                                                     Collection<String> fieldNames ) throws MetaverseException {
+    Map<String, Set<StepField>> originStepsMap = new HashMap<>();
+
+    try {
+      Future<Graph> lineageGraphTask = LineageGraphMap.getInstance().get( transMeta );
+      if ( lineageGraphTask != null ) {
+        Graph lineageGraph = lineageGraphTask.get();
+        List<Vertex> targetFields = getTargetFields( lineageGraph, targetStepName, fieldNames );
+
+        GremlinPipeline pipe = getOriginStepsPipe( targetFields );
+        List<List<Vertex>> pathList = pipe.toList();
+        if ( pathList != null ) {
+
+          for ( List<Vertex> path : pathList ) {
+            // Transform each path of vertices into a "path" of StepFieldOperations objects (basically save off
+            // properties of each vertex into a new list)
+            String targetField = path.get( 0 ).getProperty( DictionaryConst.PROPERTY_NAME );
+            Set<StepField> pathSet = originStepsMap.get( targetField );
+
+            if ( pathSet == null ) {
+              pathSet = new HashSet<>();
+              originStepsMap.put( targetField, pathSet );
+            }
+
+            Vertex v = path.get( path.size() - 1 );
+            Map<String, String> stepField = STEPFIELDOPS_PIPE_FUNC.compute( v );
+            String stepName = stepField.get( "stepName" );
+            String fieldName = stepField.get( "fieldName" );
+
+            pathSet.add( new StepField( stepName, fieldName ) );
+          }
+        }
+      }
+    } catch ( Exception e ) {
+      throw new MetaverseException( e );
+    }
+
+    return originStepsMap;
+  }
+
+  /**
    * Returns the paths between the origin field(s) and target field(s). A path in this context is an ordered list of
    * StepFieldOperations objects, each of which corresponds to a field at a certain step where operation(s) are
    * applied. The order of the list corresponds to the order of the steps from the origin step (see getOriginSteps())
@@ -187,7 +245,6 @@ public class LineageClient implements ILineageClient {
               .loop( 1, new NumLoops( MAX_LOOPS ), new NotNullAndNotDerivativeLoop() )
               .dedup();
             return basePipe.path();
-
           }
         },
         new PipeFunction<Vertex, GremlinPipeline>() {
@@ -239,8 +296,7 @@ public class LineageClient implements ILineageClient {
   protected static class HasDerivesOrJoinsLink implements PipeFunction<Vertex, Boolean> {
     @Override
     public Boolean compute( Vertex v ) {
-      return ( v != null
-        && v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES, DictionaryConst.LINK_JOINS )
+      return ( v != null && v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES, DictionaryConst.LINK_JOINS )
         .iterator().hasNext() );
     }
   }
@@ -289,63 +345,5 @@ public class LineageClient implements ILineageClient {
 
       return stepFieldOpsMap;
     }
-  }
-
-  /**
-   * Finds the step(s) in the given transformation that created the given field, with respect to the given target step.
-   * This means if a field has been renamed or derived from another field from another step, then the lineage graph
-   * is traversed back from the target step to determine which steps contributed to the field in the target step.
-   * This differs from getCreatorSteps() as the lineage graph traversal will not stop with a "creates" relationship;
-   * rather, this method will traverse other relationships ("uses", "derives", e.g.) to find the actual origin fields
-   * that comprise the final field in the target step.
-   *
-   * @param transMeta      a reference to a transformation's metadata
-   * @param targetStepName the target step name associated with the given field names
-   * @param fieldNames     a collection of field names associated with the target step, for which to find the step(s)
-   *                       and field(s) that contributed to those fields
-   * @return a map from target field name to step-field objects, where each step has created a field with
-   * the returned name, and that field has contributed in some way to the specified target field.
-   * @throws MetaverseException if an error occurred while finding the origin steps
-   */
-  @Override
-  public Map<String, Set<StepField>> getOriginSteps( TransMeta transMeta, String targetStepName,
-    Collection<String> fieldNames ) throws MetaverseException {
-    Map<String, Set<StepField>> originStepsMap = new HashMap<String, Set<StepField>>();
-
-    try {
-      Future<Graph> lineageGraphTask = LineageGraphMap.getInstance().get( transMeta );
-      if ( lineageGraphTask != null ) {
-        Graph lineageGraph = lineageGraphTask.get();
-        List<Vertex> targetFields = getTargetFields( lineageGraph, targetStepName, fieldNames );
-
-        for ( Vertex targetField : targetFields ) {
-
-          GremlinPipeline pipe = getOriginStepsPipe( targetFields );
-          List<List<Vertex>> pathList = pipe.toList();
-          if ( pathList != null ) {
-            Set<StepField> originStepsSet = originStepsMap.get( targetField );
-            if ( originStepsSet == null ) {
-              originStepsSet = new HashSet<StepField>();
-              originStepsMap.put( targetField.getProperty( DictionaryConst.PROPERTY_NAME ).toString(), originStepsSet );
-            }
-            for ( List<Vertex> path : pathList ) {
-              Vertex ancestor = path.get( path.size() - 1 );
-              GremlinPipeline p = new GremlinPipeline( ancestor )
-                .in( DictionaryConst.LINK_OUTPUTS )
-                .has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
-              List<Vertex> list = p.toList();
-              String stepName = list.get( 0 ).getProperty( DictionaryConst.PROPERTY_NAME );
-              String field = ancestor.getProperty( DictionaryConst.PROPERTY_NAME );
-              StepField newStepField = new StepField( stepName, field );
-              originStepsSet.add( newStepField );
-            }
-          }
-        }
-      }
-    } catch ( Exception e ) {
-      throw new MetaverseException( e );
-    }
-
-    return originStepsMap;
   }
 }
