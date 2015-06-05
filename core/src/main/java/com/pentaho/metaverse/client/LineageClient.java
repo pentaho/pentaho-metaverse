@@ -23,6 +23,7 @@ package com.pentaho.metaverse.client;
 
 import com.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.api.ILineageClient;
+import com.pentaho.metaverse.api.MetaverseException;
 import com.pentaho.metaverse.api.StepField;
 import com.pentaho.metaverse.api.StepFieldOperations;
 import com.pentaho.metaverse.api.model.Operations;
@@ -36,12 +37,10 @@ import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.trans.TransMeta;
-import com.pentaho.metaverse.api.MetaverseException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -290,5 +289,63 @@ public class LineageClient implements ILineageClient {
 
       return stepFieldOpsMap;
     }
+  }
+
+  /**
+   * Finds the step(s) in the given transformation that created the given field, with respect to the given target step.
+   * This means if a field has been renamed or derived from another field from another step, then the lineage graph
+   * is traversed back from the target step to determine which steps contributed to the field in the target step.
+   * This differs from getCreatorSteps() as the lineage graph traversal will not stop with a "creates" relationship;
+   * rather, this method will traverse other relationships ("uses", "derives", e.g.) to find the actual origin fields
+   * that comprise the final field in the target step.
+   *
+   * @param transMeta      a reference to a transformation's metadata
+   * @param targetStepName the target step name associated with the given field names
+   * @param fieldNames     a collection of field names associated with the target step, for which to find the step(s)
+   *                       and field(s) that contributed to those fields
+   * @return a map from target field name to step-field objects, where each step has created a field with
+   * the returned name, and that field has contributed in some way to the specified target field.
+   * @throws MetaverseException if an error occurred while finding the origin steps
+   */
+  @Override
+  public Map<String, Set<StepField>> getOriginSteps( TransMeta transMeta, String targetStepName,
+    Collection<String> fieldNames ) throws MetaverseException {
+    Map<String, Set<StepField>> originStepsMap = new HashMap<String, Set<StepField>>();
+
+    try {
+      Future<Graph> lineageGraphTask = LineageGraphMap.getInstance().get( transMeta );
+      if ( lineageGraphTask != null ) {
+        Graph lineageGraph = lineageGraphTask.get();
+        List<Vertex> targetFields = getTargetFields( lineageGraph, targetStepName, fieldNames );
+
+        for ( Vertex targetField : targetFields ) {
+
+          GremlinPipeline pipe = getOriginStepsPipe( targetFields );
+          List<List<Vertex>> pathList = pipe.toList();
+          if ( pathList != null ) {
+            Set<StepField> originStepsSet = originStepsMap.get( targetField );
+            if ( originStepsSet == null ) {
+              originStepsSet = new HashSet<StepField>();
+              originStepsMap.put( targetField.getProperty( DictionaryConst.PROPERTY_NAME ).toString(), originStepsSet );
+            }
+            for ( List<Vertex> path : pathList ) {
+              Vertex ancestor = path.get( path.size() - 1 );
+              GremlinPipeline p = new GremlinPipeline( ancestor )
+                .in( DictionaryConst.LINK_OUTPUTS )
+                .has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
+              List<Vertex> list = p.toList();
+              String stepName = list.get( 0 ).getProperty( DictionaryConst.PROPERTY_NAME );
+              String field = ancestor.getProperty( DictionaryConst.PROPERTY_NAME );
+              StepField newStepField = new StepField( stepName, field );
+              originStepsSet.add( newStepField );
+            }
+          }
+        }
+      }
+    } catch ( Exception e ) {
+      throw new MetaverseException( e );
+    }
+
+    return originStepsMap;
   }
 }
