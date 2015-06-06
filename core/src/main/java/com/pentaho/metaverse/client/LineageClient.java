@@ -296,8 +296,8 @@ public class LineageClient implements ILineageClient {
   protected static class HasDerivesOrJoinsLink implements PipeFunction<Vertex, Boolean> {
     @Override
     public Boolean compute( Vertex v ) {
-      return ( v != null && v.getVertices( Direction.IN, DictionaryConst.LINK_DERIVES, DictionaryConst.LINK_JOINS )
-        .iterator().hasNext() );
+      return ( v != null && v.getVertices(
+        Direction.IN, DictionaryConst.LINK_DERIVES, DictionaryConst.LINK_JOINS ).iterator().hasNext() );
     }
   }
 
@@ -346,4 +346,4 @@ public class LineageClient implements ILineageClient {
       return stepFieldOpsMap;
     }
   }
-}
+            }
