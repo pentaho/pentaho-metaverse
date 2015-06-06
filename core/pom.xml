@@ -328,6 +328,7 @@
               com.pentaho.metaverse.analyzer.kettle,
               com.pentaho.metaverse.analyzer.kettle.*,
               com.pentaho.metaverse.util,
+              com.pentaho.metaverse.graph
             </Export-Package>
             <Bundle-Activator>com.pentaho.metaverse.util.MetaverseBundleActivator</Bundle-Activator>
           </instructions>
