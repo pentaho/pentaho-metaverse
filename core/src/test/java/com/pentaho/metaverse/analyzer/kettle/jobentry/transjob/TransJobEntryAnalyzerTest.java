@@ -21,9 +21,19 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.jobentry.transjob;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,31 +43,28 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.KettleEnvironment;
+import org.pentaho.di.core.ObjectLocationSpecificationMethod;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.di.trans.TransMeta;
+
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.dictionary.MetaverseTransientNode;
 import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IMetaverseBuilder;
 import com.pentaho.metaverse.api.IMetaverseObjectFactory;
 import com.pentaho.metaverse.api.INamespace;
 import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.util.Set;
-
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
+import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
 
 @RunWith( MockitoJUnitRunner.class )
 public class TransJobEntryAnalyzerTest {
 
   private static final String TEST_FILE_NAME = "file.ktr";
 
-  private TransJobEntryAnalyzer analyzer = new TransJobEntryAnalyzer();
+  private TransJobEntryAnalyzer analyzer;
 
   private IComponentDescriptor descriptor;
 
@@ -79,6 +86,11 @@ public class TransJobEntryAnalyzerTest {
   @Mock
   private IMetaverseObjectFactory objectFactory;
 
+  @Mock
+  private TransMeta childTransMeta;
+  
+  private TransJobEntryAnalyzer spyAnalyzer;
+  
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     KettleEnvironment.init();
@@ -90,6 +102,7 @@ public class TransJobEntryAnalyzerTest {
     when( objectFactory.createNodeObject( anyString(), anyString(),
       anyString() ) ).thenReturn( new MetaverseTransientNode( "name" ) );
     when( jobEntryTrans.getName() ).thenReturn( "job entry" );
+    when( jobEntryTrans.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.FILENAME );
     when( jobEntryTrans.getFilename() ).thenReturn( TEST_FILE_NAME );
     when( jobEntryTrans.getParentJob() ).thenReturn( mockParentJob );
     when( mockParentJob.getJobMeta() ).thenReturn( mockParentJobMeta );
@@ -103,13 +116,16 @@ public class TransJobEntryAnalyzerTest {
     } );
 
     descriptor = new MetaverseComponentDescriptor( "job entry", DictionaryConst.NODE_TYPE_JOB_ENTRY, namespace );
-    analyzer.setMetaverseBuilder( metaverseBuilder );
-
+    analyzer = new TransJobEntryAnalyzer();
+    spyAnalyzer = spy( analyzer );
+    spyAnalyzer.setMetaverseBuilder( metaverseBuilder );
+    spyAnalyzer.setDescriptor( descriptor );
+    doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( anyString() );
   }
 
   @Test
   public void testAnalyze() throws Exception {
-    assertNotNull( analyzer.analyze( descriptor, jobEntryTrans ) );
+    assertNotNull( spyAnalyzer.analyze( descriptor, jobEntryTrans ) );
   }
 
   @Test
@@ -126,41 +142,35 @@ public class TransJobEntryAnalyzerTest {
       ps.close();
       testFile.deleteOnExit();
     }
-    assertNotNull( analyzer.analyze( descriptor, jobEntryTrans ) );
-  }
-
-  @Test
-  public void testAnalyzeNullFilename() throws Exception {
-    when( jobEntryTrans.getFilename() ).thenReturn( null );
-    assertNotNull( analyzer.analyze( descriptor, jobEntryTrans ) );
+    assertNotNull( spyAnalyzer.analyze( descriptor, jobEntryTrans ) );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeNullParentJob() throws Exception {
     when( jobEntryTrans.getParentJob() ).thenReturn( null );
-    assertNotNull( analyzer.analyze( descriptor, jobEntryTrans ) );
+    assertNotNull( spyAnalyzer.analyze( descriptor, jobEntryTrans ) );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeNull() throws Exception {
-    analyzer.analyze( null, null );
+    spyAnalyzer.analyze( null, null );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeWithNullParentJob() throws Exception {
     when( jobEntryTrans.getParentJob() ).thenReturn( null );
-    assertNotNull( analyzer.analyze( descriptor, jobEntryTrans ) );
+    assertNotNull( spyAnalyzer.analyze( descriptor, jobEntryTrans ) );
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeWithNullParentJobMeta() throws Exception {
     when( mockParentJob.getJobMeta() ).thenReturn( null );
-    assertNotNull( analyzer.analyze( descriptor, jobEntryTrans ) );
+    assertNotNull( spyAnalyzer.analyze( descriptor, jobEntryTrans ) );
   }
 
   @Test
   public void testGetSupportedEntries() throws Exception {
-    Set<Class<? extends JobEntryInterface>> supportedEntities = analyzer.getSupportedEntries();
+    Set<Class<? extends JobEntryInterface>> supportedEntities = spyAnalyzer.getSupportedEntries();
     assertNotNull( supportedEntities );
     assertEquals( supportedEntities.size(), 1 );
     assertTrue( supportedEntities.contains( JobEntryTrans.class ) );

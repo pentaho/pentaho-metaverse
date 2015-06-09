@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
-import com.pentaho.metaverse.api.analyzer.kettle.jobentry.BaseJobEntryAnalyzer;
+import com.pentaho.metaverse.api.analyzer.kettle.jobentry.JobEntryAnalyzer;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import com.pentaho.metaverse.api.IComponentDescriptor;
 import com.pentaho.metaverse.api.IMetaverseNode;
@@ -31,10 +31,10 @@ import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import java.util.Set;
 
 /**
- * KettleGenericStepMetaAnalyzer provides a default implementation for analyzing PDI step
- * to gather metadata for the metaverse.
+ * KettleGenericStepMetaAnalyzer provides a default implementation for analyzing PDI step to gather metadata for the
+ * metaverse.
  */
-public class GenericJobEntryMetaAnalyzer extends BaseJobEntryAnalyzer<JobEntryInterface> {
+public class GenericJobEntryMetaAnalyzer extends JobEntryAnalyzer<JobEntryInterface> {
 
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
@@ -51,6 +51,12 @@ public class GenericJobEntryMetaAnalyzer extends BaseJobEntryAnalyzer<JobEntryIn
   @Override
   public Set<Class<? extends JobEntryInterface>> getSupportedEntries() {
     return null;
+  }
+
+  @Override
+  protected void customAnalyze( JobEntryInterface entry, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+    // TODO Auto-generated method stub
+
   }
 
 }

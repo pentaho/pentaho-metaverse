@@ -22,33 +22,37 @@
 
 package com.pentaho.metaverse.api.analyzer.kettle.jobentry;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IConnectionAnalyzer;
-import com.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
-import com.pentaho.metaverse.api.messages.Messages;
+import java.lang.reflect.Method;
+import java.util.List;
+
 import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-import java.util.List;
+import com.pentaho.dictionary.DictionaryConst;
+import com.pentaho.metaverse.api.IComponentDescriptor;
+import com.pentaho.metaverse.api.IConnectionAnalyzer;
+import com.pentaho.metaverse.api.IMetaverseNode;
+import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import com.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
+import com.pentaho.metaverse.api.messages.Messages;
 
 /**
  * The JobEntryAnalyzer provides JobEntryCopy metadata to the metaverse.
  * <p/>
  * Created by gmoran on 7/16/14.
  */
-public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
-    extends BaseKettleMetaverseComponent implements IJobEntryAnalyzer<IMetaverseNode, T> {
+public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends BaseKettleMetaverseComponent implements
+    IJobEntryAnalyzer<IMetaverseNode, T> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger( BaseJobEntryAnalyzer.class );
+  private static final Logger LOGGER = LoggerFactory.getLogger( JobEntryAnalyzer.class );
+
+  protected String[] prevJobNames = null;
 
   /**
    * A reference to the JobEntryInterface under analysis
@@ -76,6 +80,11 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
   protected IConnectionAnalyzer<Object, T> connectionAnalyzer = null;
 
   /**
+   * A descriptor for creating this node
+   */
+  protected IComponentDescriptor descriptor;
+
+  /**
    * Analyzes job entries
    *
    * @param entry
@@ -86,13 +95,14 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
   public IMetaverseNode analyze( IComponentDescriptor descriptor, T entry ) throws MetaverseAnalyzerException {
 
     validateState( descriptor, entry );
+    this.descriptor = descriptor;
 
     // Add yourself
     rootNode = createNodeFromDescriptor( descriptor );
     String stepType = null;
     try {
-      stepType = PluginRegistry.getInstance().findPluginWithId(
-          JobEntryPluginType.class, entry.getPluginId() ).getName();
+      stepType =
+          PluginRegistry.getInstance().findPluginWithId( JobEntryPluginType.class, entry.getPluginId() ).getName();
     } catch ( Throwable t ) {
       stepType = entry.getClass().getSimpleName();
     }
@@ -100,16 +110,19 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
     rootNode.setProperty( "copies", entry.getParentJob().getJobMeta().getJobCopies().size() );
     metaverseBuilder.addNode( rootNode );
 
+    customAnalyze( entry, rootNode );
+
     return rootNode;
   }
+
+  protected abstract void customAnalyze( T entry, IMetaverseNode rootNode ) throws MetaverseAnalyzerException;
 
   /**
    * Adds any used database connections to the metaverse using the appropriate analyzer
    *
    * @throws MetaverseAnalyzerException
    */
-  protected void addConnectionNodes( IComponentDescriptor descriptor )
-    throws MetaverseAnalyzerException {
+  protected void addConnectionNodes( IComponentDescriptor descriptor ) throws MetaverseAnalyzerException {
 
     if ( jobEntryInterface == null ) {
       throw new MetaverseAnalyzerException( Messages.getString( "ERROR.JobEntryInterface.IsNull" ) );
@@ -173,6 +186,32 @@ public abstract class BaseJobEntryAnalyzer<T extends JobEntryInterface>
 
   public void setConnectionAnalyzer( IConnectionAnalyzer<Object, T> connectionAnalyzer ) {
     this.connectionAnalyzer = connectionAnalyzer;
+  }
+
+  public IComponentDescriptor getDescriptor() {
+    return descriptor;
+  }
+
+  public void setDescriptor( IComponentDescriptor descriptor ) {
+    this.descriptor = descriptor;
+  }
+
+  protected IMetaverseNode createFieldNode( IComponentDescriptor fieldDescriptor, ValueMetaInterface fieldMeta,
+      String targetStepName, boolean addTheNode ) {
+
+    IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
+    newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, fieldMeta.getTypeDesc() );
+
+    // don't add it to the graph if it is a transient node
+    if ( targetStepName != null ) {
+      newFieldNode.setProperty( DictionaryConst.PROPERTY_TARGET_STEP, targetStepName );
+      newFieldNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_TARGET_AWARE );
+      if ( addTheNode ) {
+        getMetaverseBuilder().addNode( newFieldNode );
+      }
+    }
+
+    return newFieldNode;
   }
 
 }
