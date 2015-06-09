@@ -25,7 +25,7 @@ package com.pentaho.metaverse.impl.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
 
 import java.io.IOException;
 import java.io.OutputStream;

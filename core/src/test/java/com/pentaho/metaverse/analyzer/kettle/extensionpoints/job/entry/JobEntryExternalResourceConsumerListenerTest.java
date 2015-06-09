@@ -22,11 +22,11 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
 import com.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryExternalResourceConsumerProvider;
-import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
-import com.pentaho.metaverse.api.model.IExecutionData;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.model.IExecutionData;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Test;
 import org.mockito.Mockito;

@@ -1,15 +1,15 @@
 package com.pentaho.metaverse.analyzer.kettle.step.tableinput;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.step.ConnectionExternalResourceStepAnalyzer;
-import com.pentaho.metaverse.api.model.BaseDatabaseResourceInfo;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.analyzer.kettle.step.ConnectionExternalResourceStepAnalyzer;
+import org.pentaho.metaverse.api.model.BaseDatabaseResourceInfo;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

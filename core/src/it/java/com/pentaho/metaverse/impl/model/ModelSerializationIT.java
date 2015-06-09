@@ -28,8 +28,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.sql.Timestamp;
 import java.util.Map;
 
-import com.pentaho.metaverse.api.model.BaseResourceInfo;
-import com.pentaho.metaverse.api.model.JdbcResourceInfo;
+import org.pentaho.metaverse.api.model.BaseResourceInfo;
+import org.pentaho.metaverse.api.model.JdbcResourceInfo;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

@@ -1,10 +1,10 @@
 package com.pentaho.metaverse.impl.model;
 
-import com.pentaho.metaverse.api.model.BaseResourceInfo;
-import com.pentaho.metaverse.api.model.IArtifactMetadata;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.api.model.IParamInfo;
-import com.pentaho.metaverse.api.model.IUserMetadata;
+import org.pentaho.metaverse.api.model.BaseResourceInfo;
+import org.pentaho.metaverse.api.model.IArtifactMetadata;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.model.IParamInfo;
+import org.pentaho.metaverse.api.model.IUserMetadata;
 import org.junit.Before;
 import org.junit.Test;
 

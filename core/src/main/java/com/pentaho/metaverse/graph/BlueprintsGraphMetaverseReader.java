@@ -21,10 +21,10 @@
  */
 package com.pentaho.metaverse.graph;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
-import com.pentaho.dictionary.MetaverseLink;
-import com.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryHelper;
+import org.pentaho.dictionary.MetaverseLink;
+import org.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.impl.MetaverseNode;
 import com.pentaho.metaverse.messages.Messages;
 import com.pentaho.metaverse.util.MetaverseUtil;
@@ -33,8 +33,8 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import com.pentaho.metaverse.api.IMetaverseLink;
-import com.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.IMetaverseLink;
+import org.pentaho.metaverse.api.IMetaverseNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

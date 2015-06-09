@@ -22,11 +22,11 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.metaverse.api.IGraphWriter;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.model.IExecutionData;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.IGraphWriter;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.model.IExecutionData;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.impl.model.ExecutionData;
 import com.pentaho.metaverse.impl.model.ExecutionProfile;
 import com.tinkerpop.blueprints.Graph;

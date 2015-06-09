@@ -23,10 +23,10 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.rowstoresult;
 
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.rowstoresult.RowsToResultMeta;
 

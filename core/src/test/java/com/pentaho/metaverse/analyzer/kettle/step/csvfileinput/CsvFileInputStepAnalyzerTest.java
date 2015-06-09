@@ -1,26 +1,21 @@
 package com.pentaho.metaverse.analyzer.kettle.step.csvfileinput;
 
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
 
-import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.Assert.*;

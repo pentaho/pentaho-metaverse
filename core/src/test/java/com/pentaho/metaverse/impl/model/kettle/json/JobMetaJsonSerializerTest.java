@@ -25,7 +25,7 @@ package com.pentaho.metaverse.impl.model.kettle.json;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.pentaho.metaverse.api.model.kettle.HopInfo;
+import org.pentaho.metaverse.api.model.kettle.HopInfo;
 import com.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import org.junit.Before;
 import org.junit.Test;

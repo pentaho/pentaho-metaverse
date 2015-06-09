@@ -27,8 +27,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
-import com.pentaho.metaverse.api.IAnalysisContext;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
+import org.pentaho.metaverse.api.IAnalysisContext;
+import org.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -40,8 +40,8 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutput;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
 
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 
 public class ExcelOutputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<ExcelOutput, ExcelOutputMeta> {

@@ -22,16 +22,16 @@
 
 package com.pentaho.metaverse.service;
 
-import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.IDocumentLocatorProvider;
+import org.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.messages.Messages;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import com.pentaho.metaverse.api.IDocumentLocator;
-import com.pentaho.metaverse.api.MetaverseLocatorException;
+import org.pentaho.metaverse.api.IDocumentLocator;
+import org.pentaho.metaverse.api.MetaverseLocatorException;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;

@@ -22,11 +22,11 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IAnalysisContext;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.IAnalysisContext;
+import org.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
+import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutput;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;

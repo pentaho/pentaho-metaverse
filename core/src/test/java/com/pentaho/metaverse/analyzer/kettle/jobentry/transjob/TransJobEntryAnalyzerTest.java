@@ -50,14 +50,14 @@ import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.trans.TransMeta;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.MetaverseTransientNode;
+import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
+import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 
 @RunWith( MockitoJUnitRunner.class )
 public class TransJobEntryAnalyzerTest {

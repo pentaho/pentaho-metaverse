@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step;
 
-import com.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.IMetaverseNode;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

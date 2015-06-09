@@ -22,15 +22,15 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.IDocumentLocator;
+import org.pentaho.metaverse.api.IDocumentLocatorProvider;
+import org.pentaho.metaverse.api.IDocumentLocator;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Base implementation of the IDocumentLocatorProvider interface
- * @see com.pentaho.metaverse.api.IDocumentLocatorProvider
+ * @see IDocumentLocatorProvider
  */
 public class MetaverseDocumentLocatorProvider implements IDocumentLocatorProvider {
 

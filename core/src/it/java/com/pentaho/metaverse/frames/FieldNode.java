@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.frames;
 
-import com.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryConst;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;

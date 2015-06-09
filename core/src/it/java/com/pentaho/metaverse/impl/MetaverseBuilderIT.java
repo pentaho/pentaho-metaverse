@@ -21,11 +21,11 @@
  */
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.dictionary.DictionaryHelper;
+import org.pentaho.dictionary.DictionaryHelper;
 import com.pentaho.metaverse.IntegrationTestUtil;
-import com.pentaho.metaverse.api.IDocumentController;
-import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.IDocumentController;
+import org.pentaho.metaverse.api.IDocumentLocatorProvider;
+import org.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;

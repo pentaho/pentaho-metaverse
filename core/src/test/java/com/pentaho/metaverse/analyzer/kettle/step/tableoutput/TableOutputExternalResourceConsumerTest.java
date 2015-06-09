@@ -22,9 +22,9 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.AnalysisContext;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.AnalysisContext;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +39,6 @@ import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)

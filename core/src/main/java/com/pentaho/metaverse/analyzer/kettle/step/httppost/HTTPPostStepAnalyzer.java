@@ -22,14 +22,14 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.httppost;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.MetaverseException;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
+import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.row.RowMetaInterface;

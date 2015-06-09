@@ -1,8 +1,8 @@
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.MetaverseTransientNode;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.MetaverseTransientNode;
+import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,11 +11,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
+import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

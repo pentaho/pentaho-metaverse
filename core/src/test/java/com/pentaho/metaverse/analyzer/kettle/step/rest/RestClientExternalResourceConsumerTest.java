@@ -23,7 +23,7 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.rest;
 
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

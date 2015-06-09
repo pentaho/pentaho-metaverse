@@ -21,8 +21,8 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.step;
 
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
 import java.util.ArrayList;

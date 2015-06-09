@@ -22,16 +22,16 @@
 
 package com.pentaho.metaverse.graph;
 
-import com.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.IntegrationTestUtil;
-import com.pentaho.metaverse.api.IDocumentController;
-import com.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.IDocumentController;
+import org.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.FileOutputStream;

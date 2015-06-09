@@ -1,7 +1,7 @@
 package com.pentaho.metaverse.impl.model;
 
-import com.pentaho.metaverse.api.model.BaseInfo;
-import com.pentaho.metaverse.api.model.IVersionInfo;
+import org.pentaho.metaverse.api.model.BaseInfo;
+import org.pentaho.metaverse.api.model.IVersionInfo;
 
 /**
  * VersionInfo is a base implementation of a bean for IVersionInfo, providing version, name, and description

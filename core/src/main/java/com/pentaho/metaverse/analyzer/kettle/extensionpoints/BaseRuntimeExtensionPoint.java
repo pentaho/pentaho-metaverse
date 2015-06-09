@@ -22,14 +22,14 @@
 
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import com.pentaho.metaverse.api.ILineageWriter;
-import com.pentaho.metaverse.api.model.IExecutionEngine;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.ILineageWriter;
+import org.pentaho.metaverse.api.model.IExecutionEngine;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.impl.model.ExecutionEngine;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.version.BuildVersion;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
 
 import java.io.IOException;
 

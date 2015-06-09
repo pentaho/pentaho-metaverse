@@ -21,11 +21,11 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
 
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.util.MetaverseBeanUtil;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;

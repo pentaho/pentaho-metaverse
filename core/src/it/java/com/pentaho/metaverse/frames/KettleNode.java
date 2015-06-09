@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.frames;
 
-import com.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryConst;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import com.tinkerpop.frames.annotations.gremlin.GremlinParam;

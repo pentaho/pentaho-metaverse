@@ -71,7 +71,7 @@ public class JsonLineageIT {
 
     // make sure that we got an external resource of file and DB type
     assertTrue( json.contains( "\"@class\" : \"com.pentaho.metaverse.api.model.BaseResourceInfo\"" ) );
-    assertTrue( json.contains( "\"@class\" : \"com.pentaho.metaverse.api.model.JdbcResourceInfo\"" ) );
+    assertTrue( json.contains( "\"@class\" : \"JdbcResourceInfo\"" ) );
 
     // now deserialize it
     TransMeta rehydrated = mapper.readValue( json, TransMeta.class );

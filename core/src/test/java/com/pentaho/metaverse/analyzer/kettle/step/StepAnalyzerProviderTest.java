@@ -1,7 +1,7 @@
 package com.pentaho.metaverse.analyzer.kettle.step;
 
 import com.google.common.collect.Lists;
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -22,8 +22,8 @@
 
 package com.pentaho.metaverse;
 
-import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.IDocumentLocatorProvider;
+import org.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
 import com.pentaho.metaverse.messages.Messages;
 import com.pentaho.metaverse.util.MetaverseUtil;
@@ -37,8 +37,8 @@ import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.mongodbinput.MongoDbInputMeta;
 import org.pentaho.platform.api.engine.IPentahoObjectFactory;
-import com.pentaho.metaverse.api.IDocumentLocator;
-import com.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.IDocumentLocator;
+import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.platform.engine.core.system.PathBasedSystemSettings;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
@@ -47,7 +47,6 @@ import org.pentaho.platform.engine.core.system.StandaloneSession;
 import org.pentaho.platform.engine.core.system.objfac.StandaloneSpringPentahoObjectFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

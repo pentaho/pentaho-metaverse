@@ -22,14 +22,14 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.selectvalues;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
-import com.pentaho.metaverse.api.model.Operation;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.ChangeType;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.metaverse.api.model.Operation;
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;

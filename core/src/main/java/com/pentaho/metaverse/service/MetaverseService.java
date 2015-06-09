@@ -22,12 +22,12 @@
 
 package com.pentaho.metaverse.service;
 
-import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.IDocumentLocatorProvider;
+import org.pentaho.metaverse.api.IMetaverseReader;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
 import com.pentaho.metaverse.messages.Messages;
-import com.pentaho.metaverse.api.IDocumentLocator;
-import com.pentaho.metaverse.api.MetaverseLocatorException;
+import org.pentaho.metaverse.api.IDocumentLocator;
+import org.pentaho.metaverse.api.MetaverseLocatorException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

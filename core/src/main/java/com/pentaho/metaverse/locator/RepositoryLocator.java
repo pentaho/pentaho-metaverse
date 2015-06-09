@@ -24,8 +24,8 @@ package com.pentaho.metaverse.locator;
 
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.engine.IPentahoSession;
-import com.pentaho.metaverse.api.IDocumentListener;
-import com.pentaho.metaverse.api.MetaverseLocatorException;
+import org.pentaho.metaverse.api.IDocumentListener;
+import org.pentaho.metaverse.api.MetaverseLocatorException;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;

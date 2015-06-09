@@ -24,7 +24,7 @@ package com.pentaho.metaverse.impl;
 
 import org.junit.Test;
 import org.mockito.Mock;
-import com.pentaho.metaverse.api.IDocumentLocator;
+import org.pentaho.metaverse.api.IDocumentLocator;
 
 import java.util.HashSet;
 import java.util.Set;

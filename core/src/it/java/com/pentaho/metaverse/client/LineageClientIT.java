@@ -22,18 +22,18 @@
 
 package com.pentaho.metaverse.client;
 
-import com.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.IntegrationTestUtil;
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.IDocumentController;
-import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.StepFieldOperations;
-import com.pentaho.metaverse.api.model.IOperation;
-import com.pentaho.metaverse.api.model.Operations;
+import org.pentaho.metaverse.api.ChangeType;
+import org.pentaho.metaverse.api.IDocumentController;
+import org.pentaho.metaverse.api.IDocumentLocatorProvider;
+import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.StepFieldOperations;
+import org.pentaho.metaverse.api.model.IOperation;
+import org.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.graph.LineageGraphMap;
 import com.pentaho.metaverse.impl.DocumentController;
-import com.pentaho.metaverse.api.Namespace;
+import org.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.locator.FileSystemLocator;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
@@ -44,7 +44,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.di.trans.TransMeta;
-import com.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.net.URLConnection;

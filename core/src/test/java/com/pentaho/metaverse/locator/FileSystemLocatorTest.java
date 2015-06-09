@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.locator;
 
-import com.pentaho.metaverse.api.MetaverseDocument;
+import org.pentaho.metaverse.api.MetaverseDocument;
 import com.pentaho.metaverse.graph.GraphMLWriter;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
@@ -36,10 +36,10 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
-import com.pentaho.metaverse.api.IDocumentEvent;
-import com.pentaho.metaverse.api.IDocumentListener;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.MetaverseLocatorException;
+import org.pentaho.metaverse.api.IDocumentEvent;
+import org.pentaho.metaverse.api.IDocumentListener;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.MetaverseLocatorException;
 
 import java.io.File;
 import java.io.FileOutputStream;

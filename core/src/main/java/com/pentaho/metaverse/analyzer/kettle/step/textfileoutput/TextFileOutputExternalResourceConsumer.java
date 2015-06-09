@@ -22,10 +22,10 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.textfileoutput;
 
-import com.pentaho.metaverse.api.IAnalysisContext;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
+import org.pentaho.metaverse.api.IAnalysisContext;
+import org.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;

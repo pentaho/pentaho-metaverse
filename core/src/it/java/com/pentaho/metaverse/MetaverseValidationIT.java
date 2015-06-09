@@ -22,14 +22,14 @@
 
 package com.pentaho.metaverse;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.IDocumentController;
-import com.pentaho.metaverse.api.IDocumentLocatorProvider;
-import com.pentaho.metaverse.api.IMetaverseReader;
-import com.pentaho.metaverse.api.model.IOperation;
-import com.pentaho.metaverse.api.model.Operation;
-import com.pentaho.metaverse.api.model.Operations;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.ChangeType;
+import org.pentaho.metaverse.api.IDocumentController;
+import org.pentaho.metaverse.api.IDocumentLocatorProvider;
+import org.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.model.IOperation;
+import org.pentaho.metaverse.api.model.Operation;
+import org.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.frames.CalculatorStepNode;
 import com.pentaho.metaverse.frames.CsvFileInputStepNode;
 import com.pentaho.metaverse.frames.DatabaseColumnNode;

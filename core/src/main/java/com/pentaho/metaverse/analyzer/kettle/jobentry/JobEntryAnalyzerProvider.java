@@ -1,8 +1,8 @@
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
-import com.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
-import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
-import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
+import org.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
 import org.pentaho.di.job.entry.JobEntryInterface;
 
 import java.util.ArrayList;

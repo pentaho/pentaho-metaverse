@@ -22,10 +22,10 @@
 
 package com.pentaho.metaverse.impl.model;
 
-import com.pentaho.metaverse.api.model.BaseInfo;
-import com.pentaho.metaverse.api.model.IExecutionData;
-import com.pentaho.metaverse.api.model.IExecutionEngine;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.BaseInfo;
+import org.pentaho.metaverse.api.model.IExecutionData;
+import org.pentaho.metaverse.api.model.IExecutionEngine;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
 
 public class ExecutionProfile extends BaseInfo implements IExecutionProfile {
 

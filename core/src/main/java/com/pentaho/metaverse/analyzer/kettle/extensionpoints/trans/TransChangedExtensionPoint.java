@@ -28,7 +28,7 @@ import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.trans.TransMeta;
-import com.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.MetaverseException;
 
 /**
  * An extension point to maintain a lineage graph for an active transformation

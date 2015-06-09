@@ -21,22 +21,22 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
-import com.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
 import com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
-import com.pentaho.metaverse.api.AnalysisContext;
-import com.pentaho.metaverse.api.IDocument;
-import com.pentaho.metaverse.api.IDocumentAnalyzer;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseException;
-import com.pentaho.metaverse.api.Namespace;
-import com.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
-import com.pentaho.metaverse.api.model.IExecutionData;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.api.model.IParamInfo;
-import com.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.AnalysisContext;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IDocumentAnalyzer;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.Namespace;
+import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
+import org.pentaho.metaverse.api.model.IExecutionData;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.IParamInfo;
+import org.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.impl.MetaverseCompletionService;
 import com.pentaho.metaverse.impl.model.ExecutionData;
 import com.pentaho.metaverse.impl.model.ExecutionProfile;

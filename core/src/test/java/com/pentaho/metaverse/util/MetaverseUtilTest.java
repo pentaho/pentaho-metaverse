@@ -21,12 +21,12 @@
  */
 package com.pentaho.metaverse.util;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.IDocumentController;
-import com.pentaho.metaverse.api.model.IOperation;
-import com.pentaho.metaverse.api.model.Operation;
-import com.pentaho.metaverse.api.model.Operations;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.ChangeType;
+import org.pentaho.metaverse.api.IDocumentController;
+import org.pentaho.metaverse.api.model.IOperation;
+import org.pentaho.metaverse.api.model.Operation;
+import org.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -39,13 +39,13 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.blueprint.container.BlueprintContainer;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IDocument;
-import com.pentaho.metaverse.api.IDocumentAnalyzer;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.IRequiresMetaverseBuilder;
-import com.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IDocumentAnalyzer;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.IRequiresMetaverseBuilder;
+import org.pentaho.metaverse.api.MetaverseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -167,7 +167,7 @@ public class MetaverseUtilTest {
     assertNotNull( MetaverseUtil.convertOperationsStringToMap( "{}" ) );
     Operations ops = MetaverseUtil.convertOperationsStringToMap(
       "{\"metadataOperations\":[{\"category\":\"changeMetadata\",\"class\":"
-        + "\"com.pentaho.metaverse.api.model.Operation\",\"description\":\"name\","
+        + "\"Operation\",\"description\":\"name\","
         + "\"name\":\"modified\",\"type\":\"METADATA\"}]}"
     );
     assertNotNull( ops );

@@ -23,11 +23,11 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.metaverse.api.IGraphWriter;
-import com.pentaho.metaverse.api.ILineageWriter;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.IGraphWriter;
+import org.pentaho.metaverse.api.ILineageWriter;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.graph.GraphMLWriter;
 import com.pentaho.metaverse.graph.GraphSONWriter;
 import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;

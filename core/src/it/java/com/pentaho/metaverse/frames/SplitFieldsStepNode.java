@@ -23,7 +23,7 @@
 
 package com.pentaho.metaverse.frames;
 
-import com.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryConst;
 import com.tinkerpop.frames.Property;
 
 /**

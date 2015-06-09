@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.graph;
 
-import com.pentaho.metaverse.api.IGraphWriter;
+import org.pentaho.metaverse.api.IGraphWriter;
 import com.tinkerpop.blueprints.Graph;
 
 import java.io.IOException;

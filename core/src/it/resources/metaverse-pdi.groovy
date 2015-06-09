@@ -48,8 +48,11 @@ import org.pentaho.di.trans.step.*
 import org.pentaho.di.ui.spoon.*
 import org.pentaho.di.ui.spoon.delegates.*
 import org.pentaho.di.ui.spoon.trans.*
+import org.pentaho.dictionary.DictionaryConst
 import org.pentaho.groovy.ui.spoon.*
 import org.pentaho.groovy.ui.spoon.repo.*
+import org.pentaho.metaverse.api.Namespace
+import org.pentaho.metaverse.api.analyzer.kettle.step.StepDatabaseConnectionAnalyzer
 
 i:
 {

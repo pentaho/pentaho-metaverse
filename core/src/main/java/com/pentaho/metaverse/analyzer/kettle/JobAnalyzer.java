@@ -22,13 +22,14 @@
 
 package com.pentaho.metaverse.analyzer.kettle;
 
-import com.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
-import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
-import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.Namespace;
-import com.pentaho.metaverse.api.PropertiesHolder;
+import org.pentaho.metaverse.api.IDocumentAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
+import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.metaverse.api.Namespace;
+import org.pentaho.metaverse.api.PropertiesHolder;
 import com.pentaho.metaverse.messages.Messages;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.parameters.UnknownParamException;
@@ -37,11 +38,11 @@ import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IDocument;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -246,7 +247,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
    * Returns a set of strings corresponding to which types of content are supported by this analyzer
    *
    * @return the supported types (as a set of Strings)
-   * @see com.pentaho.metaverse.api.IDocumentAnalyzer#getSupportedTypes()
+   * @see IDocumentAnalyzer#getSupportedTypes()
    */
   @Override
   public Set<String> getSupportedTypes() {

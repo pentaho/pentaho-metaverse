@@ -21,21 +21,21 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
-import com.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryConst;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
-import com.pentaho.metaverse.api.Namespace;
+import org.pentaho.metaverse.api.Namespace;
 import com.pentaho.metaverse.messages.Messages;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.trans.TransMeta;
-import com.pentaho.metaverse.api.IDocument;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
+import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.MetaverseException;
 
 import java.net.URLConnection;
 

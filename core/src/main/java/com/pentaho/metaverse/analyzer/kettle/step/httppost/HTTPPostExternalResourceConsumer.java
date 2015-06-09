@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
-import com.pentaho.metaverse.api.IAnalysisContext;
+import org.pentaho.metaverse.api.IAnalysisContext;
 import org.apache.commons.lang.ArrayUtils;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -38,10 +38,10 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.httppost.HTTPPOST;
 import org.pentaho.di.trans.steps.httppost.HTTPPOSTMeta;
 
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.api.model.WebServiceResourceInfo;
+import org.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
+import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.model.WebServiceResourceInfo;
 
 public class HTTPPostExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<HTTPPOST, HTTPPOSTMeta> {

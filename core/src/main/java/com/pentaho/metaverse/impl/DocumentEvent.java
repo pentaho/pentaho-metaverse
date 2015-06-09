@@ -22,11 +22,11 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.metaverse.api.IDocument;
-import com.pentaho.metaverse.api.IDocumentEvent;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IDocumentEvent;
 
 /**
- * Simple implementation of @see com.pentaho.metaverse.api.IDocumentEvent
+ * Simple implementation of @see IDocumentEvent
  * @author jdixon
  *
  */

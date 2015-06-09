@@ -35,8 +35,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import com.pentaho.metaverse.api.model.IExecutionData;
-import com.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.model.IExecutionData;
+import org.pentaho.metaverse.api.model.LineageHolder;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -51,8 +51,8 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
 
-import com.pentaho.metaverse.api.model.IExecutionProfile;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
 
 @RunWith( MockitoJUnitRunner.class )
 public class JobRuntimeExtensionPointTest {

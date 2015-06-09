@@ -21,11 +21,11 @@
  */
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.AnalysisContext;
-import com.pentaho.metaverse.api.IAnalysisContext;
-import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.AnalysisContext;
+import org.pentaho.metaverse.api.IAnalysisContext;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.job.entry.JobEntryBase;
 
 import java.util.Collection;

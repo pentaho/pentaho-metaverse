@@ -1,7 +1,7 @@
 package com.pentaho.metaverse.impl.model;
 
-import com.pentaho.metaverse.api.model.IExecutionData;
-import com.pentaho.metaverse.api.model.IExecutionEngine;
+import org.pentaho.metaverse.api.model.IExecutionData;
+import org.pentaho.metaverse.api.model.IExecutionEngine;
 import org.junit.Before;
 import org.junit.Test;
 

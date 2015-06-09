@@ -22,9 +22,9 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.metaverse.api.IGraphWriter;
-import com.pentaho.metaverse.api.ILineageWriter;
-import com.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.IGraphWriter;
+import org.pentaho.metaverse.api.ILineageWriter;
+import org.pentaho.metaverse.api.model.LineageHolder;
 import com.pentaho.metaverse.impl.model.ExecutionProfileUtil;
 
 import java.io.IOException;

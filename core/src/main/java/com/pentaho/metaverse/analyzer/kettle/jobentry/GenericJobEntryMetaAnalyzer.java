@@ -22,11 +22,12 @@
 
 package com.pentaho.metaverse.analyzer.kettle.jobentry;
 
-import com.pentaho.metaverse.api.analyzer.kettle.jobentry.JobEntryAnalyzer;
+import org.pentaho.metaverse.api.IAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.JobEntryAnalyzer;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.Set;
 
@@ -39,7 +40,7 @@ public class GenericJobEntryMetaAnalyzer extends JobEntryAnalyzer<JobEntryInterf
   /**
    * Analyzes a step to gather metadata (such as input/output fields, used database connections, etc.)
    *
-   * @see com.pentaho.metaverse.api.IAnalyzer#analyze(com.pentaho.metaverse.api.IComponentDescriptor, Object)
+   * @see IAnalyzer#analyze(IComponentDescriptor, Object)
    */
   @Override
   public IMetaverseNode analyze( IComponentDescriptor descriptor, JobEntryInterface jobEntryInterface )

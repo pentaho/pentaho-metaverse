@@ -22,9 +22,9 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step;
 
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 
 import org.pentaho.di.trans.step.BaseStepMeta;
 

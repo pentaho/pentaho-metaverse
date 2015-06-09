@@ -23,9 +23,9 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.tableinput;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IAnalysisContext;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.IAnalysisContext;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

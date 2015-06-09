@@ -22,15 +22,15 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.textfileinput;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.MetaverseException;
 
 import java.util.HashSet;
 import java.util.Set;

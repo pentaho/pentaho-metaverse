@@ -23,11 +23,11 @@
 package com.pentaho.metaverse.impl.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.AnalysisContext;
-import com.pentaho.metaverse.api.IAnalysisContext;
-import com.pentaho.metaverse.api.model.BaseResourceInfo;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.AnalysisContext;
+import org.pentaho.metaverse.api.IAnalysisContext;
+import org.pentaho.metaverse.api.model.BaseResourceInfo;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
 

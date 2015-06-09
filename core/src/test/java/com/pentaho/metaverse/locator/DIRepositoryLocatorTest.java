@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.locator;
 
-import com.pentaho.metaverse.api.MetaverseDocument;
+import org.pentaho.metaverse.api.MetaverseDocument;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
 import com.pentaho.metaverse.testutils.MetaverseTestUtils;
 import com.pentaho.metaverse.util.MetaverseUtil;
@@ -42,9 +42,9 @@ import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.platform.api.engine.IPentahoSession;
-import com.pentaho.metaverse.api.IDocumentEvent;
-import com.pentaho.metaverse.api.IDocumentListener;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IDocumentEvent;
+import org.pentaho.metaverse.api.IDocumentListener;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 
 import java.util.ArrayList;

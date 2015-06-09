@@ -1,8 +1,8 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import com.pentaho.metaverse.api.IAnalysisContext;
-import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.IAnalysisContext;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.di.job.entry.JobEntryBase;
 
 import java.util.Collection;

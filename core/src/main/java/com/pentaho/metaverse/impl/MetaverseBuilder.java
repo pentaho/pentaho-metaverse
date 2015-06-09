@@ -22,17 +22,17 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
-import com.pentaho.metaverse.api.MetaverseObjectFactory;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryHelper;
+import org.pentaho.metaverse.api.MetaverseObjectFactory;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseLink;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseLink;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 /**
@@ -418,7 +418,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * (non-Javadoc)
    * 
    * @see
-   * com.pentaho.metaverse.api.IMetaverseBuilder#updateLink(com.pentaho.metaverse.api.IMetaverseLink)
+   * IMetaverseBuilder#updateLink(IMetaverseLink)
    */
   @Override
   public IMetaverseBuilder updateLinkLabel( IMetaverseLink link, String label ) {
@@ -455,7 +455,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * (non-Javadoc)
    * 
    * @see
-   * com.pentaho.metaverse.api.IMetaverseBuilder#updateNode(com.pentaho.metaverse.api.IMetaverseNode)
+   * IMetaverseBuilder#updateNode(IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder updateNode( IMetaverseNode node ) {
@@ -475,10 +475,10 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * @param label    the label
    * @param toNode   the to node
    * @return this metaverse builder
-   * @see com.pentaho.metaverse.api.IMetaverseBuilder#addLink(
-   *com.pentaho.metaverse.api.IMetaverseNode,
+   * @see IMetaverseBuilder#addLink(
+   *IMetaverseNode,
    * java.lang.String,
-   * com.pentaho.metaverse.api.IMetaverseNode)
+   * IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder addLink( IMetaverseNode fromNode, String label, IMetaverseNode toNode ) {

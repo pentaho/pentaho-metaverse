@@ -1,6 +1,6 @@
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
-import com.pentaho.metaverse.api.analyzer.kettle.IExternalResourceConsumer;
+import org.pentaho.metaverse.api.analyzer.kettle.IExternalResourceConsumer;
 import org.junit.Before;
 import org.junit.Test;
 

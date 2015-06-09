@@ -24,8 +24,8 @@ package com.pentaho.metaverse.locator;
 
 import com.pentaho.metaverse.messages.Messages;
 import org.apache.commons.io.FileUtils;
-import com.pentaho.metaverse.api.IDocumentListener;
-import com.pentaho.metaverse.api.MetaverseLocatorException;
+import org.pentaho.metaverse.api.IDocumentListener;
+import org.pentaho.metaverse.api.MetaverseLocatorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

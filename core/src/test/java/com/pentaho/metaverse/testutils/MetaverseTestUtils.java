@@ -23,12 +23,12 @@
 
 package com.pentaho.metaverse.testutils;
 
-import com.pentaho.metaverse.api.IDocumentController;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.MetaverseObjectFactory;
-import com.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
-import com.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
+import org.pentaho.metaverse.api.IDocumentController;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
+import org.pentaho.metaverse.api.MetaverseObjectFactory;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

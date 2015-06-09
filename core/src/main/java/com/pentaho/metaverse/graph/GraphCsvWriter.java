@@ -22,8 +22,8 @@
 
 package com.pentaho.metaverse.graph;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IGraphWriter;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.IGraphWriter;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;

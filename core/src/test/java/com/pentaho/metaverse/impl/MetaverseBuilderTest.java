@@ -22,9 +22,9 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.MetaverseLink;
-import com.pentaho.dictionary.MetaverseTransientNode;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.MetaverseLink;
+import org.pentaho.dictionary.MetaverseTransientNode;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -32,10 +32,10 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
-import com.pentaho.metaverse.api.IDocument;
-import com.pentaho.metaverse.api.IMetaverseLink;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IMetaverseLink;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;

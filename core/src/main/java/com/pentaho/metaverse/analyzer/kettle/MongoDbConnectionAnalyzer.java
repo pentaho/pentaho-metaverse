@@ -1,15 +1,15 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IConnectionAnalyzer;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import com.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
-import com.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.IConnectionAnalyzer;
+import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
+import org.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
 import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.ILogicalIdGenerator;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.ILogicalIdGenerator;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 import java.util.ArrayList;
 import java.util.List;

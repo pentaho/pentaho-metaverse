@@ -22,17 +22,17 @@
 
 package com.pentaho.metaverse.util;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.dictionary.DictionaryHelper;
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.IDocumentController;
-import com.pentaho.metaverse.api.model.IOperation;
-import com.pentaho.metaverse.api.model.Operation;
-import com.pentaho.metaverse.api.model.Operations;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryHelper;
+import org.pentaho.metaverse.api.ChangeType;
+import org.pentaho.metaverse.api.IDocumentController;
+import org.pentaho.metaverse.api.model.IOperation;
+import org.pentaho.metaverse.api.model.Operation;
+import org.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.graph.LineageGraphCompletionService;
 import com.pentaho.metaverse.graph.LineageGraphMap;
 import com.pentaho.metaverse.impl.MetaverseBuilder;
-import com.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import com.pentaho.metaverse.messages.Messages;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -40,12 +40,12 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import flexjson.JSONDeserializer;
 import org.pentaho.di.core.Const;
-import com.pentaho.metaverse.api.IDocument;
-import com.pentaho.metaverse.api.IDocumentAnalyzer;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.INamespace;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
-import com.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IDocumentAnalyzer;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.MetaverseException;
 
 import java.util.List;
 import java.util.Map;

@@ -14,7 +14,7 @@
     (DummyTransMeta in this case).
   -->
   <service id="dummyStepAnalyzerService"
-           interface="com.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="dummyStepAnalyzer"/>
 
 </blueprint>

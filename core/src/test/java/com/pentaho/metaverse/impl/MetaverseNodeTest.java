@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.impl;
 
-import com.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
+import org.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import org.junit.After;
@@ -31,7 +31,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
-import com.pentaho.metaverse.api.ILogicalIdGenerator;
+import org.pentaho.metaverse.api.ILogicalIdGenerator;
 
 import java.util.Date;
 import java.util.HashMap;

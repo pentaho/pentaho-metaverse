@@ -22,7 +22,7 @@
 
 package com.pentaho.metaverse.locator;
 
-import com.pentaho.metaverse.api.MetaverseDocument;
+import org.pentaho.metaverse.api.MetaverseDocument;
 import com.pentaho.metaverse.impl.MetaverseNode;
 import com.tinkerpop.blueprints.Vertex;
 import org.junit.Before;
@@ -31,11 +31,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.platform.api.engine.IPentahoSession;
-import com.pentaho.metaverse.api.IDocumentListener;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.IMetaverseObjectFactory;
-import com.pentaho.metaverse.api.MetaverseLocatorException;
+import org.pentaho.metaverse.api.IDocumentListener;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
+import org.pentaho.metaverse.api.MetaverseLocatorException;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;

@@ -22,10 +22,9 @@
 
 package com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
-import com.pentaho.metaverse.api.ILineageWriter;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.ILineageWriter;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
 
-import com.pentaho.metaverse.api.model.LineageHolder;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,9 +36,8 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
-import com.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 

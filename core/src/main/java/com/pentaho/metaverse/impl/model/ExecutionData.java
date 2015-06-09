@@ -30,11 +30,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.pentaho.metaverse.api.model.IArtifactMetadata;
-import com.pentaho.metaverse.api.model.IExecutionData;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
-import com.pentaho.metaverse.api.model.IParamInfo;
-import com.pentaho.metaverse.api.model.IUserMetadata;
+import org.pentaho.metaverse.api.model.IArtifactMetadata;
+import org.pentaho.metaverse.api.model.IExecutionData;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.model.IParamInfo;
+import org.pentaho.metaverse.api.model.IUserMetadata;
 
 public class ExecutionData implements IExecutionData {
   private Date startTime;

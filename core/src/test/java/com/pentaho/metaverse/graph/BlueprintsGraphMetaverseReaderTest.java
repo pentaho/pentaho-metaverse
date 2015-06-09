@@ -21,8 +21,8 @@
  */
 package com.pentaho.metaverse.graph;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.IMetaverseReader;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -31,8 +31,8 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.pentaho.metaverse.api.IMetaverseLink;
-import com.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.IMetaverseLink;
+import org.pentaho.metaverse.api.IMetaverseNode;
 
 import java.io.File;
 import java.io.FileOutputStream;

@@ -21,12 +21,12 @@
  */
 package com.pentaho.metaverse.client;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.ILineageClient;
-import com.pentaho.metaverse.api.MetaverseException;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.StepFieldOperations;
-import com.pentaho.metaverse.api.model.Operations;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.ILineageClient;
+import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.StepFieldOperations;
+import org.pentaho.metaverse.api.model.Operations;
 import com.pentaho.metaverse.graph.LineageGraphMap;
 import com.pentaho.metaverse.util.MetaverseUtil;
 import com.tinkerpop.blueprints.Direction;

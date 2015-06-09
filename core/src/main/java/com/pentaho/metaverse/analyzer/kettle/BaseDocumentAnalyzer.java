@@ -1,13 +1,13 @@
 package com.pentaho.metaverse.analyzer.kettle;
 
-import com.pentaho.dictionary.DictionaryConst;
-import com.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
 import com.pentaho.metaverse.messages.Messages;
-import com.pentaho.metaverse.api.IComponentDescriptor;
-import com.pentaho.metaverse.api.IDocument;
-import com.pentaho.metaverse.api.IDocumentAnalyzer;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IDocumentAnalyzer;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 /**
  * Created by gmoran on 8/11/14.

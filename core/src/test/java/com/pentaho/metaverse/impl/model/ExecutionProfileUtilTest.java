@@ -24,7 +24,7 @@
 package com.pentaho.metaverse.impl.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;

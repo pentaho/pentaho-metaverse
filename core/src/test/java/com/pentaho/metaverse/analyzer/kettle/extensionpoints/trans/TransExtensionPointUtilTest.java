@@ -28,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.trans.TransMeta;
-import com.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.MetaverseException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;

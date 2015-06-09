@@ -40,11 +40,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.pentaho.metaverse.api.ChangeType;
-import com.pentaho.metaverse.api.IMetaverseNode;
-import com.pentaho.metaverse.api.StepField;
-import com.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import com.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
+import org.pentaho.metaverse.api.ChangeType;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

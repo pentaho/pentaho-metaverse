@@ -22,9 +22,9 @@
 
 package com.pentaho.metaverse.analyzer.kettle.step.mongodbinput;
 
-import com.pentaho.metaverse.api.IAnalysisContext;
-import com.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
-import com.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.IAnalysisContext;
+import org.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import com.pentaho.metaverse.impl.model.MongoDbResourceInfo;
 import org.pentaho.di.trans.steps.mongodbinput.MongoDbInput;
 import org.pentaho.di.trans.steps.mongodbinput.MongoDbInputMeta;
