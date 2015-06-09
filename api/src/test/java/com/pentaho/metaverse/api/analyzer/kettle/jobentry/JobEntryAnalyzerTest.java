@@ -49,9 +49,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BaseJobEntryAnalyzerTest {
+public class JobEntryAnalyzerTest {
 
-  BaseJobEntryAnalyzer analyzer;
+  JobEntryAnalyzer analyzer;
 
   @Mock
   private IMetaverseBuilder mockBuilder;
@@ -97,17 +97,18 @@ public class BaseJobEntryAnalyzerTest {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( factory );
 
-    BaseJobEntryAnalyzer baseAnalyzer =
-        new BaseJobEntryAnalyzer() {
+    JobEntryAnalyzer baseAnalyzer =
+        new JobEntryAnalyzer() {
 
           @Override public Set<Class<? super JobEntryCopy>> getSupportedEntries() {
             return null;
           }
 
           @Override
-          public IMetaverseNode analyze( IComponentDescriptor descriptor, Object object )
-              throws MetaverseAnalyzerException {
-            return null;
+          protected void customAnalyze( JobEntryInterface entry, IMetaverseNode rootNode )
+            throws MetaverseAnalyzerException {
+            // TODO Auto-generated method stub
+            
           }
         };
     analyzer = spy( baseAnalyzer );
