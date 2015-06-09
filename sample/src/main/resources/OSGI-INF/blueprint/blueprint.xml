@@ -6,7 +6,7 @@
              ">
 
   <!-- Define a bean for our new step analyzer -->
-  <bean id="dummyStepAnalyzer" class="com.pentaho.metaverse.sample.DummyStepAnalyzer"/>
+  <bean id="dummyStepAnalyzer" class="org.pentaho.metaverse.sample.DummyStepAnalyzer"/>
 
   <!--
     Define our analyzer as a service. This will allow it to be automatically added to the reference-list ultimately used

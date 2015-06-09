@@ -1,22 +1,25 @@
-import com.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.rowstoresult.RowsToResultStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.transexecutor.TransExecutorStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.calculator.CalculatorStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer
-import com.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.JobAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider
+import org.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.rowstoresult.RowsToResultStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.transexecutor.TransExecutorStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.calculator.CalculatorStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer
 
 import com.pentaho.metaverse.api.*
 import com.pentaho.metaverse.api.analyzer.kettle.step.*
@@ -53,12 +56,20 @@ import org.pentaho.groovy.ui.spoon.*
 import org.pentaho.groovy.ui.spoon.repo.*
 import org.pentaho.metaverse.api.Namespace
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepDatabaseConnectionAnalyzer
+import org.pentaho.metaverse.client.LineageClient
+import org.pentaho.metaverse.graph.GraphMLWriter
+import org.pentaho.metaverse.graph.GraphSONWriter
+import org.pentaho.metaverse.impl.DocumentController
+import org.pentaho.metaverse.impl.MetaverseBuilder
+import org.pentaho.metaverse.impl.MetaverseCompletionService
+import org.pentaho.metaverse.locator.FileSystemLocator
+import org.pentaho.metaverse.util.MetaverseUtil
 
 i:
 {
 
   try {
-    c = Class.forName('com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint')
+    c = Class.forName('TransformationRuntimeExtensionPoint')
     ExtensionPointPluginType.getInstance().registerCustom(c, "custom", "transRuntimeMetaverse", "TransformationStartThreads", "no description", null)
   }
   catch (e) {

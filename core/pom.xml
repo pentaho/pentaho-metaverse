@@ -317,20 +317,20 @@
             <Import-Package>
               org.osgi.service.http,
               org.apache.felix.http.api,
-              com.pentaho.dictionary,
-              com.pentaho.metaverse.api,
-              com.pentaho.metaverse.api.*,
+              org.pentaho.dictionary,
+              org.pentaho.metaverse.api,
+              org.pentaho.metaverse.api.*,
               *
             </Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
             <Export-Package>
-              com.pentaho.metaverse.client,
-              com.pentaho.metaverse.analyzer.kettle,
-              com.pentaho.metaverse.analyzer.kettle.*,
-              com.pentaho.metaverse.util,
-              com.pentaho.metaverse.graph
+              org.pentaho.metaverse.client,
+              org.pentaho.metaverse.analyzer.kettle,
+              org.pentaho.metaverse.analyzer.kettle.*,
+              org.pentaho.metaverse.util,
+              org.pentaho.metaverse.graph
             </Export-Package>
-            <Bundle-Activator>com.pentaho.metaverse.util.MetaverseBundleActivator</Bundle-Activator>
+            <Bundle-Activator>org.pentaho.metaverse.util.MetaverseBundleActivator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>
