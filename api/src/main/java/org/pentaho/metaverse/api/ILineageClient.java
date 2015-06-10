@@ -71,6 +71,6 @@ public interface ILineageClient {
    * describing the path from the origin step field to the target step field, including the operations performed.
    * @throws MetaverseException if an error occurred while finding the origin steps
    */
-   Map<String, Set<List<StepFieldOperations>>> getOperationPaths(
+  Map<String, Set<List<StepFieldOperations>>> getOperationPaths(
     TransMeta transMeta, String targetStepName, Collection<String> fieldNames ) throws MetaverseException;
 }

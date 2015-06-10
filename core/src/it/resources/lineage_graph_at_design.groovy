@@ -1,4 +1,4 @@
-import org.pentaho.di.core.extension.*
+import org.pentaho.di.core.extension.ExtensionPointPluginType
 
 metaversePlugin = plugins.findPluginWithId(ExtensionPointPluginType, 'transChangeLineageGraph')
 

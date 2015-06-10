@@ -33,7 +33,6 @@ import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
-import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;

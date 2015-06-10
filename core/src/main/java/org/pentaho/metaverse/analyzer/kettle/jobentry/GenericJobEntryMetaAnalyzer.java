@@ -23,7 +23,6 @@
 package org.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.metaverse.api.IAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;

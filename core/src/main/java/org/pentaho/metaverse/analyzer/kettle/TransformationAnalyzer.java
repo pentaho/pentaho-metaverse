@@ -36,7 +36,6 @@ import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
-import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IMetaverseLink;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;

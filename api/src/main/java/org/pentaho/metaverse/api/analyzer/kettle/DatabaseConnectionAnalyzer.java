@@ -24,7 +24,6 @@ package org.pentaho.metaverse.api.analyzer.kettle;
 
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.dictionary.DictionaryConst;
-import org.pentaho.metaverse.api.IAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.ILogicalIdGenerator;
 import org.pentaho.metaverse.api.IMetaverseNode;
