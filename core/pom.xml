@@ -2,19 +2,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.pentaho</groupId>
-  <artifactId>pentaho-metaverse-ee</artifactId>
+  <groupId>pentaho</groupId>
+  <artifactId>pentaho-metaverse-core</artifactId>
   <packaging>bundle</packaging>
 
   <parent>
-    <groupId>com.pentaho</groupId>
-    <artifactId>pentaho-metaverse-ee-parent</artifactId>
+    <groupId>pentaho</groupId>
+    <artifactId>pentaho-metaverse</artifactId>
     <version>6.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <name>${project.artifactId}</name>
-  <description>A Pentaho closed-source project to provide data lineage capabilities</description>
+  <description>Provides data lineage capabilities</description>
   <url>http://www.pentaho.com</url>
 
   <properties>
@@ -62,7 +62,7 @@
     <!-- NOTE: Maintain dependencies grouped together by scope (compile, runtime, provided, and test) and then ordered alphabetically by groupId and artifactId. -->
 
     <dependency>
-      <groupId>com.pentaho</groupId>
+      <groupId>pentaho</groupId>
       <artifactId>pentaho-metaverse-api</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
@@ -401,7 +401,7 @@
             <version>${dependency.pentaho-kettle.kettle-core.version}</version>
           </dependency>
           <dependency>
-            <groupId>com.pentaho</groupId>
+            <groupId>pentaho</groupId>
             <artifactId>pentaho-metaverse-api</artifactId>
             <version>${project.version}</version>
           </dependency>

@@ -89,31 +89,16 @@ public class MetaverseTransientNode extends PropertiesHolder implements IMetaver
     return getPropertyAsString( DictionaryConst.PROPERTY_TYPE );
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.pentaho.metaverse.api.IIdentifiableWritable#setName(java.lang.String)
-   */
   @Override
   public void setName( String name ) {
     setProperty( DictionaryConst.PROPERTY_NAME, name );
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.pentaho.metaverse.api.IIdentifiableWritable#setStringID(java.lang.String)
-   */
   @Override
   public void setStringID( String id ) {
     setProperty( DictionaryConst.PROPERTY_ID, id );
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.pentaho.metaverse.api.IIdentifiableWritable#setType(java.lang.String)
-   */
   @Override
   public void setType( String type ) {
     setProperty( "type", type );

@@ -99,17 +99,11 @@ public class MetaverseDocument extends PropertiesHolder implements IDocument {
     this.content = content;
   }
 
-  /* (non-Javadoc)
-   * @see com.pentaho.metaverse.api.IIdentifiableWritable#setName(java.lang.String)
-   */
   @Override
   public void setName( String name ) {
     setProperty( "name", name );
   }
 
-  /* (non-Javadoc)
-   * @see com.pentaho.metaverse.api.IIdentifiableWritable#setType(java.lang.String)
-   */
   @Override
   public void setType( String type ) {
     setProperty( "type", type );

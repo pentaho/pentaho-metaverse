@@ -52,8 +52,7 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
   /*
    * (non-Javadoc)
    *
-   * @see IDocumentAnalyzer#setMetaverseBuilder(com.pentaho.metaverse.api.
-   * IMetaverseBuilder)
+   * @see IDocumentAnalyzer#setMetaverseBuilder(org.pentaho.metaverse.api.IMetaverseBuilder)
    */
   @Override
   public void setMetaverseBuilder( IMetaverseBuilder metaverseBuilder ) {
