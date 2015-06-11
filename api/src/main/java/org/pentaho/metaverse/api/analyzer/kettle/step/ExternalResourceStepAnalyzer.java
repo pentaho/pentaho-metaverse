@@ -120,18 +120,20 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
     // assume that the output fields are defined in the step and are based on the resource inputs
     if ( isInput() ) {
       RowMetaInterface stepFields = getOutputFields( meta );
-      RowMetaInterface clone = stepFields.clone();
-      // if there are previous steps providing data, we should remove them from the set of "resource" fields
-      for ( RowMetaInterface rowMetaInterface : inputRows.values() ) {
-        for ( ValueMetaInterface valueMetaInterface : rowMetaInterface.getValueMetaList() ) {
-          try {
-            clone.removeValueMeta( valueMetaInterface.getName() );
-          } catch ( KettleValueException e ) {
-            // could not find it in the output, skip it
+      if ( stepFields != null ) {
+        RowMetaInterface clone = stepFields.clone();
+        // if there are previous steps providing data, we should remove them from the set of "resource" fields
+        for ( RowMetaInterface rowMetaInterface : inputRows.values() ) {
+          for ( ValueMetaInterface valueMetaInterface : rowMetaInterface.getValueMetaList() ) {
+            try {
+              clone.removeValueMeta( valueMetaInterface.getName() );
+            } catch ( KettleValueException e ) {
+              // could not find it in the output, skip it
+            }
           }
         }
+        inputRows.put( RESOURCE, clone );
       }
-      inputRows.put( RESOURCE, clone );
     }
     return inputRows;
   }
