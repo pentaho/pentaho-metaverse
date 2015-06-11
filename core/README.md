@@ -1,4 +1,4 @@
-#pentaho-metaverse-ee
+#pentaho-metaverse
 
 This project defines implementations and interfaces for use with the Pentaho Metaverse, which provides the following capabilities:
 

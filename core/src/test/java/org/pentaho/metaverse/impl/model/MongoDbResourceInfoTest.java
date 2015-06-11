@@ -1,0 +1,132 @@
+/*! ******************************************************************************
+ *
+ * Pentaho Data Integration
+ *
+ * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ *
+ *******************************************************************************
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ******************************************************************************/
+
+package org.pentaho.metaverse.impl.model;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.pentaho.di.core.encryption.Encr;
+import org.pentaho.di.core.encryption.TwoWayPasswordEncoderPluginType;
+import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+
+public class MongoDbResourceInfoTest {
+
+  MongoDbResourceInfo info;
+
+  MongoDbMeta meta;
+
+  @BeforeClass
+  public static void init() throws Exception {
+    PluginRegistry.addPluginType( TwoWayPasswordEncoderPluginType.getInstance() );
+    PluginRegistry.init();
+    Encr.init( "Kettle" );
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    meta = mock( MongoDbMeta.class );
+    info = new MongoDbResourceInfo( meta );
+  }
+
+  @Test
+  public void testStringConstructor() {
+    info = new MongoDbResourceInfo( "localhost, remote.pentaho.com" , "1000", "myDb" );
+    assertEquals( "localhost, remote.pentaho.com", info.getHostNames() );
+    assertEquals( "1000", info.getPort() );
+    assertEquals( "myDb", info.getDatabase() );
+  }
+
+  @Test
+  public void testGetConnectTimeout() throws Exception {
+    assertNull( info.getConnectTimeout() );
+    info.setConnectTimeout( "1000" );
+    assertEquals( "1000", info.getConnectTimeout() );
+  }
+
+  @Test
+  public void testGetDatabase() throws Exception {
+    assertNull( info.getDatabase() );
+    info.setDatabase( "myDb" );
+    assertEquals( "myDb", info.getDatabase() );
+  }
+
+  @Test
+  public void testGetHostNames() throws Exception {
+    assertNull( info.getHostNames() );
+    info.setHostNames( "localhost, remote.pentaho.com" );
+    assertEquals( "localhost, remote.pentaho.com", info.getHostNames() );
+  }
+
+  @Test
+  public void testGetPort() throws Exception {
+    assertNull( info.getPort() );
+    info.setPort( "1000" );
+    assertEquals( "1000", info.getPort() );
+  }
+
+  @Test
+  public void testGetSocketTimeout() throws Exception {
+    assertNull( info.getSocketTimeout() );
+    info.setSocketTimeout( "1000" );
+    assertEquals( "1000", info.getSocketTimeout() );
+  }
+
+  @Test
+  public void testIsUseAllReplicaSetMembers() throws Exception {
+    assertFalse( info.isUseAllReplicaSetMembers() );
+    info.setUseAllReplicaSetMembers( true );
+    assertTrue( info.isUseAllReplicaSetMembers() );
+  }
+
+  @Test
+  public void testIsUseKerberosAuthentication() throws Exception {
+    assertFalse( info.isUseKerberosAuthentication() );
+    info.setUseKerberosAuthentication( true );
+    assertTrue( info.isUseKerberosAuthentication() );
+  }
+
+  @Test
+  public void testGetUser() throws Exception {
+    assertNull( info.getUser() );
+    info.setUser( "joe" );
+    assertEquals( "joe", info.getUser() );
+  }
+
+  @Test
+  public void testGetPassword() throws Exception {
+    assertNull( info.getPassword() );
+    info.setPassword( "password" );
+    assertEquals( "password", info.getPassword() );
+  }
+
+  @Test
+  public void testGetEncryptedPassword() throws Exception {
+    assertNull( info.getPassword() );
+    info.setPassword( "password" );
+    assertEquals( "Encrypted 2be98afc86aa7f2e4bb18bd63c99dbdde", info.getEncryptedPassword() );
+  }
+}

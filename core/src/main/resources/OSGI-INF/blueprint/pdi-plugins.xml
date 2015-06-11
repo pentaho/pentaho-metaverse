@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:jaxrs="http://cxf.apache.org/blueprint/jaxrs"
-           xmlns:cxf="http://cxf.apache.org/blueprint/core"
-           xsi:schemaLocation="
-             http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
-             http://cxf.apache.org/blueprint/jaxrs http://cxf.apache.org/schemas/blueprint/jaxrs.xsd
-             http://cxf.apache.org/blueprint/core http://cxf.apache.org/schemas/blueprint/core.xsd
-             ">
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
   <!-- Extension Points -->
   <!-- TransOpened extension point -->
-  <bean id="transOpened" scope="singleton" class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransOpenedExtensionPoint"/>
+  <bean id="transOpened" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransOpenedExtensionPoint"/>
   <bean id="transOpenedPlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
     <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
     <property name="name" value="TransAfterOpen"/>
@@ -32,7 +26,7 @@
   </service>
 
   <!-- TransChanged extension point -->
-  <bean id="transChanged" scope="singleton" class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransChangedExtensionPoint"/>
+  <bean id="transChanged" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransChangedExtensionPoint"/>
   <bean id="transChangedPlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
     <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
     <property name="name" value="TransChanged"/>
@@ -53,7 +47,7 @@
   </service>
 
   <!-- TransRuntime extension point -->
-  <bean id="transRuntime" scope="singleton" class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint">
+  <bean id="transRuntime" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint">
     <property name="documentAnalyzer" ref="TransformationAnalyzer"/>
     <property name="lineageWriter" ref="lineageWriter"/>
   </bean>
@@ -78,7 +72,7 @@
   </service>
 
   <!-- JobRuntime extension point -->
-  <bean id="jobRuntime" scope="singleton" class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint"/>
+  <bean id="jobRuntime" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint"/>
   <bean id="jobRuntimePlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
     <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
     <property name="name" value="JobStart"/>
@@ -102,7 +96,7 @@
   <!-- StepExternalResourceConsumerListener extension point -->
   <bean id="stepExternalResourceConsumerListener"
         scope="singleton"
-        class="com.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExternalResourceConsumerListener">
+        class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExternalResourceConsumerListener">
     <property name="stepExternalResourceConsumerProvider" ref="IStepExternalResourceConsumerProvider"/>
   </bean>
   <bean id="stepExternalResourceConsumerListenerPlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">

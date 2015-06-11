@@ -1,4 +1,4 @@
-#pentaho-metaverse-ee
+#pentaho-metaverse
 
 This project defines implementations and interfaces for use with the Pentaho Metaverse, which provides the following capabilities:
 
@@ -85,7 +85,7 @@ mvn install -Denv=prod
 
 This project follows the standard maven project layout
 ```
-pentaho-metaverse-ee
+pentaho-metaverse
 ├── core
 │   ├── src
 │   │   ├── assembly               # artifact assembly definition and resources

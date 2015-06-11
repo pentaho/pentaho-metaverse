@@ -1,0 +1,121 @@
+/*! ******************************************************************************
+ *
+ * Pentaho Data Integration
+ *
+ * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ *
+ *******************************************************************************
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ******************************************************************************/
+
+package org.pentaho.metaverse.impl;
+
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.junit.Before;
+import org.junit.Test;
+import org.pentaho.metaverse.api.IGraphWriter;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.model.IExecutionData;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.impl.model.ExecutionData;
+import org.pentaho.metaverse.impl.model.ExecutionProfile;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+
+/**
+ * Created by mburgess on 4/2/15.
+ */
+public class LineageWriterTest {
+
+  private LineageWriter writer;
+
+  private LineageHolder holder;
+
+  private static final Date now = new Date();
+
+  @Before
+  public void setUp() throws Exception {
+    LineageWriter fslw = new LineageWriter();
+    writer = spy( fslw );
+
+    holder = new LineageHolder();
+    IExecutionProfile profile = new ExecutionProfile();
+    profile.setName( "test" );
+    IExecutionData data = new ExecutionData();
+    data.setStartTime( now );
+    profile.setExecutionData( data );
+
+    holder.setExecutionProfile( profile );
+  }
+
+  @Test
+  public void testOutputExecutionProfile() throws Exception {
+    writer.setProfileOutputStream( System.out );
+    writer.outputExecutionProfile( holder );
+    writer.setProfileOutputStream( null );
+    writer.outputExecutionProfile( holder );
+  }
+
+  @Test
+  public void testOutputLineageGraph() throws Exception {
+    Graph g = new TinkerGraph();
+    IMetaverseBuilder builder = new MetaverseBuilder( g );
+    holder.setMetaverseBuilder( builder );
+    writer.setGraphOutputStream( System.out );
+    IGraphWriter graphWriter = mock( IGraphWriter.class );
+    writer.setGraphWriter( graphWriter );
+    writer.outputLineageGraph( holder );
+  }
+
+  @Test( expected = IOException.class )
+  public void testOutputLineageGraphNoOutputStream() throws Exception {
+    Graph g = new TinkerGraph();
+    IMetaverseBuilder builder = new MetaverseBuilder( g );
+    holder.setMetaverseBuilder( builder );
+
+    writer.outputLineageGraph( holder );
+  }
+
+  @Test
+  public void testGetSetGraphWriter() throws Exception {
+    assertNull( writer.getGraphWriter() );
+    IGraphWriter graphWriter = mock( IGraphWriter.class );
+    writer.setGraphWriter( graphWriter );
+    assertEquals( graphWriter, writer.getGraphWriter() );
+  }
+
+  @Test
+  public void testGetSetProfileOutputStream() throws Exception {
+    assertNotNull( writer.getProfileOutputStream() );
+  }
+
+  @Test
+  public void testGetSetGraphOutputStream() {
+    assertEquals( System.out, writer.getGraphOutputStream() );
+    writer.setGraphOutputStream( null );
+    assertEquals( System.out, writer.getGraphOutputStream() );
+    OutputStream outStream = mock( OutputStream.class );
+    writer.setGraphOutputStream( outStream );
+    assertEquals( outStream, writer.getGraphOutputStream() );
+  }
+}

@@ -1,0 +1,114 @@
+/*! ******************************************************************************
+ *
+ * Pentaho Data Integration
+ *
+ * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ *
+ *******************************************************************************
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ******************************************************************************/
+
+package org.pentaho.metaverse.analyzer.kettle.step.textfileoutput;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutput;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputData;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+
+import java.util.Collection;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+@RunWith( MockitoJUnitRunner.class )
+public class TextFileOutputExternalResourceConsumerTest {
+
+  TextFileOutputExternalResourceConsumer consumer;
+
+  @Mock TextFileOutputMeta meta;
+  @Mock TextFileOutputData data;
+  @Mock TextFileOutput tfo;
+  @Mock TransMeta transMeta;
+  @Mock RowMetaInterface rmi;
+
+  @Before
+  public void setUp() throws Exception {
+    consumer = new TextFileOutputExternalResourceConsumer();
+  }
+
+  @Test
+  public void testTextFileOutputExternalResourceConsumer() throws Exception {
+
+    StepMeta stepMeta = new StepMeta( "test", meta );
+    StepMeta spyMeta = spy( stepMeta );
+
+    when( tfo.getStepMeta() ).thenReturn( spyMeta );
+    when( tfo.getStepDataInterface() ).thenReturn( data );
+
+    when( meta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( meta.getFileName() ).thenReturn( null );
+    when( meta.isFileNameInField() ).thenReturn( false );
+    String[] filePaths = { "/path/to/file1", "/another/path/to/file2" };
+    when( meta.getFiles( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
+
+    assertFalse( consumer.isDataDriven( meta ) );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( meta );
+    assertFalse( resources.isEmpty() );
+    assertEquals( 2, resources.size() );
+
+
+    when( meta.isFileNameInField() ).thenReturn( true );
+    when( meta.getExtension() ).thenReturn( "txt" );
+
+    assertTrue( consumer.isDataDriven( meta ) );
+    assertTrue( consumer.getResourcesFromMeta( meta ).isEmpty() );
+
+    data.fileName = "/path/to/row/file";
+    when( tfo.buildFilename( Mockito.anyString(), Mockito.anyBoolean() ) )
+      .thenAnswer( new Answer<String>() {
+        @Override
+        public String answer( InvocationOnMock invocation ) throws Throwable {
+          Object[] args = invocation.getArguments();
+          return ( args[ 0 ].toString() + ".txt" );
+        }
+      } );
+
+    resources = consumer.getResourcesFromRow( tfo, rmi, new String[]{ "id", "name" } );
+    assertFalse( resources.isEmpty() );
+    assertEquals( 1, resources.size() );
+
+    when( data.fileName ).thenThrow( KettleException.class );
+    resources = consumer.getResourcesFromRow( tfo, rmi, new String[]{ "id", "name" } );
+    assertTrue( resources.isEmpty() );
+
+    assertEquals( TextFileOutputMeta.class, consumer.getMetaClass() );
+  }
+
+}
