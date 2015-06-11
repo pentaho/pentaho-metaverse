@@ -167,6 +167,17 @@ public class ExternalResourceStepAnalyzerTest {
   }
 
   @Test
+  public void testGetInputRowMetaInterfaces_isInputNullOutputFields() throws Exception {
+    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( null );
+
+    doReturn( null ).when( analyzer ).getOutputFields( meta );
+    doReturn( true ).when( analyzer ).isInput();
+
+    Map<String, RowMetaInterface> rowMetaInterfaces = analyzer.getInputRowMetaInterfaces( meta );
+    assertNotNull( rowMetaInterfaces );
+  }
+
+  @Test
   public void testGetInputRowMetaInterfaces_isInputAndIncomingNodes() throws Exception {
     Map<String, RowMetaInterface> inputs = new HashMap<>();
     RowMetaInterface inputRmi = mock( RowMetaInterface.class );
