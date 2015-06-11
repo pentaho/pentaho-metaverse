@@ -76,14 +76,16 @@ public abstract class ConnectionExternalResourceStepAnalyzer<T extends BaseStepM
   public void linkResourceToFields( StepNodes stepNodes ) {
     // link in the resource nodes as "contains" to the table node
     Set<String> fieldNames = stepNodes.getFieldNames( ExternalResourceStepAnalyzer.RESOURCE );
-    for ( String fieldName : fieldNames ) {
-      IMetaverseNode resNode = stepNodes.findNode( ExternalResourceStepAnalyzer.RESOURCE, fieldName );
-      if ( resNode != null ) {
-        // set the column's namespace to the logical id of the table
-        resNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, getTableNode().getLogicalId() );
-        // update the db column node to force the logical id to re-generate with the updated namespace
-        getMetaverseBuilder().updateNode( resNode );
-        getMetaverseBuilder().addLink( getTableNode(), DictionaryConst.LINK_CONTAINS, resNode );
+    if ( fieldNames != null ) {
+      for ( String fieldName : fieldNames ) {
+        IMetaverseNode resNode = stepNodes.findNode( ExternalResourceStepAnalyzer.RESOURCE, fieldName );
+        if ( resNode != null ) {
+          // set the column's namespace to the logical id of the table
+          resNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, getTableNode().getLogicalId() );
+          // update the db column node to force the logical id to re-generate with the updated namespace
+          getMetaverseBuilder().updateNode( resNode );
+          getMetaverseBuilder().addLink( getTableNode(), DictionaryConst.LINK_CONTAINS, resNode );
+        }
       }
     }
   }
