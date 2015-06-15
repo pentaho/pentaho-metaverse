@@ -6,7 +6,7 @@
       <param name="ConversionPattern" value="%d %-5p  [%c{1}] %m %n" />
     </layout>
   </appender>
-  <logger name="com.pentaho.metaverse" additivity="false">
+  <logger name="org.pentaho.metaverse" additivity="false">
     <level value="DEBUG" />
     <appender-ref ref="consoleAppender"/>
   </logger>
