@@ -33,7 +33,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 public class Messages {
-  private static final String BUNDLE_NAME = "com.pentaho.metaverse.api.messages.messages";
+  private static final String BUNDLE_NAME = "org.pentaho.metaverse.api.messages.messages";
 
   private static final Map<Locale, ResourceBundle>
   locales = Collections.synchronizedMap( new HashMap<Locale, ResourceBundle>() );
