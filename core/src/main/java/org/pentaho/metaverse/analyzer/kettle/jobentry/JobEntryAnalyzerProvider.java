@@ -128,23 +128,25 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
 
   @Override
   public void removeAnalyzer( IJobEntryAnalyzer analyzer ) {
-    if ( jobEntryAnalyzers.contains( analyzer ) ) {
-      try {
-        jobEntryAnalyzers.remove( analyzer );
-      } catch ( UnsupportedOperationException e ) {
-        // reference-list doesn't support remove
+    if ( analyzer != null ) {
+      if ( jobEntryAnalyzers.contains( analyzer ) ) {
+        try {
+          jobEntryAnalyzers.remove( analyzer );
+        } catch ( UnsupportedOperationException e ) {
+          // reference-list doesn't support remove
+        }
       }
-    }
-    Set<Class<? extends JobEntryInterface>> types = analyzer.getSupportedEntries();
-    if ( types != null ) {
-      for ( Class<? extends JobEntryInterface> type : types ) {
-        Set<IJobEntryAnalyzer> analyzerSet = null;
-        if ( analyzerTypeMap.containsKey( type ) ) {
-          // we have someone that handles this type, remove it from the set
-          analyzerSet = analyzerTypeMap.get( type );
-          analyzerSet.remove( analyzer );
-          if ( analyzerSet.size() == 0 ) {
-            analyzerTypeMap.remove( type );
+      Set<Class<? extends JobEntryInterface>> types = analyzer.getSupportedEntries();
+      if ( types != null ) {
+        for ( Class<? extends JobEntryInterface> type : types ) {
+          Set<IJobEntryAnalyzer> analyzerSet = null;
+          if ( analyzerTypeMap.containsKey( type ) ) {
+            // we have someone that handles this type, remove it from the set
+            analyzerSet = analyzerTypeMap.get( type );
+            analyzerSet.remove( analyzer );
+            if ( analyzerSet.size() == 0 ) {
+              analyzerTypeMap.remove( type );
+            }
           }
         }
       }
