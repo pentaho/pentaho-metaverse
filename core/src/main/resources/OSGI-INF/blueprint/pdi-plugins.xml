@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+  <!-- Extension Points -->
+  <!-- TransOpened extension point -->
+  <bean id="transOpened" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransOpenedExtensionPoint"/>
+  <bean id="transOpenedPlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
+    <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
+    <property name="name" value="TransAfterOpen"/>
+    <property name="ID" value="transOpenLineageGraph"/>
+    <property name="description" value="Creates a lineage graph for the transformation on open"/>
+    <property name="pluginTypeInterface" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    <property name="category" value="Data Lineage"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="org.pentaho.di.core.extension.ExtensionPointInterface" value="transOpened"/>
+      </map>
+    </property>
+  </bean>
+  <service id="transOpenedPluginService" interface="org.pentaho.di.core.plugins.PluginInterface" ref="transOpenedPlugin">
+    <service-properties>
+      <entry key="PluginType" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    </service-properties>
+  </service>
+
+  <!-- TransChanged extension point -->
+  <bean id="transChanged" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransChangedExtensionPoint"/>
+  <bean id="transChangedPlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
+    <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
+    <property name="name" value="TransChanged"/>
+    <property name="ID" value="transChangeLineageGraph"/>
+    <property name="description" value="Creates/updates a lineage graph for the transformation when it changes"/>
+    <property name="pluginTypeInterface" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    <property name="category" value="Data Lineage"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="org.pentaho.di.core.extension.ExtensionPointInterface" value="transChanged"/>
+      </map>
+    </property>
+  </bean>
+  <service id="transChangedPluginService" interface="org.pentaho.di.core.plugins.PluginInterface" ref="transChangedPlugin">
+    <service-properties>
+      <entry key="PluginType" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    </service-properties>
+  </service>
+
+  <!-- TransRuntime extension point -->
+  <bean id="transRuntime" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint">
+    <property name="documentAnalyzer" ref="TransformationAnalyzer"/>
+    <property name="lineageWriter" ref="lineageWriter"/>
+  </bean>
+  <bean id="transRuntimePlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
+    <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
+    <property name="name" value="TransformationStartThreads"/>
+    <property name="ID" value="transRuntimeMetaverse"/>
+    <property name="description" value="Creates execution profiles when transformations run"/>
+    <property name="pluginTypeInterface" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    <property name="category" value="Data Lineage"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="org.pentaho.di.core.extension.ExtensionPointInterface" value="transRuntime"/>
+        <entry key="org.pentaho.di.trans.TransListener" value="transRuntime"/>
+      </map>
+    </property>
+  </bean>
+  <service id="transRuntimePluginService" interface="org.pentaho.di.core.plugins.PluginInterface" ref="transRuntimePlugin">
+    <service-properties>
+      <entry key="PluginType" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    </service-properties>
+  </service>
+
+  <!-- JobRuntime extension point -->
+  <bean id="jobRuntime" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint"/>
+  <bean id="jobRuntimePlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
+    <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
+    <property name="name" value="JobStart"/>
+    <property name="ID" value="jobRuntimeMetaverse"/>
+    <property name="description" value="Creates execution profiles when jobs run"/>
+    <property name="pluginTypeInterface" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    <property name="category" value="Data Lineage"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="org.pentaho.di.core.extension.ExtensionPointInterface" value="jobRuntime"/>
+        <entry key="org.pentaho.di.job.JobListener" value="jobRuntime"/>
+      </map>
+    </property>
+  </bean>
+  <service id="jobRuntimePluginService" interface="org.pentaho.di.core.plugins.PluginInterface" ref="jobRuntimePlugin">
+    <service-properties>
+      <entry key="PluginType" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    </service-properties>
+  </service>
+
+  <!-- StepExternalResourceConsumerListener extension point -->
+  <bean id="stepExternalResourceConsumerListener"
+        scope="singleton"
+        class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExternalResourceConsumerListener">
+    <property name="stepExternalResourceConsumerProvider" ref="IStepExternalResourceConsumerProvider"/>
+  </bean>
+  <bean id="stepExternalResourceConsumerListenerPlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
+    <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
+    <property name="name" value="StepBeforeStart"/>
+    <property name="ID" value="stepExternalResource"/>
+    <property name="description" value="Step external resource listener"/>
+    <property name="pluginTypeInterface" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    <property name="category" value="Data Lineage"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="org.pentaho.di.core.extension.ExtensionPointInterface" value="stepExternalResourceConsumerListener"/>
+      </map>
+    </property>
+  </bean>
+  <service id="stepExternalResourceConsumerListenerPluginService"
+           interface="org.pentaho.di.core.plugins.PluginInterface"
+           ref="stepExternalResourceConsumerListenerPlugin">
+    <service-properties>
+      <entry key="PluginType" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    </service-properties>
+  </service>
+</blueprint>
