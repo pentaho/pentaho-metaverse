@@ -267,23 +267,23 @@ public class DocumentController implements IDocumentController, IDocumentListene
         // This comes from Blueprint for managed containers (which are read-only). Nothing to do in this case
       }
     }
-    if (analyzer !=  null) {
-    Set<String> types = analyzer.getSupportedTypes();
-    analyzer.setMetaverseBuilder( this );
-    if ( types != null ) {
-      for ( String type : types ) {
-        HashSet<IDocumentAnalyzer> analyzerSet = null;
-        if ( analyzerTypeMap.containsKey( type ) ) {
-          // we have someone that handles this type, remove it from the set
-          analyzerSet = analyzerTypeMap.get( type );
-          analyzerSet.remove( analyzer );
-          if ( analyzerSet.size() == 0 ) {
-            analyzerTypeMap.remove( type );
+    if ( analyzer != null ) {
+      Set<String> types = analyzer.getSupportedTypes();
+      analyzer.setMetaverseBuilder( this );
+      if ( types != null ) {
+        for ( String type : types ) {
+          HashSet<IDocumentAnalyzer> analyzerSet = null;
+          if ( analyzerTypeMap.containsKey( type ) ) {
+            // we have someone that handles this type, remove it from the set
+            analyzerSet = analyzerTypeMap.get( type );
+            analyzerSet.remove( analyzer );
+            if ( analyzerSet.size() == 0 ) {
+              analyzerTypeMap.remove( type );
+            }
           }
         }
       }
     }
-   }
   }
 
   /**

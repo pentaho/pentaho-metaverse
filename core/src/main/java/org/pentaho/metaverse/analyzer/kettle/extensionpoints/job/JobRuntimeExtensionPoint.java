@@ -49,8 +49,11 @@ import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.impl.model.ExecutionData;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.impl.model.ParamInfo;
+import org.pentaho.metaverse.messages.Messages;
 import org.pentaho.metaverse.util.MetaverseBeanUtil;
 import org.pentaho.metaverse.util.MetaverseUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,6 +79,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
   private IDocumentAnalyzer documentAnalyzer;
 
   private static Map<Job, LineageHolder> lineageHolderMap = new ConcurrentHashMap<Job, LineageHolder>();
+  private static final Logger LOG = LoggerFactory.getLogger( JobRuntimeExtensionPoint.class );
 
   public static LineageHolder getLineageHolder( Job job ) {
     LineageHolder holder = lineageHolderMap.get( job );
@@ -150,7 +154,9 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       try {
         filePath = f.getCanonicalPath();
       } catch ( IOException e ) {
-        e.printStackTrace();
+        // if we fail to get the canonical path, just use the path
+        filePath = f.getPath();
+        LOG.debug( Messages.getString( "INFO.CouldNotGetFileCanonicalPath", filePath ), e );
       }
 
       ExecutionProfile executionProfile = new ExecutionProfile();
