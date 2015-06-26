@@ -26,18 +26,23 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.metaverse.api.IDocumentLocator;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
+import org.pentaho.metaverse.api.ILineageCollector;
 import org.pentaho.metaverse.api.IMetaverseReader;
 import org.pentaho.metaverse.api.MetaverseLocatorException;
+import org.pentaho.metaverse.api.model.LineageRequest;
 import org.pentaho.metaverse.messages.Messages;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -66,6 +71,9 @@ public class MetaverseServiceTest {
 
   @Mock
   private HttpHeaders mockHeadersText;
+
+  @Mock
+  private ILineageCollector mockCollector;
 
   private static final String TEST_XML = "<xml><graphml></graphml>";
   private static final String TEST_JSON = "{\"mode\":\"NORMAL\",\"vertices\":[],\"edges\":[]}";
@@ -236,5 +244,180 @@ public class MetaverseServiceTest {
     // Set up for exception
     when( mockProvider.getDocumentLocators() ).thenThrow( ExecutionException.class );
     service.prepareMetaverse();
+  }
+
+  @Test
+  public void testDownload() throws Exception {
+    service.setLineageCollector( mockCollector );
+
+    List<String> paths = new ArrayList<>();
+    when( mockCollector.listArtifacts() ).thenReturn( paths );
+
+    Response response = service.download();
+    assertNotNull( response );
+    assertEquals( Response.Status.OK.getStatusCode(), response.getStatus() );
+    assertEquals( "application/zip", response.getHeaderString( "Content-Type" ) );
+    assertEquals( "inline; filename=pentaho-lineage.zip", response.getHeaderString( "Content-Disposition" ) );
+
+    verify( mockCollector ).listArtifacts( null, null );
+  }
+
+  @Test
+  public void testDownload_nullLineageCollector() throws Exception {
+    service.setLineageCollector( null );
+
+    List<String> paths = new ArrayList<>();
+
+    Response response = service.download();
+    assertNotNull( response );
+    assertEquals( Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus() );
+  }
+
+  @Test
+  public void testDownload_startingDate() throws Exception {
+    service.setLineageCollector( mockCollector );
+
+    List<String> paths = new ArrayList<>();
+    String dateString = "20150707";
+    when( mockCollector.listArtifacts( dateString ) ).thenReturn( paths );
+
+    Response response = service.download( dateString );
+    assertNotNull( response );
+    assertEquals( Response.Status.OK.getStatusCode(), response.getStatus() );
+    assertEquals( "application/zip", response.getHeaderString( "Content-Type" ) );
+    assertEquals( "inline; filename=pentaho-lineage_" + dateString + ".zip",
+      response.getHeaderString( "Content-Disposition" ) );
+
+    verify( mockCollector ).listArtifacts( eq( dateString ), anyString() );
+  }
+
+  @Test
+  public void testDownload_startingDate_endingDate() throws Exception {
+    service.setLineageCollector( mockCollector );
+
+    List<String> paths = new ArrayList<>();
+    String dateString = "20150707";
+    String endingDate = "20151030";
+    when( mockCollector.listArtifacts( dateString, endingDate ) ).thenReturn( paths );
+
+    Response response = service.download( dateString, endingDate );
+    assertNotNull( response );
+    assertEquals( Response.Status.OK.getStatusCode(), response.getStatus() );
+    assertEquals( "application/zip", response.getHeaderString( "Content-Type" ) );
+    assertEquals( "inline; filename=pentaho-lineage_" + dateString + "-" + endingDate + ".zip",
+      response.getHeaderString( "Content-Disposition" ) );
+
+    verify( mockCollector ).listArtifacts( eq( dateString ), eq( endingDate ) );
+  }
+
+  @Test
+  public void testDownload_startingDate_nullLineageCollector() throws Exception {
+    service.setLineageCollector( null );
+
+    String dateString = "20150707";
+
+    Response response = service.download( dateString );
+    assertNotNull( response );
+    assertEquals( Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus() );
+  }
+
+  @Test( expected = BadRequestException.class )
+  public void testDownload_invalidStartingDate() throws Exception {
+    service.setLineageCollector( mockCollector );
+
+    List<String> paths = new ArrayList<>();
+    String dateString = "20159999";
+    when( mockCollector.listArtifacts( dateString, null ) ).thenThrow( new IllegalArgumentException( "bad" ) );
+
+    Response response = service.download( dateString );
+  }
+
+  @Test
+  public void testDownload_forSpecificKtr() throws Exception {
+    service.setLineageCollector( mockCollector );
+
+    List<String> paths = new ArrayList<>();
+    String path = "/tmp/test/some.ktr";
+    when( mockCollector.listArtifactsForFile( path ) ).thenReturn( paths );
+
+    LineageRequest request = new LineageRequest();
+    request.setPath( path );
+    Response response = service.downloadFile( request );
+    assertNotNull( response );
+    assertEquals( Response.Status.OK.getStatusCode(), response.getStatus() );
+    assertEquals( "application/zip", response.getHeaderString( "Content-Type" ) );
+    assertEquals( "inline; filename=some.ktr_lineage.zip", response.getHeaderString( "Content-Disposition" ) );
+
+    verify( mockCollector ).listArtifactsForFile( path, null, null );
+  }
+
+  @Test
+  public void testDownload_forSpecificKtr_nullLineageCollector() throws Exception {
+    service.setLineageCollector( null );
+
+    String path = "/tmp/test/some.ktr";
+
+    LineageRequest request = new LineageRequest();
+    request.setPath( path );
+    Response response = service.downloadFile( request );
+    assertNotNull( response );
+    assertEquals( Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus() );
+  }
+
+  @Test
+  public void testDownload_forSpecificKtr_startingDate() throws Exception {
+    service.setLineageCollector( mockCollector );
+
+    List<String> paths = new ArrayList<>();
+    String path = "/tmp/test/some.ktr";
+    String dateString = "20150707";
+    when( mockCollector.listArtifactsForFile( path, dateString ) ).thenReturn( paths );
+
+    LineageRequest request = new LineageRequest();
+    request.setPath( path );
+    Response response = service.downloadFile( request, dateString );
+    assertNotNull( response );
+    assertEquals( Response.Status.OK.getStatusCode(), response.getStatus() );
+    assertEquals( "application/zip", response.getHeaderString( "Content-Type" ) );
+    assertEquals( "inline; filename=some.ktr_lineage_" + dateString + ".zip",
+      response.getHeaderString( "Content-Disposition" ) );
+
+    verify( mockCollector ).listArtifactsForFile( path, dateString, null );
+  }
+
+  @Test
+  public void testDownload_forSpecificKtr_startingDate_endingDate() throws Exception {
+    service.setLineageCollector( mockCollector );
+
+    List<String> paths = new ArrayList<>();
+    String path = "/tmp/test/some.ktr";
+    String dateString = "20150707";
+    String endingDate = "20151030";
+    when( mockCollector.listArtifactsForFile( path, dateString, endingDate ) ).thenReturn( paths );
+
+    LineageRequest request = new LineageRequest();
+    request.setPath( path );
+    Response response = service.downloadFile( request, dateString, endingDate );
+    assertNotNull( response );
+    assertEquals( Response.Status.OK.getStatusCode(), response.getStatus() );
+    assertEquals( "application/zip", response.getHeaderString( "Content-Type" ) );
+    assertEquals( "inline; filename=some.ktr_lineage_" + dateString + "-" + endingDate + ".zip",
+      response.getHeaderString( "Content-Disposition" ) );
+
+    verify( mockCollector ).listArtifactsForFile( path, dateString, endingDate );
+  }
+
+  @Test( expected = BadRequestException.class )
+  public void testDownload_forSpecificKtr_invalidDate() throws Exception {
+    service.setLineageCollector( mockCollector );
+
+    List<String> paths = new ArrayList<>();
+    String path = "/tmp/test/some.ktr";
+    String dateString = "20159999";
+    when( mockCollector.listArtifactsForFile( path, dateString, null ) ).thenThrow( new IllegalArgumentException( "error" ) );
+
+    LineageRequest request = new LineageRequest();
+    request.setPath( path );
+    Response response = service.downloadFile( request, dateString );
   }
 }

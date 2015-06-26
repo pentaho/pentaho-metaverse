@@ -1,0 +1,418 @@
+<?xml version="1.0" ?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.1/graphml.xsd">
+    <key id="_analyzer" for="node" attr.name="_analyzer" attr.type="string"></key>
+    <key id="category" for="node" attr.name="category" attr.type="string"></key>
+    <key id="copies" for="node" attr.name="copies" attr.type="int"></key>
+    <key id="created" for="node" attr.name="created" attr.type="string"></key>
+    <key id="createdby" for="node" attr.name="createdby" attr.type="string"></key>
+    <key id="description" for="node" attr.name="description" attr.type="string"></key>
+    <key id="division" for="node" attr.name="division" attr.type="string"></key>
+    <key id="kettleType" for="node" attr.name="kettleType" attr.type="string"></key>
+    <key id="lastmodified" for="node" attr.name="lastmodified" attr.type="string"></key>
+    <key id="lastmodifiedby" for="node" attr.name="lastmodifiedby" attr.type="string"></key>
+    <key id="logicalId" for="node" attr.name="logicalId" attr.type="string"></key>
+    <key id="name" for="node" attr.name="name" attr.type="string"></key>
+    <key id="namespace" for="node" attr.name="namespace" attr.type="string"></key>
+    <key id="operations" for="node" attr.name="operations" attr.type="string"></key>
+    <key id="path" for="node" attr.name="path" attr.type="string"></key>
+    <key id="project" for="node" attr.name="project" attr.type="string"></key>
+    <key id="stepType" for="node" attr.name="stepType" attr.type="string"></key>
+    <key id="targetStep" for="node" attr.name="targetStep" attr.type="string"></key>
+    <key id="type" for="node" attr.name="type" attr.type="string"></key>
+    <key id="virtual" for="node" attr.name="virtual" attr.type="boolean"></key>
+    <key id="enabled" for="edge" attr.name="enabled" attr.type="boolean"></key>
+    <key id="text" for="edge" attr.name="text" attr.type="string"></key>
+    <key id="type" for="edge" attr.name="type" attr.type="string"></key>
+    <graph id="G" edgedefault="directed">
+        <node id="23b7a21f-8e26-4e4d-b3e8-ecc161df4187">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"LastName","namespace":{"name":"Strings cut","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"Dummy (do nothing)","type":"Transformation Stream field"}</data>
+            <data key="name">LastName</data>
+            <data key="namespace">{"name":"Strings cut","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="operations">{"dataOperations":[{"category":"calculation","class":"org.pentaho.metaverse.api.model.Operation","description":"LastName -&gt; [ substring [ 0, 5 ] ] -&gt; LastName","name":"transforms","type":"DATA"}]}</data>
+            <data key="targetStep">Dummy (do nothing)</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="354d101a-37da-44b7-a93e-d3d85816e227">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"LastName","namespace":{"name":"Data Grid","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"Strings cut","type":"Transformation Stream field"}</data>
+            <data key="name">LastName</data>
+            <data key="namespace">{"name":"Data Grid","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="targetStep">Strings cut</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="3b3dc1d3-7965-4b08-bf5b-2bf73070f3ae">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"Middle Name","namespace":{"name":"Strings cut","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"Dummy (do nothing)","type":"Transformation Stream field"}</data>
+            <data key="name">Middle Name</data>
+            <data key="namespace">{"name":"Strings cut","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="targetStep">Dummy (do nothing)</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="3cf11b34-6fa7-432a-8392-fd4289d3235d">
+            <data key="_analyzer">StringsCutStepAnalyzer</data>
+            <data key="category">documentelement</data>
+            <data key="copies">1</data>
+            <data key="logicalId">{"name":"Strings cut","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="name">Strings cut</data>
+            <data key="namespace">{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"}</data>
+            <data key="stepType">Strings cut</data>
+            <data key="type">Transformation Step</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="6e26af19-3a95-4815-860a-65c46c70c8d0">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"FirstName","namespace":{"name":"Strings cut","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"Dummy (do nothing)","type":"Transformation Stream field"}</data>
+            <data key="name">FirstName</data>
+            <data key="namespace">{"name":"Strings cut","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="operations">{"dataOperations":[{"category":"calculation","class":"org.pentaho.metaverse.api.model.Operation","description":"FirstName -&gt; [ substring [ 3, 7 ] ] -&gt; FirstName","name":"transforms","type":"DATA"}]}</data>
+            <data key="targetStep">Dummy (do nothing)</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="75a8f2f2-1be6-416d-bbb0-0be4249883de">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"MI","namespace":{"name":"Dummy (do nothing)","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"_none_","type":"Transformation Stream field"}</data>
+            <data key="name">MI</data>
+            <data key="namespace">{"name":"Dummy (do nothing)","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="targetStep">_none_</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="7620e2c7-7e90-4394-92c7-684d7067cfb1">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"LastName","namespace":{"name":"Dummy (do nothing)","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"_none_","type":"Transformation Stream field"}</data>
+            <data key="name">LastName</data>
+            <data key="namespace">{"name":"Dummy (do nothing)","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="targetStep">_none_</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="90b178bd-d96e-44ba-aacc-93cf3d8c42e6">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"FirstName","namespace":{"name":"Dummy (do nothing)","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"_none_","type":"Transformation Stream field"}</data>
+            <data key="name">FirstName</data>
+            <data key="namespace">{"name":"Dummy (do nothing)","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="targetStep">_none_</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="Pentaho Data Integration">
+            <data key="category">repository</data>
+            <data key="logicalId">{"name":"Pentaho Data Integration","namespace":"","type":"Locator"}</data>
+            <data key="name">Pentaho Data Integration</data>
+            <data key="type">Locator</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="bad39f0d-1a1f-456c-b505-d0061abf58f9">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"Middle Name","namespace":{"name":"Dummy (do nothing)","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"_none_","type":"Transformation Stream field"}</data>
+            <data key="name">Middle Name</data>
+            <data key="namespace">{"name":"Dummy (do nothing)","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="targetStep">_none_</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="bd28ab95-ec5a-43d0-8340-3d607f36cabd">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"FirstName","namespace":{"name":"Data Grid","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"Strings cut","type":"Transformation Stream field"}</data>
+            <data key="name">FirstName</data>
+            <data key="namespace">{"name":"Data Grid","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="targetStep">Strings cut</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="be5d8518-1606-4416-85f1-762c29956db2">
+            <data key="category">document</data>
+            <data key="created">1427810072083</data>
+            <data key="createdby">-</data>
+            <data key="lastmodified">1427810072083</data>
+            <data key="lastmodifiedby">-</data>
+            <data key="logicalId">{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"}</data>
+            <data key="name">strings_cut</data>
+            <data key="namespace">Pentaho Data Integration</data>
+            <data key="path">/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr</data>
+            <data key="type">Transformation</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="c07c388c-cdea-4736-8bbd-2530dec2e4a5">
+            <data key="_analyzer">GenericStepMetaAnalyzer</data>
+            <data key="category">documentelement</data>
+            <data key="copies">1</data>
+            <data key="logicalId">{"name":"Dummy (do nothing)","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="name">Dummy (do nothing)</data>
+            <data key="namespace">{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"}</data>
+            <data key="stepType">Dummy (do nothing)</data>
+            <data key="type">Transformation Step</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="c337161e-3a90-471d-8ac0-d818d6503141">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"MI","namespace":{"name":"Strings cut","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"Dummy (do nothing)","type":"Transformation Stream field"}</data>
+            <data key="name">MI</data>
+            <data key="namespace">{"name":"Strings cut","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="operations">{"dataOperations":[{"category":"calculation","class":"org.pentaho.metaverse.api.model.Operation","description":"Middle Name -&gt; [ substring [ 0, 1 ] ] -&gt; MI","name":"transforms","type":"DATA"}]}</data>
+            <data key="targetStep">Dummy (do nothing)</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="d380f08f-6003-4312-b363-b58e425a010a">
+            <data key="_analyzer">GenericStepMetaAnalyzer</data>
+            <data key="category">documentelement</data>
+            <data key="copies">1</data>
+            <data key="logicalId">{"name":"Data Grid","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="name">Data Grid</data>
+            <data key="namespace">{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"}</data>
+            <data key="stepType">Data Grid</data>
+            <data key="type">Transformation Step</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="eb4dfc04-5de7-47d8-bd25-e22334a9e2b1">
+            <data key="category">field</data>
+            <data key="kettleType">String</data>
+            <data key="logicalId">{"name":"Middle Name","namespace":{"name":"Data Grid","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"},"targetStep":"Strings cut","type":"Transformation Stream field"}</data>
+            <data key="name">Middle Name</data>
+            <data key="namespace">{"name":"Data Grid","namespace":{"namespace":"Pentaho Data Integration","path":"/Users/rfellows/code/git/pentaho-metaverse/core/src/it/resources/repo/validation/strings_cut.ktr","type":"Transformation"},"type":"Transformation Step"}</data>
+            <data key="targetStep">Strings cut</data>
+            <data key="type">Transformation Stream field</data>
+            <data key="virtual">false</data>
+        </node>
+        <node id="entity">
+            <data key="description">Data lineage is tracing the path that data has traveled upstream from its destination, through Pentaho systems and artifacts as well as external systems and artifacts.</data>
+            <data key="division">Engineering</data>
+            <data key="name">METAVERSE</data>
+            <data key="project">Pentaho Data Lineage</data>
+            <data key="type">Root_Entity</data>
+        </node>
+        <node id="entity_Database Column">
+            <data key="name">Database Column</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_Database Connection">
+            <data key="name">Database Connection</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_Database Table">
+            <data key="name">Database Table</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_External Connection">
+            <data key="name">External Connection</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_Job">
+            <data key="description">Pentaho Data Integration</data>
+            <data key="name">Job</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_Job Entry">
+            <data key="name">Job Entry</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_Logical Model">
+            <data key="name">Logical Model</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_MongoDB Collection">
+            <data key="name">MongoDB Collection</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_MongoDB Connection">
+            <data key="name">MongoDB Connection</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_Transformation">
+            <data key="description">Pentaho Data Integration</data>
+            <data key="name">Transformation</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_Transformation Step">
+            <data key="name">Transformation Step</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_Transformation Stream field">
+            <data key="name">Transformation Stream field</data>
+            <data key="type">Entity</data>
+        </node>
+        <node id="entity_User Content">
+            <data key="name">User Content</data>
+            <data key="type">Entity</data>
+        </node>
+        <edge id="0409fb5c-0440-4dfe-ba4c-916a473bd737" source="entity_Transformation Stream field" target="75a8f2f2-1be6-416d-bbb0-0be4249883de" label="parentconcept"></edge>
+        <edge id="09cbeca3-66d1-490a-b0df-40ecb6994202" source="entity_Transformation Stream field" target="7620e2c7-7e90-4394-92c7-684d7067cfb1" label="parentconcept"></edge>
+        <edge id="23b7a21f-8e26-4e4d-b3e8-ecc161df4187~derives~7620e2c7-7e90-4394-92c7-684d7067cfb1" source="23b7a21f-8e26-4e4d-b3e8-ecc161df4187" target="7620e2c7-7e90-4394-92c7-684d7067cfb1" label="derives">
+            <data key="text">derives</data>
+        </edge>
+        <edge id="23b7a21f-8e26-4e4d-b3e8-ecc161df4187~inputs~c07c388c-cdea-4736-8bbd-2530dec2e4a5" source="23b7a21f-8e26-4e4d-b3e8-ecc161df4187" target="c07c388c-cdea-4736-8bbd-2530dec2e4a5" label="inputs">
+            <data key="text">inputs</data>
+        </edge>
+        <edge id="29592f13-f094-4770-a554-893ea44962fb" source="entity_Transformation Step" target="d380f08f-6003-4312-b363-b58e425a010a" label="parentconcept"></edge>
+        <edge id="354d101a-37da-44b7-a93e-d3d85816e227~derives~23b7a21f-8e26-4e4d-b3e8-ecc161df4187" source="354d101a-37da-44b7-a93e-d3d85816e227" target="23b7a21f-8e26-4e4d-b3e8-ecc161df4187" label="derives">
+            <data key="text">derives</data>
+        </edge>
+        <edge id="354d101a-37da-44b7-a93e-d3d85816e227~inputs~3cf11b34-6fa7-432a-8392-fd4289d3235d" source="354d101a-37da-44b7-a93e-d3d85816e227" target="3cf11b34-6fa7-432a-8392-fd4289d3235d" label="inputs">
+            <data key="text">inputs</data>
+        </edge>
+        <edge id="3b3dc1d3-7965-4b08-bf5b-2bf73070f3ae~derives~bad39f0d-1a1f-456c-b505-d0061abf58f9" source="3b3dc1d3-7965-4b08-bf5b-2bf73070f3ae" target="bad39f0d-1a1f-456c-b505-d0061abf58f9" label="derives">
+            <data key="text">derives</data>
+        </edge>
+        <edge id="3b3dc1d3-7965-4b08-bf5b-2bf73070f3ae~inputs~c07c388c-cdea-4736-8bbd-2530dec2e4a5" source="3b3dc1d3-7965-4b08-bf5b-2bf73070f3ae" target="c07c388c-cdea-4736-8bbd-2530dec2e4a5" label="inputs">
+            <data key="text">inputs</data>
+        </edge>
+        <edge id="3cf11b34-6fa7-432a-8392-fd4289d3235d~hops_to~c07c388c-cdea-4736-8bbd-2530dec2e4a5" source="3cf11b34-6fa7-432a-8392-fd4289d3235d" target="c07c388c-cdea-4736-8bbd-2530dec2e4a5" label="hops_to">
+            <data key="enabled">true</data>
+            <data key="text">hops_to</data>
+            <data key="type">target</data>
+        </edge>
+        <edge id="3cf11b34-6fa7-432a-8392-fd4289d3235d~outputs~23b7a21f-8e26-4e4d-b3e8-ecc161df4187" source="3cf11b34-6fa7-432a-8392-fd4289d3235d" target="23b7a21f-8e26-4e4d-b3e8-ecc161df4187" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="3cf11b34-6fa7-432a-8392-fd4289d3235d~outputs~3b3dc1d3-7965-4b08-bf5b-2bf73070f3ae" source="3cf11b34-6fa7-432a-8392-fd4289d3235d" target="3b3dc1d3-7965-4b08-bf5b-2bf73070f3ae" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="3cf11b34-6fa7-432a-8392-fd4289d3235d~outputs~6e26af19-3a95-4815-860a-65c46c70c8d0" source="3cf11b34-6fa7-432a-8392-fd4289d3235d" target="6e26af19-3a95-4815-860a-65c46c70c8d0" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="3cf11b34-6fa7-432a-8392-fd4289d3235d~outputs~c337161e-3a90-471d-8ac0-d818d6503141" source="3cf11b34-6fa7-432a-8392-fd4289d3235d" target="c337161e-3a90-471d-8ac0-d818d6503141" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="3cf11b34-6fa7-432a-8392-fd4289d3235d~uses~354d101a-37da-44b7-a93e-d3d85816e227" source="3cf11b34-6fa7-432a-8392-fd4289d3235d" target="354d101a-37da-44b7-a93e-d3d85816e227" label="uses">
+            <data key="text">uses</data>
+        </edge>
+        <edge id="3cf11b34-6fa7-432a-8392-fd4289d3235d~uses~bd28ab95-ec5a-43d0-8340-3d607f36cabd" source="3cf11b34-6fa7-432a-8392-fd4289d3235d" target="bd28ab95-ec5a-43d0-8340-3d607f36cabd" label="uses">
+            <data key="text">uses</data>
+        </edge>
+        <edge id="3cf11b34-6fa7-432a-8392-fd4289d3235d~uses~eb4dfc04-5de7-47d8-bd25-e22334a9e2b1" source="3cf11b34-6fa7-432a-8392-fd4289d3235d" target="eb4dfc04-5de7-47d8-bd25-e22334a9e2b1" label="uses">
+            <data key="text">uses</data>
+        </edge>
+        <edge id="40a53974-eb68-431d-b87f-f7f6fcfad81d" source="entity_Transformation Step" target="c07c388c-cdea-4736-8bbd-2530dec2e4a5" label="parentconcept"></edge>
+        <edge id="4f89df7e-46ed-416e-af92-65bc88aaa5b5" source="entity_Transformation" target="be5d8518-1606-4416-85f1-762c29956db2" label="parentconcept"></edge>
+        <edge id="6ac9195e-8662-4302-b5f3-67bfa89e4100" source="entity_Transformation Stream field" target="3b3dc1d3-7965-4b08-bf5b-2bf73070f3ae" label="parentconcept"></edge>
+        <edge id="6e26af19-3a95-4815-860a-65c46c70c8d0~derives~90b178bd-d96e-44ba-aacc-93cf3d8c42e6" source="6e26af19-3a95-4815-860a-65c46c70c8d0" target="90b178bd-d96e-44ba-aacc-93cf3d8c42e6" label="derives">
+            <data key="text">derives</data>
+        </edge>
+        <edge id="6e26af19-3a95-4815-860a-65c46c70c8d0~inputs~c07c388c-cdea-4736-8bbd-2530dec2e4a5" source="6e26af19-3a95-4815-860a-65c46c70c8d0" target="c07c388c-cdea-4736-8bbd-2530dec2e4a5" label="inputs">
+            <data key="text">inputs</data>
+        </edge>
+        <edge id="75709853-8dba-4c9d-999e-43830365f3fb" source="entity_Transformation Stream field" target="bad39f0d-1a1f-456c-b505-d0061abf58f9" label="parentconcept"></edge>
+        <edge id="7e038c93-63e5-4059-a910-6798f44de537" source="entity_Transformation Stream field" target="90b178bd-d96e-44ba-aacc-93cf3d8c42e6" label="parentconcept"></edge>
+        <edge id="805a7a9f-d55c-48cf-a997-77b5e50546ea" source="entity_Transformation Stream field" target="bd28ab95-ec5a-43d0-8340-3d607f36cabd" label="parentconcept"></edge>
+        <edge id="8b22f51a-b860-4c23-9947-cde1092baebe" source="entity_Transformation Stream field" target="6e26af19-3a95-4815-860a-65c46c70c8d0" label="parentconcept"></edge>
+        <edge id="Pentaho Data Integration~contains~be5d8518-1606-4416-85f1-762c29956db2" source="Pentaho Data Integration" target="be5d8518-1606-4416-85f1-762c29956db2" label="contains">
+            <data key="text">contains</data>
+        </edge>
+        <edge id="a166ff3c-40aa-4290-9cc8-1f8c7d42660b" source="entity_Transformation Stream field" target="eb4dfc04-5de7-47d8-bd25-e22334a9e2b1" label="parentconcept"></edge>
+        <edge id="bd28ab95-ec5a-43d0-8340-3d607f36cabd~derives~6e26af19-3a95-4815-860a-65c46c70c8d0" source="bd28ab95-ec5a-43d0-8340-3d607f36cabd" target="6e26af19-3a95-4815-860a-65c46c70c8d0" label="derives">
+            <data key="text">derives</data>
+        </edge>
+        <edge id="bd28ab95-ec5a-43d0-8340-3d607f36cabd~inputs~3cf11b34-6fa7-432a-8392-fd4289d3235d" source="bd28ab95-ec5a-43d0-8340-3d607f36cabd" target="3cf11b34-6fa7-432a-8392-fd4289d3235d" label="inputs">
+            <data key="text">inputs</data>
+        </edge>
+        <edge id="be5d8518-1606-4416-85f1-762c29956db2~contains~3cf11b34-6fa7-432a-8392-fd4289d3235d" source="be5d8518-1606-4416-85f1-762c29956db2" target="3cf11b34-6fa7-432a-8392-fd4289d3235d" label="contains">
+            <data key="text">contains</data>
+        </edge>
+        <edge id="be5d8518-1606-4416-85f1-762c29956db2~contains~c07c388c-cdea-4736-8bbd-2530dec2e4a5" source="be5d8518-1606-4416-85f1-762c29956db2" target="c07c388c-cdea-4736-8bbd-2530dec2e4a5" label="contains">
+            <data key="text">contains</data>
+        </edge>
+        <edge id="be5d8518-1606-4416-85f1-762c29956db2~contains~d380f08f-6003-4312-b363-b58e425a010a" source="be5d8518-1606-4416-85f1-762c29956db2" target="d380f08f-6003-4312-b363-b58e425a010a" label="contains">
+            <data key="text">contains</data>
+        </edge>
+        <edge id="bfc11a76-efe6-49f3-b1c8-be6b431e526a" source="entity_Transformation Stream field" target="354d101a-37da-44b7-a93e-d3d85816e227" label="parentconcept"></edge>
+        <edge id="c07c388c-cdea-4736-8bbd-2530dec2e4a5~outputs~75a8f2f2-1be6-416d-bbb0-0be4249883de" source="c07c388c-cdea-4736-8bbd-2530dec2e4a5" target="75a8f2f2-1be6-416d-bbb0-0be4249883de" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="c07c388c-cdea-4736-8bbd-2530dec2e4a5~outputs~7620e2c7-7e90-4394-92c7-684d7067cfb1" source="c07c388c-cdea-4736-8bbd-2530dec2e4a5" target="7620e2c7-7e90-4394-92c7-684d7067cfb1" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="c07c388c-cdea-4736-8bbd-2530dec2e4a5~outputs~90b178bd-d96e-44ba-aacc-93cf3d8c42e6" source="c07c388c-cdea-4736-8bbd-2530dec2e4a5" target="90b178bd-d96e-44ba-aacc-93cf3d8c42e6" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="c07c388c-cdea-4736-8bbd-2530dec2e4a5~outputs~bad39f0d-1a1f-456c-b505-d0061abf58f9" source="c07c388c-cdea-4736-8bbd-2530dec2e4a5" target="bad39f0d-1a1f-456c-b505-d0061abf58f9" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="c0c72363-0e23-4588-80fd-41c7c03da7d3" source="entity_Transformation Step" target="3cf11b34-6fa7-432a-8392-fd4289d3235d" label="parentconcept"></edge>
+        <edge id="c337161e-3a90-471d-8ac0-d818d6503141~derives~75a8f2f2-1be6-416d-bbb0-0be4249883de" source="c337161e-3a90-471d-8ac0-d818d6503141" target="75a8f2f2-1be6-416d-bbb0-0be4249883de" label="derives">
+            <data key="text">derives</data>
+        </edge>
+        <edge id="c337161e-3a90-471d-8ac0-d818d6503141~inputs~c07c388c-cdea-4736-8bbd-2530dec2e4a5" source="c337161e-3a90-471d-8ac0-d818d6503141" target="c07c388c-cdea-4736-8bbd-2530dec2e4a5" label="inputs">
+            <data key="text">inputs</data>
+        </edge>
+        <edge id="d380f08f-6003-4312-b363-b58e425a010a~hops_to~3cf11b34-6fa7-432a-8392-fd4289d3235d" source="d380f08f-6003-4312-b363-b58e425a010a" target="3cf11b34-6fa7-432a-8392-fd4289d3235d" label="hops_to">
+            <data key="enabled">true</data>
+            <data key="text">hops_to</data>
+            <data key="type">target</data>
+        </edge>
+        <edge id="d380f08f-6003-4312-b363-b58e425a010a~outputs~354d101a-37da-44b7-a93e-d3d85816e227" source="d380f08f-6003-4312-b363-b58e425a010a" target="354d101a-37da-44b7-a93e-d3d85816e227" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="d380f08f-6003-4312-b363-b58e425a010a~outputs~bd28ab95-ec5a-43d0-8340-3d607f36cabd" source="d380f08f-6003-4312-b363-b58e425a010a" target="bd28ab95-ec5a-43d0-8340-3d607f36cabd" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="d380f08f-6003-4312-b363-b58e425a010a~outputs~eb4dfc04-5de7-47d8-bd25-e22334a9e2b1" source="d380f08f-6003-4312-b363-b58e425a010a" target="eb4dfc04-5de7-47d8-bd25-e22334a9e2b1" label="outputs">
+            <data key="text">outputs</data>
+        </edge>
+        <edge id="dcb98a3f-07a9-4a23-a8b8-224cf17d4046" source="entity_Transformation Stream field" target="c337161e-3a90-471d-8ac0-d818d6503141" label="parentconcept"></edge>
+        <edge id="e281a574-16e5-471d-a0d9-d7111f9242ac" source="entity_Transformation Stream field" target="23b7a21f-8e26-4e4d-b3e8-ecc161df4187" label="parentconcept"></edge>
+        <edge id="eb4dfc04-5de7-47d8-bd25-e22334a9e2b1~derives~3b3dc1d3-7965-4b08-bf5b-2bf73070f3ae" source="eb4dfc04-5de7-47d8-bd25-e22334a9e2b1" target="3b3dc1d3-7965-4b08-bf5b-2bf73070f3ae" label="derives">
+            <data key="text">derives</data>
+        </edge>
+        <edge id="eb4dfc04-5de7-47d8-bd25-e22334a9e2b1~derives~c337161e-3a90-471d-8ac0-d818d6503141" source="eb4dfc04-5de7-47d8-bd25-e22334a9e2b1" target="c337161e-3a90-471d-8ac0-d818d6503141" label="derives">
+            <data key="text">derives</data>
+        </edge>
+        <edge id="eb4dfc04-5de7-47d8-bd25-e22334a9e2b1~inputs~3cf11b34-6fa7-432a-8392-fd4289d3235d" source="eb4dfc04-5de7-47d8-bd25-e22334a9e2b1" target="3cf11b34-6fa7-432a-8392-fd4289d3235d" label="inputs">
+            <data key="text">inputs</data>
+        </edge>
+        <edge id="entity_External Connection~parentconcept~entity_Database Connection" source="entity_External Connection" target="entity_Database Connection" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity_External Connection~parentconcept~entity_MongoDB Connection" source="entity_External Connection" target="entity_MongoDB Connection" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_Database Column" source="entity" target="entity_Database Column" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_Database Table" source="entity" target="entity_Database Table" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_External Connection" source="entity" target="entity_External Connection" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_Job" source="entity" target="entity_Job" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_Job Entry" source="entity" target="entity_Job Entry" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_Logical Model" source="entity" target="entity_Logical Model" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_MongoDB Collection" source="entity" target="entity_MongoDB Collection" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_Transformation" source="entity" target="entity_Transformation" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_Transformation Step" source="entity" target="entity_Transformation Step" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_Transformation Stream field" source="entity" target="entity_Transformation Stream field" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+        <edge id="entity~parentconcept~entity_User Content" source="entity" target="entity_User Content" label="parentconcept">
+            <data key="text">parentconcept</data>
+        </edge>
+    </graph>
+</graphml>

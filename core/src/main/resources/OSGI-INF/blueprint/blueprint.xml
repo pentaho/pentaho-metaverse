@@ -43,9 +43,19 @@
     </cxf:features>
   </cxf:bus>
 
+  <bean id="lineageCollector" class="org.pentaho.metaverse.impl.FileSystemLineageCollector" scope="prototype">
+    <property name="outputFolder" value="${lineage.execution.output.folder}"/>
+  </bean>
+
   <bean id="metaverseServiceBean" class="org.pentaho.metaverse.service.MetaverseService">
     <argument ref="IMetaverseReader"/>
     <argument ref="IDocumentLocatorProvider"/>
+    <property name="lineageCollector" ref="lineageCollector"/>
+  </bean>
+
+  <bean id="analyzerInfoServiceBean" class="org.pentaho.metaverse.service.AnalyzerInfoService">
+    <property name="stepAnalyzerProvider" ref="IStepAnalyzerProvider"/>
+    <property name="jobEntryAnalyzerProvider" ref="IJobEntryAnalyzerProvider"/>
   </bean>
 
   <jaxrs:server id="metaverseService" address="/lineage">
@@ -54,6 +64,7 @@
     </jaxrs:providers>
     <jaxrs:serviceBeans>
       <ref component-id="metaverseServiceBean"/>
+      <ref component-id="analyzerInfoServiceBean"/>
     </jaxrs:serviceBeans>
   </jaxrs:server>
 
