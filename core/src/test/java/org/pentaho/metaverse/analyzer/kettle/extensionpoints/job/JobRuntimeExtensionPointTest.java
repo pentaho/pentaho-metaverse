@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -101,28 +100,6 @@ public class JobRuntimeExtensionPointTest {
     List<JobListener> listeners = job.getJobListeners();
     assertNotNull( listeners );
     assertTrue( listeners.contains( spyJobExtensionPoint ) );
-  }
-
-  @Test
-  public void testCallExtensionPoint_failToGetCanonicalPath() throws Exception {
-    String filename = "\u0000";
-    jobMeta.setFilename( filename );
-    jobMeta.setDescription( TEST_JOB_DESCRIPTION );
-    job = new Job( null, jobMeta );
-    job.setExecutingServer( TEST_SERVER );
-    job.setExecutingUser( TEST_USER );
-    job.setVariable( TEST_VAR_NAME, TEST_VAR_VALUE );
-    when( jobMeta.getUsedVariables() ).thenReturn( Collections.singletonList( TEST_VAR_NAME ) );
-    job.addParameterDefinition( TEST_PARAM_NAME, TEST_PARAM_DEFAULT_VALUE, TEST_PARAM_DESCRIPTION );
-    job.setParameterValue( TEST_PARAM_NAME, TEST_PARAM_VALUE );
-    job.setArguments( new String[] { "arg0", "arg1" } );
-
-    JobRuntimeExtensionPoint spyJobExtensionPoint = spy( jobExtensionPoint );
-    when( spyJobExtensionPoint.getMetaverseBuilder( Mockito.any( Job.class ) ) ).thenReturn( mockBuilder );
-    spyJobExtensionPoint.callExtensionPoint( null, job );
-
-    String path = JobRuntimeExtensionPoint.getLineageHolder( job ).getExecutionProfile().getPath();
-    assertEquals( filename, path );
   }
 
   @Test

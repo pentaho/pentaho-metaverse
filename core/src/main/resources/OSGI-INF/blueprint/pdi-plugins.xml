@@ -72,7 +72,10 @@
   </service>
 
   <!-- JobRuntime extension point -->
-  <bean id="jobRuntime" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint"/>
+  <bean id="jobRuntime" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint">
+    <property name="documentAnalyzer" ref="JobAnalyzer"/>
+    <property name="lineageWriter" ref="lineageWriter"/>
+  </bean>
   <bean id="jobRuntimePlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
     <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
     <property name="name" value="JobStart"/>
