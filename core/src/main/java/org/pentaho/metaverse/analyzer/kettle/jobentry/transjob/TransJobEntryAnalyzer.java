@@ -115,8 +115,8 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
     }
 
     IComponentDescriptor ds =
-        new MetaverseComponentDescriptor( name, DictionaryConst.NODE_TYPE_TRANS, descriptor.getNamespace()
-            .getParentNamespace() );
+        new MetaverseComponentDescriptor( subTransMeta.getName(), DictionaryConst.NODE_TYPE_TRANS,
+          descriptor.getNamespace().getParentNamespace() );
 
     IMetaverseNode transformationNode = createNodeFromDescriptor( ds );
     transformationNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, ds.getNamespaceId() );

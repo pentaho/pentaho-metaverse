@@ -40,7 +40,9 @@ import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.Namespace;
+import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.IParamInfo;
@@ -108,14 +110,21 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     if ( o instanceof Job ) {
       Job job = ( (Job) o );
 
+      // Create and populate an execution profile with what we know so far
+      ExecutionProfile executionProfile = new ExecutionProfile();
+      populateExecutionProfile( executionProfile, job );
+
       IMetaverseBuilder builder = getMetaverseBuilder( job );
+
+      // Add the job finished listener
+      job.addJobListener( this );
 
       // Analyze the current transformation
       if ( documentAnalyzer != null ) {
         documentAnalyzer.setMetaverseBuilder( builder );
 
-        // Create a document for the Trans TODO - fix this!
-        final String clientName = "PDI Engine";
+        // Create a document for the Trans
+        final String clientName = executionProfile.getExecutionEngine().getName();
         final INamespace namespace = new Namespace( clientName );
 
         final IMetaverseNode designNode = builder.getMetaverseObjectFactory()
@@ -132,10 +141,17 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         metaverseDocument.setContent( jobMeta );
         metaverseDocument.setStringID( id );
         metaverseDocument.setName( jobMeta.getName() );
-        metaverseDocument.setExtension( "ktr" );
-        metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "trans.ktr" ) );
+        metaverseDocument.setExtension( "kjb" );
+        metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "job.kjb" ) );
         metaverseDocument.setContext( new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
-        metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, id );
+        String normalizedPath;
+        try {
+          normalizedPath = KettleAnalyzerUtil.normalizeFilePath( id );
+        } catch ( MetaverseException e ) {
+          normalizedPath = id;
+        }
+        metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAME, job.getName() );
+        metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, normalizedPath );
         metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
 
         Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
@@ -143,79 +159,11 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         MetaverseCompletionService.getInstance().submit( analyzerRunner, id );
       }
 
-      // Add the job finished listener
-      job.addJobListener( this );
-
-      JobMeta jobMeta = job.getJobMeta();
-
-      File f = new File( getFilename( job ) );
-
-      String filePath = null;
-      try {
-        filePath = f.getCanonicalPath();
-      } catch ( IOException e ) {
-        // if we fail to get the canonical path, just use the path
-        filePath = f.getPath();
-        LOG.debug( Messages.getString( "INFO.CouldNotGetFileCanonicalPath", filePath ), e );
-      }
-
-      ExecutionProfile executionProfile = new ExecutionProfile();
-
-      // Set artifact information (path, type, description, etc.)
-      executionProfile.setPath( filePath );
-      executionProfile.setType( DictionaryConst.NODE_TYPE_JOB );
-      executionProfile.setDescription( jobMeta.getDescription() );
-
-      // Set execution engine information
-      executionProfile.setExecutionEngine( getExecutionEngineInfo() );
-
-      IExecutionData executionData = executionProfile.getExecutionData();
-
-      // Store execution information (client, server, user, etc.)
-      executionData.setStartTime( new Timestamp( new Date().getTime() ) );
-      KettleClientEnvironment.ClientType clientType = KettleClientEnvironment.getInstance().getClient();
-      executionData.setClientExecutor( clientType == null ? "DI Server" : clientType.name() );
-      executionData.setExecutorUser( job.getExecutingUser() );
-      executionData.setExecutorServer( job.getExecutingServer() );
-
-      // Store variables
-      List<String> vars = jobMeta.getUsedVariables();
-      Map<Object, Object> variableMap = executionData.getVariables();
-      for ( String var : vars ) {
-        String value = job.getVariable( var );
-        if ( value != null ) {
-          variableMap.put( var, value );
-        }
-      }
-
-      // Store parameters
-      String[] params = job.listParameters();
-      List<IParamInfo<String>> paramList = executionData.getParameters();
-      if ( params != null ) {
-        for ( String param : params ) {
-          try {
-            ParamInfo paramInfo = new ParamInfo( param, job.getParameterDescription( param ),
-              job.getParameterDefault( param ) );
-            paramList.add( paramInfo );
-          } catch ( UnknownParamException e ) {
-            e.printStackTrace();
-          }
-        }
-      }
-
-      // Store arguments
-      String[] args = job.getArguments();
-      List<Object> argList = executionData.getArguments();
-      if ( args != null ) {
-        argList.addAll( Arrays.asList( args ) );
-      }
-
       // Save the lineage objects for later
       LineageHolder holder = getLineageHolder( job );
       holder.setExecutionProfile( executionProfile );
       holder.setMetaverseBuilder( builder );
 
-      // TODO log System.out.println( "Added job profile: " + job.getName() );
     }
   }
 
@@ -286,7 +234,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
     // Set artifact information (path, type, description, etc.)
     executionProfile.setPath( filePath );
-    executionProfile.setType( DictionaryConst.NODE_TYPE_TRANS );
+    executionProfile.setType( DictionaryConst.NODE_TYPE_JOB );
     executionProfile.setDescription( jobMeta.getDescription() );
 
     // Set execution engine information
