@@ -51,7 +51,6 @@ import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.impl.model.ExecutionData;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.impl.model.ParamInfo;
-import org.pentaho.metaverse.messages.Messages;
 import org.pentaho.metaverse.util.MetaverseBeanUtil;
 import org.pentaho.metaverse.util.MetaverseUtil;
 import org.slf4j.Logger;

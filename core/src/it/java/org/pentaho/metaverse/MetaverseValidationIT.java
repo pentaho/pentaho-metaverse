@@ -283,8 +283,9 @@ public class MetaverseValidationIT {
       int matchCount = 0;
       for ( int i = 0; i < numJobEntries; i++ ) {
         JobEntryCopy jobEntry = jobMeta.getJobEntry( i );
+        assertNotNull( jobEntry );
         JobEntryNode jobEntryNode = jobNode.getJobEntryNode( jobEntry.getName() );
-        assertNotNull( jobEntryNode );
+        assertNotNull( "Job Entry " + jobEntry.getName() + " should be in the graph!", jobEntryNode );
         assertEquals( jobEntry.getName(), jobEntryNode.getName() );
         assertEquals( jobEntry.getDescription(), jobEntryNode.getDescription() );
         assertEquals( "Incorrect type", DictionaryConst.NODE_TYPE_JOB_ENTRY, jobEntryNode.getType() );
@@ -1273,7 +1274,7 @@ public class MetaverseValidationIT {
     assertEquals( fileNames.length, getIterableSize( outputFiles ) );
     int i = 0;
     for ( FramedMetaverseNode node : outputFiles ) {
-      assertTrue( fileNames[ i++ ].endsWith( node.getName() ) );
+      assertTrue( fileNames[i++].endsWith( node.getName() ) );
     }
 
     Iterable<StreamFieldNode> outputs = xmlOutputStepNode.getOutputStreamFields();
@@ -1289,7 +1290,7 @@ public class MetaverseValidationIT {
           break;
         }
       }
-      assertTrue("No graph node found for XMLField - " + xmlField.getFieldName(), xmlFieldFound );
+      assertTrue( "No graph node found for XMLField - " + xmlField.getFieldName(), xmlFieldFound );
     }
 
   }
