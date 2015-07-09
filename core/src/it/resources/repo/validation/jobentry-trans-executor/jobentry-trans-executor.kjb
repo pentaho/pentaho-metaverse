@@ -93,7 +93,7 @@
       <type>TRANS</type>
       <specification_method>filename</specification_method>
       <trans_object_id/>
-      <filename>&#x2f;Users&#x2f;mburgess&#x2f;git&#x2f;pentaho-metaverse&#x2f;core&#x2f;src&#x2f;it&#x2f;resources&#x2f;repo&#x2f;validation&#x2f;jobentry-trans-executor&#x2f;rowgen_trans.ktr</filename>
+      <filename>&#x24;&#x7b;Internal.Job.Filename.Directory&#x7d;&#x2f;rowgen_trans.ktr</filename>
       <transname/>
       <arg_from_previous>N</arg_from_previous>
       <params_from_previous>N</params_from_previous>
@@ -126,7 +126,7 @@
       <type>TRANS</type>
       <specification_method>filename</specification_method>
       <trans_object_id/>
-      <filename>&#x2f;Users&#x2f;mburgess&#x2f;git&#x2f;pentaho-metaverse&#x2f;core&#x2f;src&#x2f;it&#x2f;resources&#x2f;repo&#x2f;validation&#x2f;jobentry-trans-executor&#x2f;logging_trans.ktr</filename>
+      <filename>&#x24;&#x7b;Internal.Job.Filename.Directory&#x7d;&#x2f;logging_trans.ktr</filename>
       <transname/>
       <arg_from_previous>N</arg_from_previous>
       <params_from_previous>N</params_from_previous>
