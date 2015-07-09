@@ -24,19 +24,26 @@ package org.pentaho.metaverse.service;
 
 import org.pentaho.metaverse.api.IDocumentLocator;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
+import org.pentaho.metaverse.api.ILineageCollector;
 import org.pentaho.metaverse.api.IMetaverseReader;
 import org.pentaho.metaverse.api.MetaverseLocatorException;
+import org.pentaho.metaverse.api.model.LineageRequest;
 import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.messages.Messages;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.File;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -44,11 +51,13 @@ import java.util.concurrent.ExecutionException;
 /**
  * REST endpoint for the metaverse. Includes Impact Analysis and Lineage
  */
-@Path( "/metaverse/api/service" )
+@Path( "/api" )
 public class MetaverseService {
 
   private IMetaverseReader metaverseReader;
   private IDocumentLocatorProvider documentLocatorProvider;
+  private ILineageCollector lineageCollector;
+  private static final String DATE_FORMAT = "yyyyMMdd";
   private int count;
 
   /**
@@ -68,6 +77,10 @@ public class MetaverseService {
 
   public void setDocumentLocatorProvider( IDocumentLocatorProvider documentLocatorProvider ) {
     this.documentLocatorProvider = documentLocatorProvider;
+  }
+
+  public void setLineageCollector( ILineageCollector collector ) {
+    this.lineageCollector = collector;
   }
 
   /**
@@ -117,6 +130,114 @@ public class MetaverseService {
     }
     return Response.ok( metaverseReader.exportFormat( format ), mediaType ).build();
   }
+
+  @GET
+  @Path( "/download/all" )
+  @Produces( { "application/zip" } )
+  public Response download() {
+    return download( null, null );
+  }
+
+  @GET
+  @Path( "/download/all/{startingDate}" )
+  @Produces( { "application/zip" } )
+  public Response download( @PathParam( "startingDate" ) final String startingDate ) {
+    return download( startingDate, null );
+  }
+
+  @GET
+  @Path( "/download/all/{startingDate}/{endingDate}" )
+  @Produces( { "application/zip" } )
+  public Response download( @PathParam( "startingDate" ) final String startingDate,
+    @PathParam( "endingDate" ) String endingDate ) {
+
+    if ( lineageCollector == null ) {
+      return Response.serverError().entity( Messages.getString( "ERROR.LineageCollector.IsNull" ) ).build();
+    }
+    String filename = "pentaho-lineage";
+    if ( startingDate != null ) {
+      filename += "_" + startingDate;
+    }
+    if ( endingDate != null ) {
+      filename += "-" + endingDate;
+    }
+    filename += ".zip";
+
+    try {
+      final List<String> artifacts = lineageCollector.listArtifacts( startingDate, endingDate );
+      StreamingOutput stream = new LineageStreamingOutput( artifacts, lineageCollector );
+      return Response.ok( stream )
+        .header( "Content-Type", "application/zip" )
+        .header( "Content-Disposition", "inline; filename=" + filename )
+        .build();
+    } catch ( IllegalArgumentException e ) {
+      // illegal date format, return an error to the caller
+      throw new BadRequestException( Response.status( Response.Status.BAD_REQUEST )
+        .entity(
+          "Invalid date string provided. All dates must be valid and conform to this format " + DATE_FORMAT ).build() );
+    }
+  }
+
+  @POST
+  @Path( "/download/file" )
+  @Consumes( MediaType.APPLICATION_JSON )
+  @Produces( { "application/zip" } )
+  public Response downloadFile( LineageRequest request ) {
+    return downloadFile( request, null, null );
+  }
+
+  @POST
+  @Path( "/download/file/{startingDate}" )
+  @Consumes( MediaType.APPLICATION_JSON )
+  @Produces( { "application/zip" } )
+  public Response downloadFile( LineageRequest request, @PathParam( "startingDate" ) String startingDate ) {
+    return downloadFile( request, startingDate, null );
+  }
+
+  @POST
+  @Path( "/download/file/{startingDate}/{endingDate}" )
+  @Consumes( MediaType.APPLICATION_JSON )
+  @Produces( { "application/zip" } )
+  public Response downloadFile( LineageRequest request, @PathParam( "startingDate" ) String startingDate,
+    @PathParam( "endingDate" ) String endingDate ) {
+
+    if ( lineageCollector == null ) {
+      return Response.serverError().entity( Messages.getString( "ERROR.LineageCollector.IsNull" ) ).build();
+    }
+    if ( request == null || request.getPath() == null ) {
+      return Response.serverError().entity( Messages.getString( "ERROR.NoPathFound" ) ).build();
+    }
+
+    try {
+      final List<String> artifacts = lineageCollector.listArtifactsForFile(
+        request.getPath(),
+        startingDate,
+        endingDate );
+
+      File f = new File( request.getPath() );
+
+      String filename = f.getName() + "_lineage";
+      if ( startingDate != null ) {
+        filename += "_" + startingDate;
+      }
+      if ( endingDate != null ) {
+        filename += "-" + endingDate;
+      }
+      filename += ".zip";
+
+      StreamingOutput stream = new LineageStreamingOutput( artifacts, lineageCollector );
+      return Response.ok( stream )
+        .header( "Content-Type", "application/zip" )
+        .header( "Content-Disposition", "inline; filename=" + filename )
+        .build();
+    } catch ( IllegalArgumentException e ) {
+      // illegal date format, return an error to the caller
+      throw new BadRequestException( Response.status( Response.Status.BAD_REQUEST )
+        .entity(
+          "Invalid date string provided. All dates must be valid and conform to this format " + DATE_FORMAT ).build() );
+    }
+  }
+
 
   /**
    * Makes sure that the metaverse is fully populated.
