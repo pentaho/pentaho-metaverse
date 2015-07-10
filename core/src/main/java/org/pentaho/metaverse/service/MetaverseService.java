@@ -65,6 +65,10 @@ public class MetaverseService {
   private static final String DATE_FORMAT = "yyyyMMdd";
   private int count;
 
+  public static final int OK = 200;
+  public static final int BAD_REQUEST = 400;
+  public static final int SERVER_ERROR = 500;
+
   /**
    * Creates a new metaverse service using a provided metaverse reader (to pass calls to), 
    * and locator provider (to rebuild the metaverse).
@@ -115,8 +119,8 @@ public class MetaverseService {
   @Produces( { MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN } )
   @Facet( name = "Unsupported" )
   @StatusCodes ( {
-    @ResponseCode ( code = 200, condition = "Successfully created and returned graph." ),
-    @ResponseCode ( code = 500, condition = "Server Error." )
+    @ResponseCode ( code = OK, condition = "Successfully created and returned graph." ),
+    @ResponseCode ( code = SERVER_ERROR, condition = "Server Error." )
   } )
   public Response export( @Context HttpHeaders headers ) {
     List<MediaType> acceptTypes = headers.getAcceptableMediaTypes();
@@ -154,8 +158,8 @@ public class MetaverseService {
   @Path( "/download/all" )
   @Produces( { "application/zip" } )
   @StatusCodes ( {
-    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
-    @ResponseCode ( code = 500, condition = "Server Error." )
+    @ResponseCode ( code = OK, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = SERVER_ERROR, condition = "Server Error." )
   } )
   public Response download() {
     return download( null, null );
@@ -175,9 +179,9 @@ public class MetaverseService {
   @Path( "/download/all/{startingDate}" )
   @Produces( { "application/zip" } )
   @StatusCodes ( {
-    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
-    @ResponseCode ( code = 400, condition = "Bad request, invalid starting date provided." ),
-    @ResponseCode ( code = 500, condition = "Server Error." )
+    @ResponseCode ( code = OK, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = BAD_REQUEST, condition = "Bad request, invalid starting date provided." ),
+    @ResponseCode ( code = SERVER_ERROR, condition = "Server Error." )
   } )
   public Response download( @PathParam( "startingDate" ) final String startingDate ) {
     return download( startingDate, null );
@@ -199,9 +203,9 @@ public class MetaverseService {
   @Path( "/download/all/{startingDate}/{endingDate}" )
   @Produces( { "application/zip" } )
   @StatusCodes ( {
-    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
-    @ResponseCode ( code = 400, condition = "Bad request, invalid starting and/or ending date provided." ),
-    @ResponseCode ( code = 500, condition = "Server Error." )
+    @ResponseCode ( code = OK, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = BAD_REQUEST, condition = "Bad request, invalid starting and/or ending date provided." ),
+    @ResponseCode ( code = SERVER_ERROR, condition = "Server Error." )
   } )
   public Response download( @PathParam( "startingDate" ) final String startingDate,
     @PathParam( "endingDate" ) String endingDate ) {
@@ -253,8 +257,8 @@ public class MetaverseService {
   @Consumes( MediaType.APPLICATION_JSON )
   @Produces( { "application/zip" } )
   @StatusCodes ( {
-    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
-    @ResponseCode ( code = 500, condition = "Server Error." )
+    @ResponseCode ( code = OK, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = SERVER_ERROR, condition = "Server Error." )
   } )
   public Response downloadFile( LineageRequest request ) {
     return downloadFile( request, null, null );
@@ -282,9 +286,9 @@ public class MetaverseService {
   @Consumes( MediaType.APPLICATION_JSON )
   @Produces( { "application/zip" } )
   @StatusCodes ( {
-    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
-    @ResponseCode ( code = 400, condition = "Bad request, invalid starting date provided." ),
-    @ResponseCode ( code = 500, condition = "Server Error." )
+    @ResponseCode ( code = OK, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = BAD_REQUEST, condition = "Bad request, invalid starting date provided." ),
+    @ResponseCode ( code = SERVER_ERROR, condition = "Server Error." )
   } )
   public Response downloadFile( LineageRequest request, @PathParam( "startingDate" ) String startingDate ) {
     return downloadFile( request, startingDate, null );
@@ -313,9 +317,9 @@ public class MetaverseService {
   @Consumes( MediaType.APPLICATION_JSON )
   @Produces( { "application/zip" } )
   @StatusCodes ( {
-    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
-    @ResponseCode ( code = 400, condition = "Bad request, invalid starting and/or ending date provided." ),
-    @ResponseCode ( code = 500, condition = "Server Error." )
+    @ResponseCode ( code = OK, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = BAD_REQUEST, condition = "Bad request, invalid starting and/or ending date provided." ),
+    @ResponseCode ( code = SERVER_ERROR, condition = "Server Error." )
   } )
   public Response downloadFile( LineageRequest request, @PathParam( "startingDate" ) String startingDate,
     @PathParam( "endingDate" ) String endingDate ) {

@@ -56,7 +56,6 @@ import org.pentaho.metaverse.util.MetaverseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.sql.Timestamp;
@@ -225,10 +224,14 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     String filename = job.getFilename();
 
     String filePath = null;
-    try {
-      filePath = new File( filename ).getCanonicalPath();
-    } catch ( IOException e ) {
-      // TODO ?
+    if ( job.getRepositoryDirectory() == null ) {
+      try {
+        filePath = KettleAnalyzerUtil.normalizeFilePath( filename );
+      } catch ( Exception e ) {
+        LOG.error( "Couldn't normalize file path: " + filename, e );
+      }
+    } else {
+      filePath = filename;
     }
 
     // Set artifact information (path, type, description, etc.)

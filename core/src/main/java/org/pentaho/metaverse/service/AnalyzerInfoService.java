@@ -48,6 +48,9 @@ import java.util.Set;
 @Path( "/info" )
 public class AnalyzerInfoService {
 
+  public static final int OK = 200;
+  public static final int SERVER_ERROR = 500;
+
   private IStepAnalyzerProvider stepAnalyzerProvider;
   private IJobEntryAnalyzerProvider jobEntryAnalyzerProvider;
 
@@ -87,8 +90,8 @@ public class AnalyzerInfoService {
   @Path( "/steps" )
   @Produces( { MediaType.APPLICATION_JSON } )
   @StatusCodes( {
-    @ResponseCode( code = 200, condition = "Successfully listed the supported steps" ),
-    @ResponseCode( code = 500, condition = "Server Error." )
+    @ResponseCode( code = OK, condition = "Successfully listed the supported steps" ),
+    @ResponseCode( code = SERVER_ERROR, condition = "Server Error." )
   } )
   public Response getSupportedSteps() {
     List<AnalyzerInfo> analyzers = new ArrayList<>();
@@ -123,8 +126,8 @@ public class AnalyzerInfoService {
   @Path( "/entries" )
   @Produces( { MediaType.APPLICATION_JSON } )
   @StatusCodes( {
-    @ResponseCode( code = 200, condition = "Successfully listed the supported job entries" ),
-    @ResponseCode( code = 500, condition = "Server Error." )
+    @ResponseCode( code = OK, condition = "Successfully listed the supported job entries" ),
+    @ResponseCode( code = SERVER_ERROR, condition = "Server Error." )
   } )
   public Response getSupportedJobEntries() {
     List<AnalyzerInfo> analyzers = new ArrayList<>();
