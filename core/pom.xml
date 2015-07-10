@@ -34,6 +34,7 @@
     <dependency.org.springFramework.spring.version>2.5.6</dependency.org.springFramework.spring.version>
     <dependency.osgi.version>4.3.1</dependency.osgi.version>
     <dependency.commons-io.commons-io.version>2.4</dependency.commons-io.commons-io.version>
+    <enunciate.version>1.27</enunciate.version>
 
     <!-- Testing dependencies -->
     <dependency.com.h2database.hs.version>1.3.168</dependency.com.h2database.hs.version>
@@ -184,6 +185,11 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
       <version>${dependency.com.fasterxml.jackson.core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-jersey-rt</artifactId>
+      <version>${enunciate.version}</version>
     </dependency>
 
     <!-- 'RUNTIME' SCOPED DEPS -->
@@ -474,6 +480,26 @@
           </check>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.enunciate</groupId>
+        <artifactId>maven-enunciate-plugin</artifactId>
+        <version>${enunciate.version}</version>
+        <configuration>
+          <configFile>enunciate.xml</configFile>
+          <moduleName>pentaho-metaverse-core enunciate doc</moduleName>
+          <enunciateArtifactId>pentaho-metaverse-core-doc</enunciateArtifactId>
+          <forceWarPackaging>false</forceWarPackaging>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 

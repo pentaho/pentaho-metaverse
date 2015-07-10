@@ -22,6 +22,8 @@
 
 package org.pentaho.metaverse.service;
 
+import org.codehaus.enunciate.jaxrs.ResponseCode;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
@@ -40,8 +42,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Provides information about the lineage analyzers active in the system
+ */
 @Path( "/info" )
 public class AnalyzerInfoService {
+
+  public static final int OK = 200;
+  public static final int SERVER_ERROR = 500;
 
   private IStepAnalyzerProvider stepAnalyzerProvider;
   private IJobEntryAnalyzerProvider jobEntryAnalyzerProvider;
@@ -62,9 +70,29 @@ public class AnalyzerInfoService {
     this.jobEntryAnalyzerProvider = jobEntryAnalyzerProvider;
   }
 
+  /**
+   * Gets a list of all implementations of {@link BaseStepMeta} with a custom {@link IStepAnalyzer}
+   * that produces lineage. Any step not found in this list will fall back to using
+   * {@link org.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer}.
+   *
+   * <p><b>Example Request:</b><br />
+   *    GET pentaho-di/osgi/cxf/lineage/info/steps
+   * </p>
+   *
+   * @return List of {@link AnalyzerInfo}
+   *
+   * <p><b>Example Response:</b></p>
+   *    <pre function="syntax.js">
+   *      [ { meta: "CalculatorMeta" }, { meta: "CsvInputMeta" }, { meta: "ExcelInputMeta" } ]
+   *    </pre>
+   */
   @GET
   @Path( "/steps" )
   @Produces( { MediaType.APPLICATION_JSON } )
+  @StatusCodes( {
+    @ResponseCode( code = OK, condition = "Successfully listed the supported steps" ),
+    @ResponseCode( code = SERVER_ERROR, condition = "Server Error." )
+  } )
   public Response getSupportedSteps() {
     List<AnalyzerInfo> analyzers = new ArrayList<>();
     for ( IStepAnalyzer analyzer : getStepAnalyzerProvider().getAnalyzers() ) {
@@ -78,9 +106,29 @@ public class AnalyzerInfoService {
     return Response.ok( analyzers ).build();
   }
 
+  /**
+   * Gets a list of all implementations of {@link JobEntryInterface} with a custom {@link IJobEntryAnalyzer}
+   * that produces lineage. Any step not found in this list will fall back to using
+   * {@link org.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer}.
+   *
+   * <p><b>Example Request:</b><br />
+   *    GET pentaho-di/osgi/cxf/lineage/info/entries
+   * </p>
+   *
+   * @return List of {@link AnalyzerInfo}
+   *
+   * <p><b>Example Response:</b></p>
+   *    <pre function="syntax.js">
+   *      [ { meta: "JobEntryTrans" } ]
+   *    </pre>
+   */
   @GET
   @Path( "/entries" )
   @Produces( { MediaType.APPLICATION_JSON } )
+  @StatusCodes( {
+    @ResponseCode( code = OK, condition = "Successfully listed the supported job entries" ),
+    @ResponseCode( code = SERVER_ERROR, condition = "Server Error." )
+  } )
   public Response getSupportedJobEntries() {
     List<AnalyzerInfo> analyzers = new ArrayList<>();
     for ( IJobEntryAnalyzer analyzer : getJobEntryAnalyzerProvider().getAnalyzers() ) {

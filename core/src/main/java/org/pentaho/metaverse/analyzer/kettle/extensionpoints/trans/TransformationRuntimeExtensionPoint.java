@@ -57,7 +57,6 @@ import org.pentaho.metaverse.util.MetaverseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.sql.Timestamp;
@@ -204,8 +203,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         log.error( "Couldn't normalize file path: " + filename, e );
       }
     } else {
-      String repoName = trans.getRepository().getName();
-      filePath = repoName == null ? filename : File.separator + repoName + filename;
+      filePath = filename;
     }
 
 
