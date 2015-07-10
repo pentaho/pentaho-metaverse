@@ -22,6 +22,10 @@
 
 package org.pentaho.metaverse.service;
 
+import org.codehaus.enunciate.Facet;
+import org.codehaus.enunciate.jaxrs.ResponseCode;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
+import org.codehaus.enunciate.modules.jersey.ExternallyManagedLifecycle;
 import org.pentaho.metaverse.api.IDocumentLocator;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
 import org.pentaho.metaverse.api.ILineageCollector;
@@ -49,9 +53,10 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
- * REST endpoint for the metaverse. Includes Impact Analysis and Lineage
+ * REST endpoints for the accessing lineage artifacts.
  */
 @Path( "/api" )
+@ExternallyManagedLifecycle
 public class MetaverseService {
 
   private IMetaverseReader metaverseReader;
@@ -108,6 +113,11 @@ public class MetaverseService {
   @Path( "/export" )
   @Consumes( { MediaType.WILDCARD } )
   @Produces( { MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN } )
+  @Facet( name = "Unsupported" )
+  @StatusCodes ( {
+    @ResponseCode ( code = 200, condition = "Successfully created and returned graph." ),
+    @ResponseCode ( code = 500, condition = "Server Error." )
+  } )
   public Response export( @Context HttpHeaders headers ) {
     List<MediaType> acceptTypes = headers.getAcceptableMediaTypes();
     String mediaType = acceptTypes.get( 0 ).toString();
@@ -131,23 +141,68 @@ public class MetaverseService {
     return Response.ok( metaverseReader.exportFormat( format ), mediaType ).build();
   }
 
+  /**
+   * Download a zip file of all known lineage related artifacts.
+   *
+   * <p><b>Example Request:</b><br />
+   *    GET pentaho-di/osgi/cxf/lineage/api/download/all
+   * </p>
+   *
+   * @return A zip file containing lineage artifacts
+   */
   @GET
   @Path( "/download/all" )
   @Produces( { "application/zip" } )
+  @StatusCodes ( {
+    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = 500, condition = "Server Error." )
+  } )
   public Response download() {
     return download( null, null );
   }
 
+  /**
+   * Download a zip file of all known lineage related artifacts created on or after a specific date.
+   *
+   * <p><b>Example Request:</b><br />
+   *    GET pentaho-di/osgi/cxf/lineage/api/download/all/20150101
+   * </p>
+   *
+   * @param startingDate a date string in the format YYYYMMDD
+   * @return A zip file containing lineage artifacts
+   */
   @GET
   @Path( "/download/all/{startingDate}" )
   @Produces( { "application/zip" } )
+  @StatusCodes ( {
+    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = 400, condition = "Bad request, invalid starting date provided." ),
+    @ResponseCode ( code = 500, condition = "Server Error." )
+  } )
   public Response download( @PathParam( "startingDate" ) final String startingDate ) {
     return download( startingDate, null );
   }
 
+  /**
+   * Download a zip file of all known lineage related artifacts created between (inclusive) two dates.
+   *
+   * <p><b>Example Request:</b><br />
+   *    GET pentaho-di/osgi/cxf/lineage/api/download/all/20150101/20151231
+   * </p>
+   *
+   * @param startingDate a date string in the format YYYYMMDD
+   * @param endingDate   a date string in the format YYYYMMDD
+   *
+   * @return A zip file containing lineage artifacts
+   */
   @GET
   @Path( "/download/all/{startingDate}/{endingDate}" )
   @Produces( { "application/zip" } )
+  @StatusCodes ( {
+    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = 400, condition = "Bad request, invalid starting and/or ending date provided." ),
+    @ResponseCode ( code = 500, condition = "Server Error." )
+  } )
   public Response download( @PathParam( "startingDate" ) final String startingDate,
     @PathParam( "endingDate" ) String endingDate ) {
 
@@ -178,26 +233,90 @@ public class MetaverseService {
     }
   }
 
+  /**
+   * Download a zip file of all known lineage related artifacts for a specified file.
+   *
+   * <p><b>Example Request:</b><br />
+   *    POST pentaho-di/osgi/cxf/lineage/api/download/file
+   * <br /><b>POST data:</b>
+   *  <pre function="syntax.xml">
+   *    { "path": "/home/suzy/test.ktr" }
+   *  </pre>
+   * </p>
+   *
+   * @param request {@link LineageRequest} containing the path to the file of interest
+   *
+   * @return A zip file containing lineage artifacts
+   */
   @POST
   @Path( "/download/file" )
   @Consumes( MediaType.APPLICATION_JSON )
   @Produces( { "application/zip" } )
+  @StatusCodes ( {
+    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = 500, condition = "Server Error." )
+  } )
   public Response downloadFile( LineageRequest request ) {
     return downloadFile( request, null, null );
   }
 
+  /**
+   * Download a zip file of all known lineage related artifacts for a specified file created on or after a specified
+   * date
+   *
+   * <p><b>Example Request:</b><br />
+   *    POST pentaho-di/osgi/cxf/lineage/api/download/file/20150101
+   * <br /><b>POST data:</b>
+   *  <pre function="syntax.xml">
+   *    { "path": "/home/suzy/test.ktr" }
+   *  </pre>
+   * </p>
+   *
+   * @param request      {@link LineageRequest} containing the path to the file of interest
+   * @param startingDate a date string in the format YYYYMMDD
+   *
+   * @return A zip file containing lineage artifacts
+   */
   @POST
   @Path( "/download/file/{startingDate}" )
   @Consumes( MediaType.APPLICATION_JSON )
   @Produces( { "application/zip" } )
+  @StatusCodes ( {
+    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = 400, condition = "Bad request, invalid starting date provided." ),
+    @ResponseCode ( code = 500, condition = "Server Error." )
+  } )
   public Response downloadFile( LineageRequest request, @PathParam( "startingDate" ) String startingDate ) {
     return downloadFile( request, startingDate, null );
   }
 
+  /**
+   * Download a zip file of all known lineage related artifacts for a specified file
+   * created between two dates (inclusive)
+   *
+   * <p><b>Example Request:</b><br />
+   *    POST pentaho-di/osgi/cxf/lineage/api/download/file/20150101/20151231
+   * <br /><b>POST data:</b>
+   *  <pre function="syntax.xml">
+   *    { "path": "/home/suzy/test.ktr" }
+   *  </pre>
+   * </p>
+   *
+   * @param request      {@link LineageRequest} containing the path to the file of interest
+   * @param startingDate a date string in the format YYYYMMDD
+   * @param endingDate   a date string in the format YYYYMMDD
+   *
+   * @return A zip file containing lineage artifacts
+   */
   @POST
   @Path( "/download/file/{startingDate}/{endingDate}" )
   @Consumes( MediaType.APPLICATION_JSON )
   @Produces( { "application/zip" } )
+  @StatusCodes ( {
+    @ResponseCode ( code = 200, condition = "Successfully created and returned the zip file." ),
+    @ResponseCode ( code = 400, condition = "Bad request, invalid starting and/or ending date provided." ),
+    @ResponseCode ( code = 500, condition = "Server Error." )
+  } )
   public Response downloadFile( LineageRequest request, @PathParam( "startingDate" ) String startingDate,
     @PathParam( "endingDate" ) String endingDate ) {
 

@@ -1,0 +1,20 @@
+<enunciate basedir="src/main/java" defaultRestSubcontext="/lineage">
+  <facets>
+    <exclude name="Unsupported"/>
+  </facets>
+
+  <modules>
+    <docs freemarkerXMLProcessingTemplate="pentaho.fmt"
+          splashPackage="org.pentaho.metaverse"
+          title="Pentaho Metaverse documentation"
+          copyright="Pentaho.com"
+          disableRestMountpoint="false">
+    </docs>
+    <c disabled="true"/>
+    <obj-c disabled="true"/>
+    <csharp disabled="true"/>
+    <gwt disabled="true"/>
+  </modules>
+
+  <webap disabled="true" />
+</enunciate>
