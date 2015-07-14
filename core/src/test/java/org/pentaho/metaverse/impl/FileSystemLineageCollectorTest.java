@@ -84,6 +84,13 @@ public class FileSystemLineageCollectorTest {
     List<String> artifacts = collector.listArtifacts( "20159999" );
   }
 
+  @Test ( expected = IllegalArgumentException.class )
+  public void testListArtifacts_InvalidStartingDate_NoArtifactsToList() throws Exception {
+    // Even if there are no artifacts available, we should still report throw the error
+    collector.setOutputFolder( "src/test/resources/invalidFolder" );
+    List<String> artifacts = collector.listArtifacts( "20159999" );
+  }
+
   @Test
   public void testCompressArtifacts() throws Exception {
     List<String> artifacts = collector.listArtifacts();
@@ -121,4 +128,8 @@ public class FileSystemLineageCollectorTest {
     assertEquals( 0, artifacts.size() );
   }
 
+  @Test ( expected = IllegalArgumentException.class )
+  public void testGetArtifactsForFile_noArtifacts_InvalidDate() throws Exception {
+    List<String> artifacts = collector.listArtifactsForFile( "repo/validation/XYZ.ktr", "20159999" );
+  }
 }
