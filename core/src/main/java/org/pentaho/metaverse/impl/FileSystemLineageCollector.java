@@ -87,9 +87,9 @@ public class FileSystemLineageCollector implements ILineageCollector {
     File lineageRootFolder = new File( getOutputFolder() );
     List<String> paths = new ArrayList<>();
 
-    if ( lineageRootFolder.exists() && lineageRootFolder.isDirectory() ) {
-      FilenameFilter filter = new DateRangeFolderFilenameFilter( format, startingDate, endingDate );
+    FilenameFilter filter = new DateRangeFolderFilenameFilter( format, startingDate, endingDate );
 
+    if ( lineageRootFolder.exists() && lineageRootFolder.isDirectory() ) {
       // get the folders that come on or after the startingDate
       String[] dayFolders = lineageRootFolder.list( filter );
       for ( String dayFolder : dayFolders ) {
@@ -118,8 +118,9 @@ public class FileSystemLineageCollector implements ILineageCollector {
     File lineageRootFolder = new File( getOutputFolder() );
     List<String> paths = new ArrayList<>();
 
+    FilenameFilter filter = new DateRangeFolderFilenameFilter( format, startingDate, endingDate );
+
     if ( lineageRootFolder.exists() && lineageRootFolder.isDirectory() ) {
-      FilenameFilter filter = new DateRangeFolderFilenameFilter( format, startingDate, endingDate );
 
       // get all of the date folders of lineage we have
       String[] dayFolders = lineageRootFolder.list( filter );
