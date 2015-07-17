@@ -56,7 +56,6 @@ import org.pentaho.metaverse.util.MetaverseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -131,6 +130,12 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
         final JobMeta jobMeta = job.getJobMeta();
 
+        // The variables and parameters in the Job may not have been set on the meta, so we do it here
+        // to ensure the job analyzer will have access to the parameter values.
+        job.shareVariablesWith( jobMeta );
+        jobMeta.copyParametersFrom( job );
+        jobMeta.activateParameters();
+
         String id = getFilename( jobMeta );
 
         IDocument metaverseDocument = builder.getMetaverseObjectFactory().createDocumentObject();
@@ -172,50 +177,71 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
    * @throws org.pentaho.di.core.exception.KettleException
    */
   @Override
-  public void jobFinished( Job job ) throws KettleException {
+  public void jobFinished( final Job job ) throws KettleException {
 
     if ( job == null ) {
       return;
     }
 
-    // Get the current execution profile for this transformation
-    LineageHolder holder = getLineageHolder( job );
-    Future lineageTask = holder.getLineageTask();
-    if ( lineageTask != null ) {
-      try {
-        lineageTask.get();
-      } catch ( InterruptedException e ) {
-        e.printStackTrace(); // TODO logger?
-      } catch ( ExecutionException e ) {
-        e.printStackTrace(); // TODO logger?
+    // Need to spin this processing off into its own thread, so we don't hold up normal PDI processing
+    Thread lineageWorker = new Thread( new Runnable() {
+
+      /**
+       * When an object implementing interface <code>Runnable</code> is used
+       * to create a thread, starting the thread causes the object's
+       * <code>run</code> method to be called in that separately executing
+       * thread.
+       * <p/>
+       * The general contract of the method <code>run</code> is that it may
+       * take any action whatsoever.
+       *
+       * @see Thread#run()
+       */
+      @Override
+      public void run() {
+        try {
+          // Get the current execution profile for this transformation
+          LineageHolder holder = getLineageHolder( job );
+          Future lineageTask = holder.getLineageTask();
+          if ( lineageTask != null ) {
+            try {
+              lineageTask.get();
+            } catch ( InterruptedException e ) {
+              e.printStackTrace(); // TODO logger?
+            } catch ( ExecutionException e ) {
+              e.printStackTrace(); // TODO logger?
+            }
+          }
+
+          // Get the current execution profile for this job
+          IExecutionProfile executionProfile = getLineageHolder( job ).getExecutionProfile();
+          if ( executionProfile == null ) {
+            // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
+            // the same info, so populate a new ExecutionProfile using the current Trans
+            // TODO: Beware duplicate profiles!
+
+            executionProfile = new ExecutionProfile();
+            populateExecutionProfile( executionProfile, job );
+          }
+          ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
+          Result result = job.getResult();
+          if ( result != null ) {
+            executionData.setFailureCount( result.getNrErrors() );
+          }
+
+          // Add the execution profile information to the lineage graph
+          addRuntimeLineageInfo( holder );
+
+          // Export the lineage info (execution profile, lineage graph, etc.)
+          writeLineageInfo( holder );
+
+        } catch ( Throwable t ) {
+          t.printStackTrace(); // TODO logger?
+        }
       }
-    }
+    } );
 
-    // Get the current execution profile for this job
-    IExecutionProfile executionProfile = getLineageHolder( job ).getExecutionProfile();
-    if ( executionProfile == null ) {
-      // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
-      // the same info, so populate a new ExecutionProfile using the current Trans
-      // TODO: Beware duplicate profiles!
-
-      executionProfile = new ExecutionProfile();
-      populateExecutionProfile( executionProfile, job );
-    }
-    ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
-    Result result = job.getResult();
-    if ( result != null ) {
-      executionData.setFailureCount( result.getNrErrors() );
-    }
-
-    // Add the execution profile information to the lineage graph
-    addRuntimeLineageInfo( holder );
-
-    // Export the lineage info (execution profile, lineage graph, etc.)
-    try {
-      writeLineageInfo( holder );
-    } catch ( IOException e ) {
-      throw new KettleException( e );
-    }
+    lineageWorker.start();
   }
 
   protected void populateExecutionProfile( IExecutionProfile executionProfile, Job job ) {

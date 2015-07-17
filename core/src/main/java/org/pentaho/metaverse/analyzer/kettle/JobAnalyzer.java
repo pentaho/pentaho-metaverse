@@ -180,7 +180,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     for ( int i = 0; i < jobMeta.nrJobEntries(); i++ ) {
       JobEntryCopy entry = jobMeta.getJobEntry( i );
       try {
-        entry.getEntry().setParentJob( new Job( null, jobMeta ) );
+        entry.getEntry().setParentJob( j );
 
         if ( entry != null ) {
           IMetaverseNode jobEntryNode = null;

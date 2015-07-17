@@ -62,10 +62,11 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
 
   @Override
   protected void customAnalyze( JobEntryTrans entry, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
-    // String entryFilename = entry.getFilename();
     TransMeta subTransMeta = null;
-    String name = entry.getName();
     JobMeta parentJobMeta = entry.getParentJob().getJobMeta();
+    // For some reason the JobMeta's variables have been reset by now, so re-activate them
+    parentJobMeta.activateParameters();
+
     Repository repo = parentJobMeta.getRepository();
     String transPath = null;
     switch ( entry.getSpecificationMethod() ) {
@@ -106,7 +107,7 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
           } catch ( KettleException e ) {
             log.error( e.getMessage(), e );
             throw new MetaverseAnalyzerException( "Sub transformation can not be found by reference - "
-                + entry.getTransObjectId(), e );
+              + entry.getTransObjectId(), e );
           }
         } else {
           throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
@@ -115,8 +116,8 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
     }
 
     IComponentDescriptor ds =
-        new MetaverseComponentDescriptor( subTransMeta.getName(), DictionaryConst.NODE_TYPE_TRANS,
-          descriptor.getNamespace().getParentNamespace() );
+      new MetaverseComponentDescriptor( subTransMeta.getName(), DictionaryConst.NODE_TYPE_TRANS,
+        descriptor.getNamespace().getParentNamespace() );
 
     IMetaverseNode transformationNode = createNodeFromDescriptor( ds );
     transformationNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, ds.getNamespaceId() );
