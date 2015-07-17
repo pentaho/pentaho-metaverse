@@ -38,9 +38,7 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
-import org.pentaho.metaverse.api.model.LineageHolder;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -110,30 +108,15 @@ public class JobRuntimeExtensionPointTest {
       Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
 
     ext.jobFinished( job );
-    verify( ext, times( 1 ) ).populateExecutionProfile(
-      Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
+    // The logic in jobFinished() is now in a thread, so we can't verify methods were called
 
     Job mockJob = spy( job );
     Result result = mock( Result.class );
     when( mockJob.getResult() ).thenReturn( result );
     ext.jobFinished( mockJob );
-    verify( ext, times( 2 ) ).populateExecutionProfile(
-      Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
+    // The logic in jobFinished() is now in a thread, so we can't verify methods were called
 
-    // Test IOException handling during execution profile output
-    doThrow( new IOException() ).when( ext ).writeLineageInfo( Mockito.any( LineageHolder.class ) );
-    Exception ex = null;
-    try {
-      ext.jobFinished( mockJob );
-    } catch ( Exception e ) {
-      ex = e;
-    }
-    assertNotNull( ex );
-    verify( ext, times( 3 ) ).populateExecutionProfile(
-      Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
-
-    // TODO more asserts
-
+    // Exception handling test removed because jobFinished() logic is in a thread and can't throw checked exceptions
   }
 
   @Test
