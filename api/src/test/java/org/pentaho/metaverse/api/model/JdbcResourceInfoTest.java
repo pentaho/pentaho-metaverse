@@ -25,16 +25,21 @@ package org.pentaho.metaverse.api.model;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.encryption.TwoWayPasswordEncoderPluginType;
 import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.variables.Variables;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 public class JdbcResourceInfoTest {
 
@@ -114,4 +119,30 @@ public class JdbcResourceInfoTest {
     jdbcResourceInfo.setDatabaseName( dbName );
     assertEquals( dbName, jdbcResourceInfo.getDatabaseName() );
   }
+
+  @Test
+  public void testDbMetaVarPort() throws Exception {
+    DatabaseMeta dbMeta = mock( DatabaseMeta.class );
+    DatabaseInterface dbInterface = mock( DatabaseInterface.class ); 
+    when( dbMeta.getDatabaseInterface() ).thenReturn( dbInterface );
+    when( dbMeta.getAccessTypeDesc() ).thenReturn( "Native" );
+
+    final VariableSpace vs = new Variables();
+    when( dbMeta.getDatabasePortNumberString() ).thenReturn( "${port_var}" );
+    when( dbMeta.environmentSubstitute( any( String.class ) ) ).thenAnswer( new Answer<String>() {
+      public String answer( InvocationOnMock invocation ) throws Throwable {
+        return vs.environmentSubstitute( (String) invocation.getArguments()[0] );
+      }
+    } );
+
+    // check if var replaced
+    vs.setVariable( "port_var", "4321" );
+    JdbcResourceInfo jdbcResourceInfo = new JdbcResourceInfo( dbMeta );
+    assertEquals( jdbcResourceInfo.getPort(), new Integer( 4321 ) );
+
+    // check no exception when empty
+    vs.setVariable( "port_var", "" );
+    jdbcResourceInfo = new JdbcResourceInfo( dbMeta );
+  }
+
 }
