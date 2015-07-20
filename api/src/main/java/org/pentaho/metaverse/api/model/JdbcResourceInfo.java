@@ -24,6 +24,7 @@ package org.pentaho.metaverse.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.encryption.Encr;
 
@@ -54,14 +55,18 @@ public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExter
   public JdbcResourceInfo( DatabaseMeta databaseMeta ) {
     super( databaseMeta );
     if ( "Native".equals( databaseMeta.getAccessTypeDesc() ) ) {
-      setServer( databaseMeta.getHostname() );
-      String portString = databaseMeta.getDatabasePortNumberString();
+      setServer( databaseMeta.environmentSubstitute( databaseMeta.getHostname() ) );
+      String portString = databaseMeta.environmentSubstitute( databaseMeta.getDatabasePortNumberString() );
       if ( portString != null ) {
-        setPort( Integer.valueOf( portString ) );
+        try {
+          setPort( Integer.valueOf( portString ) );
+        } catch ( NumberFormatException e ) {
+          // leave null
+        }
       }
-      setUsername( databaseMeta.getUsername() );
-      setPassword( databaseMeta.getPassword() );
-      setDatabaseName( databaseMeta.getDatabaseName() );
+      setUsername( databaseMeta.environmentSubstitute( databaseMeta.getUsername() ) );
+      setPassword( databaseMeta.environmentSubstitute( databaseMeta.getPassword() ) );
+      setDatabaseName( databaseMeta.environmentSubstitute( databaseMeta.getDatabaseName() ) );
     } else {
       throw new IllegalArgumentException( "DatabaseMeta is not JDBC, it is " + databaseMeta.getAccessTypeDesc() );
     }
