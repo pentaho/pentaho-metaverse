@@ -103,7 +103,8 @@ public class TransformationRuntimeExtensionPointTest {
   @Test
   public void testTransStarted() throws Exception {
     TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
-    TransLineageHolderMap transLineageHolderMap = spy( TransLineageHolderMap.getInstance() );
+    TransLineageHolderMap originalHolderMap = TransLineageHolderMap.getInstance();
+    TransLineageHolderMap transLineageHolderMap = spy( originalHolderMap );
     when( transLineageHolderMap.getMetaverseBuilder( Mockito.any( Trans.class ) ) )
       .thenReturn( mock( IMetaverseBuilder.class ) );
     TransLineageHolderMap.setInstance( transLineageHolderMap );
@@ -114,6 +115,9 @@ public class TransformationRuntimeExtensionPointTest {
     ext.transStarted( trans );
     verify( ext, times( 1 ) ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
+
+    // Restore the original holder map
+    TransLineageHolderMap.setInstance( originalHolderMap );
   }
 
   @Test

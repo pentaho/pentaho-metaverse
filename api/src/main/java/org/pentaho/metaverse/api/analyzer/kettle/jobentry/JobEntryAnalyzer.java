@@ -47,7 +47,7 @@ import java.util.List;
  * Created by gmoran on 7/16/14.
  */
 public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends BaseKettleMetaverseComponent implements
-    IJobEntryAnalyzer<IMetaverseNode, T> {
+  IJobEntryAnalyzer<IMetaverseNode, T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger( JobEntryAnalyzer.class );
 
@@ -101,10 +101,11 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
     String stepType = null;
     try {
       stepType =
-          PluginRegistry.getInstance().findPluginWithId( JobEntryPluginType.class, entry.getPluginId() ).getName();
+        PluginRegistry.getInstance().findPluginWithId( JobEntryPluginType.class, entry.getPluginId() ).getName();
     } catch ( Throwable t ) {
       stepType = entry.getClass().getSimpleName();
     }
+    rootNode.setProperty( "pluginId", entry.getPluginId() );
     rootNode.setProperty( "jobEntryType", stepType );
     rootNode.setProperty( "copies", entry.getParentJob().getJobMeta().getJobCopies().size() );
     metaverseBuilder.addNode( rootNode );
@@ -196,7 +197,7 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
   }
 
   protected IMetaverseNode createFieldNode( IComponentDescriptor fieldDescriptor, ValueMetaInterface fieldMeta,
-      String targetStepName, boolean addTheNode ) {
+                                            String targetStepName, boolean addTheNode ) {
 
     IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
     newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, fieldMeta.getTypeDesc() );

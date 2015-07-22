@@ -22,12 +22,14 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.trans.Trans;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
@@ -62,6 +64,11 @@ public class TransLineageHolderMapTest {
     jobLineageHolderMap = TransLineageHolderMap.getInstance();
     mockHolder = spy( new LineageHolder() );
     jobLineageHolderMap.setDefaultMetaverseBuilder( defaultBuilder );
+  }
+
+  @After
+  public void tearDown() {
+    jobLineageHolderMap.setDefaultMetaverseBuilder( null );
   }
 
   @Test
