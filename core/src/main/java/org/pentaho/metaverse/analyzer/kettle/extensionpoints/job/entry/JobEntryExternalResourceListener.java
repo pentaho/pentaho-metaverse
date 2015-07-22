@@ -31,7 +31,7 @@ import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.resource.ResourceEntry;
 import org.pentaho.di.resource.ResourceReference;
-import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolderMap;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
 import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.metaverse.api.model.IExecutionData;
@@ -61,7 +61,8 @@ public class JobEntryExternalResourceListener implements JobEntryListener {
 
   @Override
   public void afterExecution( Job job, JobEntryCopy jobEntryCopy, JobEntryInterface jobEntryInterface, Result result ) {
-    IExecutionProfile executionProfile = JobRuntimeExtensionPoint.getLineageHolder( job ).getExecutionProfile();
+    IExecutionProfile executionProfile =
+      JobLineageHolderMap.getInstance().getLineageHolder( job ).getExecutionProfile();
     IExecutionData executionData = executionProfile.getExecutionData();
 
     // Get input files (aka Resource Dependencies)

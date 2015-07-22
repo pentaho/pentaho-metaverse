@@ -30,7 +30,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageHolderMap;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
 import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
@@ -57,7 +57,7 @@ public class StepExternalConsumerRowListenerTest {
     when( executionProfile.getExecutionData() ).thenReturn( executionData );
     LineageHolder holder = new LineageHolder(  );
     holder.setExecutionProfile( executionProfile );
-    TransformationRuntimeExtensionPoint.putLineageHolder( mockTrans, holder );
+    TransLineageHolderMap.getInstance().putLineageHolder( mockTrans, holder );
 
     StepExternalConsumerRowListener listener = new StepExternalConsumerRowListener( consumer, mockStep );
 

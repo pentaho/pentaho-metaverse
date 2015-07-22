@@ -27,7 +27,7 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.RowAdapter;
 import org.pentaho.di.trans.step.StepInterface;
-import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageHolderMap;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
@@ -65,7 +65,7 @@ public class StepExternalConsumerRowListener extends RowAdapter {
     if ( resources != null ) {
       // Add the resources to the execution profile
       IExecutionProfile executionProfile =
-        TransformationRuntimeExtensionPoint.getLineageHolder( step.getTrans() ).getExecutionProfile();
+        TransLineageHolderMap.getInstance().getLineageHolder( step.getTrans() ).getExecutionProfile();
       if ( executionProfile != null ) {
         String stepName = step.getStepname();
         Map<String, List<IExternalResourceInfo>> resourceMap =

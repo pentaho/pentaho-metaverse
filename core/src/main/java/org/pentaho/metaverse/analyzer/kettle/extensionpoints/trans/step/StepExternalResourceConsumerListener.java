@@ -30,7 +30,7 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageHolderMap;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
@@ -104,7 +104,7 @@ public class StepExternalResourceConsumerListener implements ExtensionPointInter
     if ( resources != null ) {
       // Add the resources to the execution profile
       IExecutionProfile executionProfile =
-        TransformationRuntimeExtensionPoint.getLineageHolder( step.getTrans() ).getExecutionProfile();
+        TransLineageHolderMap.getInstance().getLineageHolder( step.getTrans() ).getExecutionProfile();
       if ( executionProfile != null ) {
         String stepName = step.getStepname();
         Map<String, List<IExternalResourceInfo>> resourceMap =
