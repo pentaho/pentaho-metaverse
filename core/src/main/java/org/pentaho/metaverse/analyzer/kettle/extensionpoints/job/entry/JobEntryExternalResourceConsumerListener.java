@@ -30,7 +30,7 @@ import org.pentaho.di.job.JobExecutionExtension;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolderMap;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
@@ -111,7 +111,7 @@ public class JobEntryExternalResourceConsumerListener implements ExtensionPointI
     if ( resources != null ) {
       // Add the resources to the execution profile
       IExecutionProfile executionProfile =
-        JobRuntimeExtensionPoint.getLineageHolder( jobEntry.getParentJob() ).getExecutionProfile();
+        JobLineageHolderMap.getInstance().getLineageHolder( jobEntry.getParentJob() ).getExecutionProfile();
       if ( executionProfile != null ) {
         String jobEntryName = jobEntry.getName();
         Map<String, List<IExternalResourceInfo>> resourceMap =

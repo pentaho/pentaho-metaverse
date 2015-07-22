@@ -34,7 +34,6 @@ import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
-import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
 import org.pentaho.metaverse.api.AnalysisContext;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
@@ -52,7 +51,6 @@ import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.impl.model.ExecutionData;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.impl.model.ParamInfo;
-import org.pentaho.metaverse.util.MetaverseBeanUtil;
 import org.pentaho.metaverse.util.MetaverseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +62,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -80,21 +77,6 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
   private static final Logger log = LoggerFactory.getLogger( TransformationRuntimeExtensionPoint.class );
 
   private IDocumentAnalyzer documentAnalyzer;
-
-  private static Map<Trans, LineageHolder> lineageHolderMap = new ConcurrentHashMap<Trans, LineageHolder>();
-
-  public static LineageHolder getLineageHolder( Trans t ) {
-    LineageHolder holder = lineageHolderMap.get( t );
-    if ( holder == null ) {
-      holder = new LineageHolder();
-      putLineageHolder( t, holder );
-    }
-    return holder;
-  }
-
-  public static void putLineageHolder( Trans t, LineageHolder holder ) {
-    lineageHolderMap.put( t, holder );
-  }
 
   /**
    * Callback when a transformation is about to be started
@@ -136,7 +118,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     ExecutionProfile executionProfile = new ExecutionProfile();
     populateExecutionProfile( executionProfile, trans );
 
-    IMetaverseBuilder builder = getMetaverseBuilder( trans );
+    IMetaverseBuilder builder = TransLineageHolderMap.getInstance().getMetaverseBuilder( trans );
 
     // Analyze the current transformation
     if ( documentAnalyzer != null ) {
@@ -179,7 +161,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     }
 
     // Save the lineage objects for later
-    LineageHolder holder = getLineageHolder( trans );
+    LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
     holder.setExecutionProfile( executionProfile );
     holder.setMetaverseBuilder( builder );
 
@@ -276,88 +258,88 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
    * @throws org.pentaho.di.core.exception.KettleException
    */
   @Override
-  public void transFinished( Trans trans ) throws KettleException {
+  public void transFinished( final Trans trans ) throws KettleException {
 
     if ( trans == null ) {
       return;
     }
 
-    // Get the current execution profile for this transformation
-    LineageHolder holder = getLineageHolder( trans );
-    Future lineageTask = holder.getLineageTask();
-    if ( lineageTask != null ) {
-      try {
-        lineageTask.get();
-      } catch ( InterruptedException e ) {
-        // Do nothing
-      } catch ( ExecutionException e ) {
-        log.error( "Error during generation of lineage graph for " + trans.getName(), e );
-      }
-    }
-    IExecutionProfile executionProfile = holder.getExecutionProfile();
-    if ( executionProfile == null ) {
-      // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
-      // the same info, so populate a new ExecutionProfile using the current Trans
-      // TODO: Beware duplicate profiles!
+    // Need to spin this processing off into its own thread, so we don't hold up normal PDI processing
+    Thread lineageWorker = new Thread( new Runnable() {
 
-      executionProfile = new ExecutionProfile();
-      populateExecutionProfile( executionProfile, trans );
-    }
-    ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
-    Result result = trans.getResult();
-    if ( result != null ) {
-      executionData.setFailureCount( result.getNrErrors() );
-    }
+      @Override
+      public void run() {
 
-    // Export the lineage info (execution profile, lineage graph, etc.)
-    try {
-      if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
-        // NOTE: This next call to clearOutput needs only to be done once before outputExecutionProfile and
-        // outputLineage graph. If the order of these calls changes somehow, make sure to move the call to
-        // clearOutput right before the first call to outputXYZ().
-        if ( "latest".equals( lineageWriter.getOutputStrategy() ) ) {
-          lineageWriter.cleanOutput( holder );
+        try {
+          // Get the current execution profile for this transformation
+          LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
+          Future lineageTask = holder.getLineageTask();
+          if ( lineageTask != null ) {
+            try {
+              lineageTask.get();
+            } catch ( InterruptedException e ) {
+              // Do nothing
+            } catch ( ExecutionException e ) {
+              log.error( "Error during generation of lineage graph for " + trans.getName(), e );
+            }
+          }
+          IExecutionProfile executionProfile = holder.getExecutionProfile();
+          if ( executionProfile == null ) {
+            // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
+            // the same info, so populate a new ExecutionProfile using the current Trans
+            // TODO: Beware duplicate profiles!
+
+            executionProfile = new ExecutionProfile();
+            populateExecutionProfile( executionProfile, trans );
+          }
+          ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
+          Result result = trans.getResult();
+          if ( result != null ) {
+            executionData.setFailureCount( result.getNrErrors() );
+          }
+
+          // Export the lineage info (execution profile, lineage graph, etc.)
+          try {
+            if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+              // NOTE: This next call to clearOutput needs only to be done once before outputExecutionProfile and
+              // outputLineage graph. If the order of these calls changes somehow, make sure to move the call to
+              // clearOutput right before the first call to outputXYZ().
+              if ( "latest".equals( lineageWriter.getOutputStrategy() ) ) {
+                lineageWriter.cleanOutput( holder );
+              }
+              lineageWriter.outputExecutionProfile( holder );
+            }
+          } catch ( IOException e ) {
+            log.error( "Error while writing out execution profile for " + trans.getName(), e );
+          }
+
+          // Only create a lineage graph for this trans if it has no parent. If it does, the parent will incorporate the
+          // lineage information into its own graph
+          try {
+            Job parentJob = trans.getParentJob();
+            Trans parentTrans = trans.getParentTrans();
+
+            if ( parentJob == null && parentTrans == null ) {
+              // Add the execution profile information to the lineage graph
+              addRuntimeLineageInfo( holder );
+
+              if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+                lineageWriter.outputLineageGraph( holder );
+              }
+            }
+          } catch ( IOException e ) {
+            log.error( "Error while writing out lineage graph for " + trans.getName(), e );
+          }
+        } catch ( Throwable t ) {
+          t.printStackTrace(); // TODO logger?
         }
-        lineageWriter.outputExecutionProfile( holder );
       }
-    } catch ( IOException e ) {
-      log.error( "Error while writing out execution profile for " + trans.getName(), e );
-    }
+    } );
 
-    // Only create a lineage graph for this trans if it has no parent. If it does, the parent will incorporate the
-    // lineage information into its own graph
-    try {
-      Job parentJob = trans.getParentJob();
-      Trans parentTrans = trans.getParentTrans();
-
-      if ( parentJob == null && parentTrans == null ) {
-        // Add the execution profile information to the lineage graph
-        addRuntimeLineageInfo( holder );
-
-        if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
-          lineageWriter.outputLineageGraph( holder );
-        }
-      }
-    } catch ( IOException e ) {
-      log.error( "Error while writing out lineage graph for " + trans.getName(), e );
-    }
+    lineageWorker.start();
   }
 
-  protected IMetaverseBuilder getMetaverseBuilder( Trans trans ) {
-    if ( trans != null ) {
-      if ( trans.getParentJob() == null && trans.getParentTrans() == null ) {
-        return (IMetaverseBuilder) MetaverseBeanUtil.getInstance().get( "IMetaverseBuilderPrototype" );
-      } else {
-        if ( trans.getParentJob() != null ) {
-          // Get the builder for the job
-          return JobRuntimeExtensionPoint.getLineageHolder( trans.getParentJob() ).getMetaverseBuilder();
-        } else {
-          return TransformationRuntimeExtensionPoint.getLineageHolder( trans.getParentTrans() ).getMetaverseBuilder();
-        }
-      }
-    }
-    return null;
-  }
+
 
   /**
    * Sets the document analyzer for this extension point

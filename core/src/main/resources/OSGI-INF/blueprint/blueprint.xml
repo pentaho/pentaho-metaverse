@@ -174,6 +174,8 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.splitfields.SplitFieldsStepAnalyzer"/>
   <bean id="TransExecutorStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.transexecutor.TransExecutorStepAnalyzer"/>
+  <bean id="JobExecutorStepAnalyzer"
+        class="org.pentaho.metaverse.analyzer.kettle.step.jobexecutor.JobExecutorStepAnalyzer"/>
   <bean id="RowsToResultStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.rowstoresult.RowsToResultStepAnalyzer"/>
   <bean id="RowsFromResultStepAnalyzer"
@@ -296,6 +298,10 @@
   <service id="transExecutorStepAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TransExecutorStepAnalyzer"/>
+
+  <service id="jobExecutorStepAnalyzerService"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           ref="JobExecutorStepAnalyzer"/>
 
   <service id="rowsToResultStepAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"

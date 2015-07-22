@@ -31,9 +31,9 @@ import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.trans.Trans;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
-import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
 import org.pentaho.metaverse.api.AnalysisContext;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
@@ -51,18 +51,17 @@ import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.impl.model.ExecutionData;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.impl.model.ParamInfo;
-import org.pentaho.metaverse.util.MetaverseBeanUtil;
 import org.pentaho.metaverse.util.MetaverseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -77,21 +76,8 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
   private IDocumentAnalyzer documentAnalyzer;
 
-  private static Map<Job, LineageHolder> lineageHolderMap = new ConcurrentHashMap<Job, LineageHolder>();
-  private static final Logger LOG = LoggerFactory.getLogger( JobRuntimeExtensionPoint.class );
+  private static final Logger log = LoggerFactory.getLogger( JobRuntimeExtensionPoint.class );
 
-  public static LineageHolder getLineageHolder( Job job ) {
-    LineageHolder holder = lineageHolderMap.get( job );
-    if ( holder == null ) {
-      holder = new LineageHolder();
-      lineageHolderMap.put( job, holder );
-    }
-    return holder;
-  }
-
-  public static void putLineageHolder( Job job, LineageHolder holder ) {
-    lineageHolderMap.put( job, holder );
-  }
 
   /**
    * Callback when a job is about to be started
@@ -111,7 +97,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       ExecutionProfile executionProfile = new ExecutionProfile();
       populateExecutionProfile( executionProfile, job );
 
-      IMetaverseBuilder builder = getMetaverseBuilder( job );
+      IMetaverseBuilder builder = JobLineageHolderMap.getInstance().getMetaverseBuilder( job );
 
       // Add the job finished listener
       job.addJobListener( this );
@@ -163,7 +149,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       }
 
       // Save the lineage objects for later
-      LineageHolder holder = getLineageHolder( job );
+      LineageHolder holder = JobLineageHolderMap.getInstance().getLineageHolder( job );
       holder.setExecutionProfile( executionProfile );
       holder.setMetaverseBuilder( builder );
 
@@ -186,22 +172,11 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     // Need to spin this processing off into its own thread, so we don't hold up normal PDI processing
     Thread lineageWorker = new Thread( new Runnable() {
 
-      /**
-       * When an object implementing interface <code>Runnable</code> is used
-       * to create a thread, starting the thread causes the object's
-       * <code>run</code> method to be called in that separately executing
-       * thread.
-       * <p/>
-       * The general contract of the method <code>run</code> is that it may
-       * take any action whatsoever.
-       *
-       * @see Thread#run()
-       */
       @Override
       public void run() {
         try {
           // Get the current execution profile for this transformation
-          LineageHolder holder = getLineageHolder( job );
+          LineageHolder holder = JobLineageHolderMap.getInstance().getLineageHolder( job );
           Future lineageTask = holder.getLineageTask();
           if ( lineageTask != null ) {
             try {
@@ -214,11 +189,11 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
           }
 
           // Get the current execution profile for this job
-          IExecutionProfile executionProfile = getLineageHolder( job ).getExecutionProfile();
+          IExecutionProfile executionProfile =
+            JobLineageHolderMap.getInstance().getLineageHolder( job ).getExecutionProfile();
           if ( executionProfile == null ) {
             // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
             // the same info, so populate a new ExecutionProfile using the current Trans
-            // TODO: Beware duplicate profiles!
 
             executionProfile = new ExecutionProfile();
             populateExecutionProfile( executionProfile, job );
@@ -229,11 +204,38 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
             executionData.setFailureCount( result.getNrErrors() );
           }
 
-          // Add the execution profile information to the lineage graph
-          addRuntimeLineageInfo( holder );
-
           // Export the lineage info (execution profile, lineage graph, etc.)
-          writeLineageInfo( holder );
+          try {
+            if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+              // NOTE: This next call to clearOutput needs only to be done once before outputExecutionProfile and
+              // outputLineage graph. If the order of these calls changes somehow, make sure to move the call to
+              // clearOutput right before the first call to outputXYZ().
+              if ( "latest".equals( lineageWriter.getOutputStrategy() ) ) {
+                lineageWriter.cleanOutput( holder );
+              }
+              lineageWriter.outputExecutionProfile( holder );
+            }
+          } catch ( IOException e ) {
+            log.error( "Error while writing out execution profile for " + job.getName(), e );
+          }
+
+          // Only create a lineage graph for this trans if it has no parent. If it does, the parent will incorporate the
+          // lineage information into its own graph
+          try {
+            Job parentJob = job.getParentJob();
+            Trans parentTrans = job.getParentTrans();
+
+            if ( parentJob == null && parentTrans == null ) {
+              // Add the execution profile information to the lineage graph
+              addRuntimeLineageInfo( holder );
+
+              if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+                lineageWriter.outputLineageGraph( holder );
+              }
+            }
+          } catch ( IOException e ) {
+            log.error( "Error while writing out lineage graph for " + job.getName(), e );
+          }
 
         } catch ( Throwable t ) {
           t.printStackTrace(); // TODO logger?
@@ -250,11 +252,11 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     String filename = job.getFilename();
 
     String filePath = null;
-    if ( job.getRepositoryDirectory() == null ) {
+    if ( job.getRep() == null ) {
       try {
         filePath = KettleAnalyzerUtil.normalizeFilePath( filename );
       } catch ( Exception e ) {
-        LOG.error( "Couldn't normalize file path: " + filename, e );
+        log.error( "Couldn't normalize file path: " + filename, e );
       }
     } else {
       filePath = filename;
@@ -323,22 +325,6 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       filename = "";
     }
     return filename;
-  }
-
-  protected IMetaverseBuilder getMetaverseBuilder( Job job ) {
-    if ( job != null ) {
-      if ( job.getParentJob() == null && job.getParentTrans() == null ) {
-        return (IMetaverseBuilder) MetaverseBeanUtil.getInstance().get( "IMetaverseBuilderPrototype" );
-      } else {
-        if ( job.getParentJob() != null ) {
-          // Get the builder for the job
-          return JobRuntimeExtensionPoint.getLineageHolder( job.getParentJob() ).getMetaverseBuilder();
-        } else {
-          return TransformationRuntimeExtensionPoint.getLineageHolder( job.getParentTrans() ).getMetaverseBuilder();
-        }
-      }
-    }
-    return null;
   }
 
   /**

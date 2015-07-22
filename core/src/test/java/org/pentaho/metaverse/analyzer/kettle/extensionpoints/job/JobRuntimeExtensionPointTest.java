@@ -93,11 +93,17 @@ public class JobRuntimeExtensionPointTest {
   @Test
   public void testCallExtensionPoint() throws Exception {
     JobRuntimeExtensionPoint spyJobExtensionPoint = spy( jobExtensionPoint );
-    when( spyJobExtensionPoint.getMetaverseBuilder( Mockito.any( Job.class ) ) ).thenReturn( mockBuilder );
+    JobLineageHolderMap originalHolderMap = JobLineageHolderMap.getInstance();
+    JobLineageHolderMap jobLineageHolderMap = spy( originalHolderMap );
+    when( jobLineageHolderMap.getMetaverseBuilder( Mockito.any( Job.class ) ) ).thenReturn( mockBuilder );
+    JobLineageHolderMap.setInstance( jobLineageHolderMap );
     spyJobExtensionPoint.callExtensionPoint( null, job );
     List<JobListener> listeners = job.getJobListeners();
     assertNotNull( listeners );
     assertTrue( listeners.contains( spyJobExtensionPoint ) );
+
+    // Restore original JobLineageHolderMap for use by others
+    JobLineageHolderMap.setInstance( originalHolderMap );
   }
 
   @Test
@@ -130,6 +136,6 @@ public class JobRuntimeExtensionPointTest {
 
     IExecutionData executionData = mock( IExecutionData.class );
     when( executionProfile.getExecutionData() ).thenReturn( executionData );
-    JobRuntimeExtensionPoint.getLineageHolder( job ).setExecutionProfile( executionProfile );
+    JobLineageHolderMap.getInstance().getLineageHolder( job ).setExecutionProfile( executionProfile );
   }
 }
