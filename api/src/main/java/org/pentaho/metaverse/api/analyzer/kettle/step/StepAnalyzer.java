@@ -63,7 +63,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMetaverseComponent implements
-    IStepAnalyzer<T>, IFieldLineageMetadataProvider<T> {
+  IStepAnalyzer<T>, IFieldLineageMetadataProvider<T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger( StepAnalyzer.class );
   public static final String NONE = "_none_";
@@ -79,33 +79,33 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   protected T baseStepMeta = null;
 
   /**
-  * The step's parent StepMeta object (to get the parent TransMeta, in/out fields, etc.)
-  */
+   * The step's parent StepMeta object (to get the parent TransMeta, in/out fields, etc.)
+   */
   protected StepMeta parentStepMeta = null;
 
   /**
-  * A reference to the transformation that contains the step under analysis
-  */
+   * A reference to the transformation that contains the step under analysis
+   */
   protected TransMeta parentTransMeta = null;
 
   /**
-  * A reference to the root node created by the analyzer (usually corresponds to the step under analysis)
-  */
+   * A reference to the root node created by the analyzer (usually corresponds to the step under analysis)
+   */
   protected IMetaverseNode rootNode = null;
 
   /**
-  * A reference to a connection analyzer
-  */
+   * A reference to a connection analyzer
+   */
   protected IConnectionAnalyzer connectionAnalyzer = null;
 
   /**
-  * The stream fields coming into the step
-  */
+   * The stream fields coming into the step
+   */
   protected Map<String, RowMetaInterface> prevFields = null;
 
   /**
-  * The stream fields coming out of the step
-  */
+   * The stream fields coming out of the step
+   */
   protected RowMetaInterface stepFields = null;
 
   @Override
@@ -121,10 +121,11 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     String stepType = null;
     try {
       stepType =
-          PluginRegistry.getInstance().findPluginWithId( StepPluginType.class, parentStepMeta.getStepID() ).getName();
+        PluginRegistry.getInstance().findPluginWithId( StepPluginType.class, parentStepMeta.getStepID() ).getName();
     } catch ( Throwable t ) {
       stepType = parentStepMeta.getStepID();
     }
+    rootNode.setProperty( "pluginId", parentStepMeta.getStepID() );
     rootNode.setProperty( "stepType", stepType );
     rootNode.setProperty( "copies", meta.getParentStepMeta().getCopies() );
     rootNode.setProperty( "_analyzer", this.getClass().getSimpleName() );
@@ -165,7 +166,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   /**
    * Get all of the changes that need to be made to the metaverse. These are all of the "field---derives--->field"
    * changes
-   * 
+   *
    * @return
    */
   protected Set<ComponentDerivationRecord> getChanges() {
@@ -188,7 +189,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
 
   /**
    * Get ComponentDerivationRecords for each of the fields considered to be a passthrough
-   * 
+   *
    * @return
    */
   protected Set<ComponentDerivationRecord> getPassthroughChanges() {
@@ -198,7 +199,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
       for ( StepField incomingFieldName : incomingFieldNames ) {
         if ( isPassthrough( incomingFieldName ) ) {
           ComponentDerivationRecord change =
-              new ComponentDerivationRecord( incomingFieldName.getFieldName(), incomingFieldName.getFieldName() );
+            new ComponentDerivationRecord( incomingFieldName.getFieldName(), incomingFieldName.getFieldName() );
           change.setOriginalEntityStepName( incomingFieldName.getStepName() );
           passthroughs.add( change );
         }
@@ -210,7 +211,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   /**
    * Determines if a field is considered a passthrough field or not. If the field name in question exists in the output
    * (exact match), then it is considered a passthrough.
-   * 
+   *
    * @param originalFieldName
    * @return
    */
@@ -228,7 +229,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
 
   /**
    * Add the required "derives" links to the metaverse for a ComponentDerivationRecord
-   * 
+   *
    * @param change
    */
   protected void mapChange( ComponentDerivationRecord change ) {
@@ -257,7 +258,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
           // create a transient node for it
           ValueMetaInterface tmp = new ValueMeta( change.getOriginalEntityName() );
           IMetaverseNode fieldNode =
-              createOutputFieldNode( getDescriptor().getContext(), tmp, null, getTransientNodeType() );
+            createOutputFieldNode( getDescriptor().getContext(), tmp, null, getTransientNodeType() );
           // Add link to show that this step created this as a transient field
           getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_TRANSIENT, fieldNode );
           getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
@@ -269,7 +270,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
         // create a transient node for it
         ValueMetaInterface tmp = new ValueMeta( change.getChangedEntityName() );
         IMetaverseNode fieldNode =
-            createOutputFieldNode( getDescriptor().getContext(), tmp, null, getTransientNodeType() );
+          createOutputFieldNode( getDescriptor().getContext(), tmp, null, getTransientNodeType() );
         // Add link to show that this step created this as a transient field
         getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_TRANSIENT, fieldNode );
         getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_USES, fieldNode );
@@ -296,7 +297,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   /**
    * Add new nodes to the metaverse for each of the fields that are output from this step. The fields are uniquely
    * identified based on the step that created the node and the intended target step.
-   * 
+   *
    * @param meta
    * @return
    */
@@ -312,8 +313,8 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
           for ( ValueMetaInterface valueMetaInterface : outputFields.getValueMetaList() ) {
 
             IMetaverseNode fieldNode =
-                createOutputFieldNode( getDescriptor().getContext(), valueMetaInterface, nextStepName,
-                    getOutputNodeType() );
+              createOutputFieldNode( getDescriptor().getContext(), valueMetaInterface, nextStepName,
+                getOutputNodeType() );
             // Add link to show that this step created the field
             getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_OUTPUTS, fieldNode );
             outputs.addNode( nextStepName, valueMetaInterface.getName(), fieldNode );
@@ -327,15 +328,15 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   }
 
   protected IMetaverseNode createInputFieldNode( IAnalysisContext context, ValueMetaInterface fieldMeta,
-      String previousStepName, String nodeType ) {
+                                                 String previousStepName, String nodeType ) {
     IComponentDescriptor prevFieldDescriptor = getPrevFieldDescriptor( previousStepName, fieldMeta.getName() );
     return createFieldNode( prevFieldDescriptor, fieldMeta, getStepName(), false );
   }
 
   protected IMetaverseNode createOutputFieldNode( IAnalysisContext context, ValueMetaInterface fieldMeta,
-      String targetStepName, String nodeType ) {
+                                                  String targetStepName, String nodeType ) {
     IComponentDescriptor fieldDescriptor =
-        new MetaverseComponentDescriptor( fieldMeta.getName(), nodeType, rootNode, context );
+      new MetaverseComponentDescriptor( fieldMeta.getName(), nodeType, rootNode, context );
     return createFieldNode( fieldDescriptor, fieldMeta, targetStepName, true );
   }
 
@@ -345,7 +346,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   }
 
   protected IMetaverseNode createFieldNode( IComponentDescriptor fieldDescriptor, ValueMetaInterface fieldMeta,
-      String targetStepName, boolean addTheNode ) {
+                                            String targetStepName, boolean addTheNode ) {
 
     IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
     newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, fieldMeta.getTypeDesc() );
@@ -365,7 +366,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   /**
    * Add links to nodes in the metaverse for each of the fields that are input into this step. The fields are uniquely
    * identified based on the step that created the node and the intended target step.
-   * 
+   *
    * @param meta
    * @return
    */
@@ -383,8 +384,8 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
           for ( ValueMetaInterface valueMetaInterface : inputFields.getValueMetaList() ) {
 
             IMetaverseNode prevFieldNode =
-                createInputFieldNode( getDescriptor().getContext(), valueMetaInterface, prevStepName,
-                    getInputNodeType() );
+              createInputFieldNode( getDescriptor().getContext(), valueMetaInterface, prevStepName,
+                getInputNodeType() );
             getMetaverseBuilder().addLink( prevFieldNode, DictionaryConst.LINK_INPUTS, rootNode );
             inputs.addNode( prevStepName, valueMetaInterface.getName(), prevFieldNode );
           }
@@ -399,7 +400,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
 
   /**
    * Create a new IComponentDescriptor for a field input into this step
-   * 
+   *
    * @param prevStepName
    * @param fieldName
    * @return
@@ -410,13 +411,13 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
       Object nsObj = rootNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE );
       INamespace ns = new Namespace( nsObj != null ? nsObj.toString() : null );
       IMetaverseNode tmpOriginNode =
-          getMetaverseObjectFactory().createNodeObject( ns, prevStepName, DictionaryConst.NODE_TYPE_TRANS_STEP );
+        getMetaverseObjectFactory().createNodeObject( ns, prevStepName, DictionaryConst.NODE_TYPE_TRANS_STEP );
 
       INamespace stepFieldNamespace = new Namespace( tmpOriginNode.getLogicalId() );
 
       prevFieldDescriptor =
-          new MetaverseComponentDescriptor( fieldName, getInputNodeType(), stepFieldNamespace, getDescriptor()
-              .getContext() );
+        new MetaverseComponentDescriptor( fieldName, getInputNodeType(), stepFieldNamespace, getDescriptor()
+          .getContext() );
 
     }
     return prevFieldDescriptor;
@@ -472,7 +473,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     RowMetaInterface outputFields = getOutputFields( meta );
 
     if ( outputFields != null && ArrayUtils.isEmpty( nextStepNames ) ) {
-      nextStepNames = new String[] { NONE };
+      nextStepNames = new String[]{ NONE };
     }
     for ( String stepName : nextStepNames ) {
       outputRows.put( stepName, outputFields );
@@ -583,8 +584,8 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   }
 
   /**
-  * Loads the in/out fields for this step into member variables for use by the analyzer
-  */
+   * Loads the in/out fields for this step into member variables for use by the analyzer
+   */
   public void loadInputAndOutputStreamFields( T meta ) {
     prevFields = getInputFields( meta );
     stepFields = getOutputFields( meta );
@@ -605,15 +606,15 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     }
 
     IMetaverseNode tmpOriginNode =
-        metaverseObjectFactory.createNodeObject( UUID.randomUUID().toString(), origin,
-            DictionaryConst.NODE_TYPE_TRANS_STEP );
+      metaverseObjectFactory.createNodeObject( UUID.randomUUID().toString(), origin,
+        DictionaryConst.NODE_TYPE_TRANS_STEP );
     tmpOriginNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, rootNode
-        .getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
+      .getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
     INamespace stepFieldNamespace = new Namespace( tmpOriginNode.getLogicalId() );
 
     MetaverseComponentDescriptor d =
-        new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD, tmpOriginNode, descriptor
-            .getContext() );
+      new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD, tmpOriginNode, descriptor
+        .getContext() );
     return d;
   }
 

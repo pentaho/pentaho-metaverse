@@ -22,6 +22,8 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle;
 
+import org.pentaho.di.core.Const;
+import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IComponentDescriptor;
@@ -35,7 +37,7 @@ import org.pentaho.metaverse.api.messages.Messages;
  * DatabaseConnectionAnalyzer collects metadata about a PDI database connection
  */
 public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseComponent
-    implements IDatabaseConnectionAnalyzer<T> {
+  implements IDatabaseConnectionAnalyzer<T> {
 
   /**
    * Analyzes a database connection for metadata.
@@ -73,6 +75,12 @@ public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseC
 
     node.setProperty( "name", dbMeta.getName() );
 
+    DatabaseInterface dbInterface = dbMeta.getDatabaseInterface();
+    node.setProperty( "databaseType",
+      dbInterface != null
+        ? Const.NVL( dbInterface.getPluginName(), "Unknown" )
+        : "Unknown" );
+
     String port = dbMeta.getDatabasePortNumberString();
     node.setProperty( DictionaryConst.PROPERTY_PORT, port );
 
@@ -107,8 +115,8 @@ public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseC
                                                         DatabaseMeta connection ) {
 
     IComponentDescriptor dbDescriptor =
-        new MetaverseComponentDescriptor( connection.getName(), DictionaryConst.NODE_TYPE_DATASOURCE, parentDescriptor
-            .getNamespace(), parentDescriptor.getContext() );
+      new MetaverseComponentDescriptor( connection.getName(), DictionaryConst.NODE_TYPE_DATASOURCE, parentDescriptor
+        .getNamespace(), parentDescriptor.getContext() );
 
     return dbDescriptor;
 
