@@ -146,7 +146,7 @@ public class DatabaseConnectionAnalyzerTest {
     try {
       IMetaverseNode node = dbConnectionAnalyzer.analyze( mockDescriptor, databaseMeta );
       assertNotNull( node );
-      assertEquals( 13, node.getPropertyKeys().size() );
+      assertEquals( 14, node.getPropertyKeys().size() );
     } catch ( MetaverseAnalyzerException e ) {
       fail( "analyze() should not throw an exception!" );
     }
