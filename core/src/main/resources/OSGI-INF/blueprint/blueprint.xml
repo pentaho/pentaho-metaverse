@@ -364,6 +364,13 @@
            interface="org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer"
            ref="TransJobEntryAnalyzer"/>
 
+  <bean id="JobJobEntryAnalyzer"
+        class="org.pentaho.metaverse.analyzer.kettle.jobentry.job.JobJobEntryAnalyzer"/>
+
+  <service id="jobJobEntryAnalyzerService"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer"
+           ref="JobJobEntryAnalyzer"/>
+
   <reference-list id="jobEntryAnalyzerRefList"
                   interface="org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer"
                   member-type="service-object"
