@@ -96,6 +96,8 @@
   </bean>
   <bean id="TransJobEntryAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer"/>
+  <bean id="JobJobEntryAnalyzer"
+        class="org.pentaho.metaverse.analyzer.kettle.jobentry.job.JobJobEntryAnalyzer"/>
   <bean id="GetXMLDataStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer">
     <property name="externalResourceConsumer" ref="getXMLDataERC"/>
@@ -185,6 +187,7 @@
     <property name="jobEntryAnalyzers">
       <list>
         <ref bean="TransJobEntryAnalyzer"/>
+        <ref bean="JobJobEntryAnalyzer"/>
       </list>
     </property>
   </bean>
