@@ -264,6 +264,10 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       return;
     }
 
+    if ( trans.isPreview() ) {
+      return;
+    }
+
     // Need to spin this processing off into its own thread, so we don't hold up normal PDI processing
     Thread lineageWorker = new Thread( new Runnable() {
 
