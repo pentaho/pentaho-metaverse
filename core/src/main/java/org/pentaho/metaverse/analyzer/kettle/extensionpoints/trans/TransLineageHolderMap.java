@@ -97,10 +97,13 @@ public class TransLineageHolderMap {
   }
 
   protected IMetaverseBuilder getDefaultMetaverseBuilder() {
-    if ( defaultMetaverseBuilder == null ) {
-      defaultMetaverseBuilder = (IMetaverseBuilder) MetaverseBeanUtil.getInstance().get( "IMetaverseBuilderPrototype" );
+    // always try to get a new builder if this method is called. otherwise we will end up with overlapping graphs
+    IMetaverseBuilder newBuilder = (IMetaverseBuilder) MetaverseBeanUtil.getInstance().get( "IMetaverseBuilderPrototype" );
+    if ( newBuilder == null ) {
+      return defaultMetaverseBuilder;
+    } else {
+      return newBuilder;
     }
-    return defaultMetaverseBuilder;
   }
 
   protected void setDefaultMetaverseBuilder( IMetaverseBuilder builder ) {

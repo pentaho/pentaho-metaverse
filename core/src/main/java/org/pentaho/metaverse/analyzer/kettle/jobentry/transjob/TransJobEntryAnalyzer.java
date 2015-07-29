@@ -85,8 +85,8 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
         break;
       case REPOSITORY_BY_NAME:
         if ( repo != null ) {
-          String dir = parentJobMeta.environmentSubstitute( entry.getDirectoryPath() );
-          String file = parentJobMeta.environmentSubstitute( entry.getFilename() );
+          String dir = parentJobMeta.environmentSubstitute( entry.getDirectory() );
+          String file = parentJobMeta.environmentSubstitute( entry.getTransname() );
           try {
             RepositoryDirectoryInterface rdi = repo.findDirectory( dir );
             subTransMeta = repo.loadTransformation( file, rdi, null, true, null );
