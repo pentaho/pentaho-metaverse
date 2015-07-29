@@ -55,6 +55,7 @@ import org.pentaho.metaverse.util.MetaverseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.sql.Timestamp;
@@ -121,8 +122,14 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         job.shareVariablesWith( jobMeta );
         jobMeta.copyParametersFrom( job );
         jobMeta.activateParameters();
+        if ( job.getRep() != null ) {
+          jobMeta.setRepository( job.getRep() );
+        }
 
         String id = getFilename( jobMeta );
+        if ( !id.endsWith( jobMeta.getDefaultExtension() ) ) {
+          id += "." + jobMeta.getDefaultExtension();
+        }
 
         IDocument metaverseDocument = builder.getMetaverseObjectFactory().createDocumentObject();
 
@@ -249,7 +256,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
   protected void populateExecutionProfile( IExecutionProfile executionProfile, Job job ) {
     JobMeta jobMeta = job.getJobMeta();
 
-    String filename = job.getFilename();
+    String filename = getFilename( job );
 
     String filePath = null;
     if ( job.getRep() == null ) {
@@ -264,6 +271,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
     // Set artifact information (path, type, description, etc.)
     executionProfile.setPath( filePath );
+    executionProfile.setName( jobMeta.getName() );
     executionProfile.setType( DictionaryConst.NODE_TYPE_JOB );
     executionProfile.setDescription( jobMeta.getDescription() );
 
@@ -274,7 +282,10 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
     // Store execution information (client, server, user, etc.)
     executionData.setStartTime( new Timestamp( new Date().getTime() ) );
-    executionData.setClientExecutor( KettleClientEnvironment.getInstance().getClient().name() );
+
+    KettleClientEnvironment.ClientType clientType = KettleClientEnvironment.getInstance().getClient();
+    executionData.setClientExecutor( clientType == null ? "DI Server" : clientType.name() );
+
     executionData.setExecutorUser( job.getExecutingUser() );
     executionData.setExecutorServer( job.getExecutingServer() );
 
@@ -319,7 +330,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
   public static String getFilename( Job job ) {
     String filename = job.getFilename();
     if ( filename == null && job.getJobMeta() != null ) {
-      filename = job.getJobMeta().getName();
+      filename = getFilename( job.getJobMeta() );
     }
     if ( filename == null ) {
       filename = "";
@@ -348,7 +359,15 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
   public static String getFilename( JobMeta jobMeta ) {
     String filename = jobMeta.getFilename();
     if ( filename == null ) {
-      filename = "";
+      // try to get the dir and name from the job
+      if ( jobMeta.getRepositoryDirectory() != null ) {
+        String dir = jobMeta.getRepositoryDirectory().getPath();
+        String name = jobMeta.getName();
+        File f = new File( dir, name );
+        filename = f.getPath();
+      } else {
+        filename = "";
+      }
     }
     return filename;
   }

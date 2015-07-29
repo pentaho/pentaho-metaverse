@@ -85,11 +85,12 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
       case REPOSITORY_BY_NAME:
         if ( repo != null ) {
           String dir = parentJobMeta.environmentSubstitute( entry.getDirectory() );
-          String file = parentJobMeta.environmentSubstitute( entry.getFilename() );
+          String file = parentJobMeta.environmentSubstitute( entry.getJobName() );
           try {
             RepositoryDirectoryInterface rdi = repo.findDirectory( dir );
             subJobMeta = repo.loadJob( file, rdi, null, null );
-            jobPath = subJobMeta.getFilename() + "." + subJobMeta.getDefaultExtension();
+            String filename = subJobMeta.getFilename() == null ? subJobMeta.toString() : subJobMeta.getFilename();
+            jobPath = filename + "." + subJobMeta.getDefaultExtension();
           } catch ( KettleException e ) {
             log.error( e.getMessage(), e );
             throw new MetaverseAnalyzerException( "Sub job can not be found in repository - " + file, e );
@@ -102,7 +103,8 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
         if ( repo != null ) {
           try {
             subJobMeta = repo.loadJob( entry.getJobObjectId(), null );
-            jobPath = subJobMeta.getFilename() + "." + subJobMeta.getDefaultExtension();
+            String filename = subJobMeta.getFilename() == null ? subJobMeta.toString() : subJobMeta.getFilename();
+            jobPath = filename + "." + subJobMeta.getDefaultExtension();
           } catch ( KettleException e ) {
             log.error( e.getMessage(), e );
             throw new MetaverseAnalyzerException( "Sub job can not be found by reference - "
