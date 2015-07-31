@@ -58,7 +58,9 @@ public class MetaverseBeanUtil {
     } else {
       try {
         Bundle bundle = bundleContext.getBundle();
-
+        if ( bundle == null ) {
+          return null;
+        }
         Collection<ServiceReference<BlueprintContainer>> serviceReferences =
           bundleContext.getServiceReferences( BlueprintContainer.class,
             "(osgi.blueprint.container.symbolicname=" + bundle.getSymbolicName() + ")" );
