@@ -83,4 +83,14 @@ public class MetaverseBeanUtilTest {
 
 
   }
+
+  @Test
+  public void testGetNullBundle() throws Exception {
+    MetaverseBeanUtil instance = MetaverseBeanUtil.getInstance();
+    BundleContext bundleContext = mock( BundleContext.class );
+    when( bundleContext.getBundle() ).thenReturn( null );
+    instance.setBundleContext( bundleContext );
+    assertNull( instance.get( BEAN_NAME ) );
+    assertNull( MetaverseBeanUtil.getInstance().get( BEAN_NAME ) );
+  }
 }
