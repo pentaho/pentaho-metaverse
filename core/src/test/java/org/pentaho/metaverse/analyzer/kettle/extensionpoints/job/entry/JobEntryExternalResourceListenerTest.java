@@ -22,8 +22,8 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
-import org.apache.commons.vfs.FileName;
-import org.apache.commons.vfs.FileObject;
+import org.apache.commons.vfs2.FileName;
+import org.apache.commons.vfs2.FileObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.Result;

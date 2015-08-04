@@ -22,7 +22,7 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle;
 
-import org.apache.commons.vfs.FileObject;
+import org.apache.commons.vfs2.FileObject;
 import org.junit.Test;
 import org.pentaho.di.core.vfs.KettleVFS;
 
