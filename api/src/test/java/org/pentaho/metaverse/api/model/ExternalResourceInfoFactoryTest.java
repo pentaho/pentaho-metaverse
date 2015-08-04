@@ -22,8 +22,8 @@
 
 package org.pentaho.metaverse.api.model;
 
-import org.apache.commons.vfs.FileName;
-import org.apache.commons.vfs.FileObject;
+import org.apache.commons.vfs2.FileName;
+import org.apache.commons.vfs2.FileObject;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

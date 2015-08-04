@@ -22,7 +22,7 @@
 
 package org.pentaho.metaverse.api.model;
 
-import org.apache.commons.vfs.FileObject;
+import org.apache.commons.vfs2.FileObject;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.resource.ResourceEntry;
 import org.pentaho.dictionary.DictionaryConst;
