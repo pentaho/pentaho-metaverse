@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle;
 
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
@@ -180,9 +181,8 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     for ( int i = 0; i < jobMeta.nrJobEntries(); i++ ) {
       JobEntryCopy entry = jobMeta.getJobEntry( i );
       try {
-        entry.getEntry().setParentJob( j );
-
         if ( entry != null ) {
+          entry.getEntry().setParentJob( j );
           IMetaverseNode jobEntryNode = null;
           JobEntryInterface jobEntryInterface = entry.getEntry();
 
@@ -198,18 +198,17 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
           } else {
             GenericJobEntryMetaAnalyzer defaultJobEntryAnalyzer = new GenericJobEntryMetaAnalyzer();
             defaultJobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
-            jobEntryNode = (IMetaverseNode) defaultJobEntryAnalyzer.analyze( entryDescriptor, jobEntryInterface );
+            jobEntryNode = defaultJobEntryAnalyzer.analyze( entryDescriptor, jobEntryInterface );
           }
           if ( jobEntryNode != null ) {
             metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, jobEntryNode );
           }
         }
-      } catch ( MetaverseAnalyzerException mae ) {
+      } catch ( Throwable mae ) {
         //Don't throw an exception, just log and carry on
-        log.error( "Error processing " + entry.getName(), mae );
-      } catch ( Exception e ) {
-        //Don't throw an exception, just log and carry on
-        log.error( "Error processing " + entry.getName(), e );
+        log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis ", entry.getName(),
+          Const.NVL( mae.getLocalizedMessage(), "Unspecified" ) ) );
+        log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), mae );
       }
     }
 
@@ -255,7 +254,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
 
   public Set<IJobEntryAnalyzer> getJobEntryAnalyzers( final JobEntryInterface jobEntryInterface ) {
 
-    Set<IJobEntryAnalyzer> jobEntryAnalyzers = new HashSet<IJobEntryAnalyzer>();
+    Set<IJobEntryAnalyzer> jobEntryAnalyzers = new HashSet<>();
 
     // Attempt to discover a BaseStepMeta from the given StepMeta
     jobEntryAnalyzerProvider = getJobEntryAnalyzerProvider();
@@ -263,7 +262,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
       if ( jobEntryInterface == null ) {
         jobEntryAnalyzers.addAll( jobEntryAnalyzerProvider.getAnalyzers() );
       } else {
-        Set<Class<?>> analyzerClassSet = new HashSet<Class<?>>( 1 );
+        Set<Class<?>> analyzerClassSet = new HashSet<>( 1 );
         analyzerClassSet.add( jobEntryInterface.getClass() );
         jobEntryAnalyzers.addAll( jobEntryAnalyzerProvider.getAnalyzers( analyzerClassSet ) );
       }
@@ -287,7 +286,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     if ( jobEntryAnalyzerProvider != null ) {
       return jobEntryAnalyzerProvider;
     }
-    jobEntryAnalyzerProvider = (IJobEntryAnalyzerProvider) PentahoSystem.get( IJobEntryAnalyzerProvider.class );
+    jobEntryAnalyzerProvider = PentahoSystem.get( IJobEntryAnalyzerProvider.class );
     return jobEntryAnalyzerProvider;
   }
 }
