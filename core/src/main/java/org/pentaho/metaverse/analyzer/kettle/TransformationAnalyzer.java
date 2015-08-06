@@ -23,8 +23,7 @@
 package org.pentaho.metaverse.analyzer.kettle;
 
 import org.pentaho.di.core.Const;
-import org.pentaho.di.core.exception.KettleMissingPluginsException;
-import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransHopMeta;
@@ -95,9 +94,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
         String content = (String) repoObject;
         ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
         transMeta = new TransMeta( xmlStream, null, false, null, null );
-      } catch ( KettleXMLException e ) {
-        throw new MetaverseAnalyzerException( e );
-      } catch ( KettleMissingPluginsException e ) {
+      } catch ( KettleException e ) {
         throw new MetaverseAnalyzerException( e );
       }
     } else if ( repoObject instanceof TransMeta ) {
@@ -209,9 +206,11 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
             metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, stepNode );
           }
         }
-      } catch ( MetaverseAnalyzerException mae ) {
+      } catch ( Throwable mae ) {
         //Don't throw an exception, just log and carry on
-        log.error( "Error processing " + stepMeta.getName(), mae );
+        log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis ", stepMeta.getName(),
+          Const.NVL( mae.getLocalizedMessage(), "Unspecified" ) ) );
+        log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), mae );
       }
     }
 
