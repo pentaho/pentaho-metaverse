@@ -39,8 +39,13 @@ public class KettleAnalyzerUtil {
    */
   public static String normalizeFilePath( String filePath ) throws MetaverseException {
     try {
+      String path = filePath;
       FileObject fo = KettleVFS.getFileObject( filePath );
-      String path = fo.getURL().getPath();
+      try {
+        path = fo.getURL().getPath();
+      } catch ( Throwable t ) {
+        // Something went wrong with VFS, just try the filePath
+      }
       File f = new File( path );
       return f.getAbsolutePath();
     } catch ( Exception e ) {
