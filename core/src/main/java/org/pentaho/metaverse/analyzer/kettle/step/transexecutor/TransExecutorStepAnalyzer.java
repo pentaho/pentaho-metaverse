@@ -97,7 +97,6 @@ public class TransExecutorStepAnalyzer extends StepAnalyzer<TransExecutorMeta> {
           transPath = normalized;
 
         } catch ( Exception e ) {
-          log.error( e.getMessage(), e );
           throw new MetaverseAnalyzerException( "Sub transformation can not be found - " + transPath, e );
         }
         break;
@@ -110,7 +109,6 @@ public class TransExecutorStepAnalyzer extends StepAnalyzer<TransExecutorMeta> {
             subTransMeta = repo.loadTransformation( file, rdi, null, true, null );
             transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
           } catch ( KettleException e ) {
-            log.error( e.getMessage(), e );
             throw new MetaverseAnalyzerException( "Sub transformation can not be found in repository - " + file, e );
           }
         } else {
@@ -123,7 +121,6 @@ public class TransExecutorStepAnalyzer extends StepAnalyzer<TransExecutorMeta> {
             subTransMeta = repo.loadTransformation( meta.getTransObjectId(), null );
             transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
           } catch ( KettleException e ) {
-            log.error( e.getMessage(), e );
             throw new MetaverseAnalyzerException( "Sub transformation can not be found by reference - "
               + meta.getTransObjectId(), e );
           }

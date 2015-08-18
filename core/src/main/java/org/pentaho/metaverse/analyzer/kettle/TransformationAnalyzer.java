@@ -208,7 +208,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
         }
       } catch ( Throwable mae ) {
         //Don't throw an exception, just log and carry on
-        log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis ", stepMeta.getName(),
+        log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", stepMeta.getName(),
           Const.NVL( mae.getLocalizedMessage(), "Unspecified" ) ) );
         log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), mae );
       }

@@ -206,7 +206,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
         }
       } catch ( Throwable mae ) {
         //Don't throw an exception, just log and carry on
-        log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis ", entry.getName(),
+        log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", entry.getName(),
           Const.NVL( mae.getLocalizedMessage(), "Unspecified" ) ) );
         log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), mae );
       }

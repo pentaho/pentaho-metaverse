@@ -94,7 +94,6 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
           jobPath = normalized;
 
         } catch ( Exception e ) {
-          log.error( e.getMessage(), e );
           throw new MetaverseAnalyzerException( "Sub transformation can not be found - " + jobPath, e );
         }
         break;
@@ -108,7 +107,6 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
             String filename = subJobMeta.getFilename() == null ? subJobMeta.toString() : subJobMeta.getFilename();
             jobPath = filename + "." + subJobMeta.getDefaultExtension();
           } catch ( KettleException e ) {
-            log.error( e.getMessage(), e );
             throw new MetaverseAnalyzerException( "Sub transformation can not be found in repository - " + file, e );
           }
         } else {
@@ -122,7 +120,6 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
             String filename = subJobMeta.getFilename() == null ? subJobMeta.toString() : subJobMeta.getFilename();
             jobPath = filename + "." + subJobMeta.getDefaultExtension();
           } catch ( KettleException e ) {
-            log.error( e.getMessage(), e );
             throw new MetaverseAnalyzerException( "Sub transformation can not be found by reference - "
               + meta.getJobObjectId(), e );
           }

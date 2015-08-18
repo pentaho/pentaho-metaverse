@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
@@ -51,6 +52,7 @@ import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.impl.model.ExecutionData;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.impl.model.ParamInfo;
+import org.pentaho.metaverse.messages.Messages;
 import org.pentaho.metaverse.util.MetaverseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,7 +184,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       try {
         filePath = KettleAnalyzerUtil.normalizeFilePath( filename );
       } catch ( Exception e ) {
-        log.error( "Couldn't normalize file path: " + filename, e );
+        log.warn( "Couldn't normalize file path: " + filename, e );
+        filePath = filename;
       }
     } else {
       filePath = filename;
@@ -284,7 +287,9 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
             } catch ( InterruptedException e ) {
               // Do nothing
             } catch ( ExecutionException e ) {
-              log.error( "Error during generation of lineage graph for " + trans.getName(), e );
+              log.warn( Messages.getString( "ERROR.CouldNotWriteLineageGraph", trans.getName(),
+                Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+              log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
             }
           }
           IExecutionProfile executionProfile = holder.getExecutionProfile();
@@ -314,10 +319,12 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
               lineageWriter.outputExecutionProfile( holder );
             }
           } catch ( IOException e ) {
-            log.error( "Error while writing out execution profile for " + trans.getName(), e );
+            log.warn( Messages.getString( "ERROR.CouldNotWriteExecutionProfile", trans.getName(),
+              Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+            log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
           }
 
-          // Only create a lineage graph for this trans if it has no parent. If it does, the parent will incorporate the
+          // Only create a lineage graph for this trans if it has no parent. Otherwise, the parent will incorporate the
           // lineage information into its own graph
           try {
             Job parentJob = trans.getParentJob();
@@ -332,17 +339,20 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
               }
             }
           } catch ( IOException e ) {
-            log.error( "Error while writing out lineage graph for " + trans.getName(), e );
+            log.warn( Messages.getString( "ERROR.CouldNotWriteExecutionProfile", trans.getName(),
+              Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+            log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
           }
         } catch ( Throwable t ) {
-          t.printStackTrace(); // TODO logger?
+          log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", trans.getName(),
+            Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
+          log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), t );
         }
       }
     } );
 
     lineageWorker.start();
   }
-
 
 
   /**
