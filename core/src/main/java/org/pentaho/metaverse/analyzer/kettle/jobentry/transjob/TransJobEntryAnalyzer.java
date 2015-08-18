@@ -79,7 +79,6 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
           transPath = normalized;
 
         } catch ( Exception e ) {
-          log.error( e.getMessage(), e );
           throw new MetaverseAnalyzerException( "Sub transformation can not be found - " + transPath, e );
         }
         break;
@@ -92,7 +91,6 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
             subTransMeta = repo.loadTransformation( file, rdi, null, true, null );
             transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
           } catch ( KettleException e ) {
-            log.error( e.getMessage(), e );
             throw new MetaverseAnalyzerException( "Sub transformation can not be found in repository - " + file, e );
           }
         } else {
@@ -105,7 +103,6 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
             subTransMeta = repo.loadTransformation( entry.getTransObjectId(), null );
             transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
           } catch ( KettleException e ) {
-            log.error( e.getMessage(), e );
             throw new MetaverseAnalyzerException( "Sub transformation can not be found by reference - "
               + entry.getTransObjectId(), e );
           }

@@ -40,7 +40,7 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
 
   public static final String EXECUTION_ENGINE_NAME = "Pentaho Data Integration";
   public static final String EXECUTION_ENGINE_DESCRIPTION =
-    "Pentaho data integration prepares and blends data to create a complete picture of your business "
+    "Pentaho Data Integration (PDI) prepares and blends data to create a complete picture of your business "
       + "that drives actionable insights.";
 
   protected ILineageWriter lineageWriter;

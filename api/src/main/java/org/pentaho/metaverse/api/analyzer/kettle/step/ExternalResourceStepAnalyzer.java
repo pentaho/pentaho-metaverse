@@ -32,6 +32,7 @@ import org.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.messages.Messages;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,8 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
             getMetaverseBuilder().addLink( node, label, resourceNode );
           }
         } catch ( MetaverseException e ) {
-          LOGGER.error( e.getMessage(), e );
+          LOGGER.warn( e.getLocalizedMessage() );
+          LOGGER.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
         }
       }
     }
@@ -175,6 +177,7 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
    * Get the resource fields actually written to the external resource (file, table, ...). Return of null assumes
    * that all fields that are reported when calling getStepFields are written. If that is NOT the case, override this
    * method and return the field names that are actually written.
+   *
    * @return
    */
   public Set<String> getOutputResourceFields( T meta ) {
@@ -193,9 +196,13 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
   }
 
   public abstract IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException;
+
   public abstract String getResourceInputNodeType();
+
   public abstract String getResourceOutputNodeType();
+
   public abstract boolean isOutput();
+
   public abstract boolean isInput();
 
 }
