@@ -43,7 +43,7 @@
     <dependency.net.sourceforge.jexcelapi.version>2.6.12</dependency.net.sourceforge.jexcelapi.version>
     <dependency.org.springframework.spring-context.version>2.5.6</dependency.org.springframework.spring-context.version>
     <dependency.pentaho-platform-core-test.version>${project.version}</dependency.pentaho-platform-core-test.version>
-    <dependency.pentaho-mongodb-plugin.version>6.0-SNAPSHOT</dependency.pentaho-mongodb-plugin.version>
+    <dependency.pentaho-mongodb-plugin.revision>6.0-SNAPSHOT</dependency.pentaho-mongodb-plugin.revision>
     <dependency.commons-cli.version>1.2</dependency.commons-cli.version>
     
     <!-- Plugin dependencies -->
@@ -198,14 +198,14 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-mongodb-plugin</artifactId>
-      <version>${dependency.pentaho-mongodb-plugin.version}</version>
+      <version>${dependency.pentaho-mongodb-plugin.revision}</version>
       <type>jar</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-mongo-utils</artifactId>
-      <version>${dependency.pentaho-mongodb-plugin.version}</version>
+      <version>${dependency.pentaho-mongodb-plugin.revision}</version>
       <type>jar</type>
       <scope>provided</scope>
     </dependency>
@@ -285,7 +285,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-capability-manager</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
 
