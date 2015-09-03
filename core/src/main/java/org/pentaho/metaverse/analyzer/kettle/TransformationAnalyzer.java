@@ -94,6 +94,9 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
         String content = (String) repoObject;
         ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
         transMeta = new TransMeta( xmlStream, null, false, null, null );
+        if ( transMeta.hasMissingPlugins() ) {
+          throw new MetaverseAnalyzerException( Messages.getErrorString( "ERROR.MissingPlugin" ) );
+        }
       } catch ( KettleException e ) {
         throw new MetaverseAnalyzerException( e );
       }
