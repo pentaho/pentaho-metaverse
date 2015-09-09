@@ -40,7 +40,7 @@
   </bean>
 
   <bean id="TextFileInputStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer">
+        class="org.pentaho.metaverse.analyzer.kettle.step.oldtextfileinput.TextFileInputStepAnalyzer">
     <property name="externalResourceConsumer" ref="textFileInputERC"/>
   </bean>
   <bean id="SelectValuesStepAnalyzer"
@@ -195,7 +195,7 @@
   <bean id="tableOutputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer"/>
   <bean id="textFileInputERC" scope="singleton"
-        class="org.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer"/>
+        class="org.pentaho.metaverse.analyzer.kettle.step.oldtextfileinput.TextFileInputExternalResourceConsumer"/>
   <bean id="textFileOutputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputExternalResourceConsumer"/>
   <bean id="excelInputERC" scope="singleton"

@@ -20,7 +20,7 @@
  *
  ******************************************************************************/
 
-package org.pentaho.metaverse.analyzer.kettle.step.textfileinput;
+package org.pentaho.metaverse.analyzer.kettle.step.oldtextfileinput;
 
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.trans.step.BaseStepMeta;
