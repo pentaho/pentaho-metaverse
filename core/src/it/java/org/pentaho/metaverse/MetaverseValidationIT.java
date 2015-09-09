@@ -461,7 +461,7 @@ public class MetaverseValidationIT {
       assertTrue( inputFile.getName().endsWith( "SacramentocrimeJanuary2006.csv" ) );
     }
 
-    assertEquals( "Text file input", fileInputStepNode.getStepType() );
+    assertEquals( "Old Text file input", fileInputStepNode.getStepType() );
 
     int countUses = getIterableSize( fileInputStepNode.getFileFieldNodesUses() );
     int countInputs = getIterableSize( fileInputStepNode.getInputStreamFields() );

@@ -38,7 +38,7 @@ import org.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperati
 import org.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer
 import org.pentaho.metaverse.analyzer.kettle.step.stringsreplace.StringsReplaceStepAnalyzer
 import org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer
-import org.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer
+import org.pentaho.metaverse.analyzer.kettle.step.oldtextfileinput.TextFileInputStepAnalyzer
 import org.pentaho.metaverse.analyzer.kettle.step.transexecutor.TransExecutorStepAnalyzer
 import org.pentaho.metaverse.analyzer.kettle.step.valuemapper.ValueMapperStepAnalyzer
 import org.pentaho.metaverse.api.Namespace
