@@ -183,7 +183,7 @@
 
   <step>
     <name>Sacramento crime stats 2006 file </name>
-    <type>TextFileInput</type>
+    <type>OldTextFileInput</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
