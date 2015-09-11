@@ -20,18 +20,19 @@
  *
  ******************************************************************************/
 
-package org.pentaho.metaverse.analyzer.kettle.step.textfileinput;
+package org.pentaho.metaverse.analyzer.kettle.step.fileinput.text;
 
 import org.apache.commons.vfs2.FileObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
+import org.pentaho.di.core.fileinput.FileInputList;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInput;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
+import org.pentaho.di.trans.steps.fileinput.text.TextFileInput;
+import org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta;
 import org.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
@@ -42,9 +43,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
-// This annotation is here to show that we know the referenced classes are deprecated, but we support them anyway (from
-// a lineage perspective)
-@SuppressWarnings("deprecation")
 public class TextFileInputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<TextFileInput, TextFileInputMeta> {
 
@@ -65,23 +63,26 @@ public class TextFileInputExternalResourceConsumer
       if ( parentStepMeta != null ) {
         TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
         if ( parentTransMeta != null ) {
-          String[] paths = meta.getFilePaths( parentTransMeta );
-          if ( paths != null ) {
-            resources = new ArrayList<>( paths.length );
+          FileInputList inputList = meta.getFileInputList( parentTransMeta );
+          if ( inputList != null ) {
+            String[] paths = inputList.getFileStrings();
+            if ( paths != null ) {
+              resources = new ArrayList<>( paths.length );
 
-            for ( String path : paths ) {
-              if ( !Const.isEmpty( path ) ) {
-                try {
+              for ( String path : paths ) {
+                if ( !Const.isEmpty( path ) ) {
+                  try {
 
-                  IExternalResourceInfo resource = ExternalResourceInfoFactory
-                    .createFileResource( KettleVFS.getFileObject( path ), true );
-                  if ( resource != null ) {
-                    resources.add( resource );
-                  } else {
-                    throw new KettleFileException( "Error getting file resource!" );
+                    IExternalResourceInfo resource = ExternalResourceInfoFactory
+                      .createFileResource( KettleVFS.getFileObject( path ), true );
+                    if ( resource != null ) {
+                      resources.add( resource );
+                    } else {
+                      throw new KettleFileException( "Error getting file resource!" );
+                    }
+                  } catch ( KettleFileException kfe ) {
+                    // TODO throw or ignore?
                   }
-                } catch ( KettleFileException kfe ) {
-                  // TODO throw or ignore?
                 }
               }
             }

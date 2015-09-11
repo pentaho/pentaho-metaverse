@@ -59,7 +59,6 @@ import org.pentaho.di.trans.steps.rest.RestMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
 import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.pentaho.di.trans.steps.transexecutor.TransExecutorMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
@@ -484,6 +483,51 @@ public class MetaverseValidationIT {
   }
 
   @Test
+  public void testOldTextFileInputStep_filenameFromField() throws Exception {
+    // this is testing a specific TextFileInputStep instance
+    FileInputStepNode fileInputStepNode = root.getOldTextFileInputStepNode_filenameFromField();
+    assertNotNull( fileInputStepNode );
+
+    int countUses = getIterableSize( fileInputStepNode.getFileFieldNodesUses() );
+    int countInputs = getIterableSize( fileInputStepNode.getInputStreamFields() );
+
+    assertEquals( 1, countUses );
+
+    int fileFieldCount = 0;
+    Iterable<StreamFieldNode> outFields = fileInputStepNode.getOutputStreamFields();
+    int countOutputs = getIterableSize( outFields );
+    for ( StreamFieldNode outField : outFields ) {
+      assertNotNull( outField.getKettleType() );
+      if ( !outField.getName().equals( "filename" ) ) {
+        FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
+        assertNotNull( fieldPopulatesMe );
+        assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
+        assertEquals( fileInputStepNode, fieldPopulatesMe.getStepThatInputsMe() );
+        fileFieldCount++;
+      }
+    }
+    // we should have one more input than file fields since we are reading it off of the input stream
+    assertEquals( countInputs - 1, fileFieldCount );
+    assertEquals( countOutputs, fileFieldCount );
+
+    String filenameField = null;
+    TransMeta tm =
+      new TransMeta( new FileInputStream( fileInputStepNode.getTransNode().getPath() ), null, true, null, null );
+    for ( StepMeta stepMeta : tm.getSteps() ) {
+      if ( stepMeta.getName().equals( fileInputStepNode.getName() ) ) {
+        org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta meta =
+          (org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta) getBaseStepMetaFromStepMeta( stepMeta );
+        assertTrue( meta.isAcceptingFilenames() );
+        filenameField = meta.getAcceptingField();
+        assertNotNull( filenameField );
+        assertEquals( filenameField, fileInputStepNode.getFileFieldNodesUses().iterator().next().getName() );
+        // this was the one we cared about...
+        break;
+      }
+    }
+  }
+
+  @Test
   public void testTextFileInputStep_filenameFromField() throws Exception {
     // this is testing a specific TextFileInputStep instance
     FileInputStepNode fileInputStepNode = root.getTextFileInputStepNode_filenameFromField();
@@ -516,7 +560,8 @@ public class MetaverseValidationIT {
       new TransMeta( new FileInputStream( fileInputStepNode.getTransNode().getPath() ), null, true, null, null );
     for ( StepMeta stepMeta : tm.getSteps() ) {
       if ( stepMeta.getName().equals( fileInputStepNode.getName() ) ) {
-        TextFileInputMeta meta = (TextFileInputMeta) getBaseStepMetaFromStepMeta( stepMeta );
+        org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta meta =
+          (org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta) getBaseStepMetaFromStepMeta( stepMeta );
         assertTrue( meta.isAcceptingFilenames() );
         filenameField = meta.getAcceptingField();
         assertNotNull( filenameField );

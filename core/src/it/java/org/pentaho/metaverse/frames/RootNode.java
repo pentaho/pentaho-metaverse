@@ -69,6 +69,9 @@ public interface RootNode extends FramedMetaverseNode {
     @GremlinParam( "transformationName" ) String transformationName,
     @GremlinParam( "stepName" ) String stepName );
 
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'Get Customers').as('step').in('contains').has('name', T.eq, 'Old Textfile input - filename from field').back('step')" )
+  FileInputStepNode getOldTextFileInputStepNode_filenameFromField();
+
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation Step').out.has('name', T.eq, 'Get Customers').as('step').in('contains').has('name', T.eq, 'Textfile input - filename from field').back('step')" )
   FileInputStepNode getTextFileInputStepNode_filenameFromField();
 

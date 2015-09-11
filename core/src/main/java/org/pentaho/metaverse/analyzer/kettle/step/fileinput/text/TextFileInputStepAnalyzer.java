@@ -20,11 +20,11 @@
  *
  ******************************************************************************/
 
-package org.pentaho.metaverse.analyzer.kettle.step.textfileinput;
+package org.pentaho.metaverse.analyzer.kettle.step.fileinput.text;
 
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
+import org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseException;
@@ -39,9 +39,6 @@ import java.util.Set;
  * The TextFileInputStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between itself and
  * other metaverse entities
  */
-// This annotation is here to show that we know the referenced classes are deprecated, but we support them anyway (from
-// a lineage perspective)
-@SuppressWarnings("deprecation")
 public class TextFileInputStepAnalyzer extends ExternalResourceStepAnalyzer<TextFileInputMeta> {
 
   @Override
