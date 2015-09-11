@@ -135,8 +135,12 @@
     <property name="externalResourceConsumer" ref="tableInputERC"/>
   </bean>
 
-  <bean id="TextFileInputStepAnalyzer"
+  <bean id="OldTextFileInputStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="oldTextFileInputERC"/>
+  </bean>
+  <bean id="TextFileInputStepAnalyzer"
+        class="org.pentaho.metaverse.analyzer.kettle.step.fileinput.text.TextFileInputStepAnalyzer">
     <property name="externalResourceConsumer" ref="textFileInputERC"/>
   </bean>
   <bean id="SelectValuesStepAnalyzer"
@@ -231,6 +235,9 @@
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TableOutputStepAnalyzer"/>
 
+  <service id="oldTextFileInputStepAnalyzerService"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           ref="OldTextFileInputStepAnalyzer"/>
   <service id="textFileInputStepAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TextFileInputStepAnalyzer"/>
@@ -383,8 +390,10 @@
 
   <bean id="tableOutputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer"/>
-  <bean id="textFileInputERC" scope="singleton"
+  <bean id="oldTextFileInputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer"/>
+  <bean id="textFileInputERC" scope="singleton"
+        class="org.pentaho.metaverse.analyzer.kettle.step.fileinput.text.TextFileInputExternalResourceConsumer"/>
   <bean id="textFileOutputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputExternalResourceConsumer"/>
   <bean id="excelInputERC" scope="singleton"
@@ -414,6 +423,9 @@
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="tableOutputERC"/>
 
+  <service id="oldTextFileInputERCService"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
+           ref="oldTextFileInputERC"/>
   <service id="textFileInputERCService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="textFileInputERC"/>

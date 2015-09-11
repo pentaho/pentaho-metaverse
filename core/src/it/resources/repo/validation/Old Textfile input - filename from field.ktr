@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>Textfile input - filename from field</name>
+    <name>Old Textfile input - filename from field</name>
     <description/>
     <extended_description/>
     <trans_version/>
@@ -80,7 +80,7 @@
   </order>
   <step>
     <name>Get Customers</name>
-    <type>TextFileInput</type>
+    <type>OldTextFileInput</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>

@@ -39,10 +39,15 @@
     <property name="externalResourceConsumer" ref="tableInputERC"/>
   </bean>
 
-  <bean id="TextFileInputStepAnalyzer"
+  <bean id="OldTextFileInputStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputStepAnalyzer">
+    <property name="externalResourceConsumer" ref="oldTextFileInputERC"/>
+  </bean>
+  <bean id="TextFileInputStepAnalyzer"
+        class="org.pentaho.metaverse.analyzer.kettle.step.fileinput.text.TextFileInputStepAnalyzer">
     <property name="externalResourceConsumer" ref="textFileInputERC"/>
   </bean>
+
   <bean id="SelectValuesStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer"/>
   <bean id="NumberRangeStepAnalyzer"
@@ -150,6 +155,7 @@
       <list>
         <ref bean="TableOutputStepAnalyzer"/>
         <ref bean="tableInputStepAnalyzer"/>
+        <ref bean="OldTextFileInputStepAnalyzer"/>
         <ref bean="TextFileInputStepAnalyzer"/>
         <ref bean="SelectValuesStepAnalyzer"/>
         <ref bean="NumberRangeStepAnalyzer"/>
@@ -194,8 +200,10 @@
 
   <bean id="tableOutputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer"/>
-  <bean id="textFileInputERC" scope="singleton"
+  <bean id="oldTextFileInputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.textfileinput.TextFileInputExternalResourceConsumer"/>
+  <bean id="textFileInputERC" scope="singleton"
+        class="org.pentaho.metaverse.analyzer.kettle.step.fileinput.text.TextFileInputExternalResourceConsumer"/>
   <bean id="textFileOutputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputExternalResourceConsumer"/>
   <bean id="excelInputERC" scope="singleton"
@@ -227,6 +235,7 @@
     <property name="externalResourceConsumers">
       <list>
         <ref bean="tableOutputERC"/>
+        <ref bean="oldTextFileInputERC"/>
         <ref bean="textFileInputERC"/>
         <ref bean="textFileOutputERC"/>
         <ref bean="excelInputERC"/>
