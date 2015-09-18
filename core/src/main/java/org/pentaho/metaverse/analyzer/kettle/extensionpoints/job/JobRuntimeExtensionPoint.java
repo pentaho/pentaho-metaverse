@@ -121,7 +121,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
         // The variables and parameters in the Job may not have been set on the meta, so we do it here
         // to ensure the job analyzer will have access to the parameter values.
-        job.shareVariablesWith( jobMeta );
+        job.copyVariablesFrom( jobMeta );
         jobMeta.copyParametersFrom( job );
         jobMeta.activateParameters();
         if ( job.getRep() != null ) {
