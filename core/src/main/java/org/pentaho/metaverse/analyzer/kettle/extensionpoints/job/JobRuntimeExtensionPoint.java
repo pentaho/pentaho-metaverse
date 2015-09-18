@@ -72,9 +72,9 @@ import java.util.concurrent.Future;
  * An extension point to gather runtime data for an execution of a job into an ExecutionProfile object
  */
 @ExtensionPoint(
-  description = "Job Runtime metadata extractor",
-  extensionPointId = "JobStart",
-  id = "jobRuntimeMetaverse" )
+    description = "Job Runtime metadata extractor",
+    extensionPointId = "JobStart",
+    id = "jobRuntimeMetaverse" )
 public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements JobListener {
 
   private IDocumentAnalyzer documentAnalyzer;
@@ -114,14 +114,14 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         final INamespace namespace = new Namespace( clientName );
 
         final IMetaverseNode designNode = builder.getMetaverseObjectFactory()
-          .createNodeObject( clientName, clientName, DictionaryConst.NODE_TYPE_LOCATOR );
+            .createNodeObject( clientName, clientName, DictionaryConst.NODE_TYPE_LOCATOR );
         builder.addNode( designNode );
 
         final JobMeta jobMeta = job.getJobMeta();
 
         // The variables and parameters in the Job may not have been set on the meta, so we do it here
         // to ensure the job analyzer will have access to the parameter values.
-        job.shareVariablesWith( jobMeta );
+        job.copyVariablesFrom( jobMeta );
         jobMeta.copyParametersFrom( job );
         jobMeta.activateParameters();
         if ( job.getRep() != null ) {
@@ -199,7 +199,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
           // Get the current execution profile for this job
           IExecutionProfile executionProfile =
-            JobLineageHolderMap.getInstance().getLineageHolder( job ).getExecutionProfile();
+              JobLineageHolderMap.getInstance().getLineageHolder( job ).getExecutionProfile();
           if ( executionProfile == null ) {
             // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
             // the same info, so populate a new ExecutionProfile using the current Trans
@@ -245,13 +245,13 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
             }
           } catch ( IOException e ) {
             log.warn( Messages.getString( "ERROR.CouldNotWriteLineageGraph", job.getName(),
-              Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+                Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
             log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
           }
 
         } catch ( Throwable t ) {
           log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", job.getName(),
-            Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
+              Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
           log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), t );
         }
       }
@@ -314,7 +314,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       for ( String param : params ) {
         try {
           ParamInfo paramInfo = new ParamInfo( param, job.getParameterDescription( param ),
-            job.getParameterDefault( param ) );
+              job.getParameterDefault( param ) );
           paramList.add( paramInfo );
         } catch ( UnknownParamException e ) {
           e.printStackTrace();
