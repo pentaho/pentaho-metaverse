@@ -111,7 +111,7 @@ public class JobRuntimeExtensionPointTest {
     JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
     ext.jobFinished( null );
     verify( ext, never() ).populateExecutionProfile(
-      Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
+        Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
 
     ext.jobFinished( job );
     // The logic in jobFinished() is now in a thread, so we can't verify methods were called
