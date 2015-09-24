@@ -96,6 +96,11 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     if ( o instanceof Job ) {
       Job job = ( (Job) o );
 
+      // If runtime lineage collection is disabled, don't run any lineage processes/methods
+      if( !isRuntimeEnabled() ) {
+        return;
+      }
+
       // Create and populate an execution profile with what we know so far
       ExecutionProfile executionProfile = new ExecutionProfile();
       populateExecutionProfile( executionProfile, job );

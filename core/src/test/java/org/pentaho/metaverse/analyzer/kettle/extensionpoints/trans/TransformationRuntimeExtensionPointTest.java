@@ -30,6 +30,7 @@ import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.job.JobListener;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
@@ -40,6 +41,7 @@ import org.pentaho.metaverse.api.model.IExecutionProfile;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -73,6 +75,7 @@ public class TransformationRuntimeExtensionPointTest {
   @Before
   public void setUp() throws Exception {
     transExtensionPoint = new TransformationRuntimeExtensionPoint();
+    transExtensionPoint.setRuntimeEnabled( true );
     lineageWriter = mock( ILineageWriter.class );
     transExtensionPoint.setLineageWriter( lineageWriter );
 
@@ -147,8 +150,17 @@ public class TransformationRuntimeExtensionPointTest {
   public void testPreviewTrans() throws Exception {
     TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
     trans.setPreview( true );
-    ext.transStarted( trans );
+    ext.callExtensionPoint( null, trans );
     verify( ext, never() ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
+  }
+
+  @Test
+  public void testRuntimeDisabled() throws Exception {
+    transExtensionPoint.setRuntimeEnabled( false );
+    transExtensionPoint.callExtensionPoint( null, trans );
+    List<TransListener> listeners = trans.getTransListeners();
+    assertNotNull( listeners );
+    assertFalse( listeners.contains( transExtensionPoint ) );
   }
 }
