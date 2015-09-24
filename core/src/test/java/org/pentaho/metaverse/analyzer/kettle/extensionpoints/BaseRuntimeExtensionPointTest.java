@@ -38,21 +38,36 @@ import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class BaseRuntimeExtensionPointTest {
 
   BaseRuntimeExtensionPoint extensionPoint;
 
+  final AtomicBoolean called = new AtomicBoolean( false );
+
   @Before
   public void setUp() throws Exception {
     extensionPoint = new BaseRuntimeExtensionPoint() {
+
       @Override
       public void callExtensionPoint( LogChannelInterface log, Object object ) throws KettleException {
-        // Noop
+        // trivial isRuntimeEnabled logic
+        if ( isRuntimeEnabled() ) {
+          called.set( true );
+        } else {
+          called.set( false );
+        }
       }
     };
   }
@@ -86,9 +101,37 @@ public class BaseRuntimeExtensionPointTest {
 
   @Test
   public void testGetExecutionEngineInfo() {
-    IExecutionEngine engineInfo = extensionPoint.getExecutionEngineInfo();
+    IExecutionEngine engineInfo = BaseRuntimeExtensionPoint.getExecutionEngineInfo();
     assertNotNull( engineInfo );
     assertEquals( BaseRuntimeExtensionPoint.EXECUTION_ENGINE_NAME, engineInfo.getName() );
     assertEquals( BaseRuntimeExtensionPoint.EXECUTION_ENGINE_DESCRIPTION, engineInfo.getDescription() );
   }
+
+  @Test
+  public void testGetSetRuntimeEnabled() throws Exception {
+    // Ensure runtime is disabled by default
+    assertFalse( extensionPoint.isRuntimeEnabled() );
+    extensionPoint.callExtensionPoint( null, null );
+    assertFalse( called.get() );
+
+    extensionPoint.setRuntimeEnabled( true );
+    assertTrue( extensionPoint.isRuntimeEnabled() );
+    extensionPoint.callExtensionPoint( null, null );
+    assertTrue( called.get() );
+
+    // Test string setting
+    extensionPoint.setRuntimeEnabled( "on" );
+    assertTrue( extensionPoint.isRuntimeEnabled() );
+    extensionPoint.setRuntimeEnabled( "ON" );
+    assertTrue( extensionPoint.isRuntimeEnabled() );
+    extensionPoint.setRuntimeEnabled( "yes" );
+    assertFalse( extensionPoint.isRuntimeEnabled() );
+    extensionPoint.setRuntimeEnabled( "true" );
+    assertFalse( extensionPoint.isRuntimeEnabled() );
+    extensionPoint.setRuntimeEnabled( "off" );
+    assertFalse( extensionPoint.isRuntimeEnabled() );
+    extensionPoint.callExtensionPoint( null, null );
+    assertFalse( called.get() );
+  }
+
 }

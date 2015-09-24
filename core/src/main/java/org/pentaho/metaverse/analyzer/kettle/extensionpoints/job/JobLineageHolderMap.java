@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job;
 
+import com.google.common.collect.MapMaker;
 import org.pentaho.di.job.Job;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
@@ -42,7 +43,7 @@ public class JobLineageHolderMap {
 
   private IMetaverseBuilder defaultMetaverseBuilder;
 
-  private Map<Job, LineageHolder> lineageHolderMap = new ConcurrentHashMap<>();
+  private Map<Job, LineageHolder> lineageHolderMap = new MapMaker().weakKeys().makeMap();
 
   private JobLineageHolderMap() {
     // Private constructor to enforce Singleton pattern
@@ -98,7 +99,8 @@ public class JobLineageHolderMap {
 
   protected IMetaverseBuilder getDefaultMetaverseBuilder() {
     // always try to get a new builder if this method is called. otherwise we will end up with overlapping graphs
-    IMetaverseBuilder newBuilder = (IMetaverseBuilder) MetaverseBeanUtil.getInstance().get( "IMetaverseBuilderPrototype" );
+    IMetaverseBuilder newBuilder =
+      (IMetaverseBuilder) MetaverseBeanUtil.getInstance().get( "IMetaverseBuilderPrototype" );
     if ( newBuilder == null ) {
       return defaultMetaverseBuilder;
     } else {
