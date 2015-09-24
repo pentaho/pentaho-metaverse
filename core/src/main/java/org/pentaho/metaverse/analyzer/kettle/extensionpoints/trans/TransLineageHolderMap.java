@@ -22,6 +22,8 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
+import com.google.common.collect.MapMaker;
+
 import org.pentaho.di.trans.Trans;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
@@ -29,7 +31,6 @@ import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.util.MetaverseBeanUtil;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class is a singleton that provides a map from Jobs to LineageHolder objects, and can/should be used
@@ -40,7 +41,7 @@ public class TransLineageHolderMap {
 
   private static TransLineageHolderMap INSTANCE = new TransLineageHolderMap();
 
-  private Map<Trans, LineageHolder> lineageHolderMap = new ConcurrentHashMap<>();
+  private Map<Trans, LineageHolder> lineageHolderMap = new MapMaker().weakKeys().makeMap();
 
   private IMetaverseBuilder defaultMetaverseBuilder;
 

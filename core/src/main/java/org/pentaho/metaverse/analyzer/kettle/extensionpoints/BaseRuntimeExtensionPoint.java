@@ -45,6 +45,8 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
 
   protected ILineageWriter lineageWriter;
 
+  protected boolean runtimeEnabled;
+
   public void writeLineageInfo( LineageHolder holder ) throws IOException {
     if ( lineageWriter != null ) {
       String strategy = lineageWriter.getOutputStrategy();
@@ -95,5 +97,17 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
    */
   public void setLineageWriter( ILineageWriter lineageWriter ) {
     this.lineageWriter = lineageWriter;
+  }
+
+  public void setRuntimeEnabled( String runtimeEnabled ) {
+    this.runtimeEnabled = ( runtimeEnabled != null && runtimeEnabled.equalsIgnoreCase( "on" ) );
+  }
+
+  public void setRuntimeEnabled( boolean runtimeEnabled ) {
+    this.runtimeEnabled = runtimeEnabled;
+  }
+
+  public boolean isRuntimeEnabled() {
+    return runtimeEnabled;
   }
 }

@@ -91,8 +91,14 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
   public void callExtensionPoint( LogChannelInterface logChannelInterface, Object o ) throws KettleException {
 
     // Transformation Started listeners get called after the extension point is invoked, so just add a trans listener
-    if ( o instanceof Trans ) {
+    if ( o != null && o instanceof Trans ) {
       Trans trans = ( (Trans) o );
+
+      // Only generate lineage/execution information for "real" transformations, not the preview or debug ones. Whether
+      // in Preview or Debug mode in Spoon, trans.isPreview() returns true, so just check that.
+      if ( trans.isPreview() || !isRuntimeEnabled() ) {
+        return;
+      }
       trans.addTransListener( this );
     }
 
@@ -106,13 +112,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
    */
   @Override
   public void transStarted( Trans trans ) throws KettleException {
-    if ( trans == null ) {
-      return;
-    }
 
-    // Only generate lineage/execution information for "real" transformations, not the preview or debug ones. Whether
-    // in Preview or Debug mode in Spoon, trans.isPreview() returns true, so just check that.
-    if ( trans.isPreview() ) {
+    if ( trans == null ) {
       return;
     }
 
