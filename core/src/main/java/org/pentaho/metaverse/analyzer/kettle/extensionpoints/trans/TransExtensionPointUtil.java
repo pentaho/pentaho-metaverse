@@ -52,7 +52,7 @@ public class TransExtensionPointUtil {
     }
 
     // Don't analyze the transformation until it has been saved (i.e. has a filename)
-    if ( transMeta.getFilename() == null ) {
+    if ( transMeta.getFilename() == null && transMeta.getPathAndName() == null ) {
       throw new MetaverseException( Messages.getString( "ERROR.Document.NotSaved" ) );
     }
 
