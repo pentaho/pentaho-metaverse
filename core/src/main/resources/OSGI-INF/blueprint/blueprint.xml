@@ -11,11 +11,12 @@
              ">
 
 
-  <!-- Put all properties (for user config of lineage) here -->
+  <!-- Put properties (for user config of lineage) here -->
   <cm:property-placeholder persistent-id="pentaho.metaverse" update-strategy="reload" >
     <cm:default-properties>
+      <cm:property name="lineage.execution.runtime" value="off"/>
       <cm:property name="lineage.execution.output.folder" value="./pentaho-lineage-output"/>
-      <cm:property name="lineage.execution.generation.strategy" value="none"/>
+      <cm:property name="lineage.execution.generation.strategy" value="latest"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -630,6 +631,58 @@
       </set>
     </argument>
   </bean>
+
+  <!-- TransRuntime extension point -->
+  <bean id="transRuntime" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint">
+    <property name="documentAnalyzer" ref="TransformationAnalyzer"/>
+    <property name="lineageWriter" ref="lineageWriter"/>
+    <property name="runtimeEnabled" value="${lineage.execution.runtime}"/>
+  </bean>
+  <bean id="transRuntimePlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
+    <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
+    <property name="name" value="TransformationStartThreads"/>
+    <property name="ID" value="transRuntimeMetaverse"/>
+    <property name="description" value="Creates execution profiles when transformations run"/>
+    <property name="pluginTypeInterface" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    <property name="category" value="Data Lineage"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="org.pentaho.di.core.extension.ExtensionPointInterface" value="transRuntime"/>
+        <entry key="org.pentaho.di.trans.TransListener" value="transRuntime"/>
+      </map>
+    </property>
+  </bean>
+  <service id="transRuntimePluginService" interface="org.pentaho.di.core.plugins.PluginInterface" ref="transRuntimePlugin">
+    <service-properties>
+      <entry key="PluginType" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    </service-properties>
+  </service>
+
+  <!-- JobRuntime extension point -->
+  <bean id="jobRuntime" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint">
+    <property name="documentAnalyzer" ref="JobAnalyzer"/>
+    <property name="lineageWriter" ref="lineageWriter"/>
+    <property name="runtimeEnabled" value="${lineage.execution.runtime}"/>
+  </bean>
+  <bean id="jobRuntimePlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
+    <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
+    <property name="name" value="JobStart"/>
+    <property name="ID" value="jobRuntimeMetaverse"/>
+    <property name="description" value="Creates execution profiles when jobs run"/>
+    <property name="pluginTypeInterface" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    <property name="category" value="Data Lineage"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="org.pentaho.di.core.extension.ExtensionPointInterface" value="jobRuntime"/>
+        <entry key="org.pentaho.di.job.JobListener" value="jobRuntime"/>
+      </map>
+    </property>
+  </bean>
+  <service id="jobRuntimePluginService" interface="org.pentaho.di.core.plugins.PluginInterface" ref="jobRuntimePlugin">
+    <service-properties>
+      <entry key="PluginType" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    </service-properties>
+  </service>
 
 
   <!-- DI Repository config if ever needed/desired -->

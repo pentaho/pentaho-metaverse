@@ -45,7 +45,7 @@ import org.pentaho.metaverse.api.model.IExecutionProfile;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -80,6 +80,7 @@ public class JobRuntimeExtensionPointTest {
   @Before
   public void setUp() throws Exception {
     jobExtensionPoint = new JobRuntimeExtensionPoint();
+    jobExtensionPoint.setRuntimeEnabled( true );
     jobMeta = spy( new JobMeta() );
     jobMeta.setName( TEST_JOB_NAME );
     jobMeta.setFilename( TEST_JOB_PATH );
@@ -139,7 +140,7 @@ public class JobRuntimeExtensionPointTest {
     JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
     ext.jobFinished( null );
     verify( ext, never() ).populateExecutionProfile(
-        Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
+      Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
 
     ext.jobFinished( job );
     // The logic in jobFinished() is now in a thread, so we can't verify methods were called
@@ -157,6 +158,15 @@ public class JobRuntimeExtensionPointTest {
   public void testJobStarted() throws Exception {
     // Test jobStarted for coverage, it should do nothing
     jobExtensionPoint.jobStarted( null );
+  }
+
+  @Test
+  public void testRuntimeDisabled() throws Exception {
+    jobExtensionPoint.setRuntimeEnabled( false );
+    jobExtensionPoint.callExtensionPoint( null, job );
+    List<JobListener> listeners = job.getJobListeners();
+    assertNotNull( listeners );
+    assertFalse( listeners.contains( jobExtensionPoint ) );
   }
 
   private void createExecutionProfile( Job job ) {
