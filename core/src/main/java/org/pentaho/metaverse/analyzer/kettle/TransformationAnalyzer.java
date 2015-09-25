@@ -94,6 +94,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
         String content = (String) repoObject;
         ByteArrayInputStream xmlStream = new ByteArrayInputStream( content.getBytes() );
         transMeta = new TransMeta( xmlStream, null, false, null, null );
+        transMeta.setFilename( document.getStringID() );
         if ( transMeta.hasMissingPlugins() ) {
           throw new MetaverseAnalyzerException( Messages.getErrorString( "ERROR.MissingPlugin" ) );
         }
@@ -104,9 +105,6 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       transMeta = (TransMeta) repoObject;
     }
 
-    if ( transMeta.getRepository() == null ) {
-      transMeta.setFilename( document.getStringID() );
-    }
     Trans t = new Trans( transMeta );
     t.setInternalKettleVariables( transMeta );
 

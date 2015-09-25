@@ -51,7 +51,8 @@ public class TransOpenedExtensionPoint implements ExtensionPointInterface {
 
     if ( object instanceof TransMeta ) {
       try {
-        TransExtensionPointUtil.addLineageGraph( (TransMeta) object );
+        TransMeta transMeta = (TransMeta) object;
+        TransExtensionPointUtil.addLineageGraph( transMeta );
       } catch ( MetaverseException me ) {
         if ( log != null && log.isDebug() ) {
           log.logDebug( Messages.getString( "ERROR.Graph.CouldNotCreate", me.getMessage() ) );
