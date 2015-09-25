@@ -29,9 +29,14 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.metaverse.api.IDocumentController;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.testutils.MetaverseTestUtils;
+import org.pentaho.metaverse.util.MetaverseUtil;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith( MockitoJUnitRunner.class )
@@ -57,9 +62,14 @@ public class TransExtensionPointUtilTest {
     TransExtensionPointUtil.addLineageGraph( null );
   }
 
-  @Test( expected = MetaverseException.class )
+  @Test
   public void testAddLineageGraphNullFilename() throws Exception {
+    IDocumentController mockDoc = mock( IDocumentController.class );
+    IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
+    when( mockDoc.getMetaverseObjectFactory() ).thenReturn( factory );
+    MetaverseUtil.setDocumentController( mockDoc );
     when( transMeta.getFilename() ).thenReturn( null );
+    when( transMeta.getPathAndName() ).thenReturn( "/Transformation 1" );
     TransExtensionPointUtil.addLineageGraph( transMeta );
   }
 }
