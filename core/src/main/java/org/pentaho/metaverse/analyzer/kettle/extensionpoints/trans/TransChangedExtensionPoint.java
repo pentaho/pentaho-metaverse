@@ -25,10 +25,10 @@ package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
+import org.pentaho.di.core.listeners.ContentChangedListener;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metaverse.api.MetaverseException;
-import org.pentaho.metaverse.messages.Messages;
 
 /**
  * An extension point to maintain a lineage graph for an active transformation
@@ -37,7 +37,7 @@ import org.pentaho.metaverse.messages.Messages;
   description = "Transformation Lineage Graph creator",
   extensionPointId = "TransChanged",
   id = "transChangeLineageGraph" )
-public class TransChangedExtensionPoint implements ExtensionPointInterface {
+public class TransChangedExtensionPoint implements ExtensionPointInterface, ContentChangedListener {
 
   /**
    * This method is called by the Kettle code
@@ -49,13 +49,41 @@ public class TransChangedExtensionPoint implements ExtensionPointInterface {
   @Override
   public void callExtensionPoint( final LogChannelInterface log, Object object ) throws KettleException {
 
-    if ( object instanceof TransMeta ) {
+    if ( object != null && object instanceof TransMeta ) {
+      TransMeta transMeta = (TransMeta) object;
+      if ( !transMeta.getContentChangedListeners().contains( this ) ) {
+        transMeta.addContentChangedListener( this );
+      }
+    }
+  }
+
+  /**
+   * This method will be called when the parent object to which this listener is added, has been changed.
+   *
+   * @param object The changed object.
+   */
+  @Override
+  public void contentChanged( Object object ) {
+    updateLineage( object );
+  }
+
+  /**
+   * This method will be called when the parent object has been declared safe (or saved, persisted, ...)
+   *
+   * @param object The safe object.
+   */
+  @Override
+  public void contentSafe( Object object ) {
+    updateLineage( object );
+  }
+
+  protected void updateLineage( Object object ) {
+    if ( object != null && object instanceof TransMeta ) {
       try {
-        TransExtensionPointUtil.addLineageGraph( (TransMeta) object );
+        TransMeta transMeta = (TransMeta) object;
+        TransExtensionPointUtil.addLineageGraph( transMeta );
       } catch ( MetaverseException me ) {
-        if ( log != null && log.isDebug() ) {
-          log.logDebug( Messages.getString( "ERROR.Graph.CouldNotCreate", me.getMessage() ) );
-        }
+        // Nothing we can do here
       }
     }
   }

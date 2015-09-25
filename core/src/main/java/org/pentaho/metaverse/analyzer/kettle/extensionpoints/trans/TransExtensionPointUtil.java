@@ -51,11 +51,6 @@ public class TransExtensionPointUtil {
       throw new MetaverseException( Messages.getString( "ERROR.Document.IsNull" ) );
     }
 
-    // Don't analyze the transformation until it has been saved (i.e. has a filename)
-    if ( transMeta.getFilename() == null ) {
-      throw new MetaverseException( Messages.getString( "ERROR.Document.NotSaved" ) );
-    }
-
     // Get the "natural" filename (repo-based if in repository, filesystem-based otherwise)
     String filename = getFilename( transMeta );
 
