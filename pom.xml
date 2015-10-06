@@ -1,22 +1,19 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
-  <groupId>pentaho</groupId>
-  <artifactId>pentaho-metaverse</artifactId>
-  <packaging>pom</packaging>
-  <version>6.0-SNAPSHOT</version>
-
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
     <version>1.0.13</version>
   </parent>
-
+  <groupId>pentaho</groupId>
+  <artifactId>pentaho-metaverse</artifactId>
+  <version>6.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
   <name>${project.artifactId}</name>
   <description>Parent pom for pentaho-metaverse projects</description>
   <url>http://www.pentaho.com</url>
-
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -25,7 +22,6 @@
       <comments>A business-friendly OSS license</comments>
     </license>
   </licenses>
-
   <developers>
     <developer>
       <name>Rob Fellows</name>
@@ -49,38 +45,33 @@
       </roles>
     </developer>
   </developers>
-
+  <modules>
+    <module>api</module>
+    <module>core</module>
+    <module>sample</module>
+  </modules>
   <scm>
     <connection>scm:git:git@github.com:${github.user}/${project.artifactId}.git</connection>
-    <url>https://github.com/pentaho/${project.artifactId}</url>
     <developerConnection>scm:git:git@github.com:${github.user}/${project.artifactId}.git</developerConnection>
-    <tag>HEAD</tag>
+    <url>https://github.com/pentaho/${project.artifactId}</url>
   </scm>
-
   <properties>
-
-    <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
+    <dependency.net.sf.flexjson.flexjson.version>2.1</dependency.net.sf.flexjson.flexjson.version>
     <dependency.pentaho.pentaho-platform-repository.version>${project.version}</dependency.pentaho.pentaho-platform-repository.version>
-    <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
+    <dependency.org.slf4j.slf4j-log4j12.version>1.7.7</dependency.org.slf4j.slf4j-log4j12.version>
     <dependency.com.fasterxml.jackson.core.version>2.2.3</dependency.com.fasterxml.jackson.core.version>
+    <dependency.junit.junit.version>4.11</dependency.junit.junit.version>
     <dependency.com.tinkerpop.blueprints.version>2.6.0</dependency.com.tinkerpop.blueprints.version>
     <dependency.commons-configuration.commons-configuration.version>1.9</dependency.commons-configuration.commons-configuration.version>
     <dependency.commons-collections.commons-collections.version>3.2.1</dependency.commons-collections.commons-collections.version>
-    <dependency.net.sf.flexjson.flexjson.version>2.1</dependency.net.sf.flexjson.flexjson.version>
     <dependency.org.slf4j.slf4j-api.version>1.7.7</dependency.org.slf4j.slf4j-api.version>
-
-    <!-- Test dependency properties-->
-    <dependency.junit.junit.version>4.11</dependency.junit.junit.version>
     <dependency.org.mockito.mockito-all.version>1.9.5</dependency.org.mockito.mockito-all.version>
-    <dependency.org.slf4j.slf4j-log4j12.version>1.7.7</dependency.org.slf4j.slf4j-log4j12.version>
-
+    <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
+    <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
   </properties>
-
   <build>
     <plugins>
-      <!-- Override here to allow "mvn checkstyle:checkstyle" to work against pentaho standards -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${plugin.org.apache.maven.plugins.maven-checkstyle-plugin.version}</version>
         <configuration>
@@ -92,11 +83,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <modules>
-    <module>api</module>
-    <module>core</module>
-    <module>sample</module>
-  </modules>
-
 </project>
