@@ -35,7 +35,10 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 
@@ -43,6 +46,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -92,17 +96,41 @@ public class JobRuntimeExtensionPointTest {
     job.setArguments( new String[]{ "arg0", "arg1" } );
   }
 
-  @Test
-  public void testCallExtensionPoint() throws Exception {
-    JobRuntimeExtensionPoint spyJobExtensionPoint = spy( jobExtensionPoint );
+  private JobLineageHolderMap mockBuilder() {
     JobLineageHolderMap originalHolderMap = JobLineageHolderMap.getInstance();
     JobLineageHolderMap jobLineageHolderMap = spy( originalHolderMap );
     when( jobLineageHolderMap.getMetaverseBuilder( Mockito.any( Job.class ) ) ).thenReturn( mockBuilder );
     JobLineageHolderMap.setInstance( jobLineageHolderMap );
-    spyJobExtensionPoint.callExtensionPoint( null, job );
+    return originalHolderMap;
+  }
+
+  @Test
+  public void testCallExtensionPoint() throws Exception {
+    JobLineageHolderMap originalHolderMap = mockBuilder();
+    jobExtensionPoint.callExtensionPoint( null, job );
     List<JobListener> listeners = job.getJobListeners();
     assertNotNull( listeners );
-    assertTrue( listeners.contains( spyJobExtensionPoint ) );
+    assertTrue( listeners.contains( jobExtensionPoint ) );
+
+    // Restore original JobLineageHolderMap for use by others
+    JobLineageHolderMap.setInstance( originalHolderMap );
+  }
+
+  @Test
+  public void testJobMetaVariablesAreCombinedWithExistingJobVariables() throws Exception {
+    JobLineageHolderMap originalHolderMap = mockBuilder();
+
+    JobRuntimeExtensionPoint extensionPoint = new JobRuntimeExtensionPoint();
+    IDocumentAnalyzer documentAnalyzer = Mockito.mock( IDocumentAnalyzer.class );
+    extensionPoint.setDocumentAnalyzer( documentAnalyzer );
+
+    final IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
+    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
+    final IDocument document = mock( IDocument.class );
+    when( objectFactory.createDocumentObject() ).thenReturn( document );
+    job.setVariable( "dontloseme", "okipromise" );
+    extensionPoint.callExtensionPoint( null, job );
+    assertEquals( "okipromise", job.getVariable( "dontloseme" ) );
 
     // Restore original JobLineageHolderMap for use by others
     JobLineageHolderMap.setInstance( originalHolderMap );
@@ -113,7 +141,7 @@ public class JobRuntimeExtensionPointTest {
     JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
     ext.jobFinished( null );
     verify( ext, never() ).populateExecutionProfile(
-      Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
+        Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
 
     ext.jobFinished( job );
     // The logic in jobFinished() is now in a thread, so we can't verify methods were called
