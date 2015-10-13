@@ -23,13 +23,19 @@
 package org.pentaho.metaverse.api.analyzer.kettle;
 
 import org.junit.Test;
+import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.ILogicalIdGenerator;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseObjectFactory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -76,5 +82,23 @@ public class BaseKettleMetaverseComponentTest {
     INamespace ns = mock( INamespace.class );
     when( descriptor.getNamespace() ).thenReturn( ns );
     assertNotNull( component.createFileNode( "/path/to/my/file", descriptor ) );
+  }
+
+  @Test
+  public void testCreateNodeFromDescriptor() throws Exception {
+    String namespaceId = "{namespace: 'my namespace', name: 'my name', type: 'my type'}";
+    ILogicalIdGenerator idGenerator = DictionaryConst.LOGICAL_ID_GENERATOR_DEFAULT;
+    IComponentDescriptor descriptor = mock( IComponentDescriptor.class );
+    INamespace ns = mock( INamespace.class );
+
+    when( descriptor.getParentNamespace() ).thenReturn( mock( INamespace.class ) );
+    when( descriptor.getNamespace() ).thenReturn( ns );
+    when( ns.getNamespaceId() ).thenReturn( namespaceId );
+
+    component.metaverseObjectFactory = spy( new MetaverseObjectFactory() );
+    IMetaverseNode node = component.createNodeFromDescriptor( descriptor, idGenerator );
+
+    assertNotNull( node );
+    assertTrue( node.getLogicalId().contains( namespaceId ) );
   }
 }

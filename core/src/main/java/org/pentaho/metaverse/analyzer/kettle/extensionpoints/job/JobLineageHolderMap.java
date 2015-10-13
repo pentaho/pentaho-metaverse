@@ -30,7 +30,6 @@ import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.util.MetaverseBeanUtil;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class is a singleton that provides a map from Jobs to LineageHolder objects, and can/should be used

@@ -22,6 +22,8 @@
 
 package org.pentaho.metaverse.api;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +48,7 @@ import static org.mockito.Mockito.*;
 public class MetaverseLogicalIdGeneratorTest {
 
   MetaverseLogicalIdGenerator idGenerator;
+  ObjectMapper objectMapper = new ObjectMapper();
 
   @Mock
   private IHasProperties node;
@@ -60,7 +63,7 @@ public class MetaverseLogicalIdGeneratorTest {
   public void testGenerateLogicalId() throws Exception {
     when( node.getProperty( "name" ) ).thenReturn( "john doe" );
     when( node.getProperty( "age" ) ).thenReturn( 30 );
-    when( node.getProperty( "address" ) ).thenReturn( "1234 Pentaho Way\nOrlando, FL 12345" );
+    when( node.getProperty( "address" ) ).thenReturn( "1234 Pentaho Way Orlando, FL 12345" );
     Calendar cal = GregorianCalendar.getInstance();
     cal.set( 1976, Calendar.JANUARY, 1, 0, 0, 0 );
     when( node.getProperty( "birthday" ) ).thenReturn( cal.getTime() );
@@ -77,8 +80,50 @@ public class MetaverseLogicalIdGeneratorTest {
     String logicalId = idGenerator.generateId( node );
 
     // it should come out in alphabetical order by key
-    assertEquals( "{\"address\":\"1234 Pentaho Way\nOrlando, FL 12345\",\"age\":\"30\",\"birthday\":\"1976-01-01 00:00:00\",\"name\":\"john doe\"}",
+    assertEquals( "{\"address\":\"1234 Pentaho Way Orlando, FL 12345\",\"age\":\"30\",\"birthday\":\"1976-01-01 00:00:00\",\"name\":\"john doe\"}",
       logicalId );
+
+    // make sure the json string is parseable
+    JsonNode jsonObject = objectMapper.readTree( logicalId );
+    JsonNode address = jsonObject.get( "address" );
+    assertEquals( "1234 Pentaho Way Orlando, FL 12345", address.textValue() );
+
+    // make sure a call was made to add the logical id as a property
+    verify( node ).setProperty( DictionaryConst.PROPERTY_LOGICAL_ID, logicalId );
+
+  }
+
+  @Test
+  public void testGenerateLogicalId_escapedCharacters() throws Exception {
+    when( node.getProperty( "name" ) ).thenReturn( "john\ndoe" );
+    when( node.getProperty( "age" ) ).thenReturn( 30 );
+    when( node.getProperty( "address" ) ).thenReturn( "1234 Pentaho Way\\Orlando, FL 12345" );
+    Calendar cal = GregorianCalendar.getInstance();
+    cal.set( 1976, Calendar.JANUARY, 1, 0, 0, 0 );
+    when( node.getProperty( "birthday" ) ).thenReturn( cal.getTime() );
+    when( node.getPropertyKeys() ).thenReturn( new HashSet<String>() {{
+      add( "address" );
+      add( "age" );
+      add( "birthday" );
+      add( "name" );
+    }} );
+
+    // make sure there is no logicalid on the node initially
+    assertNull( node.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID ) );
+
+    String logicalId = idGenerator.generateId( node );
+
+    // it should come out in alphabetical order by key
+    assertEquals( "{\"address\":\"1234 Pentaho Way\\\\Orlando, FL 12345\",\"age\":\"30\",\"birthday\":\"1976-01-01 00:00:00\",\"name\":\"john\\ndoe\"}",
+      logicalId );
+
+    // make sure the json string is parseable
+    JsonNode jsonObject = objectMapper.readTree( logicalId );
+    JsonNode address = jsonObject.get( "address" );
+    assertEquals( "1234 Pentaho Way\\Orlando, FL 12345", address.textValue() );
+    JsonNode name = jsonObject.get( "name" );
+    assertEquals( "john\ndoe", name.textValue() );
+    System.out.println(jsonObject.toString());
 
     // make sure a call was made to add the logical id as a property
     verify( node ).setProperty( DictionaryConst.PROPERTY_LOGICAL_ID, logicalId );
@@ -89,7 +134,7 @@ public class MetaverseLogicalIdGeneratorTest {
   public void testGenerateLogicalId_duplicateKey() throws Exception {
     when( node.getProperty( "name" ) ).thenReturn( "john doe" );
     when( node.getProperty( "age" ) ).thenReturn( 30 );
-    when( node.getProperty( "address" ) ).thenReturn( "1234 Pentaho Way\nOrlando, FL 12345" );
+    when( node.getProperty( "address" ) ).thenReturn( "1234 Pentaho Way Orlando, FL 12345" );
     Calendar cal = GregorianCalendar.getInstance();
     cal.set( 1976, Calendar.JANUARY, 1, 0, 0, 0 );
     when( node.getProperty( "birthday" ) ).thenReturn( cal.getTime() );
@@ -103,7 +148,7 @@ public class MetaverseLogicalIdGeneratorTest {
     String logicalId = idGenerator.generateId( node );
 
     // it should come out in alphabetical order by key
-    assertEquals( "{\"address\":\"1234 Pentaho Way\n"
+    assertEquals( "{\"address\":\"1234 Pentaho Way "
         + "Orlando, FL 12345\",\"age\":\"30\",\"birthday\":\"1976-01-01 00:00:00\",\"name\":\"john doe\"}",
       logicalId );
 
@@ -115,7 +160,7 @@ public class MetaverseLogicalIdGeneratorTest {
   public void testGenerateLogicalId_nullValue() throws Exception {
     when( node.getProperty( "name" ) ).thenReturn( "john doe" );
     when( node.getProperty( "age" ) ).thenReturn( null );
-    when( node.getProperty( "address" ) ).thenReturn( "1234 Pentaho Way\nOrlando, FL 12345" );
+    when( node.getProperty( "address" ) ).thenReturn( "1234 Pentaho Way Orlando, FL 12345" );
     Calendar cal = GregorianCalendar.getInstance();
     cal.set( 1976, Calendar.JANUARY, 1, 0, 0, 0 );
     when( node.getProperty( "birthday" ) ).thenReturn( cal.getTime() );
@@ -129,7 +174,7 @@ public class MetaverseLogicalIdGeneratorTest {
     String logicalId = idGenerator.generateId( node );
 
     // it should come out in alphabetical order by key
-    assertEquals( "{\"address\":\"1234 Pentaho Way\n"
+    assertEquals( "{\"address\":\"1234 Pentaho Way "
         + "Orlando, FL 12345\",\"age\":\"\",\"birthday\":\"1976-01-01 00:00:00\",\"name\":\"john doe\"}",
       logicalId );
 

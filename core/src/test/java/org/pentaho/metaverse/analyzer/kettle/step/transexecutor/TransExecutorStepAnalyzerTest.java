@@ -304,6 +304,33 @@ public class TransExecutorStepAnalyzerTest {
   @Test
   public void testConnectToSubTransOutputFields() throws Exception {
     when( meta.getOutputRowsSourceStep() ).thenReturn( "outputRowsStepName" );
+    when( meta.getExecutorsOutputStep() ).thenReturn( null );
+    String[] outputFields = new String[]{ "first", "last" };
+    when( meta.getOutputRowsField() ).thenReturn( outputFields );
+    IMetaverseNode outNode = mock( IMetaverseNode.class );
+    StepNodes outputs = new StepNodes();
+    outputs.addNode( "outputRowsStepName", "first", outNode );
+    outputs.addNode( "outputRowsStepName", "last", outNode );
+
+    doReturn( outputs ).when( spyAnalyzer ).getOutputs();
+
+    // we'll test this in it's own test
+    doNothing().when( spyAnalyzer ).linkResultFieldToSubTrans( any( IMetaverseNode.class ), any( TransMeta.class ),
+      any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
+
+    IMetaverseNode childTransNode = mock( IMetaverseNode.class );
+    spyAnalyzer.connectToSubTransOutputFields( meta, childTransMeta, childTransNode, descriptor );
+
+    verify( spyAnalyzer, times( outputFields.length ) ).linkResultFieldToSubTrans( any( IMetaverseNode.class ),
+      any( TransMeta.class ),
+      any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
+
+  }
+
+  @Test
+  public void testConnectToSubTransOutputFields_MainOutput() throws Exception {
+    when( meta.getOutputRowsSourceStep() ).thenReturn( null );
+    when( meta.getExecutorsOutputStep() ).thenReturn( "outputRowsStepName" );
     String[] outputFields = new String[]{ "first", "last" };
     when( meta.getOutputRowsField() ).thenReturn( outputFields );
     IMetaverseNode outNode = mock( IMetaverseNode.class );

@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.api;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.pentaho.dictionary.DictionaryConst;
 
 import java.text.DateFormat;
@@ -103,9 +104,11 @@ public class MetaverseLogicalIdGenerator implements ILogicalIdGenerator {
             } else {
               String value = prop.toString();
               if ( value.startsWith( LEFT_BRACE ) && value.endsWith( RIGHT_BRACE ) ) {
+                // pre-stringified JSON, should already be escaped so don't do it again
                 sb.append( value );
               } else {
-                sb.append( QUOTE ).append( value ).append( QUOTE );
+                String escaped = StringEscapeUtils.escapeJavaScript( value );
+                sb.append( QUOTE ).append( escaped ).append( QUOTE );
               }
 
             }

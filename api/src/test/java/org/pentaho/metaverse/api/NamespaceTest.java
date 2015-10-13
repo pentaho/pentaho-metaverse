@@ -49,6 +49,14 @@ public class NamespaceTest {
   }
 
   @Test
+  public void testGetParentNamespace_HasBackslash() throws Exception {
+    Namespace ns = new Namespace( "{\"namespace\":\"PDI Engine\"," +
+      "\"path\":\"C:\\\\repo\\\\Table Output - DataGrid to H2.ktr\",\"type\":\"Transformation\"}" );
+
+    assertEquals( "PDI Engine", ns.getParentNamespace().getNamespaceId() );
+  }
+
+  @Test
   public void testGetParentNamespace_nullNamespace() throws Exception {
     Namespace ns = new Namespace( null );
     assertNull( ns.getParentNamespace() );
