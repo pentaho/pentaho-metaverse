@@ -44,7 +44,7 @@ import java.util.LinkedList;
 
 // This annotation is here to show that we know the referenced classes are deprecated, but we support them anyway (from
 // a lineage perspective)
-@SuppressWarnings("deprecation")
+@SuppressWarnings( "deprecation" )
 public class TextFileInputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<TextFileInput, TextFileInputMeta> {
 

@@ -185,6 +185,18 @@ public class TransExecutorStepAnalyzer extends StepAnalyzer<TransExecutorMeta> {
         }
       }
     }
+    if ( meta.getExecutorsOutputStep() != null ) {
+      String outputStep = meta.getExecutorsOutputStep();
+
+      for ( int i = 0; i < meta.getOutputRowsField().length; i++ ) {
+        String fieldName = meta.getOutputRowsField()[ i ];
+        IMetaverseNode outNode = getOutputs().findNode( outputStep, fieldName );
+        if ( outNode != null ) {
+          // add link, if needed, from sub tran result fields to the node just created
+          linkResultFieldToSubTrans( outNode, subTransMeta, subTransNode, descriptor );
+        }
+      }
+    }
   }
 
   /**
