@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>1.0.13</version>
+    <version>1.1.2</version>
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse</artifactId>
@@ -58,15 +58,15 @@
   <properties>
     <dependency.net.sf.flexjson.flexjson.version>2.1</dependency.net.sf.flexjson.flexjson.version>
     <dependency.pentaho.pentaho-platform-repository.version>${project.version}</dependency.pentaho.pentaho-platform-repository.version>
-    <dependency.org.slf4j.slf4j-log4j12.version>1.7.7</dependency.org.slf4j.slf4j-log4j12.version>
     <dependency.com.fasterxml.jackson.core.version>2.2.3</dependency.com.fasterxml.jackson.core.version>
+    <dependency.org.slf4j.slf4j-log4j12.version>1.7.7</dependency.org.slf4j.slf4j-log4j12.version>
     <dependency.junit.junit.version>4.11</dependency.junit.junit.version>
     <dependency.com.tinkerpop.blueprints.version>2.6.0</dependency.com.tinkerpop.blueprints.version>
     <dependency.commons-configuration.commons-configuration.version>1.9</dependency.commons-configuration.commons-configuration.version>
     <dependency.commons-collections.commons-collections.version>3.2.1</dependency.commons-collections.commons-collections.version>
     <dependency.org.slf4j.slf4j-api.version>1.7.7</dependency.org.slf4j.slf4j-api.version>
-    <dependency.org.mockito.mockito-all.version>1.9.5</dependency.org.mockito.mockito-all.version>
     <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
+    <dependency.org.mockito.mockito-all.version>1.9.5</dependency.org.mockito.mockito-all.version>
     <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
   </properties>
   <build>
