@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.3</version>
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse</artifactId>
@@ -51,8 +51,8 @@
     <module>sample</module>
   </modules>
   <scm>
-    <connection>scm:git:git@github.com:${github.user}/${project.artifactId}.git</connection>
-    <developerConnection>scm:git:git@github.com:${github.user}/${project.artifactId}.git</developerConnection>
+    <connection>scm:git:git@github.com:pentaho/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:pentaho/${project.artifactId}.git</developerConnection>
     <url>https://github.com/pentaho/${project.artifactId}</url>
   </scm>
   <properties>
@@ -69,18 +69,4 @@
     <dependency.org.mockito.mockito-all.version>1.9.5</dependency.org.mockito.mockito-all.version>
     <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
   </properties>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${plugin.org.apache.maven.plugins.maven-checkstyle-plugin.version}</version>
-        <configuration>
-          <configLocation>${checkstyle-config-url}</configLocation>
-          <propertiesLocation>${checkstyle-properties-url}</propertiesLocation>
-          <linkXRef>true</linkXRef>
-          <cacheFile></cacheFile>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
