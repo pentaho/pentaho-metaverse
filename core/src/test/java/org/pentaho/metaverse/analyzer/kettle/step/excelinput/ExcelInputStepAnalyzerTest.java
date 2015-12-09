@@ -48,6 +48,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -61,8 +62,11 @@ public class ExcelInputStepAnalyzerTest {
   @Mock TransMeta transMeta;
   @Mock RowMetaInterface rmi;
   @Mock ExcelInput excelInput;
-  
+
   IComponentDescriptor descriptor;
+  ExcelInputExternalResourceConsumer consumer;
+
+  public static String[] ROW = new String[] { "id", "name" };
 
   @Before
   public void setUp() throws Exception {
@@ -71,6 +75,7 @@ public class ExcelInputStepAnalyzerTest {
     analyzer = spy( new ExcelInputStepAnalyzer() );
     analyzer.setDescriptor( descriptor );
     analyzer.setObjectFactory( MetaverseTestUtils.getMetaverseObjectFactory() );
+    consumer = new ExcelInputExternalResourceConsumer();
   }
 
 
@@ -135,12 +140,9 @@ public class ExcelInputStepAnalyzerTest {
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( ExcelInputMeta.class ) );
   }
-  
 
   @Test
-  public void testExcelInputExternalResourceConsumer() throws Exception {
-    ExcelInputExternalResourceConsumer consumer = new ExcelInputExternalResourceConsumer();
-
+  public void resourcesFromMetaGotSuccessfully() throws Exception {
     StepMeta spyMeta = spy( new StepMeta( "test", meta ) );
 
     when( meta.getParentStepMeta() ).thenReturn( spyMeta );
@@ -152,26 +154,48 @@ public class ExcelInputStepAnalyzerTest {
 
     assertFalse( consumer.isDataDriven( meta ) );
     Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( meta );
-    assertFalse( resources.isEmpty() );
     assertEquals( 2, resources.size() );
+  }
 
-
+  @Test
+  public void resourcesFromRowGotSuccessfully() throws Exception {
     when( meta.isAcceptingFilenames() ).thenReturn( true );
+
     assertTrue( consumer.isDataDriven( meta ) );
     assertTrue( consumer.getResourcesFromMeta( meta ).isEmpty() );
     when( rmi.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenReturn( "/path/to/row/file" );
     when( excelInput.getStepMetaInterface() ).thenReturn( meta );
-    resources = consumer.getResourcesFromRow( excelInput, rmi, new String[]{ "id", "name" } );
-    assertFalse( resources.isEmpty() );
-    assertEquals( 1, resources.size() );
 
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromRow( excelInput, rmi, ROW );
+
+    assertEquals( 1, resources.size() );
+  }
+
+  @Test
+  public void resourcesFromRowGotSuccessfullyWhenExceptionThrown() throws Exception {
+    when( excelInput.getStepMetaInterface() ).thenReturn( meta );
     when( rmi.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenThrow( KettleException.class );
-    resources = consumer.getResourcesFromRow( excelInput, rmi, new String[]{ "id", "name" } );
-    assertTrue( resources.isEmpty() );
 
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromRow( excelInput, rmi, ROW );
+
+    assertTrue( resources.isEmpty() );
     assertEquals( ExcelInputMeta.class, consumer.getMetaClass() );
+  }
+
+  @Test
+  public void resourcesFromRowGotSuccessfullyWhenStepInputMetaInterfaceIsNull() throws Exception {
+    StepMeta mockedStepMeta = mock( StepMeta.class );
+    when( excelInput.getStepMetaInterface() ).thenReturn( null );
+    when( excelInput.getStepMeta() ).thenReturn( mockedStepMeta );
+    when( mockedStepMeta.getStepMetaInterface() ).thenReturn( new ExcelInputMeta() );
+    when( rmi.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+      .thenReturn( "/path/to/row/file" );
+
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromRow( excelInput, rmi, ROW );
+
+    assertEquals( 1, resources.size() );
   }
 
 }

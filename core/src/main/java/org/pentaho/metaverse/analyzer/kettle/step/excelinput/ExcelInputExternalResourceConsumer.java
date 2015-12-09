@@ -92,6 +92,9 @@ public class ExcelInputExternalResourceConsumer extends BaseStepExternalResource
     ExcelInput excelInput, RowMetaInterface rowMeta, Object[] row ) {
     Collection<IExternalResourceInfo> resources = new LinkedList<IExternalResourceInfo>();
     ExcelInputMeta meta = (ExcelInputMeta) excelInput.getStepMetaInterface();
+    if ( meta == null ) {
+      meta = (ExcelInputMeta) excelInput.getStepMeta().getStepMetaInterface();
+    }
 
     try {
       String filename = rowMeta.getString( row, meta.getAcceptingField(), null );
