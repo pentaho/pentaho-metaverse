@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>1.1.6</version>
+    <version>1.1.7</version>
   </parent>
 
   <name>${project.artifactId}</name>
@@ -57,6 +57,14 @@
     <tag>HEAD</tag>
   </scm>
 
+  <distributionManagement>
+    <site>
+      <id>pentaho.public.snapshot.repo</id>
+      <name>${project.artifactId}-${project.version}</name>
+      <url>dav:${site.publish.url}/${project.groupId}/pentaho-metaverse-${project.version}</url>
+    </site>
+  </distributionManagement>
+
   <properties>
 
     <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
@@ -81,4 +89,70 @@
     <module>sample</module>
   </modules>
 
+  <profiles>
+    <profile>
+      <id>aggregate-reporting</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jxr-plugin</artifactId>
+            <configuration>
+              <linkJavadoc>true</linkJavadoc>
+            </configuration>
+            <reportSets>
+              <reportSet>
+                <id>aggregate-jxr</id>
+                <inherited>false</inherited>
+                <reports>
+                  <report>aggregate</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <failOnError>false</failOnError>
+            </configuration>
+            <reportSets>
+              <reportSet>
+                <id>aggregate-javadoc</id>
+                <inherited>false</inherited>
+                <reports>
+                  <report>aggregate</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <configuration>
+              <configLocation>${checkstyle-config-url}</configLocation>
+              <propertiesLocation>${checkstyle-properties-url}</propertiesLocation>
+              <linkXRef>true</linkXRef>
+              <cacheFile />
+            </configuration>
+            <reportSets>
+              <reportSet>
+                <id>aggregate-checkstyle</id>
+                <inherited>false</inherited>
+                <reports>
+                  <report>checkstyle-aggregate</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+  </profiles>
 </project>
