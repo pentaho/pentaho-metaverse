@@ -103,14 +103,6 @@
         class="org.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer"/>
   <bean id="JobJobEntryAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.jobentry.job.JobJobEntryAnalyzer"/>
-  <bean id="GetXMLDataStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer">
-    <property name="externalResourceConsumer" ref="getXMLDataERC"/>
-  </bean>
-  <bean id="XMLOutputStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer">
-    <property name="externalResourceConsumer" ref="xmlOutputERC"/>
-  </bean>
   <bean id="FilterRowsStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.filterrows.FilterRowsStepAnalyzer"/>
   <bean id="HTTPClientStepAnalyzer"
@@ -177,9 +169,7 @@
         <ref bean="RowsToResultStepAnalyzer"/>
         <ref bean="RowsFromResultStepAnalyzer"/>
         <ref bean="FixedFileInputStepAnalyzer"/>
-        <ref bean="GetXMLDataStepAnalyzer"/>
         <ref bean="FilterRowsStepAnalyzer"/>
-        <ref bean="XMLOutputStepAnalyzer"/>
         <ref bean="HTTPClientStepAnalyzer"/>
         <ref bean="RestClientStepAnalyzer"/>
         <ref bean="HTTPPostStepAnalyzer"/>
@@ -212,8 +202,6 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputExternalResourceConsumer"/>
   <bean id="csvInputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
-  <bean id="getXMLDataERC" scope="singleton"
-        class="org.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataExternalResourceConsumer"/>
   <bean id="httpClientERC" scope="singleton"
 		    class="org.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientExternalResourceConsumer"/>
   <bean id="restClientERC" scope="singleton"
@@ -224,8 +212,6 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputExternalResourceConsumer"/>
   <bean id="mongoDbInputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.mongodbinput.MongoDbInputExternalResourceConsumer"/>
-  <bean id="xmlOutputERC" scope="singleton"
-        class="org.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputExternalResourceConsumer"/>
   <bean id="tableInputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.tableinput.TableInputExternalResourceConsumer"/>
 
@@ -241,12 +227,10 @@
         <ref bean="excelInputERC"/>
         <ref bean="excelOutputERC"/>
         <ref bean="csvInputERC"/>
-        <ref bean="getXMLDataERC"/>
         <ref bean="httpClientERC"/>
         <ref bean="restClientERC"/>
         <ref bean="httpPostERC"/>
         <ref bean="fixedFileInputERC"/>
-        <ref bean="xmlOutputERC"/>
         <ref bean="tableInputERC"/>
       </list>
     </property>

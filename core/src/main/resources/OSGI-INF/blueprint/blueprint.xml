@@ -185,10 +185,6 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.rowstoresult.RowsToResultStepAnalyzer"/>
   <bean id="RowsFromResultStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.rowsfromresult.RowsFromResultStepAnalyzer"/>
-  <bean id="GetXMLDataStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataStepAnalyzer">
-    <property name="externalResourceConsumer" ref="getXMLDataERC"/>
-  </bean>
 
   <bean id="StringOperationsStepAnalyzer" 
   		  class="org.pentaho.metaverse.analyzer.kettle.step.stringoperations.StringOperationsStepAnalyzer"/>
@@ -211,11 +207,6 @@
 
   <bean id="FilterRowsStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.filterrows.FilterRowsStepAnalyzer"/>
-
-  <bean id="XMLOutputStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputStepAnalyzer">
-    <property name="externalResourceConsumer" ref="xmlOutputERC"/>
-  </bean>
 
   <bean id="HTTPClientStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientStepAnalyzer">
@@ -327,17 +318,9 @@
   		   interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
   		   ref="FixedFileInputStepAnalyzer"/>
   		   
-  <service id="getXMLDataStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
-           ref="GetXMLDataStepAnalyzer"/>
-
   <service id="filterRowsStepAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="FilterRowsStepAnalyzer"/>
-
-  <service id="xmlOutputStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
-           ref="XMLOutputStepAnalyzer"/>
 
   <service id="httpClientStepAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
@@ -405,10 +388,6 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
   <bean id="fixedFileInputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.fixedfileinput.FixedFileInputExternalResourceConsumer"/>
-  <bean id="getXMLDataERC" scope="singleton"
-        class="org.pentaho.metaverse.analyzer.kettle.step.getxmldata.GetXMLDataExternalResourceConsumer"/>
-  <bean id="xmlOutputERC" scope="singleton"
-        class="org.pentaho.metaverse.analyzer.kettle.step.xmloutput.XMLOutputExternalResourceConsumer"/>
   <bean id="httpClientERC" scope="singleton"
 		class="org.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientExternalResourceConsumer"/>
   <bean id="restClientERC" scope="singleton"
@@ -450,14 +429,6 @@
   <service id="fixedFileInputERCService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="fixedFileInputERC"/>
-
-  <service id="getXMLDataERCService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
-           ref="getXMLDataERC"/>
-
-  <service id="xmlOutputERCService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
-           ref="xmlOutputERC"/>
 
   <service id="httpClientERCService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
