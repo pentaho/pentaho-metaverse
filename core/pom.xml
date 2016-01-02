@@ -132,18 +132,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>pentaho-kettle</groupId>
-      <artifactId>kettle-xml-plugin</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>pentaho-kettle</groupId>
-      <artifactId>kettle-json-plugin</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
       <version>${dependency.osgi.version}</version>
