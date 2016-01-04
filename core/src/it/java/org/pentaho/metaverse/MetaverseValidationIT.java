@@ -62,8 +62,6 @@ import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.pentaho.di.trans.steps.transexecutor.TransExecutorMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
-import org.pentaho.di.trans.steps.xmloutput.XMLField;
-import org.pentaho.di.trans.steps.xmloutput.XMLOutputMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.ChangeType;
 import org.pentaho.metaverse.api.IDocumentController;
@@ -1266,78 +1264,6 @@ public class MetaverseValidationIT {
       fileFieldCount++;
     }
     assertEquals( countOutputs, fileFieldCount );
-  }
-
-  @Test
-  public void testGetXMLDataStep() throws Exception {
-    // this is testing a specific GetXMLDataStep instance
-    GetXMLDataStepNode getXMLDataStepNode = root.getGetXMLDataStepNode( "Read XML file" );
-    assertNotNull( getXMLDataStepNode );
-
-    Iterable<FramedMetaverseNode> inputFiles = getXMLDataStepNode.getInputFiles();
-    int countInputFiles = getIterableSize( inputFiles );
-    assertEquals( 1, countInputFiles );
-    for ( FramedMetaverseNode inputFile : inputFiles ) {
-      assertTrue( inputFile.getName().endsWith( "XML - flat.xml" ) );
-    }
-
-    assertEquals( "Get data from XML", getXMLDataStepNode.getStepType() );
-
-    int countFileFieldNode = getIterableSize( getXMLDataStepNode.getFileFieldNodesUses() );
-    assertEquals( 0, countFileFieldNode );
-
-    int countOutputs = getIterableSize( getXMLDataStepNode.getOutputStreamFields() );
-    int fileFieldCount = 0;
-    Iterable<StreamFieldNode> outFields = getXMLDataStepNode.getOutputStreamFields();
-    for ( StreamFieldNode outField : outFields ) {
-      assertNotNull( outField.getKettleType() );
-      FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
-      assertNotNull( fieldPopulatesMe );
-      assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
-      assertEquals( getXMLDataStepNode, fieldPopulatesMe.getStepThatInputsMe() );
-      fileFieldCount++;
-    }
-    assertEquals( countOutputs, fileFieldCount );
-
-
-  }
-
-  @Test
-  public void testXMLOutputStepNode() throws Exception {
-    XMLOutputStepNode xmlOutputStepNode =
-      root.getXMLOutputStepNode( "xml_output", "XML Output" );
-    XMLOutputMeta meta = (XMLOutputMeta) getStepMeta( xmlOutputStepNode );
-    TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
-    String[] fileNames = meta.getFiles( tm );
-
-    RowMetaInterface incomingFields = tm.getStepFields( meta.getParentStepMeta() );
-    XMLField[] outputFields = meta.getOutputFields();
-
-    assertNotNull( xmlOutputStepNode );
-    // should write to one file
-    Iterable<FramedMetaverseNode> outputFiles = xmlOutputStepNode.getOutputFiles();
-    assertEquals( fileNames.length, getIterableSize( outputFiles ) );
-    int i = 0;
-    for ( FramedMetaverseNode node : outputFiles ) {
-      assertTrue( fileNames[i++].endsWith( node.getName() ) );
-    }
-
-    Iterable<StreamFieldNode> outputs = xmlOutputStepNode.getOutputStreamFields();
-    int outFieldCount = getIterableSize( outputs );
-    assertEquals( incomingFields.getValueMetaList().size() + meta.getOutputFields().length, outFieldCount );
-
-    for ( XMLField xmlField : meta.getOutputFields() ) {
-      boolean xmlFieldFound = false;
-      for ( StreamFieldNode output : outputs ) {
-        if ( output.getType().equals( DictionaryConst.NODE_TYPE_FILE_FIELD ) && output.getName().equals( xmlField.getFieldName() ) ) {
-          xmlFieldFound = true;
-          assertNotNull( output.getFieldPopulatesMe() );
-          break;
-        }
-      }
-      assertTrue( "No graph node found for XMLField - " + xmlField.getFieldName(), xmlFieldFound );
-    }
-
   }
 
   @Test
