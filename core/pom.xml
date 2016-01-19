@@ -1,174 +1,140 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
-  <groupId>pentaho</groupId>
-  <artifactId>pentaho-metaverse-core</artifactId>
-  <packaging>bundle</packaging>
-
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>pentaho-metaverse</artifactId>
-    <version>6.0-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
+    <version>6.0.1.1-398</version>
   </parent>
-
+  <groupId>pentaho</groupId>
+  <artifactId>pentaho-metaverse-core</artifactId>
+  <version>6.0.1.1-398</version>
+  <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Provides data lineage capabilities</description>
   <url>http://www.pentaho.com</url>
-
   <properties>
-  	<!-- General properties -->
+    <plugin.org.codehaus.mojo.exec-maven-plugin.version>1.3.2</plugin.org.codehaus.mojo.exec-maven-plugin.version>
+    <dependency.net.sourceforge.jexcelapi.version>2.6.12</dependency.net.sourceforge.jexcelapi.version>
     <pentaho.public.release.repo>http://nexus.pentaho.org/content/repositories/private-release/</pentaho.public.release.repo>
+    <dependency.com.tinkerpop.frames.version>2.5.0</dependency.com.tinkerpop.frames.version>
+    <dependency.com.sun.jersey.jersey-client.version>1.16</dependency.com.sun.jersey.jersey-client.version>
+    <plugin.com.tinkerpop.blueprints.blueprints-core.version>2.6.0</plugin.com.tinkerpop.blueprints.blueprints-core.version>
+    <plugin.org.apache.maven.plugins.maven-jxr-plugin.version>2.3</plugin.org.apache.maven.plugins.maven-jxr-plugin.version>
+    <dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>2.7.12</dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>
+    <dependency.osgi.version>4.3.1</dependency.osgi.version>
     <pentaho.public.snapshot.repo>http://nexus.pentaho.org/content/repositories/private-snapshot/</pentaho.public.snapshot.repo>
     <platform.plugin.name>platform</platform.plugin.name>
-    <pdi.plugin.name>pdi</pdi.plugin.name>
-    <target.jdk.version>1.7</target.jdk.version>
-    <pmd.rulesets.url>https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/pmd/rulesets/java</pmd.rulesets.url>
-
-    <!-- Compile dependencies -->
-    <dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>2.7.12</dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>
-    <dependency.com.google.guava.guava.version>17.0</dependency.com.google.guava.guava.version>
-    <dependency.javax.jcr.jcr.version>2.0</dependency.javax.jcr.jcr.version>
-    <dependency.org.codehaus.jackson.jackson-jaxrs.version>1.9.13</dependency.org.codehaus.jackson.jackson-jaxrs.version>
-    <dependency.org.springFramework.spring.version>2.5.6</dependency.org.springFramework.spring.version>
-    <dependency.osgi.version>4.3.1</dependency.osgi.version>
-    <dependency.commons-io.commons-io.version>2.4</dependency.commons-io.commons-io.version>
-    <enunciate.version>1.27</enunciate.version>
-
-    <!-- Testing dependencies -->
-    <dependency.com.h2database.hs.version>1.3.168</dependency.com.h2database.hs.version>
-    <dependency.com.sun.jersey.jersey-client.version>1.16</dependency.com.sun.jersey.jersey-client.version>
-    <dependency.com.tinkerpop.frames.version>2.5.0</dependency.com.tinkerpop.frames.version>
-    <dependency.net.sourceforge.jexcelapi.version>2.6.12</dependency.net.sourceforge.jexcelapi.version>
-    <dependency.org.springframework.spring-context.version>2.5.6</dependency.org.springframework.spring-context.version>
     <dependency.pentaho-platform-core-test.version>${project.version}</dependency.pentaho-platform-core-test.version>
-    <dependency.pentaho-mongodb-plugin.revision>6.0-SNAPSHOT</dependency.pentaho-mongodb-plugin.revision>
-    <dependency.commons-cli.version>1.2</dependency.commons-cli.version>
-    
-    <!-- Plugin dependencies -->
-    <plugin.com.tinkerpop.blueprints.blueprints-core.version>2.6.0</plugin.com.tinkerpop.blueprints.blueprints-core.version>
-    <plugin.org.codehaus.mojo.cobertura-maven-plugin.version>2.6</plugin.org.codehaus.mojo.cobertura-maven-plugin.version>
-    <plugin.org.codehaus.mojo.exec-maven-plugin.version>1.3.2</plugin.org.codehaus.mojo.exec-maven-plugin.version>
-    <plugin.org.apache.felix.maven-bundle-plugin.version>2.3.7</plugin.org.apache.felix.maven-bundle-plugin.version>
-    <plugin.org.apache.maven.plugins.maven-compiler-plugin.version>3.1</plugin.org.apache.maven.plugins.maven-compiler-plugin.version>
+    <pmd.rulesets.url>https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/pmd/rulesets/java</pmd.rulesets.url>
     <plugin.org.apache.maven.plugins.maven-failsafe-plugin.version>2.17</plugin.org.apache.maven.plugins.maven-failsafe-plugin.version>
-    <plugin.org.apache.maven.plugins.maven-jxr-plugin.version>2.3</plugin.org.apache.maven.plugins.maven-jxr-plugin.version>
-    <plugin.org.apache.maven.plugins.maven-pmd-plugin.version>3.2</plugin.org.apache.maven.plugins.maven-pmd-plugin.version>
+    <plugin.org.apache.felix.maven-bundle-plugin.version>2.3.7</plugin.org.apache.felix.maven-bundle-plugin.version>
+    <enunciate.version>1.27</enunciate.version>
+    <dependency.org.codehaus.jackson.jackson-jaxrs.version>1.9.13</dependency.org.codehaus.jackson.jackson-jaxrs.version>
+    <pdi.plugin.name>pdi</pdi.plugin.name>
+    <dependency.commons-io.commons-io.version>2.4</dependency.commons-io.commons-io.version>
+    <dependency.org.springframework.spring-context.version>2.5.6</dependency.org.springframework.spring-context.version>
+    <plugin.org.codehaus.mojo.cobertura-maven-plugin.version>2.6</plugin.org.codehaus.mojo.cobertura-maven-plugin.version>
+    <dependency.com.h2database.hs.version>1.3.168</dependency.com.h2database.hs.version>
+    <dependency.com.google.guava.guava.version>17.0</dependency.com.google.guava.guava.version>
+    <plugin.org.apache.maven.plugins.maven-compiler-plugin.version>3.1</plugin.org.apache.maven.plugins.maven-compiler-plugin.version>
+    <dependency.commons-cli.version>1.2</dependency.commons-cli.version>
+    <target.jdk.version>1.7</target.jdk.version>
+    <dependency.javax.jcr.jcr.version>2.0</dependency.javax.jcr.jcr.version>
     <plugin.org.codehaus.mojo.build-helper-maven-plugin.version>1.5</plugin.org.codehaus.mojo.build-helper-maven-plugin.version>
+    <dependency.org.springFramework.spring.version>2.5.6</dependency.org.springFramework.spring.version>
+    <dependency.pentaho-mongodb-plugin.revision>6.0.1.1-398</dependency.pentaho-mongodb-plugin.revision>
+    <plugin.org.apache.maven.plugins.maven-pmd-plugin.version>3.2</plugin.org.apache.maven.plugins.maven-pmd-plugin.version>
   </properties>
-
   <dependencies>
-    <!-- 'COMPILE' SCOPED DEPS -->
-    <!-- NOTE: Maintain dependencies grouped together by scope (compile, runtime, provided, and test) and then ordered alphabetically by groupId and artifactId. -->
-
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-metaverse-api</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
-      <type>jar</type>
     </dependency>
-
     <dependency>
       <groupId>com.tinkerpop.blueprints</groupId>
       <artifactId>blueprints-core</artifactId>
       <version>${dependency.com.tinkerpop.blueprints.version}</version>
       <scope>provided</scope>
     </dependency>
-
-    <!--
-      tinkerpop blueprints uses commons-configuration, but brings in an older non-osgi version.
-      so we force a higher version that is more compatible
-    -->
     <dependency>
       <groupId>commons-configuration</groupId>
       <artifactId>commons-configuration</artifactId>
       <version>${dependency.commons-configuration.commons-configuration.version}</version>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-rt-frontend-jaxrs</artifactId>
       <version>${dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version}</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${dependency.com.google.guava.guava.version}</version>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${dependency.commons-io.commons-io.version}</version>
     </dependency>
-
     <dependency>
       <groupId>com.tinkerpop.gremlin</groupId>
       <artifactId>gremlin-java</artifactId>
       <version>${plugin.com.tinkerpop.blueprints.blueprints-core.version}</version>
     </dependency>
-
     <dependency>
       <groupId>javax.jcr</groupId>
       <artifactId>jcr</artifactId>
       <version>${dependency.javax.jcr.jcr.version}</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
       <groupId>net.sf.flexjson</groupId>
       <artifactId>flexjson</artifactId>
       <version>${dependency.net.sf.flexjson.flexjson.version}</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${dependency.org.slf4j.slf4j-api.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring</artifactId>
       <version>${dependency.org.springFramework.spring.version}</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
       <version>${dependency.pentaho.pentaho-platform-core.version}</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
       <version>${dependency.pentaho.pentaho-platform-repository.version}</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
       <version>${dependency.pentaho-kettle.kettle-core.version}</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-engine</artifactId>
       <version>${dependency.pentaho-kettle.kettle-core.version}</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
@@ -191,106 +157,85 @@
       <artifactId>enunciate-jersey-rt</artifactId>
       <version>${enunciate.version}</version>
     </dependency>
-
-    <!-- 'RUNTIME' SCOPED DEPS -->
-
-    <!-- 'PROVIDED' SCOPED DEPS -->
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-mongodb-plugin</artifactId>
       <version>${dependency.pentaho-mongodb-plugin.revision}</version>
-      <type>jar</type>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-mongo-utils</artifactId>
       <version>${dependency.pentaho-mongodb-plugin.revision}</version>
-      <type>jar</type>
       <scope>provided</scope>
     </dependency>
-
-    <!-- 'TEST' SCOPED DEPS -->
-
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <version>${dependency.com.h2database.hs.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
       <version>${dependency.com.sun.jersey.jersey-client.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>com.tinkerpop</groupId>
       <artifactId>frames</artifactId>
       <version>${dependency.com.tinkerpop.frames.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <version>${dependency.org.mockito.mockito-all.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <version>${dependency.org.slf4j.slf4j-log4j12.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>${dependency.org.springframework.spring-context.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core-test</artifactId>
       <version>${dependency.pentaho-platform-core-test.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
-        <groupId>commons-cli</groupId>
-        <artifactId>commons-cli</artifactId>
-        <version>${dependency.commons-cli.version}</version>
-        <scope>test</scope>
-    </dependency>
-      
-    <dependency>
-	  <groupId>net.sourceforge.jexcelapi</groupId>
-	  <artifactId>jxl</artifactId>
-	  <version>${dependency.net.sourceforge.jexcelapi.version}</version>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+      <version>${dependency.commons-cli.version}</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>net.sourceforge.jexcelapi</groupId>
+      <artifactId>jxl</artifactId>
+      <version>${dependency.net.sourceforge.jexcelapi.version}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-capability-manager</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-apache-client</artifactId>
       <version>1.16</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
@@ -304,7 +249,6 @@
           <includeTransitiveDependency>false</includeTransitiveDependency>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -314,30 +258,23 @@
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>
-            <Import-Package>
-              org.osgi.service.http,
+            <Import-Package>org.osgi.service.http,
               org.apache.felix.http.api,
               org.pentaho.dictionary,
               org.pentaho.metaverse.api,
               org.pentaho.metaverse.api.*,
-              *
-            </Import-Package>
+              *</Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
-            <Export-Package>
-              org.pentaho.metaverse.client,
+            <Export-Package>org.pentaho.metaverse.client,
               org.pentaho.metaverse.analyzer.kettle,
               org.pentaho.metaverse.analyzer.kettle.*,
               org.pentaho.metaverse.util,
-              org.pentaho.metaverse.graph
-            </Export-Package>
+              org.pentaho.metaverse.graph</Export-Package>
             <Bundle-Activator>org.pentaho.metaverse.util.MetaverseBundleActivator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>
-
-      <!-- override the declaration in the reporting section so we can call 'mvn pmd:pmd without building the whole site -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${plugin.org.apache.maven.plugins.maven-pmd-plugin.version}</version>
         <configuration>
@@ -353,11 +290,17 @@
           </rulesets>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>${plugin.org.codehaus.mojo.exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
         <dependencies>
           <dependency>
             <groupId>com.tinkerpop.gremlin</groupId>
@@ -375,15 +318,7 @@
             <version>${project.version}</version>
           </dependency>
         </dependencies>
-        <executions>
-          <execution>
-            <goals>
-              <goal>java</goal>
-            </goals>
-          </execution>
-        </executions>
         <configuration>
-
           <classpathScope>test</classpathScope>
           <includeProjectDependencies>true</includeProjectDependencies>
           <includePluginDependencies>true</includePluginDependencies>
@@ -395,21 +330,13 @@
           <arguments>
             <argument>src/it/resources/metaverse-pdi.groovy</argument>
           </arguments>
-          <systemProperties>
-          </systemProperties>
+          <systemProperties></systemProperties>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
         <version>${enunciate.version}</version>
-        <configuration>
-          <configFile>enunciate.xml</configFile>
-          <moduleName>pentaho-metaverse-core enunciate doc</moduleName>
-          <enunciateArtifactId>pentaho-metaverse-core-doc</enunciateArtifactId>
-          <forceWarPackaging>false</forceWarPackaging>
-        </configuration>
         <executions>
           <execution>
             <goals>
@@ -417,20 +344,22 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <configFile>enunciate.xml</configFile>
+          <moduleName>pentaho-metaverse-core enunciate doc</moduleName>
+          <enunciateArtifactId>pentaho-metaverse-core-doc</enunciateArtifactId>
+          <forceWarPackaging>false</forceWarPackaging>
+        </configuration>
       </plugin>
-
     </plugins>
   </build>
-
   <reporting>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
         <version>${plugin.org.apache.maven.plugins.maven-jxr-plugin.version}</version>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${plugin.org.apache.maven.plugins.maven-pmd-plugin.version}</version>
         <configuration>
@@ -448,5 +377,4 @@
       </plugin>
     </plugins>
   </reporting>
-
 </project>
