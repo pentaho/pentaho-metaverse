@@ -20,7 +20,7 @@
  *
  ******************************************************************************/
 
-package org.pentaho.metaverse.service;
+package org.pentaho.metaverse.listener;
 
 import com.tinkerpop.blueprints.Graph;
 import org.junit.Before;
@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.metaverse.listener.MetaversePluginLifecycleListener;
 
 import static org.mockito.Mockito.*;
 

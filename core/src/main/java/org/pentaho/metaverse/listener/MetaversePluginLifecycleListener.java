@@ -20,7 +20,7 @@
  *
  ******************************************************************************/
 
-package org.pentaho.metaverse.service;
+package org.pentaho.metaverse.listener;
 
 import com.tinkerpop.blueprints.Graph;
 import org.pentaho.metaverse.messages.Messages;

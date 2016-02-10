@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:jaxrs="http://cxf.apache.org/blueprint/jaxrs"
-           xmlns:cxf="http://cxf.apache.org/blueprint/core"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
            xsi:schemaLocation="
              http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
-             http://cxf.apache.org/blueprint/jaxrs http://cxf.apache.org/schemas/blueprint/jaxrs.xsd
-             http://cxf.apache.org/blueprint/core http://cxf.apache.org/schemas/blueprint/core.xsd
              ">
 
 
@@ -38,36 +34,11 @@
     </argument>
   </bean>
 
-  <cxf:bus>
-    <cxf:features>
-      <cxf:logging/>
-    </cxf:features>
-  </cxf:bus>
-
   <bean id="lineageCollector" class="org.pentaho.metaverse.impl.FileSystemLineageCollector" scope="prototype">
     <property name="outputFolder" value="${lineage.execution.output.folder}"/>
   </bean>
 
-  <bean id="metaverseServiceBean" class="org.pentaho.metaverse.service.MetaverseService">
-    <argument ref="IMetaverseReader"/>
-    <argument ref="IDocumentLocatorProvider"/>
-    <property name="lineageCollector" ref="lineageCollector"/>
-  </bean>
-
-  <bean id="analyzerInfoServiceBean" class="org.pentaho.metaverse.service.AnalyzerInfoService">
-    <property name="stepAnalyzerProvider" ref="IStepAnalyzerProvider"/>
-    <property name="jobEntryAnalyzerProvider" ref="IJobEntryAnalyzerProvider"/>
-  </bean>
-
-  <jaxrs:server id="metaverseService" address="/lineage">
-    <jaxrs:providers>
-      <bean class="org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider"/>
-    </jaxrs:providers>
-    <jaxrs:serviceBeans>
-      <ref component-id="metaverseServiceBean"/>
-      <ref component-id="analyzerInfoServiceBean"/>
-    </jaxrs:serviceBeans>
-  </jaxrs:server>
+  <service id="lineageCollectorService" interface="org.pentaho.metaverse.api.ILineageCollector" ref="lineageCollector"/>
 
   <bean id="IMetaverseBuilder" class="org.pentaho.metaverse.impl.MetaverseBuilder" scope="singleton">
     <argument ref="MetaverseGraphImpl"/>
@@ -558,16 +529,25 @@
     <property name="stepAnalyzers" ref="stepAnalyzerRefList"/>
   </bean>
 
+  <service id="IStepAnalyzerProviderService"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider"
+           ref="IStepAnalyzerProvider"/>
+
   <bean id="IJobEntryAnalyzerProvider" class="org.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider"
         scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="jobEntryAnalyzers" ref="jobEntryAnalyzerRefList"/>
   </bean>
 
+  <service id="IJobEntryAnalyzerProviderService"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider"
+           ref="IJobEntryAnalyzerProvider"/>
 
   <bean id="IMetaverseReader" class="org.pentaho.metaverse.graph.BlueprintsGraphMetaverseReader" scope="singleton">
     <argument ref="MetaverseGraphImpl"/>
   </bean>
+
+  <service id="IMetaverseReaderService" interface="org.pentaho.metaverse.api.IMetaverseReader" ref="IMetaverseReader"/>
 
   <!-- Lineage writers -->
   <bean id="graphCsvWriter" class="org.pentaho.metaverse.graph.GraphCsvWriter"/>
@@ -602,6 +582,8 @@
       </set>
     </argument>
   </bean>
+
+  <service id="IDocumentLocatorProviderService" interface="org.pentaho.metaverse.api.IDocumentLocatorProvider" ref="IDocumentLocatorProvider"/>
 
   <!-- TransRuntime extension point -->
   <bean id="transRuntime" scope="singleton" class="org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint">
