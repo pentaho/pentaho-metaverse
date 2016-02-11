@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>pentaho</groupId>
@@ -144,16 +144,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>${dependency.com.fasterxml.jackson.core.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-jersey-rt</artifactId>
-      <version>${enunciate.version}</version>
-    </dependency>
-    <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-mongodb-plugin</artifactId>
       <version>${dependency.pentaho-mongodb-plugin.revision}</version>
@@ -237,14 +227,12 @@
       <version>1.16</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <version>3.0.1</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
   <build>
     <plugins>
@@ -268,8 +256,7 @@
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>
-            <Import-Package>org.osgi.service.http,
-              org.apache.felix.http.api,
+            <Import-Package>
               org.pentaho.dictionary,
               org.pentaho.metaverse.api,
               org.pentaho.metaverse.api.*,
@@ -279,7 +266,10 @@
               org.pentaho.metaverse.analyzer.kettle,
               org.pentaho.metaverse.analyzer.kettle.*,
               org.pentaho.metaverse.util,
-              org.pentaho.metaverse.graph</Export-Package>
+              org.pentaho.metaverse.graph,
+              org.pentaho.metaverse.impl,
+              org.pentaho.metaverse.messages,
+              org.pentaho.metaverse.locator</Export-Package>
             <Bundle-Activator>org.pentaho.metaverse.util.MetaverseBundleActivator</Bundle-Activator>
           </instructions>
         </configuration>
@@ -341,25 +331,6 @@
             <argument>src/it/resources/metaverse-pdi.groovy</argument>
           </arguments>
           <systemProperties></systemProperties>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-plugin</artifactId>
-        <version>${enunciate.version}</version>
-        <!-- not compatible with JDK 8 ... see https://bugs.opendaylight.org/show_bug.cgi?id=2626 & https://github.com/stoicflame/enunciate/issues/68 -->
-        <executions>
-          <execution>
-            <goals>
-              <goal>assemble</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <configFile>enunciate.xml</configFile>
-          <moduleName>pentaho-metaverse-core enunciate doc</moduleName>
-          <enunciateArtifactId>pentaho-metaverse-core-doc</enunciateArtifactId>
-          <forceWarPackaging>false</forceWarPackaging>
         </configuration>
       </plugin>
     </plugins>
