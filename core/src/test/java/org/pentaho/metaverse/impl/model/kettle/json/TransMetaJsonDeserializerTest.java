@@ -120,10 +120,10 @@ public class TransMetaJsonDeserializerTest {
   ParamInfo var0 = new ParamInfo( "var0", "hello" );
   ParamInfo var1 = new ParamInfo( "var1", "world" );
 
-  Map<String, Object> attrs0 = new HashMap<String, Object>();
-  Map<String, Object> attrs1 = new HashMap<String, Object>();
-  List<Map<String, Object>> fields0 = new ArrayList<Map<String, Object>>();
-  List<Map<String, Object>> fields1 = new ArrayList<Map<String, Object>>();
+  Map<String, Object> attrs0 = new HashMap<>();
+  Map<String, Object> attrs1 = new HashMap<>();
+  List<Map<String, Object>> fields0 = new ArrayList<>();
+  List<Map<String, Object>> fields1 = new ArrayList<>();
 
   @BeforeClass
   public static void init() throws KettleException {
@@ -154,10 +154,10 @@ public class TransMetaJsonDeserializerTest {
     when( mapper.readValue( "mocked param1", ParamInfo.class ) ).thenReturn( param1 );
     when( mapper.readValue( "mocked var0", ParamInfo.class ) ).thenReturn( var0 );
     when( mapper.readValue( "mocked var1", ParamInfo.class ) ).thenReturn( var1 );
-    when( mapper.readValue( "attrs0", attrs0.getClass() ) ).thenReturn( attrs0 );
-    when( mapper.readValue( "attrs1", attrs1.getClass() ) ).thenReturn( attrs1 );
-    when( mapper.readValue( "fields0", fields0.getClass() ) ).thenReturn( fields0 );
-    when( mapper.readValue( "fields1", fields1.getClass() ) ).thenReturn( fields1 );
+    when( mapper.readValue( "attrs0", attrs0.getClass() ) ).then( invocationOnMock -> attrs0 );
+    when( mapper.readValue( "attrs1", attrs1.getClass() ) ).then( invocationOnMock -> attrs1 );
+    when( mapper.readValue( "fields0", fields0.getClass() ) ).then( invocationOnMock -> fields0 );
+    when( mapper.readValue( "fields1", fields1.getClass() ) ).then( invocationOnMock -> fields1 );
 
     // build root node expectations
     when( root.get( IInfo.JSON_PROPERTY_NAME ) ).thenReturn( root_nameNode );
@@ -281,7 +281,7 @@ public class TransMetaJsonDeserializerTest {
     }};
 
     when( attributes.toString() ).thenReturn( "mockedAttributes" );
-    when( mapper.readValue( "mockedAttributes", attrs0.getClass() ) ).thenReturn( attrMap );
+    when( mapper.readValue( "mockedAttributes", attrs0.getClass() ) ).then( invocationOnMock -> attrMap );
 
     deserializer.writeJsonAttributes( attributes, mapper, stepId );
 
@@ -318,7 +318,7 @@ public class TransMetaJsonDeserializerTest {
     fieldLists.add( fieldMap1 );
 
     when( fields.toString() ).thenReturn( "mockedFields" );
-    when( mapper.readValue( "mockedFields", fieldLists.getClass() ) ).thenReturn( fieldLists );
+    when( mapper.readValue( "mockedFields", fieldLists.getClass() ) ).then( invocationOnMock -> fieldLists );
 
     deserializer.writeJsonFields( fields, mapper, stepId );
 
