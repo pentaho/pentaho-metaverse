@@ -36,6 +36,7 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -249,5 +250,33 @@ public class MetaverseLogicalIdGeneratorTest {
 
     // make sure a call was made to add the logical id as a property
     verify( node ).setProperty( DictionaryConst.PROPERTY_LOGICAL_ID, logicalId );
+  }
+
+  /**
+   * Test for: http://jira.pentaho.com/browse/PDI-14888
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testLogicalIdGeneratorDbJdbc() throws Exception {
+    PropertiesHolder node1 = new PropertiesHolder();
+    node1.setProperty("accessTypeDesc", "Native");
+    node1.setProperty("hostName", "localhost");
+    node1.setProperty("port", "3306");
+    node1.setProperty("type", "Database Connection");
+    node1.setProperty("userName", "root");
+    node1.setProperty("name", "name_1");
+
+    PropertiesHolder node2 = new PropertiesHolder();
+    node2.setProperty("accessTypeDesc", "Native");
+    node2.setProperty("hostName", "localhost");
+    node2.setProperty("port", "3306");
+    node2.setProperty("type", "Database Connection");
+    node2.setProperty("userName", "root");
+    node2.setProperty("name", "name_2");
+
+    ILogicalIdGenerator generator = DictionaryConst.LOGICAL_ID_GENERATOR_DB_JDBC;
+
+    assertNotEquals(generator.generateId(node1), generator.generateId(node2));
   }
 }
