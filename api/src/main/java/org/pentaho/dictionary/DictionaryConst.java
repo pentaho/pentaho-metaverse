@@ -543,6 +543,7 @@ public class DictionaryConst {
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_JDBC = new MetaverseLogicalIdGenerator( new String[] {
     PROPERTY_TYPE,
+    PROPERTY_NAME,
     PROPERTY_HOST_NAME,
     PROPERTY_USER_NAME,
     PROPERTY_PORT,
