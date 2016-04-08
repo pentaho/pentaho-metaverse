@@ -265,7 +265,7 @@ public class MetaverseLogicalIdGeneratorTest {
     node1.setProperty("port", "3306");
     node1.setProperty("type", "Database Connection");
     node1.setProperty("userName", "root");
-    node1.setProperty("name", "name_1");
+    node1.setProperty("databaseName", "db_1");
 
     PropertiesHolder node2 = new PropertiesHolder();
     node2.setProperty("accessTypeDesc", "Native");
@@ -273,7 +273,7 @@ public class MetaverseLogicalIdGeneratorTest {
     node2.setProperty("port", "3306");
     node2.setProperty("type", "Database Connection");
     node2.setProperty("userName", "root");
-    node2.setProperty("name", "name_2");
+    node2.setProperty("databaseName", "db_2");
 
     ILogicalIdGenerator generator = DictionaryConst.LOGICAL_ID_GENERATOR_DB_JDBC;
 
