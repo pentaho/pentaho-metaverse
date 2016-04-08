@@ -546,7 +546,8 @@ public class DictionaryConst {
     PROPERTY_HOST_NAME,
     PROPERTY_USER_NAME,
     PROPERTY_PORT,
-    "accessTypeDesc"
+    "accessTypeDesc",
+    "databaseName"
   } );
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_JNDI = new MetaverseLogicalIdGenerator( new String[] {
