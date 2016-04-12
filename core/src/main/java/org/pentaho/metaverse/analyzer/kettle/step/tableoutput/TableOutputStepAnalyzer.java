@@ -126,7 +126,7 @@ public class TableOutputStepAnalyzer extends ConnectionExternalResourceStepAnaly
     String[] fieldArray = meta.getFieldDatabase();
     // !meta.specifyFields() condition can be removed if necessary since it is some kind of overhead --Kaa
     // Additional info: http://jira.pentaho.com/browse/PDI-14959
-    if( ArrayUtils.isEmpty( fieldArray ) && !meta.specifyFields() ) {
+    if ( ArrayUtils.isEmpty( fieldArray ) && !meta.specifyFields() ) {
       fieldArray = getOutputFields( meta ).getFieldNames();
     }
     Set<String> fields = new LinkedHashSet<>( Arrays.asList( fieldArray ) );
