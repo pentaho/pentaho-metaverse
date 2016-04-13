@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -58,6 +58,7 @@ import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -161,7 +162,7 @@ public class TransExecutorStepAnalyzerTest {
 
   @Test
   public void testCustomAnalyze_fileName() throws Exception {
-    String filePath = "src/it/resources/repo/validation/transformation-executor/trans-executor-child.ktr";
+    String filePath = "src/it/resources/repo/validation/transformation-executor/trans-executor-child.ktr".replace( "/", File.pathSeparator );
     doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( anyString() );
     when( meta.getFileName() ).thenReturn( filePath );
 

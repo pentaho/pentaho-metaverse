@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -114,9 +114,22 @@ public class TableOutputStepAnalyzer extends ConnectionExternalResourceStepAnaly
     return outputRows;
   }
 
+  /**
+   * Get the resource fields actually written to the table. Normally return fields specified in table settings.
+   * If no fields specified and "specify database fields" option is unchecked, return regular output fields.
+   *
+   * @param meta Table Output component metadata
+   * @return set of resource field names
+   */
   @Override
   public Set<String> getOutputResourceFields( TableOutputMeta meta ) {
-    Set<String> fields = new LinkedHashSet<>( Arrays.asList( meta.getFieldDatabase() ) );
+    String[] fieldArray = meta.getFieldDatabase();
+    // !meta.specifyFields() condition can be removed if necessary since it is some kind of overhead --Kaa
+    // Additional info: http://jira.pentaho.com/browse/PDI-14959
+    if ( ArrayUtils.isEmpty( fieldArray ) && !meta.specifyFields() ) {
+      fieldArray = getOutputFields( meta ).getFieldNames();
+    }
+    Set<String> fields = new LinkedHashSet<>( Arrays.asList( fieldArray ) );
     return fields;
   }
 

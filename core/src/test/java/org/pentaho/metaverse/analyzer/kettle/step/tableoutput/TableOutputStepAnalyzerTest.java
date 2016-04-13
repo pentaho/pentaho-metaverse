@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -233,6 +234,36 @@ public class TableOutputStepAnalyzerTest {
     for ( String outputField : outputFields ) {
       assertTrue( outputResourceFields.contains( outputField ) );
     }
+  }
+
+  /**
+   * Test case for http://jira.pentaho.com/browse/PDI-14959 issue.
+   *
+   * @throws Exception
+   */
+  @Test
+  public void testGetOutputResourceFieldsWithoutSpecifiedFields() throws Exception {
+    String[] outputFields = new String[2];
+    outputFields[0] = "fieldA";
+    outputFields[1] = "fieldB";
+    RowMetaInterface rmi = mock( RowMetaInterface.class );
+
+    when( meta.getFieldDatabase() ).thenReturn( new String[0] );
+    when( meta.specifyFields() ).thenReturn( Boolean.FALSE );
+    when( rmi.getFieldNames() ).thenReturn( outputFields );
+
+    doReturn( rmi ).when( analyzer ).getOutputFields( meta );
+
+    Set<String> outputResourceFields = analyzer.getOutputResourceFields( meta );
+
+    assertEquals( outputFields.length, outputResourceFields.size() );
+    for ( String outputField : outputFields ) {
+      assertTrue( outputResourceFields.contains( outputField ) );
+    }
+
+    when( meta.specifyFields() ).thenReturn( Boolean.TRUE );
+    outputResourceFields = analyzer.getOutputResourceFields( meta );
+    assertEquals( 0, outputResourceFields.size() );
   }
 
   @Test
