@@ -5,11 +5,11 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>pentaho-metaverse</artifactId>
-    <version>6.1-SNAPSHOT</version>
+    <version>6.1.0.3-223</version>
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>sample-metaverse-bundle</artifactId>
-  <version>6.1-SNAPSHOT</version>
+  <version>6.1.0.3-223</version>
   <packaging>bundle</packaging>
   <name>sample-metaverse-bundle Bundle</name>
   <description>sample-metaverse-bundle OSGi bundle project.</description>
