@@ -54,7 +54,7 @@
     <dependency>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-apache-client</artifactId>
-      <version>1.16</version>
+      <version>1.19.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
