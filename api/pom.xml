@@ -17,6 +17,12 @@
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
       <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+       <exclusions>
+          <exclusion>
+          <groupId>xerces</groupId>
+          <artifactId>xercesImpl</artifactId>
+        </exclusion>
+       </exclusions>      
     </dependency>
     <dependency>
       <groupId>pentaho-kettle</groupId>
@@ -54,7 +60,7 @@
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
       <version>${dependency.pentaho.pentaho-platform-core.version}</version>
-      <scope>compile</scope>
+      <scope>compile</scope>      
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>
@@ -67,6 +73,13 @@
       <artifactId>mockito-all</artifactId>
       <version>${dependency.org.mockito.mockito-all.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>xerces</groupId>
+          <artifactId>xerces</artifactId>
+        </exclusion>
+      </exclusions>            
+      
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
