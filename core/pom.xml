@@ -110,6 +110,12 @@
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
       <version>${dependency.pentaho.pentaho-platform-core.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>xerces</groupId>
+          <artifactId>xercesImpl</artifactId>
+        </exclusion>
+      </exclusions>
       <scope>compile</scope>
     </dependency>
     <dependency>
