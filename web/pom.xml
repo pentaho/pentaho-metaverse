@@ -89,7 +89,6 @@
             <Import-Package>org.osgi.service.http,
                             org.apache.felix.http.api,
                             *</Import-Package>
-            <DynamicImport-Package>*</DynamicImport-Package>
           </instructions>
         </configuration>
       </plugin>
