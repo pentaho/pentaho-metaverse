@@ -158,10 +158,8 @@ public class TableOutputStepAnalyzer extends ConnectionExternalResourceStepAnaly
 
   @Override
   public IMetaverseNode getConnectionNode() throws MetaverseAnalyzerException {
-    if ( connectionNode == null ) {
-      connectionNode = (IMetaverseNode) getConnectionAnalyzer().analyze(
+    connectionNode = (IMetaverseNode) getConnectionAnalyzer().analyze(
         getDescriptor(), baseStepMeta.getDatabaseMeta() );
-    }
     return connectionNode;
   }
 
