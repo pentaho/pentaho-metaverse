@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -543,5 +543,17 @@ public class MetaverseBuilderTest {
     // It's a Blueprints thing
     assertNull( edge.getProperty( DictionaryConst.PROPERTY_LABEL ) );
 
+  }
+
+  @Test
+  public void testGetVertexForNodeWithDiffStringId(){
+    node.setStringID( "test string id" );
+    node.setName( "test name" );
+    node.setType( "test type" );
+    builder.addNode( node );
+    Vertex vertex = builder.getVertexForNode( node );
+    node.setStringID( "diff test string id" );
+    Vertex newVertex = builder.getVertexForNode( node );
+    assertEquals( vertex, newVertex );
   }
 }

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -134,6 +134,15 @@ public class TableInputStepAnalyzerTest {
   @Test
   public void testGetUsedFields() throws Exception {
     assertNull( analyzer.getUsedFields( meta ) );
+  }
+
+  @Test
+  public void testSetBaseStepMeta() throws Exception{
+    analyzer.setBaseStepMeta( meta );
+    DatabaseConnectionAnalyzer dbAnalyzer = mock( DatabaseConnectionAnalyzer.class );
+    doReturn( dbAnalyzer ).when( analyzer ).getConnectionAnalyzer();
+    analyzer.getConnectionNode();
+    verify( meta, times( 1 ) ).getDatabaseMeta();
   }
 
   @Test

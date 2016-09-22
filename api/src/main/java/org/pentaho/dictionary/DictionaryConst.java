@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -164,6 +164,11 @@ public class DictionaryConst {
    * Property key for the "hostName"
    */
   public static final String PROPERTY_USER_NAME = "userName";
+
+  /**
+   * Property key for the "databaseName"
+   */
+  public static final String PROPERTY_DATABASE_NAME = "databaseName";
 
   /**
    * Property key for the "hostName"
@@ -546,6 +551,7 @@ public class DictionaryConst {
     PROPERTY_HOST_NAME,
     PROPERTY_USER_NAME,
     PROPERTY_PORT,
+    PROPERTY_DATABASE_NAME,
     "accessTypeDesc"
   } );
 

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -103,10 +103,8 @@ public class TableInputStepAnalyzer extends ConnectionExternalResourceStepAnalyz
 
   @Override
   public IMetaverseNode getConnectionNode() throws MetaverseAnalyzerException {
-    if ( connectionNode == null ) {
-      connectionNode = (IMetaverseNode) getConnectionAnalyzer().analyze(
+    connectionNode = (IMetaverseNode) getConnectionAnalyzer().analyze(
         getDescriptor(), baseStepMeta.getDatabaseMeta() );
-    }
     return connectionNode;
   }
 
