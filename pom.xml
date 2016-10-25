@@ -9,7 +9,7 @@
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse</artifactId>
-  <version>7.0-SNAPSHOT</version>
+  <version>7.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
   <description>Parent pom for pentaho-metaverse projects</description>
@@ -73,8 +73,8 @@
     <dependency.commons-configuration.commons-configuration.version>1.9</dependency.commons-configuration.commons-configuration.version>
     <dependency.commons-collections.commons-collections.version>3.2.1</dependency.commons-collections.commons-collections.version>
     <dependency.org.slf4j.slf4j-api.version>1.7.7</dependency.org.slf4j.slf4j-api.version>
-    <dependency.org.mockito.mockito-all.version>1.9.5</dependency.org.mockito.mockito-all.version>
     <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
+    <dependency.org.mockito.mockito-all.version>1.9.5</dependency.org.mockito.mockito-all.version>
     <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
   </properties>
   <profiles>
