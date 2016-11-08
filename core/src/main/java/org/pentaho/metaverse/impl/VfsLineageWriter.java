@@ -22,8 +22,19 @@
 
 package org.pentaho.metaverse.impl;
 
-import org.apache.commons.io.FileUtils;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.apache.commons.vfs2.FileContent;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileSystemOptions;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.exception.KettleFileException;
+import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.metaverse.api.IGraphWriter;
 import org.pentaho.metaverse.api.ILineageWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
@@ -32,33 +43,18 @@ import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.graph.GraphMLWriter;
 import org.pentaho.metaverse.graph.GraphSONWriter;
 import org.pentaho.metaverse.impl.model.ExecutionProfileUtil;
+import org.pentaho.metaverse.messages.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
- * Created by rfellows on 3/31/15.
+ * Created by wseyler on 10/27/15.
  */
-/**
- * @see org.pentaho.metaverse.impl.VfsLineageWriter
- * 
- * @deprecated Use above class as a direct replacement.  It provides backward compatibility
- * for the local file system, but allows use of VFS based file systems simply by changing
- * the lineage.execution.output.folder to a VFS supported specification path.
- */
-@Deprecated
-public class FileSystemLineageWriter implements ILineageWriter {
+public class VfsLineageWriter implements ILineageWriter {
 
-  public static final String DEFAULT_OUTPUT_FOLDER = ".";
+  public static final String DEFAULT_OUTPUT_FOLDER = "tmp://dir";
 
-  private static final Logger log = LoggerFactory.getLogger( FileSystemLineageWriter.class );
+  private static final Logger log = LoggerFactory.getLogger( VfsLineageWriter.class );
 
   private IGraphWriter graphWriter = new GraphMLWriter();
   private String outputFolder = DEFAULT_OUTPUT_FOLDER;
@@ -66,7 +62,11 @@ public class FileSystemLineageWriter implements ILineageWriter {
 
   protected static SimpleDateFormat dateFolderFormat = new SimpleDateFormat( "YYYYMMdd" );
 
-  public FileSystemLineageWriter() {
+  private static enum VFS_Prefixes {
+    BZIP2, FILE, FTP, FTPS, GZIP, HDFS, HTTP, HTTPS, JAR, RAM, RES, SFTP, TAR, TEMP, WEBDAV, ZIP
+  }
+
+  public VfsLineageWriter() {
   }
 
   @Override
@@ -78,7 +78,7 @@ public class FileSystemLineageWriter implements ILineageWriter {
         if ( fis != null ) {
           ExecutionProfileUtil.outputExecutionProfile( fis, profile );
         } else {
-          log.debug( "No profile output stream associated with this LineageWriter" );
+          log.debug( Messages.getString( "DEBUG.noProfileOutputStream" ) );
         }
       }
     }
@@ -89,11 +89,12 @@ public class FileSystemLineageWriter implements ILineageWriter {
     if ( holder != null ) {
       IMetaverseBuilder builder = holder.getMetaverseBuilder();
       if ( builder != null ) {
-        OutputStream fis = getGraphOutputStream( holder );
-        if ( fis != null ) {
-          graphWriter.outputGraph( builder.getGraph(), fis );
+        OutputStream fos = getGraphOutputStream( holder );
+        if ( fos != null ) {
+          graphWriter.outputGraph( builder.getGraph(), fos );
+          fos.close();
         } else {
-          log.debug( "No graph output stream associated with this LineageWriter" );
+          log.debug( Messages.getString( "DEBUG.noGraphOutputStream" ) );
         }
       }
     }
@@ -128,6 +129,16 @@ public class FileSystemLineageWriter implements ILineageWriter {
     return outputFolder;
   }
 
+  public static boolean isVFSPrefix( String prefix ) {
+    prefix = prefix.toUpperCase();
+    for ( VFS_Prefixes vfs_prefix : VFS_Prefixes.values() ) {
+      if ( vfs_prefix.name().equals( prefix ) ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Sets the output folder for this writer
    *
@@ -135,7 +146,27 @@ public class FileSystemLineageWriter implements ILineageWriter {
    *          The String output folder to write to
    */
   public void setOutputFolder( String outputFolder ) {
-    this.outputFolder = outputFolder;
+    int seperatorIndex = outputFolder.indexOf( ":" );
+    if ( seperatorIndex > -1 ) {
+      String prefix = outputFolder.substring( 0, outputFolder.indexOf( ":" ) );
+      if ( isVFSPrefix( prefix ) ) {
+        this.outputFolder = outputFolder;
+      } else { // Prefix is not in VFS so try to make a local file from this
+        File localFile = new File( outputFolder );
+        try {
+          this.outputFolder = "file://" + localFile.getCanonicalPath();
+        } catch ( IOException e ) {
+          log.error( Messages.getString( "ERROR.CantUseOutputFile", outputFolder ), e );
+        }
+      }
+    } else { // Had no prefix so try to make a local file from this.
+      File localFile = new File( outputFolder );
+      try {
+        this.outputFolder = "file://" + localFile.getCanonicalPath();
+      } catch ( IOException e ) {
+        log.error( Messages.getString( "ERROR.CantUseOutputFile", outputFolder ), e );
+      }
+    }
   }
 
   protected OutputStream createOutputStream( LineageHolder holder, String extension ) {
@@ -143,17 +174,13 @@ public class FileSystemLineageWriter implements ILineageWriter {
       try {
         IExecutionProfile profile = holder.getExecutionProfile();
         String timestampString = Long.toString( profile.getExecutionData().getStartTime().getTime() );
-        File destFolder = getOutputDirectoryAsFile( holder );
+        FileObject destFolder = getOutputDirectoryAsFile( holder );
         String name = Const.NVL( profile.getName(), "unknown" );
-        File file = new File( destFolder, timestampString + "_" + name + extension );
-        try {
-          return new FileOutputStream( file );
-        } catch ( FileNotFoundException e ) {
-          log.error( "Couldn't find file: " + file.getAbsolutePath(), e );
-          return null;
-        }
+        FileObject file = destFolder.resolveFile( timestampString + "_" + name + extension );
+        FileContent content = file.getContent();
+        return content.getOutputStream();
       } catch ( Exception e ) {
-        log.error( "Couldn't get output stream", e );
+        log.error( Messages.getErrorString( "ERROR.CantCreateOutputStream" ), e );
         return null;
       }
     } else {
@@ -161,66 +188,51 @@ public class FileSystemLineageWriter implements ILineageWriter {
     }
   }
 
-  protected File getOutputDirectoryAsFile( LineageHolder holder ) {
-    File rootFolder = getDateFolder( outputFolder, holder );
-    boolean rootFolderExists = rootFolder.exists();
-    if ( !rootFolderExists ) {
-      rootFolderExists = rootFolder.mkdirs();
-    }
-    if ( rootFolderExists ) {
-      IExecutionProfile profile = holder.getExecutionProfile();
+  protected FileObject getOutputDirectoryAsFile( LineageHolder holder ) {
+    try {
+      FileObject rootFolder = getDateFolder( getOutputFolder(), holder );
+      rootFolder.createFolder();
       String id = holder.getId() == null ? "unknown_artifact" : holder.getId();
+      if ( id.startsWith( File.separator ) ) {
+        id = id.substring( 1 );
+      }
       try {
-        // strip off the colon from C:\path\to\file on windows
-        if ( isWindows() ) {
-          id = replaceColonInPath( id );
-        }
-
-        File folder = new File( rootFolder, id );
-        if ( !folder.exists() ) {
-          boolean result = folder.mkdirs();
-          if ( !result ) {
-            log.error( "Couldn't create folder: " + folder.getAbsolutePath() );
-          }
-        } else if ( folder.isFile() ) {
+        FileObject folder = rootFolder.resolveFile( id );
+        folder.createFolder();
+        if ( folder.isFile() ) {
           // must be a folder
-          throw new IllegalStateException( "Output folder must be a folder, not a file. [" + folder.getAbsolutePath()
-              + "]" );
+          throw new IllegalStateException( Messages.getErrorString( "ERROR.OutputFolderWrongType", folder.getName()
+              .getPath() ) );
         }
         return folder;
       } catch ( Exception e ) {
-        log.error( "Couldn't create output file", e );
+        log.error( Messages.getErrorString( "ERROR.CouldNotCreateFile" ), e );
         return null;
       }
+    } catch ( Exception e ) {
+      log.error( Messages.getErrorString( "ERROR.CouldNotCreateFile" ), e );
+      throw new IllegalStateException( e );
     }
-    return null;
   }
 
-  protected String replaceColonInPath( String id ) {
-    String newPath = id;
-    if ( id.matches( "([A-Za-z]:.*)" ) ) {
-      newPath = id.replaceFirst( ":", "" );
-    }
-    return newPath;
-  }
-
-  protected boolean isWindows() {
-    return getOsName().contains( "win" );
-  }
-
-  protected String getOsName() {
-    return System.getProperty( "os.name" ).toLowerCase();
-  }
-
-  protected File getDateFolder( String parentDir, LineageHolder holder ) {
-    String dir = ( parentDir == null ) ? "" : parentDir + File.separator;
+  protected FileObject getDateFolder( String parentDir, LineageHolder holder ) throws KettleFileException,
+    FileSystemException {
+    String dir = ( parentDir == null ) ? "" : parentDir + "/";
     if ( holder != null && holder.getExecutionProfile() != null ) {
       IExecutionProfile profile = holder.getExecutionProfile();
       dir += dateFolderFormat.format( profile.getExecutionData().getStartTime() );
     } else {
       dir += dateFolderFormat.format( new Date() );
     }
-    return new File( dir );
+    FileSystemOptions opts = new FileSystemOptions();
+    FileObject lineageRootFolder = null;
+    if ( !getOutputFolder().equals( parentDir ) ) {
+      lineageRootFolder =
+          KettleVFS.getFileObject( parentDir == null ? getOutputFolder() : getOutputFolder() + "/" + parentDir, opts );
+    }
+    FileObject dateFolder =
+        lineageRootFolder == null ? KettleVFS.getFileObject( dir, opts ) : lineageRootFolder.resolveFile( dir );
+    return dateFolder;
   }
 
   protected OutputStream getProfileOutputStream( LineageHolder holder ) {
@@ -267,13 +279,11 @@ public class FileSystemLineageWriter implements ILineageWriter {
   public void cleanOutput( LineageHolder holder ) {
     String folderName = "unknown";
     try {
-      File folder = getOutputDirectoryAsFile( holder );
-      if ( folder.exists() ) {
-        FileUtils.deleteDirectory( folder );
-      }
-      folderName = folder.getAbsolutePath();
+      FileObject folder = getOutputDirectoryAsFile( holder );
+      folderName = folder.getName().getPath();
+      folder.deleteAll();
     } catch ( IOException ioe ) {
-      log.error( "Couldn't delete directory: " + folderName, ioe );
+      log.error( Messages.getErrorString( "ERROR.CouldNotDeleteFile", folderName ), ioe );
     }
   }
 
