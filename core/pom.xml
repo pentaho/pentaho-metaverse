@@ -16,16 +16,14 @@
   <url>http://www.pentaho.com</url>
   <properties>
     <dependency.net.sourceforge.jexcelapi.version>2.6.12</dependency.net.sourceforge.jexcelapi.version>
-    <pentaho.public.release.repo>http://nexus.pentaho.org/content/repositories/private-release/</pentaho.public.release.repo>
     <dependency.com.tinkerpop.frames.version>2.5.0</dependency.com.tinkerpop.frames.version>
     <karaf-maven-plugin.version>3.0.3</karaf-maven-plugin.version>
     <dependency.com.sun.jersey.jersey-client.version>1.19.1</dependency.com.sun.jersey.jersey-client.version>
     <exec-maven-plugin.version>1.3.2</exec-maven-plugin.version>
     <dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>2.7.12</dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>
     <dependency.osgi.version>4.3.1</dependency.osgi.version>
-    <pentaho.public.snapshot.repo>http://nexus.pentaho.org/content/repositories/private-snapshot/</pentaho.public.snapshot.repo>
     <platform.plugin.name>platform</platform.plugin.name>
-    <dependency.pentaho-platform-core-test.version>${project.version}</dependency.pentaho-platform-core-test.version>
+    <dependency.pentaho-platform.revision>7.1-SNAPSHOT</dependency.pentaho-platform.revision>
     <maven-pmd-plugin.version>3.2</maven-pmd-plugin.version>
     <pmd.rulesets.url>https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/pmd/rulesets/java</pmd.rulesets.url>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
@@ -210,8 +208,9 @@
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
-      <artifactId>pentaho-platform-core-test</artifactId>
-      <version>${dependency.pentaho-platform-core-test.version}</version>
+      <artifactId>pentaho-platform-core</artifactId>
+      <classifier>tests</classifier>
+      <version>${dependency.pentaho-platform.revision}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
