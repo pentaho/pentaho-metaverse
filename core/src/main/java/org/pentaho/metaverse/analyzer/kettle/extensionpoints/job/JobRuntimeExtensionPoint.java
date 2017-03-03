@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -126,9 +126,9 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
         // The variables and parameters in the Job may not have been set on the meta, so we do it here
         // to ensure the job analyzer will have access to the parameter values.
-        job.copyVariablesFrom( jobMeta );
         jobMeta.copyParametersFrom( job );
         jobMeta.activateParameters();
+        job.copyVariablesFrom( jobMeta );
         if ( job.getRep() != null ) {
           jobMeta.setRepository( job.getRep() );
         }
