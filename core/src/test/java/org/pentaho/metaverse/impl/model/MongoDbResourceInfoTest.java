@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,10 +28,15 @@ import org.junit.Test;
 import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.encryption.TwoWayPasswordEncoderPluginType;
 import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.variables.Variables;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MongoDbResourceInfoTest {
 
@@ -49,6 +54,23 @@ public class MongoDbResourceInfoTest {
   @Before
   public void setUp() throws Exception {
     meta = mock( MongoDbMeta.class );
+    when( meta.getDbName() ).thenReturn( null );
+    when( meta.getPort() ).thenReturn( null );
+    when( meta.getHostnames() ).thenReturn( null );
+    when( meta.getAuthenticationUser() ).thenReturn( null );
+    when( meta.getAuthenticationPassword() ).thenReturn( null );
+    when( meta.getUseAllReplicaSetMembers() ).thenReturn( false );
+    when( meta.getUseKerberosAuthentication() ).thenReturn( false );
+    when( meta.getConnectTimeout() ).thenReturn( null );
+    when( meta.getSocketTimeout() ).thenReturn( null );
+    when( meta.getCollection() ).thenReturn( null );
+    StepMeta stepMeta = new StepMeta();
+    TransMeta transMeta = new TransMeta();
+
+    stepMeta.setParentTransMeta( transMeta );
+    VariableSpace variables = new Variables();
+
+    when( meta.getParentStepMeta() ).thenReturn( stepMeta );
     info = new MongoDbResourceInfo( meta );
   }
 
