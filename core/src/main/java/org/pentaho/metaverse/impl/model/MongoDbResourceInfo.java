@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -83,7 +83,8 @@ public class MongoDbResourceInfo extends BaseResourceInfo implements IExternalRe
   }
 
   private String substituteIfNeeded( String value, MongoDbMeta meta, IAnalysisContext context ) {
-    String ret = context.equals( DictionaryConst.CONTEXT_RUNTIME )
+    String contextName = context != null ? context.getContextName() : "";
+    String ret = contextName.equals( DictionaryConst.CONTEXT_RUNTIME )
       ? meta.getParentStepMeta().getParentTransMeta().environmentSubstitute( value ) : value;
     return ret;
   }
