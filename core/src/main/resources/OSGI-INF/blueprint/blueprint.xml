@@ -34,7 +34,7 @@
     </argument>
   </bean>
 
-  <bean id="lineageCollector" class="org.pentaho.metaverse.impl.FileSystemLineageCollector" scope="prototype">
+  <bean id="lineageCollector" class="org.pentaho.metaverse.impl.VfsLineageCollector" scope="prototype">
     <property name="outputFolder" value="${lineage.execution.output.folder}"/>
   </bean>
 
@@ -554,24 +554,11 @@
   <bean id="graphSONWriter" class="org.pentaho.metaverse.graph.GraphSONWriter"/>
   <bean id="graphMLWriter" class="org.pentaho.metaverse.graph.GraphMLWriter"/>
 
-  <bean id="lineageWriter" class="org.pentaho.metaverse.impl.FileSystemLineageWriter" scope="prototype">
+  <bean id="lineageWriter" class="org.pentaho.metaverse.impl.VfsLineageWriter" scope="prototype">
     <property name="graphWriter" ref="graphMLWriter"/>
     <property name="outputFolder" value="${lineage.execution.output.folder}"/>
     <property name="outputStrategy" value="${lineage.execution.generation.strategy}"/>
   </bean>
-
-  <!--
-  <bean id="FileSystemLocator" class="FileSystemLocator" scope="singleton">
-    <argument>
-      <list>
-        <ref component-id="IDocumentController"/>
-      </list>
-    </argument>
-    <property name="repositoryId" value="FILE_SYSTEM_REPO"/>
-    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
-    <property name="rootFolder" value="src/it/resources/repo"/>
-  </bean>
-  -->
 
   <bean id="IDocumentLocatorProvider" class="org.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider"
         scope="singleton">

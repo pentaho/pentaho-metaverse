@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -42,6 +42,14 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * @see org.pentaho.metaverse.impl.VfsLineageCollector
+ * 
+ * @deprecated Use above class as a direct replacement.  It provides backward compatibility
+ * for the local file system, but allows use of VFS based file systems simply by changing
+ * the lineage.execution.output.folder to a VFS supported specification path.
+ */
+@Deprecated
 public class FileSystemLineageCollector implements ILineageCollector {
 
   public static final String DEFAULT_OUTPUT_FOLDER = ".";
@@ -65,7 +73,8 @@ public class FileSystemLineageCollector implements ILineageCollector {
   /**
    * Sets the output folder for this collector
    *
-   * @param outputFolder The String output folder to gather lineage artifacts from
+   * @param outputFolder
+   *          The String output folder to gather lineage artifacts from
    */
   public void setOutputFolder( String outputFolder ) {
     this.outputFolder = outputFolder;

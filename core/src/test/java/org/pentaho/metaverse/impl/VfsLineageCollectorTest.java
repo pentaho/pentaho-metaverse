@@ -1,0 +1,139 @@
+/*! ******************************************************************************
+ *
+ * Pentaho Data Integration
+ *
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
+ *
+ *******************************************************************************
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ******************************************************************************/
+
+package org.pentaho.metaverse.impl;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.List;
+
+import org.apache.commons.io.FilenameUtils;
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * Created by rfellows on 7/6/15.
+ */
+public class VfsLineageCollectorTest {
+
+  VfsLineageCollector collector;
+
+  @Before
+  public void setUp() throws Exception {
+    collector = new VfsLineageCollector();
+    String basePath = new File( "." ).getCanonicalPath();
+    collector.setOutputFolder( FilenameUtils.separatorsToSystem( "file://" + basePath
+        + "/src/test/resources/pentaho-lineage-output" ) );
+  }
+
+  @Test
+  public void testListArtifacts() throws Exception {
+    List<String> artifacts = collector.listArtifacts();
+    assertNotNull( artifacts );
+    assertEquals( 6, artifacts.size() );
+  }
+
+  @Test
+  public void testListArtifacts_startingDate() throws Exception {
+    List<String> artifacts = collector.listArtifacts( "20150706" );
+    assertNotNull( artifacts );
+    assertEquals( 6, artifacts.size() );
+  }
+
+  @Test
+  public void testListArtifacts_startingDate2() throws Exception {
+    // Find any artifacts from July, 7 2015 - There should only be 2
+    List<String> artifacts = collector.listArtifacts( "20150707" );
+    assertNotNull( artifacts );
+    assertEquals( 2, artifacts.size() );
+  }
+
+  @Test
+  public void testListArtifacts_startingDateNoResults() throws Exception {
+    // Find any artifacts from July, 7 2016 - There should be 0 results
+    List<String> artifacts = collector.listArtifacts( "20160707" );
+    assertNotNull( artifacts );
+    assertEquals( 0, artifacts.size() );
+  }
+
+  @Test( expected = IllegalArgumentException.class )
+  public void testListArtifacts_InvalidStartingDate() throws Exception {
+    List<String> artifacts = collector.listArtifacts( "20159999" );
+  }
+
+  @Test( expected = IllegalArgumentException.class )
+  public void testListArtifacts_InvalidStartingDate_NoArtifactsToList() throws Exception {
+    // Even if there are no artifacts available, we should still report throw the error
+    collector.setOutputFolder( "file:///target/test/resources/invalidFolder" );
+    List<String> artifacts = collector.listArtifacts( "20159999" );
+  }
+
+  @Test
+  public void testCompressArtifacts() throws Exception {
+    List<String> artifacts = collector.listArtifacts();
+    File output = new File( "target/outputfiles/compressedFiles.zip" );
+    output.mkdirs();
+    if ( output.exists() ) {
+      output.delete();
+    }
+    FileOutputStream fos = spy( new FileOutputStream( output ) );
+    collector.compressArtifacts( artifacts, fos );
+    byte[] emptyByteArray = new byte[0];
+
+    // should be called at least once per file
+    verify( fos, atLeast( 6 ) ).write( any( emptyByteArray.getClass() ), anyInt(), anyInt() );
+
+  }
+
+  @Test
+  public void testGetArtifactsForFile_mergeJoin() throws Exception {
+    // we have artifacts for merge_join on 2 days (execution profile + graph for each day)
+    List<String> artifacts = collector.listArtifactsForFile( "validation/merge_join.ktr" );
+    assertEquals( 4, artifacts.size() );
+  }
+
+  @Test
+  public void testGetArtifactsForFile_stringsCut() throws Exception {
+    // we have artifacts for strings_cut on 1 day (execution profile + graph)
+    List<String> artifacts = collector.listArtifactsForFile( "validation/strings_cut.ktr" );
+    assertEquals( 2, artifacts.size() );
+  }
+
+  @Test
+  public void testGetArtifactsForFile_noArtifacts() throws Exception {
+    List<String> artifacts = collector.listArtifactsForFile( "repo/validation/XYZ.ktr" );
+    assertEquals( 0, artifacts.size() );
+  }
+
+  @Test( expected = IllegalArgumentException.class )
+  public void testGetArtifactsForFile_noArtifacts_InvalidDate() throws Exception {
+    List<String> artifacts = collector.listArtifactsForFile( "repo/validation/XYZ.ktr", "20159999" );
+  }
+}

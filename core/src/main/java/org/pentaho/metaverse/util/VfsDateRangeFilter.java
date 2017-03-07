@@ -22,51 +22,44 @@
 
 package org.pentaho.metaverse.util;
 
-import org.pentaho.metaverse.messages.Messages;
-
-import java.io.File;
-import java.io.FilenameFilter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- * @see org.pentaho.metaverse.impl.util.VfsDateRangeFilter
- * 
- * @deprecated Use above class as a direct replacement.  It provides backward compatibility
- * for the local file system, but allows use of VFS based file systems simply by changing
- * the lineage.execution.output.folder to a VFS supported specification path.
- */
-@Deprecated
-public class DateRangeFolderFilenameFilter implements FilenameFilter {
+import org.apache.commons.vfs2.FileDepthSelector;
+import org.apache.commons.vfs2.FileSelectInfo;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileType;
+import org.pentaho.metaverse.messages.Messages;
+
+public class VfsDateRangeFilter extends FileDepthSelector {
 
   protected SimpleDateFormat format;
   private Date startingDate;
   private Date endingDate;
 
-  public DateRangeFolderFilenameFilter( SimpleDateFormat format ) {
+  public VfsDateRangeFilter( SimpleDateFormat format ) {
+    super( 1, 256 );
     this.format = format;
   }
 
-  public DateRangeFolderFilenameFilter( SimpleDateFormat format, Date startingDate ) {
-    this.format = format;
+  public VfsDateRangeFilter( SimpleDateFormat format, Date startingDate ) {
+    this( format );
     this.startingDate = startingDate;
   }
 
-  public DateRangeFolderFilenameFilter( SimpleDateFormat format, String startingDate ) {
-    this.format = format;
+  public VfsDateRangeFilter( SimpleDateFormat format, String startingDate ) {
+    this( format );
     setStartingDate( startingDate );
   }
 
-  public DateRangeFolderFilenameFilter( SimpleDateFormat format, Date startingDate, Date endingDate ) {
-    this.format = format;
-    this.startingDate = startingDate;
+  public VfsDateRangeFilter( SimpleDateFormat format, Date startingDate, Date endingDate ) {
+    this( format, startingDate );
     this.endingDate = endingDate;
   }
 
-  public DateRangeFolderFilenameFilter( SimpleDateFormat format, String startingDate, String endingDate ) {
-    this.format = format;
-    setStartingDate( startingDate );
+  public VfsDateRangeFilter( SimpleDateFormat format, String startingDate, String endingDate ) {
+    this( format, startingDate );
     setEndingDate( endingDate );
   }
 
@@ -106,10 +99,12 @@ public class DateRangeFolderFilenameFilter implements FilenameFilter {
   }
 
   @Override
-  public boolean accept( File dir, String name ) {
-    if ( dir.isDirectory() ) {
-      try {
-        Date folderDate = format.parse( name );
+  public boolean includeFile( FileSelectInfo fileInfo ) {
+    boolean result = super.includeFile( fileInfo );
+    try {
+      if ( fileInfo.getFile().getType() == FileType.FOLDER ) {
+
+        Date folderDate = format.parse( fileInfo.getFile().getName().getBaseName() );
 
         // assume a match on start & end dates
         int startCompare = 0;
@@ -123,13 +118,12 @@ public class DateRangeFolderFilenameFilter implements FilenameFilter {
           endCompare = folderDate.compareTo( endingDate );
         }
 
-        return startCompare >= 0 && endCompare <= 0;
-
-      } catch ( ParseException e ) {
-        // folder name is not a valid date string, reject it
+        return startCompare >= 0 && endCompare <= 0 && result;
+      } else {
         return false;
       }
-    } else {
+    } catch ( ParseException | FileSystemException e ) {
+      // folder name is not a valid date string, reject it
       return false;
     }
   }
