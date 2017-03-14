@@ -27,11 +27,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemOptions;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
@@ -130,9 +130,8 @@ public class VfsLineageWriter implements ILineageWriter {
   }
 
   public static boolean isVFSPrefix( String prefix ) {
-    prefix = prefix.toUpperCase();
     for ( VFS_Prefixes vfs_prefix : VFS_Prefixes.values() ) {
-      if ( vfs_prefix.name().equals( prefix ) ) {
+      if ( vfs_prefix.name().equalsIgnoreCase( prefix ) ) {
         return true;
       }
     }
@@ -190,14 +189,16 @@ public class VfsLineageWriter implements ILineageWriter {
 
   protected FileObject getOutputDirectoryAsFile( LineageHolder holder ) {
     try {
-      FileObject rootFolder = getDateFolder( getOutputFolder(), holder );
-      rootFolder.createFolder();
+      FileObject dateRootFolder = getDateFolder( holder );
+      dateRootFolder.createFolder();
       String id = holder.getId() == null ? "unknown_artifact" : holder.getId();
-      if ( id.startsWith( File.separator ) ) {
+      if ( id.startsWith( File.separator ) ) { // For *nix
         id = id.substring( 1 );
+      } else if ( Const.isWindows() && id.charAt( 1 ) == ':' ) { // For windows
+        id = id.replaceFirst( Pattern.quote( ":" ), "" );
       }
       try {
-        FileObject folder = rootFolder.resolveFile( id );
+        FileObject folder = dateRootFolder.resolveFile( id );
         folder.createFolder();
         if ( folder.isFile() ) {
           // must be a folder
@@ -215,23 +216,16 @@ public class VfsLineageWriter implements ILineageWriter {
     }
   }
 
-  protected FileObject getDateFolder( String parentDir, LineageHolder holder ) throws KettleFileException,
-    FileSystemException {
-    String dir = ( parentDir == null ) ? "" : parentDir + "/";
+  protected FileObject getDateFolder( LineageHolder holder ) throws KettleFileException, FileSystemException {
+    String dir = "";
     if ( holder != null && holder.getExecutionProfile() != null ) {
       IExecutionProfile profile = holder.getExecutionProfile();
       dir += dateFolderFormat.format( profile.getExecutionData().getStartTime() );
     } else {
       dir += dateFolderFormat.format( new Date() );
     }
-    FileSystemOptions opts = new FileSystemOptions();
-    FileObject lineageRootFolder = null;
-    if ( !getOutputFolder().equals( parentDir ) ) {
-      lineageRootFolder =
-          KettleVFS.getFileObject( parentDir == null ? getOutputFolder() : getOutputFolder() + "/" + parentDir, opts );
-    }
-    FileObject dateFolder =
-        lineageRootFolder == null ? KettleVFS.getFileObject( dir, opts ) : lineageRootFolder.resolveFile( dir );
+    FileObject lineageRootFolder = KettleVFS.getFileObject( getOutputFolder() );
+    FileObject dateFolder = lineageRootFolder.resolveFile( dir );
     return dateFolder;
   }
 
