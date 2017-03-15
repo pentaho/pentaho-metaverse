@@ -152,11 +152,12 @@ public class VfsLineageWriterTest {
 
   @Test
   public void testGetDateFolder() throws KettleFileException, FileSystemException {
-    assertNotNull( writer.getDateFolder( null, null ) );
-    FileObject folder = writer.getDateFolder( null, holder );
+    assertNotNull( writer.getDateFolder( null ) );
+    FileObject folder = writer.getDateFolder( holder );
     assertNotNull( folder );
     assertTrue( folder.getName().getPath().endsWith( VfsLineageWriter.dateFolderFormat.format( now ) ) );
-    folder = writer.getDateFolder( "root", holder );
+    writer.setOutputFolder( "file://root" );
+    folder = writer.getDateFolder( holder );
     assertTrue( folder.getName().getPath().endsWith( "root" + "/" + VfsLineageWriter.dateFolderFormat.format( now ) ) );
   }
 
