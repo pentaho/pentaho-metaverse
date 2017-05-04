@@ -183,86 +183,98 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       return;
     }
 
+    if ( allowedAsync() ) {
+      createLineGraphAsync( job );
+    } else {
+      createLineGraph( job );
+    }
+  }
+
+  protected void createLineGraphAsync( final Job job ) {
     // Need to spin this processing off into its own thread, so we don't hold up normal PDI processing
     Thread lineageWorker = new Thread( new Runnable() {
 
       @Override
       public void run() {
-        try {
-          // Get the current execution profile for this transformation
-          LineageHolder holder = JobLineageHolderMap.getInstance().getLineageHolder( job );
-          Future lineageTask = holder.getLineageTask();
-          if ( lineageTask != null ) {
-            try {
-              lineageTask.get();
-            } catch ( InterruptedException e ) {
-              e.printStackTrace(); // TODO logger?
-            } catch ( ExecutionException e ) {
-              e.printStackTrace(); // TODO logger?
-            }
-          }
-
-          // Get the current execution profile for this job
-          IExecutionProfile executionProfile =
-              JobLineageHolderMap.getInstance().getLineageHolder( job ).getExecutionProfile();
-          if ( executionProfile == null ) {
-            // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
-            // the same info, so populate a new ExecutionProfile using the current Trans
-
-            executionProfile = new ExecutionProfile();
-            populateExecutionProfile( executionProfile, job );
-          }
-          ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
-          Result result = job.getResult();
-          if ( result != null ) {
-            executionData.setFailureCount( result.getNrErrors() );
-          }
-
-          // Export the lineage info (execution profile, lineage graph, etc.)
-          try {
-            if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
-              // NOTE: This next call to clearOutput needs only to be done once before outputExecutionProfile and
-              // outputLineage graph. If the order of these calls changes somehow, make sure to move the call to
-              // clearOutput right before the first call to outputXYZ().
-              if ( "latest".equals( lineageWriter.getOutputStrategy() ) ) {
-                lineageWriter.cleanOutput( holder );
-              }
-              lineageWriter.outputExecutionProfile( holder );
-            }
-          } catch ( IOException e ) {
-            log.warn( Messages.getString( "ERROR.CouldNotWriteExecutionProfile", job.getName(), e.getMessage() ) );
-            log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
-          }
-
-          // Only create a lineage graph for this trans if it has no parent. If it does, the parent will incorporate the
-          // lineage information into its own graph
-          try {
-            Job parentJob = job.getParentJob();
-            Trans parentTrans = job.getParentTrans();
-
-            if ( parentJob == null && parentTrans == null ) {
-              // Add the execution profile information to the lineage graph
-              addRuntimeLineageInfo( holder );
-
-              if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
-                lineageWriter.outputLineageGraph( holder );
-              }
-            }
-          } catch ( IOException e ) {
-            log.warn( Messages.getString( "ERROR.CouldNotWriteLineageGraph", job.getName(),
-                Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
-            log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
-          }
-
-        } catch ( Throwable t ) {
-          log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", job.getName(),
-              Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
-          log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), t );
-        }
+        createLineGraph( job );
       }
     } );
 
     lineageWorker.start();
+  }
+
+  protected void createLineGraph( final Job job ) {
+    try {
+      // Get the current execution profile for this transformation
+      LineageHolder holder = JobLineageHolderMap.getInstance().getLineageHolder( job );
+      Future lineageTask = holder.getLineageTask();
+      if ( lineageTask != null ) {
+        try {
+          lineageTask.get();
+        } catch ( InterruptedException e ) {
+          e.printStackTrace(); // TODO logger?
+        } catch ( ExecutionException e ) {
+          e.printStackTrace(); // TODO logger?
+        }
+      }
+
+      // Get the current execution profile for this job
+      IExecutionProfile executionProfile =
+              JobLineageHolderMap.getInstance().getLineageHolder( job ).getExecutionProfile();
+      if ( executionProfile == null ) {
+        // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
+        // the same info, so populate a new ExecutionProfile using the current Trans
+
+        executionProfile = new ExecutionProfile();
+        populateExecutionProfile( executionProfile, job );
+      }
+      ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
+      Result result = job.getResult();
+      if ( result != null ) {
+        executionData.setFailureCount( result.getNrErrors() );
+      }
+
+      // Export the lineage info (execution profile, lineage graph, etc.)
+      try {
+        if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+          // NOTE: This next call to clearOutput needs only to be done once before outputExecutionProfile and
+          // outputLineage graph. If the order of these calls changes somehow, make sure to move the call to
+          // clearOutput right before the first call to outputXYZ().
+          if ( "latest".equals( lineageWriter.getOutputStrategy() ) ) {
+            lineageWriter.cleanOutput( holder );
+          }
+          lineageWriter.outputExecutionProfile( holder );
+        }
+      } catch ( IOException e ) {
+        log.warn( Messages.getString( "ERROR.CouldNotWriteExecutionProfile", job.getName(), e.getMessage() ) );
+        log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
+      }
+
+      // Only create a lineage graph for this trans if it has no parent. If it does, the parent will incorporate the
+      // lineage information into its own graph
+      try {
+        Job parentJob = job.getParentJob();
+        Trans parentTrans = job.getParentTrans();
+
+        if ( parentJob == null && parentTrans == null ) {
+          // Add the execution profile information to the lineage graph
+          addRuntimeLineageInfo( holder );
+
+          if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+            lineageWriter.outputLineageGraph( holder );
+          }
+        }
+      } catch ( IOException e ) {
+        log.warn( Messages.getString( "ERROR.CouldNotWriteLineageGraph", job.getName(),
+                Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+        log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
+      }
+
+    } catch ( Throwable t ) {
+      log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", job.getName(),
+              Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
+      log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), t );
+    }
   }
 
   protected void populateExecutionProfile( IExecutionProfile executionProfile, Job job ) {
