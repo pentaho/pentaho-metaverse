@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,8 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
+import org.apache.commons.lang.ObjectUtils;
+import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.version.BuildVersion;
 import org.pentaho.metaverse.api.ILineageWriter;
@@ -109,5 +111,17 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
 
   public boolean isRuntimeEnabled() {
     return runtimeEnabled;
+  }
+
+  /**
+   * When executing from Kitchen or Pan there might not enough time to finish all async tasks
+   * from job and trans listeners. To prevent jvm to exit use this flag to decide whether to run
+   * them async or not.
+   */
+  public boolean allowedAsync() {
+    KettleClientEnvironment.ClientType client = KettleClientEnvironment.getInstance().getClient();
+    return !(
+          ObjectUtils.equals( client, KettleClientEnvironment.ClientType.KITCHEN )
+          || ObjectUtils.equals( client, KettleClientEnvironment.ClientType.PAN ) );
   }
 }

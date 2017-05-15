@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -150,6 +150,23 @@ public class JobRuntimeExtensionPointTest {
     // The logic in jobFinished() is now in a thread, so we can't verify methods were called
 
     // Exception handling test removed because jobFinished() logic is in a thread and can't throw checked exceptions
+  }
+
+  @Test
+  public void testJobFinishedNotAsync() throws Exception {
+    JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
+    when( ext.allowedAsync() ).thenReturn( false );
+    ext.jobFinished( job );
+    verify( ext ).createLineGraph( job );
+    verify( ext, never() ).createLineGraphAsync( job );
+  }
+
+  @Test
+  public void testJobFinishedAsync() throws Exception {
+    JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
+    when( ext.allowedAsync() ).thenReturn( true );
+    ext.jobFinished( job );
+    verify( ext ).createLineGraphAsync( job );
   }
 
   @Test
