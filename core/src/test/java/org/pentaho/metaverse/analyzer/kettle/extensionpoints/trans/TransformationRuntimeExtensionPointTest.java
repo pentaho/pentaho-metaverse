@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -138,6 +138,25 @@ public class TransformationRuntimeExtensionPointTest {
     when( mockTrans.getResult() ).thenReturn( result );
     ext.transFinished( mockTrans );
     // The logic in transFinished() is now in a thread, so we can't verify methods were called
+  }
+
+  @Test
+  public void testTransFinishedNotAsync() throws Exception {
+    TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
+    when( ext.allowedAsync() ).thenReturn( false );
+    ext.transFinished( trans );
+
+    verify( ext ).createLineGraph( trans );
+    verify( ext, never() ).createLineGraphAsync( trans );
+  }
+
+  @Test
+  public void testTransFinishedAsync() throws Exception {
+    TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
+    when( ext.allowedAsync() ).thenReturn( true );
+    ext.transFinished( trans );
+
+    verify( ext ).createLineGraphAsync( trans );
   }
 
   @Test
