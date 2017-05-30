@@ -279,7 +279,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     }
   }
 
-  protected void createLineGraphAsync( Trans trans ) {
+  protected void createLineGraphAsync( final Trans trans ) {
     // Need to spin this processing off into its own thread, so we don't hold up normal PDI processing
     Thread lineageWorker = new Thread( new Runnable() {
 
