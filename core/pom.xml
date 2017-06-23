@@ -5,11 +5,11 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>pentaho-metaverse</artifactId>
-    <version>7.1-SNAPSHOT</version>
+    <version>7.1.0.1-34</version>
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse-core</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1.0.1-34</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Provides data lineage capabilities</description>
@@ -20,10 +20,9 @@
     <karaf-maven-plugin.version>3.0.3</karaf-maven-plugin.version>
     <dependency.com.sun.jersey.jersey-client.version>1.19.1</dependency.com.sun.jersey.jersey-client.version>
     <exec-maven-plugin.version>1.3.2</exec-maven-plugin.version>
-    <dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>2.7.12</dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>
     <dependency.osgi.version>4.3.1</dependency.osgi.version>
+    <dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>2.7.12</dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>
     <platform.plugin.name>platform</platform.plugin.name>
-    <dependency.pentaho-platform.revision>7.1-SNAPSHOT</dependency.pentaho-platform.revision>
     <maven-pmd-plugin.version>3.2</maven-pmd-plugin.version>
     <pmd.rulesets.url>https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/pmd/rulesets/java</pmd.rulesets.url>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
@@ -35,10 +34,11 @@
     <dependency.org.springframework.spring-context.version>2.5.6</dependency.org.springframework.spring-context.version>
     <dependency.com.h2database.hs.version>1.3.168</dependency.com.h2database.hs.version>
     <dependency.com.google.guava.guava.version>17.0</dependency.com.google.guava.guava.version>
-    <dependency.commons-cli.version>1.2</dependency.commons-cli.version>
     <dependency.javax.jcr.jcr.version>2.0</dependency.javax.jcr.jcr.version>
+    <dependency.commons-cli.version>1.2</dependency.commons-cli.version>
     <dependency.org.springFramework.spring.version>2.5.6</dependency.org.springFramework.spring.version>
-    <dependency.pentaho-mongodb-plugin.revision>7.1-SNAPSHOT</dependency.pentaho-mongodb-plugin.revision>
+    <dependency.pentaho-mongodb-plugin.revision>7.1.0.1-34</dependency.pentaho-mongodb-plugin.revision>
+    <dependency.pentaho-platform.revision>7.1.0.1-34</dependency.pentaho-platform.revision>
   </properties>
   <dependencies>
     <dependency>
@@ -209,8 +209,8 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <classifier>tests</classifier>
       <version>${dependency.pentaho-platform.revision}</version>
+      <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
     <dependency>
