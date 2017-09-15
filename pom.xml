@@ -2,22 +2,18 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>7.1-SNAPSHOT</version>
+    <version>7.1.0.4-66</version>
   </parent>
-  
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1.0.4-66</version>
   <packaging>pom</packaging>
-  
   <name>${project.artifactId}</name>
   <description>Parent pom for pentaho-metaverse projects</description>
   <url>http://www.pentaho.com</url>
-  
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -26,7 +22,6 @@
       <comments>A business-friendly OSS license</comments>
     </license>
   </licenses>
-  
   <developers>
     <developer>
       <name>Rob Fellows</name>
@@ -50,20 +45,17 @@
       </roles>
     </developer>
   </developers>
-  
   <modules>
     <module>api</module>
     <module>core</module>
     <module>web</module>
     <module>sample</module>
   </modules>
-  
   <scm>
     <connection>scm:git:git@github.com:pentaho/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:pentaho/${project.artifactId}.git</developerConnection>
     <url>https://github.com/pentaho/${project.artifactId}</url>
   </scm>
-  
   <distributionManagement>
     <site>
       <id>pentaho.public.snapshot.repo</id>
@@ -71,7 +63,6 @@
       <url>dav:${site.publish.url}/${project.groupId}/pentaho-metaverse-${project.version}</url>
     </site>
   </distributionManagement>
-  
   <properties>
     <dependency.net.sf.flexjson.flexjson.version>2.1</dependency.net.sf.flexjson.flexjson.version>
     <dependency.pentaho.pentaho-platform-repository.version>${project.version}</dependency.pentaho.pentaho-platform-repository.version>
@@ -82,11 +73,10 @@
     <dependency.commons-configuration.commons-configuration.version>1.9</dependency.commons-configuration.commons-configuration.version>
     <dependency.commons-collections.commons-collections.version>3.2.1</dependency.commons-collections.commons-collections.version>
     <dependency.org.slf4j.slf4j-api.version>1.7.7</dependency.org.slf4j.slf4j-api.version>
-    <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
     <dependency.org.mockito.mockito-all.version>1.9.5</dependency.org.mockito.mockito-all.version>
+    <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
     <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
   </properties>
-  
   <profiles>
     <profile>
       <id>aggregate-reporting</id>
@@ -149,5 +139,4 @@
       </reporting>
     </profile>
   </profiles>
-  
 </project>
