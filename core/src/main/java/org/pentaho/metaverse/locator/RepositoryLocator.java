@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -35,7 +35,7 @@ import org.pentaho.platform.repository2.ClientRepositoryPaths;
 import java.util.List;
 
 /**
- * An abstract implementation of a document locator for Pentaho repositories
+ * An abstract implementation of a document locator for Hitachi Vantara repositories
  * @author jdixon
  *
  */

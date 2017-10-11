@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -25,7 +25,7 @@ package org.pentaho.metaverse.impl.model;
 import org.pentaho.metaverse.api.model.IExecutionEngine;
 
 /**
- * ExecutionEngine is a base implementation for IExecutionEngine, which describes a Pentaho execution engine
+ * ExecutionEngine is a base implementation for IExecutionEngine, which describes a Hitachi Vantara execution engine
  *
  * @see IExecutionEngine
  */
