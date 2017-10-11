@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -32,7 +32,7 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * A helper class for the Pentaho Dictionary
+ * A helper class for the Hitachi Vantara Dictionary
  *
  * @author jdixon
  */

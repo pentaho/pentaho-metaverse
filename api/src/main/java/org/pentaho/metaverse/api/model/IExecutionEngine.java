@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,10 +23,10 @@
 package org.pentaho.metaverse.api.model;
 
 /**
- * The IExecutionEngine interface describes a Pentaho execution engine.
+ * The IExecutionEngine interface describes a Hitachi Vantara execution engine.
  *
- * A Pentaho execution engine is any product that can operate on Pentaho documents/artifacts. For example,
- * Pentaho Data Integration is a Pentaho execution engine as it operates on Transformations and Jobs.
+ * A Pentaho execution engine is any product that can operate on Hitachi Vantara documents/artifacts. For example,
+ * Pentaho Data Integration is a Hitachi Vantara execution engine as it operates on Transformations and Jobs.
  */
 public interface IExecutionEngine extends IVersionInfo {
 
