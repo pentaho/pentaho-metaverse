@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,6 +29,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.Random;
 
@@ -138,16 +140,26 @@ public class VfsLineageWriterTest {
 
   @Test
   public void testGetProfileOutputStream() throws Exception {
-    assertNotNull( writer.getProfileOutputStream( holder ) );
+    try ( OutputStream os = writer.getProfileOutputStream( holder ) ) {
+      assertNotNull( os );
+    }
   }
 
   @Test
-  public void testCreateOutputStream() throws FileSystemException {
-    assertNull( writer.createOutputStream( null, null ) );
-    assertNotNull( writer.createOutputStream( holder, "ktr" ) );
+  public void testCreateOutputStream() throws IOException {
+    try ( OutputStream nullOS = writer.createOutputStream( null, null );
+          OutputStream ktrOS = writer.createOutputStream( holder, "ktr" ) ) {
+      assertNull( nullOS );
+      assertNotNull( ktrOS );
+    }
+
     writer.setOutputFolder( BAD_OUTPUT_FOLDER );
-    assertNotNull( writer.createOutputStream( holder, null ) );
-    assertNotNull( writer.createOutputStream( holder, "ktr" ) );
+
+    try ( OutputStream nullOS = writer.createOutputStream( holder, null );
+          OutputStream ktrOS = writer.createOutputStream( holder, "ktr" ) ) {
+      assertNotNull( nullOS );
+      assertNotNull( ktrOS );
+    }
   }
 
   @Test
@@ -162,16 +174,27 @@ public class VfsLineageWriterTest {
   }
 
   @Test
-  public void testSetGraphOutputStream() {
-    assertNull( writer.getGraphOutputStream( null ) );
+  public void testSetGraphOutputStream() throws IOException {
+    try ( OutputStream graphOutputStream = writer.getGraphOutputStream( null ) ) {
+      assertNull( graphOutputStream );
+    }
+
     IGraphWriter graphWriter = new GraphMLWriter();
     writer.setGraphWriter( graphWriter );
-    assertNotNull( writer.getGraphOutputStream( holder ) );
+    try ( OutputStream graphOutputStream = writer.getGraphOutputStream( holder ) ) {
+      assertNotNull( graphOutputStream );
+    }
+
     graphWriter = new GraphSONWriter();
     writer.setGraphWriter( graphWriter );
-    assertNotNull( writer.getGraphOutputStream( holder ) );
+    try ( OutputStream graphOutputStream = writer.getGraphOutputStream( holder ) ) {
+      assertNotNull( graphOutputStream );
+    }
+
     graphWriter = new GraphCsvWriter();
     writer.setGraphWriter( graphWriter );
-    assertNotNull( writer.getGraphOutputStream( holder ) );
+    try ( OutputStream graphOutputStream = writer.getGraphOutputStream( holder ) ) {
+      assertNotNull( graphOutputStream );
+    }
   }
 }
