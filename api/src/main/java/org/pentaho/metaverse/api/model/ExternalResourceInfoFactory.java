@@ -47,7 +47,9 @@ public class ExternalResourceInfoFactory {
     BaseDatabaseResourceInfo resourceInfo;
     if ( "Native".equals( databaseMeta.getAccessTypeDesc() ) ) {
       resourceInfo = new JdbcResourceInfo( databaseMeta );
-    } else {
+    } else if ( "OCI".equals( databaseMeta.getAccessTypeDesc() ) ) {
+      resourceInfo = new OCIResourceInfo( databaseMeta );
+    } else{
       resourceInfo = new JndiResourceInfo( databaseMeta );
     }
     resourceInfo.setInput( isInput );
