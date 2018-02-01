@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -49,6 +49,7 @@ import org.pentaho.di.repository.RepositorySecurityProvider;
 import org.pentaho.di.shared.SharedObjects;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metastore.api.IMetaStore;
+import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 
 import java.util.Calendar;
 import java.util.List;
@@ -714,6 +715,11 @@ public class SimpleRepository implements Repository {
   }
 
   @Override public IMetaStore getMetaStore() {
+    // TODO - Implement this
+    throw new UnsupportedOperationException( NOT_IMPLEMENTED );
+  }
+
+  @Override public IUnifiedRepository getUnderlyingRepository() {
     // TODO - Implement this
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
