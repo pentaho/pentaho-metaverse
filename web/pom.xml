@@ -21,6 +21,7 @@
     <enunciate.version>1.27</enunciate.version>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <maven-pmd-plugin.version>3.2</maven-pmd-plugin.version>
+    <fasterxml.jackson.version>2.9.4</fasterxml.jackson.version>
   </properties>
   <dependencies>
     <dependency>
@@ -44,6 +45,26 @@
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-jersey-rt</artifactId>
       <version>${enunciate.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>jackson-jaxrs</artifactId>
+          <groupId>org.codehaus.jackson</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jackson-xc</artifactId>
+          <groupId>org.codehaus.jackson</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <version>${fasterxml.jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jaxb-annotations</artifactId>
+      <version>${fasterxml.jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -88,6 +109,17 @@
             <Bundle-Version>${project.version}</Bundle-Version>
             <Import-Package>org.osgi.service.http,
                             org.apache.felix.http.api,
+                            com.fasterxml.jackson.jaxrs.annotation,
+                            com.fasterxml.jackson.jaxrs.base,
+                            com.fasterxml.jackson.jaxrs.base.nocontent,
+                            com.fasterxml.jackson.jaxrs.cfg,
+                            com.fasterxml.jackson.jaxrs.util,
+                            com.fasterxml.jackson.jaxrs.json,
+                            com.fasterxml.jackson.jaxrs.json.annotation,
+                            com.fasterxml.jackson.module.jaxb,
+                            com.fasterxml.jackson.module.jaxb.deser,
+                            com.fasterxml.jackson.module.jaxb.ser,
+                            !org.codehaus.jackson.jaxrs,
                             *</Import-Package>
           </instructions>
         </configuration>
