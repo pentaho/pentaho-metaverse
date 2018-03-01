@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -74,11 +74,12 @@ public class VfsLineageWriter implements ILineageWriter {
     if ( holder != null ) {
       IExecutionProfile profile = holder.getExecutionProfile();
       if ( profile != null ) {
-        OutputStream fis = getProfileOutputStream( holder );
-        if ( fis != null ) {
-          ExecutionProfileUtil.outputExecutionProfile( fis, profile );
-        } else {
-          log.debug( Messages.getString( "DEBUG.noProfileOutputStream" ) );
+        try ( OutputStream fis = getProfileOutputStream( holder ) ) {
+          if ( fis != null ) {
+            ExecutionProfileUtil.outputExecutionProfile( fis, profile );
+          } else {
+            log.debug( Messages.getString( "DEBUG.noProfileOutputStream" ) );
+          }
         }
       }
     }
@@ -89,12 +90,12 @@ public class VfsLineageWriter implements ILineageWriter {
     if ( holder != null ) {
       IMetaverseBuilder builder = holder.getMetaverseBuilder();
       if ( builder != null ) {
-        OutputStream fos = getGraphOutputStream( holder );
-        if ( fos != null ) {
-          graphWriter.outputGraph( builder.getGraph(), fos );
-          fos.close();
-        } else {
-          log.debug( Messages.getString( "DEBUG.noGraphOutputStream" ) );
+        try ( OutputStream fos = getGraphOutputStream( holder ) ) {
+          if ( fos != null ) {
+            graphWriter.outputGraph( builder.getGraph(), fos );
+          } else {
+            log.debug( Messages.getString( "DEBUG.noGraphOutputStream" ) );
+          }
         }
       }
     }
