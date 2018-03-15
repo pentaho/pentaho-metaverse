@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -34,6 +34,8 @@ import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.file.BaseFileField;
+import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.metaverse.api.IComponentDescriptor;
@@ -64,6 +66,7 @@ public class ExternalResourceStepAnalyzerTest {
 
   @Mock IComponentDescriptor descriptor;
   @Mock BaseStepMeta meta;
+  @Mock BaseFileInputMeta fileMeta;
   @Mock IMetaverseNode node;
   @Mock IStepExternalResourceConsumer erc;
   @Mock IMetaverseBuilder builder;
@@ -382,5 +385,39 @@ public class ExternalResourceStepAnalyzerTest {
     analyzer.linkChangeNodes( inputNode, outputNode );
     verify( builder, never() ).addLink( inputNode, DictionaryConst.LINK_POPULATES, outputNode );
     verify( builder ).addLink( inputNode, analyzer.getInputToOutputLinkLabel(), outputNode );
+  }
+
+  @Test
+  public void testGetInputFieldsToIgnore() {
+
+    doReturn( true ).when( analyzer ).isInput();
+
+    // setup input fields
+    RowMetaInterface inputFieldRowMeta = mock( RowMetaInterface.class );
+    List<ValueMetaInterface> inputFields = new ArrayList<>();
+    inputFields.add( new ValueMeta( "in_field_1" ) );
+    Map<String, RowMetaInterface> inputFieldRowMetaMap = new HashMap<>();
+    inputFieldRowMetaMap.put( ExternalResourceStepAnalyzer.RESOURCE, inputFieldRowMeta );
+    when( inputFieldRowMeta.getValueMetaList() ).thenReturn( inputFields );
+
+    // setup output fields
+    List<ValueMetaInterface> outputFields = new ArrayList<>();
+    outputFields.addAll( inputFields );
+    outputFields.add( new ValueMeta( "file_field_1" ) );
+    outputFields.add( new ValueMeta( "additional_field" ) );
+    outputFields.add( new ValueMeta( "file_field_2" ) );
+    RowMetaInterface outputFieldsRowMeta = mock( RowMetaInterface.class );
+    when( outputFieldsRowMeta.getValueMetaList() ).thenReturn( outputFields );
+
+    // setup step "resource" fields
+    final BaseFileField[] resourceFields = new BaseFileField[ 2 ];
+    resourceFields[ 0 ] = new BaseFileField( "file_field_1", 0, 0 );
+    resourceFields[ 1 ] = new BaseFileField( "file_field_2", 0, 0 );
+    doReturn( resourceFields ).when( fileMeta ).getInputFields();
+
+    Set<String> fieldsToIgnore = analyzer.getInputFieldsToIgnore( fileMeta, inputFieldRowMetaMap, outputFieldsRowMeta );
+    assertEquals( 2, fieldsToIgnore.size() );
+    assertTrue( fieldsToIgnore.contains( "in_field_1" ) );
+    assertTrue( fieldsToIgnore.contains( "additional_field" ) );
   }
 }

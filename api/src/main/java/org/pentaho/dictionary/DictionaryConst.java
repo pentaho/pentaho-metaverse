@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -393,6 +393,16 @@ public class DictionaryConst {
    * The node type for a field in a physical file
    */
   public static final String NODE_TYPE_FILE_FIELD = "File Field";
+
+  /**
+   * The node type for a JSON file
+   */
+  public static final String NODE_TYPE_JSON_FILE = "JSON File";
+
+  /**
+   * The node type for a field in a JSON file
+   */
+  public static final String NODE_TYPE_JSON_FIELD = "JSON Field";
 
   /**
    * The node type for a web service, e.g. SalesForce.com or a HTTP call

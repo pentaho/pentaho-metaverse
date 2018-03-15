@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,6 +27,8 @@ import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.file.BaseFileField;
+import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.metaverse.api.IMetaverseNode;
@@ -37,8 +39,11 @@ import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -124,20 +129,49 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
       RowMetaInterface stepFields = getOutputFields( meta );
       if ( stepFields != null ) {
         RowMetaInterface clone = stepFields.clone();
-        // if there are previous steps providing data, we should remove them from the set of "resource" fields
-        for ( RowMetaInterface rowMetaInterface : inputRows.values() ) {
-          for ( ValueMetaInterface valueMetaInterface : rowMetaInterface.getValueMetaList() ) {
-            try {
-              clone.removeValueMeta( valueMetaInterface.getName() );
-            } catch ( KettleValueException e ) {
-              // could not find it in the output, skip it
-            }
+        // ignore any input fields that are not specifically defined as meta inputs, for example, all the
+        // "additional" fields, or fields coming from previous steps
+        for ( final String inputFieldToIgnore : getInputFieldsToIgnore( meta, inputRows, stepFields ) ) {
+          try {
+            clone.removeValueMeta( inputFieldToIgnore );
+          } catch ( KettleValueException e ) {
+            // could not find it in the output, skip it
           }
         }
         inputRows.put( RESOURCE, clone );
       }
     }
     return inputRows;
+  }
+
+  /**
+   * Returns a {@lnk Set} of field names that are to be ignored when fetching "resource" fields. This set will
+   * typically include any field that is either provided by a previous step, or is some "additional" field.
+   */
+  protected Set<String> getInputFieldsToIgnore( final T meta, final Map<String, RowMetaInterface> inputRows,
+                                                 final RowMetaInterface rowMeta ) {
+    Set<String> inputFieldsToIgnore = new HashSet<>();
+    for ( RowMetaInterface rowMetaInterface : inputRows.values() ) {
+      for ( ValueMetaInterface inputField : rowMetaInterface.getValueMetaList() ) {
+        inputFieldsToIgnore.add( inputField.getName() );
+      }
+    }
+    if ( meta instanceof BaseFileInputMeta ) {
+      final BaseFileInputMeta fileMeta = (BaseFileInputMeta) meta;
+      final BaseFileField[] inputFields = fileMeta.getInputFields();
+      final List<String> inputFieldNames = new ArrayList<>();
+      for ( final BaseFileField inputField : inputFields ) {
+        inputFieldNames.add( inputField.getName() );
+      }
+      // get the fields within rowMeta - any field tha ISN'T a meta input field, should be ignored
+      final List<ValueMetaInterface> rowMetaValueMetaList = rowMeta.getValueMetaList();
+      for ( final ValueMetaInterface rowMetaValueMeta : rowMetaValueMetaList ) {
+        if ( !inputFieldNames.contains( rowMetaValueMeta.getName() ) ) {
+          inputFieldsToIgnore.add( rowMetaValueMeta.getName() );
+        }
+      }
+    }
+    return inputFieldsToIgnore;
   }
 
   @Override

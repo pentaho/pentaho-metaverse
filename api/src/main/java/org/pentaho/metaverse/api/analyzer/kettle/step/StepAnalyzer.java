@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -423,6 +423,33 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     return prevFieldDescriptor;
   }
 
+  /**
+   * Returns a {@link Set} of step names that contain the given {@code fieldName}.
+   *
+   * @param meta      a concrete instance of {@link BaseStepMeta}
+   * @param fieldName the field name used to find matching steps
+   * @return a {@link Set} of step names that contain the given {@code fieldName}.
+   */
+  public Set<String> getInputStepNames( final T meta, final String fieldName ) {
+    // get all input steps
+    final Map<String, RowMetaInterface> inputRowMetaInterfaces = getInputRowMetaInterfaces( meta );
+    final Set<String> prevStepNames = new HashSet<>();
+    if ( MapUtils.isNotEmpty( inputRowMetaInterfaces ) ) {
+      for ( Map.Entry<String, RowMetaInterface> entry : inputRowMetaInterfaces.entrySet() ) {
+        final String prevStepName = entry.getKey();
+        final RowMetaInterface inputFields = entry.getValue();
+        if ( inputFields != null ) {
+          for ( ValueMetaInterface valueMetaInterface : inputFields.getValueMetaList() ) {
+            if ( valueMetaInterface.getName().equalsIgnoreCase( fieldName ) ) {
+              prevStepNames.add( prevStepName );
+            }
+          }
+        }
+      }
+    }
+    return prevStepNames;
+  }
+
   public String getStepName() {
     return parentStepMeta.getName();
   }
@@ -544,7 +571,11 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
         RowMetaInterface rmi = parentTransMeta.getPrevStepFields( parentStepMeta, progressMonitor );
         progressMonitor.done();
         if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
-          rowMeta.put( prevStepNames[0], rmi );
+          // get input fields from all previous steps, not just the first one
+          for ( int i = 0; i < prevStepNames.length; i++ ) {
+            rowMeta.put( prevStepNames[i], rmi );
+          }
+
         }
       } catch ( KettleStepException e ) {
         rowMeta = null;
