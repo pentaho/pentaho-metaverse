@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -79,6 +79,10 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     addEntityType( DictionaryConst.NODE_TYPE_TRANS_STEP, null );
     addEntityType( DictionaryConst.NODE_TYPE_TRANS_FIELD, null );
     addEntityType( DictionaryConst.NODE_TYPE_USER_CONTENT, null );
+    addEntityType( DictionaryConst.NODE_TYPE_FILE, null );
+    addEntityType( DictionaryConst.NODE_TYPE_FILE_FIELD, null );
+    addEntityType( DictionaryConst.NODE_TYPE_JSON_FILE, DictionaryConst.NODE_TYPE_FILE );
+    addEntityType( DictionaryConst.NODE_TYPE_JSON_FIELD, DictionaryConst.NODE_TYPE_FILE_FIELD );
   }
 
   /**

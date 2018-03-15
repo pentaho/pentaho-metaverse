@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -53,6 +53,8 @@ public class DictionaryHelperTest {
     types.add( DictionaryConst.NODE_TYPE_DATA_COLUMN );
     types.add( DictionaryConst.NODE_TYPE_FILE );
     types.add( DictionaryConst.NODE_TYPE_FILE_FIELD );
+    types.add( DictionaryConst.NODE_TYPE_JSON_FILE );
+    types.add( DictionaryConst.NODE_TYPE_JSON_FIELD );
   }
 
   @Test( expected = UnsupportedOperationException.class )

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,10 +22,12 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle.step;
 
+import org.pentaho.di.core.util.StringUtil;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.StepField;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,18 +38,17 @@ import java.util.Set;
  * Created by rfellows on 5/6/15.
  */
 public class StepNodes {
-
   // use LinkedHashMap to preserve order in which elements are added
-  private LinkedHashMap<String, LinkedHashMap<String, IMetaverseNode>> store;
+  private LowerCaseKeyLinkedHashMap<String, LowerCaseKeyLinkedHashMap<String, IMetaverseNode>> store;
 
   public StepNodes() {
-    store = new LinkedHashMap<>();
+    store = new LowerCaseKeyLinkedHashMap<>();
   }
 
   public void addNode( String stepName, String fieldName, IMetaverseNode node ) {
 
     if ( !store.containsKey( stepName ) ) {
-      store.put( stepName, new LinkedHashMap<String, IMetaverseNode>() );
+      store.put( stepName, new LowerCaseKeyLinkedHashMap<String, IMetaverseNode>() );
     }
 
     Map<String, IMetaverseNode> stepFields = store.get( stepName );
@@ -107,4 +108,28 @@ public class StepNodes {
     return fieldNames;
   }
 
+  /**
+   * An implementation of {@link LinkedHashMap} that provides case-insensitive lookup on keys. Ensures
+   * that step and field name lookup is not case sensitive, in case some step pulls fields using the wrong case.
+   */
+  static class LowerCaseKeyLinkedHashMap<K, V> extends LinkedHashMap<String, V> {
+
+    private Map<String, String> keyMap = new HashMap<>();
+
+    @Override
+    public V put( final String key, final V value ) {
+      keyMap.put( StringUtil.safeToLowerCase( key ), key );
+      return super.put( key, value );
+    }
+
+    @Override
+    public V get( final Object key  ) {
+      return super.get( keyMap.get( StringUtil.safeToLowerCase( key ) ) );
+    }
+
+    @Override
+    public boolean containsKey( final Object key ) {
+      return super.containsKey( keyMap.get( StringUtil.safeToLowerCase( key ) ) );
+    }
+  }
 }

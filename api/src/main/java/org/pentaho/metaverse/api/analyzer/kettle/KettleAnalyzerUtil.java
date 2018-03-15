@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,10 +23,26 @@
 package org.pentaho.metaverse.api.analyzer.kettle;
 
 import org.apache.commons.vfs2.FileObject;
+import org.pentaho.di.core.Const;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleFileException;
+import org.pentaho.di.core.fileinput.FileInputList;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
+import org.pentaho.di.trans.steps.file.BaseFileInputStep;
+import org.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 
 public class KettleAnalyzerUtil {
 
@@ -51,6 +67,65 @@ public class KettleAnalyzerUtil {
     } catch ( Exception e ) {
       throw new MetaverseException( e );
     }
+  }
+
+  public static Collection<IExternalResourceInfo> getResourcesFromMeta(
+    final BaseFileInputMeta meta, final IAnalysisContext context ) {
+    Collection<IExternalResourceInfo> resources = Collections.emptyList();
+
+    final StepMeta parentStepMeta = meta.getParentStepMeta();
+    if ( parentStepMeta != null ) {
+      final TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
+      if ( parentTransMeta != null ) {
+        final FileInputList inputList = meta.getFileInputList( parentTransMeta );
+        if ( inputList != null ) {
+          final String[] paths = inputList.getFileStrings();
+          if ( paths != null ) {
+            resources = new ArrayList<>( paths.length );
+
+            for ( final String path : paths ) {
+              if ( !Const.isEmpty( path ) ) {
+                try {
+
+                  final IExternalResourceInfo resource = ExternalResourceInfoFactory
+                    .createFileResource( KettleVFS.getFileObject( path ), true );
+                  if ( resource != null ) {
+                    resources.add( resource );
+                  } else {
+                    throw new KettleFileException( "Error getting file resource!" );
+                  }
+                } catch ( KettleFileException kfe ) {
+                  // TODO throw or ignore?
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return resources;
+  }
+
+  public static Collection<IExternalResourceInfo> getResourcesFromRow(
+    BaseFileInputStep step, RowMetaInterface rowMeta, Object[] row ) {
+
+    Collection<IExternalResourceInfo> resources = new LinkedList<>();
+    // For some reason the step doesn't return the StepMetaInterface directly, so go around it
+    BaseFileInputMeta meta = (BaseFileInputMeta) step.getStepMetaInterface();
+    if ( meta == null ) {
+      meta = (BaseFileInputMeta) step.getStepMeta().getStepMetaInterface();
+    }
+
+    try {
+      String filename = meta == null ? null : rowMeta.getString( row, meta.getAcceptingField(), null );
+      if ( !Const.isEmpty( filename ) ) {
+        FileObject fileObject = KettleVFS.getFileObject( filename );
+        resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, true ) );
+      }
+    } catch ( KettleException kve ) {
+      // TODO throw exception or ignore?
+    }
+    return resources;
   }
 
 }
