@@ -56,13 +56,6 @@
     <developerConnection>scm:git:git@github.com:pentaho/${project.artifactId}.git</developerConnection>
     <url>https://github.com/pentaho/${project.artifactId}</url>
   </scm>
-  <distributionManagement>
-    <site>
-      <id>pentaho.public.snapshot.repo</id>
-      <name>${project.artifactId}-${project.version}</name>
-      <url>dav:${site.publish.url}/${project.groupId}/pentaho-metaverse-${project.version}</url>
-    </site>
-  </distributionManagement>
   <properties>
     <dependency.net.sf.flexjson.flexjson.version>2.1</dependency.net.sf.flexjson.flexjson.version>
     <dependency.pentaho.pentaho-platform-repository.version>${project.version}</dependency.pentaho.pentaho-platform-repository.version>
