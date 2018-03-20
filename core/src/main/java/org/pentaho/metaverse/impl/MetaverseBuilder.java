@@ -35,6 +35,8 @@ import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.MetaverseObjectFactory;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
+import java.util.Iterator;
+
 /**
  * This is the reference implementation for IMetaverseBuilder, offering the ability to add nodes, links, etc. to an
  * underlying graph
@@ -50,8 +52,8 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
   private Graph graph;
 
   /**
-   * This is a possible delegate reference to a metaverse object factory. This builder is itself a
-   * metaverse object factory, so the reference is initialized to "this".
+   * This is a possible delegate reference to a metaverse object factory. This builder is itself a metaverse object
+   * factory, so the reference is initialized to "this".
    */
   private IMetaverseObjectFactory metaverseObjectFactory = this;
 
@@ -66,23 +68,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
   }
 
   protected void registerStaticNodes() {
-    addEntityType( DictionaryConst.NODE_TYPE_EXTERNAL_CONNECTION, null );
-    addEntityType( DictionaryConst.NODE_TYPE_DATASOURCE, DictionaryConst.NODE_TYPE_EXTERNAL_CONNECTION );
-    addEntityType( DictionaryConst.NODE_TYPE_DATA_TABLE, null );
-    addEntityType( DictionaryConst.NODE_TYPE_DATA_COLUMN, null );
-    addEntityType( DictionaryConst.NODE_TYPE_MONGODB_CONNECTION, DictionaryConst.NODE_TYPE_EXTERNAL_CONNECTION );
-    addEntityType( DictionaryConst.NODE_TYPE_MONGODB_COLLECTION, null );
-    addEntityType( DictionaryConst.NODE_TYPE_JOB, null );
-    addEntityType( DictionaryConst.NODE_TYPE_JOB_ENTRY, null );
-    addEntityType( DictionaryConst.NODE_TYPE_LOGICAL_MODEL, null );
-    addEntityType( DictionaryConst.NODE_TYPE_TRANS, null );
-    addEntityType( DictionaryConst.NODE_TYPE_TRANS_STEP, null );
-    addEntityType( DictionaryConst.NODE_TYPE_TRANS_FIELD, null );
-    addEntityType( DictionaryConst.NODE_TYPE_USER_CONTENT, null );
-    addEntityType( DictionaryConst.NODE_TYPE_FILE, null );
-    addEntityType( DictionaryConst.NODE_TYPE_FILE_FIELD, null );
-    addEntityType( DictionaryConst.NODE_TYPE_JSON_FILE, DictionaryConst.NODE_TYPE_FILE );
-    addEntityType( DictionaryConst.NODE_TYPE_JSON_FIELD, DictionaryConst.NODE_TYPE_FILE_FIELD );
+    DictionaryHelper.registerEntityTypes();
   }
 
   /**
@@ -135,16 +121,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     // update the to vertex properties from the toNode
     copyNodePropertiesToVertex( link.getToNode(), toVertex );
 
-    String label = link.getLabel();
-    String edgeId = getEdgeId( fromVertex, label, toVertex );
-    // only add the link if the edge doesn't already exist
-    Edge edge = graph.getEdge( edgeId );
-    if ( edge == null ) {
-      edge = graph.addEdge( edgeId, fromVertex, toVertex, label );
-      edge.setProperty( "text", label );
-    }
-
-    copyLinkPropertiesToEdge( link, edge );
+    copyLinkPropertiesToEdge( link, addEdge( fromVertex, link.getLabel(), toVertex ) );
 
     return this;
   }
@@ -197,10 +174,9 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
     if ( DictionaryHelper.isEntityType( node.getType() ) ) {
 
-      // Add a link from the entity type to the node. Note the method called is addEntityType but we expect at this
-      // point that the entities have been added, the idea is to return the existing one. That's also why the second
-      // parameter is null, we don't know or care about the parent
-      graph.addEdge( null, addEntityType( node.getType(), null ), v, DictionaryConst.LINK_PARENT_CONCEPT );
+      // Add a link from the entity type to the node
+      addEdge( addEntityType( node.getType() ), DictionaryHelper.getNonEntityToEntityLinkType(), v,
+        DictionaryHelper.addNonEntityToEntityLinkTypeLabel() );
     }
 
     return v;
@@ -211,8 +187,14 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    *
    * @param entityName the String type of the entity
    * @param parent     The String name of the parent entity
+   * @deprecated use {@link #addEntityType(String)} instead
    */
+  @Deprecated
   protected Vertex addEntityType( String entityName, String parent ) {
+    return addEntityType( entityName );
+  }
+
+  protected Vertex addEntityType( String entityName ) {
     if ( graph == null ) {
       return null;
     }
@@ -221,29 +203,28 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     Vertex entityType = graph.getVertex( ENTITY_PREFIX + entityName );
     if ( entityType == null ) {
       // the entity type node does not exist, so create it
-      DictionaryHelper.registerEntityType( entityName );
       entityType = graph.addVertex( ENTITY_PREFIX + entityName );
       entityType.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ENTITY );
       entityType.setProperty( DictionaryConst.PROPERTY_NAME, entityName );
 
       // TODO move this to a map of types to strings or something
-      if ( entityName.equals( DictionaryConst.NODE_TYPE_TRANS ) || entityName.equals( DictionaryConst.NODE_TYPE_JOB ) ) {
+      if ( entityName.equals( DictionaryConst.NODE_TYPE_TRANS ) || entityName
+        .equals( DictionaryConst.NODE_TYPE_JOB ) ) {
         entityType.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, "Pentaho Data Integration" );
       }
 
-      Vertex rootEntity = graph.getVertex( ENTITY_NODE_ID );
-      if ( rootEntity == null ) {
-        // the root entity node does not exist, so create it
-        rootEntity = createRootEntity();
-      }
-
-      // Add and link the parent entity if specified, otherwise link to the root
-      if ( parent != null ) {
-        Vertex parentEntity = addEntityType( parent, null );
-        addLink( parentEntity, DictionaryConst.LINK_PARENT_CONCEPT, entityType );
-      } else {
-        // add the link from the root node to the entity type
-        addLink( rootEntity, DictionaryConst.LINK_PARENT_CONCEPT, entityType );
+      // get all available entity link types
+      final Iterator<String> entityLinkTypeIter = DictionaryHelper.getEntityLinkTypes().iterator();
+      while ( entityLinkTypeIter.hasNext() ) {
+        final String entityLinkType = entityLinkTypeIter.next();
+        // check if there is a parent node for the given node entityName with the current link type
+        final String parentEntityNode = DictionaryHelper.getParentEntityNodeType( entityLinkType, entityName );
+        // if the node exists, add it and add a link to it
+        if ( parentEntityNode != null ) {
+          addEdge( addEntityType( parentEntityNode ), entityLinkType, entityType );
+        } else if ( DictionaryHelper.linksToRoot( entityLinkType, entityName ) ) {
+          addEdge( createRootEntity(), entityLinkType, entityType );
+        }
       }
     }
     return entityType;
@@ -360,8 +341,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
   }
 
   /**
-   * Deletes the specific link from the metaverse model and optionally removing virtual nodes associated
-   * with the link
+   * Deletes the specific link from the metaverse model and optionally removing virtual nodes associated with the link
    *
    * @param link               the link to remove
    * @param removeVirtualNodes should any virtual nodes be removed or not?
@@ -398,7 +378,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
 
       // now remove any "virtual" nodes associated with the link
       if ( removeVirtualNodes ) {
-        Vertex[] fromAndTo = new Vertex[]{ fromVertex, toVertex };
+        Vertex[] fromAndTo = new Vertex[] { fromVertex, toVertex };
         for ( Vertex v : fromAndTo ) {
           if ( isVirtual( v ) ) {
             graph.removeVertex( v );
@@ -479,10 +459,7 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
    * @param label    the label
    * @param toNode   the to node
    * @return this metaverse builder
-   * @see IMetaverseBuilder#addLink(
-   *IMetaverseNode,
-   * java.lang.String,
-   * IMetaverseNode)
+   * @see IMetaverseBuilder#addLink(IMetaverseNode, java.lang.String, IMetaverseNode)
    */
   @Override
   public IMetaverseBuilder addLink( IMetaverseNode fromNode, String label, IMetaverseNode toNode ) {
@@ -494,18 +471,34 @@ public class MetaverseBuilder extends MetaverseObjectFactory implements IMetaver
     return addLink( link );
   }
 
+  /**
+   * @deprecated  use {@link #addEdge(Vertex, String, Vertex)} instead
+   */
+  @Deprecated
   protected void addLink( Vertex fromVertex, String label, Vertex toVertex ) {
+    addEdge( fromVertex, label, toVertex );
+  }
+
+  private Edge addEdge( Vertex fromVertex, String label, Vertex toVertex ) {
+    return addEdge( fromVertex, label, toVertex, true );
+  }
+
+  private Edge addEdge( final Vertex fromVertex, final String label, Vertex toVertex, final boolean addLabel ) {
     String edgeId = getEdgeId( fromVertex, label, toVertex );
+    Edge edge = graph.getEdge( edgeId );
     // only add the link if the edge doesn't already exist
-    if ( graph.getEdge( edgeId ) == null ) {
-      Edge e = graph.addEdge( edgeId, fromVertex, toVertex, label );
-      e.setProperty( "text", label );
+    if ( edge == null ) {
+      edge = graph.addEdge( edgeId, fromVertex, toVertex, label );
+      if ( addLabel ) {
+        edge.setProperty( "text", label );
+      }
     }
+    return edge;
   }
 
   /**
-   * determines if the node passed in is a virtual node
-   * (meaning it has been implicitly added to the graph by an addLink)
+   * determines if the node passed in is a virtual node (meaning it has been implicitly added to the graph by an
+   * addLink)
    *
    * @param vertex node to determine if it is virtual
    * @return true/false
