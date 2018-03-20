@@ -246,9 +246,21 @@ public class DictionaryConst {
   public static final String LINK_EXECUTES = "executes";
 
   /**
-   * Label for an "parent concept" edge in the graph, e.g. a transformation entity is the parent concept of a ktr
+   * Label for an "parent concept" edge in the graph, e.g. a External Connection is a parent concept of a DB Connection
    */
   public static final String LINK_PARENT_CONCEPT = "parentconcept";
+
+  /**
+   * Label for an "contains concept" edge in the graph, e.g. a transformation entity contains transformation step
+   * entities
+   */
+  public static final String LINK_CONTAINS_CONCEPT = "containsconcept";
+
+  /**
+   * Label for an "type concept" edge in the graph, e.g. a transformation entity is a type concept of concrete ktr,
+   * transformation stream field entity is a type concept of a concrete transformation field
+   */
+  public static final String LINK_TYPE_CONCEPT = "typeconcept";
 
   /**
    * Label for an "contains" edge in the graph, e.g. a transformation contains a step
