@@ -47,8 +47,8 @@ import java.util.LinkedList;
 public class KettleAnalyzerUtil {
 
   /**
-   * Utility method for normalizing file paths used in Metaverse Id generation. It will convert a valid path
-   * into a consistent path regardless of URI notation or filesystem absolute path.
+   * Utility method for normalizing file paths used in Metaverse Id generation. It will convert a valid path into a
+   * consistent path regardless of URI notation or filesystem absolute path.
    *
    * @param filePath full path to normalize
    * @return the normalized path
@@ -117,9 +117,10 @@ public class KettleAnalyzerUtil {
     }
 
     try {
-      String filename = meta == null ? null : rowMeta.getString( row, meta.getAcceptingField(), null );
+      String filename = meta == null ? null : step.environmentSubstitute(
+        rowMeta.getString( row, meta.getAcceptingField(), null ) );
       if ( !Const.isEmpty( filename ) ) {
-        FileObject fileObject = KettleVFS.getFileObject( filename );
+        FileObject fileObject = KettleVFS.getFileObject( filename, step );
         resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, true ) );
       }
     } catch ( KettleException kve ) {

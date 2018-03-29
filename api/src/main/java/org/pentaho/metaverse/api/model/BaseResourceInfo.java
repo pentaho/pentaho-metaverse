@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,6 +23,8 @@
 package org.pentaho.metaverse.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,4 +69,26 @@ public class BaseResourceInfo extends BaseInfo implements IExternalResourceInfo 
     attributes.put( key, value );
   }
 
+  @Override
+  public boolean equals( final Object obj ) {
+    if ( obj == null ) {
+      return false;
+    }
+    if ( obj == this ) {
+      return true;
+    }
+    if ( obj.getClass() != getClass() ) {
+      return false;
+    }
+    final BaseResourceInfo info = (BaseResourceInfo) obj;
+    return new EqualsBuilder().append( getName(), info.getName() ).append( getDescription(), info.getDescription() )
+      .append( getType(), info.getType() ).append( isInput(), info.isInput() )
+      .append( getAttributes(), info.getAttributes() ).isEquals();
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder( 17, 37 ).append( getName() ).append( getDescription() ).append( getType() )
+      .append( isInput() ).append( getAttributes() ).toHashCode();
+  }
 }

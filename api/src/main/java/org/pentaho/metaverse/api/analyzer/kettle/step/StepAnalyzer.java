@@ -571,11 +571,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
         RowMetaInterface rmi = parentTransMeta.getPrevStepFields( parentStepMeta, progressMonitor );
         progressMonitor.done();
         if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
-          // get input fields from all previous steps, not just the first one
-          for ( int i = 0; i < prevStepNames.length; i++ ) {
-            rowMeta.put( prevStepNames[i], rmi );
-          }
-
+          rowMeta.put( prevStepNames[0], rmi );
         }
       } catch ( KettleStepException e ) {
         rowMeta = null;

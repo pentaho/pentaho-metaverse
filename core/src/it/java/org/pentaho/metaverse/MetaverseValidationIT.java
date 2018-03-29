@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -82,7 +82,6 @@ import org.pentaho.metaverse.frames.FileInputStepNode;
 import org.pentaho.metaverse.frames.FilterRowsStepNode;
 import org.pentaho.metaverse.frames.FixedFileInputStepNode;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
-import org.pentaho.metaverse.frames.GetXMLDataStepNode;
 import org.pentaho.metaverse.frames.GroupByStepNode;
 import org.pentaho.metaverse.frames.HttpClientStepNode;
 import org.pentaho.metaverse.frames.HttpPostStepNode;
@@ -106,7 +105,6 @@ import org.pentaho.metaverse.frames.TextFileOutputStepNode;
 import org.pentaho.metaverse.frames.TransExecutorStepNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
-import org.pentaho.metaverse.frames.XMLOutputStepNode;
 import org.pentaho.metaverse.locator.FileSystemLocator;
 import org.pentaho.metaverse.util.MetaverseUtil;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
@@ -169,6 +167,13 @@ public class MetaverseValidationIT {
   @Before
   public void setUp() throws Exception {
 
+  }
+
+  private String normalizeFilePath( final String tilePath ) {
+    if ( StringUtils.isBlank( tilePath ) ) {
+      return tilePath;
+    }
+    return tilePath.replace( "file://", "" ).replace( "/C:", "C:" ).replace( "\\", "/" );
   }
 
   @Test
@@ -747,7 +752,7 @@ public class MetaverseValidationIT {
     assertEquals( fileNames.length, getIterableSize( outputFiles ) );
     int i = 0;
     for ( FramedMetaverseNode node : outputFiles ) {
-      assertEquals( fileNames[i++].replace( "file://", "" ), node.getName() );
+      assertEquals( normalizeFilePath( fileNames[i++] ),normalizeFilePath(  node.getName() ) );
     }
 
     Iterable<StreamFieldNode> outFields = textFileOutputStepNode.getOutputStreamFields();
@@ -1010,7 +1015,7 @@ public class MetaverseValidationIT {
     assertEquals( fileNames.length, getIterableSize( outputFiles ) );
     int i = 0;
     for ( FramedMetaverseNode node : outputFiles ) {
-      assertEquals( fileNames[i++].replace( "file://", "" ), node.getName() );
+      assertEquals( normalizeFilePath( fileNames[i++] ), normalizeFilePath( node.getName() ) );
     }
 
     Iterable<StreamFieldNode> outFields = excelOutputStepNode.getOutputStreamFields();

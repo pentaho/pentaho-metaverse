@@ -13,6 +13,7 @@
       <cm:property name="lineage.execution.runtime" value="off"/>
       <cm:property name="lineage.execution.output.folder" value="./pentaho-lineage-output"/>
       <cm:property name="lineage.execution.generation.strategy" value="latest"/>
+      <cm:property name="lineage.resolve.external.resources" value="false"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -25,6 +26,15 @@
       </map>
     </argument>
   </bean>
+
+  <!-- A single point of access for all metaverse osgi config properties -->
+  <bean id="metaverseConfig" class="org.pentaho.metaverse.impl.MetaverseConfig" scope="singleton">
+    <property name="executionRuntime" value="${lineage.execution.runtime}"/>
+    <property name="executionOutputFolder" value="${lineage.execution.output.folder}"/>
+    <property name="executionGenerationStrategy" value="${lineage.execution.generation.strategy}"/>
+    <property name="resolveExternalResources" value="${lineage.resolve.external.resources}"/>
+  </bean>
+  <service id="metaverseConfigService" interface="org.pentaho.metaverse.api.IMetaverseConfig" ref="metaverseConfig"/>
 
   <bean id="MetaverseGraphImplPrototype" class="org.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open" scope="prototype">
     <argument>

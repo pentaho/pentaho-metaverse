@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -134,6 +134,7 @@ public class ConnectionExternalResourceStepAnalyzerTest {
     doReturn( connectionNode ).when( analyzer ).getConnectionNode();
 
     doReturn( resourceNode ).when( analyzer ).createResourceNode( any( IExternalResourceInfo.class ) );
+    when( erc.getResources( eq( meta ), any( IAnalysisContext.class ) ) ).thenReturn( resources );
 
     analyzer.customAnalyze( meta, node );
 

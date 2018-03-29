@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -30,7 +30,6 @@ import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.job.JobListener;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
@@ -112,15 +111,22 @@ public class TransformationRuntimeExtensionPointTest {
       .thenReturn( mock( IMetaverseBuilder.class ) );
     TransLineageHolderMap.setInstance( transLineageHolderMap );
     ext.transStarted( null );
+    verify( ext, never() ).startAnalyzer( Mockito.any( Trans.class ) );
     verify( ext, never() ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
 
     ext.transStarted( trans );
-    verify( ext, times( 1 ) ).populateExecutionProfile(
+    verify( ext, never() ).startAnalyzer( Mockito.any( Trans.class ) );
+    verify( ext, never() ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
-
     // Restore the original holder map
     TransLineageHolderMap.setInstance( originalHolderMap );
+
+    Trans mockTrans = spy( trans );
+    ext.transStarted( mockTrans );
+    verify( ext, never() ).startAnalyzer( mockTrans );
+    verify( ext, never() ).populateExecutionProfile(
+      Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
   }
 
   @Test
@@ -131,13 +137,18 @@ public class TransformationRuntimeExtensionPointTest {
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
 
     ext.transFinished( trans );
-    // The logic in transFinished() is now in a thread, so we can't verify methods were called
+    verify( ext, times( 1 ) ).startAnalyzer( trans );
+    verify( ext, times( 1 ) ).populateExecutionProfile(
+      Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
 
     Trans mockTrans = spy( trans );
     Result result = mock( Result.class );
     when( mockTrans.getResult() ).thenReturn( result );
     ext.transFinished( mockTrans );
     // The logic in transFinished() is now in a thread, so we can't verify methods were called
+    verify( ext, times( 1 ) ).startAnalyzer( mockTrans );
+    verify( ext, times( 2 ) ).populateExecutionProfile(
+      Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
   }
 
   @Test

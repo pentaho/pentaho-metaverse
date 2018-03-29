@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
@@ -112,7 +113,10 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
    */
   @Override
   public void transStarted( Trans trans ) throws KettleException {
+    // no-op, we wait to kick off the analyzer until the transformation is finished executing
+  }
 
+  protected void startAnalyzer( Trans trans ) throws KettleException {
     if ( trans == null ) {
       return;
     }
@@ -267,6 +271,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     if ( trans == null ) {
       return;
     }
+
+    startAnalyzer( trans );
 
     if ( trans.isPreview() ) {
       return;
