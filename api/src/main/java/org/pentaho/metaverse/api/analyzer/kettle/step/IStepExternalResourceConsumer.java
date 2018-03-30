@@ -25,12 +25,10 @@ package org.pentaho.metaverse.api.analyzer.kettle.step;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.metaverse.api.analyzer.kettle.IExternalResourceConsumer;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * IStepExternalResourceConsumer is a helper interface used by ExternalResourceConsumer plugins that handle a single
@@ -42,8 +40,4 @@ public interface IStepExternalResourceConsumer<S extends BaseStep, M extends Bas
   extends IExternalResourceConsumer<M> {
 
   Collection<IExternalResourceInfo> getResourcesFromRow( S consumer, RowMetaInterface rowMeta, Object[] row );
-
-  default Collection<IExternalResourceInfo> getResources( final M meta, final IAnalysisContext context ) {
-    return Collections.emptyList();
-  }
 }

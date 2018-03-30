@@ -111,22 +111,14 @@ public class TransformationRuntimeExtensionPointTest {
       .thenReturn( mock( IMetaverseBuilder.class ) );
     TransLineageHolderMap.setInstance( transLineageHolderMap );
     ext.transStarted( null );
-    verify( ext, never() ).startAnalyzer( Mockito.any( Trans.class ) );
     verify( ext, never() ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
 
     ext.transStarted( trans );
-    verify( ext, never() ).startAnalyzer( Mockito.any( Trans.class ) );
-    verify( ext, never() ).populateExecutionProfile(
+    verify( ext, times( 1 ) ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
     // Restore the original holder map
     TransLineageHolderMap.setInstance( originalHolderMap );
-
-    Trans mockTrans = spy( trans );
-    ext.transStarted( mockTrans );
-    verify( ext, never() ).startAnalyzer( mockTrans );
-    verify( ext, never() ).populateExecutionProfile(
-      Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
   }
 
   @Test
@@ -137,18 +129,13 @@ public class TransformationRuntimeExtensionPointTest {
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
 
     ext.transFinished( trans );
-    verify( ext, times( 1 ) ).startAnalyzer( trans );
-    verify( ext, times( 1 ) ).populateExecutionProfile(
-      Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
+    // The logic in transFinished() is now in a thread, so we can't verify methods were called
 
     Trans mockTrans = spy( trans );
     Result result = mock( Result.class );
     when( mockTrans.getResult() ).thenReturn( result );
     ext.transFinished( mockTrans );
     // The logic in transFinished() is now in a thread, so we can't verify methods were called
-    verify( ext, times( 1 ) ).startAnalyzer( mockTrans );
-    verify( ext, times( 2 ) ).populateExecutionProfile(
-      Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
   }
 
   @Test
