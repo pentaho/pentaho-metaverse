@@ -30,16 +30,11 @@ import org.pentaho.di.trans.steps.file.BaseFileInputStep;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.AnalysisContext;
 import org.pentaho.metaverse.api.IAnalysisContext;
-import org.pentaho.metaverse.api.IMetaverseConfig;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * This class is a base implementation for StepExternalConsumer plugins. Subclasses should override the various methods
@@ -47,12 +42,6 @@ import java.util.Set;
  */
 public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M extends BaseStepMeta>
   implements IStepExternalResourceConsumer<S, M> {
-
-  private Set<IExternalResourceInfo> resourcesFromRow = new HashSet<>();
-
-  protected boolean resolveExternalResources() {
-    return true;
-  }
 
   @Override
   public boolean isDataDriven( M meta ) {
@@ -66,9 +55,6 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( final M meta, final IAnalysisContext context ) {
-    if ( !resolveExternalResources() ) {
-      return Collections.emptyList();
-    }
 
     if ( meta instanceof BaseFileInputMeta && !isDataDriven( meta ) ) {
       return KettleAnalyzerUtil.getResourcesFromMeta( (BaseFileInputMeta) meta, context );
@@ -78,36 +64,12 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResources( final M meta, final IAnalysisContext context ) {
-    if ( !resolveExternalResources() ) {
-      return Collections.emptyList();
-    }
-
-    Collection<IExternalResourceInfo> allResources = getResourcesFromMeta( meta, context );
-    if ( allResources.isEmpty() ) {
-      allResources = new ArrayList<>( this.resourcesFromRow.size() );
-    }
-    for ( final IExternalResourceInfo resource : this.resourcesFromRow ) {
-      allResources.add( resource );
-    }
-    return allResources;
-  }
-
-  @Override
   public Collection<IExternalResourceInfo> getResourcesFromRow(
     final S step, final RowMetaInterface rowMeta, final Object[] row ) {
-    if ( !resolveExternalResources() ) {
-      return Collections.emptyList();
-    }
 
     if ( step instanceof BaseFileInputStep ) {
       Collection<IExternalResourceInfo> resourcesFromRow = KettleAnalyzerUtil.getResourcesFromRow(
         (BaseFileInputStep) step, rowMeta, row );
-      // keep track of resources from row, as they are encountered - we do this, because this method is called for
-      // each row, and we need to keep track of all of them
-      for ( final IExternalResourceInfo resource : resourcesFromRow ) {
-        this.resourcesFromRow.add( resource );
-      }
       return resourcesFromRow;
     } else {
       return Collections.emptyList();

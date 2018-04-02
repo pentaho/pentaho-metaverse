@@ -134,7 +134,6 @@ public class ConnectionExternalResourceStepAnalyzerTest {
     doReturn( connectionNode ).when( analyzer ).getConnectionNode();
 
     doReturn( resourceNode ).when( analyzer ).createResourceNode( any( IExternalResourceInfo.class ) );
-    when( erc.getResources( eq( meta ), any( IAnalysisContext.class ) ) ).thenReturn( resources );
 
     analyzer.customAnalyze( meta, node );
 
