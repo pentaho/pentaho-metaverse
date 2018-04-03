@@ -26,14 +26,11 @@ import org.apache.commons.vfs2.FileObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
-import org.pentaho.di.core.fileinput.FileInputList;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputStep;
-import org.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
@@ -70,35 +67,24 @@ public class KettleAnalyzerUtil {
   }
 
   public static Collection<IExternalResourceInfo> getResourcesFromMeta(
-    final BaseFileInputMeta meta, final IAnalysisContext context ) {
+    final StepMeta parentStepMeta, final String[] filePaths ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
-    final StepMeta parentStepMeta = meta.getParentStepMeta();
-    if ( parentStepMeta != null ) {
-      final TransMeta parentTransMeta = parentStepMeta.getParentTransMeta();
-      if ( parentTransMeta != null ) {
-        final FileInputList inputList = meta.getFileInputList( parentTransMeta );
-        if ( inputList != null ) {
-          final String[] paths = inputList.getFileStrings();
-          if ( paths != null ) {
-            resources = new ArrayList<>( paths.length );
+    if ( parentStepMeta != null && filePaths != null && filePaths.length > 0 ) {
+      resources = new ArrayList<>( filePaths.length );
+      for ( final String path : filePaths ) {
+        if ( !Const.isEmpty( path ) ) {
+          try {
 
-            for ( final String path : paths ) {
-              if ( !Const.isEmpty( path ) ) {
-                try {
-
-                  final IExternalResourceInfo resource = ExternalResourceInfoFactory
-                    .createFileResource( KettleVFS.getFileObject( path ), true );
-                  if ( resource != null ) {
-                    resources.add( resource );
-                  } else {
-                    throw new KettleFileException( "Error getting file resource!" );
-                  }
-                } catch ( KettleFileException kfe ) {
-                  // TODO throw or ignore?
-                }
-              }
+            final IExternalResourceInfo resource = ExternalResourceInfoFactory
+              .createFileResource( KettleVFS.getFileObject( path ), true );
+            if ( resource != null ) {
+              resources.add( resource );
+            } else {
+              throw new KettleFileException( "Error getting file resource!" );
             }
+          } catch ( KettleFileException kfe ) {
+            // TODO throw or ignore?
           }
         }
       }
