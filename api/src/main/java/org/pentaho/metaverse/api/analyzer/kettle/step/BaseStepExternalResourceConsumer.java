@@ -63,7 +63,7 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( final M meta, final IAnalysisContext context ) {
-    if ( !fetchResources( meta ) ) {
+    if ( meta == null || !fetchResources( meta ) ) {
       return Collections.emptyList();
     }
 
