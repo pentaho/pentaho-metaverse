@@ -25,8 +25,8 @@ package org.pentaho.metaverse.api.analyzer.kettle.step;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputStep;
+import org.pentaho.di.trans.steps.file.BaseFileMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.AnalysisContext;
 import org.pentaho.metaverse.api.IAnalysisContext;
@@ -43,6 +43,14 @@ import java.util.Collections;
 public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M extends BaseStepMeta>
   implements IStepExternalResourceConsumer<S, M> {
 
+  /**
+   * Returns true when resources should be fetched. Resources are fetched when they are expected to be resolved (true
+   * by default), and in the case of {@link BaseFileMeta}, when the step writes to a file, otherwise false is returned.
+   */
+  private boolean fetchResources( final M meta ) {
+    return !( meta instanceof BaseFileMeta ) || ( ( (BaseFileMeta) meta ).writesToFile() );
+  }
+
   @Override
   public boolean isDataDriven( M meta ) {
     return false;
@@ -55,9 +63,13 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( final M meta, final IAnalysisContext context ) {
+    if ( !fetchResources( meta ) ) {
+      return Collections.emptyList();
+    }
 
-    if ( meta instanceof BaseFileInputMeta && !isDataDriven( meta ) ) {
-      return KettleAnalyzerUtil.getResourcesFromMeta( (BaseFileInputMeta) meta, context );
+    if ( meta instanceof BaseFileMeta || !isDataDriven( meta ) ) {
+      return KettleAnalyzerUtil.getResourcesFromMeta( meta.getParentStepMeta(),
+        ( (BaseFileMeta) meta ).getFilePaths( false ) );
     } else {
       return Collections.emptyList();
     }
@@ -66,6 +78,9 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromRow(
     final S step, final RowMetaInterface rowMeta, final Object[] row ) {
+    if ( !fetchResources( null ) ) {
+      return Collections.emptyList();
+    }
 
     if ( step instanceof BaseFileInputStep ) {
       Collection<IExternalResourceInfo> resourcesFromRow = KettleAnalyzerUtil.getResourcesFromRow(

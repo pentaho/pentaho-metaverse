@@ -82,10 +82,20 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
     }
   }
 
+  /**
+   * Returns true if the step has an output resource. This will be true in most cases, except for steps that may
+   * choose to pass the data as a value or to some target other than an external resource (such as a servlet).
+   *
+   * @return rue if the step has an output resource
+   */
+  public boolean hasOutputResource( T meta ) {
+    return true;
+  }
+
   @Override
   protected Map<String, RowMetaInterface> getOutputRowMetaInterfaces( T meta ) {
     Map<String, RowMetaInterface> outputRows = super.getOutputRowMetaInterfaces( meta );
-    if ( MapUtils.isNotEmpty( outputRows ) ) {
+    if ( hasOutputResource( meta ) && MapUtils.isNotEmpty( outputRows ) ) {
       // if this is an output step analyzer, we always need to write the resource fields out
       if ( isOutput() ) {
         RowMetaInterface out = null;
