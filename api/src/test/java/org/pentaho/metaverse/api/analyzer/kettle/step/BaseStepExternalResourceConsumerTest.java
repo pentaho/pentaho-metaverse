@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,9 @@ package org.pentaho.metaverse.api.analyzer.kettle.step;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.file.BaseFileMeta;
 import org.pentaho.metaverse.api.analyzer.kettle.IExternalResourceConsumer;
 
 import java.util.Collection;
@@ -51,9 +54,28 @@ public class BaseStepExternalResourceConsumerTest {
 
   @Test
   public void testGetResourcesFromMeta() throws Exception {
-    Collection<IExternalResourceConsumer> resources = consumer.getResourcesFromMeta( null );
+
+    Collection<IExternalResourceConsumer> resources = null;
+    BaseStepMeta meta = null;
+
+    // null meta
+    resources = consumer.getResourcesFromMeta( meta );
     assertNotNull( resources );
     assertTrue( resources.isEmpty() );
+
+    // non-file meta
+    meta = Mockito.mock( BaseStepMeta.class );
+    resources = consumer.getResourcesFromMeta( meta );
+    assertNotNull( resources );
+    assertTrue( resources.isEmpty() );
+    Mockito.verify( meta, Mockito.times( 0 ) ).getParentStepMeta();
+
+    // file meta
+    meta = Mockito.mock( BaseFileMeta.class );
+    Mockito.when( ( (BaseFileMeta) meta ).writesToFile() ).thenReturn( true );
+    consumer.getResourcesFromMeta( meta );
+    Mockito.verify( meta, Mockito.times( 1 ) ).getParentStepMeta();
+    Mockito.verify( (BaseFileMeta) meta, Mockito.times( 1 ) ).getFilePaths( false );
   }
 
   @Test
