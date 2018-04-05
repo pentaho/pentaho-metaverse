@@ -44,8 +44,8 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
   implements IStepExternalResourceConsumer<S, M> {
 
   /**
-   * Returns true when resources should be fetched. Resources are fetched when they are expected to be resolved (true
-   * by default), and in the case of {@link BaseFileMeta}, when the step writes to a file, otherwise false is returned.
+   * Returns true when resources should be fetched. Resources are fetched when they are expected to be resolved (true by
+   * default), and in the case of {@link BaseFileMeta}, when the step writes to a file, otherwise false is returned.
    */
   private boolean fetchResources( final M meta ) {
     return !( meta instanceof BaseFileMeta ) || ( ( (BaseFileMeta) meta ).writesToFile() );
@@ -57,22 +57,18 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( M meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( final M meta ) {
     return getResourcesFromMeta( meta, new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
   }
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( final M meta, final IAnalysisContext context ) {
-    if ( meta == null || !fetchResources( meta ) ) {
+    if ( !( meta instanceof BaseFileMeta ) || !fetchResources( meta ) || isDataDriven( meta ) ) {
       return Collections.emptyList();
     }
 
-    if ( meta instanceof BaseFileMeta || !isDataDriven( meta ) ) {
-      return KettleAnalyzerUtil.getResourcesFromMeta( meta.getParentStepMeta(),
-        ( (BaseFileMeta) meta ).getFilePaths( false ) );
-    } else {
-      return Collections.emptyList();
-    }
+    return KettleAnalyzerUtil.getResourcesFromMeta( meta.getParentStepMeta(),
+      ( (BaseFileMeta) meta ).getFilePaths( false ) );
   }
 
   @Override
