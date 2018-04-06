@@ -1387,10 +1387,10 @@ public class MetaverseValidationIT {
     }
 
     Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
-    assertEquals( 4, getIterableSize( outputs ) );
+    assertEquals( 3, getIterableSize( outputs ) );
 
     Iterable<StreamFieldNode> inputs = node.getInputStreamFields();
-    assertEquals( 3, getIterableSize( inputs ) );
+    assertEquals( 2, getIterableSize( inputs ) );
     for ( StreamFieldNode in : inputs ) {
       assertNotNull( in.getFieldNodesDerivedFromMe() );
       assertEquals( in.getName(), in.getFieldNodesDerivedFromMe().iterator().next().getName() );

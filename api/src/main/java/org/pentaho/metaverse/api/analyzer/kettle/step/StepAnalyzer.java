@@ -55,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -381,13 +382,27 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
         String prevStepName = entry.getKey();
         RowMetaInterface inputFields = entry.getValue();
         if ( inputFields != null ) {
+          String[] stepInputFieldNames = inputFields.getFieldNames();
+          try {
+            if ( !ExternalResourceStepAnalyzer.RESOURCE.equals( prevStepName ) ) {
+              final RowMetaInterface stepInputFields = parentTransMeta.getPrevStepFields(
+                parentStepMeta, prevStepName, null );
+              if ( stepInputFields != null ) {
+                stepInputFieldNames = stepInputFields.getFieldNames();
+              }
+            }
+          } catch ( final KettleStepException e ) {
+            // no-op
+          }
           for ( ValueMetaInterface valueMetaInterface : inputFields.getValueMetaList() ) {
-
+            boolean addLink = Arrays.asList( stepInputFieldNames ).contains( valueMetaInterface.getName() );
             IMetaverseNode prevFieldNode =
               createInputFieldNode( getDescriptor().getContext(), valueMetaInterface, prevStepName,
                 getInputNodeType() );
-            getMetaverseBuilder().addLink( prevFieldNode, DictionaryConst.LINK_INPUTS, rootNode );
-            inputs.addNode( prevStepName, valueMetaInterface.getName(), prevFieldNode );
+            if ( addLink ) {
+              getMetaverseBuilder().addLink( prevFieldNode, DictionaryConst.LINK_INPUTS, rootNode );
+              inputs.addNode( prevStepName, valueMetaInterface.getName(), prevFieldNode );
+            }
           }
         } else {
           LOGGER.warn( "No input fields found for step " + getStepName() );
@@ -500,7 +515,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     RowMetaInterface outputFields = getOutputFields( meta );
 
     if ( outputFields != null && ArrayUtils.isEmpty( nextStepNames ) ) {
-      nextStepNames = new String[]{ NONE };
+      nextStepNames = new String[] { NONE };
     }
     for ( String stepName : nextStepNames ) {
       outputRows.put( stepName, outputFields );
@@ -571,7 +586,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
         RowMetaInterface rmi = parentTransMeta.getPrevStepFields( parentStepMeta, progressMonitor );
         progressMonitor.done();
         if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
-          rowMeta.put( prevStepNames[0], rmi );
+          rowMeta.put( prevStepNames[ 0 ], rmi );
         }
       } catch ( KettleStepException e ) {
         rowMeta = null;

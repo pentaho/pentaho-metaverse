@@ -155,7 +155,7 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
   }
 
   /**
-   * Returns a {@lnk Set} of field names that are to be ignored when fetching "resource" fields. This set will
+   * Returns a {@link Set} of field names that are to be ignored when fetching "resource" fields. This set will
    * typically include any field that is either provided by a previous step, or is some "additional" field.
    */
   protected Set<String> getInputFieldsToIgnore( final T meta, final Map<String, RowMetaInterface> inputRows,
