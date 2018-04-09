@@ -22,6 +22,7 @@
 
 package org.pentaho.dictionary;
 
+import org.apache.commons.lang.StringUtils;
 import org.pentaho.metaverse.api.IMetaverseNode;
 
 import java.util.Enumeration;
@@ -30,6 +31,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import static org.pentaho.dictionary.DictionaryConst.*;
 
 /**
  * A helper class for the Hitachi Vantara Dictionary
@@ -56,6 +59,7 @@ public class DictionaryHelper {
 
   private static Map<String, String> categoryColorMap = new HashMap<String, String>();
   private static Map<String, String> typeCategoryMap = new HashMap<String, String>();
+  private static Map<String, Map<String, String>> entityTypeLinks = new HashMap<>();
 
   /**
    * Hides the constructor so that this class cannot be instanced
@@ -70,7 +74,35 @@ public class DictionaryHelper {
    * @param entityType The entity type
    */
   public static void registerEntityType( String entityType ) {
-    ENTITY_NODE_TYPES.add( entityType );
+    registerEntityType( null, entityType, null );
+  }
+
+  /**
+   * Registers the node {@code entityType} as a known entity node, along with its link to a potential parent entity
+   * node. Note that {@code parentEntityType} can be {@code null}, which signifies a link to the root node.
+   *
+   * @param linkType         the type of link between the {@code entityType} and {@code parentEntityType}
+   * @param entityType       the entity node being registered
+   * @param parentEntityType the parent entity node to which the node is linked - a value of {@code null} signifies a
+   *                         link to the root node
+   */
+  public static void registerEntityType(
+    final String linkType, final String entityType, final String parentEntityType ) {
+    if ( linkType != null ) {
+      // are any links of this type already registered?
+      Map<String, String> links = entityTypeLinks.get( linkType );
+      if ( links == null ) {
+        // this is the first link of this type
+        links = new HashMap<>();
+        entityTypeLinks.put( linkType, links );
+      }
+      // register the link between of entityType and parentNodeType - allow null values intentionally to mark links to
+      // the root node
+      links.put( entityType, parentEntityType );
+    }
+    if ( !StringUtils.isBlank( entityType ) ) {
+      ENTITY_NODE_TYPES.add( entityType );
+    }
   }
 
   /**
@@ -122,71 +154,157 @@ public class DictionaryHelper {
   }
 
   static {
-    registerStructuralLinkType( DictionaryConst.LINK_EXECUTES );
-    registerStructuralLinkType( DictionaryConst.LINK_CONTAINS );
-    registerStructuralLinkType( DictionaryConst.LINK_DEFINES );
-    registerStructuralLinkType( DictionaryConst.LINK_PARENT_CONCEPT );
+    registerStructuralLinkType( LINK_EXECUTES );
+    registerStructuralLinkType( LINK_CONTAINS );
+    registerStructuralLinkType( LINK_DEFINES );
+    registerStructuralLinkType( LINK_PARENT_CONCEPT );
 
-    registerDataFlowLinkType( DictionaryConst.LINK_POPULATES );
-    registerDataFlowLinkType( DictionaryConst.LINK_READBY );
-    registerDataFlowLinkType( DictionaryConst.LINK_WRITESTO );
-    registerDataFlowLinkType( DictionaryConst.LINK_DERIVES );
-    registerDataFlowLinkType( DictionaryConst.LINK_DEPENDENCYOF );
+    registerDataFlowLinkType( LINK_POPULATES );
+    registerDataFlowLinkType( LINK_READBY );
+    registerDataFlowLinkType( LINK_WRITESTO );
+    registerDataFlowLinkType( LINK_DERIVES );
+    registerDataFlowLinkType( LINK_DEPENDENCYOF );
 
-    categoryColorMap.put( DictionaryConst.CATEGORY_ABSTRACT, DictionaryConst.COLOR_ABSTRACT );
-    categoryColorMap.put( DictionaryConst.CATEGORY_DATASOURCE, DictionaryConst.COLOR_DATASOURCE );
-    categoryColorMap.put( DictionaryConst.CATEGORY_DOCUMENT, DictionaryConst.COLOR_DOCUMENT );
-    categoryColorMap.put( DictionaryConst.CATEGORY_DOCUMENT_ELEMENT, DictionaryConst.COLOR_DOCUMENT_ELEMENT );
-    categoryColorMap.put( DictionaryConst.CATEGORY_FIELD, DictionaryConst.COLOR_FIELD );
-    categoryColorMap.put( DictionaryConst.CATEGORY_FIELD_COLLECTION, DictionaryConst.COLOR_FIELD_COLLECTION );
-    categoryColorMap.put( DictionaryConst.CATEGORY_REPOSITORY, DictionaryConst.COLOR_REPOSITORY );
-    categoryColorMap.put( DictionaryConst.CATEGORY_OTHER, DictionaryConst.COLOR_OTHER );
+    categoryColorMap.put( CATEGORY_ABSTRACT, COLOR_ABSTRACT );
+    categoryColorMap.put( CATEGORY_DATASOURCE, COLOR_DATASOURCE );
+    categoryColorMap.put( CATEGORY_DOCUMENT, COLOR_DOCUMENT );
+    categoryColorMap.put( CATEGORY_DOCUMENT_ELEMENT, COLOR_DOCUMENT_ELEMENT );
+    categoryColorMap.put( CATEGORY_FIELD, COLOR_FIELD );
+    categoryColorMap.put( CATEGORY_FIELD_COLLECTION, COLOR_FIELD_COLLECTION );
+    categoryColorMap.put( CATEGORY_REPOSITORY, COLOR_REPOSITORY );
+    categoryColorMap.put( CATEGORY_OTHER, COLOR_OTHER );
 
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_DATASOURCE, DictionaryConst.CATEGORY_DATASOURCE );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_DATA_TABLE, DictionaryConst.CATEGORY_FIELD_COLLECTION );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_DATA_COLUMN, DictionaryConst.CATEGORY_FIELD );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_JOB, DictionaryConst.CATEGORY_DOCUMENT );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_JOB_ENTRY, DictionaryConst.CATEGORY_DOCUMENT_ELEMENT );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_TRANS, DictionaryConst.CATEGORY_DOCUMENT );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_TRANS_STEP, DictionaryConst.CATEGORY_DOCUMENT_ELEMENT );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_TRANS_FIELD, DictionaryConst.CATEGORY_FIELD );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_ENTITY, DictionaryConst.CATEGORY_ABSTRACT );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_FILE, DictionaryConst.CATEGORY_FIELD_COLLECTION );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_JSON_FILE, DictionaryConst.CATEGORY_FIELD_COLLECTION );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_FILE_FIELD, DictionaryConst.CATEGORY_FIELD );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_JSON_FIELD, DictionaryConst.CATEGORY_FIELD );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_LOCATOR, DictionaryConst.CATEGORY_REPOSITORY );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_ROOT_ENTITY, DictionaryConst.CATEGORY_ABSTRACT );
-    typeCategoryMap.put( DictionaryConst.NODE_TYPE_WEBSERVICE, DictionaryConst.CATEGORY_DATASOURCE );
+    typeCategoryMap.put( NODE_TYPE_DATASOURCE, CATEGORY_DATASOURCE );
+    typeCategoryMap.put( NODE_TYPE_DATA_TABLE, CATEGORY_FIELD_COLLECTION );
+    typeCategoryMap.put( NODE_TYPE_DATA_COLUMN, CATEGORY_FIELD );
+    typeCategoryMap.put( NODE_TYPE_JOB, CATEGORY_DOCUMENT );
+    typeCategoryMap.put( NODE_TYPE_JOB_ENTRY, CATEGORY_DOCUMENT_ELEMENT );
+    typeCategoryMap.put( NODE_TYPE_TRANS, CATEGORY_DOCUMENT );
+    typeCategoryMap.put( NODE_TYPE_TRANS_STEP, CATEGORY_DOCUMENT_ELEMENT );
+    typeCategoryMap.put( NODE_TYPE_TRANS_FIELD, CATEGORY_FIELD );
+    typeCategoryMap.put( NODE_TYPE_ENTITY, CATEGORY_ABSTRACT );
+    typeCategoryMap.put( NODE_TYPE_FILE, CATEGORY_FIELD_COLLECTION );
+    typeCategoryMap.put( NODE_TYPE_JSON_FILE, CATEGORY_FIELD_COLLECTION );
+    typeCategoryMap.put( NODE_TYPE_FILE_FIELD, CATEGORY_FIELD );
+    typeCategoryMap.put( NODE_TYPE_JSON_FIELD, CATEGORY_FIELD );
+    typeCategoryMap.put( NODE_TYPE_LOCATOR, CATEGORY_REPOSITORY );
+    typeCategoryMap.put( NODE_TYPE_ROOT_ENTITY, CATEGORY_ABSTRACT );
+    typeCategoryMap.put( NODE_TYPE_WEBSERVICE, CATEGORY_DATASOURCE );
+  }
 
+  public static void registerEntityTypes() {
+
+    // register all used entity nodes and add appropriate links between them and the nodes that they are related to
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_EXTERNAL_CONNECTION, null );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_DATASOURCE, NODE_TYPE_EXTERNAL_CONNECTION );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_DATA_TABLE, null );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_DATA_COLUMN, null );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_MONGODB_CONNECTION, NODE_TYPE_EXTERNAL_CONNECTION );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_MONGODB_COLLECTION, null );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_JOB, null );
+    registerEntityType( LINK_CONTAINS_CONCEPT, NODE_TYPE_JOB_ENTRY, NODE_TYPE_JOB );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_LOGICAL_MODEL, null );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_TRANS, null );
+    registerEntityType( LINK_CONTAINS_CONCEPT, NODE_TYPE_TRANS_STEP, NODE_TYPE_TRANS );
+    registerEntityType( LINK_CONTAINS_CONCEPT, NODE_TYPE_TRANS_FIELD, NODE_TYPE_TRANS_STEP );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_USER_CONTENT, null );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_FILE, null );
+    registerEntityType( LINK_CONTAINS_CONCEPT, NODE_TYPE_FILE_FIELD, NODE_TYPE_FILE );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_JSON_FILE, NODE_TYPE_FILE );
+    registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_JSON_FIELD, NODE_TYPE_FILE_FIELD );
+    registerEntityType( LINK_CONTAINS_CONCEPT, NODE_TYPE_JSON_FIELD, NODE_TYPE_JSON_FILE );
   }
 
   /**
-   * Returns the category id for a given node type. If the node type is not of a known category,
-   * a category of "other" will be returned
-   * 
+   * Returns the link type for a relationship between concrete data nodes (non-entity types) and the entity nodes that
+   * represents their type.
+   *
+   * @return the link type for a relationship between concrete data nodes (non-entity types) and the entity nodes that
+   * represents their type
+   */
+  public static String getNonEntityToEntityLinkType() {
+    return LINK_TYPE_CONCEPT;
+  }
+
+  /**
+   * Determines whether the links between concrete data nodes (non-entity types) and the entity nodes that represent
+   * their types should have labels.
+   *
+   * @return true if the links between concrete data nodes (non-entity types) and the entity nodes that represent their
+   * types should have labels
+   */
+  public static boolean addNonEntityToEntityLinkTypeLabel() {
+    return true;
+  }
+
+  /**
+   * Returns a {@link Set} of currently registered link types.
+   *
+   * @return a {@link Set} of currently registered link types
+   */
+  public static Set<String> getEntityLinkTypes() {
+    return entityTypeLinks.keySet();
+  }
+
+  /**
+   * Given the {@code linkType}, returns the name of the entity node that is expected to have a link of this type to
+   * the node with the given {@code nodeName}.
+   *
+   * @param linkType the type of link being looked up for the given node
+   * @param nodeName the node name whose parent is being looked up
+   * @return the name of the entity node that is expected to have a link of type {@code linkType} to the node with the
+   * given {@code nodeName}
+   */
+  public static String getParentEntityNodeType( final String linkType, final String nodeName ) {
+    final Map<String, String> parentLinkMap = entityTypeLinks.get( linkType );
+    if ( parentLinkMap != null ) {
+      return parentLinkMap.get( nodeName );
+    }
+    return null;
+  }
+
+  /**
+   * Returns true if the node with given {@code nodeName} has a link of type {@code linkType} to the root node.
+   *
+   * @param linkType the type of link being looked up for the given node
+   * @param nodeName the name of the node whose relationship to the root node is being looked up
+   * @return true if the node with given {@code nodeName} has a link of type {@code linkType} to the root node
+   */
+  public static boolean linksToRoot( final String linkType, final String nodeName ) {
+    final Map<String, String> parentLinkMap = entityTypeLinks.get( linkType );
+    if ( parentLinkMap != null ) {
+      // value is null, but the key exists in the map - that means we should create a link of this type to the root
+      return parentLinkMap.get( nodeName ) == null && parentLinkMap.containsKey( nodeName );
+    }
+    return false;
+  }
+
+  /**
+   * Returns the category id for a given node type. If the node type is not of a known category, a category of "other"
+   * will be returned
+   *
    * @param type The type for which the category is needed
    * @return The category
    */
   public static String getCategoryForType( String type ) {
     String category = typeCategoryMap.get( type );
     if ( category == null ) {
-      category = DictionaryConst.CATEGORY_OTHER;
+      category = CATEGORY_OTHER;
     }
     return category;
   }
 
   /**
-   * Returns the suggested color for a given category. If the category does not have a known color,
-   * a the color for the "other" category will be returned.
-   * 
+   * Returns the suggested color for a given category. If the category does not have a known color, a the color for the
+   * "other" category will be returned.
+   *
    * @param category The category for which the color is needed
    * @return The color
    */
   public static String getColorForCategory( String category ) {
     String color = categoryColorMap.get( category );
     if ( color == null ) {
-      color = categoryColorMap.get( DictionaryConst.CATEGORY_OTHER );
+      color = categoryColorMap.get( CATEGORY_OTHER );
     }
     return color;
   }
@@ -194,9 +312,9 @@ public class DictionaryHelper {
   /**
    * Creates an in-memory metaverse node from the provided parameters
    *
-   * @param id The id of the node. An IIdGenerator should be used to create this.
-   * @param name The name of the node
-   * @param type The type of the node
+   * @param id         The id of the node. An IIdGenerator should be used to create this.
+   * @param name       The name of the node
+   * @param type       The type of the node
    * @param properties The properties of the node
    * @return The metaverse node
    */
@@ -217,21 +335,21 @@ public class DictionaryHelper {
   }
 
   /**
-   * Creates a child node of a metaverse node and populates it with the provided parameters.
-   * The relationship should be one of DictionaryConst.LINK_*
+   * Creates a child node of a metaverse node and populates it with the provided parameters. The relationship should be
+   * one of LINK_*
    *
-   * @param id The id of the node. An IIdGenerator should be used to create this.
-   * @param name The name of the node
-   * @param type The type of the node
-   * @param properties The properties of the node
-   * @param parent The parent node
+   * @param id           The id of the node. An IIdGenerator should be used to create this.
+   * @param name         The name of the node
+   * @param type         The type of the node
+   * @param properties   The properties of the node
+   * @param parent       The parent node
    * @param relationship The type of parent-child relationship
    * @return The metaverse node
    */
   public static IMetaverseNode addChildNode( String id, String name, String type,
-      Properties properties, IMetaverseNode parent, String relationship ) {
+                                             Properties properties, IMetaverseNode parent, String relationship ) {
     MetaverseTransientNode child = (MetaverseTransientNode) DictionaryHelper.createMetaverseNode(
-        id, name, type, properties );
+      id, name, type, properties );
     if ( parent instanceof MetaverseTransientNode ) {
       MetaverseLink link = new MetaverseLink( parent, relationship, child );
       ( (MetaverseTransientNode) parent ).addLink( link );
