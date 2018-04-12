@@ -108,9 +108,19 @@ public class DictionaryHelperTest {
 
   @Test
   public void testRegisterEntityType() {
-    assertFalse( DictionaryHelper.ENTITY_NODE_TYPES.contains( "newEntityType" ) );
+    // get the current size of ENTITY_NODE_TYPES
+    int numEntityNodes = DictionaryHelper.ENTITY_NODE_TYPES.size();
+
+    assertEquals( numEntityNodes, DictionaryHelper.ENTITY_NODE_TYPES.size() );
+    DictionaryHelper.registerEntityType( null );
+    assertEquals( numEntityNodes, DictionaryHelper.ENTITY_NODE_TYPES.size() );
+    DictionaryHelper.registerEntityType( "" );
+    assertEquals( numEntityNodes, DictionaryHelper.ENTITY_NODE_TYPES.size() );
+    DictionaryHelper.registerEntityType( " " );
+    assertEquals( numEntityNodes, DictionaryHelper.ENTITY_NODE_TYPES.size() );
     DictionaryHelper.registerEntityType( "newEntityType" );
     assertTrue( DictionaryHelper.ENTITY_NODE_TYPES.contains( "newEntityType" ) );
+    assertEquals( numEntityNodes + 1, DictionaryHelper.ENTITY_NODE_TYPES.size() );
   }
 
   @Test
@@ -123,4 +133,44 @@ public class DictionaryHelperTest {
     assertTrue( DictionaryHelper.isEntityType( "newEntityType" ) );
   }
 
+  @Test
+  public void testEntityTypeRegistration () {
+
+    // get the current sizes of ENTITY_NODE_TYPES and entityLinkTypes
+    int numEntityNodes = DictionaryHelper.ENTITY_NODE_TYPES.size();
+    int numLinkTypes = DictionaryHelper.getEntityLinkTypes().size();
+
+    assertEquals( numEntityNodes, DictionaryHelper.ENTITY_NODE_TYPES.size() );
+    assertEquals( numLinkTypes, DictionaryHelper.getEntityLinkTypes().size() );
+
+    // File > isparent > JSON File
+    DictionaryHelper.registerEntityType( "isparent", "JSON File", "File" );
+    assertEquals( numEntityNodes + 1, DictionaryHelper.ENTITY_NODE_TYPES.size() );
+    assertTrue( DictionaryHelper.ENTITY_NODE_TYPES.contains( "JSON File" ) );
+    assertEquals( numLinkTypes + 1, DictionaryHelper.getEntityLinkTypes().size() );
+    assertTrue( DictionaryHelper.getEntityLinkTypes().contains( "isparent" ) );
+    assertEquals( "File", DictionaryHelper.getParentEntityNodeType( "isparent", "JSON File" ) );
+    assertFalse( DictionaryHelper.linksToRoot( "isparent", "File" ) );
+    assertFalse( DictionaryHelper.linksToRoot( "isparent", "JSON File" ) );
+
+    // null > isparent > File
+    DictionaryHelper.registerEntityType( "isparent", "File", null );
+    assertEquals( numEntityNodes + 2, DictionaryHelper.ENTITY_NODE_TYPES.size() );
+    assertTrue( DictionaryHelper.ENTITY_NODE_TYPES.contains( "File" ) );
+    assertEquals( numLinkTypes + 1, DictionaryHelper.getEntityLinkTypes().size() );
+    assertNull( DictionaryHelper.getParentEntityNodeType( "isparent", "File" ) );
+    assertTrue( DictionaryHelper.linksToRoot( "isparent", "File" ) );
+
+    // File > contains > Field
+    DictionaryHelper.registerEntityType( "contains", "Field", "File" );
+    assertEquals( numEntityNodes + 3, DictionaryHelper.ENTITY_NODE_TYPES.size() );
+    assertTrue( DictionaryHelper.ENTITY_NODE_TYPES.contains( "Field" ) );
+    assertEquals( numLinkTypes + 2, DictionaryHelper.getEntityLinkTypes().size() );
+    assertTrue( DictionaryHelper.getEntityLinkTypes().contains( "contains" ) );
+    assertEquals( "File", DictionaryHelper.getParentEntityNodeType( "contains", "Field" ) );
+    assertNull( DictionaryHelper.getParentEntityNodeType( "isparent", "Field" ) );
+    assertFalse( DictionaryHelper.linksToRoot( "isparent", "Field" ) );
+    assertFalse( DictionaryHelper.linksToRoot( "contains", "Field" ) );
+
+  }
 }
