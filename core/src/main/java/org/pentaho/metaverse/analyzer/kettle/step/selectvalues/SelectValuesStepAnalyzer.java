@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.selectvalues;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.Const;
@@ -43,8 +44,12 @@ import org.pentaho.metaverse.messages.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The SelectValuesStepAnalyzer is responsible for providing nodes and links (i.e. relationships) between for the fields
@@ -73,12 +78,15 @@ public class SelectValuesStepAnalyzer extends StepAnalyzer<SelectValuesMeta> {
       boolean isOnMetaTab = false;
       for ( int i = 0; i < changes.length; i++ ) {
         SelectMetadataChange change = changes[ i ];
-        if ( originalFieldName.getFieldName().equals( change.getName() ) ) {
+        if ( originalFieldName.getFieldName().equalsIgnoreCase( change.getName() ) ) {
           isOnMetaTab = true;
           break;
         }
       }
-      boolean isDeleted = ArrayUtils.contains( baseStepMeta.getDeleteName(), originalFieldName.getFieldName() );
+      // check if the field is being deleted (make the check case insensitive)
+      final List<String> fieldDeletesLowerCase = baseStepMeta.getDeleteName() == null ? new ArrayList<>() : Arrays
+        .asList( baseStepMeta.getDeleteName() ).stream().map( String::toLowerCase ).collect( Collectors.toList() );
+      boolean isDeleted = fieldDeletesLowerCase.contains( originalFieldName.getFieldName().toLowerCase() );
       return ( !( isOnMetaTab || isDeleted ) );
     }
     return false;
@@ -91,25 +99,40 @@ public class SelectValuesStepAnalyzer extends StepAnalyzer<SelectValuesMeta> {
     validateState( null, selectValuesMeta );
     Set<ComponentDerivationRecord> changeRecords = new HashSet<ComponentDerivationRecord>();
 
-    String inputFieldName;
-    String outputFieldName;
     ComponentDerivationRecord changeRecord;
+    // get a list of fields to be deleted, in lower case for case-insensitive comparisons
+    final List<String> fieldDeletesLowerCase = selectValuesMeta.getDeleteName() == null ? new ArrayList<>() : Arrays
+      .asList( selectValuesMeta.getDeleteName() ).stream().map( String::toLowerCase ).collect( Collectors.toList() );
+    final SelectMetadataChange[] metadataChanges = selectValuesMeta.getMeta(); // Changes form the 'Meta-data' tab
 
     // Process the fields/tabs in the same order as the real step does
     if ( !Const.isEmpty( selectValuesMeta.getSelectName() ) ) {
       String[] fieldNames = selectValuesMeta.getSelectName();
-      String[] fieldRenames = selectValuesMeta.getSelectRename();
+      String[] fieldRenames = selectValuesMeta.getSelectRename(); // rename fields from the 'Select & Alter' tab
       int[] fieldLength = selectValuesMeta.getSelectLength();
       int[] fieldPrecision = selectValuesMeta.getSelectPrecision();
 
       for ( int i = 0; i < fieldNames.length; i++ ) {
-        inputFieldName = fieldNames[i];
-        outputFieldName = fieldRenames[i];
+        final String inputFieldName = fieldNames[i];
+        final String outputFieldName = fieldRenames[i];
+        // if the inputFieldName is being removed or renamed through the 'Select & Alter' tab or the 'Meta-data' tab,
+        // DO NOT create a change record
+        // Get a list of rename field names from the 'Meta-data' tab where the 'Fieldname' matches
+        // (case-insensitive) inputFieldName, if the list is not empty, we know that inputFieldName is being renamed
+        // via the 'Meta-data' tab and therefore we do not want to create a change record here, because it will be
+        // addressed below, where the 'Meta-data' tab is being analyzed
+        final List<String> metaRenameFieldsLowerCase = metadataChanges == null ? new ArrayList<>() : Arrays.asList(
+          metadataChanges ).stream().filter( change -> change.getName().equalsIgnoreCase( inputFieldName ) ).map(
+            e -> e.getRename() ).collect( Collectors.toList() );
+        if ( StringUtils.isEmpty( outputFieldName ) && ( fieldDeletesLowerCase.contains( inputFieldName.toLowerCase() )
+          || !CollectionUtils.isEmpty( metaRenameFieldsLowerCase ) ) ) {
+          continue;
+        }
 
-        changeRecord = new ComponentDerivationRecord( inputFieldName,
-          outputFieldName == null ? inputFieldName : outputFieldName, ChangeType.METADATA );
+        changeRecord = new ComponentDerivationRecord( inputFieldName, outputFieldName == null ? inputFieldName
+          : outputFieldName, ChangeType.METADATA );
 
-        Set<String> metadataChangedFields = new HashSet<String>();
+        final Set<String> metadataChangedFields = new HashSet<>();
 
         if ( inputFieldName != null && outputFieldName != null && !inputFieldName.equals( outputFieldName ) ) {
           metadataChangedFields.add( "name" );
@@ -139,11 +162,15 @@ public class SelectValuesStepAnalyzer extends StepAnalyzer<SelectValuesMeta> {
 
     if ( !Const.isEmpty( selectValuesMeta.getMeta() ) ) {
       String[] prevStepNames = parentTransMeta.getPrevStepNames( getStepName() );
-      SelectMetadataChange[] metadataChanges = selectValuesMeta.getMeta();
       if ( metadataChanges != null ) {
         for ( SelectMetadataChange metadataChange : metadataChanges ) {
-          inputFieldName = metadataChange.getName();
-          outputFieldName = metadataChange.getRename();
+          final String inputFieldName = metadataChange.getName();
+          final String outputFieldName = metadataChange.getRename();
+          // if the inputFieldName is being removed, DO NOT create a change record
+          if ( StringUtils.isEmpty( outputFieldName ) && fieldDeletesLowerCase.contains(
+            inputFieldName.toLowerCase() ) ) {
+            continue;
+          }
 
           changeRecord = new ComponentDerivationRecord( inputFieldName,
             outputFieldName == null ? inputFieldName : outputFieldName, ChangeType.METADATA );
