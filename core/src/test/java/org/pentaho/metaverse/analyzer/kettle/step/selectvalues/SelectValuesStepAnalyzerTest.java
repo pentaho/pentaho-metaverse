@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -107,7 +107,8 @@ public class SelectValuesStepAnalyzerTest {
   @Test
   public void testGetChangeRecords_select() throws Exception {
 
-    String[] selectedNames = new String[] { "first", "last", "age" };
+    // intentionally select some of the fields using upper case
+    String[] selectedNames = new String[] { "first", "LAST", "age" };
     String[] selectedRenames = new String[] { null, null, "years on earth" };
     int[] fieldLengths = new int[] { 60, SelectValuesStepAnalyzer.NOT_CHANGED, SelectValuesStepAnalyzer.NOT_CHANGED };
     int[] fieldPrecisions = new int[] { SelectValuesStepAnalyzer.NOT_CHANGED, SelectValuesStepAnalyzer.NOT_CHANGED, 1 };
@@ -153,11 +154,10 @@ public class SelectValuesStepAnalyzerTest {
     assertEquals( metadataChanges.length, changeRecords.size() );
   }
 
-
-
   @Test
   public void testGetUsedFields_selectOnly() throws Exception {
-    String[] selectedNames = new String[] { "first", "last", "age" };
+    // intentionally select some of the fields using upper case
+    String[] selectedNames = new String[] { "FIRST", "LAST", "age" };
     when( selectValuesMeta.getSelectName() ).thenReturn( selectedNames );
     when( selectValuesMeta.getMeta() ).thenReturn( new SelectMetadataChange[0] );
     Set<StepField> usedFields = analyzer.getUsedFields( selectValuesMeta );
@@ -179,7 +179,8 @@ public class SelectValuesStepAnalyzerTest {
 
   @Test
   public void testGetUsedFields_selectAndMetaOverlap() throws Exception {
-    String[] selectedNames = new String[] { "first", "age" };
+    // intentionally select some of the fields using upper case
+    String[] selectedNames = new String[] { "first", "AGE" };
     SelectMetadataChange[] changes = new SelectMetadataChange[] { testChange1, testChange2 };
 
     when( selectValuesMeta.getSelectName() ).thenReturn( selectedNames );
@@ -201,8 +202,9 @@ public class SelectValuesStepAnalyzerTest {
 
   @Test
   public void testIsPassthrough() throws Exception {
-    String[] deleted = new String[] { "first, last" };
-    String[] selected = new String[] { "age" };
+    // intentionally select some of the fields using upper case
+    String[] deleted = new String[] { "FIRST, last" };
+    String[] selected = new String[] { "AGE" };
     SelectMetadataChange[] changed = new SelectMetadataChange[] { testChange1, testChange2 };
 
     when( selectValuesMeta.getDeleteName() ).thenReturn( deleted );
@@ -225,7 +227,8 @@ public class SelectValuesStepAnalyzerTest {
 
   @Test
   public void testIsPassthrough_onlyDelete() throws Exception {
-    String[] deleted = new String[] { "first", "last" };
+    // intentionally select some of the fields using upper case
+    String[] deleted = new String[] { "first", "LAST" };
     String[] selected = new String[0];
     SelectMetadataChange[] changed = new SelectMetadataChange[0];
 
@@ -252,7 +255,8 @@ public class SelectValuesStepAnalyzerTest {
 
   @Test
   public void testIsPassthrough_deleteAndMeta() throws Exception {
-    String[] deleted = new String[] { "first", "age" };
+    // intentionally select some of the fields using upper case
+    String[] deleted = new String[] { "FIRST", "age" };
     String[] selected = new String[0];
     SelectMetadataChange[] changed = new SelectMetadataChange[] { testChange1, testChange2 };
 

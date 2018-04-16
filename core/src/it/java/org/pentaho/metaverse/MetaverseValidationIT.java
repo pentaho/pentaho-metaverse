@@ -342,7 +342,7 @@ public class MetaverseValidationIT {
     int countUses = getIterableSize( selectValues.getStreamFieldNodesUses() );
     int countOutputs = getIterableSize( selectValues.getOutputStreamFields() );
     int countInputs = getIterableSize( selectValues.getInputStreamFields() );
-    assertEquals( 9, countUses );
+    assertEquals( 8, countUses );
     SelectValuesMeta meta = (SelectValuesMeta) getStepMeta( selectValues );
     assertEquals( getExpectedOutputFieldCount( meta ), countOutputs );
     assertEquals( 9, countInputs );
