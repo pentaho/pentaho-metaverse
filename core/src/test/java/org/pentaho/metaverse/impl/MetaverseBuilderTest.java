@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -36,6 +36,7 @@ import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseLink;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.IMetaverseObjectFactory;
+import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -46,7 +47,7 @@ import static org.mockito.Mockito.when;
  */
 public class MetaverseBuilderTest {
 
-  private MetaverseBuilder builder;
+  private BaseMetaverseBuilder builder;
   private Graph graph;
   MetaverseTransientNode node = new MetaverseTransientNode();
 
