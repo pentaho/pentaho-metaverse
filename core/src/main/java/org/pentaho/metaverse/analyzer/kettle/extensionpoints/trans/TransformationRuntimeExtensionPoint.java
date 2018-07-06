@@ -112,7 +112,14 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
    */
   @Override
   public void transStarted( Trans trans ) throws KettleException {
-    if ( trans == null ) {
+
+  }
+
+  private void runAnalyzers( Trans trans ) throws KettleException {
+
+    // Only generate lineage/execution information for "real" transformations, not the preview or debug ones. Whether
+    // in Preview or Debug mode in Spoon, trans.isPreview() returns true, so just check that.
+    if ( trans == null || trans.isPreview() || !isRuntimeEnabled() ) {
       return;
     }
 
@@ -270,6 +277,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     if ( trans.isPreview() ) {
       return;
     }
+
+    runAnalyzers( trans );
 
     if ( allowedAsync() ) {
       createLineGraphAsync( trans );
