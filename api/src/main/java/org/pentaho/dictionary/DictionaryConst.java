@@ -206,6 +206,12 @@ public class DictionaryConst {
   public static final String PROPERTY_QUERY = "query";
 
   /**
+   * Property key for index
+   */
+  public static final String PROPERTY_INDEX = "index";
+
+
+  /**
    * Property key to represent a string delimiter to parse tokens on;
    */
   public static final String PROPERTY_DELIMITER = "delimiter";
@@ -372,6 +378,16 @@ public class DictionaryConst {
   public static final String NODE_TYPE_MONGODB_CONNECTION = "MongoDB Connection";
 
   /**
+   * The node type for Splunk connections
+   */
+  public static final String NODE_TYPE_SPLUNK_CONNECTION = "Splunk Connection";
+
+  /**
+   * The node type for a data field in a Splunk
+   */
+  public static final String NODE_TYPE_SPLUNK_FIELD = "Splunk Field";
+
+  /**
    * The node type for MongoDB collections
    */
   public static final String NODE_TYPE_MONGODB_COLLECTION = "MongoDB Collection";
@@ -382,9 +398,19 @@ public class DictionaryConst {
   public static final String NODE_TYPE_DATA_TABLE = "Database Table";
 
   /**
+   * The node type for Splunk indices
+   */
+  public static final String NODE_TYPE_SPLUNK_INDEX = "Splunk Index";
+
+  /**
    * The node type for SQL Queries
    */
   public static final String NODE_TYPE_SQL_QUERY = "SQL Query";
+
+  /**
+   * The node type for Splunk Queries
+   */
+  public static final String NODE_TYPE_SPLUNK_QUERY = "Splunk Query";
 
   /**
    * The node type for PDI transformation fields

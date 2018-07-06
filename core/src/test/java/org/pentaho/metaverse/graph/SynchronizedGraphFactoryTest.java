@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,10 +29,12 @@ import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.Test;
+import org.pentaho.metaverse.api.model.BaseSynchronizedGraph;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -50,7 +52,7 @@ public class SynchronizedGraphFactoryTest {
     config.addProperty( "blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph" );
     Graph g = SynchronizedGraphFactory.open( config );
 
-    assertTrue( g instanceof SynchronizedGraph );
+    assertTrue( g instanceof BaseSynchronizedGraph );
   }
 
   @Test
@@ -59,7 +61,7 @@ public class SynchronizedGraphFactoryTest {
     config.put( "blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph" );
     Graph g = SynchronizedGraphFactory.open( config );
 
-    assertTrue( g instanceof SynchronizedGraph );
+    assertTrue( g instanceof BaseSynchronizedGraph );
   }
 
   @Test
@@ -67,7 +69,7 @@ public class SynchronizedGraphFactoryTest {
     String config = "src/test/resources/graph.properties";
     Graph g = SynchronizedGraphFactory.open( config );
 
-    assertTrue( g instanceof SynchronizedGraph );
+    assertTrue( g instanceof BaseSynchronizedGraph );
   }
 
   @Test( expected = IllegalArgumentException.class )
@@ -79,11 +81,11 @@ public class SynchronizedGraphFactoryTest {
   @Test
   public void testWrapGraph() throws Exception {
     Graph g = new TinkerGraph();
-    SynchronizedGraph wrapped = (SynchronizedGraph) SynchronizedGraphFactory.wrapGraph( g );
+    BaseSynchronizedGraph wrapped = (BaseSynchronizedGraph) SynchronizedGraphFactory.wrapGraph( g );
 
-    assertTrue( wrapped instanceof SynchronizedGraph );
-    assertTrue( wrapped.graph instanceof IdGraph );
-    assertTrue( wrapped.graph instanceof KeyIndexableGraph );
+    assertNotNull( wrapped );
+    assertTrue( wrapped.getGraph() instanceof IdGraph );
+    assertTrue( wrapped.getGraph() instanceof KeyIndexableGraph );
 
   }
 
