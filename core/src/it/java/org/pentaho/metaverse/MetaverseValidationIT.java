@@ -747,13 +747,6 @@ public class MetaverseValidationIT {
     int outputFields = getExpectedOutputFieldCount( meta );
 
     assertNotNull( textFileOutputStepNode );
-    // should write to one file
-    Iterable<FramedMetaverseNode> outputFiles = textFileOutputStepNode.getOutputFiles();
-    assertEquals( fileNames.length, getIterableSize( outputFiles ) );
-    int i = 0;
-    for ( FramedMetaverseNode node : outputFiles ) {
-      assertEquals( normalizeFilePath( fileNames[i++] ),normalizeFilePath(  node.getName() ) );
-    }
 
     Iterable<StreamFieldNode> outFields = textFileOutputStepNode.getOutputStreamFields();
     int outFieldCount = getIterableSize( outFields );
