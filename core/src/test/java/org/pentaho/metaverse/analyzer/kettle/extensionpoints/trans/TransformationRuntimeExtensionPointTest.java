@@ -115,7 +115,7 @@ public class TransformationRuntimeExtensionPointTest {
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
 
     ext.transStarted( trans );
-    verify( ext, times( 1 ) ).populateExecutionProfile(
+    verify( ext, times( 0 ) ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
     // Restore the original holder map
     TransLineageHolderMap.setInstance( originalHolderMap );
@@ -129,13 +129,14 @@ public class TransformationRuntimeExtensionPointTest {
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
 
     ext.transFinished( trans );
-    // The logic in transFinished() is now in a thread, so we can't verify methods were called
+    verify( ext, times( 1 ) ).populateExecutionProfile( Mockito.any( IExecutionProfile.class ), eq( trans ) );
 
+    // Restore the original holder map
     Trans mockTrans = spy( trans );
     Result result = mock( Result.class );
     when( mockTrans.getResult() ).thenReturn( result );
     ext.transFinished( mockTrans );
-    // The logic in transFinished() is now in a thread, so we can't verify methods were called
+    verify( ext, times( 1 ) ).populateExecutionProfile( Mockito.any( IExecutionProfile.class ), eq( mockTrans ) );
   }
 
   @Test

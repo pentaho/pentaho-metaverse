@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -101,14 +101,21 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         return;
       }
 
+      // Add the job finished listener
+      job.addJobListener( this );
+    }
+  }
+
+  private void runAnalyzers( final Job job ) throws KettleException {
+
+    // If runtime lineage collection is disabled, don't run any lineage processes/methods
+    if ( job != null && isRuntimeEnabled() ) {
+
       // Create and populate an execution profile with what we know so far
       ExecutionProfile executionProfile = new ExecutionProfile();
       populateExecutionProfile( executionProfile, job );
 
       IMetaverseBuilder builder = JobLineageHolderMap.getInstance().getMetaverseBuilder( job );
-
-      // Add the job finished listener
-      job.addJobListener( this );
 
       // Analyze the current transformation
       if ( documentAnalyzer != null ) {
@@ -119,7 +126,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         final INamespace namespace = new Namespace( clientName );
 
         final IMetaverseNode designNode = builder.getMetaverseObjectFactory()
-            .createNodeObject( clientName, clientName, DictionaryConst.NODE_TYPE_LOCATOR );
+          .createNodeObject( clientName, clientName, DictionaryConst.NODE_TYPE_LOCATOR );
         builder.addNode( designNode );
 
         final JobMeta jobMeta = job.getJobMeta();
@@ -166,7 +173,6 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       LineageHolder holder = JobLineageHolderMap.getInstance().getLineageHolder( job );
       holder.setExecutionProfile( executionProfile );
       holder.setMetaverseBuilder( builder );
-
     }
   }
 
@@ -182,6 +188,8 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     if ( job == null ) {
       return;
     }
+
+    runAnalyzers( job );
 
     if ( allowedAsync() ) {
       createLineGraphAsync( job );
