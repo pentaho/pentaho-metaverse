@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -198,9 +198,9 @@ public class VfsLineageCollector implements ILineageCollector {
           zos.putNextEntry( zipEntry );
 
           // write the file's bytes to the zip stream
-          InputStream fis = file.getContent().getInputStream();
-          zos.write( IOUtils.toByteArray( fis ) );
-
+          try ( InputStream fis = file.getContent().getInputStream() ) {
+            zos.write( IOUtils.toByteArray( fis ) );
+          }
         } catch ( IOException e ) {
           log.error( Messages.getString( "ERROR.FailedAddingFileToZip", file.getName().getPath() ) );
         } finally {
