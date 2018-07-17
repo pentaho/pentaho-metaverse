@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -25,6 +25,7 @@ package org.pentaho.metaverse.impl.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.apache.commons.io.IOUtils;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 
 import java.io.IOException;
@@ -43,20 +44,24 @@ public class ExecutionProfileUtil {
   public static void outputExecutionProfile( OutputStream outputStream, IExecutionProfile executionProfile )
     throws IOException {
 
-    PrintStream out;
-    if ( outputStream instanceof PrintStream ) {
-      out = (PrintStream) outputStream;
-    } else {
-      out = new PrintStream( outputStream );
-    }
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.enable( SerializationFeature.INDENT_OUTPUT );
-    mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );
-    mapper.enable( SerializationFeature.WRAP_EXCEPTIONS );
+    PrintStream out = null;
     try {
-      out.println( mapper.writeValueAsString( executionProfile ) );
-    } catch ( JsonProcessingException jpe ) {
-      throw new IOException( jpe );
+      if ( outputStream instanceof PrintStream ) {
+        out = (PrintStream) outputStream;
+      } else {
+        out = new PrintStream( outputStream );
+      }
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.enable( SerializationFeature.INDENT_OUTPUT );
+      mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );
+      mapper.enable( SerializationFeature.WRAP_EXCEPTIONS );
+      try {
+        out.println( mapper.writeValueAsString( executionProfile ) );
+      } catch ( JsonProcessingException jpe ) {
+        throw new IOException( jpe );
+      }
+    } finally {
+      IOUtils.closeQuietly( out );
     }
   }
 }
