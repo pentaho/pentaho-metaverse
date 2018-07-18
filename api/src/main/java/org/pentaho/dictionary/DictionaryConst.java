@@ -156,6 +156,12 @@ public class DictionaryConst {
   public static final String PROPERTY_LOGICAL_ID = "logicalId";
 
   /**
+   * Property key for the "cluster"
+   */
+  public static final String PROPERTY_CLUSTER = "cluster";
+
+
+  /**
    * Property key for the "hostName"
    */
   public static final String PROPERTY_HOST_NAME = "hostName";
@@ -415,6 +421,16 @@ public class DictionaryConst {
    * The node type for a field in a JSON file
    */
   public static final String NODE_TYPE_JSON_FIELD = "JSON Field";
+
+  /**
+   * The node type for a Hadoop file
+   */
+  public static final String NODE_TYPE_HDFS_FILE = "Hadoop File";
+
+  /**
+   * The node type for a field in a HDFS file
+   */
+  public static final String NODE_TYPE_HDFS_FIELD = "Hadoop Field";
 
   /**
    * The node type for a web service, e.g. SalesForce.com or a HTTP call
