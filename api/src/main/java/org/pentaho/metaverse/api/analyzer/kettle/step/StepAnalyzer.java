@@ -529,10 +529,6 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     return inputFields;
   }
 
-  protected IMetaverseObjectFactory getMetaverseObjectFactory() {
-    return super.metaverseObjectFactory;
-  }
-
   protected void setMetaverseObjectFactory( IMetaverseObjectFactory factory ) {
     metaverseObjectFactory = factory;
   }
