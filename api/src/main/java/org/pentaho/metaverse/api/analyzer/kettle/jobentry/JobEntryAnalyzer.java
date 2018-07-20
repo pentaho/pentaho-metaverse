@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -108,6 +108,7 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
     rootNode.setProperty( "pluginId", entry.getPluginId() );
     rootNode.setProperty( "jobEntryType", stepType );
     rootNode.setProperty( "copies", entry.getParentJob().getJobMeta().getJobCopies().size() );
+    rootNode.setProperty( "description", entry.getDescription() );
     metaverseBuilder.addNode( rootNode );
 
     customAnalyze( entry, rootNode );
