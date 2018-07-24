@@ -128,6 +128,9 @@ public class ExternalResourceStepAnalyzerTest {
     IExternalResourceInfo resInfo = mock( IExternalResourceInfo.class );
     resources.add( resInfo );
     when( resInfo.isInput() ).thenReturn( true );
+    when( resInfo.isOutput() ).thenReturn( false );
+    when( analyzer.isInput() ).thenReturn( true );
+    when( analyzer.isOutput() ).thenReturn( false );
 
     when( erc.getResourcesFromMeta( eq( meta ), any( IAnalysisContext.class ) ) ).thenReturn( resources );
 
@@ -148,6 +151,9 @@ public class ExternalResourceStepAnalyzerTest {
     resources.add( resInfo );
     when( resInfo.isInput() ).thenReturn( false );
     when( resInfo.isOutput() ).thenReturn( true );
+
+    when( analyzer.isInput() ).thenReturn( false );
+    when( analyzer.isOutput() ).thenReturn( true );
 
     when( erc.getResourcesFromMeta( eq( meta ), any( IAnalysisContext.class ) ) ).thenReturn( resources );
 

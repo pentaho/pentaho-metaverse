@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -92,8 +92,9 @@ public class ExternalResourceInfoFactory {
     BaseResourceInfo resource = null;
     if ( fileObject != null ) {
       resource = new BaseResourceInfo();
-      resource.setName( fileObject.getName().getPath() );
+      resource.setName( fileObject.getPublicURIString() );
       resource.setInput( isInput );
+      // default value, different value can be specified by the custom analyzer
       resource.setType( DictionaryConst.NODE_TYPE_FILE );
     }
     return resource;

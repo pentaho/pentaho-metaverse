@@ -166,7 +166,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
       Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
 
-      MetaverseCompletionService.getInstance().submit( analyzerRunner, id );
+      LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
+      holder.setLineageTask( MetaverseCompletionService.getInstance().submit( analyzerRunner, id ) );
     }
 
     // Save the lineage objects for later
@@ -302,6 +303,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
   protected void createLineGraph( final Trans trans ) {
     try {
+
       // Get the current execution profile for this transformation
       LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
       Future lineageTask = holder.getLineageTask();

@@ -109,6 +109,7 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
     rootNode.setProperty( "jobEntryType", stepType );
     rootNode.setProperty( "copies", entry.getParentJob().getJobMeta().getJobCopies().size() );
     rootNode.setProperty( "description", entry.getDescription() );
+    rootNode.setProperty( "_analyzer", this.getClass().getSimpleName() );
     metaverseBuilder.addNode( rootNode );
 
     customAnalyze( entry, rootNode );
