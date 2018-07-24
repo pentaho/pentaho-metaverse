@@ -62,6 +62,10 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     }
   }
 
+  public IMetaverseObjectFactory getMetaverseObjectFactory() {
+    return this.metaverseObjectFactory;
+  }
+
   public IMetaverseBuilder getMetaverseBuilder() {
     return metaverseBuilder;
   }
@@ -110,12 +114,12 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     IMetaverseNode fileNode = null;
 
     if ( fileName != null && descriptor != null ) {
-      normalized = KettleAnalyzerUtil.normalizeFilePath( fileName );
+      normalized = normalizeFilePath() ? KettleAnalyzerUtil.normalizeFilePath( fileName ) : fileName;
 
       INamespace ns = descriptor.getNamespace();
       INamespace parentNs = ns.getParentNamespace();
 
-      fileNode = metaverseObjectFactory.createNodeObject( parentNs == null ? ns : parentNs, normalized, nodeType );
+      fileNode = getMetaverseObjectFactory().createNodeObject( parentNs == null ? ns : parentNs, normalized, nodeType );
 
       fileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
       fileNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_FILE );
@@ -125,5 +129,13 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
 
   protected ILogicalIdGenerator getLogicalIdGenerator() {
     return DictionaryConst.LOGICAL_ID_GENERATOR_DEFAULT;
+  }
+
+  /**
+   * Returns true if the filepath shown as the meteverse node label should be normalized.
+   * @return true if the filepath shown as the meteverse node label should be normalized.
+   */
+  protected boolean normalizeFilePath() {
+    return true;
   }
 }

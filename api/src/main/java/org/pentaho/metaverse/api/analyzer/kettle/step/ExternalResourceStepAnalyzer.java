@@ -62,15 +62,15 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
       Collection<IExternalResourceInfo> resources = getExternalResourceConsumer().getResourcesFromMeta( meta, context );
       for ( IExternalResourceInfo resource : resources ) {
         try {
-          if ( resource.isInput() ) {
+          if ( isInput() ) {
             String label = DictionaryConst.LINK_READBY;
-            IMetaverseNode resourceNode = createResourceNode( resource );
+            IMetaverseNode resourceNode = createResourceNode( meta, resource );
             getMetaverseBuilder().addNode( resourceNode );
             getMetaverseBuilder().addLink( resourceNode, label, node );
           }
-          if ( resource.isOutput() ) {
+          if ( isOutput() ) {
             String label = DictionaryConst.LINK_WRITESTO;
-            IMetaverseNode resourceNode = createResourceNode( resource );
+            IMetaverseNode resourceNode = createResourceNode( meta, resource );
             getMetaverseBuilder().addNode( resourceNode );
             getMetaverseBuilder().addLink( node, label, resourceNode );
           }
@@ -240,6 +240,10 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
   }
 
   public abstract IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException;
+
+  public IMetaverseNode createResourceNode( T meta, IExternalResourceInfo resource ) throws MetaverseException {
+    return createResourceNode( resource );
+  }
 
   public abstract String getResourceInputNodeType();
 

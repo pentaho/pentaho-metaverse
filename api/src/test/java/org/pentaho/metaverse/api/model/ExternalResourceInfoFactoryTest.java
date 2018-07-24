@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,7 +22,6 @@
 
 package org.pentaho.metaverse.api.model;
 
-import org.apache.commons.vfs2.FileName;
 import org.apache.commons.vfs2.FileObject;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -107,12 +106,15 @@ public class ExternalResourceInfoFactoryTest {
   public void testCreateFileResource() throws Exception {
     assertNull( ExternalResourceInfoFactory.createFileResource( null ) );
     FileObject mockFile = mock( FileObject.class );
-    FileName mockFilename = mock( FileName.class );
-    when( mockFilename.getPath() ).thenReturn( "/path/to/file" );
-    when( mockFile.getName() ).thenReturn( mockFilename );
     IExternalResourceInfo resource = ExternalResourceInfoFactory.createFileResource( mockFile, false );
     assertNotNull( resource );
-    assertEquals( "/path/to/file", resource.getName() );
+    assertNull( resource.getName() );
     assertFalse( resource.isInput() );
+
+    when( mockFile.getPublicURIString() ).thenReturn( "/path/to/file" );
+    resource = ExternalResourceInfoFactory.createFileResource( mockFile, true );
+    assertNotNull( resource );
+    assertEquals( "/path/to/file", resource.getName() );
+    assertTrue( resource.isInput() );
   }
 }
