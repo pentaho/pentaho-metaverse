@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,19 +28,25 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.extension.ExtensionPointHandler;
+import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
+import org.pentaho.metaverse.api.ILineageWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +54,8 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@RunWith( MockitoJUnitRunner.class )
+@PrepareForTest( { ExtensionPointHandler.class } )
+@RunWith( PowerMockRunner.class )
 public class JobRuntimeExtensionPointTest {
 
   private static final String TEST_SERVER = "test.pentaho.com";
@@ -66,6 +73,7 @@ public class JobRuntimeExtensionPointTest {
   JobRuntimeExtensionPoint jobExtensionPoint;
   Job job;
   JobMeta jobMeta;
+  ILineageWriter lineageWriter;
 
   @Mock
   private IMetaverseBuilder mockBuilder;
@@ -79,6 +87,9 @@ public class JobRuntimeExtensionPointTest {
   public void setUp() throws Exception {
     jobExtensionPoint = new JobRuntimeExtensionPoint();
     jobExtensionPoint.setRuntimeEnabled( true );
+    lineageWriter = mock( ILineageWriter.class );
+    jobExtensionPoint.setLineageWriter( lineageWriter );
+
     jobMeta = spy( new JobMeta() );
     jobMeta.setName( TEST_JOB_NAME );
     jobMeta.setFilename( TEST_JOB_PATH );
@@ -90,7 +101,7 @@ public class JobRuntimeExtensionPointTest {
     when( jobMeta.getUsedVariables() ).thenReturn( Collections.singletonList( TEST_VAR_NAME ) );
     job.addParameterDefinition( TEST_PARAM_NAME, TEST_PARAM_DEFAULT_VALUE, TEST_PARAM_DESCRIPTION );
     job.setParameterValue( TEST_PARAM_NAME, TEST_PARAM_VALUE );
-    job.setArguments( new String[]{ "arg0", "arg1" } );
+    job.setArguments( new String[] { "arg0", "arg1" } );
   }
 
   private JobLineageHolderMap mockBuilder() {
@@ -156,9 +167,14 @@ public class JobRuntimeExtensionPointTest {
   public void testJobFinishedNotAsync() throws Exception {
     JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
     when( ext.allowedAsync() ).thenReturn( false );
+    PowerMockito.mockStatic( ExtensionPointHandler.class );
     ext.jobFinished( job );
     verify( ext ).createLineGraph( job );
     verify( ext, never() ).createLineGraphAsync( job );
+
+    PowerMockito.verifyStatic();
+    ExtensionPointHandler.callExtensionPoint( Mockito.any( LogChannelInterface.class ),
+      Mockito.eq( MetaverseExtensionPoint.JobLineageWriteEnd.id ), eq( job ) );
   }
 
   @Test

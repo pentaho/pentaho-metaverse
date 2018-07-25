@@ -27,6 +27,7 @@ import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
+import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
@@ -48,6 +49,7 @@ import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.IParamInfo;
 import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.impl.model.ExecutionData;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
@@ -362,6 +364,9 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
           if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
             lineageWriter.outputLineageGraph( holder );
+            // lineage has been written - call the appropriate extension point
+            ExtensionPointHandler.callExtensionPoint(
+              trans.getLogChannel(), MetaverseExtensionPoint.TransLineageWriteEnd.id, trans );
           }
         }
       } catch ( IOException e ) {
