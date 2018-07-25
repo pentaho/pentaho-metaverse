@@ -25,26 +25,33 @@ package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.extension.ExtensionPointHandler;
+import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metaverse.api.ILineageWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+@PrepareForTest( { ExtensionPointHandler.class } )
+@RunWith( PowerMockRunner.class )
 public class TransformationRuntimeExtensionPointTest {
 
   private static final String TEST_SERVER = "test.pentaho.com";
@@ -90,7 +97,7 @@ public class TransformationRuntimeExtensionPointTest {
     when( transMeta.getUsedVariables() ).thenReturn( Collections.singletonList( TEST_VAR_NAME ) );
     trans.addParameterDefinition( TEST_PARAM_NAME, TEST_PARAM_DEFAULT_VALUE, TEST_PARAM_DESCRIPTION );
     trans.setParameterValue( TEST_PARAM_NAME, TEST_PARAM_VALUE );
-    trans.setArguments( new String[]{ "arg0", "arg1" } );
+    trans.setArguments( new String[] { "arg0", "arg1" } );
 
   }
 
@@ -143,10 +150,15 @@ public class TransformationRuntimeExtensionPointTest {
   public void testTransFinishedNotAsync() throws Exception {
     TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
     when( ext.allowedAsync() ).thenReturn( false );
+    PowerMockito.mockStatic( ExtensionPointHandler.class );
     ext.transFinished( trans );
 
     verify( ext ).createLineGraph( trans );
     verify( ext, never() ).createLineGraphAsync( trans );
+
+    PowerMockito.verifyStatic();
+    ExtensionPointHandler.callExtensionPoint( Mockito.any( LogChannelInterface.class ),
+      Mockito.eq( MetaverseExtensionPoint.TransLineageWriteEnd.id ), eq( trans ) );
   }
 
   @Test
