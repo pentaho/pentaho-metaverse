@@ -383,7 +383,7 @@ public class MetaverseValidationIT {
       assertTrue( inputFile.getName().endsWith( "SacramentoCrime.xls" ) );
     }
 
-    assertEquals( "Microsoft Excel Input", excelInputStepNode.getStepType() );
+    assertEquals( "Microsoft Excel input", excelInputStepNode.getStepType() );
 
     int countUses = getIterableSize( excelInputStepNode.getFileFieldNodesUses() );
     int countInputs = getIterableSize( excelInputStepNode.getInputStreamFields() );
@@ -463,7 +463,7 @@ public class MetaverseValidationIT {
       assertTrue( inputFile.getName().endsWith( "SacramentocrimeJanuary2006.csv" ) );
     }
 
-    assertEquals( "Old Text file input", fileInputStepNode.getStepType() );
+    assertEquals( "Text file input (deprecated)", fileInputStepNode.getStepType() );
 
     int countUses = getIterableSize( fileInputStepNode.getFileFieldNodesUses() );
     int countInputs = getIterableSize( fileInputStepNode.getInputStreamFields() );
@@ -1303,7 +1303,7 @@ public class MetaverseValidationIT {
     Iterable<FramedMetaverseNode> inputUrls = node.getInputUrls();
     int countInputUrls = getIterableSize( inputUrls );
     assertEquals( 1, countInputUrls );
-    assertEquals( "HTTP Client", node.getStepType() );
+    assertEquals( "HTTP client", node.getStepType() );
 
     HTTPMeta stepMeta = (HTTPMeta) getStepMeta( node );
     for ( FramedMetaverseNode inputUrl : inputUrls ) {
@@ -1338,7 +1338,7 @@ public class MetaverseValidationIT {
     assertEquals( 0, countInputUrls );
 
     HTTPMeta stepMeta = (HTTPMeta) getStepMeta( node );
-    assertEquals( "HTTP Client", node.getStepType() );
+    assertEquals( "HTTP client", node.getStepType() );
 
     Set<String> usedFields = new HashSet<>();
     Collections.addAll( usedFields, stepMeta.getHeaderField() );
@@ -1365,7 +1365,7 @@ public class MetaverseValidationIT {
     Iterable<FramedMetaverseNode> inputUrls = node.getInputUrls();
     int countInputUrls = getIterableSize( inputUrls );
     assertEquals( 1, countInputUrls );
-    assertEquals( "REST Client", node.getStepType() );
+    assertEquals( "REST client", node.getStepType() );
 
     RestMeta stepMeta = (RestMeta) getStepMeta( node );
     for ( FramedMetaverseNode inputUrl : inputUrls ) {
@@ -1395,7 +1395,7 @@ public class MetaverseValidationIT {
     RestClientStepNode node = root.getRestClientStepNode( "REST Client - parameterized" );
     assertNotNull( node );
     Iterable<FramedMetaverseNode> inputUrls = node.getInputUrls();
-    assertEquals( "REST Client", node.getStepType() );
+    assertEquals( "REST client", node.getStepType() );
 
     RestMeta stepMeta = (RestMeta) getStepMeta( node );
     for ( FramedMetaverseNode inputUrl : inputUrls ) {
@@ -1440,7 +1440,7 @@ public class MetaverseValidationIT {
       assertTrue( inputUrl.getName().endsWith( "/posts" ) );
     }
 
-    assertEquals( "HTTP Post", node.getStepType() );
+    assertEquals( "HTTP post", node.getStepType() );
 
     // check the param  field is "used"
     Iterable<StreamFieldNode> streamFieldNodesUses = node.getStreamFieldNodesUses();
@@ -1468,7 +1468,7 @@ public class MetaverseValidationIT {
     int countInputUrls = getIterableSize( inputUrls );
     assertEquals( 0, countInputUrls );
 
-    assertEquals( "HTTP Post", node.getStepType() );
+    assertEquals( "HTTP post", node.getStepType() );
 
     HTTPPOSTMeta stepMeta = (HTTPPOSTMeta) getStepMeta( node );
     Set<String> usedFields = new HashSet<>();

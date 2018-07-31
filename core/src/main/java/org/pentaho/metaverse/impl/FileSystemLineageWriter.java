@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -74,11 +74,12 @@ public class FileSystemLineageWriter implements ILineageWriter {
     if ( holder != null ) {
       IExecutionProfile profile = holder.getExecutionProfile();
       if ( profile != null ) {
-        OutputStream fis = getProfileOutputStream( holder );
-        if ( fis != null ) {
-          ExecutionProfileUtil.outputExecutionProfile( fis, profile );
-        } else {
-          log.debug( "No profile output stream associated with this LineageWriter" );
+        try ( OutputStream fos = getProfileOutputStream( holder ) ) {
+          if ( fos != null ) {
+            ExecutionProfileUtil.outputExecutionProfile( fos, profile );
+          } else {
+            log.debug( "No profile output stream associated with this LineageWriter" );
+          }
         }
       }
     }
@@ -89,15 +90,15 @@ public class FileSystemLineageWriter implements ILineageWriter {
     if ( holder != null ) {
       IMetaverseBuilder builder = holder.getMetaverseBuilder();
       if ( builder != null ) {
-        OutputStream fis = getGraphOutputStream( holder );
-        if ( fis != null ) {
-          graphWriter.outputGraph( builder.getGraph(), fis );
-        } else {
-          log.debug( "No graph output stream associated with this LineageWriter" );
+        try ( OutputStream fos = getGraphOutputStream( holder ) ) {
+          if ( fos != null ) {
+            graphWriter.outputGraph( builder.getGraph(), fos );
+          } else {
+            log.debug( "No graph output stream associated with this LineageWriter" );
+          }
         }
       }
     }
-
   }
 
   /**
