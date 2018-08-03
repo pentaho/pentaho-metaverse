@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,7 @@ package org.pentaho.metaverse.analyzer.kettle.jobentry;
 
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
 
@@ -68,7 +69,7 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
    * @return a set of analyzers that can process the specified step
    */
   @Override public List<IJobEntryAnalyzer> getAnalyzers( Collection<Class<?>> types ) {
-    List<IJobEntryAnalyzer> stepAnalyzers = getAnalyzers();
+    List<IJobEntryAnalyzer> jobEntryAnalyzers = getAnalyzers();
     if ( types != null ) {
       final Set<IJobEntryAnalyzer> specificStepAnalyzers = new HashSet<IJobEntryAnalyzer>();
       for ( Class<?> clazz : types ) {
@@ -76,9 +77,9 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
           specificStepAnalyzers.addAll( analyzerTypeMap.get( clazz ) );
         }
       }
-      stepAnalyzers = new ArrayList<IJobEntryAnalyzer>( specificStepAnalyzers );
+      jobEntryAnalyzers = new ArrayList<IJobEntryAnalyzer>( specificStepAnalyzers );
     }
-    return stepAnalyzers;
+    return jobEntryAnalyzers;
   }
 
   /**
@@ -87,8 +88,19 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
    * @param analyzers
    */
   public void setJobEntryAnalyzers( List<IJobEntryAnalyzer> analyzers ) {
-    jobEntryAnalyzers = analyzers;
-    loadAnalyzerTypeMap();
+    if ( analyzers == null ) {
+      this.jobEntryAnalyzers = null;
+    } else {
+      if ( this.jobEntryAnalyzers == null ) {
+        this.jobEntryAnalyzers = new ArrayList();
+      }
+      this.jobEntryAnalyzers.addAll( analyzers );
+      loadAnalyzerTypeMap();
+    }
+  }
+
+  public void setClonableJobEntryAnalyzers( List<IJobEntryAnalyzer> analyzers ) {
+    setJobEntryAnalyzers( analyzers );
   }
 
   /**
@@ -109,7 +121,6 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
       jobEntryAnalyzers.add( analyzer );
     }
     Set<Class<? extends JobEntryInterface>> types = analyzer.getSupportedEntries();
-    analyzer.setMetaverseBuilder( metaverseBuilder );
     if ( types != null ) {
       for ( Class<? extends JobEntryInterface> type : types ) {
         Set<IJobEntryAnalyzer> analyzerSet = null;
@@ -124,6 +135,10 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
         analyzerTypeMap.put( type, analyzerSet );
       }
     }
+  }
+
+  public void addClonableAnalyzer( IClonableJobEntryAnalyzer analyzer ) {
+    addAnalyzer( analyzer );
   }
 
   @Override
@@ -151,6 +166,10 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
         }
       }
     }
+  }
+
+  public void removeClonableAnalyzer( IClonableJobEntryAnalyzer analyzer ) {
+    removeAnalyzer( analyzer );
   }
 
 }

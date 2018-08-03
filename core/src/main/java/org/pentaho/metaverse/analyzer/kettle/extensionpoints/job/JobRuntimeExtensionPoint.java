@@ -79,10 +79,7 @@ import java.util.concurrent.Future;
     id = "jobRuntimeMetaverse" )
 public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements JobListener {
 
-  private IDocumentAnalyzer documentAnalyzer;
-
   private static final Logger log = LoggerFactory.getLogger( JobRuntimeExtensionPoint.class );
-
 
   /**
    * Callback when a job is about to be started
@@ -118,8 +115,9 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       populateExecutionProfile( executionProfile, job );
 
       IMetaverseBuilder builder = JobLineageHolderMap.getInstance().getMetaverseBuilder( job );
+      final LineageHolder holder = JobLineageHolderMap.getInstance().getLineageHolder( job );
+      IDocumentAnalyzer documentAnalyzer = getDocumentAnalyzer();
 
-      // Analyze the current transformation
       if ( documentAnalyzer != null ) {
         documentAnalyzer.setMetaverseBuilder( builder );
 
@@ -153,7 +151,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         metaverseDocument.setContent( jobMeta );
         metaverseDocument.setStringID( id );
         metaverseDocument.setName( jobMeta.getName() );
-        metaverseDocument.setExtension( "kjb" );
+        metaverseDocument.setExtension( jobMeta.getDefaultExtension() );
         metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "job.kjb" ) );
         metaverseDocument.setContext( new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
         String normalizedPath;
@@ -167,12 +165,11 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
 
         Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
-
-        MetaverseCompletionService.getInstance().submit( analyzerRunner, id );
+        // set the lineage task, so that we can wait for it to finish before proceeding to write out the graph
+        holder.setLineageTask( MetaverseCompletionService.getInstance().submit( analyzerRunner, id ) );
       }
 
       // Save the lineage objects for later
-      LineageHolder holder = JobLineageHolderMap.getInstance().getLineageHolder( job );
       holder.setExecutionProfile( executionProfile );
       holder.setMetaverseBuilder( builder );
     }
@@ -374,24 +371,6 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       filename = "";
     }
     return filename;
-  }
-
-  /**
-   * Sets the document analyzer for this extension point
-   *
-   * @param analyzer The document analyzer for this extension point
-   */
-  public void setDocumentAnalyzer( IDocumentAnalyzer analyzer ) {
-    this.documentAnalyzer = analyzer;
-  }
-
-  /**
-   * Gets the document analyzer of this extension point
-   *
-   * @return IDocumentAnalyzer - The document analyzer for this extension point
-   */
-  public IDocumentAnalyzer getDocumentAnalyzer() {
-    return documentAnalyzer;
   }
 
   public static String getFilename( JobMeta jobMeta ) {

@@ -109,6 +109,12 @@ public class JobRuntimeExtensionPointTest {
     JobLineageHolderMap jobLineageHolderMap = spy( originalHolderMap );
     when( jobLineageHolderMap.getMetaverseBuilder( Mockito.any( Job.class ) ) ).thenReturn( mockBuilder );
     JobLineageHolderMap.setInstance( jobLineageHolderMap );
+
+    final IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
+    final IDocument metaverseDocument = mock( IDocument.class );
+    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
+    when( objectFactory.createDocumentObject() ).thenReturn( metaverseDocument );
+
     return originalHolderMap;
   }
 
@@ -130,7 +136,6 @@ public class JobRuntimeExtensionPointTest {
 
     JobRuntimeExtensionPoint extensionPoint = new JobRuntimeExtensionPoint();
     IDocumentAnalyzer documentAnalyzer = Mockito.mock( IDocumentAnalyzer.class );
-    extensionPoint.setDocumentAnalyzer( documentAnalyzer );
 
     final IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
@@ -146,6 +151,8 @@ public class JobRuntimeExtensionPointTest {
 
   @Test
   public void testJobFinished() throws Exception {
+    JobLineageHolderMap originalHolderMap = mockBuilder();
+
     JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
     ext.jobFinished( null );
     verify( ext, never() ).populateExecutionProfile(
@@ -161,10 +168,15 @@ public class JobRuntimeExtensionPointTest {
     // The logic in jobFinished() is now in a thread, so we can't verify methods were called
 
     // Exception handling test removed because jobFinished() logic is in a thread and can't throw checked exceptions
+
+    // Restore original JobLineageHolderMap for use by others
+    JobLineageHolderMap.setInstance( originalHolderMap );
   }
 
   @Test
   public void testJobFinishedNotAsync() throws Exception {
+    JobLineageHolderMap originalHolderMap = mockBuilder();
+
     JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
     when( ext.allowedAsync() ).thenReturn( false );
     PowerMockito.mockStatic( ExtensionPointHandler.class );
@@ -175,14 +187,22 @@ public class JobRuntimeExtensionPointTest {
     PowerMockito.verifyStatic();
     ExtensionPointHandler.callExtensionPoint( Mockito.any( LogChannelInterface.class ),
       Mockito.eq( MetaverseExtensionPoint.JobLineageWriteEnd.id ), eq( job ) );
+
+    // Restore original JobLineageHolderMap for use by others
+    JobLineageHolderMap.setInstance( originalHolderMap );
   }
 
   @Test
   public void testJobFinishedAsync() throws Exception {
+    JobLineageHolderMap originalHolderMap = mockBuilder();
+
     JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
     when( ext.allowedAsync() ).thenReturn( true );
     ext.jobFinished( job );
     verify( ext ).createLineGraphAsync( job );
+
+    // Restore original JobLineageHolderMap for use by others
+    JobLineageHolderMap.setInstance( originalHolderMap );
   }
 
   @Test
