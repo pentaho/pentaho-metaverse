@@ -64,7 +64,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMetaverseComponent implements
-  IStepAnalyzer<T>, IFieldLineageMetadataProvider<T> {
+  IClonableStepAnalyzer<T>, IFieldLineageMetadataProvider<T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger( StepAnalyzer.class );
   public static final String NONE = "_none_";
@@ -655,6 +655,37 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
       new MetaverseComponentDescriptor( fieldName, DictionaryConst.NODE_TYPE_TRANS_FIELD, tmpOriginNode, descriptor
         .getContext() );
     return d;
+  }
+
+  @Override
+  public IClonableStepAnalyzer cloneAnalyzer() {
+    final IClonableStepAnalyzer newInstance = newInstance();
+    copyState( newInstance );
+    return newInstance;
+  }
+
+  /**
+   * Returns this {@link IClonableStepAnalyzer} by default and should be overridden by concrete implementations to
+   * create a new instance.
+   * @return this {@link IClonableStepAnalyzer} by default and should be overridden by concrete implementations to
+   * create a new instance.
+   */
+  protected IClonableStepAnalyzer newInstance() {
+    return this;
+  }
+
+  /**
+   * Copies the any relevant properties from this {@link IClonableStepAnalyzer} to the {@code newAnalyzer}
+   * @param newAnalyzer the {@link IClonableStepAnalyzer} into which the properties from this {@link IClonableStepAnalyzer}
+   *                    are being copied.
+   * @return true if the properties were copied, false otherwise
+   */
+  protected boolean copyState( final IClonableStepAnalyzer newAnalyzer ) {
+    if ( newAnalyzer instanceof StepAnalyzer ) {
+      ( (StepAnalyzer) newAnalyzer ).setConnectionAnalyzer( getConnectionAnalyzer() );
+      return true;
+    }
+    return false;
   }
 
 }

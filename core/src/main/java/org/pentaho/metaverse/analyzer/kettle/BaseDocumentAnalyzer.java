@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,9 +23,9 @@
 package org.pentaho.metaverse.analyzer.kettle;
 
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
-import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
@@ -35,7 +35,7 @@ import org.pentaho.metaverse.messages.Messages;
  * Created by gmoran on 8/11/14.
  */
 public abstract class BaseDocumentAnalyzer extends BaseKettleMetaverseComponent
-  implements IDocumentAnalyzer<IMetaverseNode> {
+  implements IClonableDocumentAnalyzer<IMetaverseNode> {
 
   /**
    * This method handles null checks for state validation
@@ -85,6 +85,34 @@ public abstract class BaseDocumentAnalyzer extends BaseKettleMetaverseComponent
 
     metaverseBuilder.addLink( locatorNode, DictionaryConst.LINK_CONTAINS, child );
 
+  }
+
+  @Override
+  public IClonableDocumentAnalyzer cloneAnalyzer() {
+    final IClonableDocumentAnalyzer newInstance = newInstance();
+    copyState( newInstance );
+    return newInstance;
+  }
+
+  /**
+   * Returns this {@link IClonableDocumentAnalyzer} by default and should be overridden by concrete implementations
+   * to create a new instance.
+   * @return this {@link IClonableDocumentAnalyzer} by default and should be overridden by concrete implementations
+   * to create a new instance.
+   */
+  protected IClonableDocumentAnalyzer newInstance() {
+    return this;
+  }
+
+  /**
+   * Copies the any relevant properties from this {@link IClonableDocumentAnalyzer} to the {@code newAnalyzer}
+   * @param newAnalyzer the {@link IClonableDocumentAnalyzer} into which the properties from this
+   *                    {@link IClonableDocumentAnalyzer} are being copied.
+   * @return true if the properties were copied, false otherwise
+   */
+  protected boolean copyState( final IClonableDocumentAnalyzer newAnalyzer ) {
+    newAnalyzer.setMetaverseBuilder( getMetaverseBuilder() );
+    return true;
   }
 
 }

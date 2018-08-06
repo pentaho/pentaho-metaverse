@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.impl;
 
 import com.tinkerpop.blueprints.Graph;
+import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IDocumentController;
 import org.pentaho.metaverse.api.IDocumentEvent;
@@ -115,7 +116,8 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * @return the metaverse object factory
    */
   public IMetaverseObjectFactory getMetaverseObjectFactory() {
-    return ( metaverseBuilder == null ) ? null : metaverseBuilder.getMetaverseObjectFactory();
+    return metaverseObjectFactory != null ? metaverseObjectFactory
+      : ( metaverseBuilder == null ) ? null : metaverseBuilder.getMetaverseObjectFactory();
   }
 
   /**
@@ -124,6 +126,7 @@ public class DocumentController implements IDocumentController, IDocumentListene
    * @param metaverseObjectFactory the new metaverse object factory
    */
   public void setMetaverseObjectFactory( IMetaverseObjectFactory metaverseObjectFactory ) {
+    this.metaverseObjectFactory = metaverseObjectFactory;
     if ( metaverseBuilder != null ) {
       metaverseBuilder.setMetaverseObjectFactory( metaverseObjectFactory );
     }
@@ -202,9 +205,20 @@ public class DocumentController implements IDocumentController, IDocumentListene
    */
   @Override
   public void setDocumentAnalyzers( List<IDocumentAnalyzer> documentAnalyzers ) {
-    this.documentAnalyzers = documentAnalyzers;
-    // reset the analyzer type map
-    loadAnalyzerTypeMap();
+    if ( documentAnalyzers == null ) {
+      this.documentAnalyzers = null;
+    } else {
+      if ( this.documentAnalyzers == null ) {
+        this.documentAnalyzers = new ArrayList();
+      }
+      this.documentAnalyzers.addAll( documentAnalyzers );
+      // reset the analyzer type map
+      loadAnalyzerTypeMap();
+    }
+  }
+
+  public void setClonableDocumentAnalyzers( List<IDocumentAnalyzer> documentAnalyzers ) {
+    setDocumentAnalyzers( documentAnalyzers );
   }
 
   /*
@@ -235,6 +249,10 @@ public class DocumentController implements IDocumentController, IDocumentListene
     }
   }
 
+  public void addClonableAnalyzer( final IClonableDocumentAnalyzer analyzer ) {
+    addAnalyzer( analyzer );
+  }
+
   @Override
   public void addAnalyzer( IDocumentAnalyzer analyzer ) {
     if ( !documentAnalyzers.contains( analyzer ) ) {
@@ -256,6 +274,10 @@ public class DocumentController implements IDocumentController, IDocumentListene
         analyzerTypeMap.put( type, analyzerSet );
       }
     }
+  }
+
+  public void removeClonableAnalyzer( final IClonableDocumentAnalyzer analyzer ) {
+    removeAnalyzer( analyzer );
   }
 
   @Override

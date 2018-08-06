@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -145,6 +145,7 @@ public class DatabaseConnectionAnalyzerTest {
     } );
     try {
       IMetaverseNode node = dbConnectionAnalyzer.analyze( mockDescriptor, databaseMeta );
+      builder.addNode( node );
       assertNotNull( node );
       assertEquals( 14, node.getPropertyKeys().size() );
     } catch ( MetaverseAnalyzerException e ) {

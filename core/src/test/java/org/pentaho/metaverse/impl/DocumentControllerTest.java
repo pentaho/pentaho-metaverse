@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -271,12 +271,14 @@ public class DocumentControllerTest {
 
   @Test
   public void testGetMetaverseObjectFactory() throws Exception {
-    docController.setMetaverseBuilder( mockBuilder );
     IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
-
-    assertNotNull( docController.getMetaverseObjectFactory() );
-    verify( mockBuilder ).getMetaverseObjectFactory();
+    docController.setMetaverseBuilder( mockBuilder );
+    // the docController might have its own factory copy
+    assertNotEquals( mockBuilder.getMetaverseObjectFactory(), docController.getMetaverseObjectFactory() );
+    // ... but when this factory is null, we return the factory associated with the metaverseBuilder
+    docController.setMetaverseObjectFactory( null );
+    assertEquals( mockBuilder.getMetaverseObjectFactory(), docController.getMetaverseObjectFactory() );
   }
 
 }

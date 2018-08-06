@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -43,7 +43,7 @@ public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseC
    * Analyzes a database connection for metadata.
    *
    * @param dbMeta the object
-   * @see IAnalyzer#analyze(IComponentDescriptor, java.lang.Object)
+   * @see org.pentaho.metaverse.api.IAnalyzer#analyze(IComponentDescriptor, java.lang.Object)
    */
   @Override
   public IMetaverseNode analyze( IComponentDescriptor descriptor, DatabaseMeta dbMeta )
@@ -98,8 +98,6 @@ public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseC
     } else {
       node.setLogicalIdGenerator( getLogicalIdGenerator() );
     }
-
-    metaverseBuilder.addNode( node );
 
     return node;
 

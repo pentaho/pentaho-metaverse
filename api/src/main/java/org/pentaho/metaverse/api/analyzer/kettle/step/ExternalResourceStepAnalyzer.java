@@ -253,4 +253,13 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
 
   public abstract boolean isInput();
 
+  @Override
+  public boolean copyState( final IClonableStepAnalyzer newAnalyzer ) {
+    super.copyState( newAnalyzer );
+    if ( newAnalyzer instanceof ExternalResourceStepAnalyzer ) {
+      ( (ExternalResourceStepAnalyzer) newAnalyzer ).setExternalResourceConsumer( getExternalResourceConsumer() );
+      return true;
+    }
+    return false;
+  }
 }
