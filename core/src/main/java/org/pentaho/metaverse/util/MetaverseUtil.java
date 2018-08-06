@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -31,6 +31,7 @@ import org.pentaho.di.core.Const;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.metaverse.api.ChangeType;
+import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IDocumentController;
@@ -46,6 +47,8 @@ import org.pentaho.metaverse.graph.LineageGraphCompletionService;
 import org.pentaho.metaverse.graph.LineageGraphMap;
 import org.pentaho.metaverse.impl.MetaverseBuilder;
 import org.pentaho.metaverse.messages.Messages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -56,6 +59,8 @@ import java.util.concurrent.Future;
  * A class containing utility methods for Metaverse / lineage
  */
 public class MetaverseUtil {
+
+  private static final Logger log = LoggerFactory.getLogger( MetaverseUtil.class );
 
   public static final String MESSAGE_PREFIX_NODETYPE = "USER.nodetype.";
   public static final String MESSAGE_PREFIX_LINKTYPE = "USER.linktype.";
@@ -121,8 +126,13 @@ public class MetaverseUtil {
       List<IDocumentAnalyzer> matchingAnalyzers = docController.getDocumentAnalyzers( "ktr" );
 
       if ( matchingAnalyzers != null ) {
-        for ( final IDocumentAnalyzer analyzer : matchingAnalyzers ) {
+        for ( IDocumentAnalyzer analyzer : matchingAnalyzers ) {
 
+          if ( analyzer instanceof IClonableDocumentAnalyzer ) {
+            analyzer = ( (IClonableDocumentAnalyzer) analyzer ).cloneAnalyzer();
+          } else {
+            log.debug( Messages.getString( "WARNING.CannotCloneAnalyzer" ), analyzer );
+          }
           Runnable analyzerRunner = getAnalyzerRunner( analyzer, document );
 
           Graph g = ( graph != null ) ? graph : new TinkerGraph();

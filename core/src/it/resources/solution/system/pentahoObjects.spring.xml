@@ -142,7 +142,6 @@
 
   <bean id="IStepAnalyzerProvider" class="org.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
         scope="singleton">
-    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="stepAnalyzers">
       <list>
         <ref bean="TableOutputStepAnalyzer"/>
@@ -179,7 +178,6 @@
 
   <bean id="IJobEntryAnalyzerProvider" class="org.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider"
         scope="singleton">
-    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="jobEntryAnalyzers">
       <list>
         <ref bean="TransJobEntryAnalyzer"/>

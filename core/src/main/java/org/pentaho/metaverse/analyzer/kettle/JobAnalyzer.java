@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -32,6 +32,7 @@ import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
+import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseNode;
@@ -40,6 +41,7 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.PropertiesHolder;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
 import org.pentaho.metaverse.messages.Messages;
@@ -192,6 +194,15 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
           Set<IJobEntryAnalyzer> jobEntryAnalyzers = getJobEntryAnalyzers( jobEntryInterface );
           if ( jobEntryAnalyzers != null && !jobEntryAnalyzers.isEmpty() ) {
             for ( IJobEntryAnalyzer jobEntryAnalyzer : jobEntryAnalyzers ) {
+              // the analyzers provided by the provider are singletons created at startup time - in order to be able
+              // to analyze multiple jobs concurrently, we need to clone the analyzer, such that each job entry has
+              // its own dedicated analyzer with a metaverseBuilder that is unique to the job execution and does not
+              // change while the job is being analyzed
+              if ( jobEntryAnalyzer instanceof IClonableJobEntryAnalyzer ) {
+                jobEntryAnalyzer = ( (IClonableJobEntryAnalyzer) jobEntryAnalyzer ).cloneAnalyzer();
+              } else {
+                log.debug( Messages.getString( "WARNING.CannotCloneAnalyzer" ), jobEntryAnalyzer );
+              }
               jobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
               jobEntryNode = (IMetaverseNode) jobEntryAnalyzer.analyze( entryDescriptor, entry.getEntry() );
             }
@@ -245,7 +256,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
    * Returns a set of strings corresponding to which types of content are supported by this analyzer
    *
    * @return the supported types (as a set of Strings)
-   * @see IDocumentAnalyzer#getSupportedTypes()
+   * @see org.pentaho.metaverse.api.IDocumentAnalyzer#getSupportedTypes()
    */
   @Override
   public Set<String> getSupportedTypes() {
@@ -288,5 +299,10 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
     }
     jobEntryAnalyzerProvider = PentahoSystem.get( IJobEntryAnalyzerProvider.class );
     return jobEntryAnalyzerProvider;
+  }
+
+  @Override
+  public IClonableDocumentAnalyzer newInstance() {
+    return new JobAnalyzer();
   }
 }

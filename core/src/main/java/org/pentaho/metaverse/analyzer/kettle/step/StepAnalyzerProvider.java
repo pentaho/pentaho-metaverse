@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,7 @@ package org.pentaho.metaverse.analyzer.kettle.step;
 
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
 
@@ -87,8 +88,19 @@ public class StepAnalyzerProvider extends BaseKettleMetaverseComponent implement
    * @param analyzers the list of step analyzers for this object to provide
    */
   public void setStepAnalyzers( List<IStepAnalyzer> analyzers ) {
-    stepAnalyzers = analyzers;
-    loadAnalyzerTypeMap();
+    if ( analyzers == null ) {
+      this.stepAnalyzers = null;
+    } else {
+      if ( this.stepAnalyzers == null ) {
+        this.stepAnalyzers = new ArrayList();
+      }
+      this.stepAnalyzers.addAll( analyzers );
+      loadAnalyzerTypeMap();
+    }
+  }
+
+  public void setClonableStepAnalyzers( List<IStepAnalyzer> analyzers ) {
+    setStepAnalyzers( analyzers );
   }
 
   /**
@@ -110,7 +122,6 @@ public class StepAnalyzerProvider extends BaseKettleMetaverseComponent implement
         stepAnalyzers.add( analyzer );
       }
       Set<Class<? extends BaseStepMeta>> types = analyzer.getSupportedSteps();
-      analyzer.setMetaverseBuilder( metaverseBuilder );
       if ( types != null ) {
         for ( Class<? extends BaseStepMeta> type : types ) {
           Set<IStepAnalyzer> analyzerSet;
@@ -128,6 +139,11 @@ public class StepAnalyzerProvider extends BaseKettleMetaverseComponent implement
     }
   }
 
+  public void addClonableAnalyzer( IClonableStepAnalyzer analyzer ) {
+    addAnalyzer( analyzer );
+  }
+
+
   @Override
   public void removeAnalyzer( IStepAnalyzer analyzer ) {
     if ( analyzer != null ) {
@@ -138,7 +154,6 @@ public class StepAnalyzerProvider extends BaseKettleMetaverseComponent implement
           // reference-list doesn't support remove, just ignore
         }
       }
-
       Set<Class<? extends BaseStepMeta>> types = analyzer.getSupportedSteps();
       if ( types != null ) {
         for ( Class<? extends BaseStepMeta> type : types ) {
@@ -154,5 +169,9 @@ public class StepAnalyzerProvider extends BaseKettleMetaverseComponent implement
         }
       }
     }
+  }
+
+  public void removeClonableAnalyzer( IClonableStepAnalyzer analyzer ) {
+    removeAnalyzer( analyzer );
   }
 }

@@ -47,7 +47,7 @@ import java.util.List;
  * Created by gmoran on 7/16/14.
  */
 public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends BaseKettleMetaverseComponent implements
-  IJobEntryAnalyzer<IMetaverseNode, T> {
+  IClonableJobEntryAnalyzer<IMetaverseNode, T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger( JobEntryAnalyzer.class );
 
@@ -214,6 +214,37 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
     }
 
     return newFieldNode;
+  }
+
+  @Override
+  public IClonableJobEntryAnalyzer cloneAnalyzer() {
+    final IClonableJobEntryAnalyzer newInstance = newInstance();
+    copyState( newInstance );
+    return newInstance;
+  }
+
+  /**
+   * Returns this {@link IClonableJobEntryAnalyzer} by default and should be overridden by concrete implementations
+   * to create a new instance.
+   * @return this {@link IClonableJobEntryAnalyzer} by default and should be overridden by concrete implementations
+   * to create a new instance.
+   */
+  protected IClonableJobEntryAnalyzer newInstance() {
+    return this;
+  }
+
+  /**
+   * Copies the any relevant properties from this {@link IClonableJobEntryAnalyzer} to the {@code newAnalyzer}
+   * @param newAnalyzer the {@link IClonableJobEntryAnalyzer} into which the properties from this
+   *                    {@link IClonableJobEntryAnalyzer} are being copied.
+   * @return true if the properties were copied, false otherwise
+   */
+  protected boolean copyState( final IClonableJobEntryAnalyzer newAnalyzer ) {
+    if ( newAnalyzer instanceof JobEntryAnalyzer ) {
+      ( (JobEntryAnalyzer) newAnalyzer ).setConnectionAnalyzer( getConnectionAnalyzer() );
+      return true;
+    }
+    return false;
   }
 
 }
