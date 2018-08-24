@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -33,6 +33,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -187,4 +188,32 @@ public class JobEntryAnalyzerProviderTest {
     assertEquals( tableOutputStepAnalyzers.size(), 1 );
   }
 
+  @Test
+  public void TestAddAndSetAnalyzers() {
+
+    final IJobEntryAnalyzer analyzer1 = mock( IJobEntryAnalyzer.class );
+    final IJobEntryAnalyzer analyzer2 = mock( IJobEntryAnalyzer.class );
+    List<IJobEntryAnalyzer> analyzers = new ArrayList();
+    analyzers.add( analyzer1 );
+    analyzers.add( analyzer2 );
+
+    provider.setJobEntryAnalyzers( analyzers );
+    assertEquals( 2, provider.getAnalyzers().size() );
+    // verify that duplicate analyzers aren't added to the list
+    provider.setJobEntryAnalyzers( analyzers );
+    assertEquals( 2, provider.getAnalyzers().size() );
+
+    provider.setJobEntryAnalyzers( null );
+    assertNull( provider.getAnalyzers() );
+
+    // verify that "clonable" analyzers are added to the main analyzers list
+    provider.setClonableJobEntryAnalyzers( analyzers );
+    assertEquals( 2, provider.getAnalyzers().size() );
+    // and that duplicate clonable analyzers aren't added to the list
+    provider.setClonableJobEntryAnalyzers( analyzers );
+    assertEquals( 2, provider.getAnalyzers().size() );
+
+    provider.setClonableJobEntryAnalyzers( null );
+    assertNull( provider.getAnalyzers() );
+  }
 }
