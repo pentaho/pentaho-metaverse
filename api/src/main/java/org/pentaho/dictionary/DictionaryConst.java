@@ -413,26 +413,6 @@ public class DictionaryConst {
   public static final String NODE_TYPE_FILE_FIELD = "File Field";
 
   /**
-   * The node type for a JSON file
-   */
-  public static final String NODE_TYPE_JSON_FILE = "JSON File";
-
-  /**
-   * The node type for a field in a JSON file
-   */
-  public static final String NODE_TYPE_JSON_FIELD = "JSON Field";
-
-  /**
-   * The node type for a Hadoop file
-   */
-  public static final String NODE_TYPE_HDFS_FILE = "Hadoop File";
-
-  /**
-   * The node type for a field in a HDFS file
-   */
-  public static final String NODE_TYPE_HDFS_FIELD = "Hadoop Field";
-
-  /**
    * The node type for a web service, e.g. SalesForce.com or a HTTP call
    */
   public static final String NODE_TYPE_WEBSERVICE = "Web Service";
