@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,6 +26,7 @@ import org.pentaho.metaverse.api.IGraphWriter;
 import org.pentaho.metaverse.api.ILineageWriter;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.impl.model.ExecutionProfileUtil;
+import org.pentaho.metaverse.util.MetaverseUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,7 +49,10 @@ public class LineageWriter implements ILineageWriter {
   @Override
   public void outputLineageGraph( LineageHolder holder ) throws IOException {
     if ( graphWriter != null ) {
+      // no-op by default, can be used to introduce an artificial delay in the graphml file, for testing purposes
+      MetaverseUtil.delay();
       graphWriter.outputGraph( holder.getMetaverseBuilder().getGraph(), getGraphOutputStream() );
+      MetaverseUtil.delay();
     } else {
       throw new IOException( "No graph output stream associated with this LineageWriter" ); // TODO different exception?
     }
