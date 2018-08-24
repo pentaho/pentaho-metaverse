@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -187,5 +187,34 @@ public class StepAnalyzerProviderTest {
     assertEquals( tableOutputStepAnalyzers.size(), 1 );
     assertEquals( tableOutputStepAnalyzer, tableOutputStepAnalyzers.iterator().next() );
 
+  }
+
+  @Test
+  public void TestAddAndSetAnalyzers() {
+
+    final IStepAnalyzer analyzer1 = mock( IStepAnalyzer.class );
+    final  IStepAnalyzer analyzer2 = mock( IStepAnalyzer.class );
+    List<IStepAnalyzer> analyzers = new ArrayList();
+    analyzers.add( analyzer1 );
+    analyzers.add( analyzer2 );
+
+    provider.setStepAnalyzers( analyzers );
+    assertEquals( 2, provider.getAnalyzers().size() );
+    // verify that duplicate analyzers aren't added to the list
+    provider.setStepAnalyzers( analyzers );
+    assertEquals( 2, provider.getAnalyzers().size() );
+
+    provider.setStepAnalyzers( null );
+    assertNull( provider.getAnalyzers() );
+
+    // verify that "clonable" analyzers are added to the main analyzers list
+    provider.setClonableStepAnalyzers( analyzers );
+    assertEquals( 2, provider.getAnalyzers().size() );
+    // and that duplicate clonable analyzers aren't added to the list
+    provider.setClonableStepAnalyzers( analyzers );
+    assertEquals( 2, provider.getAnalyzers().size() );
+
+    provider.setClonableStepAnalyzers( null );
+    assertNull( provider.getAnalyzers() );
   }
 }
