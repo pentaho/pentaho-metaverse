@@ -33,6 +33,9 @@ public class MetaverseConfig implements IMetaverseConfig {
   private String extecutionOutputFolder = "./pentaho-lineage-output";
   private String executionGenerationStrategy = "latest";
   private boolean resolveExternalResources = false;
+  // Used for testing ONLY, to verify that any listeners waiting for lineage to be written aren't invoked until
+  // graphml has been written
+  private int lineageDelay = 0;
 
   public void setExecutionRuntime( final String executionRuntime ) {
     this.executionRuntime = executionRuntime;
@@ -64,5 +67,13 @@ public class MetaverseConfig implements IMetaverseConfig {
 
   public boolean getResolveExternalResources() {
     return this.resolveExternalResources;
+  }
+
+  public void setLineageDelay( final int lineageDelay ) {
+    this.lineageDelay = lineageDelay;
+  }
+
+  public int getLineageDelay() {
+    return this.lineageDelay;
   }
 }
