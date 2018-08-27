@@ -53,8 +53,6 @@ public class DictionaryHelperTest {
     types.add( DictionaryConst.NODE_TYPE_DATA_COLUMN );
     types.add( DictionaryConst.NODE_TYPE_FILE );
     types.add( DictionaryConst.NODE_TYPE_FILE_FIELD );
-    types.add( DictionaryConst.NODE_TYPE_JSON_FILE );
-    types.add( DictionaryConst.NODE_TYPE_JSON_FIELD );
   }
 
   @Test( expected = UnsupportedOperationException.class )
