@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,14 +24,13 @@ package org.pentaho.metaverse.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.dictionary.DictionaryConst;
 
 /**
  * User: RFellows Date: 12/5/14
  */
 public class BaseDatabaseResourceInfo extends BaseResourceInfo implements IExternalResourceInfo {
   private String pluginId;
-
-  public static final String JSON_PROPERTY_PLUGIN_ID = "pluginId";
 
   public BaseDatabaseResourceInfo() {
   }
@@ -42,7 +41,7 @@ public class BaseDatabaseResourceInfo extends BaseResourceInfo implements IExter
     setPluginId( databaseMeta.getDatabaseInterface().getPluginId() );
   }
 
-  @JsonProperty( JSON_PROPERTY_PLUGIN_ID )
+  @JsonProperty( DictionaryConst.PROPERTY_PLUGIN_ID )
   public String getPluginId() {
     return pluginId;
   }

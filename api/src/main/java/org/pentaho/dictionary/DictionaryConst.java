@@ -34,6 +34,11 @@ import org.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
 public class DictionaryConst {
 
   /**
+   * Property key for "pluginId".
+   */
+  public static final String PROPERTY_PLUGIN_ID = "pluginId";
+
+  /**
    * Property key for "type". Value could be NODE_TYPE_TRANS or NODE_TYPE_CONTENT etc
    */
   public static final String PROPERTY_TYPE = "type";

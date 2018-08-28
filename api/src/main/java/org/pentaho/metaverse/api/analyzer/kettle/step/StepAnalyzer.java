@@ -126,7 +126,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     } catch ( Throwable t ) {
       stepType = parentStepMeta.getStepID();
     }
-    rootNode.setProperty( "pluginId", parentStepMeta.getStepID() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_PLUGIN_ID, parentStepMeta.getStepID() );
     rootNode.setProperty( "stepType", stepType );
     rootNode.setProperty( "copies", meta.getParentStepMeta().getCopies() );
     rootNode.setProperty( "_analyzer", this.getClass().getSimpleName() );
