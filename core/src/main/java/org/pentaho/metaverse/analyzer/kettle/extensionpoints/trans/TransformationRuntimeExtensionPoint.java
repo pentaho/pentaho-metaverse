@@ -80,8 +80,6 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
   private static final Logger log = LoggerFactory.getLogger( TransformationRuntimeExtensionPoint.class );
 
-  private IDocumentAnalyzer documentAnalyzer;
-
   /**
    * Callback when a transformation is about to be started
    *
@@ -130,8 +128,9 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     populateExecutionProfile( executionProfile, trans );
 
     IMetaverseBuilder builder = TransLineageHolderMap.getInstance().getMetaverseBuilder( trans );
+    final LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
+    IDocumentAnalyzer documentAnalyzer = getDocumentAnalyzer();
 
-    // Analyze the current transformation
     if ( documentAnalyzer != null ) {
       documentAnalyzer.setMetaverseBuilder( builder );
 
@@ -153,7 +152,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       metaverseDocument.setContent( transMeta );
       metaverseDocument.setStringID( id );
       metaverseDocument.setName( transMeta.getName() );
-      metaverseDocument.setExtension( "ktr" );
+      metaverseDocument.setExtension( transMeta.getDefaultExtension() );
       metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "trans.ktr" ) );
       metaverseDocument.setContext( new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
       String normalizedPath;
@@ -168,16 +167,13 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
       Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
 
-      LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
+      // set the lineage task, so that we can wait for it to finish before proceeding to write out the graph
       holder.setLineageTask( MetaverseCompletionService.getInstance().submit( analyzerRunner, id ) );
     }
 
     // Save the lineage objects for later
-    LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
     holder.setExecutionProfile( executionProfile );
     holder.setMetaverseBuilder( builder );
-
-
   }
 
   protected void populateExecutionProfile( IExecutionProfile executionProfile, Trans trans ) {
@@ -379,24 +375,5 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
               Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
       log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), t );
     }
-  }
-
-
-  /**
-   * Sets the document analyzer for this extension point
-   *
-   * @param analyzer The document analyzer for this extension point
-   */
-  public void setDocumentAnalyzer( IDocumentAnalyzer analyzer ) {
-    this.documentAnalyzer = analyzer;
-  }
-
-  /**
-   * Gets the document analyzer of this extension point
-   *
-   * @return IDocumentAnalyzer - The document analyzer for this extension point
-   */
-  public IDocumentAnalyzer getDocumentAnalyzer() {
-    return documentAnalyzer;
   }
 }

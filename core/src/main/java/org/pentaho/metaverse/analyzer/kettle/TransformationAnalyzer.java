@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -33,6 +33,7 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
+import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseLink;
@@ -42,6 +43,7 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.PropertiesHolder;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
 import org.pentaho.metaverse.messages.Messages;
@@ -195,6 +197,15 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
           Set<IStepAnalyzer> stepAnalyzers = getStepAnalyzers( stepMeta );
           if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
             for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
+              // the analyzers provided by the provider are singletons created at startup time - in order to be able
+              // to analyze multiple transformations concurrently, we need to clone the analyzer, such that each
+              // transformation step has its own dedicated analyzer with a metaverseBuilder that is unique to the
+              // transformation execution and does not change while the transformation is being analyzed
+              if ( stepAnalyzer instanceof IClonableStepAnalyzer ) {
+                stepAnalyzer = ( (IClonableStepAnalyzer) stepAnalyzer ).cloneAnalyzer();
+              } else {
+                log.debug( Messages.getString( "WARNING.CannotCloneAnalyzer" ), stepAnalyzer );
+              }
               stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
               stepNode = (IMetaverseNode) stepAnalyzer.analyze( stepDescriptor, getBaseStepMetaFromStepMeta( stepMeta ) );
             }
@@ -269,7 +280,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
    * Returns a set of strings corresponding to which types of content are supported by this analyzer
    *
    * @return the supported types (as a set of Strings)
-   * @see IDocumentAnalyzer#getSupportedTypes()
+   * @see org.pentaho.metaverse.api.IDocumentAnalyzer#getSupportedTypes()
    */
   public Set<String> getSupportedTypes() {
     return defaultSupportedTypes;
@@ -326,6 +337,11 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
       }
     }
     return baseStepMeta;
+  }
+
+  @Override
+  public IClonableDocumentAnalyzer newInstance() {
+    return new TransformationAnalyzer();
   }
 
 }

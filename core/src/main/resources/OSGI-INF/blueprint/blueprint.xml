@@ -65,14 +65,14 @@
     <property name="stepAnalyzerProvider" ref="IStepAnalyzerProvider"/>
   </bean>
   <service id="transformationAnalyzerService"
-           interface="org.pentaho.metaverse.api.IDocumentAnalyzer"
+           interface="org.pentaho.metaverse.api.IClonableDocumentAnalyzer"
            ref="TransformationAnalyzer"/>
 
   <bean id="JobAnalyzer" class="org.pentaho.metaverse.analyzer.kettle.JobAnalyzer">
     <property name="jobEntryAnalyzerProvider" ref="IJobEntryAnalyzerProvider"/>
   </bean>
   <service id="jobAnalyzerService"
-           interface="org.pentaho.metaverse.api.IDocumentAnalyzer"
+           interface="org.pentaho.metaverse.api.IClonableDocumentAnalyzer"
            ref="JobAnalyzer"/>
 
   <reference-list id="documentAnalyzersRefList"
@@ -80,6 +80,14 @@
                   member-type="service-object"
                   availability="optional">
     <reference-listener ref="IDocumentController" bind-method="addAnalyzer" unbind-method="removeAnalyzer"/>
+  </reference-list>
+
+  <reference-list id="clonableDocumentAnalyzersRefList"
+                  interface="org.pentaho.metaverse.api.IClonableDocumentAnalyzer"
+                  member-type="service-object"
+                  availability="optional">
+    <reference-listener ref="IDocumentController" bind-method="addClonableAnalyzer"
+                        unbind-method="removeClonableAnalyzer"/>
   </reference-list>
   <!-- END - Document Analyzers -->
 
@@ -292,7 +300,7 @@
            ref="RowsFromResultStepAnalyzer"/>
 
   <service id="csvFileInputStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="CsvFileInputStepAnalyzer"/>
 
   <service id="fixedFileInputStepAnalyzerService"
@@ -325,6 +333,13 @@
                   availability="optional">
     <reference-listener ref="IStepAnalyzerProvider" bind-method="addAnalyzer" unbind-method="removeAnalyzer"/>
   </reference-list>
+
+  <reference-list id="clonableStepAnalyzerRefList"
+                  interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
+                  member-type="service-object"
+                  availability="optional">
+    <reference-listener ref="IStepAnalyzerProvider" bind-method="addClonableAnalyzer" unbind-method="removeClonableAnalyzer"/>
+  </reference-list>
   <!-- END - Step Analyzers -->
 
 
@@ -333,7 +348,7 @@
         class="org.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer"/>
 
   <service id="transJobEntryAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer"
            ref="TransJobEntryAnalyzer"/>
 
   <bean id="JobJobEntryAnalyzer"
@@ -349,6 +364,14 @@
                   availability="optional">
     <reference-listener ref="IJobEntryAnalyzerProvider" bind-method="addAnalyzer" unbind-method="removeAnalyzer"/>
   </reference-list>
+
+  <reference-list id="clonableJobEntryAnalyzerRefList"
+                  interface="org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer"
+                  member-type="service-object"
+                  availability="optional">
+    <reference-listener ref="IJobEntryAnalyzerProvider" bind-method="addClonableAnalyzer" unbind-method="removeClonableAnalyzer"/>
+  </reference-list>
+
   <!-- END - Job Entry Analyzers -->
 
   <!-- External Resource Consumers -->
@@ -526,7 +549,9 @@
 
   <bean id="IDocumentController" class="org.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
+    <property name="metaverseObjectFactory" ref="IMetaverseObjectFactory"/>
     <property name="documentAnalyzers" ref="documentAnalyzersRefList"/>
+    <property name="clonableDocumentAnalyzers" ref="clonableDocumentAnalyzersRefList"/>
   </bean>
 
   <!-- Make the doc controller available to the system -->
@@ -535,8 +560,8 @@
 
   <bean id="IStepAnalyzerProvider" class="org.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider"
         scope="singleton">
-    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="stepAnalyzers" ref="stepAnalyzerRefList"/>
+    <property name="clonableStepAnalyzers" ref="clonableStepAnalyzerRefList"/>
   </bean>
 
   <service id="IStepAnalyzerProviderService"
@@ -545,8 +570,8 @@
 
   <bean id="IJobEntryAnalyzerProvider" class="org.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider"
         scope="singleton">
-    <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="jobEntryAnalyzers" ref="jobEntryAnalyzerRefList"/>
+    <property name="clonableJobEntryAnalyzers" ref="clonableJobEntryAnalyzerRefList"/>
   </bean>
 
   <service id="IJobEntryAnalyzerProviderService"
