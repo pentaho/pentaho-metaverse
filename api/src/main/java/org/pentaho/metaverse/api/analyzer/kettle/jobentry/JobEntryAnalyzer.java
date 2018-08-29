@@ -105,7 +105,7 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
     } catch ( Throwable t ) {
       stepType = entry.getClass().getSimpleName();
     }
-    rootNode.setProperty( "pluginId", entry.getPluginId() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_PLUGIN_ID, entry.getPluginId() );
     rootNode.setProperty( "jobEntryType", stepType );
     rootNode.setProperty( "copies", entry.getParentJob().getJobMeta().getJobCopies().size() );
     rootNode.setProperty( "description", entry.getDescription() );
