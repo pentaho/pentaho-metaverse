@@ -33,6 +33,13 @@ import org.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
  */
 public class DictionaryConst {
 
+  public static final String EXECUTION_ENGINE_NAME = "Pentaho Data Integration";
+
+  public static final String EXECUTION_ENGINE_DESCRIPTION =
+    "Pentaho Data Integration (PDI) prepares and blends data to create a complete picture of your business "
+      + "that drives actionable insights.";
+
+
   /**
    * Property key for "pluginId".
    */

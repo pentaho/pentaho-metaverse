@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.LogChannelInterface;
+import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IGraphWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionEngine;
@@ -103,8 +104,8 @@ public class BaseRuntimeExtensionPointTest {
   public void testGetExecutionEngineInfo() {
     IExecutionEngine engineInfo = BaseRuntimeExtensionPoint.getExecutionEngineInfo();
     assertNotNull( engineInfo );
-    assertEquals( BaseRuntimeExtensionPoint.EXECUTION_ENGINE_NAME, engineInfo.getName() );
-    assertEquals( BaseRuntimeExtensionPoint.EXECUTION_ENGINE_DESCRIPTION, engineInfo.getDescription() );
+    assertEquals( DictionaryConst.EXECUTION_ENGINE_NAME, engineInfo.getName() );
+    assertEquals( DictionaryConst.EXECUTION_ENGINE_DESCRIPTION, engineInfo.getDescription() );
   }
 
   @Test
