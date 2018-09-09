@@ -106,10 +106,10 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
       stepType = entry.getClass().getSimpleName();
     }
     rootNode.setProperty( DictionaryConst.PROPERTY_PLUGIN_ID, entry.getPluginId() );
-    rootNode.setProperty( "jobEntryType", stepType );
-    rootNode.setProperty( "copies", entry.getParentJob().getJobMeta().getJobCopies().size() );
-    rootNode.setProperty( "description", entry.getDescription() );
-    rootNode.setProperty( "_analyzer", this.getClass().getSimpleName() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_JOB_ENTRY_TYPE, stepType );
+    rootNode.setProperty( DictionaryConst.PROPERTY_COPIES, entry.getParentJob().getJobMeta().getJobCopies().size() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, entry.getDescription() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_ANALYZER, this.getClass().getSimpleName() );
     metaverseBuilder.addNode( rootNode );
 
     customAnalyze( entry, rootNode );
