@@ -127,10 +127,10 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
       stepType = parentStepMeta.getStepID();
     }
     rootNode.setProperty( DictionaryConst.PROPERTY_PLUGIN_ID, parentStepMeta.getStepID() );
-    rootNode.setProperty( "stepType", stepType );
-    rootNode.setProperty( "copies", meta.getParentStepMeta().getCopies() );
-    rootNode.setProperty( "_analyzer", this.getClass().getSimpleName() );
-    rootNode.setProperty( "description", parentStepMeta.getDescription() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_STEP_TYPE, stepType );
+    rootNode.setProperty( DictionaryConst.PROPERTY_COPIES, meta.getParentStepMeta().getCopies() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_ANALYZER, this.getClass().getSimpleName() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, parentStepMeta.getDescription() );
     metaverseBuilder.addNode( rootNode );
 
     inputs = processInputs( meta );
