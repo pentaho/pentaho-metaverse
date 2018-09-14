@@ -248,7 +248,7 @@
            ref="StreamLookupStepAnalyzer"/>
 
   <service id="calculatorStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="CalculatorStepAnalyzer"/>
 
   <service id="excelInputStepAnalyzerService"
