@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -69,7 +69,7 @@ public class TableOutputStepAnalyzer extends ConnectionExternalResourceStepAnaly
     BaseDatabaseResourceInfo resourceInfo = (BaseDatabaseResourceInfo) resource;
 
     Object obj = resourceInfo.getAttributes().get( DictionaryConst.PROPERTY_TABLE );
-    String tableName = obj == null ? null : obj.toString();
+    String tableName = obj == null ? null : parentTransMeta.environmentSubstitute( obj.toString() );
     obj = resourceInfo.getAttributes().get( DictionaryConst.PROPERTY_SCHEMA );
     String schema = obj == null ? null : obj.toString();
 

@@ -231,7 +231,7 @@ public class MetaverseUtil {
    * output wait sufficiently long enough for the file to be finished writing before attempting to process it.
    */
   public static void delay() {
-    final MetaverseConfig metaverseConfig = (MetaverseConfig) MetaverseBeanUtil.getInstance().get( "metaverseConfig" );
+    final MetaverseConfig metaverseConfig = MetaverseConfig.getInstance();
     if ( metaverseConfig != null && metaverseConfig.getLineageDelay() > 0 ) {
       try {
         Thread.sleep( metaverseConfig.getLineageDelay() * 1000 );

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,8 @@
 
 package org.pentaho.metaverse.frames;
 
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import org.pentaho.dictionary.DictionaryConst;
 
@@ -40,4 +42,7 @@ public interface FramedMetaverseNode {
 
   @Property( DictionaryConst.PROPERTY_DESCRIPTION )
   String getDescription();
+
+  @Adjacency( label = "contains", direction = Direction.OUT )
+  Iterable<StreamFieldNode> getContainedNodes();
 }
