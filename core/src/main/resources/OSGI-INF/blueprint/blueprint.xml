@@ -13,7 +13,9 @@
       <cm:property name="lineage.execution.runtime" value="off"/>
       <cm:property name="lineage.execution.output.folder" value="./pentaho-lineage-output"/>
       <cm:property name="lineage.execution.generation.strategy" value="latest"/>
-      <cm:property name="lineage.resolve.external.resources" value="false"/>
+      <cm:property name="lineage.resolve.external.resources" value="true"/>
+      <cm:property name="lineage.deduplicate.transformation.fields" value="true"/>
+      <cm:property name="lineage.adjust.external.resource.fields" value="true"/>
       <!-- Used for testing ONLY - write delay in seconds -->
       <cm:property name="lineage.delay" value="0"/>
     </cm:default-properties>
@@ -35,6 +37,8 @@
     <property name="executionOutputFolder" value="${lineage.execution.output.folder}"/>
     <property name="executionGenerationStrategy" value="${lineage.execution.generation.strategy}"/>
     <property name="resolveExternalResources" value="${lineage.resolve.external.resources}"/>
+    <property name="deduplicateTransformationFields" value="${lineage.deduplicate.transformation.fields}"/>
+    <property name="adjustExternalResourceFields" value="${lineage.adjust.external.resource.fields}"/>
     <!-- Used for testing ONLY - write delay in seconds -->
     <property name="lineageDelay" value="${lineage.delay}"/>
   </bean>

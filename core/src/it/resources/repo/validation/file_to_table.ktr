@@ -7,7 +7,7 @@
     <trans_version>1.0</trans_version>
     <trans_type>Normal</trans_type>
     <trans_status>2</trans_status>
-    <directory>&#x2f;</directory>
+    <directory>/</directory>
     <parameters>
       <parameter>
         <name>testTransParam1</name>
@@ -438,9 +438,11 @@
     <clusterschemas>
     </clusterschemas>
     <created_user>gmoran</created_user>
-    <created_date>2014&#x2f;08&#x2f;12 14&#x3a;30&#x3a;43.221</created_date>
+    <created_date>2014/08/12 14:30:43.221</created_date>
     <modified_user>rfellows</modified_user>
-    <modified_date>2014&#x2f;08&#x2f;12 14&#x3a;30&#x3a;43.221</modified_date>
+    <modified_date>2014/08/12 14:30:43.221</modified_date>
+    <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA=</key_for_session_key>
+    <is_key_private>N</is_key_private>
   </info>
   <notepads>
   </notepads>
@@ -452,7 +454,7 @@
     <database>sampledata</database>
     <port>-1</port>
     <username>sa</username>
-    <password>Encrypted</password>
+    <password>Encrypted 2be98afc86aa7f2a1a51abc69ce86aade</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -497,18 +499,23 @@
   </connection>
   <order>
     <hop>
+      <from>Select values</from>
+      <to>Demo table crime stats output [1]</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
       <from>Sacramento crime stats 2006 file</from>
       <to>Select values</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
       <from>Select values</from>
-      <to>Demo table crime stats output</to>
+      <to>Demo table crime stats output [2]</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <step>
-    <name>Demo table crime stats output</name>
+    <name>Demo table crime stats output [1]</name>
     <type>TableOutput</type>
     <description/>
     <distribute>Y</distribute>
@@ -520,7 +527,7 @@
     </partitioning>
     <connection>Sampledata</connection>
     <schema/>
-    <table>&#x24;&#x7b;testTransParam3&#x7d;</table>
+    <table>${testTransParam1}</table>
     <commit>1000</commit>
     <truncate>N</truncate>
     <ignore_errors>N</ignore_errors>
@@ -571,19 +578,95 @@
     </fields>
     <cluster_schema/>
     <remotesteps>
-      <input></input>
-      <output></output>
+      <input>
+      </input>
+      <output>
+      </output>
     </remotesteps>
     <GUI>
-      <xloc>612</xloc>
-      <yloc>105</yloc>
+      <xloc>688</xloc>
+      <yloc>80</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
-
+  <step>
+    <name>Demo table crime stats output [2]</name>
+    <type>TableOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>Sampledata</connection>
+    <schema/>
+    <table>${testTransParam2}</table>
+    <commit>1000</commit>
+    <truncate>N</truncate>
+    <ignore_errors>N</ignore_errors>
+    <use_batch>Y</use_batch>
+    <specify_fields>Y</specify_fields>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <tablename_in_field>N</tablename_in_field>
+    <tablename_field/>
+    <tablename_in_table>Y</tablename_in_table>
+    <return_keys>N</return_keys>
+    <return_field/>
+    <fields>
+      <field>
+        <column_name>cdatetime</column_name>
+        <stream_name>cdatetime</stream_name>
+      </field>
+      <field>
+        <column_name>addr</column_name>
+        <stream_name>addr</stream_name>
+      </field>
+      <field>
+        <column_name>district</column_name>
+        <stream_name>district</stream_name>
+      </field>
+      <field>
+        <column_name>beat</column_name>
+        <stream_name>beat</stream_name>
+      </field>
+      <field>
+        <column_name>crimedescr</column_name>
+        <stream_name>crimedescr</stream_name>
+      </field>
+      <field>
+        <column_name>ucr_ncic_code</column_name>
+        <stream_name>ucr_ncic_code</stream_name>
+      </field>
+      <field>
+        <column_name>lat</column_name>
+        <stream_name>lat</stream_name>
+      </field>
+      <field>
+        <column_name>longitude</column_name>
+        <stream_name>longitude</stream_name>
+      </field>
+    </fields>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>688</xloc>
+      <yloc>208</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
   <step>
     <name>Sacramento crime stats 2006 file</name>
-    <type>OldTextFileInput</type>
+    <type>TextFileInput</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -597,7 +680,7 @@
     <accept_field/>
     <accept_stepname/>
     <separator>,</separator>
-    <enclosure>&#x22;</enclosure>
+    <enclosure>"</enclosure>
     <enclosure_breaks>N</enclosure_breaks>
     <escapechar/>
     <header>Y</header>
@@ -617,9 +700,10 @@
     <rownum_field/>
     <format>Unix</format>
     <encoding/>
+    <length>Characters</length>
     <add_to_result_filenames>Y</add_to_result_filenames>
     <file>
-      <name>&#x24;&#x7b;Internal.Transformation.Filename.Directory&#x7d;&#x2f;SacramentocrimeJanuary2006.csv</name>
+      <name>${Internal.Transformation.Filename.Directory}/SacramentocrimeJanuary2006.csv</name>
       <filemask/>
       <exclude_filemask/>
       <file_required>N</file_required>
@@ -632,15 +716,15 @@
     <fields>
       <field>
         <name>cdatetime</name>
-        <type>Date</type>
-        <format>yyyy&#x2f;MM&#x2f;dd</format>
-        <currency>&#x24;</currency>
+        <type>String</type>
+        <format/>
+        <currency>$</currency>
         <decimal>.</decimal>
         <group>,</group>
         <nullif>-</nullif>
         <ifnull/>
         <position>-1</position>
-        <length>-1</length>
+        <length>11</length>
         <precision>-1</precision>
         <trim_type>none</trim_type>
         <repeat>N</repeat>
@@ -649,13 +733,13 @@
         <name>address</name>
         <type>String</type>
         <format/>
-        <currency>&#x24;</currency>
+        <currency>$</currency>
         <decimal>.</decimal>
         <group>,</group>
         <nullif>-</nullif>
         <ifnull/>
         <position>-1</position>
-        <length>40</length>
+        <length>34</length>
         <precision>-1</precision>
         <trim_type>none</trim_type>
         <repeat>N</repeat>
@@ -663,8 +747,8 @@
       <field>
         <name>district</name>
         <type>Integer</type>
-        <format>&#x23;</format>
-        <currency>&#x24;</currency>
+        <format>#</format>
+        <currency>$</currency>
         <decimal>.</decimal>
         <group>,</group>
         <nullif>-</nullif>
@@ -679,7 +763,7 @@
         <name>beat</name>
         <type>String</type>
         <format/>
-        <currency>&#x24;</currency>
+        <currency>$</currency>
         <decimal>.</decimal>
         <group>,</group>
         <nullif>-</nullif>
@@ -693,8 +777,8 @@
       <field>
         <name>grid</name>
         <type>Integer</type>
-        <format>&#x23;</format>
-        <currency>&#x24;</currency>
+        <format>#</format>
+        <currency>$</currency>
         <decimal>.</decimal>
         <group>,</group>
         <nullif>-</nullif>
@@ -709,7 +793,7 @@
         <name>crimedescr</name>
         <type>String</type>
         <format/>
-        <currency>&#x24;</currency>
+        <currency>$</currency>
         <decimal>.</decimal>
         <group>,</group>
         <nullif>-</nullif>
@@ -723,8 +807,8 @@
       <field>
         <name>ucr_ncic_code</name>
         <type>Integer</type>
-        <format>&#x23;</format>
-        <currency>&#x24;</currency>
+        <format>#</format>
+        <currency>$</currency>
         <decimal>.</decimal>
         <group>,</group>
         <nullif>-</nullif>
@@ -738,14 +822,14 @@
       <field>
         <name>latitude</name>
         <type>Number</type>
-        <format>&#x23;.&#x23;</format>
-        <currency>&#x24;</currency>
+        <format>#.#</format>
+        <currency>$</currency>
         <decimal>.</decimal>
         <group>,</group>
         <nullif>-</nullif>
         <ifnull/>
         <position>-1</position>
-        <length>15</length>
+        <length>11</length>
         <precision>8</precision>
         <trim_type>none</trim_type>
         <repeat>N</repeat>
@@ -753,14 +837,14 @@
       <field>
         <name>longitude</name>
         <type>Number</type>
-        <format>&#x23;.&#x23;</format>
-        <currency>&#x24;</currency>
+        <format>#.#</format>
+        <currency>$</currency>
         <decimal>.</decimal>
         <group>,</group>
         <nullif>-</nullif>
         <ifnull/>
         <position>-1</position>
-        <length>15</length>
+        <length>12</length>
         <precision>7</precision>
         <trim_type>none</trim_type>
         <repeat>N</repeat>
@@ -793,21 +877,22 @@
     <sizeFieldName/>
     <cluster_schema/>
     <remotesteps>
-      <input></input>
-      <output></output>
+      <input>
+      </input>
+      <output>
+      </output>
     </remotesteps>
     <GUI>
-      <xloc>231</xloc>
-      <yloc>105</yloc>
+      <xloc>208</xloc>
+      <yloc>144</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
-
   <step>
     <name>Select values</name>
     <type>SelectValues</type>
     <description/>
-    <distribute>Y</distribute>
+    <distribute>N</distribute>
     <custom_distribution/>
     <copies>1</copies>
     <partitioning>
@@ -817,51 +902,28 @@
     <fields>
       <field>
         <name>cdatetime</name>
-        <rename/>
-        <length>-2</length>
-        <precision>-2</precision>
       </field>
       <field>
         <name>address</name>
         <rename>addr</rename>
-        <length>50</length>
-        <precision>-2</precision>
       </field>
       <field>
         <name>district</name>
-        <rename/>
-        <length>-2</length>
-        <precision>-2</precision>
       </field>
       <field>
         <name>beat</name>
-        <rename/>
-        <length>-2</length>
-        <precision>-2</precision>
       </field>
       <field>
         <name>crimedescr</name>
-        <rename/>
-        <length>-2</length>
-        <precision>-2</precision>
       </field>
       <field>
         <name>ucr_ncic_code</name>
-        <rename/>
-        <length>-2</length>
-        <precision>0</precision>
       </field>
       <field>
         <name>latitude</name>
-        <rename/>
-        <length>-2</length>
-        <precision>-2</precision>
       </field>
       <field>
         <name>longitude</name>
-        <rename/>
-        <length>-2</length>
-        <precision>-2</precision>
       </field>
       <select_unspecified>N</select_unspecified>
       <meta>
@@ -895,22 +957,23 @@
         <encoding/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol/>
-        <currency_symbol>&#x24;</currency_symbol>
+        <currency_symbol>$</currency_symbol>
         <storage_type/>
       </meta>
     </fields>
     <cluster_schema/>
     <remotesteps>
-      <input></input>
-      <output></output>
+      <input>
+      </input>
+      <output>
+      </output>
     </remotesteps>
     <GUI>
-      <xloc>418</xloc>
-      <yloc>105</yloc>
+      <xloc>416</xloc>
+      <yloc>144</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
-
   <step_error_handling>
   </step_error_handling>
   <slave-step-copy-partition-distribution>
@@ -920,6 +983,22 @@
     <group>
       <name>DataService</name>
     </group>
+    <group>
+      <name>METASTORE.NamedClusters</name>
+      <attribute>
+        <key>NamedCluster</key>
+        <value>{"namespace":"NamedClusters","id":"NamedCluster","name":"NamedCluster","description":"A NamedCluster","metaStoreName":null}</value>
+      </attribute>
+    </group>
+    <group>
+      <name>explorerState</name>
+    </group>
+    <group>
+      <name>{"_":"Embedded MetaStore Elements","namespace":"NamedClusters","type":"NamedCluster"}</name>
+      <attribute>
+        <key>hdp26</key>
+        <value>{"children":[{"children":[],"id":"hdfsPassword","value":"cGFzc3dvcmQ="},{"children":[],"id":"oozieUrl","value":"http://svqxbdcn6hdp26n2.pentahoqa.com:11000"},{"children":[],"id":"mapr","value":"N"},{"children":[],"id":"useGateway","value":"N"},{"children":[],"id":"lastModifiedDate","value":"1531312119656"},{"children":[],"id":"jobTrackerHost","value":"svqxbdcn6hdp26n2.pentahoqa.com"},{"children":[],"id":"zooKeeperHost","value":"svqxbdcn6hdp26n1.pentahoqa.com"},{"children":[],"id":"shimIdentifier","value":null},{"children":[],"id":"gatewayUrl","value":null},{"children":[],"id":"jobTrackerPort","value":"8050"},{"children":[],"id":"zooKeeperPort","value":"2181"},{"children":[],"id":"name","value":"hdp26"},{"children":[],"id":"hdfsPort","value":"8020"},{"children":[],"id":"hdfsUsername","value":"devuser"},{"children":[],"id":"gatewayPassword","value":null},{"children":[],"id":"kafkaBootstrapServers","value":null},{"children":[],"id":"storageScheme","value":"hdfs"},{"children":[],"id":"hdfsHost","value":"svqxbdcn6hdp26n3.pentahoqa.com"},{"children":[],"id":"gatewayUsername","value":null}],"id":"hdp26","value":null,"name":"hdp26","owner":null,"ownerPermissionsList":[]}</value>
+      </attribute>
+    </group>
   </attributes>
-
 </transformation>

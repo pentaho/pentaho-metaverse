@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -112,4 +112,11 @@ public class TableInputStepAnalyzer extends ConnectionExternalResourceStepAnalyz
   public void setBaseStepMeta( TableInputMeta meta ) {
     baseStepMeta = meta;
   }
+
+  @Override
+  protected void customAnalyze( TableInputMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
+    super.customAnalyze( meta, rootNode );
+    rootNode.setProperty( DictionaryConst.PROPERTY_QUERY, parentTransMeta.environmentSubstitute( meta.getSQL() ) );
+  }
+
 }

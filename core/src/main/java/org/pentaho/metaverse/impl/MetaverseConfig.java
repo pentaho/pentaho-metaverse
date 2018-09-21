@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.impl;
 
 import org.pentaho.metaverse.api.IMetaverseConfig;
+import org.pentaho.metaverse.util.MetaverseBeanUtil;
 
 /**
  * A single point of access for all metaverse osgi configuration properties.
@@ -32,10 +33,17 @@ public class MetaverseConfig implements IMetaverseConfig {
   private String executionRuntime = "off";
   private String extecutionOutputFolder = "./pentaho-lineage-output";
   private String executionGenerationStrategy = "latest";
-  private boolean resolveExternalResources = false;
+  private boolean resolveExternalResources = true;
+  private boolean deduplicateTransformationFields = true;
+  private boolean adjustExternalResourceFields = true;
+
   // Used for testing ONLY, to verify that any listeners waiting for lineage to be written aren't invoked until
   // graphml has been written
   private int lineageDelay = 0;
+
+  public static MetaverseConfig getInstance() {
+    return (MetaverseConfig) MetaverseBeanUtil.getInstance().get( "metaverseConfig" );
+  }
 
   public void setExecutionRuntime( final String executionRuntime ) {
     this.executionRuntime = executionRuntime;
@@ -67,6 +75,32 @@ public class MetaverseConfig implements IMetaverseConfig {
 
   public boolean getResolveExternalResources() {
     return this.resolveExternalResources;
+  }
+
+  public void setDeduplicateTransformationFields( final boolean deduplicateTransformationFields ) {
+    this.deduplicateTransformationFields = deduplicateTransformationFields;
+  }
+
+  public boolean getDeduplicateTransformationFields() {
+    return this.deduplicateTransformationFields;
+  }
+
+  public static boolean deduplicateTransformationFields() {
+    final MetaverseConfig config = getInstance();
+    return config != null && config.getDeduplicateTransformationFields();
+  }
+
+  public void setAdjustExternalResourceFields( final boolean adjustExternalResourceFields ) {
+    this.adjustExternalResourceFields = adjustExternalResourceFields;
+  }
+
+  public boolean getAdjustExternalResourceFields() {
+    return this.adjustExternalResourceFields;
+  }
+
+  public static boolean adjustExternalResourceFields() {
+    final MetaverseConfig config = getInstance();
+    return config != null && config.getAdjustExternalResourceFields();
   }
 
   public void setLineageDelay( final int lineageDelay ) {

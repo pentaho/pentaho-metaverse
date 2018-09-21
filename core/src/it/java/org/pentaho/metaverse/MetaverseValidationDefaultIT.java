@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -20,22 +20,28 @@
  *
  ******************************************************************************/
 
-package org.pentaho.metaverse.graph;
+package org.pentaho.metaverse;
 
-import com.tinkerpop.blueprints.Graph;
-
-import java.io.IOException;
-import java.io.OutputStream;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
- * The GraphSONWriter class contains methods for writing a metaverse graph model in GraphSON format
- * 
+ * Runs the integration tests with the details configuration (no field deduplication).
  */
-public class GraphSONWriter extends BaseGraphWriter {
+public class MetaverseValidationDefaultIT extends MetaverseValidationIT {
 
-  @Override
-  public void outputGraphImpl( Graph graph, OutputStream graphSONOutputStream ) throws IOException {
-    com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter.outputGraph( graph, graphSONOutputStream );
+  @BeforeClass
+  public static void init() throws Exception {
+    MetaverseValidationIT.init();
   }
 
+  @Test
+  public void testSelectValuesStep() throws Exception {
+    testSelectValuesStep( 16 );
+  }
+
+  @Test
+  public void testTextFileInputNode() throws Exception {
+    testTextFileInputNodeImpl( 0 );
+  }
 }

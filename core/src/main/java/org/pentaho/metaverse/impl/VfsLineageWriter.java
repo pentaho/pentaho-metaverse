@@ -91,16 +91,16 @@ public class VfsLineageWriter implements ILineageWriter {
     if ( holder != null ) {
       IMetaverseBuilder builder = holder.getMetaverseBuilder();
       if ( builder != null ) {
+        // no-op by default, can be used to introduce an artificial delay in the graphml file, for testing purposes
+        MetaverseUtil.delay();
         try ( OutputStream fos = getGraphOutputStream( holder ) ) {
           if ( fos != null ) {
-            // no-op by default, can be used to introduce an artificial delay in the graphml file, for testing purposes
-            MetaverseUtil.delay();
             graphWriter.outputGraph( builder.getGraph(), fos );
-            MetaverseUtil.delay();
           } else {
             log.debug( Messages.getString( "DEBUG.noGraphOutputStream" ) );
           }
         }
+        MetaverseUtil.delay();
       }
     }
   }

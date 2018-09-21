@@ -41,6 +41,26 @@ public class DictionaryConst {
 
 
   /**
+   * Property key for "stepType".
+   */
+  public static final String PROPERTY_STEP_TYPE = "stepType";
+
+  /**
+   * Property key for "jobEntryType".
+   */
+  public static final String PROPERTY_JOB_ENTRY_TYPE = "jobEntryType";
+
+  /**
+   * Property key for "copies".
+   */
+  public static final String PROPERTY_COPIES = "copies";
+
+  /**
+   * Property key for "_analyzer".
+   */
+  public static final String PROPERTY_ANALYZER = "_analyzer";
+
+  /**
    * Property key for "pluginId".
    */
   public static final String PROPERTY_PLUGIN_ID = "pluginId";
@@ -403,6 +423,11 @@ public class DictionaryConst {
    * The node type for SQL Queries
    */
   public static final String NODE_TYPE_SQL_QUERY = "SQL Query";
+
+  /**
+   * The name assigned to nodes representing SQL queries.
+   */
+  public static final String NODE_NAME_SQL = "SQL";
 
   /**
    * The node type for PDI transformation fields
