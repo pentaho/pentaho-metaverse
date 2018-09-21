@@ -583,13 +583,22 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
         RowMetaInterface rmi = parentTransMeta.getPrevStepFields( parentStepMeta, progressMonitor );
         progressMonitor.done();
         if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
-          rowMeta.put( prevStepNames[ 0 ], rmi );
+          populateInputFieldsRowMeta( rowMeta, rmi );
         }
       } catch ( KettleStepException e ) {
         rowMeta = null;
       }
     }
     return rowMeta;
+  }
+
+  /**
+   * Populates the {@code rowMeta} with data from all input steps, can be overridden to do otherwise.
+   */
+  protected void populateInputFieldsRowMeta( final Map<String, RowMetaInterface> rowMeta, final RowMetaInterface rmi ) {
+    for ( final String previousStepName : prevStepNames ) {
+      rowMeta.put( previousStepName, rmi );
+    }
   }
 
   @Override

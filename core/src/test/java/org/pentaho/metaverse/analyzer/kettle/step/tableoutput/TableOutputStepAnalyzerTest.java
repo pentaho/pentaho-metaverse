@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -80,6 +80,8 @@ public class TableOutputStepAnalyzerTest {
 
   IComponentDescriptor descriptor;
 
+  private static final String TABLE_NAME = "myTableName";
+
   @Before
   public void setUp() throws Exception {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
@@ -100,6 +102,8 @@ public class TableOutputStepAnalyzerTest {
     when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
     when( parentStepMeta.getName() ).thenReturn( "test" );
     when( parentStepMeta.getStepID() ).thenReturn( "TableOutputStep" );
+
+    when( parentTransMeta.environmentSubstitute( TABLE_NAME ) ).thenReturn( TABLE_NAME );
   }
 
   @Test
@@ -129,10 +133,9 @@ public class TableOutputStepAnalyzerTest {
     IMetaverseNode connNode = mock( IMetaverseNode.class );
     when( connectionAnalyzer.analyze( any( IComponentDescriptor.class ), anyObject() ) ).thenReturn( connNode );
 
-
     BaseDatabaseResourceInfo resourceInfo = mock( BaseDatabaseResourceInfo.class );
     Map<Object, Object> attributes = new HashMap<>();
-    attributes.put( DictionaryConst.PROPERTY_TABLE, "tableName" );
+    attributes.put( DictionaryConst.PROPERTY_TABLE, TABLE_NAME );
     attributes.put( DictionaryConst.PROPERTY_SCHEMA, "schemaName" );
     when( resourceInfo.getAttributes() ).thenReturn( attributes );
 
@@ -141,8 +144,8 @@ public class TableOutputStepAnalyzerTest {
     when( connectionNode.getLogicalId() ).thenReturn( "CONNECTION_ID" );
 
     IMetaverseNode resourceNode = analyzer.createTableNode( resourceInfo );
-    assertEquals( "tableName", resourceNode.getProperty( DictionaryConst.PROPERTY_TABLE ) );
-    assertEquals( "tableName", resourceNode.getName() );
+    assertEquals( TABLE_NAME, resourceNode.getProperty( DictionaryConst.PROPERTY_TABLE ) );
+    assertEquals( TABLE_NAME, resourceNode.getName() );
     assertEquals( "schemaName", resourceNode.getProperty( DictionaryConst.PROPERTY_SCHEMA ) );
     assertEquals( "CONNECTION_ID", resourceNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
   }
@@ -155,10 +158,9 @@ public class TableOutputStepAnalyzerTest {
     IMetaverseNode connNode = mock( IMetaverseNode.class );
     when( connectionAnalyzer.analyze( any( IComponentDescriptor.class ), anyObject() ) ).thenReturn( connNode );
 
-
     BaseDatabaseResourceInfo resourceInfo = mock( BaseDatabaseResourceInfo.class );
     Map<Object, Object> attributes = new HashMap<>();
-    attributes.put( DictionaryConst.PROPERTY_TABLE, "tableName" );
+    attributes.put( DictionaryConst.PROPERTY_TABLE, TABLE_NAME );
     when( resourceInfo.getAttributes() ).thenReturn( attributes );
 
     IMetaverseNode connectionNode = mock( IMetaverseNode.class );
@@ -166,8 +168,8 @@ public class TableOutputStepAnalyzerTest {
     when( connectionNode.getLogicalId() ).thenReturn( "CONNECTION_ID" );
 
     IMetaverseNode resourceNode = analyzer.createTableNode( resourceInfo );
-    assertEquals( "tableName", resourceNode.getProperty( DictionaryConst.PROPERTY_TABLE ) );
-    assertEquals( "tableName", resourceNode.getName() );
+    assertEquals( TABLE_NAME, resourceNode.getProperty( DictionaryConst.PROPERTY_TABLE ) );
+    assertEquals( TABLE_NAME, resourceNode.getName() );
     assertNull( resourceNode.getProperty( DictionaryConst.PROPERTY_SCHEMA ) );
     assertEquals( "CONNECTION_ID", resourceNode.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
   }

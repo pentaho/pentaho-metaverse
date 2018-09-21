@@ -425,6 +425,11 @@ public class DictionaryConst {
   public static final String NODE_TYPE_SQL_QUERY = "SQL Query";
 
   /**
+   * The name assigned to nodes representing SQL queries.
+   */
+  public static final String NODE_NAME_SQL = "SQL";
+
+  /**
    * The node type for PDI transformation fields
    */
   public static final String NODE_TYPE_TRANS_FIELD = "Transformation Stream field";

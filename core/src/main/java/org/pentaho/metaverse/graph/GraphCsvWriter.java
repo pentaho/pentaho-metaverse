@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,7 +27,6 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import org.pentaho.dictionary.DictionaryConst;
-import org.pentaho.metaverse.api.IGraphWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -37,12 +36,12 @@ import java.util.Iterator;
  * The GraphMLWriter class contains methods for writing a metaverse graph model in GraphML format
  * 
  */
-public class GraphCsvWriter implements IGraphWriter {
+public class GraphCsvWriter extends BaseGraphWriter {
 
   private static final String CSV_ENCLOSURE = "\"";
 
   @Override
-  public void outputGraph( Graph graph, OutputStream out ) throws IOException {
+  public void outputGraphImpl( Graph graph, OutputStream out ) throws IOException {
 
     Iterable<Edge> iterable = graph.getEdges();
     Iterator<Edge> it = iterable.iterator();

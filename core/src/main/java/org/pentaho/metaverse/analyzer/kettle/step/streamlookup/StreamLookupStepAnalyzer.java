@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -197,5 +197,15 @@ public class StreamLookupStepAnalyzer extends StepAnalyzer<StreamLookupMeta> {
     this.parentStepMeta = parentStepMeta;
   }
   // ******** End - Used to aid in unit testing **********
+
+  /**
+   * Stream Lookup is a special sten, only take into account the first input step
+   * @param rowMeta
+   * @param rmi
+   */
+  protected void populateInputFieldsRowMeta( final Map<String, RowMetaInterface> rowMeta, final RowMetaInterface rmi ) {
+    rowMeta.put( prevStepNames[ 0 ], rmi );
+  }
+
 
 }
