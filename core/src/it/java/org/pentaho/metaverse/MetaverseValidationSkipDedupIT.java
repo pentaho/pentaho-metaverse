@@ -24,14 +24,29 @@ package org.pentaho.metaverse;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.pentaho.metaverse.impl.MetaverseConfig;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
- * Runs the integration tests with the details configuration (no field deduplication).
+ * Runs the integration test with the {@link MetaverseConfig} mocked to have
+ * the {@code deduplicateTransformationFields} graph dedupping turned off.
  */
-public class MetaverseValidationDefaultIT extends MetaverseValidationIT {
+@RunWith( PowerMockRunner.class )
+@PrepareForTest( MetaverseConfig.class )
+public class MetaverseValidationSkipDedupIT extends MetaverseValidationIT {
 
   @BeforeClass
   public static void init() throws Exception {
+
+    PowerMockito.mockStatic( MetaverseConfig.class );
+    // expecting to deduplicate by default - need to mock to return false
+    Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( false );
+    Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( false );
+
     MetaverseValidationIT.init();
   }
 

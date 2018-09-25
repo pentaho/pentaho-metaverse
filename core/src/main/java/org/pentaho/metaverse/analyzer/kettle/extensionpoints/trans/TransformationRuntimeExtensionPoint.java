@@ -348,22 +348,15 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
       }
 
-      // Only create a lineage graph for this trans if it has no parent. Otherwise, the parent will incorporate the
-      // lineage information into its own graph
       try {
-        Job parentJob = trans.getParentJob();
-        Trans parentTrans = trans.getParentTrans();
+        // Add the execution profile information to the lineage graph
+        addRuntimeLineageInfo( holder );
 
-        if ( parentJob == null && parentTrans == null ) {
-          // Add the execution profile information to the lineage graph
-          addRuntimeLineageInfo( holder );
-
-          if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
-            lineageWriter.outputLineageGraph( holder );
-            // lineage has been written - call the appropriate extension point
-            ExtensionPointHandler.callExtensionPoint(
-              trans.getLogChannel(), MetaverseExtensionPoint.TransLineageWriteEnd.id, trans );
-          }
+        if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+          lineageWriter.outputLineageGraph( holder );
+          // lineage has been written - call the appropriate extension point
+          ExtensionPointHandler.callExtensionPoint(
+            trans.getLogChannel(), MetaverseExtensionPoint.TransLineageWriteEnd.id, trans );
         }
       } catch ( IOException e ) {
         log.warn( Messages.getString( "ERROR.CouldNotWriteExecutionProfile", trans.getName(),

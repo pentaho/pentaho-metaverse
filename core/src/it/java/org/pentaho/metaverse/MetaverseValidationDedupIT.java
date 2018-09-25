@@ -38,8 +38,8 @@ import java.util.List;
 
 
 /**
- * Runs the integration test with the {@link MetaverseConfig} mocked to have the {@code deduplicateTransformationFields}
- * and {@code adjustExternalResourceFields} variables set to true, to force the graph to be adjusted.
+ * Runs the integration test with the {@link MetaverseConfig} mocked to have
+ * the {@code deduplicateTransformationFields} graph dedupping turned on.
  */
 @RunWith( PowerMockRunner.class )
 @PrepareForTest( MetaverseConfig.class )
@@ -49,6 +49,7 @@ public class MetaverseValidationDedupIT extends MetaverseValidationIT {
   public static void init() throws Exception {
 
     PowerMockito.mockStatic( MetaverseConfig.class );
+    // expecting to deduplicate by default - need to mock to return false
     Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( true );
     Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
 

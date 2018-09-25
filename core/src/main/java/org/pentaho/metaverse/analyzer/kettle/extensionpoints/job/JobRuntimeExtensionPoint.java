@@ -257,22 +257,15 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
       }
 
-      // Only create a lineage graph for this trans if it has no parent. If it does, the parent will incorporate the
-      // lineage information into its own graph
       try {
-        Job parentJob = job.getParentJob();
-        Trans parentTrans = job.getParentTrans();
+        // Add the execution profile information to the lineage graph
+        addRuntimeLineageInfo( holder );
 
-        if ( parentJob == null && parentTrans == null ) {
-          // Add the execution profile information to the lineage graph
-          addRuntimeLineageInfo( holder );
-
-          if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
-            lineageWriter.outputLineageGraph( holder );
-            // lineage has been written - call the appropriate extension point
-            ExtensionPointHandler.callExtensionPoint(
-              job.getLogChannel(), MetaverseExtensionPoint.JobLineageWriteEnd.id, job );
-          }
+        if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+          lineageWriter.outputLineageGraph( holder );
+          // lineage has been written - call the appropriate extension point
+          ExtensionPointHandler.callExtensionPoint(
+            job.getLogChannel(), MetaverseExtensionPoint.JobLineageWriteEnd.id, job );
         }
       } catch ( IOException e ) {
         log.warn( Messages.getString( "ERROR.CouldNotWriteLineageGraph", job.getName(),
