@@ -122,6 +122,7 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
     transformationNode.setProperty( DictionaryConst.PROPERTY_PATH, transPath );
     transformationNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
 
+    rootNode.setProperty( DictionaryConst.PROPERTY_PATH, transPath );
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_EXECUTES, transformationNode );
 
   }
