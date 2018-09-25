@@ -14,6 +14,8 @@
       <cm:property name="lineage.execution.output.folder" value="./pentaho-lineage-output"/>
       <cm:property name="lineage.execution.generation.strategy" value="latest"/>
       <cm:property name="lineage.resolve.external.resources" value="false"/>
+      <!-- Used for testing ONLY - write delay in seconds -->
+      <cm:property name="lineage.delay" value="0"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -33,6 +35,8 @@
     <property name="executionOutputFolder" value="${lineage.execution.output.folder}"/>
     <property name="executionGenerationStrategy" value="${lineage.execution.generation.strategy}"/>
     <property name="resolveExternalResources" value="${lineage.resolve.external.resources}"/>
+    <!-- Used for testing ONLY - write delay in seconds -->
+    <property name="lineageDelay" value="${lineage.delay}"/>
   </bean>
   <service id="metaverseConfigService" interface="org.pentaho.metaverse.api.IMetaverseConfig" ref="metaverseConfig"/>
 

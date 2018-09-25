@@ -46,6 +46,7 @@ import org.pentaho.metaverse.api.model.Operations;
 import org.pentaho.metaverse.graph.LineageGraphCompletionService;
 import org.pentaho.metaverse.graph.LineageGraphMap;
 import org.pentaho.metaverse.impl.MetaverseBuilder;
+import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.pentaho.metaverse.messages.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -222,5 +223,21 @@ public class MetaverseUtil {
         }
       }
     };
+  }
+
+  /**
+   * This method is implemented for integration testing purposes. By default, there is no delay, but a delay can be
+   * introduced to verify certain features are working as expected, such as that all parties interested in the graphml
+   * output wait sufficiently long enough for the file to be finished writing before attempting to process it.
+   */
+  public static void delay() {
+    final MetaverseConfig metaverseConfig = (MetaverseConfig) MetaverseBeanUtil.getInstance().get( "metaverseConfig" );
+    if ( metaverseConfig != null && metaverseConfig.getLineageDelay() > 0 ) {
+      try {
+        Thread.sleep( metaverseConfig.getLineageDelay() * 1000 );
+      } catch ( final InterruptedException ie ) {
+        // no-op
+      }
+    }
   }
 }

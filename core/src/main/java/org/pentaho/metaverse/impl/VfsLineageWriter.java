@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -44,6 +44,7 @@ import org.pentaho.metaverse.graph.GraphMLWriter;
 import org.pentaho.metaverse.graph.GraphSONWriter;
 import org.pentaho.metaverse.impl.model.ExecutionProfileUtil;
 import org.pentaho.metaverse.messages.Messages;
+import org.pentaho.metaverse.util.MetaverseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,14 +93,16 @@ public class VfsLineageWriter implements ILineageWriter {
       if ( builder != null ) {
         try ( OutputStream fos = getGraphOutputStream( holder ) ) {
           if ( fos != null ) {
+            // no-op by default, can be used to introduce an artificial delay in the graphml file, for testing purposes
+            MetaverseUtil.delay();
             graphWriter.outputGraph( builder.getGraph(), fos );
+            MetaverseUtil.delay();
           } else {
             log.debug( Messages.getString( "DEBUG.noGraphOutputStream" ) );
           }
         }
       }
     }
-
   }
 
   /**
