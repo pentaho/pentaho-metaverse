@@ -30,7 +30,6 @@ import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
-import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
@@ -312,7 +311,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
           // Do nothing
         } catch ( ExecutionException e ) {
           log.warn( Messages.getString( "ERROR.CouldNotWriteLineageGraph", trans.getName(),
-                  Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+            Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
           log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
         }
       }
@@ -344,35 +343,28 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         }
       } catch ( IOException e ) {
         log.warn( Messages.getString( "ERROR.CouldNotWriteExecutionProfile", trans.getName(),
-                Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+          Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
         log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
       }
 
-      // Only create a lineage graph for this trans if it has no parent. Otherwise, the parent will incorporate the
-      // lineage information into its own graph
       try {
-        Job parentJob = trans.getParentJob();
-        Trans parentTrans = trans.getParentTrans();
+        // Add the execution profile information to the lineage graph
+        addRuntimeLineageInfo( holder );
 
-        if ( parentJob == null && parentTrans == null ) {
-          // Add the execution profile information to the lineage graph
-          addRuntimeLineageInfo( holder );
-
-          if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
-            lineageWriter.outputLineageGraph( holder );
-            // lineage has been written - call the appropriate extension point
-            ExtensionPointHandler.callExtensionPoint(
-              trans.getLogChannel(), MetaverseExtensionPoint.TransLineageWriteEnd.id, trans );
-          }
+        if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+          lineageWriter.outputLineageGraph( holder );
+          // lineage has been written - call the appropriate extension point
+          ExtensionPointHandler.callExtensionPoint(
+            trans.getLogChannel(), MetaverseExtensionPoint.TransLineageWriteEnd.id, trans );
         }
       } catch ( IOException e ) {
         log.warn( Messages.getString( "ERROR.CouldNotWriteExecutionProfile", trans.getName(),
-                Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+          Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
         log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
       }
     } catch ( Throwable t ) {
       log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", trans.getName(),
-              Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
+        Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
       log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), t );
     }
   }
