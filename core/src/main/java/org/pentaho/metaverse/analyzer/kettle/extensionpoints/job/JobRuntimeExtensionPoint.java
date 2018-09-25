@@ -33,7 +33,6 @@ import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.trans.Trans;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
 import org.pentaho.metaverse.api.AnalysisContext;
@@ -74,9 +73,9 @@ import java.util.concurrent.Future;
  * An extension point to gather runtime data for an execution of a job into an ExecutionProfile object
  */
 @ExtensionPoint(
-    description = "Job Runtime metadata extractor",
-    extensionPointId = "JobStart",
-    id = "jobRuntimeMetaverse" )
+  description = "Job Runtime metadata extractor",
+  extensionPointId = "JobStart",
+  id = "jobRuntimeMetaverse" )
 public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements JobListener {
 
   private static final Logger log = LoggerFactory.getLogger( JobRuntimeExtensionPoint.class );
@@ -227,7 +226,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
       // Get the current execution profile for this job
       IExecutionProfile executionProfile =
-              JobLineageHolderMap.getInstance().getLineageHolder( job ).getExecutionProfile();
+        JobLineageHolderMap.getInstance().getLineageHolder( job ).getExecutionProfile();
       if ( executionProfile == null ) {
         // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
         // the same info, so populate a new ExecutionProfile using the current Trans
@@ -269,13 +268,13 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         }
       } catch ( IOException e ) {
         log.warn( Messages.getString( "ERROR.CouldNotWriteLineageGraph", job.getName(),
-                Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+          Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
         log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
       }
 
     } catch ( Throwable t ) {
       log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", job.getName(),
-              Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
+        Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
       log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), t );
     }
   }
@@ -334,7 +333,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       for ( String param : params ) {
         try {
           ParamInfo paramInfo = new ParamInfo( param, job.getParameterDescription( param ),
-              job.getParameterDefault( param ) );
+            job.getParameterDefault( param ) );
           paramList.add( paramInfo );
         } catch ( UnknownParamException e ) {
           e.printStackTrace();

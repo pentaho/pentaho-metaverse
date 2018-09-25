@@ -30,7 +30,6 @@ import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
-import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
@@ -312,7 +311,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
           // Do nothing
         } catch ( ExecutionException e ) {
           log.warn( Messages.getString( "ERROR.CouldNotWriteLineageGraph", trans.getName(),
-                  Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+            Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
           log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
         }
       }
@@ -344,7 +343,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         }
       } catch ( IOException e ) {
         log.warn( Messages.getString( "ERROR.CouldNotWriteExecutionProfile", trans.getName(),
-                Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+          Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
         log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
       }
 
@@ -360,12 +359,12 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         }
       } catch ( IOException e ) {
         log.warn( Messages.getString( "ERROR.CouldNotWriteExecutionProfile", trans.getName(),
-                Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
+          Const.NVL( e.getLocalizedMessage(), "Unspecified" ) ) );
         log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), e );
       }
     } catch ( Throwable t ) {
       log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", trans.getName(),
-              Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
+        Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
       log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), t );
     }
   }
