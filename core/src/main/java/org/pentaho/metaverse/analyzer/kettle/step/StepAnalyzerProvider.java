@@ -94,7 +94,11 @@ public class StepAnalyzerProvider extends BaseKettleMetaverseComponent implement
       if ( this.stepAnalyzers == null ) {
         this.stepAnalyzers = new ArrayList();
       }
-      this.stepAnalyzers.addAll( analyzers );
+      for ( final IStepAnalyzer analyzer : analyzers ) {
+        if ( !stepAnalyzers.contains( analyzer ) ) {
+          stepAnalyzers.add( analyzer );
+        }
+      }
       loadAnalyzerTypeMap();
     }
   }

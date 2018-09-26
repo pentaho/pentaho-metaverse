@@ -94,7 +94,11 @@ public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent imple
       if ( this.jobEntryAnalyzers == null ) {
         this.jobEntryAnalyzers = new ArrayList();
       }
-      this.jobEntryAnalyzers.addAll( analyzers );
+      for ( final IJobEntryAnalyzer analyzer : analyzers ) {
+        if ( !jobEntryAnalyzers.contains( analyzer ) ) {
+          jobEntryAnalyzers.add( analyzer );
+        }
+      }
       loadAnalyzerTypeMap();
     }
   }
