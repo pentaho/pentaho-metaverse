@@ -211,7 +211,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
       // TODO move this to a map of types to strings or something
       if ( entityName.equals( DictionaryConst.NODE_TYPE_TRANS ) || entityName
         .equals( DictionaryConst.NODE_TYPE_JOB ) ) {
-        entityType.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, "Pentaho Data Integration" );
+        entityType.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, DictionaryConst.EXECUTION_ENGINE_NAME );
       }
 
       // get all available entity link types
