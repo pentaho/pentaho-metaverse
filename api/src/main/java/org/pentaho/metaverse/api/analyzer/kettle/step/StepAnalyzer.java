@@ -127,10 +127,10 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
       stepType = parentStepMeta.getStepID();
     }
     rootNode.setProperty( DictionaryConst.PROPERTY_PLUGIN_ID, parentStepMeta.getStepID() );
-    rootNode.setProperty( "stepType", stepType );
-    rootNode.setProperty( "copies", meta.getParentStepMeta().getCopies() );
-    rootNode.setProperty( "_analyzer", this.getClass().getSimpleName() );
-    rootNode.setProperty( "description", parentStepMeta.getDescription() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_STEP_TYPE, stepType );
+    rootNode.setProperty( DictionaryConst.PROPERTY_COPIES, meta.getParentStepMeta().getCopies() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_ANALYZER, this.getClass().getSimpleName() );
+    rootNode.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, parentStepMeta.getDescription() );
     metaverseBuilder.addNode( rootNode );
 
     inputs = processInputs( meta );
@@ -583,13 +583,22 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
         RowMetaInterface rmi = parentTransMeta.getPrevStepFields( parentStepMeta, progressMonitor );
         progressMonitor.done();
         if ( !ArrayUtils.isEmpty( prevStepNames ) ) {
-          rowMeta.put( prevStepNames[ 0 ], rmi );
+          populateInputFieldsRowMeta( rowMeta, rmi );
         }
       } catch ( KettleStepException e ) {
         rowMeta = null;
       }
     }
     return rowMeta;
+  }
+
+  /**
+   * Populates the {@code rowMeta} with data from all input steps, can be overridden to do otherwise.
+   */
+  protected void populateInputFieldsRowMeta( final Map<String, RowMetaInterface> rowMeta, final RowMetaInterface rmi ) {
+    for ( final String previousStepName : prevStepNames ) {
+      rowMeta.put( previousStepName, rmi );
+    }
   }
 
   @Override

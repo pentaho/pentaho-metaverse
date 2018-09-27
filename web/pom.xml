@@ -21,7 +21,6 @@
     <enunciate.version>1.27</enunciate.version>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <maven-pmd-plugin.version>3.2</maven-pmd-plugin.version>
-    <fasterxml.jackson.version>2.9.4</fasterxml.jackson.version>
   </properties>
   <dependencies>
     <dependency>
@@ -39,7 +38,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>${dependency.com.fasterxml.jackson.core.version}</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
@@ -59,12 +57,10 @@
     <dependency>
       <groupId>com.fasterxml.jackson.jaxrs</groupId>
       <artifactId>jackson-jaxrs-json-provider</artifactId>
-      <version>${fasterxml.jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-jaxb-annotations</artifactId>
-      <version>${fasterxml.jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

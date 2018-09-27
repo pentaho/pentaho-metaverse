@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -20,22 +20,14 @@
  *
  ******************************************************************************/
 
-package org.pentaho.metaverse.graph;
+package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
 
-import java.io.IOException;
-import java.io.OutputStream;
+public interface TextFileInputNode extends TransformationStepNode {
 
-/**
- * The GraphSONWriter class contains methods for writing a metaverse graph model in GraphSON format
- * 
- */
-public class GraphSONWriter extends BaseGraphWriter {
-
-  @Override
-  public void outputGraphImpl( Graph graph, OutputStream graphSONOutputStream ) throws IOException {
-    com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter.outputGraph( graph, graphSONOutputStream );
-  }
+  @Adjacency( label = "isreadby", direction = Direction.IN )
+  Iterable<FramedMetaverseNode> getInputFiles();
 
 }

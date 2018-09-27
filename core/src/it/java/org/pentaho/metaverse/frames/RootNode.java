@@ -81,8 +81,17 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.has('name', T.eq, 'External Connection').out.has('name', T.eq, 'Database Connection').out('typeconcept').has('name', T.eq, name)" )
   DatasourceNode getDatasourceNode( @GremlinParam( "name" ) String name );
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Demo table crime stats output').as('step').in('contains').has('name', T.eq, 'Populate Table From File').back('step')" )
-  TableOutputStepNode getTableOutputStepNode();
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Sacramento crime stats 2006 file').as('step').in('contains').has('name', T"
+    + ".eq, 'Populate Table From File').back('step')" )
+  TextFileInputNode getTextFileInputNode();
+
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Demo table crime stats output [1]').as('step').in('contains').has('name', T"
+    + ".eq, 'Populate Table From File').back('step')" )
+  TableOutputStepNode getTableOutputStepNode1();
+
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Demo table crime stats output [2]').as('step').in('contains').has('name', T"
+    + ".eq, 'Populate Table From File').back('step')" )
+  TableOutputStepNode getTableOutputStepNode2();
 
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Table input').as('step').in('contains').has('name', T.eq, 'merge_join').back('step')" )
   TableInputStepNode getTableInputStepNode();

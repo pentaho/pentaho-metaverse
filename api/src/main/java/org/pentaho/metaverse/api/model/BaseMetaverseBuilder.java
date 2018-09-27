@@ -135,7 +135,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
    * @param toVertex   the target vertex
    * @return the String edge ID
    */
-  public String getEdgeId( Vertex fromVertex, String label, Vertex toVertex ) {
+  public static String getEdgeId( Vertex fromVertex, String label, Vertex toVertex ) {
     return fromVertex.getId() + SEPARATOR + label + SEPARATOR + toVertex.getId();
   }
 
