@@ -26,16 +26,25 @@ import org.apache.commons.vfs2.FileObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
+import org.pentaho.di.core.exception.KettleMissingPluginsException;
+import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
+import org.pentaho.di.repository.Repository;
+import org.pentaho.di.repository.RepositoryDirectoryInterface;
+import org.pentaho.di.trans.ISubTransAwareMeta;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputStep;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -115,4 +124,81 @@ public class KettleAnalyzerUtil {
     return resources;
   }
 
+  public static TransMeta getSubTransMeta( final ISubTransAwareMeta meta ) throws MetaverseAnalyzerException {
+
+    final TransMeta parentTransMeta = meta.getParentStepMeta().getParentTransMeta();
+    final Repository repo = parentTransMeta.getRepository();
+
+    TransMeta subTransMeta = null;
+    switch ( meta.getSpecificationMethod() ) {
+      case FILENAME:
+        String transPath = null;
+        try {
+          transPath = KettleAnalyzerUtil.normalizeFilePath( parentTransMeta.environmentSubstitute(
+            meta.getFileName() ) );
+          subTransMeta = getSubTransMeta( transPath );
+        } catch ( Exception e ) {
+          throw new MetaverseAnalyzerException( "Sub transformation can not be found - " + transPath, e );
+        }
+        break;
+      case REPOSITORY_BY_NAME:
+        if ( repo != null ) {
+          String dir = parentTransMeta.environmentSubstitute( meta.getDirectoryPath() );
+          String file = parentTransMeta.environmentSubstitute( meta.getTransName() );
+          try {
+            RepositoryDirectoryInterface rdi = repo.findDirectory( dir );
+            subTransMeta = repo.loadTransformation( file, rdi, null, true, null );
+          } catch ( KettleException e ) {
+            throw new MetaverseAnalyzerException( "Sub transformation can not be found in repository - " + file, e );
+          }
+        } else {
+          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
+        }
+        break;
+      case REPOSITORY_BY_REFERENCE:
+        if ( repo != null ) {
+          try {
+            subTransMeta = repo.loadTransformation( meta.getTransObjectId(), null );
+          } catch ( KettleException e ) {
+            throw new MetaverseAnalyzerException( "Sub transformation can not be found by reference - "
+              + meta.getTransObjectId(), e );
+          }
+        } else {
+          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
+        }
+        break;
+    }
+    return subTransMeta;
+  }
+
+
+  public static String getSubTransMetaPath( final ISubTransAwareMeta meta, final TransMeta subTransMeta ) throws
+    MetaverseAnalyzerException {
+
+    final TransMeta parentTransMeta = meta.getParentStepMeta().getParentTransMeta();
+    String transPath = null;
+    switch ( meta.getSpecificationMethod() ) {
+      case FILENAME:
+        try {
+          transPath = KettleAnalyzerUtil.normalizeFilePath( parentTransMeta.environmentSubstitute(
+            meta.getFileName() ) );
+        } catch ( Exception e ) {
+          throw new MetaverseAnalyzerException( "Sub transformation can not be found - " + transPath, e );
+        }
+        break;
+      case REPOSITORY_BY_NAME:
+        transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
+        break;
+      case REPOSITORY_BY_REFERENCE:
+        transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
+        break;
+    }
+    return transPath;
+  }
+
+  private static TransMeta getSubTransMeta( final String filePath ) throws FileNotFoundException, KettleXMLException,
+    KettleMissingPluginsException {
+    FileInputStream fis = new FileInputStream( filePath );
+    return new TransMeta( fis, null, true, null, null );
+  }
 }
