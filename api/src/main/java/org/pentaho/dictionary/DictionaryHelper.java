@@ -182,6 +182,7 @@ public class DictionaryHelper {
     typeCategoryMap.put( NODE_TYPE_TRANS, CATEGORY_DOCUMENT );
     typeCategoryMap.put( NODE_TYPE_TRANS_STEP, CATEGORY_DOCUMENT_ELEMENT );
     typeCategoryMap.put( NODE_TYPE_TRANS_FIELD, CATEGORY_FIELD );
+    typeCategoryMap.put( NODE_TYPE_STEP_PROPERTY, CATEGORY_OTHER );
     typeCategoryMap.put( NODE_TYPE_ENTITY, CATEGORY_ABSTRACT );
     typeCategoryMap.put( NODE_TYPE_FILE, CATEGORY_FIELD_COLLECTION );
     typeCategoryMap.put( NODE_TYPE_FILE_FIELD, CATEGORY_FIELD );
@@ -206,6 +207,7 @@ public class DictionaryHelper {
     registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_TRANS, null );
     registerEntityType( LINK_CONTAINS_CONCEPT, NODE_TYPE_TRANS_STEP, NODE_TYPE_TRANS );
     registerEntityType( LINK_CONTAINS_CONCEPT, NODE_TYPE_TRANS_FIELD, NODE_TYPE_TRANS_STEP );
+    registerEntityType( LINK_CONTAINS_CONCEPT, NODE_TYPE_STEP_PROPERTY, NODE_TYPE_TRANS_STEP );
     registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_USER_CONTENT, null );
     registerEntityType( LINK_PARENT_CONCEPT, NODE_TYPE_FILE, null );
     registerEntityType( LINK_CONTAINS_CONCEPT, NODE_TYPE_FILE_FIELD, NODE_TYPE_FILE );

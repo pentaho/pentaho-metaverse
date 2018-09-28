@@ -136,6 +136,11 @@ public class DictionaryConst {
   public static final String PROPERTY_DESCRIPTION = "description";
 
   /**
+   * Property key for "parameters"
+   */
+  public static final String PROPERTY_PARAMETERS = "parameters";
+
+  /**
    * Property key for "artifact version"
    */
   public static final String PROPERTY_ARTIFACT_VERSION = "version";
@@ -433,6 +438,11 @@ public class DictionaryConst {
    * The node type for PDI transformation fields
    */
   public static final String NODE_TYPE_TRANS_FIELD = "Transformation Stream field";
+
+  /**
+   * The node type for PDI step properties
+   */
+  public static final String NODE_TYPE_STEP_PROPERTY = "Transformation Step property";
 
   /**
    * The node type for a data column in a data table
