@@ -28,6 +28,9 @@
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
   </bean>
 
+  <bean id="MetaInjectAnalyzer"
+        class="org.pentaho.di.ui.trans.steps.metainject.analyzer.MetaInjectAnalyzer" />
+
   <bean id="TableOutputStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer">
     <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
@@ -144,6 +147,7 @@
         scope="singleton">
     <property name="stepAnalyzers">
       <list>
+        <ref bean="MetaInjectAnalyzer" />
         <ref bean="TableOutputStepAnalyzer"/>
         <ref bean="tableInputStepAnalyzer"/>
         <ref bean="OldTextFileInputStepAnalyzer"/>

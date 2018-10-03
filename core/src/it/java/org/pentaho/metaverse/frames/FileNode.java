@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,23 +22,10 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
+import com.tinkerpop.frames.Property;
+import org.pentaho.dictionary.DictionaryConst;
 
-/**
- * User: RFellows Date: 9/4/14
- */
-public interface TransformationNode extends KettleNode {
-  @GremlinGroovy( "it.out('contains').hasNot('virtual', true)" )
-  Iterable<TransformationStepNode> getStepNodes();
-
-  @GremlinGroovy( "it.out('contains').has('virtual', true)" )
-  Iterable<TransformationStepNode> getVirtualStepNodes();
-
-  @GremlinGroovy( "it.out('contains').has( 'name', T.eq, name )" )
-  TransformationStepNode getStepNode( @GremlinParam( "name" ) String name );
-
-  @GremlinGroovy( "it.in('contains').has( 'type', T.eq, 'JobEntry' )" )
-  Iterable<JobEntryNode> getJobEntriesThatExecuteMe();
+public interface FileNode extends Concept {
+  @Property( DictionaryConst.PROPERTY_PATH )
+  String getPath();
 }
-

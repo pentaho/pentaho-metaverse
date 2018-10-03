@@ -44,5 +44,11 @@ public interface FramedMetaverseNode {
   String getDescription();
 
   @Adjacency( label = "contains", direction = Direction.OUT )
-  Iterable<StreamFieldNode> getContainedNodes();
+  Iterable<Concept> getContainedNodes();
+
+  @Adjacency( label = "executes", direction = Direction.OUT )
+  Iterable<TransformationNode> getExecutesNodes();
+
+  @Adjacency( label = "populates", direction = Direction.OUT )
+  Iterable<Concept> getNodesPopulatedByMe();
 }

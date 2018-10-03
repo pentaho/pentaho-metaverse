@@ -38,6 +38,7 @@
     <dependency.org.springFramework.spring.version>2.5.6</dependency.org.springFramework.spring.version>
     <pentaho-mongodb-plugin.version>8.2.0.0-SNAPSHOT</pentaho-mongodb-plugin.version>
     <platform.version>8.2.0.0-SNAPSHOT</platform.version>
+    <pdi.version>8.2.0.0-SNAPSHOT</pdi.version>
   </properties>
   <dependencies>
     <dependency>
@@ -288,6 +289,18 @@
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito</artifactId>
       <version>${dependency.org.powermock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.pentaho.di.plugins</groupId>
+      <artifactId>meta-inject-plugin</artifactId>
+      <version>${pdi.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.pentaho.di.plugins</groupId>
+      <artifactId>pdi-core-plugins-impl</artifactId>
+      <version>${pdi.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
