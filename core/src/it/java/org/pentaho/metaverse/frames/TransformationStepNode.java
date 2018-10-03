@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -31,29 +31,32 @@ import com.tinkerpop.frames.Property;
  */
 public interface TransformationStepNode extends Concept {
   @Property( "stepType" )
-  public String getStepType();
+  String getStepType();
 
   @Adjacency( label = "contains", direction = Direction.IN )
-  public TransformationNode getTransNode();
+  TransformationNode getTransNode();
 
   @Adjacency( label = "deletes", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesDeletes();
+  Iterable<StreamFieldNode> getStreamFieldNodesDeletes();
 
   @Adjacency( label = "creates", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesCreates();
+  Iterable<StreamFieldNode> getStreamFieldNodesCreates();
 
   @Adjacency( label = "uses", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getStreamFieldNodesUses();
+  Iterable<StreamFieldNode> getStreamFieldNodesUses();
 
   @Adjacency( label = "hops_to", direction = Direction.OUT )
-  public Iterable<TransformationStepNode> getNextSteps();
+  Iterable<TransformationStepNode> getNextSteps();
 
   @Adjacency( label = "hops_to", direction = Direction.IN )
-  public Iterable<TransformationStepNode> getPreviousSteps();
+  Iterable<TransformationStepNode> getPreviousSteps();
 
   @Adjacency( label = "inputs", direction = Direction.IN )
-  public Iterable<StreamFieldNode> getInputStreamFields();
+  Iterable<StreamFieldNode> getInputStreamFields();
 
   @Adjacency( label = "outputs", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getOutputStreamFields();
+  Iterable<StreamFieldNode> getOutputStreamFields();
+
+  @Adjacency( label = "writesto", direction = Direction.OUT )
+  Iterable<FileNode> getWritesToNodes();
 }
