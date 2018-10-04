@@ -284,6 +284,11 @@ public class DictionaryConst {
   public static final String PROPERTY_TARGET_STEP = "targetStep";
 
   /**
+   * Property key to represent a "verbose" details of a step and document.
+   */
+  public static final String PROPERTY_VERBOSE_DETAILS = "verboseDetails";
+
+  /**
    * Label for an "executes" edge in the graph, e.g. a job executes a transformation
    */
   public static final String LINK_EXECUTES = "executes";
