@@ -27,8 +27,6 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
-import org.pentaho.metaverse.BaseMetaverseValidationIT;
-import org.pentaho.metaverse.MetaverseValidationIT;
 
 /**
  * User: RFellows Date: 9/4/14
@@ -40,21 +38,11 @@ public interface RootNode extends FramedMetaverseNode {
   @Property( "project" )
   String getProject();
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out('typeconcept')" )
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out('typeconcept').dedup" )
   Iterable<TransformationNode> getTransformations();
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out('typeconcept').has('name', T.eq, name)" )
-  Iterable<TransformationNode> getTransformations( @GremlinParam( "name" ) String name );
-
-  // We only want to consider transformation connected to the "repo" node, transformation nodes not connected to the
-  // repo node migth represent sub-transformations
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out('typeconcept').has('name', T.eq, name).as"
-    + "('transformation').inE.hasNot('executes').back('transformation')" )
+  @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Transformation'}.out(){it.object.name == name }.dedup" )
   TransformationNode getTransformation( @GremlinParam( "name" ) String name );
-
-  // A transformation node that is NOT connected to the "repo" node.
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out('typeconcept').has('name', T.eq, name).as('transformation').in('executes').back('transformation')" )
-  TransformationNode getSubTransformation( @GremlinParam( "name" ) String name );
 
   @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Job'}.out('typeconcept').dedup" )
   Iterable<JobNode> getJobs();

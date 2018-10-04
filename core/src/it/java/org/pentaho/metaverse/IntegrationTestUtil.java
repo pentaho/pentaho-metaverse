@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -30,8 +30,6 @@ import org.pentaho.di.core.plugins.Plugin;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.trans.steps.checksum.CheckSumMeta;
-import org.pentaho.di.trans.steps.metainject.MetaInjectMeta;
 import org.pentaho.di.trans.steps.mongodbinput.MongoDbInputMeta;
 import org.pentaho.metaverse.api.IDocumentLocator;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
@@ -51,6 +49,7 @@ import org.pentaho.platform.engine.core.system.objfac.StandaloneSpringPentahoObj
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -109,21 +108,26 @@ public class IntegrationTestUtil {
     }
   }
 
-  private static void registerKettlePlugin( final String metaClassName, final String pluginId, final String pluginCategory,
-                                     final String stepName ) throws KettlePluginException {
-
-    final Map<Class<?>, String> classMap = new HashMap<Class<?>, String>( 1 );
-    classMap.put( StepMetaInterface.class, metaClassName );
-
-    Plugin plugin = new Plugin( new String[]{ pluginId }, StepPluginType.class, StepMetaInterface.class, pluginCategory,
-      stepName, null, null, false, false, classMap, Collections.emptyList(), null, null );
-    PluginRegistry.getInstance().registerPlugin( StepPluginType.class, plugin );
-  }
-
   private static void registerKettlePlugins() throws KettlePluginException {
-    registerKettlePlugin( MongoDbInputMeta.class.getName(), "MongoDbInput", "Big Data", "MongoDB Input" );
-    registerKettlePlugin( MetaInjectMeta.class.getName(), "MetaInject", "Flow", "ETL metadata injection" );
-    registerKettlePlugin( CheckSumMeta.class.getName(), "CheckSum", "Transform", "Add a checksum" );
+    Map<Class<?>, String> mongoInputClassMap = new HashMap<Class<?>, String>( 1 );
+    mongoInputClassMap.put( StepMetaInterface.class, MongoDbInputMeta.class.getName() );
+    List<String> empty = Collections.emptyList();
+    Plugin mongodbInputPlugin = new Plugin(
+        new String[]{ "MongoDbInput" },
+        StepPluginType.class,
+        StepMetaInterface.class,
+        "Big Data",
+        "MongoDB Input",
+        null,
+        null,
+        false,
+        false,
+        mongoInputClassMap,
+        empty,
+        null,
+        null
+    );
+    PluginRegistry.getInstance().registerPlugin( StepPluginType.class, mongodbInputPlugin );
   }
 
   public static void shutdownPentahoSystem() {

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -51,6 +51,9 @@ public interface FieldNode extends Concept {
 
   @Adjacency( label = "inputs", direction = Direction.OUT )
   public TransformationStepNode getStepThatInputsMe();
+
+  @Adjacency( label = "populates", direction = Direction.OUT )
+  public FieldNode getFieldPopulatedByMe();
 
   @Adjacency( label = "populates", direction = Direction.IN )
   public FieldNode getFieldPopulatesMe();
