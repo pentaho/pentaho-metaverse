@@ -34,6 +34,10 @@
     <property name="externalResourceConsumer" ref="tableOutputERC"/>
   </bean>
 
+
+  <bean id="MappingAnalyzer"
+        class="org.pentaho.metaverse.analyzer.kettle.step.mapping.MappingAnalyzer" />
+
   <bean id="tableInputStepAnalyzer" class="org.pentaho.metaverse.analyzer.kettle.step.tableinput.TableInputStepAnalyzer">
     <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
     <property name="externalResourceConsumer" ref="tableInputERC"/>
@@ -172,6 +176,7 @@
         <ref bean="HTTPClientStepAnalyzer"/>
         <ref bean="RestClientStepAnalyzer"/>
         <ref bean="HTTPPostStepAnalyzer"/>
+        <ref bean="MappingAnalyzer"/>
       </list>
     </property>
   </bean>

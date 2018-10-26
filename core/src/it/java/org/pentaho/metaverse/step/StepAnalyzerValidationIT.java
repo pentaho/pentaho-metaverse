@@ -20,30 +20,20 @@
  *
  ******************************************************************************/
 
-package org.pentaho.metaverse;
+package org.pentaho.metaverse.step;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.pentaho.metaverse.frames.FramedMetaverseNode;
+import org.pentaho.metaverse.BaseMetaverseValidationIT;
 import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
-/**
- * Runs the integration test with the {@link MetaverseConfig} mocked to have
- * the {@code deduplicateTransformationFields} graph dedupping turned on.
- */
 @RunWith( PowerMockRunner.class )
 @PrepareForTest( MetaverseConfig.class )
-public class MetaverseValidationDedupIT extends MetaverseValidationIT {
+public abstract class StepAnalyzerValidationIT extends BaseMetaverseValidationIT {
 
   @BeforeClass
   public static void init() throws Exception {
@@ -51,25 +41,23 @@ public class MetaverseValidationDedupIT extends MetaverseValidationIT {
     PowerMockito.mockStatic( MetaverseConfig.class );
     Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( true );
     Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
-
-    MetaverseValidationIT.init();
   }
 
-  @Test
-  public void testSelectValuesStep() throws Exception {
-    testSelectValuesStep( 8 );
+  @Override
+  protected boolean shouldCleanupInstance() {
+    return true;
   }
 
-  @Test
-  public void testTextFileInputNode() throws Exception {
-    List<FramedMetaverseNode> containedNodes = testTextFileInputNodeImpl( 3 );
-    // get field names
-    List<String> nodeNames = new ArrayList();
-    for ( final FramedMetaverseNode node : containedNodes ) {
-      nodeNames.add( node.getName() );
-    }
-    Assert.assertTrue( nodeNames.contains( "longitude" ) );
-    Assert.assertTrue( nodeNames.contains( "latitude" ) );
-    Assert.assertTrue( nodeNames.contains( "address" ) );
+  protected void initTest( final String transNodeName ) throws Exception {
+    BaseMetaverseValidationIT.init( getRootFolder() + "/" + transNodeName,
+      getOutputFileRoot() + "/" + transNodeName + ".graphml");
+  }
+
+  protected String getRootFolder() {
+    return  "src/it/resources/repo/" + getClass().getSimpleName();
+  }
+
+  protected String getOutputFileRoot() {
+    return "target/outputfiles/" + getClass().getSimpleName();
   }
 }
