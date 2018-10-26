@@ -22,6 +22,8 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
@@ -55,8 +57,6 @@ import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.impl.model.ParamInfo;
 import org.pentaho.metaverse.messages.Messages;
 import org.pentaho.metaverse.util.MetaverseUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URLConnection;
@@ -77,7 +77,7 @@ import java.util.concurrent.Future;
   id = "transRuntimeMetaverse" )
 public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements TransListener {
 
-  private static final Logger log = LoggerFactory.getLogger( TransformationRuntimeExtensionPoint.class );
+  private static final Logger log = LogManager.getLogger( TransformationRuntimeExtensionPoint.class );
 
   /**
    * Callback when a transformation is about to be started
@@ -276,6 +276,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       return;
     }
 
+    log.info( Messages.getString( "INFO.TransformationFinished", trans.getName() ) );
     runAnalyzers( trans );
 
     if ( allowedAsync() ) {
@@ -299,8 +300,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
   }
 
   protected void createLineGraph( final Trans trans ) {
+    log.info( Messages.getString( "INFO.WrittingGraphForTransformation", trans.getName() ) );
     try {
-
       // Get the current execution profile for this transformation
       LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
       Future lineageTask = holder.getLineageTask();
