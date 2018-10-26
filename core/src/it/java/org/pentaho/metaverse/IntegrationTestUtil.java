@@ -107,8 +107,9 @@ public class IntegrationTestUtil {
     }
   }
 
-  private static void registerKettlePlugin( final String metaClassName, final String pluginId, final String pluginCategory,
-                                            final String stepName ) throws KettlePluginException {
+  public static void registerKettlePlugin( final String metaClassName, final String pluginId,
+                                           final String pluginCategory, final String stepName )
+    throws KettlePluginException {
 
     final Map<Class<?>, String> classMap = new HashMap<Class<?>, String>( 1 );
     classMap.put( StepMetaInterface.class, metaClassName );
@@ -120,6 +121,9 @@ public class IntegrationTestUtil {
 
   private static void registerKettlePlugins() throws KettlePluginException {
     registerKettlePlugin( MongoDbInputMeta.class.getName(), "MongoDbInput", "Big Data", "MongoDB Input" );
+    // TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved
+    //registerKettlePlugin( MetaInjectMeta.class.getName(), "MetaInject", "Flow", "ETL metadata injection" );
+    //registerKettlePlugin( CheckSumMeta.class.getName(), "CheckSum", "Transform", "Add a checksum" );
   }
 
   public static void shutdownPentahoSystem() {
