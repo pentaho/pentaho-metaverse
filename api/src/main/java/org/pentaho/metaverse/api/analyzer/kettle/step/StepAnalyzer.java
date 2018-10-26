@@ -681,7 +681,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   }
 
   @Override
-  public IClonableStepAnalyzer cloneAnalyzer() {
+  public final IClonableStepAnalyzer cloneAnalyzer() {
     final IClonableStepAnalyzer newInstance = newInstance();
     copyState( newInstance );
     return newInstance;
