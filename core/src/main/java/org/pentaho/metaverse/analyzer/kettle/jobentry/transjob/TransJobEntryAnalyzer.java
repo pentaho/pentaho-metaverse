@@ -134,7 +134,7 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
   }
 
   @Override
-  public IClonableJobEntryAnalyzer cloneAnalyzer() {
+  protected IClonableJobEntryAnalyzer newInstance() {
     return new TransJobEntryAnalyzer();
   }
 }
