@@ -48,8 +48,6 @@ import java.util.Set;
 public abstract class BaseGraphWriter implements IGraphWriter {
 
   public static void adjustGraph( final Graph graph ) {
-    mergeOutputsAndInputs( graph );
-
     if ( MetaverseConfig.deduplicateTransformationFields() ) {
       deduplicateTransFields( graph );
     }
@@ -100,68 +98,6 @@ public abstract class BaseGraphWriter implements IGraphWriter {
    */
   private static Set<Vertex> getDocumentElementVertices( final Graph graph ) {
     return getVerticesByCategory( graph, DictionaryConst.CATEGORY_DOCUMENT_ELEMENT );
-  }
-
-  /**
-   * In some cases, we are unable to make a connection between a step's output fields and the input fields that the step
-   * hops to at analysis time. Inspect all input stream transformation fields of a step that do not have a corresponding
-   * IN "outputs" link, and check whether there are any matching "output" fields in the steps that hop to the given
-   * step. If so, merge the fields, OR if there are multiple fields that match, add appropriate missing links.
-   */
-  private static void mergeOutputsAndInputs( final Graph graph ) {
-    // get all Step and Job Entry nodes
-    final Iterator<Vertex> documentElementVertices = getDocumentElementVertices( graph ).iterator();
-
-    while ( documentElementVertices.hasNext() ) {
-      final Vertex documentElementVertex = documentElementVertices.next();
-
-      final List<Vertex> inputFields = getLinkedVertices( documentElementVertex, Direction.IN,
-        DictionaryConst.LINK_INPUTS, DictionaryConst.CATEGORY_FIELD, true, DictionaryConst.NODE_TYPE_TRANS_FIELD,
-        true );
-      final List<Vertex> orphanedInputFields = new ArrayList();
-      for ( final Vertex inputField : inputFields ) {
-        if ( !inputField.getEdges( Direction.IN, DictionaryConst.LINK_OUTPUTS ).iterator().hasNext() ) {
-          orphanedInputFields.add( inputField );
-        }
-      }
-      if ( orphanedInputFields.size() > 0 ) {
-        final List<Vertex> inputSteps = getLinkedVertices( documentElementVertex, Direction.IN,
-          DictionaryConst.LINK_HOPSTO, DictionaryConst.CATEGORY_DOCUMENT_ELEMENT, true,
-          DictionaryConst.NODE_TYPE_TRANS_STEP, true );
-        // traverse all input steps and get their output fields whose names match the orphaned field;
-        // when the first match is found, merge the two fields, all subsequent matches need to have the "input" link
-        // added from the output field to the orphaned field
-        for ( final Vertex orphanedInputField : orphanedInputFields ) {
-          final String orphanedInputFieldName = orphanedInputField.getProperty( DictionaryConst.PROPERTY_NAME );
-          int matchCount = 0;
-          for ( final Vertex inputStep : inputSteps ) {
-            final List<Vertex> inputStepOutputFields = getLinkedVertices( inputStep, Direction.OUT,
-              DictionaryConst.LINK_OUTPUTS, DictionaryConst.CATEGORY_FIELD, true,
-              DictionaryConst.NODE_TYPE_TRANS_FIELD, true );
-            for ( final Vertex inputStepOutputField : inputStepOutputFields ) {
-              final String inputStepOutputFieldName = inputStepOutputField.getProperty( DictionaryConst
-                .PROPERTY_NAME );
-              if ( inputStepOutputFieldName.equals( orphanedInputFieldName ) ) {
-                // we have a match - if this is the first match, merge the fields
-                if ( matchCount == 0 ) {
-                  rewireEdges( graph, inputStepOutputField, orphanedInputField, Direction.IN );
-                  rewireEdges( graph, inputStepOutputField, orphanedInputField, Direction.OUT );
-                  // remove the orphaned input field, we no longer need it
-                  orphanedInputField.remove();
-                } else {
-                  // otherwise add an input link from the inputStepOutputField to the parent step of the orphaned field
-                  final String newLinkId = BaseMetaverseBuilder.getEdgeId( inputStepOutputField,
-                    DictionaryConst.LINK_INPUTS, documentElementVertex );
-                  graph.addEdge( newLinkId, inputStepOutputField, documentElementVertex, DictionaryConst.LINK_INPUTS )
-                    .setProperty( "text", DictionaryConst.LINK_INPUTS );
-                }
-                matchCount++;
-              }
-            }
-          }
-        }
-      }
-    }
   }
 
   private static void deduplicateTransFields( final Graph graph ) {
