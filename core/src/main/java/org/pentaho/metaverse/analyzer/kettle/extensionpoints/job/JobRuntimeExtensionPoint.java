@@ -22,8 +22,6 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
@@ -57,6 +55,8 @@ import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.impl.model.ParamInfo;
 import org.pentaho.metaverse.messages.Messages;
 import org.pentaho.metaverse.util.MetaverseUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +78,7 @@ import java.util.concurrent.Future;
   id = "jobRuntimeMetaverse" )
 public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements JobListener {
 
-  private static final Logger log = LogManager.getLogger( JobRuntimeExtensionPoint.class );
+  private static final Logger log = LoggerFactory.getLogger( JobRuntimeExtensionPoint.class );
 
   /**
    * Callback when a job is about to be started
@@ -187,7 +187,6 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       return;
     }
 
-    log.info( Messages.getString( "INFO.JobFinished", job.getJobname() ) );
     runAnalyzers( job );
 
     if ( allowedAsync() ) {
@@ -211,7 +210,6 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
   }
 
   protected void createLineGraph( final Job job ) {
-    log.info( Messages.getString( "INFO.WrittingGraphForJobn", job.getJobname() ) );
     try {
       // Get the current execution profile for this transformation
       LineageHolder holder = JobLineageHolderMap.getInstance().getLineageHolder( job );

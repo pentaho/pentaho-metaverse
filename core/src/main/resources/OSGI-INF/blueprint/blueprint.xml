@@ -122,9 +122,6 @@
   <!-- END - Connection Analyzers -->
 
   <!-- Step Analyzers -->
-  <bean id="MappingAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.mapping.MappingAnalyzer" />
-
   <bean id="TableOutputStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer">
     <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
@@ -222,10 +219,6 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer">
     <property name="externalResourceConsumer" ref="httpPostERC"/>
   </bean>
-
-  <service id="mappingAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
-           ref="MappingAnalyzer"/>
 
   <service id="tableOutputStepAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"

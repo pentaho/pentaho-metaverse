@@ -49,6 +49,7 @@ public class MetaverseValidationDedupIT extends MetaverseValidationIT {
   public static void init() throws Exception {
 
     PowerMockito.mockStatic( MetaverseConfig.class );
+    // expecting to deduplicate by default - need to mock to return false
     Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( true );
     Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
 

@@ -26,8 +26,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.pentaho.di.core.ProgressNullMonitorListener;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.plugins.PluginRegistry;
@@ -53,6 +51,8 @@ import org.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
 import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import org.pentaho.metaverse.api.messages.Messages;
 import org.pentaho.metaverse.api.model.kettle.IFieldMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +66,7 @@ import java.util.UUID;
 public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMetaverseComponent implements
   IClonableStepAnalyzer<T>, IFieldLineageMetadataProvider<T> {
 
-  private static final Logger LOGGER = LogManager.getLogger( StepAnalyzer.class );
+  private static final Logger LOGGER = LoggerFactory.getLogger( StepAnalyzer.class );
   public static final String NONE = "_none_";
 
   protected IComponentDescriptor descriptor;
@@ -111,9 +111,6 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
 
   @Override
   public IMetaverseNode analyze( IComponentDescriptor descriptor, T meta ) throws MetaverseAnalyzerException {
-
-    LOGGER.info( Messages.getString( "INFO.runningAnalyzer", meta.getParentStepMeta().getParentTransMeta().getName(),
-      meta.getParentStepMeta().getName() ) );
 
     setDescriptor( descriptor );
     baseStepMeta = meta;
@@ -243,19 +240,13 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
       List<IMetaverseNode> outputNodes = new ArrayList<>();
 
       if ( StringUtils.isNotEmpty( change.getOriginalEntityStepName() ) ) {
-        final IMetaverseNode inputNode = getInputs().findNode( change.getOriginalField() );
-        if ( inputNode != null ) {
-          inputNodes.add( inputNode );
-        }
+        inputNodes.add( getInputs().findNode( change.getOriginalField() ) );
       } else {
         inputNodes.addAll( getInputs().findNodes( change.getOriginalEntityName() ) );
       }
 
       if ( StringUtils.isNotEmpty( change.getChangedEntityStepName() ) ) {
-        final IMetaverseNode outputNode = getOutputs().findNode( change.getChangedField() );
-        if ( outputNode != null ) {
-          outputNodes.add( outputNode );
-        }
+        outputNodes.add( getOutputs().findNode( change.getChangedField() ) );
       } else {
         outputNodes.addAll( getOutputs().findNodes( change.getChangedEntityName() ) );
       }
@@ -358,14 +349,9 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
 
   protected IMetaverseNode createFieldNode( IComponentDescriptor fieldDescriptor, ValueMetaInterface fieldMeta,
                                             String targetStepName, boolean addTheNode ) {
-    return createFieldNode( fieldDescriptor, fieldMeta.getTypeDesc(), targetStepName, addTheNode );
-  }
-
-  protected IMetaverseNode createFieldNode( IComponentDescriptor fieldDescriptor, String kettleType,
-                                            String targetStepName, boolean addTheNode ) {
 
     IMetaverseNode newFieldNode = createNodeFromDescriptor( fieldDescriptor );
-    newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, kettleType );
+    newFieldNode.setProperty( DictionaryConst.PROPERTY_KETTLE_TYPE, fieldMeta.getTypeDesc() );
 
     // don't add it to the graph if it is a transient node
     if ( targetStepName != null ) {
@@ -690,7 +676,6 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   /**
    * Returns this {@link IClonableStepAnalyzer} by default and should be overridden by concrete implementations to
    * create a new instance.
-   *
    * @return this {@link IClonableStepAnalyzer} by default and should be overridden by concrete implementations to
    * create a new instance.
    */
@@ -700,9 +685,8 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
 
   /**
    * Copies the any relevant properties from this {@link IClonableStepAnalyzer} to the {@code newAnalyzer}
-   *
-   * @param newAnalyzer the {@link IClonableStepAnalyzer} into which the properties from this {@link
-   *                    IClonableStepAnalyzer} are being copied.
+   * @param newAnalyzer the {@link IClonableStepAnalyzer} into which the properties from this {@link IClonableStepAnalyzer}
+   *                    are being copied.
    * @return true if the properties were copied, false otherwise
    */
   protected boolean copyState( final IClonableStepAnalyzer newAnalyzer ) {
@@ -713,75 +697,4 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     return false;
   }
 
-  /**
-   * Returns a {@link IMetaverseNode} from the map (if present) or created a new one.
-   *
-   * @param name        the node name
-   * @param type        the node type (Transformation Step, Transformaton Stream Field, Database column etc...)
-   * @param namespaceId the node namespace id
-   * @param nodeKey     the lookup key for the map
-   * @param nodeMap     a {@link Map} of nodes for lookup
-   * @return a {@link IMetaverseNode} from the map (if present) or created a new one.
-   */
-  protected IMetaverseNode getNode( final String name, final String type, final String namespaceId,
-                                    final String nodeKey,
-                                    final Map<String, IMetaverseNode> nodeMap ) {
-    return getNode( name, type, new Namespace( namespaceId ), nodeKey, nodeMap );
-  }
-
-  /**
-   * Returns a {@link IMetaverseNode} from the map (if present) or created a new one.
-   *
-   * @param name      the node name
-   * @param type      the node type (Transformation Step, Transformaton Stream Field, Database column etc...)
-   * @param namespace the node'as {@link INamespace}
-   * @param nodeKey   the lookup key for the map
-   * @param nodeMap   a {@link Map} of nodes for lookup
-   * @return a {@link IMetaverseNode} from the map (if present) or created a new one.
-   */
-  protected IMetaverseNode getNode( final String name, final String type, final INamespace namespace,
-                                    final String nodeKey, final Map<String, IMetaverseNode> nodeMap ) {
-    IMetaverseNode node = nodeMap == null ? null : nodeMap.get( nodeKey );
-    if ( node == null ) {
-      node = createNode( name, type, namespace );
-      if ( nodeMap != null ) {
-        nodeMap.put( nodeKey, node );
-      }
-    }
-    return node;
-  }
-
-  /**
-   * Created a new instance of {@link IMetaverseNode}.
-   * @param name      the node name
-   * @param type      the node type (Transformation Step, Transformaton Stream Field, Database column etc...)
-   * @param namespace the node'as {@link INamespace}
-   * @return a new instance of {@link IMetaverseNode}
-   */
-  protected IMetaverseNode createNode( final String name, final String type, final INamespace namespace ) {
-    final IComponentDescriptor descriptor = new MetaverseComponentDescriptor( name, type, namespace );
-    final IMetaverseNode node = createNodeFromDescriptor( descriptor );
-    node.setProperty( DictionaryConst.NODE_VIRTUAL, false );
-    return node;
-  }
-
-  /**
-   * Returns a {@link IMetaverseNode} from the map (if present) or created a new one and marks it as virtual.
-   * @see {@link #getNode(String, String, INamespace, String, Map)}
-   */
-  protected IMetaverseNode getVirtualNode( final String name, final String type, final INamespace namespace,
-                                           final String nodeKey, final Map<String, IMetaverseNode> nodeMap ) {
-    IMetaverseNode node = getNode( name, type, namespace, nodeKey, nodeMap );
-    node.setProperty( DictionaryConst.NODE_VIRTUAL, true );
-    return node;
-  }
-
-  /**
-   * Returns a {@link IMetaverseNode} from the map (if present) or created a new one and marks it as virtual.
-   * @see {@link #getNode(String, String, String, String, Map)}
-   */
-  protected IMetaverseNode getVirtualNode( final String name, final String type, final String namespaceId,
-                                           final String nodeKey, final Map<String, IMetaverseNode> nodeMap ) {
-    return getVirtualNode( name, type, new Namespace( namespaceId ), nodeKey, nodeMap );
-  }
 }
