@@ -346,7 +346,7 @@
            ref="tableInputStepAnalyzer"/>
 
   <service id="singleThreaderStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="SingleThreaderStepAnalyzer"/>
 
   <reference-list id="stepAnalyzerRefList"

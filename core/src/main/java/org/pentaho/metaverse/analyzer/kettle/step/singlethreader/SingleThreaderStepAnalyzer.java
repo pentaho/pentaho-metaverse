@@ -30,7 +30,6 @@ import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
-import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 
 import java.util.HashSet;
@@ -76,9 +75,5 @@ public class SingleThreaderStepAnalyzer extends StepAnalyzer<SingleThreaderMeta>
         add( SingleThreaderMeta.class );
       }
     };
-  }
-
-  @Override public IClonableStepAnalyzer newInstance() {
-    return new SingleThreaderStepAnalyzer();
   }
 }
