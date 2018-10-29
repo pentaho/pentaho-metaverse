@@ -223,9 +223,6 @@
     <property name="externalResourceConsumer" ref="httpPostERC"/>
   </bean>
 
-  <bean id="SingleThreaderStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.singlethreader.SingleThreaderStepAnalyzer"/>
-
   <service id="mappingAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="MappingAnalyzer"/>
@@ -344,10 +341,6 @@
   <service id="tableInputStepAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="tableInputStepAnalyzer"/>
-
-  <service id="singleThreaderStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
-           ref="SingleThreaderStepAnalyzer"/>
 
   <reference-list id="stepAnalyzerRefList"
                   interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
