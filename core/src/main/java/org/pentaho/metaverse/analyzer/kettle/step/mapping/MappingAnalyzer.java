@@ -34,7 +34,6 @@ import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
-import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 
 import java.util.ArrayList;
@@ -304,10 +303,5 @@ public class MappingAnalyzer extends StepAnalyzer<MappingMeta> {
       verboseProps.add( renameKey );
       rootNode.setProperty( renameKey, valueRename.getSourceValueName() + " > " + valueRename.getTargetValueName() );
     }
-  }
-
-  @Override
-  public IClonableStepAnalyzer newInstance() {
-    return new MappingAnalyzer();
   }
 }
