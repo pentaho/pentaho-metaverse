@@ -154,7 +154,6 @@
         <ref bean="tableInputStepAnalyzer"/>
         <ref bean="OldTextFileInputStepAnalyzer"/>
         <ref bean="TextFileInputStepAnalyzer"/>
-        <ref bean="SelectValuesStepAnalyzer"/>
         <ref bean="NumberRangeStepAnalyzer"/>
         <ref bean="ValueMapperStepAnalyzer"/>
         <ref bean="TextFileOutputStepAnalyzer"/>
@@ -182,6 +181,12 @@
         <ref bean="SimpleMappingAnalyzer"/>
       </list>
     </property>
+    <property name="clonableStepAnalyzers">
+      <list>
+        <ref bean="SelectValuesStepAnalyzer"/>
+     </list>
+    </property>
+
   </bean>
 
   <bean id="IJobEntryAnalyzerProvider" class="org.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider"
