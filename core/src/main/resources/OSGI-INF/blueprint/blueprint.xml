@@ -249,7 +249,7 @@
            ref="TextFileInputStepAnalyzer"/>
 
   <service id="selectValuesStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="SelectValuesStepAnalyzer"/>
 
   <service id="numberRangeStepAnalyzerService"
