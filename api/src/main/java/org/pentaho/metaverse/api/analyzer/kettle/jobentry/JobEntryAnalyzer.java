@@ -217,7 +217,7 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
   }
 
   @Override
-  public IClonableJobEntryAnalyzer cloneAnalyzer() {
+  public final IClonableJobEntryAnalyzer cloneAnalyzer() {
     final IClonableJobEntryAnalyzer newInstance = newInstance();
     copyState( newInstance );
     return newInstance;

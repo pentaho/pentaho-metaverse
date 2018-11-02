@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -49,8 +50,10 @@ import org.pentaho.metaverse.api.model.BaseDatabaseResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -222,39 +225,23 @@ public class TableOutputStepAnalyzerTest {
     assertNull( analyzer.getUsedFields( meta ) );
   }
 
+
   @Test
-  public void testGetOutputResourceFields() throws Exception {
+  public void testGetOutputResourceFieldsRenamed() throws Exception {
+    String[] tableFields = new String[] { "foo", "foe", "fee" };
+    when( meta.getFieldDatabase() ).thenReturn( tableFields );
+    String[] streamFields = new String[] { "field2", "field3", "bogus" };
+    when( meta.getFieldStream() ).thenReturn( streamFields );
+
+    RowMetaInterface rmi = Mockito.mock( RowMetaInterface.class );
     String[] outputFields = new String[2];
-    outputFields[0] = "field1";
-    outputFields[1] = "field2";
-
-    when( meta.getFieldDatabase() ).thenReturn( outputFields );
-
-    Set<String> outputResourceFields = analyzer.getOutputResourceFields( meta );
-
-    assertEquals( outputFields.length, outputResourceFields.size() );
-    for ( String outputField : outputFields ) {
-      assertTrue( outputResourceFields.contains( outputField ) );
-    }
-  }
-
-  /**
-   * Test case for http://jira.pentaho.com/browse/PDI-14959 issue.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testGetOutputResourceFieldsWithoutSpecifiedFields() throws Exception {
-    String[] outputFields = new String[2];
-    outputFields[0] = "fieldA";
-    outputFields[1] = "fieldB";
-    RowMetaInterface rmi = mock( RowMetaInterface.class );
-
-    when( meta.getFieldDatabase() ).thenReturn( new String[0] );
-    when( meta.specifyFields() ).thenReturn( Boolean.FALSE );
+    outputFields[0] = "field2";
+    outputFields[1] = "field3";
+    doReturn( rmi ).when( analyzer ).getOutputFields( meta );
     when( rmi.getFieldNames() ).thenReturn( outputFields );
 
-    doReturn( rmi ).when( analyzer ).getOutputFields( meta );
+    // with "specify fields" set to false, the field rename defined within the db fields table should be ignored
+    when( meta.specifyFields() ).thenReturn( Boolean.FALSE );
 
     Set<String> outputResourceFields = analyzer.getOutputResourceFields( meta );
 
@@ -263,42 +250,110 @@ public class TableOutputStepAnalyzerTest {
       assertTrue( outputResourceFields.contains( outputField ) );
     }
 
+    // "specify fields" is selected, fields should be renamed
     when( meta.specifyFields() ).thenReturn( Boolean.TRUE );
     outputResourceFields = analyzer.getOutputResourceFields( meta );
-    assertEquals( 0, outputResourceFields.size() );
+
+    assertEquals( tableFields.length, outputResourceFields.size() );
+    for ( String tableField : tableFields ) {
+      assertTrue( outputResourceFields.contains( tableField ) );
+    }
+
+  }
+
+  @Test
+  public void testGetOutputResourceFields() throws Exception {
+    String[] tableFields = new String[3];
+    tableFields[0] = "field1";
+    tableFields[1] = "field2";
+    tableFields[2] = "field3";
+    when( meta.getFieldDatabase() ).thenReturn( tableFields );
+
+    RowMetaInterface rmi = Mockito.mock( RowMetaInterface.class );
+    String[] outputFields = new String[2];
+    outputFields[0] = "out-field1";
+    outputFields[1] = "out-field2";
+
+    // specify fields is false (default)
+    doReturn( rmi ).when( analyzer ).getOutputFields( meta );
+    when( rmi.getFieldNames() ).thenReturn( outputFields );
+
+    Set<String> outputResourceFields = analyzer.getOutputResourceFields( meta );
+
+    assertEquals( outputFields.length, outputResourceFields.size() );
+    for ( String outputField : outputFields ) {
+      assertTrue( outputResourceFields.contains( outputField ) );
+    }
+
+    // specify fields is true
+    when( meta.specifyFields() ).thenReturn( Boolean.TRUE );
+    outputResourceFields = analyzer.getOutputResourceFields( meta );
+
+    assertEquals( tableFields.length, outputResourceFields.size() );
+    for ( String tableField : tableFields ) {
+      assertTrue( outputResourceFields.contains( tableField ) );
+    }
   }
 
   @Test
   public void testGetChangeRecords() throws Exception {
-    String[] tableFields = new String[] { "field1", "field2" };
+    String[] tableFields = new String[] { "field2", "field3" };
     when( meta.getFieldDatabase() ).thenReturn( tableFields );
-
-    String[] streamFields = new String[] { "f1", "field2", "field3" };
+    String[] streamFields = new String[] { "field2", "field3" };
     when( meta.getFieldStream() ).thenReturn( streamFields );
 
     StepNodes inputs = new StepNodes();
     inputs.addNode( "prevStep", "f1", node );
     inputs.addNode( "prevStep", "field2", node );
     inputs.addNode( "prevStep", "field3", node );
-    inputs.addNode( ExternalResourceStepAnalyzer.RESOURCE, "field1", node );
     inputs.addNode( ExternalResourceStepAnalyzer.RESOURCE, "field2", node );
+    inputs.addNode( ExternalResourceStepAnalyzer.RESOURCE, "field3", node );
 
     doReturn( inputs ).when( analyzer ).getInputs();
 
+    // specify db fields box is NOT selected (by default), no changes are expected
     Set<ComponentDerivationRecord> changeRecords = analyzer.getChangeRecords( meta );
     assertNotNull( changeRecords );
-    assertEquals( tableFields.length, changeRecords.size() );
+    assertEquals( 0, changeRecords.size() );
 
-    for ( ComponentDerivationRecord changeRecord : changeRecords ) {
-      if ( "f1".equals( changeRecord.getOriginalEntityName() ) ) {
-        assertEquals( "field1", changeRecord.getChangedEntityName() );
-      } else if ( "field2".equals( changeRecord.getOriginalEntityName() ) ) {
-        assertEquals( "field2", changeRecord.getChangedEntityName() );
-      } else {
-        fail( "We encountered a change record that shouldn't be here - " + changeRecord.toString() );
-      }
-    }
+    // specify db fields box is selected, but no fields are renamed
+    when( meta.specifyFields() ).thenReturn( true );
+    changeRecords = analyzer.getChangeRecords( meta );
+    assertNotNull( changeRecords );
+    assertEquals( 0, changeRecords.size() );
 
+    // one of the fields is changing
+    tableFields = new String[] { "field2-new", "field3" };
+    when( meta.getFieldDatabase() ).thenReturn( tableFields );
+    changeRecords = analyzer.getChangeRecords( meta );
+    assertNotNull( changeRecords );
+    assertEquals( 1, changeRecords.size() );
+    ComponentDerivationRecord field2 = changeRecords.stream().filter( record -> record.getOriginalEntityName()
+      .equals( "field2" ) ).findFirst().orElse( null );
+    assertNotNull( field2 );
+    assertEquals( field2.getChangedEntityName(), "field2-new" );
+
+    // both fields are changing
+    tableFields = new String[] { "field2-new", "field3-new" };
+    when( meta.getFieldDatabase() ).thenReturn( tableFields );
+    changeRecords = analyzer.getChangeRecords( meta );
+    assertNotNull( changeRecords );
+    assertEquals( 2, changeRecords.size() );
+
+    field2 = changeRecords.stream().filter( record -> record.getOriginalEntityName().equals( "field2" ) )
+      .findFirst().orElse( null );
+    assertNotNull( field2 );
+    assertEquals( field2.getChangedEntityName(), "field2-new" );
+    ComponentDerivationRecord field3 = changeRecords.stream().filter( record -> record.getOriginalEntityName()
+      .equals( "field3" ) ).findFirst().orElse( null );
+    assertNotNull( field3 );
+    assertEquals( field3.getChangedEntityName(), "field3-new" );
+
+    // field is changing, but the specify db fields checkbox is NOT selected, therefore the change should be ignored
+    when( meta.specifyFields() ).thenReturn( false );
+    changeRecords = analyzer.getChangeRecords( meta );
+    assertNotNull( changeRecords );
+    assertEquals( 0, changeRecords.size() );
   }
 
   @Test
@@ -312,16 +367,39 @@ public class TableOutputStepAnalyzerTest {
     String[] tableFields = new String[] { "field1", "field2" };
     when( meta.getFieldDatabase() ).thenReturn( tableFields );
 
+    // fields are specified - use the values returned by getFieldDatabase()
+    when( meta.specifyFields() ).thenReturn( true );
     Map<String, RowMetaInterface> outputs = analyzer.getOutputRowMetaInterfaces( meta );
     assertNotNull( outputs );
 
     assertEquals( 2, outputs.size() );
     RowMetaInterface resourceRow = outputs.get( ExternalResourceStepAnalyzer.RESOURCE );
     assertNotNull( resourceRow );
+    assertEquals( 2, resourceRow.size() );
 
     for ( String tableField : tableFields ) {
       assertNotNull( resourceRow.searchValueMeta( tableField ) );
     }
     assertEquals( rmi, outputs.get( "nextStep1" ) );
+
+    // fields NOT specified - use the step output fields instead of the table fields specified in the DB colum table
+    when( meta.specifyFields() ).thenReturn( false );
+    RowMetaInterface rmi2 = Mockito.mock( RowMetaInterface.class );
+    String[] outputFields = new String[] { "foo" };
+    when( rmi2.getFieldNames() ).thenReturn( outputFields );
+    doReturn( rmi2 ).when( analyzer ).getOutputFields( meta );
+
+    outputs = analyzer.getOutputRowMetaInterfaces( meta );
+    assertNotNull( outputs );
+
+    assertEquals( 2, outputs.size() );
+    resourceRow = outputs.get( ExternalResourceStepAnalyzer.RESOURCE );
+    assertNotNull( resourceRow );
+    assertEquals( 1, resourceRow.size() );
+
+    for ( String outputField : outputFields ) {
+      assertNotNull( resourceRow.searchValueMeta( outputField ) );
+    }
+    assertEquals( rmi2, outputs.get( "nextStep1" ) );
   }
 }

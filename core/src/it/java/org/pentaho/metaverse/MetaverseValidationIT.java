@@ -22,19 +22,12 @@
 
 package org.pentaho.metaverse;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -67,9 +60,6 @@ import org.pentaho.di.trans.steps.transexecutor.TransExecutorMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.ChangeType;
-import org.pentaho.metaverse.api.IDocumentController;
-import org.pentaho.metaverse.api.IDocumentLocatorProvider;
-import org.pentaho.metaverse.api.IMetaverseReader;
 import org.pentaho.metaverse.api.model.IOperation;
 import org.pentaho.metaverse.api.model.Operation;
 import org.pentaho.metaverse.api.model.Operations;
@@ -96,7 +86,6 @@ import org.pentaho.metaverse.frames.MongoConnectionNode;
 import org.pentaho.metaverse.frames.MongoDbDatasourceNode;
 import org.pentaho.metaverse.frames.MongoDbInputStepNode;
 import org.pentaho.metaverse.frames.RestClientStepNode;
-import org.pentaho.metaverse.frames.RootNode;
 import org.pentaho.metaverse.frames.RowsToResultStepNode;
 import org.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import org.pentaho.metaverse.frames.SplitFieldsStepNode;
@@ -109,13 +98,7 @@ import org.pentaho.metaverse.frames.TextFileOutputStepNode;
 import org.pentaho.metaverse.frames.TransExecutorStepNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
-import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.pentaho.metaverse.locator.FileSystemLocator;
 import org.pentaho.metaverse.util.MetaverseUtil;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -132,58 +115,21 @@ import static org.junit.Assert.*;
 /**
  * User: RFellows Date: 8/20/14
  */
-public abstract class MetaverseValidationIT {
+public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
 
-  protected static final String ROOT_FOLDER = "src/it/resources/repo/validation";
-  protected static IMetaverseReader reader;
-  protected static Graph graph;
-  protected static FramedGraphFactory framedGraphFactory;
-  protected static FramedGraph framedGraph;
-  protected static RootNode root;
+  private static final String ROOT_FOLDER = "src/it/resources/repo/validation";
+  private static final String OUTPUT_FILE = "target/outputfiles/validationGraph.graphml";
 
   /**
    * Call in the child class's BeforeClass method.
    */
   public static void init() throws Exception {
-    IntegrationTestUtil.initializePentahoSystem( "src/it/resources/solution/system/pentahoObjects.spring.xml" );
-
-    // we only care about the demo folder
-    FileSystemLocator fileSystemLocator = PentahoSystem.get( FileSystemLocator.class );
-    IDocumentLocatorProvider provider = PentahoSystem.get( IDocumentLocatorProvider.class );
-    // remove the original locator so we can set the modified one back on it
-    provider.removeDocumentLocator( fileSystemLocator );
-    fileSystemLocator.setRootFolder( ROOT_FOLDER );
-    provider.addDocumentLocator( fileSystemLocator );
-
-    MetaverseUtil.setDocumentController( PentahoSystem.get( IDocumentController.class ) );
-
-    // build the graph using our updated locator/provider
-    graph = IntegrationTestUtil.buildMetaverseGraph( provider );
-    reader = PentahoSystem.get( IMetaverseReader.class );
-
-    framedGraphFactory = new FramedGraphFactory( new GremlinGroovyModule() );
-    framedGraph = framedGraphFactory.create( graph );
-    root = (RootNode) framedGraph.getVertex( "entity", RootNode.class );
-
-    File exportFile = new File( "target/outputfiles/validationGraph.graphml" );
-    FileUtils.writeStringToFile( exportFile, reader.exportToXml(), "UTF-8" );
+    BaseMetaverseValidationIT.init( ROOT_FOLDER, OUTPUT_FILE );
   }
 
   @AfterClass
   public static void cleanUp() throws Exception {
     IntegrationTestUtil.shutdownPentahoSystem();
-  }
-
-  @Before
-  public void setUp() throws Exception {
-
-  }
-
-  private String normalizeFilePath( final String tilePath ) {
-    if ( StringUtils.isBlank( tilePath ) ) {
-      return tilePath;
-    }
-    return tilePath.replace( "file://", "" ).replace( "/C:", "C:" ).replace( "\\", "/" );
   }
 
   @Test
@@ -214,9 +160,9 @@ public abstract class MetaverseValidationIT {
   @Test
   public void testEntity_FileSystemLocator() throws Exception {
     LocatorNode node =
-      (LocatorNode) framedGraph.getVertex( "{\"name\":\"FILE_SYSTEM_REPO\",\"type\":\"Locator\"}", LocatorNode.class );
+      (LocatorNode) framedGraph.getVertex( "{\"name\":\"" + REPO_ID + "\",\"type\":\"Locator\"}", LocatorNode.class );
     assertEquals( DictionaryConst.NODE_TYPE_LOCATOR, node.getType() );
-    assertEquals( "FILE_SYSTEM_REPO", node.getName() );
+    assertEquals( REPO_ID, node.getName() );
     assertNotNull( node.getDescription() );
     assertNotNull( node.getUrl() );
     assertNotNull( node.getLastScan() );
@@ -657,7 +603,8 @@ public abstract class MetaverseValidationIT {
     assertEquals( getIterableSize( inputs ) + meta.getFieldDatabase().length, getIterableSize( outputs ) );
 
     for ( StreamFieldNode input : inputs ) {
-      assertEquals( input.getName(), input.getFieldPopulatedByMe().getName() );
+      assertEquals( input.getName(), ( (FramedMetaverseNode) IteratorUtils.toList(
+        input.getNodesPopulatedByMe().iterator() ).get( 0 ) ).getName() );
     }
 
     DatasourceNode datasource = node.getDatasource( meta.getDatabaseMeta().getName() );
@@ -1632,16 +1579,6 @@ public abstract class MetaverseValidationIT {
     return baseStepMeta;
   }
 
-  protected int getIterableSize( Iterable<?> iterable ) {
-    int count = 0;
-    for ( Object o : iterable ) {
-      if ( o != null ) {
-        count++;
-      }
-    }
-    return count;
-  }
-
   private String convertNumericStatusToString( int transactionStatus ) {
     String status = null;
     switch ( transactionStatus ) {
@@ -1660,6 +1597,11 @@ public abstract class MetaverseValidationIT {
 
   private int getExpectedOutputFieldCount( BaseStepMeta meta ) throws KettleStepException {
     return meta.getParentStepMeta().getParentTransMeta().getStepFields( meta.getParentStepMeta() ).size();
+  }
+
+  @Override
+  protected boolean shouldCleanupInstance() {
+    return false;
   }
 
 }

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,8 +22,6 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
 
@@ -31,13 +29,16 @@ import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
  * User: RFellows Date: 9/4/14
  */
 public interface TransformationNode extends KettleNode {
-  @Adjacency( label = "contains", direction = Direction.OUT )
-  public Iterable<TransformationStepNode> getStepNodes();
+  @GremlinGroovy( "it.out('contains').hasNot('virtual', true)" )
+  Iterable<TransformationStepNode> getStepNodes();
+
+  @GremlinGroovy( "it.out('contains').has('virtual', true)" )
+  Iterable<TransformationStepNode> getVirtualStepNodes();
 
   @GremlinGroovy( "it.out('contains').has( 'name', T.eq, name )" )
-  public TransformationStepNode getStepNode( @GremlinParam( "name" ) String name );
+  TransformationStepNode getStepNode( @GremlinParam( "name" ) String name );
 
   @GremlinGroovy( "it.in('contains').has( 'type', T.eq, 'JobEntry' )" )
-  public Iterable<JobEntryNode> getJobEntriesThatExecuteMe();
+  Iterable<JobEntryNode> getJobEntriesThatExecuteMe();
 }
 
