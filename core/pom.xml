@@ -37,7 +37,9 @@
     <dependency.commons-cli.version>1.2</dependency.commons-cli.version>
     <dependency.org.springFramework.spring.version>2.5.6</dependency.org.springFramework.spring.version>
     <pentaho-mongodb-plugin.version>8.2.0.0-SNAPSHOT</pentaho-mongodb-plugin.version>
-    <platform.version>8.2.0.0-SNAPSHOT</platform.version>
+    <platform.version>${project.version}</platform.version>
+    <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
+    <!--<pdi.version>${project.version}</pdi.version>-->
   </properties>
   <dependencies>
     <dependency>
@@ -290,6 +292,20 @@
       <version>${dependency.org.powermock.version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
+    <!--
+    <dependency>
+      <groupId>org.pentaho.di.plugins</groupId>
+      <artifactId>meta-inject-plugin</artifactId>
+      <version>${pdi.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.pentaho.di.plugins</groupId>
+      <artifactId>pdi-core-plugins-impl</artifactId>
+      <version>${pdi.version}</version>
+      <scope>test</scope>
+    </dependency>-->
   </dependencies>
   <build>
     <plugins>

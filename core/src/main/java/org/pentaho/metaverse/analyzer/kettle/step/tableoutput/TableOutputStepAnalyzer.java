@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
@@ -124,9 +125,7 @@ public class TableOutputStepAnalyzer extends ConnectionExternalResourceStepAnaly
   @Override
   public Set<String> getOutputResourceFields( TableOutputMeta meta ) {
     String[] fieldArray = meta.getFieldDatabase();
-    // !meta.specifyFields() condition can be removed if necessary since it is some kind of overhead --Kaa
-    // Additional info: http://jira.pentaho.com/browse/PDI-14959
-    if ( ArrayUtils.isEmpty( fieldArray ) && !meta.specifyFields() ) {
+    if ( ArrayUtils.isEmpty( fieldArray ) || !meta.specifyFields() ) {
       fieldArray = getOutputFields( meta ).getFieldNames();
     }
     Set<String> fields = new LinkedHashSet<>( Arrays.asList( fieldArray ) );
@@ -136,15 +135,15 @@ public class TableOutputStepAnalyzer extends ConnectionExternalResourceStepAnaly
   @Override
   public Set<ComponentDerivationRecord> getChangeRecords( TableOutputMeta meta ) throws MetaverseAnalyzerException {
     Set<ComponentDerivationRecord> changes = new HashSet<>();
-    String[] tableFields = meta.getFieldDatabase();
-    String[] streamFields = meta.getFieldStream();
+    String[] tableFields = meta.specifyFields() ? meta.getFieldDatabase() : new String[]{};
+    String[] streamFields = meta.specifyFields() ? meta.getFieldStream() : new String[]{};
     if ( getInputs() != null ) {
       Set<String> stepNames = getInputs().getStepNames();
       for ( int i = 0; i < tableFields.length; i++ ) {
         String tableField = tableFields[ i ];
         String streamField = streamFields[ i ];
         for ( String stepName : stepNames ) {
-          if ( !RESOURCE.equals( stepName ) ) {
+          if ( !RESOURCE.equals( stepName ) && !StringUtils.equals( tableField,  streamField ) ) {
             StepField inputField = new StepField( stepName, streamField );
             StepField outField = new StepField( RESOURCE, tableField );
             ComponentDerivationRecord change = new ComponentDerivationRecord( inputField, outField );
