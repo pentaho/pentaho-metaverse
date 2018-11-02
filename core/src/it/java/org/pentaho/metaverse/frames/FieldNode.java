@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -32,29 +32,26 @@ import org.pentaho.dictionary.DictionaryConst;
  */
 public interface FieldNode extends Concept {
   @Property( DictionaryConst.PROPERTY_KETTLE_TYPE )
-  public String getKettleType();
+  String getKettleType();
 
   @Property( DictionaryConst.PROPERTY_OPERATIONS )
-  public String getOperations();
+  String getOperations();
 
   @Adjacency( label = "uses", direction = Direction.IN )
-  public Iterable<TransformationStepNode> getStepsThatUseMe();
+  Iterable<TransformationStepNode> getStepsThatUseMe();
 
   @Adjacency( label = "deletes", direction = Direction.IN )
-  public TransformationStepNode getStepThatDeletesMe();
+  TransformationStepNode getStepThatDeletesMe();
 
   @Adjacency( label = "creates", direction = Direction.IN )
-  public TransformationStepNode getStepThatCreatesMe();
+  TransformationStepNode getStepThatCreatesMe();
 
   @Adjacency( label = "outputs", direction = Direction.IN )
-  public TransformationStepNode getStepThatOutputsMe();
+  TransformationStepNode getStepThatOutputsMe();
 
   @Adjacency( label = "inputs", direction = Direction.OUT )
-  public TransformationStepNode getStepThatInputsMe();
-
-  @Adjacency( label = "populates", direction = Direction.OUT )
-  public FieldNode getFieldPopulatedByMe();
+  TransformationStepNode getStepThatInputsMe();
 
   @Adjacency( label = "populates", direction = Direction.IN )
-  public FieldNode getFieldPopulatesMe();
+  FieldNode getFieldPopulatesMe();
 }
