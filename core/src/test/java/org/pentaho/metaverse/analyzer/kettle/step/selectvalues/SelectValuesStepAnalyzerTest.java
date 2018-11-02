@@ -33,9 +33,11 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectMetadataChange;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 
 import java.util.HashMap;
@@ -48,7 +50,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
-public class SelectValuesStepAnalyzerTest {
+public class SelectValuesStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private static final String DEFAULT_STEP_NAME = "testStep";
 
@@ -281,4 +283,8 @@ public class SelectValuesStepAnalyzerTest {
     assertTrue( analyzer.isPassthrough( stepField ) );
   }
 
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new SelectValuesStepAnalyzer();
+  }
 }

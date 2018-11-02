@@ -38,6 +38,7 @@ import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import org.pentaho.metaverse.api.model.Operation;
 import org.pentaho.metaverse.messages.Messages;
@@ -315,5 +316,9 @@ public class SelectValuesStepAnalyzer extends StepAnalyzer<SelectValuesMeta> {
   }
   protected void setBaseStepMeta( SelectValuesMeta meta ) {
     this.baseStepMeta = meta;
+  }
+
+  @Override protected IClonableStepAnalyzer newInstance() {
+    return new SelectValuesStepAnalyzer();
   }
 }

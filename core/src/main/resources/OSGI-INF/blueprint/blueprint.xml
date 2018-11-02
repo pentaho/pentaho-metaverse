@@ -122,6 +122,12 @@
   <!-- END - Connection Analyzers -->
 
   <!-- Step Analyzers -->
+  <bean id="SimpleMappingAnalyzer"
+        class="org.pentaho.metaverse.analyzer.kettle.step.simplemapping.SimpleMappingAnalyzer" />
+
+  <bean id="MappingAnalyzer"
+        class="org.pentaho.metaverse.analyzer.kettle.step.mapping.MappingAnalyzer" />
+
   <bean id="TableOutputStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer">
     <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
@@ -220,6 +226,17 @@
     <property name="externalResourceConsumer" ref="httpPostERC"/>
   </bean>
 
+  <bean id="SingleThreaderStepAnalyzer"
+        class="org.pentaho.metaverse.analyzer.kettle.step.singlethreader.SingleThreaderStepAnalyzer"/>
+
+  <service id="simpleMappingAnalyzerService"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
+           ref="SimpleMappingAnalyzer"/>
+
+  <service id="mappingAnalyzerService"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
+           ref="MappingAnalyzer"/>
+
   <service id="tableOutputStepAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="TableOutputStepAnalyzer"/>
@@ -232,7 +249,7 @@
            ref="TextFileInputStepAnalyzer"/>
 
   <service id="selectValuesStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="SelectValuesStepAnalyzer"/>
 
   <service id="numberRangeStepAnalyzerService"
@@ -334,6 +351,10 @@
   <service id="tableInputStepAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="tableInputStepAnalyzer"/>
+
+  <service id="singleThreaderStepAnalyzerService"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
+           ref="SingleThreaderStepAnalyzer"/>
 
   <reference-list id="stepAnalyzerRefList"
                   interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"

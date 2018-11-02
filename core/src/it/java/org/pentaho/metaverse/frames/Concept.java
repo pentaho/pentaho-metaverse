@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,5 +29,5 @@ import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
  */
 public interface Concept extends FramedMetaverseNode {
   @GremlinGroovy( "it.in.has( 'type', T.eq, 'Entity' )" )
-  public FramedMetaverseNode getEntity();
+  FramedMetaverseNode getEntity();
 }
