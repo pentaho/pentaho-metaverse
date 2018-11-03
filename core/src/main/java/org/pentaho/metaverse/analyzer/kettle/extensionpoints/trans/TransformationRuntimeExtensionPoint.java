@@ -32,18 +32,17 @@ import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
+import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
-import org.pentaho.metaverse.api.AnalysisContext;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
-import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IExecutionData;
@@ -59,7 +58,6 @@ import org.pentaho.metaverse.messages.Messages;
 import org.pentaho.metaverse.util.MetaverseUtil;
 
 import java.io.IOException;
-import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
@@ -141,33 +139,13 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         .createNodeObject( clientName, clientName, DictionaryConst.NODE_TYPE_LOCATOR );
       builder.addNode( designNode );
 
-      final TransMeta transMeta = trans.getTransMeta();
-
-      String id = TransExtensionPointUtil.getFilename( transMeta );
-
-      IDocument metaverseDocument = builder.getMetaverseObjectFactory().createDocumentObject();
-
-      metaverseDocument.setNamespace( namespace );
-      metaverseDocument.setContent( transMeta );
-      metaverseDocument.setStringID( id );
-      metaverseDocument.setName( transMeta.getName() );
-      metaverseDocument.setExtension( transMeta.getDefaultExtension() );
-      metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "trans.ktr" ) );
-      metaverseDocument.setContext( new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
-      String normalizedPath;
-      try {
-        normalizedPath = KettleAnalyzerUtil.normalizeFilePath( id );
-      } catch ( MetaverseException e ) {
-        normalizedPath = id;
-      }
-      metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAME, trans.getName() );
-      metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, normalizedPath );
-      metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
-
-      Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
+      final String id = TransExtensionPointUtil.getFilename( trans.getTransMeta() );
+      final IDocument metaverseDocument = MetaverseUtil.buildDocument( builder, trans.getTransMeta(), id, namespace );
+      final Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
 
       // set the lineage task, so that we can wait for it to finish before proceeding to write out the graph
-      holder.setLineageTask( MetaverseCompletionService.getInstance().submit( analyzerRunner, id ) );
+      holder.setLineageTask( MetaverseCompletionService.getInstance().submit( analyzerRunner,
+        metaverseDocument.getStringID() ) );
     }
 
     // Save the lineage objects for later
@@ -349,14 +327,22 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       }
 
       try {
-        // Add the execution profile information to the lineage graph
-        addRuntimeLineageInfo( holder );
+        final Job parentJob = trans.getParentJob();
+        final Trans parentTrans = trans.getParentTrans();
 
-        if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
-          lineageWriter.outputLineageGraph( holder );
-          // lineage has been written - call the appropriate extension point
-          ExtensionPointHandler.callExtensionPoint(
-            trans.getLogChannel(), MetaverseExtensionPoint.TransLineageWriteEnd.id, trans );
+        // Create a lineage graph for this transformation only if it has no parent. Otherwise, the parent will incorporate
+        // the lineage information into its own graph
+        if ( parentJob == null && parentTrans == null ) {
+
+          // Add the execution profile information to the lineage graph
+          addRuntimeLineageInfo( holder );
+
+          if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+            lineageWriter.outputLineageGraph( holder );
+            // lineage has been written - call the appropriate extension point
+            ExtensionPointHandler.callExtensionPoint(
+              trans.getLogChannel(), MetaverseExtensionPoint.TransLineageWriteEnd.id, trans );
+          }
         }
       } catch ( IOException e ) {
         log.warn( Messages.getString( "ERROR.CouldNotWriteExecutionProfile", trans.getName(),

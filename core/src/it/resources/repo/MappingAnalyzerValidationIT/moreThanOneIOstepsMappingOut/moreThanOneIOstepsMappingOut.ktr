@@ -467,6 +467,11 @@
       <to>Write to log Checksum</to>
       <enabled>Y</enabled>
     </hop>
+    <hop>
+      <from>calc parity &amp; checksum</from>
+      <to>Write to log Dummy</to>
+      <enabled>Y</enabled>
+    </hop>
   </order>
   <step>
     <name>Generate Rows</name>
@@ -794,6 +799,38 @@
       <draw>Y</draw>
     </GUI>
   </step>
+  <step>
+    <name>Write to log Dummy</name>
+    <type>WriteToLog</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <loglevel>log_level_basic</loglevel>
+    <displayHeader>Y</displayHeader>
+    <limitRows>N</limitRows>
+    <limitRowsNumber>0</limitRowsNumber>
+    <logmessage/>
+    <fields>
+      </fields>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>512</xloc>
+      <yloc>390</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
   <step_error_handling>
   </step_error_handling>
   <slave-step-copy-partition-distribution>
@@ -805,6 +842,13 @@
       <attribute>
         <key>NamedCluster</key>
         <value>{"namespace":"NamedClusters","id":"NamedCluster","name":"NamedCluster","description":"A NamedCluster","metaStoreName":null}</value>
+      </attribute>
+    </group>
+    <group>
+      <name>explorerState</name>
+      <attribute>
+        <key>Write to log Dummy</key>
+        <value/>
       </attribute>
     </group>
     <group>

@@ -49,6 +49,9 @@ import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.pentaho.metaverse.api.model.BaseDatabaseResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

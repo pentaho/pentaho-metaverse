@@ -472,11 +472,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
     return addLink( link );
   }
 
-  /**
-   * @deprecated use {@link #addEdge(Vertex, String, Vertex)} instead
-   */
-  @Deprecated
-  protected void addLink( Vertex fromVertex, String label, Vertex toVertex ) {
+  public void addLink( Vertex fromVertex, String label, Vertex toVertex ) {
     addEdge( fromVertex, label, toVertex );
   }
 
