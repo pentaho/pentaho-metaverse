@@ -27,9 +27,12 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import flexjson.JSONDeserializer;
+import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.dictionary.DictionaryHelper;
+import org.pentaho.metaverse.api.AnalysisContext;
 import org.pentaho.metaverse.api.ChangeType;
 import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IDocument;
@@ -40,6 +43,7 @@ import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IOperation;
 import org.pentaho.metaverse.api.model.Operation;
 import org.pentaho.metaverse.api.model.Operations;
@@ -51,6 +55,7 @@ import org.pentaho.metaverse.messages.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -223,6 +228,50 @@ public class MetaverseUtil {
         }
       }
     };
+  }
+
+  /**
+   * Builds a {@link IDocument} given the provided details.
+   *
+   * @param builder   the {@link IMetaverseBuilder}
+   * @param meta      the {@link AbstractMeta} (trans or job)
+   * @param id        the meta id (filename)
+   * @param namespace the {@link INamespace}
+   * @return a new {@link IDocument}
+   */
+  public static IDocument buildDocument( final IMetaverseBuilder builder, final AbstractMeta meta,
+                                         final String id, final INamespace namespace ) {
+
+    if ( builder == null || builder.getMetaverseObjectFactory() == null ) {
+      log.warn( Messages.getString( "WARN.UnableToBuildDocument" ) );
+      return null;
+    }
+
+    final IDocument metaverseDocument = builder.getMetaverseObjectFactory().createDocumentObject();
+    if ( metaverseDocument == null ) {
+      log.warn( Messages.getString( "WARN.UnableToBuildDocument" ) );
+      return null;
+    }
+
+    metaverseDocument.setNamespace( namespace );
+    metaverseDocument.setContent( meta );
+    metaverseDocument.setStringID( id );
+    metaverseDocument.setName( meta.getName() );
+    metaverseDocument.setExtension( meta.getDefaultExtension() );
+    metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor(
+      meta instanceof TransMeta ? "trans.ktr" : "job.kjb" ) );
+    metaverseDocument.setContext( new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
+    String normalizedPath;
+    try {
+      normalizedPath = KettleAnalyzerUtil.normalizeFilePath( id );
+    } catch ( MetaverseException e ) {
+      normalizedPath = id;
+    }
+    metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAME, meta.getName() );
+    metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, normalizedPath );
+    metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
+
+    return metaverseDocument;
   }
 
   /**

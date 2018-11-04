@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle;
 
+import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.parameters.UnknownParamException;
@@ -103,18 +104,29 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
 
     // construct a dummy job based on our JobMeta so we get out VariableSpace set properly
     jobMeta.setFilename( document.getStringID() );
-    Job j = new Job( null, jobMeta );
-    j.setInternalKettleVariables( jobMeta );
 
     IComponentDescriptor documentDescriptor = new MetaverseComponentDescriptor( document.getStringID(),
       DictionaryConst.NODE_TYPE_JOB, new Namespace( descriptor.getLogicalId() ), descriptor.getContext() );
 
     // Create a metaverse node and start filling in details
-    IMetaverseNode node = metaverseObjectFactory.createNodeObject(
+    IMetaverseNode jobNode = metaverseObjectFactory.createNodeObject(
       document.getNamespace(),
       jobMeta.getName(),
       DictionaryConst.NODE_TYPE_JOB );
-    node.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
+    jobNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
+
+    return analyze( documentDescriptor, jobMeta, jobNode,
+      (String) document.getProperty( DictionaryConst.PROPERTY_PATH ) );
+  }
+
+  @Override
+  public synchronized IMetaverseNode analyze(
+    final IComponentDescriptor documentDescriptor, final AbstractMeta meta, final IMetaverseNode node,
+    final String documentPath ) throws MetaverseAnalyzerException {
+
+    final JobMeta jobMeta = (JobMeta) meta;
+    Job j = new Job( null, jobMeta );
+    j.setInternalKettleVariables( jobMeta );
 
     // pull out the standard fields
     String description = jobMeta.getDescription();
@@ -157,7 +169,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
       node.setProperty( DictionaryConst.PROPERTY_STATUS, status );
     }
 
-    node.setProperty( DictionaryConst.PROPERTY_PATH, document.getProperty( DictionaryConst.PROPERTY_PATH ) );
+    node.setProperty( DictionaryConst.PROPERTY_PATH, documentPath );
 
     // Process job parameters
     String[] parameters = jobMeta.listParameters();
@@ -189,7 +201,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
           JobEntryInterface jobEntryInterface = entry.getEntry();
 
           IComponentDescriptor entryDescriptor = new MetaverseComponentDescriptor( entry.getName(),
-            DictionaryConst.NODE_TYPE_JOB_ENTRY, node, descriptor.getContext() );
+            DictionaryConst.NODE_TYPE_JOB_ENTRY, node, documentDescriptor.getContext() );
 
           Set<IJobEntryAnalyzer> jobEntryAnalyzers = getJobEntryAnalyzers( jobEntryInterface );
           if ( jobEntryAnalyzers != null && !jobEntryAnalyzers.isEmpty() ) {
@@ -200,6 +212,9 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
               // change while the job is being analyzed
               if ( jobEntryAnalyzer instanceof IClonableJobEntryAnalyzer ) {
                 jobEntryAnalyzer = ( (IClonableJobEntryAnalyzer) jobEntryAnalyzer ).cloneAnalyzer();
+                ( (IClonableJobEntryAnalyzer) jobEntryAnalyzer ).setDocumentAnalyzer( this );
+                ( (IClonableJobEntryAnalyzer) jobEntryAnalyzer ).setDocumentDescriptor( documentDescriptor );
+                ( (IClonableJobEntryAnalyzer) jobEntryAnalyzer ).setDocumentPath( documentPath );
               } else {
                 log.debug( Messages.getString( "WARNING.CannotCloneAnalyzer" ), jobEntryAnalyzer );
               }

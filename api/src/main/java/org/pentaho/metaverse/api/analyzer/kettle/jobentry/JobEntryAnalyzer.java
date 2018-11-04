@@ -29,6 +29,7 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IConnectionAnalyzer;
 import org.pentaho.metaverse.api.IMetaverseNode;
@@ -50,6 +51,10 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
   IClonableJobEntryAnalyzer<IMetaverseNode, T> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger( JobEntryAnalyzer.class );
+
+  protected IClonableDocumentAnalyzer documentAnalyzer;
+  protected IComponentDescriptor documentDescriptor;
+  protected String documentPath;
 
   protected String[] prevJobNames = null;
 
@@ -246,5 +251,21 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
     }
     return false;
   }
+
+  @Override
+  public void setDocumentAnalyzer( final IClonableDocumentAnalyzer documentAnalyzer ) {
+    this.documentAnalyzer = documentAnalyzer;
+  }
+
+  @Override
+  public void setDocumentDescriptor( final IComponentDescriptor documentDescriptor ) {
+    this.documentDescriptor = documentDescriptor;
+  }
+
+  @Override
+  public void setDocumentPath( final String documentPath ) {
+    this.documentPath = documentPath;
+  }
+
 
 }

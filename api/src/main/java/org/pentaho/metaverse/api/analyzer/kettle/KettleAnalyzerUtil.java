@@ -41,6 +41,8 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,6 +53,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 public class KettleAnalyzerUtil {
+
+  private static final Logger log = LoggerFactory.getLogger( KettleAnalyzerUtil.class );
 
   /**
    * Utility method for normalizing file paths used in Metaverse Id generation. It will convert a valid path into a
@@ -73,6 +77,15 @@ public class KettleAnalyzerUtil {
     } catch ( Exception e ) {
       throw new MetaverseException( e );
     }
+  }
+
+  public static String normalizeFilePathSafely( String filePath ) {
+    try {
+      return normalizeFilePath( filePath );
+    } catch ( final MetaverseException e ) {
+      log.error( e.getMessage() );
+    }
+    return "";
   }
 
   public static Collection<IExternalResourceInfo> getResourcesFromMeta(
@@ -192,6 +205,11 @@ public class KettleAnalyzerUtil {
       case REPOSITORY_BY_REFERENCE:
         transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
         break;
+    }
+    try {
+      transPath = KettleAnalyzerUtil.normalizeFilePath( transPath );
+    } catch ( final MetaverseException e ) {
+      // ignore
     }
     return transPath;
   }

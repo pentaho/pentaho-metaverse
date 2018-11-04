@@ -23,6 +23,8 @@
 package org.pentaho.metaverse.api.analyzer.kettle.jobentry;
 
 import org.pentaho.di.job.entry.JobEntryInterface;
+import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
+import org.pentaho.metaverse.api.IComponentDescriptor;
 
 public interface IClonableJobEntryAnalyzer<S, T extends JobEntryInterface> extends IJobEntryAnalyzer<S, T> {
 
@@ -32,4 +34,26 @@ public interface IClonableJobEntryAnalyzer<S, T extends JobEntryInterface> exten
    * @return a clone of this {@link IClonableJobEntryAnalyzer}
    */
   IClonableJobEntryAnalyzer cloneAnalyzer();
+
+  /**
+   * Sets the {@link IClonableDocumentAnalyzer} associated with this analyzer.
+   *
+   * @param parentTransformationAnalyser the {@link IClonableDocumentAnalyzer} associated with this analyzer
+   */
+  void setDocumentAnalyzer( final IClonableDocumentAnalyzer parentTransformationAnalyser );
+
+  /**
+   * Sets the {@link IComponentDescriptor} associated with this analyzer.
+   *
+   * @param documentDescriptor the {@link IComponentDescriptor} associated with this analyzer
+   */
+  void setDocumentDescriptor( final IComponentDescriptor documentDescriptor );
+
+  /**
+   * Sets the full path of the document (transformation or job) containing the step associated with this analyzer.
+   *
+   * @param documentPath the full path of the document (transformation or job) containing the step associated with this
+   *                     analyzer
+   */
+  void setDocumentPath( final String documentPath );
 }
