@@ -36,6 +36,7 @@ import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.trans.Trans;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.ILineageWriter;
@@ -47,6 +48,7 @@ import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 import java.util.Collections;
 import java.util.List;
@@ -183,13 +185,30 @@ public class JobRuntimeExtensionPointTest {
     ext.jobFinished( job );
     verify( ext ).createLineGraph( job );
     verify( ext, never() ).createLineGraphAsync( job );
+    verify( lineageWriter, times( 1 ) ).outputLineageGraph( JobLineageHolderMap.getInstance().getLineageHolder( job ) );
 
     PowerMockito.verifyStatic();
+    // the job doesn't have a parent, extension point should be called
     ExtensionPointHandler.callExtensionPoint( Mockito.any( LogChannelInterface.class ),
       Mockito.eq( MetaverseExtensionPoint.JobLineageWriteEnd.id ), eq( job ) );
 
     // Restore original JobLineageHolderMap for use by others
     JobLineageHolderMap.setInstance( originalHolderMap );
+
+    // reset the lineageWriter mock, since we're going to be verifying calls on it again
+    Mockito.reset( lineageWriter );
+    // set a parent job and verify that "lineageWriter.outputLineageGraph" never gets called
+    job.setParentJob( new Job() );
+    ext.jobFinished( job );
+    verify( lineageWriter, never() ).outputLineageGraph( JobLineageHolderMap.getInstance().getLineageHolder( job ) );
+    Whitebox.setInternalState( job, "parentJob", (Object[]) null );
+
+    // reset the lineageWriter mock, since we're going to be verifying calls on it again
+    Mockito.reset( lineageWriter );
+    // set a parent trans and verify that "lineageWriter.outputLineageGraph" never gets called
+    job.setParentTrans( new Trans() );
+    ext.jobFinished( job );
+    verify( lineageWriter, never() ).outputLineageGraph( JobLineageHolderMap.getInstance().getLineageHolder( job ) );
   }
 
   @Test

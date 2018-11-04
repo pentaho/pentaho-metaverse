@@ -23,6 +23,9 @@
 package org.pentaho.metaverse.api.analyzer.kettle.step;
 
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
+import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 
 public interface IClonableStepAnalyzer<T extends BaseStepMeta> extends IStepAnalyzer<T> {
 
@@ -32,4 +35,36 @@ public interface IClonableStepAnalyzer<T extends BaseStepMeta> extends IStepAnal
    * @return a clone of this {@link IClonableStepAnalyzer}
    */
   IClonableStepAnalyzer cloneAnalyzer();
+
+  /**
+   * Sets the {@link IClonableDocumentAnalyzer} associated with this analyzer.
+   *
+   * @param parentTransformationAnalyser the {@link IClonableDocumentAnalyzer} associated with this analyzer
+   */
+  void setDocumentAnalyzer( final IClonableDocumentAnalyzer parentTransformationAnalyser );
+
+  /**
+   * Sets the {@link IComponentDescriptor} associated with this analyzer.
+   *
+   * @param documentDescriptor the {@link IComponentDescriptor} associated with this analyzer
+   */
+  void setDocumentDescriptor( final IComponentDescriptor documentDescriptor );
+
+  /**
+   * Sets the full path of the document (transformation or job) containing the step associated with this analyzer.
+   *
+   * @param documentPath the full path of the document (transformation or job) containing the step associated with this
+   *                     analyzer
+   */
+  void setDocumentPath( final String documentPath );
+
+  /**
+   * Executed AFTER all the analyzers have already been analyzed and appropriate links added, for any final analysis
+   * and graph manipulations. Note that any manipulations must be done on the Graph and its Vertices directly at this
+   * point.
+   * @param meta
+   * @throws MetaverseAnalyzerException
+   */
+  void postAnalyze( T meta ) throws MetaverseAnalyzerException;
+
 }

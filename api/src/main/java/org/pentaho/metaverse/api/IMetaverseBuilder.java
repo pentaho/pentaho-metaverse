@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,7 @@ package org.pentaho.metaverse.api;
 
 
 import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * The IMetaverseBuilder is a Builder that creates and maintains a metaverse model, which contains nodes and links.
@@ -56,6 +57,15 @@ public interface IMetaverseBuilder {
    * @return the i metaverse builder
    */
   IMetaverseBuilder addLink( IMetaverseNode fromNode, String label, IMetaverseNode toNode );
+
+  /**
+   * Adds a link between the two vertices to the builder.
+   *
+   * @param fromVertex the from {@link Vertex}
+   * @param label      the label
+   * @param toVertex   the to {@link Vertex}
+   */
+  void addLink( Vertex fromVertex, String label, Vertex toVertex );
 
   /**
    * Deletes the specified node from the metaverse model.
@@ -98,8 +108,8 @@ public interface IMetaverseBuilder {
   IMetaverseObjectFactory getMetaverseObjectFactory();
 
   /**
-   * Sets the metaverse object factory for this builder. Most classes that need a metaverse object
-   * factory will get it from their builder (if they have implemented IRequiresMetaverseBuilder
+   * Sets the metaverse object factory for this builder. Most classes that need a metaverse object factory will get it
+   * from their builder (if they have implemented IRequiresMetaverseBuilder
    *
    * @param metaverseObjectFactory the metaverse object factory to set
    */
@@ -107,12 +117,14 @@ public interface IMetaverseBuilder {
 
   /**
    * Returns the underlying graph associated with this builder
+   *
    * @return the backing Graph object
    */
   Graph getGraph();
 
   /**
    * Sets the underlying graph for this builder
+   *
    * @param graph the graph to set for this builder
    */
   void setGraph( Graph graph );

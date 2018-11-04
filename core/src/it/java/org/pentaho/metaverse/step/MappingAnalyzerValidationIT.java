@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.IteratorUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pentaho.metaverse.step.StepAnalyzerValidationIT;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
@@ -35,14 +34,183 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.pentaho.dictionary.DictionaryConst.*;
 
 @RunWith( PowerMockRunner.class )
 @PrepareForTest( MetaverseConfig.class )
 public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
+
+  private static final String VALUE = "value";
+  private static final String RANDOM_VALUE = "randomValue";
+  private static final String CHECKSUM = "checksum";
+  private static final String NEW_CHECKSUM = "newChecksum";
+  private static final String PARITY = "parity";
+  private static final String NEW_PARITY = "newParity";
+
+  @Test
+  public void testOneOIWithMappings() throws Exception {
+
+    final String transNodeName = "oneOIWithMappings";
+    initTest( transNodeName );
+
+    final TransformationNode transformationNode = verifyTransformationNode( transNodeName, false );
+    final TransformationNode subTransNode = verifyTransformationNode( "sub", true );
+
+    // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
+    // level nodes of expected types exist
+    assertEquals( "Unexpected number of nodes", 21, getIterableSize( framedGraph.getVertices() ) );
+    assertEquals( "Unexpected number of edges", 53, getIterableSize( framedGraph.getEdges() ) );
+    verifyNodesTypes( ImmutableMap.of(
+      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, "sub" } ),
+      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { RANDOM_VALUE, RANDOM_VALUE, VALUE, VALUE, VALUE, CHECKSUM,
+        CHECKSUM, NEW_CHECKSUM } ) ) );
+
+    // verify individual step nodes
+    final Map<String, FramedMetaverseNode> parentStepNodeMap = verifyTransformationSteps( transformationNode,
+      new String[] { "Generate random integer", "calc checksum", "Write to log Checksum" }, false );
+
+    final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
+      new String[] { "Input checksum", "calc checksum", "output checksum", }, false );
+
+    final TransformationStepNode generateRandomInt = (TransformationStepNode) parentStepNodeMap.get(
+      "Generate random integer" );
+    final TransformationStepNode calcChecksum = (TransformationStepNode) parentStepNodeMap.get(
+      "calc checksum" );
+    final TransformationStepNode writeToLogChecksum = (TransformationStepNode) parentStepNodeMap.get(
+      "Write to log Checksum" );
+
+    final TransformationStepNode calcChecksumSubTrans = (TransformationStepNode) subTransStepNodeMap.get(
+      "calc checksum" );
+
+    // virtual sub-trans nodes within the parent graph
+    final TransformationStepNode inputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "Input checksum" );
+    final TransformationStepNode outputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "output checksum" );
+
+    // ---------- Generate Random Int
+    verifyNodes( IteratorUtils.toList( generateRandomInt.getPreviousSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( generateRandomInt.getNextSteps().iterator() ), testLineageNode( calcChecksum ) );
+    verifyNodes( IteratorUtils.toList( generateRandomInt.getOutputStreamFields().iterator() ),
+      testFieldNode( RANDOM_VALUE, false ) );
+    assertEquals( 2, getIterableSize( generateRandomInt.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( generateRandomInt.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( generateRandomInt.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( generateRandomInt.getAllOutNodes() ) );
+
+    // ---------- calc checksum (Mapping step)
+    verifyNodes( IteratorUtils.toList( calcChecksum.getPreviousSteps().iterator() ),
+      testLineageNode( generateRandomInt ) );
+    verifyNodes( IteratorUtils.toList( calcChecksum.getNextSteps().iterator() ),
+      testLineageNode( writeToLogChecksum ) );
+    verifyNodes( IteratorUtils.toList( calcChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( RANDOM_VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( calcChecksum.getOutputStreamFields().iterator() ) );
+    assertEquals( 4, getIterableSize( calcChecksum.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( calcChecksum.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( calcChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( calcChecksum.getAllOutNodes() ) );
+    assertEquals( 1, getIterableSize( calcChecksum.getOutNodes( LINK_EXECUTES ) ) );
+
+    // verify properties
+    verifyNodeProperties( calcChecksum, new ImmutableMap.Builder<String, Object>()
+      .put( PROPERTY_STEP_TYPE, SKIP ).put( "color", SKIP ).put( PROPERTY_PLUGIN_ID, SKIP ).put( PROPERTY_TYPE, SKIP )
+      .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
+      .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
+      .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
+      .put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] update field names,input [1] rename [1],output [1],"
+        + "output [1] update field names,output [1] rename [1]" )
+      .put( "input [1]", "Generate random integer > [sub] Input checksum" )
+      .put( "input [1] update field names", "true" )
+      .put( "input [1] rename [1]", "randomValue > value" )
+      .put( "output [1]", "[sub] output checksum > Write to log Checksum" )
+      .put( "output [1] rename [1]", "checksum > newChecksum" )
+      .put( "output [1] update field names", "false" ).build() );
+
+    // ---------- Write to log Checksum
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getPreviousSteps().iterator() ),
+      testStepNode( calcChecksum.getName(), false ) );
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getNextSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getOutputStreamFields().iterator() ),
+      testFieldNode( NEW_CHECKSUM, false ), testFieldNode( RANDOM_VALUE, false ) );
+    verifyStepIOLinks( writeToLogChecksum,
+      testLineageLink( testFieldNode( CHECKSUM, false ), LINK_DERIVES, testFieldNode( NEW_CHECKSUM, false ) ),
+      testLineageLink( testFieldNode( VALUE, false ), LINK_DERIVES, testFieldNode( RANDOM_VALUE, false ) ) );
+    assertEquals( 5, getIterableSize( writeToLogChecksum.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( writeToLogChecksum.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( writeToLogChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( writeToLogChecksum.getAllOutNodes() ) );
+
+    // ---------- output checksum
+    verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ), testStepNode(
+      calcChecksumSubTrans.getName(), false ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    assertEquals( 5, getIterableSize( outputChecksum.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( outputChecksum.getAllOutNodes() ) );
+
+    // Verify the following link chains
+    // - chain 1: Generate Random Int > outputs > randomValue >  inputs > Input checksum > outputs > value > inputs >
+    //   calc checksum > outputs > value > inputs > output checksum > outputs > value > inputs
+    //   > Write to log Checksum > outputs > randomValue
+    // - chain 2: Generate Random Int > outputs > randomValue > derives > Input Checksum:value > derives
+    //   > calc checksum:value > derives > output checksum:value > derives > Write to log Checksum:randomValue
+    final FramedMetaverseNode generateRandomInt_output_randomValue =
+      verifyLinkedNode( generateRandomInt, LINK_OUTPUTS, RANDOM_VALUE );
+    final FramedMetaverseNode inputChecksum_output_value = verifyLinkedNode( inputChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode calcChecksum_output_value = verifyLinkedNode( calcChecksumSubTrans, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode outputChecksum_output_value = verifyLinkedNode( outputChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode writeToLogChecksum_output_randomValue =
+      verifyLinkedNode( writeToLogChecksum, LINK_OUTPUTS, RANDOM_VALUE );
+
+    assertEquals( inputChecksum,
+      verifyLinkedNode( generateRandomInt_output_randomValue, LINK_INPUTS, inputChecksum.getName() ) );
+    assertEquals( calcChecksumSubTrans,
+      verifyLinkedNode( inputChecksum_output_value, LINK_INPUTS, calcChecksum.getName() ) );
+    assertEquals( outputChecksum,
+      verifyLinkedNode( calcChecksum_output_value, LINK_INPUTS, outputChecksum.getName() ) );
+    assertEquals( writeToLogChecksum,
+      verifyLinkedNode( outputChecksum_output_value, LINK_INPUTS, writeToLogChecksum.getName() ) );
+
+    assertEquals( inputChecksum_output_value,
+      verifyLinkedNode( generateRandomInt_output_randomValue, LINK_DERIVES, VALUE ) );
+    assertEquals( calcChecksum_output_value, verifyLinkedNode( inputChecksum_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( outputChecksum_output_value, verifyLinkedNode( calcChecksum_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( writeToLogChecksum_output_randomValue,
+      verifyLinkedNode( outputChecksum_output_value, LINK_DERIVES, RANDOM_VALUE ) );
+
+    // Verify the following link chains
+    // - chain 1: calc checksum > outputs > checksum > inputs > output checksum > outputs > checksum > inputs
+    //   > Write to log Checksum > outputs > newChecksum
+    // - chain 2: calc checksum:checksum > derives > output checksum:checksum > derives > Write to log
+    //   Checksum:newChecksum
+    final FramedMetaverseNode calcChecksum_output_checksum =
+      verifyLinkedNode( calcChecksumSubTrans, LINK_OUTPUTS, CHECKSUM );
+    final FramedMetaverseNode outputChecksum_output_checksum =
+      verifyLinkedNode( outputChecksum, LINK_OUTPUTS, CHECKSUM );
+    final FramedMetaverseNode writeToLogChecksum_output_newChecksum =
+      verifyLinkedNode( writeToLogChecksum, LINK_OUTPUTS, NEW_CHECKSUM );
+
+    assertEquals( outputChecksum,
+      verifyLinkedNode( calcChecksum_output_checksum, LINK_INPUTS, outputChecksum.getName() ) );
+    assertEquals( writeToLogChecksum,
+      verifyLinkedNode( outputChecksum_output_checksum, LINK_INPUTS, writeToLogChecksum.getName() ) );
+
+    assertEquals( outputChecksum_output_checksum,
+      verifyLinkedNode( calcChecksum_output_checksum, LINK_DERIVES, CHECKSUM ) );
+    assertEquals( writeToLogChecksum_output_newChecksum, verifyLinkedNode( outputChecksum_output_checksum,
+      LINK_DERIVES, NEW_CHECKSUM ) );
+  }
 
   @Test
   public void testMoreThanOneIOstepsMappingOut() throws Exception {
@@ -51,27 +219,22 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     initTest( transNodeName );
 
     final TransformationNode transformationNode = verifyTransformationNode( transNodeName, false );
-    final TransformationNode mainSubTransNode = verifyTransformationNode( "sub", true );
-    final TransformationNode subTransNode = verifyTransformationNode( "sub", false );
+    final TransformationNode subTransNode = verifyTransformationNode( "sub", true );
 
     // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
     // level nodes of expected types exist
-    assertEquals( "Unexpected number of nodes", 54, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( "Unexpected number of edges", 147, getIterableSize( framedGraph.getEdges() ) );
+    assertEquals( "Unexpected number of nodes", 43, getIterableSize( framedGraph.getVertices() ) );
+    assertEquals( "Unexpected number of edges", 123, getIterableSize( framedGraph.getEdges() ) );
     verifyNodesTypes( ImmutableMap.of(
-      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, "sub", "sub" } ),
-      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "randomValue", "randomValue", "randomValue",
-        "randomValue", "randomValue", "randomValue", "value", "value", "value", "value", "value", "value", "value",
-        "value", "checksum", "checksum", "checksum", "newChecksum", "newChecksum", "newChecksum", "parity", "parity",
-        "parity", "newParity", "newParity", "newParity" } ) ) );
+      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, "sub" } ),
+      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { RANDOM_VALUE, RANDOM_VALUE, RANDOM_VALUE,
+        RANDOM_VALUE, RANDOM_VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, CHECKSUM, CHECKSUM,
+        NEW_CHECKSUM, NEW_CHECKSUM, PARITY, PARITY, NEW_PARITY, NEW_PARITY } ) ) );
 
     // verify individual step nodes
     final Map<String, FramedMetaverseNode> parentStepNodeMap = verifyTransformationSteps( transformationNode,
       new String[] { "Generate Rows", "Generate random integer", "calc parity & checksum", "Write to file Checksum",
-        "Write to log Checksum", "Write to file Parity", "Write to log Parity" }, false );
-
-    final Map<String, FramedMetaverseNode> parentVirtualStepNodeMap = verifyTransformationSteps( mainSubTransNode,
-      new String[] { "Input checksum", "Input parity", "output checksum", "output parity" }, true );
+        "Write to log Checksum", "Write to file Parity", "Write to log Parity", "Write to log Dummy" }, false );
 
     final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
       new String[] { "Input checksum", "Input parity", "output checksum", "output parity",
@@ -90,16 +253,15 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
       "Write to log Checksum" );
     final TransformationStepNode writeToLogParity = (TransformationStepNode) parentStepNodeMap.get(
       "Write to log Parity" );
+    final TransformationStepNode writeToLogDummy = (TransformationStepNode) parentStepNodeMap.get(
+      "Write to log Dummy" );
 
     // virtual sub-trans nodes within the parent graph
-    final TransformationStepNode inputChecksum = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "Input checksum" );
-    final TransformationStepNode outputChecksum = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "output checksum" );
-    final TransformationStepNode inputParity = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "Input parity" );
-    final TransformationStepNode outputParity = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "output parity" );
+    final TransformationStepNode inputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "Input checksum" );
+    final TransformationStepNode calcChecksum = (TransformationStepNode) subTransStepNodeMap.get( "calc checksum" );
+    final TransformationStepNode outputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "output checksum" );
+    final TransformationStepNode calcParity = (TransformationStepNode) subTransStepNodeMap.get( "calc parity" );
+    final TransformationStepNode outputParity = (TransformationStepNode) subTransStepNodeMap.get( "output parity" );
 
     // ---------- Generate Rows
     verifyNodes( IteratorUtils.toList( generateRows.getPreviousSteps().iterator() ) );
@@ -119,7 +281,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( generateRandomInt.getNextSteps().iterator() ),
       testLineageNode( calcParityAndChecksum ) );
     verifyNodes( IteratorUtils.toList( generateRandomInt.getOutputStreamFields().iterator() ),
-      testFieldNode( "randomValue", false ) );
+      testFieldNode( RANDOM_VALUE, false ) );
     assertEquals( 3, getIterableSize( generateRandomInt.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( generateRandomInt.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( generateRandomInt.getInNodes( LINK_TYPE_CONCEPT ) ) );
@@ -129,27 +291,28 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getPreviousSteps().iterator() ),
       testLineageNode( generateRandomInt ) );
     verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getNextSteps().iterator() ),
-      testLineageNode( writeToFileChecksum ), testLineageNode( writeToFileParity ) );
+      testLineageNode( writeToFileChecksum ), testLineageNode( writeToFileParity ),
+      testLineageNode( writeToLogDummy ) );
     verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getInputStreamFields().iterator() ),
-      testFieldNode( "randomValue", false ) );
-    verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getOutputStreamFields().iterator() ),
-      testFieldNode( "randomValue", true ), testFieldNode( "newChecksum", true ), testFieldNode(
-        "newParity", true ) );
+      testFieldNode( RANDOM_VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getOutputStreamFields().iterator() ) );
     assertEquals( 4, getIterableSize( calcParityAndChecksum.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( calcParityAndChecksum.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( calcParityAndChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 6, getIterableSize( calcParityAndChecksum.getAllOutNodes() ) );
+    assertEquals( 4, getIterableSize( calcParityAndChecksum.getAllOutNodes() ) );
     assertEquals( 1, getIterableSize( calcParityAndChecksum.getOutNodes( LINK_EXECUTES ) ) );
 
     // verify properties
     verifyNodeProperties( calcParityAndChecksum, new ImmutableMap.Builder<String, Object>()
-      .put( "stepType", SKIP ).put( "color", SKIP ).put( "pluginId", SKIP ).put( "type", SKIP ).put( "_analyzer", SKIP )
-      .put( "category", SKIP ).put( "copies", SKIP ).put( "logicalId", SKIP ).put( "name", SKIP )
-      .put( "namespace", SKIP ).put( "virtual", SKIP )
-      .put( "verboseDetails", "input [1],input [1] description,input [1] update field names,input [1] rename [1],"
-        + "input [2],input [2] description,input [2] update field names,input [2] rename [1],output [1],"
-        + "output [1] description,output [1] update field names,output [1] rename [1],output [2],"
-        + "output [2] description,output [2] update field names,output [2] rename [1]" )
+      .put( PROPERTY_STEP_TYPE, SKIP ).put( "color", SKIP ).put( PROPERTY_PLUGIN_ID, SKIP ).put( PROPERTY_TYPE, SKIP )
+      .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
+      .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
+      .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
+      .put( PROPERTY_VERBOSE_DETAILS,
+        "input [1],input [1] description,input [1] update field names,input [1] rename [1],"
+          + "input [2],input [2] description,input [2] update field names,input [2] rename [1],output [1],"
+          + "output [1] description,output [1] update field names,output [1] rename [1],output [2],"
+          + "output [2] description,output [2] update field names,output [2] rename [1]" )
       .put( "input [1]", "Generate random integer > [sub] Input checksum" )
       .put( "input [1] update field names", "true" )
       .put( "input [1] rename [1]", "randomValue > value" )
@@ -169,12 +332,12 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( writeToFileChecksum.getNextSteps().iterator() ),
       testLineageNode( writeToLogChecksum ) );
     verifyNodes( IteratorUtils.toList( writeToFileChecksum.getInputStreamFields().iterator() ),
-      testFieldNode( "newChecksum", true ), testFieldNode( "randomValue", true ) );
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
     verifyNodes( IteratorUtils.toList( writeToFileChecksum.getOutputStreamFields().iterator() ),
-      testFieldNode( "newChecksum", false ), testFieldNode( "randomValue", false ) );
+      testFieldNode( NEW_CHECKSUM, false ), testFieldNode( RANDOM_VALUE, false ) );
     verifyStepIOLinks( writeToFileChecksum,
-      testLineageLink( testFieldNode( "newChecksum", true ), LINK_DERIVES, testFieldNode( "newChecksum", false ) ),
-      testLineageLink( testFieldNode( "randomValue", true ), LINK_DERIVES, testFieldNode( "randomValue", false ) ) );
+      testLineageLink( testFieldNode( CHECKSUM, false ), LINK_DERIVES, testFieldNode( NEW_CHECKSUM, false ) ),
+      testLineageLink( testFieldNode( VALUE, false ), LINK_DERIVES, testFieldNode( RANDOM_VALUE, false ) ) );
     assertEquals( 5, getIterableSize( writeToFileChecksum.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( writeToFileChecksum.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( writeToFileChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
@@ -187,12 +350,12 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( writeToFileParity.getNextSteps().iterator() ),
       testLineageNode( writeToLogParity ) );
     verifyNodes( IteratorUtils.toList( writeToFileParity.getInputStreamFields().iterator() ),
-      testFieldNode( "newParity", true ), testFieldNode( "randomValue", true ) );
+      testFieldNode( PARITY, false ), testFieldNode( VALUE, false ) );
     verifyNodes( IteratorUtils.toList( writeToFileParity.getOutputStreamFields().iterator() ),
-      testFieldNode( "newParity", false ), testFieldNode( "randomValue", false ) );
+      testFieldNode( NEW_PARITY, false ), testFieldNode( RANDOM_VALUE, false ) );
     verifyStepIOLinks( writeToFileParity,
-      testLineageLink( testFieldNode( "newParity", true ), LINK_DERIVES, testFieldNode( "newParity", false ) ),
-      testLineageLink( testFieldNode( "randomValue", true ), LINK_DERIVES, testFieldNode( "randomValue", false ) ) );
+      testLineageLink( testFieldNode( PARITY, false ), LINK_DERIVES, testFieldNode( NEW_PARITY, false ) ),
+      testLineageLink( testFieldNode( VALUE, false ), LINK_DERIVES, testFieldNode( RANDOM_VALUE, false ) ) );
     assertEquals( 5, getIterableSize( writeToFileParity.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( writeToFileParity.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( writeToFileParity.getInNodes( LINK_TYPE_CONCEPT ) ) );
@@ -200,256 +363,86 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     assertEquals( 1, getIterableSize( writeToFileParity.getOutNodes( LINK_WRITESTO ) ) );
 
     // ---------- output checksum
-    verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ),
+      testStepNode( calcChecksum.getName(), false ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ),
-      testFieldNode( "checksum", true ) );
-    assertEquals( 2, getIterableSize( outputChecksum.getAllInNodes() ) );
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    assertEquals( 5, getIterableSize( outputChecksum.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 1, getIterableSize( outputChecksum.getAllOutNodes() ) );
+    assertEquals( 2, getIterableSize( outputChecksum.getAllOutNodes() ) );
 
     // ---------- output parity
-    verifyNodes( IteratorUtils.toList( outputParity.getPreviousSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( outputParity.getPreviousSteps().iterator() ),
+      testStepNode( calcParity.getName(), false ) );
     verifyNodes( IteratorUtils.toList( outputParity.getNextSteps().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputParity.getInputStreamFields().iterator() ) );
+    verifyNodes( IteratorUtils.toList( outputParity.getInputStreamFields().iterator() ),
+      testFieldNode( PARITY, false ), testFieldNode( VALUE, false ) );
     verifyNodes( IteratorUtils.toList( outputParity.getOutputStreamFields().iterator() ),
-      testFieldNode( "parity", true ) );
-    assertEquals( 2, getIterableSize( outputParity.getAllInNodes() ) );
+      testFieldNode( PARITY, false ), testFieldNode( VALUE, false ) );
+    assertEquals( 5, getIterableSize( outputParity.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( outputParity.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( outputParity.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 1, getIterableSize( outputParity.getAllOutNodes() ) );
+    assertEquals( 2, getIterableSize( outputParity.getAllOutNodes() ) );
 
-    // Verify the following chain of links
-    // chain 1: Generate Random Int > outputs > randomValue >  inputs > Input checksum > outputs > value > derives >
-    // calc checksum & parity:randomValue
-    // chain 2: Generate Random Int > outputs > randomValue >  derives > Input checksum:value
-    final FramedMetaverseNode generateRandomIntOutRandomValue =
-      verifyLinkedNode( generateRandomInt, LINK_OUTPUTS, "randomValue" );
+    // Verify the following link chains
+    // - chain 1: Generate Random Int > outputs > randomValue >  inputs > Input checksum > outputs > value > inputs >
+    //   calc checksum > outputs > value > inputs > output checksum > outputs > value > inputs
+    //   > Write to file Checksum > outputs > randomValue
+    // - chain 2: Generate Random Int:randomValue > derives > Input Checksum:value > derives > calc checksum:value >
+    //   derives > output checksum:value > derives > Write to log Checksum:randomValue
+    final FramedMetaverseNode generateRandomInt_output_randomValue =
+      verifyLinkedNode( generateRandomInt, LINK_OUTPUTS, RANDOM_VALUE );
+    final FramedMetaverseNode inputChecksum_output_value = verifyLinkedNode( inputChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode calcChecksum_output_value = verifyLinkedNode( calcChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode outputChecksum_output_value = verifyLinkedNode( outputChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode writeToFileChecksum_output_randomValue =
+      verifyLinkedNode( writeToFileChecksum, LINK_OUTPUTS, RANDOM_VALUE );
+
     assertEquals( inputChecksum,
-      verifyLinkedNode( generateRandomIntOutRandomValue, LINK_INPUTS, inputChecksum.getName() ) );
-    final FramedMetaverseNode inputChecksumOutValue =
-      verifyLinkedNode( generateRandomIntOutRandomValue, LINK_DERIVES, "value" );
-    final FramedMetaverseNode calcChecksumAndParityOutRandomValue =
-      verifyLinkedNode( calcParityAndChecksum, LINK_OUTPUTS, "randomValue" );
-    assertEquals( calcChecksumAndParityOutRandomValue, verifyLinkedNode(
-      inputChecksumOutValue, LINK_DERIVES, "randomValue" ) );
+      verifyLinkedNode( generateRandomInt_output_randomValue, LINK_INPUTS, inputChecksum.getName() ) );
+    assertEquals( calcChecksum,
+      verifyLinkedNode( inputChecksum_output_value, LINK_INPUTS, calcChecksum.getName() ) );
+    assertEquals( outputChecksum,
+      verifyLinkedNode( calcChecksum_output_value, LINK_INPUTS, outputChecksum.getName() ) );
+    assertEquals( writeToFileChecksum,
+      verifyLinkedNode( outputChecksum_output_value, LINK_INPUTS, writeToFileChecksum.getName() ) );
+    // there are more than one value nodes derived from generateRandomInt_output_randomValue - make sure one if them
+    // is the inputChecksum_output_value node
+    final List<FramedMetaverseNode> derivedValueNodes =
+      verifyLinkedNodes( generateRandomInt_output_randomValue, LINK_DERIVES, VALUE );
+    assertTrue( derivedValueNodes.contains( inputChecksum_output_value ) );
 
-    // Verify the following chain of links
-    // chain 1: Generate Random Int > outputs > randomValue >  inputs > Input parity > outputs > value > derives >
-    // calc checksum & parity:randomValue
-    // chain 2: Generate Random Int > outputs > randomValue >  derives > Input parity:value
-    assertEquals( inputParity,
-      verifyLinkedNode( generateRandomIntOutRandomValue, LINK_INPUTS, inputParity.getName() ) );
-    final FramedMetaverseNode inputParityOutValue =
-      verifyLinkedNode( generateRandomIntOutRandomValue, LINK_DERIVES, "value" );
-    assertEquals( calcChecksumAndParityOutRandomValue, verifyLinkedNode(
-      inputParityOutValue, LINK_DERIVES, "randomValue" ) );
+    assertEquals( inputChecksum_output_value,
+      verifyLinkedNode( generateRandomInt_output_randomValue, LINK_DERIVES, VALUE ) );
+    assertEquals( calcChecksum_output_value,
+      verifyLinkedNode( inputChecksum_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( outputChecksum_output_value,
+      verifyLinkedNode( calcChecksum_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( writeToFileChecksum_output_randomValue,
+      verifyLinkedNode( outputChecksum_output_value, LINK_DERIVES, RANDOM_VALUE ) );
 
-    // Verify the following chain of links
-    // chain 1 : [sub] output checksum > outputs > checksum > derives > calc parity & checksum:newChecksum > inputs >
-    // Write to file Checksum
-    // chain 1 : [sub] output checksum > outputs > checksum > derives > calc parity & checksum:newChecksum > derives >
-    // Write to file Checksum:newChecksum
-    final FramedMetaverseNode outputChecksumOutChecksum =
-      verifyLinkedNode( outputChecksum, LINK_OUTPUTS, "checksum" );
-    final FramedMetaverseNode calcChecksumAndParityOutNewChecksum =
-      verifyLinkedNode( calcParityAndChecksum, LINK_OUTPUTS, "newChecksum" );
-    assertEquals( calcChecksumAndParityOutNewChecksum, verifyLinkedNode( outputChecksumOutChecksum, LINK_DERIVES,
-      "newChecksum" ) );
-    assertEquals( writeToFileChecksum, verifyLinkedNode( calcChecksumAndParityOutNewChecksum,
-      LINK_INPUTS, writeToFileChecksum.getName() ) );
-    final FramedMetaverseNode writeToFileChecksumOutNewChecksum =
-      verifyLinkedNode( writeToFileChecksum, LINK_OUTPUTS, "newChecksum" );
-    assertEquals( writeToFileChecksumOutNewChecksum, verifyLinkedNode( calcChecksumAndParityOutNewChecksum,
-      LINK_DERIVES, "newChecksum" ) );
+    // Verify the following link chains
+    // - chain 1: calc parity > outputs parity > inputs > output parity > outputs > parity > inputs > Write to file
+    //   Parity > outputs > newParity
+    // - chain 2: calc parity:parity > derives > output parity:parity > derives > Write to file Checksum:parity
+    final FramedMetaverseNode calcParity_output_parity = verifyLinkedNode( calcParity, LINK_OUTPUTS, PARITY );
+    final FramedMetaverseNode outputParity_output_parity = verifyLinkedNode( outputParity, LINK_OUTPUTS, PARITY );
+    final FramedMetaverseNode writeToFileParity_output_newParity =
+      verifyLinkedNode( writeToFileParity, LINK_OUTPUTS, NEW_PARITY );
 
-    // Verify the following chain of links
-    // chain 1 : [sub] output parity > outputs > parity > derives > calc parity & checksum:newChecksum > inputs >
-    // Write to file Parity
-    // chain 1 : [sub] output parity > outputs > parity > derives > calc parity & checksum:newChecksum > derives >
-    // Write to file Parity:newParity
-    final FramedMetaverseNode outputParityOutParity =
-      verifyLinkedNode( outputParity, LINK_OUTPUTS, "parity" );
-    final FramedMetaverseNode calcChecksumAndParityOutNewParity =
-      verifyLinkedNode( calcParityAndChecksum, LINK_OUTPUTS, "newParity" );
-    assertEquals( calcChecksumAndParityOutNewParity, verifyLinkedNode( outputParityOutParity, LINK_DERIVES,
-      "newParity" ) );
-    assertEquals( writeToFileParity, verifyLinkedNode( calcChecksumAndParityOutNewParity,
-      LINK_INPUTS, writeToFileParity.getName() ) );
-    final FramedMetaverseNode writeToFileChecksumOutNewParity =
-      verifyLinkedNode( writeToFileParity, LINK_OUTPUTS, "newParity" );
-    assertEquals( writeToFileChecksumOutNewParity, verifyLinkedNode( calcChecksumAndParityOutNewParity,
-      LINK_DERIVES, "newParity" ) );
-  }
+    assertEquals( outputParity,
+      verifyLinkedNode( calcParity_output_parity, LINK_INPUTS, outputParity.getName() ) );
+    assertEquals( writeToFileParity,
+      verifyLinkedNode( outputParity_output_parity, LINK_INPUTS, writeToFileParity.getName() ) );
 
-  @Test
-  public void testMoreThanOneIOsteps() throws Exception {
-
-    final String transNodeName = "moreThanOneIOsteps";
-    initTest( transNodeName );
-
-    final TransformationNode transformationNode = verifyTransformationNode( transNodeName, false );
-    final TransformationNode mainSubTransNode = verifyTransformationNode( "sub", true );
-    final TransformationNode subTransNode = verifyTransformationNode( "sub", false );
-
-    // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
-    // level nodes of expected types exist
-    assertEquals( "Unexpected number of nodes", 52, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( "Unexpected number of edges", 139, getIterableSize( framedGraph.getEdges() ) );
-    verifyNodesTypes( ImmutableMap.of(
-      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, "sub", "sub" } ),
-      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "randomValue", "randomValue", "randomValue",
-        "randomValue", "randomValue", "randomValue", "value", "value", "value", "value", "value", "value", "value",
-        "value", "checksum", "checksum", "checksum", "checksum", "checksum", "parity", "parity",
-        "parity", "parity", "parity" } ) ) );
-
-    // verify individual step nodes
-    final Map<String, FramedMetaverseNode> parentStepNodeMap = verifyTransformationSteps( transformationNode,
-      new String[] { "Generate Rows", "Generate random integer", "calc parity & checksum", "Write to file Checksum",
-        "Write to log Checksum", "Write to file Parity", "Write to log Parity" }, false );
-
-    final Map<String, FramedMetaverseNode> parentVirtualStepNodeMap = verifyTransformationSteps( mainSubTransNode,
-      new String[] { "Input checksum", "Input parity", "output checksum", "output parity" }, true );
-
-    final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
-      new String[] { "Input checksum", "Input parity", "output checksum", "output parity",
-        "calc parity", "calc checksum" }, false );
-
-    final TransformationStepNode generateRows = (TransformationStepNode) parentStepNodeMap.get( "Generate Rows" );
-    final TransformationStepNode generateRandomInt = (TransformationStepNode) parentStepNodeMap.get(
-      "Generate random integer" );
-    final TransformationStepNode calcParityAndChecksum = (TransformationStepNode) parentStepNodeMap.get(
-      "calc parity & checksum" );
-    final TransformationStepNode writeToFileChecksum = (TransformationStepNode) parentStepNodeMap.get(
-      "Write to file Checksum" );
-    final TransformationStepNode writeToFileParity = (TransformationStepNode) parentStepNodeMap.get(
-      "Write to file Parity" );
-    final TransformationStepNode writeToLogChecksum = (TransformationStepNode) parentStepNodeMap.get(
-      "Write to log Checksum" );
-    final TransformationStepNode writeToLogParity = (TransformationStepNode) parentStepNodeMap.get(
-      "Write to log Parity" );
-
-    // virtual sub-trans nodes within the parent graph
-    final TransformationStepNode inputChecksum = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "Input checksum" );
-    final TransformationStepNode outputChecksum = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "output checksum" );
-    final TransformationStepNode inputParity = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "Input parity" );
-    final TransformationStepNode outputParity = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "output parity" );
-
-    // ---------- Generate Rows
-    verifyNodes( IteratorUtils.toList( generateRows.getPreviousSteps().iterator() ) );
-    verifyNodes( IteratorUtils.toList( generateRows.getNextSteps().iterator() ),
-      testStepNode( generateRandomInt.getName(), false ) );
-    verifyNodes( IteratorUtils.toList( generateRows.getInputStreamFields().iterator() ) );
-    verifyNodes( IteratorUtils.toList( generateRows.getOutputStreamFields().iterator() ) );
-    assertEquals( 2, getIterableSize( generateRows.getAllInNodes() ) );
-    assertEquals( 1, getIterableSize( generateRows.getInNodes( LINK_CONTAINS ) ) );
-    assertEquals( 1, getIterableSize( generateRows.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 1, getIterableSize( generateRows.getAllOutNodes() ) );
-    assertEquals( 1, getIterableSize( generateRows.getOutNodes( LINK_HOPSTO ) ) );
-
-    // ---------- Generate Random Int
-    verifyNodes( IteratorUtils.toList( generateRandomInt.getPreviousSteps().iterator() ),
-      testLineageNode( generateRows ) );
-    verifyNodes( IteratorUtils.toList( generateRandomInt.getNextSteps().iterator() ),
-      testLineageNode( calcParityAndChecksum ) );
-    verifyNodes( IteratorUtils.toList( generateRandomInt.getOutputStreamFields().iterator() ),
-      testFieldNode( "randomValue", false ) );
-    assertEquals( 3, getIterableSize( generateRandomInt.getAllInNodes() ) );
-    assertEquals( 1, getIterableSize( generateRandomInt.getInNodes( LINK_CONTAINS ) ) );
-    assertEquals( 1, getIterableSize( generateRandomInt.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 2, getIterableSize( generateRandomInt.getAllOutNodes() ) );
-
-    // ---------- calc parity & checksum
-    verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getPreviousSteps().iterator() ),
-      testLineageNode( generateRandomInt ) );
-    verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getNextSteps().iterator() ),
-      testLineageNode( writeToFileChecksum ), testLineageNode( writeToFileParity ) );
-    verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getInputStreamFields().iterator() ),
-      testFieldNode( "randomValue", false ) );
-    verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getOutputStreamFields().iterator() ),
-      testFieldNode( "randomValue", true ) );
-    assertEquals( 4, getIterableSize( calcParityAndChecksum.getAllInNodes() ) );
-    assertEquals( 1, getIterableSize( calcParityAndChecksum.getInNodes( LINK_CONTAINS ) ) );
-    assertEquals( 1, getIterableSize( calcParityAndChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 4, getIterableSize( calcParityAndChecksum.getAllOutNodes() ) );
-    assertEquals( 1, getIterableSize( calcParityAndChecksum.getOutNodes( LINK_EXECUTES ) ) );
-
-    // ---------- Write to file Checksum
-    verifyNodes( IteratorUtils.toList( writeToFileChecksum.getPreviousSteps().iterator() ),
-      testLineageNode( calcParityAndChecksum ) );
-    verifyNodes( IteratorUtils.toList( writeToFileChecksum.getNextSteps().iterator() ),
-      testLineageNode( writeToLogChecksum ) );
-    verifyNodes( IteratorUtils.toList( writeToFileChecksum.getInputStreamFields().iterator() ),
-      testFieldNode( "checksum", true ), testFieldNode( "randomValue", true ) );
-    verifyNodes( IteratorUtils.toList( writeToFileChecksum.getOutputStreamFields().iterator() ),
-      testFieldNode( "checksum", false ), testFieldNode( "randomValue", false ) );
-    verifyStepIOLinks( writeToFileChecksum,
-      testLineageLink( testFieldNode( "checksum", true ), LINK_DERIVES, testFieldNode( "checksum", false ) ),
-      testLineageLink( testFieldNode( "randomValue", true ), LINK_DERIVES, testFieldNode( "randomValue", false ) ) );
-    assertEquals( 5, getIterableSize( writeToFileChecksum.getAllInNodes() ) );
-    assertEquals( 1, getIterableSize( writeToFileChecksum.getInNodes( LINK_CONTAINS ) ) );
-    assertEquals( 1, getIterableSize( writeToFileChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 4, getIterableSize( writeToFileChecksum.getAllOutNodes() ) );
-    assertEquals( 1, getIterableSize( writeToFileChecksum.getOutNodes( LINK_WRITESTO ) ) );
-
-    // ---------- Write to file Parity
-    verifyNodes( IteratorUtils.toList( writeToFileParity.getPreviousSteps().iterator() ),
-      testLineageNode( calcParityAndChecksum ) );
-    verifyNodes( IteratorUtils.toList( writeToFileParity.getNextSteps().iterator() ),
-      testLineageNode( writeToLogParity ) );
-    verifyNodes( IteratorUtils.toList( writeToFileParity.getInputStreamFields().iterator() ),
-      testFieldNode( "parity", true ), testFieldNode( "randomValue", true ) );
-    verifyNodes( IteratorUtils.toList( writeToFileParity.getOutputStreamFields().iterator() ),
-      testFieldNode( "parity", false ), testFieldNode( "randomValue", false ) );
-    verifyStepIOLinks( writeToFileParity,
-      testLineageLink( testFieldNode( "parity", true ), LINK_DERIVES, testFieldNode( "parity", false ) ),
-      testLineageLink( testFieldNode( "randomValue", true ), LINK_DERIVES, testFieldNode( "randomValue", false ) ) );
-    assertEquals( 5, getIterableSize( writeToFileParity.getAllInNodes() ) );
-    assertEquals( 1, getIterableSize( writeToFileParity.getInNodes( LINK_CONTAINS ) ) );
-    assertEquals( 1, getIterableSize( writeToFileParity.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 4, getIterableSize( writeToFileParity.getAllOutNodes() ) );
-    assertEquals( 1, getIterableSize( writeToFileParity.getOutNodes( LINK_WRITESTO ) ) );
-
-    // ---------- output checksum
-    verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ) );
-    assertEquals( 2, getIterableSize( outputChecksum.getAllInNodes() ) );
-    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_CONTAINS ) ) );
-    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 0, getIterableSize( outputChecksum.getAllOutNodes() ) );
-
-    // ---------- output parity
-    verifyNodes( IteratorUtils.toList( outputParity.getPreviousSteps().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputParity.getNextSteps().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputParity.getInputStreamFields().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputParity.getOutputStreamFields().iterator() ) );
-    assertEquals( 2, getIterableSize( outputChecksum.getAllInNodes() ) );
-    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_CONTAINS ) ) );
-    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 0, getIterableSize( outputChecksum.getAllOutNodes() ) );
-
-    // Verify the following chain of links
-    // chain 1: Generate Random Int > outputs > randomValue >  inputs > Input checksum > outputs > value > derives >
-    // calc checksum & parity:randomValue
-    // chain 2: Generate Random Int > outputs > randomValue >  derives > Input checksum:value
-    final FramedMetaverseNode generateRandomIntOutRandomValue =
-      verifyLinkedNode( generateRandomInt, LINK_OUTPUTS, "randomValue" );
-    assertEquals( inputChecksum,
-      verifyLinkedNode( generateRandomIntOutRandomValue, LINK_INPUTS, inputChecksum.getName() ) );
-    final FramedMetaverseNode inputChecksumOutValue =
-      verifyLinkedNode( generateRandomIntOutRandomValue, LINK_DERIVES, "value" );
-    final FramedMetaverseNode calcChecksumAndParityOutRandomValue =
-      verifyLinkedNode( calcParityAndChecksum, LINK_OUTPUTS, "randomValue" );
-    assertEquals( calcChecksumAndParityOutRandomValue, verifyLinkedNode(
-      inputChecksumOutValue, LINK_DERIVES, "randomValue" ) );
+    assertEquals( outputParity_output_parity,
+      verifyLinkedNode( calcParity_output_parity, LINK_DERIVES, PARITY ) );
+    assertEquals( writeToFileParity_output_newParity,
+      verifyLinkedNode( outputParity_output_parity, LINK_DERIVES, NEW_PARITY ) );
   }
 
   @Test
@@ -459,27 +452,22 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     initTest( transNodeName );
 
     final TransformationNode transformationNode = verifyTransformationNode( transNodeName, false );
-    final TransformationNode mainSubTransNode = verifyTransformationNode( "sub", true );
-    final TransformationNode subTransNode = verifyTransformationNode( "sub", false );
+    final TransformationNode subTransNode = verifyTransformationNode( "sub", true );
 
     // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
     // level nodes of expected types exist
-    assertEquals( "Unexpected number of nodes", 52, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( "Unexpected number of edges", 139, getIterableSize( framedGraph.getEdges() ) );
+    assertEquals( "Unexpected number of nodes", 42, getIterableSize( framedGraph.getVertices() ) );
+    assertEquals( "Unexpected number of edges", 120, getIterableSize( framedGraph.getEdges() ) );
     verifyNodesTypes( ImmutableMap.of(
-      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, "sub", "sub" } ),
-      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "randomValue", "value", "value",
-        "value", "value", "value", "value", "value", "value", "value", "value", "value", "value",
-        "value", "checksum", "checksum", "checksum", "checksum", "checksum", "parity", "parity",
-        "parity", "parity", "parity" } ) ) );
+      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, "sub" } ),
+      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { RANDOM_VALUE, VALUE, VALUE, VALUE, VALUE,
+        VALUE, VALUE, VALUE, VALUE, VALUE, VALUE, CHECKSUM, CHECKSUM, CHECKSUM, CHECKSUM,
+        PARITY, PARITY, PARITY, PARITY } ) ) );
 
     // verify individual step nodes
     final Map<String, FramedMetaverseNode> parentStepNodeMap = verifyTransformationSteps( transformationNode,
       new String[] { "Generate Rows", "Generate random integer", "calc parity & checksum", "Write to file Checksum",
         "Write to log Checksum", "Write to file Parity", "Write to log Parity" }, false );
-
-    final Map<String, FramedMetaverseNode> parentVirtualStepNodeMap = verifyTransformationSteps( mainSubTransNode,
-      new String[] { "Input checksum", "Input parity", "output checksum", "output parity" }, true );
 
     final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
       new String[] { "Input checksum", "Input parity", "output checksum", "output parity",
@@ -500,14 +488,11 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
       "Write to log Parity" );
 
     // virtual sub-trans nodes within the parent graph
-    final TransformationStepNode inputChecksum = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "Input checksum" );
-    final TransformationStepNode outputChecksum = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "output checksum" );
-    final TransformationStepNode inputParity = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "Input parity" );
-    final TransformationStepNode outputParity = (TransformationStepNode) parentVirtualStepNodeMap.get(
-      "output parity" );
+    final TransformationStepNode inputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "Input checksum" );
+    final TransformationStepNode calcChecksum = (TransformationStepNode) subTransStepNodeMap.get( "calc checksum" );
+    final TransformationStepNode outputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "output checksum" );
+    final TransformationStepNode calcParity = (TransformationStepNode) subTransStepNodeMap.get( "calc parity" );
+    final TransformationStepNode outputParity = (TransformationStepNode) subTransStepNodeMap.get( "output parity" );
 
     // ---------- Generate Rows
     verifyNodes( IteratorUtils.toList( generateRows.getPreviousSteps().iterator() ) );
@@ -527,7 +512,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( generateRandomInt.getNextSteps().iterator() ),
       testLineageNode( calcParityAndChecksum ) );
     verifyNodes( IteratorUtils.toList( generateRandomInt.getOutputStreamFields().iterator() ),
-      testFieldNode( "randomValue", false ) );
+      testFieldNode( RANDOM_VALUE, false ) );
     assertEquals( 3, getIterableSize( generateRandomInt.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( generateRandomInt.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( generateRandomInt.getInNodes( LINK_TYPE_CONCEPT ) ) );
@@ -539,21 +524,22 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getNextSteps().iterator() ),
       testLineageNode( writeToFileChecksum ), testLineageNode( writeToFileParity ) );
     verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getInputStreamFields().iterator() ),
-      testFieldNode( "randomValue", false ) );
-    verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getOutputStreamFields().iterator() ),
-      testFieldNode( "value", true ) );
+      testFieldNode( RANDOM_VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( calcParityAndChecksum.getOutputStreamFields().iterator() ) );
     assertEquals( 4, getIterableSize( calcParityAndChecksum.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( calcParityAndChecksum.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( calcParityAndChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 4, getIterableSize( calcParityAndChecksum.getAllOutNodes() ) );
+    assertEquals( 3, getIterableSize( calcParityAndChecksum.getAllOutNodes() ) );
     assertEquals( 1, getIterableSize( calcParityAndChecksum.getOutNodes( LINK_EXECUTES ) ) );
+
     // verify properties
     verifyNodeProperties( calcParityAndChecksum, new ImmutableMap.Builder<String, Object>()
-      .put( "stepType", SKIP ).put( "color", SKIP ).put( "pluginId", SKIP ).put( "type", SKIP ).put( "_analyzer", SKIP )
-      .put( "category", SKIP ).put( "copies", SKIP ).put( "logicalId", SKIP ).put( "name", SKIP )
-      .put( "namespace", SKIP ).put( "virtual", SKIP )
-      .put( "verboseDetails", "input [1],input [1] description,input [1] update field names,input [1] rename [1],"
-        + "input [2],input [2] description,input [2] update field names,input [2] rename [1],output [1],"
+      .put( PROPERTY_STEP_TYPE, SKIP ).put( "color", SKIP ).put( PROPERTY_PLUGIN_ID, SKIP ).put( PROPERTY_TYPE, SKIP )
+      .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
+      .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
+      .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
+      .put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] description,input [1] update field names,input [1] rename "
+        + "[1],input [2],input [2] description,input [2] update field names,input [2] rename [1],output [1],"
         + "output [1] description,output [1] update field names,output [2],"
         + "output [2] description,output [2] update field names" )
       .put( "input [1]", "Generate random integer > [sub] Input checksum" )
@@ -573,12 +559,12 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( writeToFileChecksum.getNextSteps().iterator() ),
       testLineageNode( writeToLogChecksum ) );
     verifyNodes( IteratorUtils.toList( writeToFileChecksum.getInputStreamFields().iterator() ),
-      testFieldNode( "checksum", true ), testFieldNode( "value", true ) );
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
     verifyNodes( IteratorUtils.toList( writeToFileChecksum.getOutputStreamFields().iterator() ),
-      testFieldNode( "checksum", false ), testFieldNode( "value", false ) );
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
     verifyStepIOLinks( writeToFileChecksum,
-      testLineageLink( testFieldNode( "checksum", true ), LINK_DERIVES, testFieldNode( "checksum", false ) ),
-      testLineageLink( testFieldNode( "value", true ), LINK_DERIVES, testFieldNode( "value", false ) ) );
+      testLineageLink( testFieldNode( CHECKSUM, true ), LINK_DERIVES, testFieldNode( CHECKSUM, false ) ),
+      testLineageLink( testFieldNode( VALUE, true ), LINK_DERIVES, testFieldNode( VALUE, false ) ) );
     assertEquals( 5, getIterableSize( writeToFileChecksum.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( writeToFileChecksum.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( writeToFileChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
@@ -591,12 +577,12 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( writeToFileParity.getNextSteps().iterator() ),
       testLineageNode( writeToLogParity ) );
     verifyNodes( IteratorUtils.toList( writeToFileParity.getInputStreamFields().iterator() ),
-      testFieldNode( "parity", true ), testFieldNode( "value", true ) );
+      testFieldNode( PARITY, false ), testFieldNode( VALUE, false ) );
     verifyNodes( IteratorUtils.toList( writeToFileParity.getOutputStreamFields().iterator() ),
-      testFieldNode( "parity", false ), testFieldNode( "value", false ) );
+      testFieldNode( PARITY, false ), testFieldNode( VALUE, false ) );
     verifyStepIOLinks( writeToFileParity,
-      testLineageLink( testFieldNode( "parity", true ), LINK_DERIVES, testFieldNode( "parity", false ) ),
-      testLineageLink( testFieldNode( "value", true ), LINK_DERIVES, testFieldNode( "value", false ) ) );
+      testLineageLink( testFieldNode( PARITY, true ), LINK_DERIVES, testFieldNode( PARITY, false ) ),
+      testLineageLink( testFieldNode( VALUE, true ), LINK_DERIVES, testFieldNode( VALUE, false ) ) );
     assertEquals( 5, getIterableSize( writeToFileParity.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( writeToFileParity.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( writeToFileParity.getInNodes( LINK_TYPE_CONCEPT ) ) );
@@ -604,38 +590,85 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     assertEquals( 1, getIterableSize( writeToFileParity.getOutNodes( LINK_WRITESTO ) ) );
 
     // ---------- output checksum
-    verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ),
+      testStepNode( calcChecksum.getName(), false ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ) );
-    assertEquals( 2, getIterableSize( outputChecksum.getAllInNodes() ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    assertEquals( 5, getIterableSize( outputChecksum.getAllInNodes() ) );
     assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_CONTAINS ) ) );
     assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 0, getIterableSize( outputChecksum.getAllOutNodes() ) );
+    assertEquals( 2, getIterableSize( outputChecksum.getAllOutNodes() ) );
 
     // ---------- output parity
-    verifyNodes( IteratorUtils.toList( outputParity.getPreviousSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( outputParity.getPreviousSteps().iterator() ),
+      testStepNode( calcParity.getName(), false ) );
     verifyNodes( IteratorUtils.toList( outputParity.getNextSteps().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputParity.getInputStreamFields().iterator() ) );
-    verifyNodes( IteratorUtils.toList( outputParity.getOutputStreamFields().iterator() ) );
-    assertEquals( 2, getIterableSize( outputChecksum.getAllInNodes() ) );
-    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_CONTAINS ) ) );
-    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
-    assertEquals( 0, getIterableSize( outputChecksum.getAllOutNodes() ) );
+    verifyNodes( IteratorUtils.toList( outputParity.getInputStreamFields().iterator() ),
+      testFieldNode( PARITY, false ), testFieldNode( VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( outputParity.getOutputStreamFields().iterator() ),
+      testFieldNode( PARITY, false ), testFieldNode( VALUE, false ) );
+    assertEquals( 5, getIterableSize( outputParity.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( outputParity.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( outputParity.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( outputParity.getAllOutNodes() ) );
 
-    // Verify the following chain of links
-    // chain 1: Generate Random Int > outputs > randomValue >  inputs > Input checksum > outputs > value > derives >
-    // calc checksum & parity:value
-    // chain 2: Generate Random Int > outputs > randomValue >  derives > Input checksum:value
-    final FramedMetaverseNode generateRandomIntOutRandomValue =
-      verifyLinkedNode( generateRandomInt, LINK_OUTPUTS, "randomValue" );
+    // Verify the following link chains
+    // - chain 1: Generate Random Int > outputs > randomValue >  inputs > Input checksum > outputs > value > inputs >
+    //   calc checksum > outputs > value > inputs > output checksum > outputs > value > inputs
+    //   > Write to file Checksum > outputs > randomValue
+    // - chain 2: Generate Random Int:randomValue > derives > Input Checksum:value > derives > calc checksum:value >
+    //   derives > output checksum:value > derives > Write to log Checksum:randomValue
+    final FramedMetaverseNode generateRandomInt_output_randomValue =
+      verifyLinkedNode( generateRandomInt, LINK_OUTPUTS, RANDOM_VALUE );
+    final FramedMetaverseNode inputChecksum_output_value = verifyLinkedNode( inputChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode calcChecksum_output_value = verifyLinkedNode( calcChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode outputChecksum_output_value = verifyLinkedNode( outputChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode writeToFileChecksum_output_value =
+      verifyLinkedNode( writeToFileChecksum, LINK_OUTPUTS, VALUE );
+
     assertEquals( inputChecksum,
-      verifyLinkedNode( generateRandomIntOutRandomValue, LINK_INPUTS, inputChecksum.getName() ) );
-    final FramedMetaverseNode inputChecksumOutValue =
-      verifyLinkedNode( generateRandomIntOutRandomValue, LINK_DERIVES, "value" );
-    final FramedMetaverseNode calcChecksumAndParityOutValue =
-      verifyLinkedNode( calcParityAndChecksum, LINK_OUTPUTS, "value" );
-    assertEquals( calcChecksumAndParityOutValue, verifyLinkedNode(
-      inputChecksumOutValue, LINK_DERIVES, "value" ) );
+      verifyLinkedNode( generateRandomInt_output_randomValue, LINK_INPUTS, inputChecksum.getName() ) );
+    assertEquals( calcChecksum,
+      verifyLinkedNode( inputChecksum_output_value, LINK_INPUTS, calcChecksum.getName() ) );
+    assertEquals( outputChecksum,
+      verifyLinkedNode( calcChecksum_output_value, LINK_INPUTS, outputChecksum.getName() ) );
+    assertEquals( writeToFileChecksum,
+      verifyLinkedNode( outputChecksum_output_value, LINK_INPUTS, writeToFileChecksum.getName() ) );
+    // there are more than one value nodes derived from generateRandomInt_output_randomValue - make sure one if them
+    // is the inputChecksum_output_value node
+    final List<FramedMetaverseNode> derivedValueNodes =
+      verifyLinkedNodes( generateRandomInt_output_randomValue, LINK_DERIVES, VALUE );
+    assertTrue( derivedValueNodes.contains( inputChecksum_output_value ) );
+
+    assertEquals( inputChecksum_output_value,
+      verifyLinkedNode( generateRandomInt_output_randomValue, LINK_DERIVES, VALUE ) );
+    assertEquals( calcChecksum_output_value,
+      verifyLinkedNode( inputChecksum_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( outputChecksum_output_value,
+      verifyLinkedNode( calcChecksum_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( writeToFileChecksum_output_value,
+      verifyLinkedNode( outputChecksum_output_value, LINK_DERIVES, VALUE ) );
+
+    // Verify the following link chains
+    // - chain 1: calc parity > outputs parity > inputs > output parity > outputs > parity > inputs > Write to file
+    //   Parity > outputs > newParity
+    // - chain 2: calc parity:parity > derives > output parity:parity > derives > Write to file Checksum:parity
+    final FramedMetaverseNode calcParity_output_parity = verifyLinkedNode( calcParity, LINK_OUTPUTS, PARITY );
+    final FramedMetaverseNode outputParity_output_parity = verifyLinkedNode( outputParity, LINK_OUTPUTS, PARITY );
+    final FramedMetaverseNode writeToFileParity_output_parity =
+      verifyLinkedNode( writeToFileParity, LINK_OUTPUTS, PARITY );
+
+    assertEquals( outputParity,
+      verifyLinkedNode( calcParity_output_parity, LINK_INPUTS, outputParity.getName() ) );
+    assertEquals( writeToFileParity,
+      verifyLinkedNode( outputParity_output_parity, LINK_INPUTS, writeToFileParity.getName() ) );
+
+    assertEquals( outputParity_output_parity,
+      verifyLinkedNode( calcParity_output_parity, LINK_DERIVES, PARITY ) );
+    assertEquals( writeToFileParity_output_parity,
+      verifyLinkedNode( outputParity_output_parity, LINK_DERIVES, PARITY ) );
   }
 }

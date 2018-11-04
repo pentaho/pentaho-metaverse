@@ -38,6 +38,8 @@ import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IDocumentController;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
 import org.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.frames.Concept;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.RootNode;
@@ -58,9 +60,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.pentaho.dictionary.DictionaryConst.LINK_CONTAINS;
-import static org.pentaho.dictionary.DictionaryConst.LINK_TYPE_CONCEPT;
-import static org.pentaho.dictionary.DictionaryConst.LINK_WRITESTO;
+import static org.pentaho.dictionary.DictionaryConst.*;
 
 public abstract  class BaseMetaverseValidationIT {
 
@@ -159,6 +159,8 @@ public abstract  class BaseMetaverseValidationIT {
       : root.getTransformation( transformationName );
     assertNotNull( node );
     assertTrue( allTransformations.contains( node ) );
+    assertEquals( "{\"name\":\"" + REPO_ID + "\",\"type\":\"Locator\"}",
+      node.getProperty( PROPERTY_NAMESPACE ).toString() );
     return node;
   }
 
@@ -180,15 +182,28 @@ public abstract  class BaseMetaverseValidationIT {
     final Map<String, FramedMetaverseNode> stepNodeMap = verifyNodeNames( stepNodes,
       DictionaryConst.NODE_TYPE_TRANS_STEP, stepNames );
 
+    String transPath = transNode.getProperty( PROPERTY_PATH ).toString();
+    try {
+      transPath = KettleAnalyzerUtil.normalizeFilePath( transPath );
+    } catch ( final MetaverseException e ) {
+      // ignore
+    }
+    // traverse each step node and verify namespace
+    for ( final FramedMetaverseNode stepNode : stepNodes ) {
+      final String stepNamespace = stepNode.getProperty( PROPERTY_NAMESPACE ).toString().replaceAll( "\\\\/", "/" );
+      final String expectedStepNamespace = "{\"namespace\":{\"name\":\"" + REPO_ID + "\",\"type\":\"Locator\"},"
+        + "\"path\":\"" + transPath + "\",\"type\":\"Transformation\"}";
+      assertEquals( expectedStepNamespace, stepNamespace );
+    }
     return stepNodeMap;
   }
 
   protected Map<String, FramedMetaverseNode> verifyNodes( final List<FramedMetaverseNode> nodes,
                                                           final TestLineageNode... expectedNodeArray ) {
     if ( expectedNodeArray == null ) {
-      assertEquals( nodes.size(), 0 );
+      assertEquals( 0,  nodes.size() );
     }
-    assertEquals( nodes.size(), expectedNodeArray.length );
+    assertEquals( expectedNodeArray.length, nodes.size() );
     final List<TestLineageNode> expectedNodes = Arrays.asList(
       expectedNodeArray == null ? new TestLineageNode[] {} : expectedNodeArray );
     return verifyNodes( nodes, expectedNodes );
@@ -204,7 +219,7 @@ public abstract  class BaseMetaverseValidationIT {
    */
   protected Map<String, FramedMetaverseNode> verifyNodes( final List<FramedMetaverseNode> nodes,
                                                           final List<TestLineageNode> expectedNodes ) {
-    assertEquals( nodes.size(), expectedNodes.size() );
+    assertEquals( expectedNodes.size(), nodes.size() );
     final Map<String, FramedMetaverseNode> nodeMap = new HashMap();
     for ( final FramedMetaverseNode node : nodes ) {
       boolean matchFound = false;
@@ -243,7 +258,7 @@ public abstract  class BaseMetaverseValidationIT {
                                                             final List<String> expectedNodeNames ) {
     final List<String> expectedNodeNameClone = new ArrayList<>( expectedNodeNames );
     assertEquals( String.format( "Incorrect number of '%s' nodes", nodeType ),
-      expectedNodeNames.size() , nodes.size() ) ;
+      expectedNodeNames.size(), nodes.size() ) ;
     final Map<String, FramedMetaverseNode> nodeMap = new HashMap();
     for ( final FramedMetaverseNode node : nodes ) {
       assertTrue( String.format( "Node '%s' is not of type '%s'", node.getName(), nodeType ),
@@ -284,12 +299,22 @@ public abstract  class BaseMetaverseValidationIT {
 
     final List<FramedMetaverseNode> inputs = IteratorUtils.toList( stepNode.getInputStreamFields().iterator() );
     final List<FramedMetaverseNode> outputs = IteratorUtils.toList( stepNode.getOutputStreamFields().iterator() );
+    final String stepName = stepNode.getProperty( PROPERTY_NAME ).toString();
+    final String stepNamespace = stepNode.getProperty( PROPERTY_NAMESPACE ).toString();
 
     for ( final TestLineageLink link : links ) {
+      // input node
       FramedMetaverseNode inputNode = findNode( inputs, link.getInputNode() );
       assertNotNull( inputNode );
+      // output node
       FramedMetaverseNode outptuNode = findNode( outputs, link.getOutputNode() );
       assertNotNull( outptuNode );
+      // verify namespace
+      final String actualNamespace = outptuNode.getProperty( PROPERTY_NAMESPACE ).toString();
+      final String expectedNamespace = "{\"name\":\"" + stepName + "\",\"namespace\":" + stepNamespace + ",\"type"
+        + "\":\"" + NODE_TYPE_TRANS_STEP + "\"}";
+      assertEquals( expectedNamespace, actualNamespace );
+
       final List<Concept> linkedNodes = IteratorUtils.toList(
         inputNode.getOutNodes( link.getLinkLabel() ).iterator() );
       assertTrue( linkedNodes.size() > 0 );
@@ -305,29 +330,31 @@ public abstract  class BaseMetaverseValidationIT {
     }
   }
 
-  public FramedMetaverseNode verifyLinkedNode( final FramedMetaverseNode fromNode, final String linkLabel,
-                                               final String toNodeName ) {
+  public List<FramedMetaverseNode> verifyLinkedNodes( final FramedMetaverseNode fromNode, final String linkLabel,
+                                                      final String toNodeName ) {
     final List<FramedMetaverseNode> outNodes = IteratorUtils.toList( fromNode.getOutNodes( linkLabel ).iterator() );
-    FramedMetaverseNode searchNode = null;
+    List<FramedMetaverseNode> searchNodes = new ArrayList();
     for ( final FramedMetaverseNode outNode : outNodes ) {
       if ( outNode.getName().equals( toNodeName ) ) {
-        searchNode = outNode;
-        break;
+        searchNodes.add( outNode );
       }
     }
-    assertNotNull( searchNode );
-    return searchNode;
+    assertNotEquals( 0, searchNodes.size() );
+    return searchNodes;
+  }
 
+  public FramedMetaverseNode verifyLinkedNode( final FramedMetaverseNode fromNode, final String linkLabel,
+                                               final String toNodeName ) {
+    return verifyLinkedNodes( fromNode, linkLabel, toNodeName ).get( 0 );
   }
 
   public static final String SKIP = "SKIP_COMPARISON";
 
   public void verifyNodeProperties( final FramedMetaverseNode node, final Map<String, Object> expectedProperties ) {
-    final Iterator<String> propertyNames = node.getPropertyNames().iterator();
+    final List<String> propertyNames = IteratorUtils.toList( node.getPropertyNames().iterator() );
     final Set<String> encounteredProperties = new HashSet();
     final Set<String> badProperties = new HashSet();
-    while ( propertyNames.hasNext() ) {
-      final String propertyName = propertyNames.next();
+    for ( final String propertyName : propertyNames ) {
       final Object expectedValue = expectedProperties.get( propertyName );
       final Object actualValue = node.getProperty( propertyName );
       if ( actualValue == null ) {
@@ -340,7 +367,7 @@ public abstract  class BaseMetaverseValidationIT {
       }
       encounteredProperties.add( propertyName );
     }
-    final Set<String> missingProperties = new HashSet( node.getPropertyNames() );
+    final Set<String> missingProperties = new HashSet( expectedProperties.keySet() );
     missingProperties.removeAll( encounteredProperties );
     assertEquals( String.format( "Missing expected properties: %s", String.join( ",", missingProperties ) ), 0,
       missingProperties.size() );
@@ -380,8 +407,16 @@ public abstract  class BaseMetaverseValidationIT {
     return new TestTableNode( name, virtual );
   }
 
+  protected TestStepNode testStepNode( final String name ) {
+    return testStepNode( name, false );
+  }
+
   protected TestStepNode testStepNode( final String name, final boolean virtual ) {
     return new TestStepNode( name, virtual );
+  }
+
+  protected TestFieldNode testFieldNode( final String name ) {
+    return testFieldNode( name, false );
   }
 
   protected TestFieldNode testFieldNode( final String name, final boolean virtual ) {
