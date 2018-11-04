@@ -39,7 +39,7 @@
     <pentaho-mongodb-plugin.version>9.0.0.0-SNAPSHOT</pentaho-mongodb-plugin.version>
     <platform.version>${project.version}</platform.version>
     <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
-    <!--<pdi.version>${project.version}</pdi.version>-->
+    <pdi.version>${project.version}</pdi.version>
   </properties>
   <dependencies>
     <dependency>
@@ -293,7 +293,6 @@
       <scope>test</scope>
     </dependency>
     <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
-    <!--
     <dependency>
       <groupId>org.pentaho.di.plugins</groupId>
       <artifactId>meta-inject-plugin</artifactId>
@@ -305,7 +304,7 @@
       <artifactId>pdi-core-plugins-impl</artifactId>
       <version>${pdi.version}</version>
       <scope>test</scope>
-    </dependency>-->
+    </dependency>
   </dependencies>
   <build>
     <plugins>

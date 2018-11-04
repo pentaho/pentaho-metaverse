@@ -51,7 +51,7 @@ import static org.junit.Assert.*;
 @RunWith( PowerMockRunner.class )
 @PrepareForTest( MetaverseConfig.class )
 // TODO: Ignored for now, remove the @Ignore annotation once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved
-@Ignore
+//@Ignore
 public class MdiValidationIT extends StepAnalyzerValidationIT {
 
   private static final String ROOT_FOLDER = "src/it/resources/repo/mdi-validation";
