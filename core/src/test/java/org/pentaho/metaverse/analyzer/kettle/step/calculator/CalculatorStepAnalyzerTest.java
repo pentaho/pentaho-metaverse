@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -30,10 +30,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
 import org.pentaho.di.trans.steps.calculator.CalculatorMetaFunction;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 
 import java.util.Set;
@@ -43,7 +45,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @RunWith( MockitoJUnitRunner.class )
-public class CalculatorStepAnalyzerTest {
+public class CalculatorStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private CalculatorStepAnalyzer analyzer;
   @Mock
@@ -115,5 +117,10 @@ public class CalculatorStepAnalyzerTest {
     assertNotNull( types );
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( CalculatorMeta.class ) );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new CalculatorStepAnalyzer();
   }
 }

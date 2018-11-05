@@ -35,15 +35,14 @@ import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.trans.Trans;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
-import org.pentaho.metaverse.api.AnalysisContext;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
-import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IExecutionData;
@@ -60,7 +59,6 @@ import org.pentaho.metaverse.util.MetaverseUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
@@ -144,24 +142,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
           id += "." + jobMeta.getDefaultExtension();
         }
 
-        IDocument metaverseDocument = builder.getMetaverseObjectFactory().createDocumentObject();
-
-        metaverseDocument.setNamespace( namespace );
-        metaverseDocument.setContent( jobMeta );
-        metaverseDocument.setStringID( id );
-        metaverseDocument.setName( jobMeta.getName() );
-        metaverseDocument.setExtension( jobMeta.getDefaultExtension() );
-        metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor( "job.kjb" ) );
-        metaverseDocument.setContext( new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
-        String normalizedPath;
-        try {
-          normalizedPath = KettleAnalyzerUtil.normalizeFilePath( id );
-        } catch ( MetaverseException e ) {
-          normalizedPath = id;
-        }
-        metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAME, job.getName() );
-        metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, normalizedPath );
-        metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
+        final IDocument metaverseDocument = MetaverseUtil.buildDocument( builder, jobMeta, id, namespace );
 
         Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
         // set the lineage task, so that we can wait for it to finish before proceeding to write out the graph
@@ -259,14 +240,21 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       }
 
       try {
-        // Add the execution profile information to the lineage graph
-        addRuntimeLineageInfo( holder );
+        final Job parentJob = job.getParentJob();
+        final Trans parentTrans = job.getParentTrans();
 
-        if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
-          lineageWriter.outputLineageGraph( holder );
-          // lineage has been written - call the appropriate extension point
-          ExtensionPointHandler.callExtensionPoint(
-            job.getLogChannel(), MetaverseExtensionPoint.JobLineageWriteEnd.id, job );
+        // Create a lineage graph for this job only if it has no parent. Otherwise, the parent will incorporate
+        // the lineage information into its own graph
+        if ( parentJob == null && parentTrans == null ) {
+          // Add the execution profile information to the lineage graph
+          addRuntimeLineageInfo( holder );
+
+          if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
+            lineageWriter.outputLineageGraph( holder );
+            // lineage has been written - call the appropriate extension point
+            ExtensionPointHandler.callExtensionPoint(
+              job.getLogChannel(), MetaverseExtensionPoint.JobLineageWriteEnd.id, job );
+          }
         }
       } catch ( IOException e ) {
         log.warn( Messages.getString( "ERROR.CouldNotWriteLineageGraph", job.getName(),
