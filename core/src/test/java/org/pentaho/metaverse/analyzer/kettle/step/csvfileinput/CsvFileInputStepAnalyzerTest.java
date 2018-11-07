@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -31,10 +31,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
@@ -44,7 +46,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
-public class CsvFileInputStepAnalyzerTest {
+public class CsvFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private CsvFileInputStepAnalyzer analyzer;
 
@@ -102,5 +104,10 @@ public class CsvFileInputStepAnalyzerTest {
     IMetaverseNode resourceNode = analyzer.createResourceNode( res );
     assertNotNull( resourceNode );
     assertEquals( DictionaryConst.NODE_TYPE_FILE, resourceNode.getType() );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new CsvFileInputStepAnalyzer();
   }
 }

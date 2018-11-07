@@ -33,6 +33,7 @@ import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.logging.LogChannelInterface;
+import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
@@ -43,6 +44,7 @@ import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 import java.util.Collections;
 import java.util.List;
@@ -155,10 +157,29 @@ public class TransformationRuntimeExtensionPointTest {
 
     verify( ext ).createLineGraph( trans );
     verify( ext, never() ).createLineGraphAsync( trans );
+    verify( lineageWriter, times( 1 ) ).outputLineageGraph(
+      TransLineageHolderMap.getInstance().getLineageHolder( trans ) );
 
     PowerMockito.verifyStatic();
     ExtensionPointHandler.callExtensionPoint( Mockito.any( LogChannelInterface.class ),
       Mockito.eq( MetaverseExtensionPoint.TransLineageWriteEnd.id ), eq( trans ) );
+
+    // reset the lineageWriter mock, since we're going to be verifying calls on it again
+    Mockito.reset( lineageWriter );
+    // set a parent job and verify that "lineageWriter.outputLineageGraph" never gets called
+    trans.setParentJob( new Job() );
+    ext.transFinished( trans );
+    verify( lineageWriter, never() )
+      .outputLineageGraph( TransLineageHolderMap.getInstance().getLineageHolder( trans ) );
+    Whitebox.setInternalState( trans, "parentJob", (Object[]) null );
+
+    // reset the lineageWriter mock, since we're going to be verifying calls on it again
+    Mockito.reset( lineageWriter );
+    // set a parent trans and verify that "lineageWriter.outputLineageGraph" never gets called
+    trans.setParentTrans( new Trans() );
+    ext.transFinished( trans );
+    verify( lineageWriter, never() )
+      .outputLineageGraph( TransLineageHolderMap.getInstance().getLineageHolder( trans ) );
   }
 
   @Test

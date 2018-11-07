@@ -160,8 +160,6 @@
         <ref bean="MergeJoinStepAnalyzer"/>
         <ref bean="StreamLookupStepAnalyzer"/>
         <ref bean="MongoDbInputStepAnalyzer"/>
-        <ref bean="CalculatorStepAnalyzer"/>
-        <ref bean="CsvFileInputStepAnalyzer"/>
         <ref bean="ExcelInputStepAnalyzer"/>
         <ref bean="GroupByStepAnalyzer"/>
         <ref bean="ExcelOutputStepAnalyzer"/>
@@ -177,13 +175,15 @@
         <ref bean="HTTPClientStepAnalyzer"/>
         <ref bean="RestClientStepAnalyzer"/>
         <ref bean="HTTPPostStepAnalyzer"/>
-        <ref bean="MappingAnalyzer"/>
-        <ref bean="SimpleMappingAnalyzer"/>
       </list>
     </property>
     <property name="clonableStepAnalyzers">
       <list>
+        <ref bean="CsvFileInputStepAnalyzer"/>
+        <ref bean="CalculatorStepAnalyzer"/>
         <ref bean="SelectValuesStepAnalyzer"/>
+        <ref bean="MappingAnalyzer"/>
+        <ref bean="SimpleMappingAnalyzer"/>
      </list>
     </property>
 
