@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,17 +24,33 @@ package org.pentaho.metaverse.api.analyzer.kettle;
 
 import org.apache.commons.vfs2.FileObject;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.pentaho.di.base.AbstractMeta;
+import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.Namespace;
+import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * User: RFellows Date: 8/14/14
  */
+@RunWith( PowerMockRunner.class )
+@PrepareForTest( KettleVFS.class )
 public class KettleAnalyzerUtilTest {
 
   @Test
@@ -61,5 +77,66 @@ public class KettleAnalyzerUtilTest {
     String result = KettleAnalyzerUtil.normalizeFilePath( input );
     assertEquals( expected, result );
 
+  }
+
+  @Test
+  public void testNormalizeFilePathSafely() throws Exception {
+
+    final String path = "temp/foo";
+    assertNotEquals( "temp/foo", KettleAnalyzerUtil.normalizeFilePathSafely( path ) );
+    assertTrue( KettleAnalyzerUtil.normalizeFilePathSafely( path ).endsWith( "temp" + File.separator + "foo" ) );
+
+    // verify that when an exception is thrown, the original value is returned
+    PowerMockito.mockStatic( KettleVFS.class );
+    Mockito.when( KettleVFS.getFileObject( path ) ).thenThrow( new KettleFileException( "mockedException" ) );
+    assertEquals( "temp/foo", KettleAnalyzerUtil.normalizeFilePathSafely( path ) );
+  }
+
+  @Test
+  public void testGetFileName() {
+    assertNull( KettleAnalyzerUtil.getFilename( null ) );
+
+    final TransMeta transMeta = Mockito.mock( TransMeta.class );
+    assertNull( KettleAnalyzerUtil.getFilename( transMeta ) );
+
+    Mockito.doReturn( "my_file_name" ).when( transMeta ).getFilename();
+    assertEquals( "my_file_name", KettleAnalyzerUtil.getFilename( transMeta ) );
+
+    Mockito.doReturn( "path_and_file_name" ).when( transMeta ).getPathAndName();
+    // filename is still set and will be returned
+    assertEquals( "my_file_name", KettleAnalyzerUtil.getFilename( transMeta ) );
+    // when filename is null, pathAndFilename is returned
+    Mockito.doReturn( null ).when( transMeta ).getFilename();
+    assertEquals( "path_and_file_name", KettleAnalyzerUtil.getFilename( transMeta ) );
+
+    Mockito.doReturn( "my_ext" ).when( transMeta ).getDefaultExtension();
+    assertEquals( "path_and_file_name.my_ext", KettleAnalyzerUtil.getFilename( transMeta ) );
+  }
+
+  @Test
+  public void tesBuildDocument() throws MetaverseException {
+    final IMetaverseBuilder builder = new BaseMetaverseBuilder( null );
+    final AbstractMeta transMeta = Mockito.mock( TransMeta.class );
+    final String transName = "MyTransMeta";
+    Mockito.doReturn( transName ).when( transMeta ).getName();
+    Mockito.doReturn( "ktr" ).when( transMeta ).getDefaultExtension();
+    final String id = "path.ktr";
+    final String namespaceId = "MyNamespace";
+    final INamespace namespace = new Namespace( namespaceId );
+
+    assertNull( KettleAnalyzerUtil.buildDocument( null, transMeta, id, namespace ) );
+
+    IDocument document = KettleAnalyzerUtil.buildDocument( builder, transMeta, id, namespace );
+    assertNotNull( document );
+    assertEquals( namespace, document.getNamespace() );
+    assertEquals( transMeta, document.getContent() );
+    assertEquals( id, document.getStringID() );
+    assertEquals( transName, document.getName() );
+    assertEquals( "ktr", document.getExtension() );
+    assertEquals( DictionaryConst.CONTEXT_RUNTIME, document.getContext().getContextName() );
+    assertEquals( document.getName(), document.getProperty( DictionaryConst.PROPERTY_NAME ) );
+    assertEquals( KettleAnalyzerUtil.normalizeFilePath( "path.ktr" ), document.getProperty( DictionaryConst
+      .PROPERTY_PATH ) );
+    assertEquals(namespaceId, document.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
   }
 }

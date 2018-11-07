@@ -39,17 +39,12 @@ import org.pentaho.di.trans.steps.mapping.MappingValueRename;
 import org.pentaho.di.trans.steps.mappinginput.MappingInputMeta;
 import org.pentaho.di.trans.steps.mappingoutput.MappingOutput;
 import org.pentaho.dictionary.DictionaryConst;
-import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransExtensionPointUtil;
-import org.pentaho.metaverse.api.IComponentDescriptor;
-import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
-import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import org.pentaho.metaverse.api.messages.Messages;
-import org.pentaho.metaverse.util.MetaverseUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,32 +69,7 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
   protected void customAnalyze( final StepWithMappingMeta meta, final IMetaverseNode rootNode )
     throws MetaverseAnalyzerException {
 
-    String transformationPath = KettleAnalyzerUtil.normalizeFilePathSafely(
-      parentTransMeta.environmentSubstitute( meta.getFileName() ) );
-    rootNode.setProperty( "subTransformation", transformationPath );
-
-    final TransMeta subTransMeta = KettleAnalyzerUtil.getSubTransMeta( (ISubTransAwareMeta) meta );
-    subTransMeta.setFilename( transformationPath );
-
-    final IMetaverseNode subTransNode = getNode( subTransMeta.getName(), DictionaryConst.NODE_TYPE_TRANS,
-      documentDescriptor.getNamespace(), null, null );
-    subTransNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, documentDescriptor.getNamespace().getNamespaceId() );
-    subTransNode.setProperty( DictionaryConst.PROPERTY_PATH,
-      KettleAnalyzerUtil.getSubTransMetaPath( (ISubTransAwareMeta) meta, subTransMeta ) );
-    subTransNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
-
-    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_EXECUTES, subTransNode );
-
-    final String id = TransExtensionPointUtil.getFilename( subTransMeta );
-    final IDocument subTransDocument = MetaverseUtil.buildDocument( metaverseBuilder, subTransMeta,
-      id, documentDescriptor.getNamespace() );
-    final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
-      subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, documentDescriptor.getNamespace(),
-      descriptor.getContext() );
-
-    // analyze the sub-transformation
-    documentAnalyzer.analyze( subtransDocumentDescriptor, subTransMeta, subTransNode,
-      KettleAnalyzerUtil.getSubTransMetaPath( (ISubTransAwareMeta) meta, subTransMeta ) );
+    KettleAnalyzerUtil.analyze( this, parentTransMeta, (ISubTransAwareMeta) meta, rootNode );
   }
 
   @Override

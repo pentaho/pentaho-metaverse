@@ -142,7 +142,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
           id += "." + jobMeta.getDefaultExtension();
         }
 
-        final IDocument metaverseDocument = MetaverseUtil.buildDocument( builder, jobMeta, id, namespace );
+        final IDocument metaverseDocument = KettleAnalyzerUtil.buildDocument( builder, jobMeta, id, namespace );
 
         Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
         // set the lineage task, so that we can wait for it to finish before proceeding to write out the graph

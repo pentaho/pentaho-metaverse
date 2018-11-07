@@ -34,6 +34,7 @@ import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.Namespace;
+import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.impl.MetaverseBuilder;
 import org.pentaho.metaverse.messages.Messages;
 import org.pentaho.metaverse.util.MetaverseUtil;
@@ -80,13 +81,6 @@ public class TransExtensionPointUtil {
   }
 
   public static String getFilename( TransMeta transMeta ) {
-    String filename = transMeta.getFilename();
-    if ( filename == null ) {
-      filename = transMeta.getPathAndName();
-      if ( transMeta.getDefaultExtension() != null ) {
-        filename = filename + "." + transMeta.getDefaultExtension();
-      }
-    }
-    return filename;
+    return KettleAnalyzerUtil.getFilename( transMeta );
   }
 }
