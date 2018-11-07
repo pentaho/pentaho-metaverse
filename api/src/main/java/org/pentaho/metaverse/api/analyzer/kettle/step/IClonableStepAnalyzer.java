@@ -44,11 +44,23 @@ public interface IClonableStepAnalyzer<T extends BaseStepMeta> extends IStepAnal
   void setDocumentAnalyzer( final IClonableDocumentAnalyzer parentTransformationAnalyser );
 
   /**
+   * Returns the {@link IClonableDocumentAnalyzer} associated with this analyzer.
+   * @return the {@link IClonableDocumentAnalyzer} associated with this analyzer
+   */
+  IClonableDocumentAnalyzer getDocumentAnalyzer();
+
+  /**
    * Sets the {@link IComponentDescriptor} associated with this analyzer.
    *
    * @param documentDescriptor the {@link IComponentDescriptor} associated with this analyzer
    */
   void setDocumentDescriptor( final IComponentDescriptor documentDescriptor );
+
+  /**
+   * Returns the {@link IComponentDescriptor} associated with this analyzer.
+   * @return the {@link IComponentDescriptor} associated with this analyzer
+   */
+  IComponentDescriptor getDocumentDescriptor();
 
   /**
    * Sets the full path of the document (transformation or job) containing the step associated with this analyzer.

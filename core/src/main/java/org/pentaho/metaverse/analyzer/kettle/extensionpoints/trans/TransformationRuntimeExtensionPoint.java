@@ -140,7 +140,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       builder.addNode( designNode );
 
       final String id = TransExtensionPointUtil.getFilename( trans.getTransMeta() );
-      final IDocument metaverseDocument = MetaverseUtil.buildDocument( builder, trans.getTransMeta(), id, namespace );
+      final IDocument metaverseDocument = KettleAnalyzerUtil.buildDocument( builder, trans.getTransMeta(), id, namespace );
       final Runnable analyzerRunner = MetaverseUtil.getAnalyzerRunner( documentAnalyzer, metaverseDocument );
 
       // set the lineage task, so that we can wait for it to finish before proceeding to write out the graph

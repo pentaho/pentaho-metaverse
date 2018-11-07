@@ -22,7 +22,7 @@
 
 package org.pentaho.metaverse.step;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.pentaho.metaverse.BaseMetaverseValidationIT;
@@ -35,8 +35,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest( MetaverseConfig.class )
 public abstract class StepAnalyzerValidationIT extends BaseMetaverseValidationIT {
 
-  @BeforeClass
-  public static void init() throws Exception {
+  @Before
+  public void init() throws Exception {
 
     PowerMockito.mockStatic( MetaverseConfig.class );
     Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( true );
