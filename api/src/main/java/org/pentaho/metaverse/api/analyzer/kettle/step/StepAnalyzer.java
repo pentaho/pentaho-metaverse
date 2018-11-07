@@ -539,10 +539,17 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     return DictionaryConst.NODE_TYPE_TRANS_FIELD;
   }
 
+
   protected Map<String, RowMetaInterface> getOutputRowMetaInterfaces( T meta ) {
-    String[] nextStepNames = parentTransMeta.getNextStepNames( parentStepMeta );
+    return getOutputRowMetaInterfaces( parentTransMeta, parentStepMeta, meta, true );
+  }
+
+  protected Map<String, RowMetaInterface> getOutputRowMetaInterfaces(
+    final TransMeta transMeta, final StepMeta stepMeta, final BaseStepMeta meta, boolean validateState ) {
+    String[] nextStepNames = transMeta.getNextStepNames( stepMeta );
     Map<String, RowMetaInterface> outputRows = new HashMap<>();
-    RowMetaInterface outputFields = getOutputFields( meta );
+    RowMetaInterface outputFields = validateState ? getOutputFields( (T) meta ) : getOutputFields( transMeta,
+      stepMeta );
 
     if ( outputFields != null && ArrayUtils.isEmpty( nextStepNames ) ) {
       nextStepNames = new String[] { NONE };
@@ -643,10 +650,16 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     } catch ( MetaverseAnalyzerException e ) {
       // eat it
     }
-    if ( parentTransMeta != null ) {
+    return getOutputFields( parentTransMeta, parentStepMeta );
+  }
+
+  protected RowMetaInterface getOutputFields(
+    final TransMeta transMeta, final StepMeta stepMeta ) {
+    RowMetaInterface rmi = null;
+    if ( transMeta != null ) {
       try {
         ProgressNullMonitorListener progressMonitor = new ProgressNullMonitorListener();
-        rmi = parentTransMeta.getStepFields( parentStepMeta, progressMonitor );
+        rmi = transMeta.getStepFields( stepMeta, progressMonitor );
         progressMonitor.done();
       } catch ( KettleStepException e ) {
         rmi = null;
@@ -758,8 +771,8 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
    * @param nodeMap   a {@link Map} of nodes for lookup
    * @return a {@link IMetaverseNode} from the map (if present) or created a new one.
    */
-  protected IMetaverseNode getNode( final String name, final String type, final INamespace namespace,
-                                    final String nodeKey, final Map<String, IMetaverseNode> nodeMap ) {
+  public IMetaverseNode getNode( final String name, final String type, final INamespace namespace,
+                                 final String nodeKey, final Map<String, IMetaverseNode> nodeMap ) {
     IMetaverseNode node = nodeMap == null ? null : nodeMap.get( nodeKey );
     if ( node == null ) {
       node = createNode( name, type, namespace );
@@ -785,36 +798,24 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     return node;
   }
 
-  /**
-   * Returns a {@link IMetaverseNode} from the map (if present) or created a new one and marks it as virtual.
-   *
-   * @see {@link #getNode(String, String, INamespace, String, Map)}
-   */
-  protected IMetaverseNode getVirtualNode( final String name, final String type, final INamespace namespace,
-                                           final String nodeKey, final Map<String, IMetaverseNode> nodeMap ) {
-    IMetaverseNode node = getNode( name, type, namespace, nodeKey, nodeMap );
-    node.setProperty( DictionaryConst.NODE_VIRTUAL, true );
-    return node;
-  }
-
-  /**
-   * Returns a {@link IMetaverseNode} from the map (if present) or created a new one and marks it as virtual.
-   *
-   * @see {@link #getNode(String, String, String, String, Map)}
-   */
-  protected IMetaverseNode getVirtualNode( final String name, final String type, final String namespaceId,
-                                           final String nodeKey, final Map<String, IMetaverseNode> nodeMap ) {
-    return getVirtualNode( name, type, new Namespace( namespaceId ), nodeKey, nodeMap );
-  }
-
   @Override
   public void setDocumentAnalyzer( final IClonableDocumentAnalyzer documentAnalyzer ) {
     this.documentAnalyzer = documentAnalyzer;
   }
 
   @Override
+  public IClonableDocumentAnalyzer getDocumentAnalyzer() {
+    return this.documentAnalyzer;
+  }
+
+  @Override
   public void setDocumentDescriptor( final IComponentDescriptor documentDescriptor ) {
     this.documentDescriptor = documentDescriptor;
+  }
+
+  @Override
+  public IComponentDescriptor getDocumentDescriptor() {
+    return this.documentDescriptor;
   }
 
   @Override
@@ -846,13 +847,15 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     while ( vertices.hasNext() ) {
       final Vertex vertex = vertices.next();
 
-      final Iterator<Map.Entry<String, String>> propsIter = properties.entrySet().iterator();
-      while ( propsIter.hasNext() ) {
-        final Map.Entry<String, String> property = propsIter.next();
-        final String propName = property.getKey();
-        final String propValue = property.getValue();
-        if ( vertex.getProperty( propName ) == null || !vertex.getProperty( propName ).equals( propValue ) ) {
-          continue outer;
+      if ( properties != null ) {
+        final Iterator<Map.Entry<String, String>> propsIter = properties.entrySet().iterator();
+        while ( propsIter.hasNext() ) {
+          final Map.Entry<String, String> property = propsIter.next();
+          final String propName = property.getKey();
+          final String propValue = property.getValue();
+          if ( vertex.getProperty( propName ) == null || !vertex.getProperty( propName ).equals( propValue ) ) {
+            continue outer;
+          }
         }
       }
       // all properties should match
@@ -886,7 +889,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     if ( matchingVertices.size() > 0 ) {
       if ( matchingVertices.size() > 1 ) {
         LOGGER.warn( Messages.getString( "WARN.MultipleMatchingStepVerticesFound", transMeta.getName(),
-          Joiner.on( ", " ).withKeyValueSeparator( ": " ).join( properties ) ) );
+          Joiner.on( ", " ).withKeyValueSeparator( ": " ).join( properties == null ? new HashMap() : properties ) ) );
       }
       return matchingVertices.get( 0 );
     }
@@ -903,7 +906,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   protected List<Vertex> findStepVertices( final TransMeta transMeta, final Map<String, String> properties ) {
 
     final List<Vertex> matchingNodes = new ArrayList();
-    final Map<String, String> propsLookupMap = new HashMap( properties );
+    final Map<String, String> propsLookupMap = properties == null ? new HashMap() : new HashMap( properties );
     propsLookupMap.put( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     final List<Vertex> potentialMatches = findVertices( propsLookupMap );
     final String transPath = KettleAnalyzerUtil.normalizeFilePathSafely( transMeta.getFilename() );
@@ -958,7 +961,8 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     if ( matchingVertices.size() > 0 ) {
       if ( matchingVertices.size() > 1 ) {
         LOGGER.warn( Messages.getString( "WARN.MultipleMatchingFieldVerticesFound", transMeta.getName(),
-          stepName, Joiner.on( ", " ).withKeyValueSeparator( ": " ).join( properties ) ) );
+          stepName, Joiner.on( ", " ).withKeyValueSeparator( ": " ).join( properties == null
+            ? new HashMap() : properties ) ) );
       }
       return matchingVertices.get( 0 );
     }
@@ -980,16 +984,46 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
 
     final Vertex stepVertex = findStepVertex( transMeta, stepName );
 
-    final Map<String, String> propsLookupMap = new HashMap( properties );
+    final Map<String, String> propsLookupMap = properties == null ? new HashMap() : new HashMap( properties );
     propsLookupMap.put( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_FIELD );
     return findVertices( stepVertex.getVertices( Direction.OUT, DictionaryConst.LINK_OUTPUTS ).iterator(),
       propsLookupMap );
   }
 
   /**
+   * Returns the {@link Vertex} with the matching id.
+   *
+   * @param id the id being looked up
+   * @return the {@link Vertex} with the matching id or null
+   */
+  protected Vertex findVertexById( final String id ) {
+
+    final Iterator<Vertex> allVertices = getMetaverseBuilder().getGraph().getVertices().iterator();
+    while ( allVertices.hasNext() ) {
+      final Vertex vertex = allVertices.next();
+      if ( vertex.getId().equals( id ) ) {
+        return vertex;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Finds all fields {@link Vertex}es for the given step, within the given {@link TransMeta}.
+   *
+   * @param transMeta a {@link TransMeta} containing steps
+   * @param stepName  containing step name
+   * @return a @{link List} of field {@link Vertex} objects with the given step name
+   */
+  protected List<Vertex> findFieldVertices( final TransMeta transMeta, final String stepName ) {
+    return findFieldVertices( transMeta, stepName, null );
+  }
+
+  /**
    * Sets the {@link Vertex} property safely, with all the proper null checks.
-   * @param vertex the {@link Vertex} whose property is being set
-   * @param propertyName the property name
+   *
+   * @param vertex        the {@link Vertex} whose property is being set
+   * @param propertyName  the property name
    * @param propertyValue the property value
    * @return true if the property was set succesfully, false otherwise
    */

@@ -63,6 +63,9 @@ public interface TransformationStepNode extends Concept {
   @Adjacency( label = "writesto", direction = Direction.OUT )
   Iterable<Concept> getWritesToNodes();
 
+  @Adjacency( label = "writesto", direction = Direction.OUT )
+  Iterable<FileNode> getWritesToFileNodes();
+
   @Adjacency( label = "isreadby", direction = Direction.IN )
   Iterable<Concept> getReadByNodes();
 

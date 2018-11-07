@@ -25,19 +25,15 @@ package org.pentaho.metaverse.step;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.StringUtils;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.pentaho.metaverse.BaseMetaverseValidationIT;
 import org.pentaho.metaverse.frames.FileNode;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.StreamFieldNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
 import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -47,25 +43,13 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.pentaho.dictionary.DictionaryConst.*;
 
 @RunWith( PowerMockRunner.class )
 @PrepareForTest( MetaverseConfig.class )
 // TODO: Ignored for now, remove the @Ignore annotation once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved
 @Ignore
 public class MdiValidationIT extends StepAnalyzerValidationIT {
-
-  private static final String ROOT_FOLDER = "src/it/resources/repo/mdi-validation";
-  private static final String OUTPUT_FILE = "target/outputfiles/mdiValidationGraph.graphml";
-
-  @BeforeClass
-  public static void init() throws Exception {
-
-    PowerMockito.mockStatic( MetaverseConfig.class );
-    Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
-
-    BaseMetaverseValidationIT.init( ROOT_FOLDER, OUTPUT_FILE );
-  }
 
   private void verifyMdiInputs( final TransformationStepNode mdiNode, final TransformationStepNode inputStepNode,
                                 final String subTransStepNodeName,
@@ -88,8 +72,6 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
       mdiNode.getExecutesNodes().iterator() ).get( 0 );
     // get the virtual step node that is contained by this sub-transformation that corresponds to 'subTransStepNodeName'
     final TransformationStepNode templateSubTransStepNode = templateSubTrans.getStepNode( subTransStepNodeName );
-    // this node should be virtual
-    assertTrue( templateSubTransStepNode.isVirtual() );
 
     final List<FramedMetaverseNode> containedProperties = IteratorUtils.toList(
       templateSubTransStepNode.getContainedNodes().iterator() );
@@ -128,10 +110,11 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
     // verify that the text file output step writes to the correct output file
     final TransformationStepNode textFileOutputNode = mdiHopsToNodes.get( 0 );
     assertEquals( "Text file output", textFileOutputNode.getName() );
-    final List<FileNode> writesToNodes = IteratorUtils.toList( textFileOutputNode.getWritesToNodes().iterator() );
+    final List<FileNode> writesToNodes = IteratorUtils.toList( textFileOutputNode.getWritesToFileNodes().iterator() );
     assertEquals( 1, writesToNodes.size() );
     final FileNode fileNode = writesToNodes.get( 0 );
-    assertTrue( fileNode.getPath().endsWith( outputFileName ) );
+    assertTrue( String.format( "Path expected to end with '%s': %s", outputFileName, fileNode.getPath() ), fileNode
+      .getPath().endsWith( outputFileName ) );
 
     // verify that the mdi node output fields are inputs into the text file output step
     final List<StreamFieldNode> mdiOutputFields = IteratorUtils.toList(
@@ -157,8 +140,6 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
         assertTrue( mdiInputFields.contains( derivingField ) );
         assertTrue( tempalteReadFromStepOutputFields.contains( derivingField ) );
         assertEquals( field.getName(), derivingField.getName() );
-        // this deriving field is also expected to be virtual
-        assertTrue( derivingField.isVirtual() );
       }
     }
 
@@ -208,9 +189,23 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
   @Test
   public void testMdiInjectorStreamReadingAndStreamingSameStep() throws Exception {
 
-    final TransformationNode injectorTransNode = verifyTransformationNode( "injector_stream_same_as_mapping", false );
-    final TransformationNode templateSubTransNode = verifyTransformationNode(
-      "template_stream_same_as_mapping", true );
+    final String transNodeName = "injector_stream_same_as_mapping";
+    final String subTransNodeName = "template_stream_same_as_mapping";
+    initTest( transNodeName );
+
+    final TransformationNode injectorTransNode = verifyTransformationNode( transNodeName, false );
+    final TransformationNode subTransNode = verifyTransformationNode( subTransNodeName, true );
+
+    // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
+    // level nodes of expected types exist
+    assertEquals( "Unexpected number of nodes", 35, getIterableSize( framedGraph.getVertices() ) );
+    assertEquals( "Unexpected number of edges", 96, getIterableSize( framedGraph.getEdges() ) );
+    verifyNodesTypes( ImmutableMap.of(
+      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, subTransNodeName } ),
+      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "File Name", "Separator", "Field Name", "Type",
+        "Trim Type", "Dummy", "First Name", "First Name", "First Name", "First Name", "Last Name", "Last Name",
+        "Last Name", "Last Name", "Age", "Age" } ),
+      NODE_TYPE_STEP_PROPERTY, Arrays.asList( new String[] { "FILENAME", "SEPARATOR" } ) ) );
 
     // The injector should "contain" 4 step nodes and no virtual nodes
     final Map<String, FramedMetaverseNode> stepNodeMap = verifyTransformationSteps( injectorTransNode,
@@ -218,52 +213,137 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
       false );
 
     // the template subTransformation should "contain" no step nodes (non-virtual) and one virtual nodes
-    final Map<String, FramedMetaverseNode> virtualTemplteStepNodeMap = verifyTransformationSteps(
-      templateSubTransNode, new String[] { "My Text file output" }, true );
+    final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps(
+      subTransNode, new String[] { "My Text file output", "My Generate Rows" }, false );
 
-    // verify that the MDI node has no output fields, we don't expect any when not reading directly from a template step
-    final TransformationStepNode mdiNode = verifyMdiNode( stepNodeMap, templateSubTransNode,
-      new String[] { "First Name", "Last Name" } );
-
-    verifyInjectorTextFileOutputNode( mdiNode, "stream_same_as_mapping_injector.txt",
-      new String[] { "First Name", "Last Name" }, (TransformationStepNode) virtualTemplteStepNodeMap.get( "My Text "
-        + "file output" ) );
-
-    // verify all the expected mdi properties and links from fields to properties exist
+    final TransformationStepNode textOutputFieldsNode = (TransformationStepNode) stepNodeMap.get(
+      "Text Output - Fields" );
     final TransformationStepNode textOutputNode = (TransformationStepNode) stepNodeMap.get( "Text Output" );
-    verifyMdiInputs( mdiNode, textOutputNode, "My Text file output", ImmutableMap.of( "File Name", "FILENAME",
-      "Separator", "SEPARATOR" ) );
+    final TransformationStepNode metaInject = (TransformationStepNode) stepNodeMap.get( "ETL Metadata Injection" );
+    final TransformationStepNode textFileOutput = (TransformationStepNode) stepNodeMap.get( "Text file output" );
 
-    final TransformationStepNode textOutputFieldsNode =
-      (TransformationStepNode) stepNodeMap.get( "Text Output - Fields" );
-    verifyMdiInputs( mdiNode, textOutputFieldsNode, "My Text file output", ImmutableMap.of( "Field Name",
+    final TransformationStepNode myTextFileOutputNode = (TransformationStepNode) subTransStepNodeMap.get(
+      "My Text file output" );
+
+    // Text Output
+    verifyNodes( IteratorUtils.toList( textOutputNode.getPreviousSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( textOutputNode.getNextSteps().iterator() ),
+      testStepNode( metaInject.getName() ) );
+    verifyNodes( IteratorUtils.toList( textOutputNode.getInputStreamFields().iterator() ) );
+    verifyNodes( IteratorUtils.toList( textOutputNode.getOutputStreamFields().iterator() ),
+      testFieldNode( "File Name" ), testFieldNode( "Separator" ) );
+    assertEquals( 2, getIterableSize( textOutputNode.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( textOutputNode.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( textOutputNode.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 3, getIterableSize( textOutputNode.getAllOutNodes() ) );
+    assertEquals( 1, getIterableSize( textOutputNode.getOutNodes( LINK_HOPSTO ) ) );
+
+    // ETL Metadata injection
+    // verify the mdi node and connections to the node
+    assertEquals( metaInject, verifyMdiNode( stepNodeMap, subTransNode, new String[] { "First Name", "Last Name" } ) );
+
+    verifyInjectorTextFileOutputNode( metaInject, "stream_same_as_mapping_injector.txt",
+      new String[] { "First Name", "Last Name" }, myTextFileOutputNode );
+    // verify all the expected mdi properties and links from fields to properties exist
+    verifyMdiInputs( metaInject, textOutputNode, myTextFileOutputNode.getName(), ImmutableMap.of( "File Name",
+      "FILENAME", "Separator", "SEPARATOR" ) );
+    verifyMdiInputs( metaInject, textOutputFieldsNode, myTextFileOutputNode.getName(), ImmutableMap.of( "Field Name",
       "", "Trim Type", "", "Type", "", "Dummy", "" ) );
 
-    // we are streaming directly from the 'Text Output - Fields' step to the template's 'My Text file output' step -
-    // verify that all the expected 'derives' links exist between the 'Text Output - Fields' output fields and the
-    // 'My Text file output'  output fields
-    final TransformationStepNode templateStreamToStepNode =
-      (TransformationStepNode) virtualTemplteStepNodeMap.get( "My Text file output" );
-    final List<StreamFieldNode> templateStreamToStepOutputFields = IteratorUtils.toList(
-      templateStreamToStepNode.getOutputStreamFields().iterator() );
-    final List<StreamFieldNode> textOutputFieldsOutputFields = IteratorUtils.toList(
-      textOutputFieldsNode.getOutputStreamFields().iterator() );
-    for ( final StreamFieldNode field : textOutputFieldsOutputFields ) {
-      // get the derived field
-      assertEquals( 1, getIterableSize( field.getFieldNodesDerivedFromMe() ) );
-      final StreamFieldNode derivedField = (StreamFieldNode) IteratorUtils.toList(
-        field.getFieldNodesDerivedFromMe().iterator() ).get( 0 );
-      assertTrue( templateStreamToStepOutputFields.contains( derivedField ) );
-    }
+    verifyNodes( IteratorUtils.toList( metaInject.getPreviousSteps().iterator() ),
+      testStepNode( textOutputNode.getName() ), testStepNode( textOutputFieldsNode.getName() ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getNextSteps().iterator() ),
+      testStepNode( textFileOutput.getName() ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getInputStreamFields().iterator() ),
+      testFieldNode( "File Name" ), testFieldNode( "Separator" ), testFieldNode( "Field Name" ),
+      testFieldNode( "Type" ), testFieldNode( "Trim Type" ), testFieldNode( "Dummy" ), testFieldNode( "First Name" ),
+      testFieldNode( "Last Name" ), testFieldNode( "Age" ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getStreamFieldNodesUses().iterator() ),
+      testFieldNode( "File Name" ), testFieldNode( "Separator" ), testFieldNode( "Field Name" ),
+      testFieldNode( "Trim Type" ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getOutputStreamFields().iterator() ),
+      testFieldNode( "First Name" ), testFieldNode( "Last Name" ) );
+    assertEquals( 13, getIterableSize( metaInject.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( metaInject.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( metaInject.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 8, getIterableSize( metaInject.getAllOutNodes() ) );
+    assertEquals( 1, getIterableSize( metaInject.getOutNodes( LINK_HOPSTO ) ) );
+    assertEquals( 1, getIterableSize( metaInject.getOutNodes( LINK_EXECUTES ) ) );
+
+    // Verify the following chains:
+    // Chain 1: Text Output > outputs First Name > populates > FILENAME
+    // Chain 2: My Text file output > contains > FILENAME
+    final FramedMetaverseNode textOutput_output_fileName = verifyLinkedNode(
+      textOutputNode, LINK_OUTPUTS, "File Name" );
+    final FramedMetaverseNode textOutput_property_fileName = verifyLinkedNode( textOutput_output_fileName,
+      LINK_POPULATES, "FILENAME" );
+    assertEquals( textOutput_property_fileName, verifyLinkedNode( myTextFileOutputNode, LINK_CONTAINS, "FILENAME" ) );
+
+    // Verify the following chains:
+    // - Text Output - Fields > outputs > Field Name > derives > My Text file output:First Name > inputs > ETL Metadata
+    //   injection
+    // - Text Output - Fields > outputs > Type > derives > My Text file output:Last Name > inputs > ETL Metadata
+    //   injection
+    // - Text Output - Fields > outputs > Trim Type > derives > My Text file output:Age > inputs > ETL Metadata
+    //   injection
+    final FramedMetaverseNode textOutputFields_output_fieldName = verifyLinkedNode(
+      textOutputFieldsNode, LINK_OUTPUTS, "Field Name" );
+    final FramedMetaverseNode myTextFileOutput_output_firstName = verifyLinkedNode(
+      myTextFileOutputNode, LINK_OUTPUTS, "First Name" );
+    assertEquals( myTextFileOutput_output_firstName, verifyLinkedNode( textOutputFields_output_fieldName, LINK_DERIVES,
+      "First Name" ) );
+    assertEquals( metaInject, verifyLinkedNode( myTextFileOutput_output_firstName,
+      LINK_INPUTS, metaInject.getName() ) );
+
+    final FramedMetaverseNode textOutputFields_output_type = verifyLinkedNode(
+      textOutputFieldsNode, LINK_OUTPUTS, "Type" );
+    final FramedMetaverseNode myTextFileOutput_output_lastName = verifyLinkedNode(
+      myTextFileOutputNode, LINK_OUTPUTS, "Last Name" );
+    assertEquals( myTextFileOutput_output_lastName, verifyLinkedNode( textOutputFields_output_type, LINK_DERIVES,
+      "Last Name" ) );
+    assertEquals( metaInject, verifyLinkedNode( myTextFileOutput_output_lastName,
+      LINK_INPUTS, metaInject.getName() ) );
+
+    final FramedMetaverseNode textOutputFields_output_trimType = verifyLinkedNode(
+      textOutputFieldsNode, LINK_OUTPUTS, "Trim Type" );
+    final FramedMetaverseNode myTextFileOutput_output_age = verifyLinkedNode(
+      myTextFileOutputNode, LINK_OUTPUTS, "Age" );
+    assertEquals( myTextFileOutput_output_age, verifyLinkedNode( textOutputFields_output_trimType, LINK_DERIVES,
+      "Age" ) );
+    assertEquals( metaInject, verifyLinkedNode( myTextFileOutput_output_age,
+      LINK_INPUTS, metaInject.getName() ) );
+
+    // Verify the following chains:
+    // - My Text file output:First Name > derives > ETL Metadata injection:First Name > inputs > Text file output >
+    // outputs First Name
+    final FramedMetaverseNode metaInject_output_firstName = verifyLinkedNode(
+      metaInject, LINK_OUTPUTS, "First Name" );
+    assertEquals( metaInject_output_firstName, verifyLinkedNode( myTextFileOutput_output_firstName, LINK_DERIVES,
+      "First Name" ) );
+    assertEquals( textFileOutput, verifyLinkedNode( metaInject_output_firstName, LINK_INPUTS,
+      textFileOutput.getName() ) );
   }
 
   @Test
-  public void testMdiInjectorStreamReadingAndStreamingDifferentStep() throws Exception {
+  public void testMdiInjectorStreamReadingAndStreamingDifferentSteps() throws Exception {
 
-    final TransformationNode injectorTransNode =
-      verifyTransformationNode( "injector_stream_different_than_mapping", false );
-    final TransformationNode templateSubTransNode = verifyTransformationNode(
-      "template_stream_different_than_mapping", true );
+    final String transNodeName = "injector_stream_different_than_mapping";
+    final String subTransNodeName = "template_stream_different_than_mapping";
+    initTest( transNodeName );
+
+    final TransformationNode injectorTransNode = verifyTransformationNode( transNodeName, false );
+    final TransformationNode subTransNode = verifyTransformationNode( subTransNodeName, true );
+
+    // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
+    // level nodes of expected types exist
+    assertEquals( "Unexpected number of nodes", 40, getIterableSize( framedGraph.getVertices() ) );
+    assertEquals( "Unexpected number of edges", 113, getIterableSize( framedGraph.getEdges() ) );
+    verifyNodesTypes( ImmutableMap.of(
+      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, subTransNodeName } ),
+      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "File Name", "Separator", "Field Name", "Type",
+        "Trim Type", "Dummy", "First Name", "First Name", "First Name", "First Name", "First Name", "Last Name",
+        "Last Name", "Last Name", "Last Name", "Last Name", "Age", "Age", "Age" } ),
+      NODE_TYPE_STEP_PROPERTY, Arrays.asList( new String[] { "FILENAME", "SEPARATOR" } ) ) );
 
     // The injector should "contain" 4 step nodes and no virtual nodes
     final Map<String, FramedMetaverseNode> stepNodeMap = verifyTransformationSteps( injectorTransNode,
@@ -271,50 +351,114 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
       false );
 
     // the template subTransformation should "contain" no step nodes (non-virtual) and one virtual nodes
-    final Map<String, FramedMetaverseNode> virtualTemplteStepNodeMap = verifyTransformationSteps(
-      templateSubTransNode, new String[] { "My Text file output", "My Text file output [2]" }, true );
+    final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps(
+      subTransNode, new String[] { "My Text file output", "My Text file output [2]", "My Generate Rows" }, false );
 
-    // verify that the MDI node has no output fields, we don't expect any when not reading directly from a template step
-    final TransformationStepNode mdiNode = verifyMdiNode( stepNodeMap, templateSubTransNode,
-      new String[] { "First Name", "Last Name" } );
-
-    verifyInjectorTextFileOutputNode( mdiNode, "stream_different_than_mapping_injector.txt",
-      new String[] { "First Name", "Last Name" },
-      (TransformationStepNode) virtualTemplteStepNodeMap.get( "My Text file output" ) );
-
-    // verify all the expected mdi properties and links from fields to properties exist
+    final TransformationStepNode textOutputFieldsNode = (TransformationStepNode) stepNodeMap.get(
+      "Text Output - Fields" );
     final TransformationStepNode textOutputNode = (TransformationStepNode) stepNodeMap.get( "Text Output" );
-    verifyMdiInputs( mdiNode, textOutputNode, "My Text file output", ImmutableMap.of( "File Name", "FILENAME",
-      "Separator", "SEPARATOR" ) );
+    final TransformationStepNode metaInject = (TransformationStepNode) stepNodeMap.get( "ETL Metadata Injection" );
+    final TransformationStepNode textFileOutput = (TransformationStepNode) stepNodeMap.get( "Text file output" );
 
-    final TransformationStepNode textOutputFieldsNode =
-      (TransformationStepNode) stepNodeMap.get( "Text Output - Fields" );
-    verifyMdiInputs( mdiNode, textOutputFieldsNode, "My Text file output", ImmutableMap.of( "Field Name",
+    final TransformationStepNode myTextFileOutputNode = (TransformationStepNode) subTransStepNodeMap.get(
+      "My Text file output" );
+    final TransformationStepNode myTextFileOutputNode2 = (TransformationStepNode) subTransStepNodeMap.get(
+      "My Text file output [2]" );
+
+    // Text Output
+    verifyNodes( IteratorUtils.toList( textOutputNode.getPreviousSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( textOutputNode.getNextSteps().iterator() ),
+      testStepNode( metaInject.getName() ) );
+    verifyNodes( IteratorUtils.toList( textOutputNode.getInputStreamFields().iterator() ) );
+    verifyNodes( IteratorUtils.toList( textOutputNode.getOutputStreamFields().iterator() ),
+      testFieldNode( "File Name" ), testFieldNode( "Separator" ) );
+    assertEquals( 2, getIterableSize( textOutputNode.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( textOutputNode.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( textOutputNode.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 3, getIterableSize( textOutputNode.getAllOutNodes() ) );
+    assertEquals( 1, getIterableSize( textOutputNode.getOutNodes( LINK_HOPSTO ) ) );
+
+    // ETL Metadata injection
+    // verify the mdi node and connections to the node
+    assertEquals( metaInject, verifyMdiNode( stepNodeMap, subTransNode, new String[] { "First Name", "Last Name" } ) );
+
+    verifyInjectorTextFileOutputNode( metaInject, "stream_different_than_mapping_injector.txt",
+      new String[] { "First Name", "Last Name" }, myTextFileOutputNode );
+    // verify all the expected mdi properties and links from fields to properties exist
+    verifyMdiInputs( metaInject, textOutputNode, myTextFileOutputNode.getName(),
+      ImmutableMap.of( "File Name", "FILENAME",
+        "Separator", "SEPARATOR" ) );
+    verifyMdiInputs( metaInject, textOutputFieldsNode, myTextFileOutputNode.getName(), ImmutableMap.of( "Field Name",
       "", "Trim Type", "", "Type", "", "Dummy", "" ) );
 
-    // we are streaming directly from the 'Text Output - Fields' step to the template's 'My Text file output [2]' step -
-    // verify that all the expected 'derives' links exist between the 'Text Output - Fields' output fields and the
-    // 'My Text file output [2]'  output fields
-    final TransformationStepNode templateStreamToStepNode =
-      (TransformationStepNode) virtualTemplteStepNodeMap.get( "My Text file output [2]" );
-    final List<StreamFieldNode> templateStreamToStepOutputFields = IteratorUtils.toList(
-      templateStreamToStepNode.getOutputStreamFields().iterator() );
-    final List<StreamFieldNode> textOutputFieldsOutputFields = IteratorUtils.toList(
-      textOutputFieldsNode.getOutputStreamFields().iterator() );
-    for ( final StreamFieldNode field : textOutputFieldsOutputFields ) {
-      // get the derived field
-      assertEquals( 1, getIterableSize( field.getFieldNodesDerivedFromMe() ) );
-      final StreamFieldNode derivedField = (StreamFieldNode) IteratorUtils.toList(
-        field.getFieldNodesDerivedFromMe().iterator() ).get( 0 );
-      assertTrue( templateStreamToStepOutputFields.contains( derivedField ) );
-    }
+    verifyNodes( IteratorUtils.toList( metaInject.getPreviousSteps().iterator() ),
+      testStepNode( textOutputNode.getName() ), testStepNode( textOutputFieldsNode.getName() ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getNextSteps().iterator() ),
+      testStepNode( textFileOutput.getName() ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getInputStreamFields().iterator() ),
+      testFieldNode( "File Name" ), testFieldNode( "Separator" ), testFieldNode( "Field Name" ),
+      testFieldNode( "Type" ), testFieldNode( "Trim Type" ), testFieldNode( "Dummy" ), testFieldNode( "First Name" ),
+      testFieldNode( "Last Name" ), testFieldNode( "Age" ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getStreamFieldNodesUses().iterator() ),
+      testFieldNode( "File Name" ), testFieldNode( "Separator" ), testFieldNode( "Field Name" ),
+      testFieldNode( "Trim Type" ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getOutputStreamFields().iterator() ),
+      testFieldNode( "First Name" ), testFieldNode( "Last Name" ) );
+    assertEquals( 13, getIterableSize( metaInject.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( metaInject.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( metaInject.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 8, getIterableSize( metaInject.getAllOutNodes() ) );
+    assertEquals( 1, getIterableSize( metaInject.getOutNodes( LINK_HOPSTO ) ) );
+    assertEquals( 1, getIterableSize( metaInject.getOutNodes( LINK_EXECUTES ) ) );
+
+    // Verify the following chains:
+    // Chain 1: Text Output > outputs First Name > populates > FILENAME
+    // Chain 2: My Text file output > contains > FILENAME
+    final FramedMetaverseNode textOutput_output_fileName = verifyLinkedNode(
+      textOutputNode, LINK_OUTPUTS, "File Name" );
+    final FramedMetaverseNode textOutput_property_fileName = verifyLinkedNode( textOutput_output_fileName,
+      LINK_POPULATES, "FILENAME" );
+    assertEquals( textOutput_property_fileName, verifyLinkedNode( myTextFileOutputNode, LINK_CONTAINS, "FILENAME" ) );
+
+    // Verify the following chains:
+    // - Text Output - Fields > outputs > Field Name > derives My Text file output [2]: First Name
+    // - My Text file output: First Name > inputs > ETL Metadata injection
+    // - My Text file output: First Name > derives > ETL Metadata injection:First Name
+    final FramedMetaverseNode textOutputFields_output_fieldName = verifyLinkedNode(
+      textOutputFieldsNode, LINK_OUTPUTS, "Field Name" );
+    final FramedMetaverseNode myTextFileOutput_output_firstName = verifyLinkedNode(
+      myTextFileOutputNode, LINK_OUTPUTS, "First Name" );
+    final FramedMetaverseNode myTextFileOutput2_output_firstName = verifyLinkedNode(
+      myTextFileOutputNode2, LINK_OUTPUTS, "First Name" );
+    final FramedMetaverseNode metaInject_output_firstName = verifyLinkedNode( metaInject, LINK_OUTPUTS, "First Name" );
+    assertEquals( myTextFileOutput2_output_firstName, verifyLinkedNode(
+      textOutputFields_output_fieldName, LINK_DERIVES, "First Name" ) );
+    assertEquals( metaInject, verifyLinkedNode( myTextFileOutput_output_firstName,
+      LINK_INPUTS, metaInject.getName() ) );
+    assertEquals( metaInject_output_firstName, verifyLinkedNode( myTextFileOutput_output_firstName,
+      LINK_DERIVES, "First Name" ) );
   }
 
   @Test
-  public void testMdiInjectorNoStream() throws Exception {
+  public void testMdiInjectorNoStreaMapTwoSteps() throws Exception {
 
-    final TransformationNode injectorTransNode = verifyTransformationNode( "injector_no_stream", false );
-    final TransformationNode templateSubTransNode = verifyTransformationNode( "template_no_stream", true );
+    final String transNodeName = "injector_no_stream_map_2_steps";
+    final String subTransNodeName = "template_no_stream_map_2_steps";
+    initTest( transNodeName );
+
+    final TransformationNode injectorTransNode = verifyTransformationNode( transNodeName, false );
+    final TransformationNode subTransNode = verifyTransformationNode( subTransNodeName, true );
+
+    // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
+    // level nodes of expected types exist
+    assertEquals( "Unexpected number of nodes", 38, getIterableSize( framedGraph.getVertices() ) );
+    assertEquals( "Unexpected number of edges", 99, getIterableSize( framedGraph.getEdges() ) );
+    verifyNodesTypes( ImmutableMap.of(
+      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, subTransNodeName } ),
+      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "File Name", "Separator", "Field Name", "Trim Type",
+        "First Name", "First Name", "First Name", "Last Name", "Last Name", "Last Name", "Age", "Age", "Age" } ),
+      NODE_TYPE_STEP_PROPERTY, Arrays.asList( new String[] { "FILENAME", "SEPARATOR", "SEPARATOR", "OUTPUT_FIELDNAME",
+        "OUTPUT_FIELDNAME", "OUTPUT_TRIM" } ) ) );
 
     // The injector should "contain" 4 step nodes and no virtual nodes
     final Map<String, FramedMetaverseNode> stepNodeMap = verifyTransformationSteps( injectorTransNode,
@@ -322,79 +466,94 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
       false );
 
     // the template subTransformation should "contain" no step nodes (non-virtual) and one virtual nodes
-    verifyTransformationSteps( templateSubTransNode, new String[] { "My Text file output" }, true );
+    final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps(
+      subTransNode, new String[] { "My Text file output", "My Text file output [2]", "My Generate Rows" }, false );
 
-    // verify that the MDI node has no output fields, we don't expect any when not reading directly from a template step
-    final TransformationStepNode mdiNode = verifyMdiNode( stepNodeMap, templateSubTransNode, null );
-
-    verifyInjectorTextFileOutputNode( mdiNode, "injector_no_stream.txt", null, null );
-
-    // verify all the expected mdi properties and links from fields to properties exist
+    final TransformationStepNode textOutputFieldsNode = (TransformationStepNode) stepNodeMap.get(
+      "Text Output - Fields" );
     final TransformationStepNode textOutputNode = (TransformationStepNode) stepNodeMap.get( "Text Output" );
-    verifyMdiInputs( mdiNode, textOutputNode, "My Text file output", ImmutableMap.of( "File Name", "FILENAME",
-      "Separator", "SEPARATOR" ) );
+    final TransformationStepNode metaInject = (TransformationStepNode) stepNodeMap.get( "ETL Metadata Injection" );
+    final TransformationStepNode textFileOutput = (TransformationStepNode) stepNodeMap.get( "Text file output" );
 
-    final TransformationStepNode textOutputFieldsNode =
-      (TransformationStepNode) stepNodeMap.get( "Text Output - Fields" );
-    verifyMdiInputs( mdiNode, textOutputFieldsNode, "My Text file output", ImmutableMap.of( "Field Name",
-      "OUTPUT_FIELDNAME", "Trim Type", "OUTPUT_TRIM", "Type", "", "Dummy", "" ) );
-  }
+    final TransformationStepNode myTextFileOutputNode = (TransformationStepNode) subTransStepNodeMap.get(
+      "My Text file output" );
+    final TransformationStepNode myTextFileOutputNode2 = (TransformationStepNode) subTransStepNodeMap.get(
+      "My Text file output [2]" );
 
-  //@Test
-  public void testMdiTemplateNoStream() throws Exception {
-    final TransformationNode templateTransNode = verifyTransformationNode( "template_no_stream", false );
+    // Text Output
+    verifyNodes( IteratorUtils.toList( textOutputNode.getPreviousSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( textOutputNode.getNextSteps().iterator() ),
+      testStepNode( metaInject.getName() ) );
+    verifyNodes( IteratorUtils.toList( textOutputNode.getInputStreamFields().iterator() ) );
+    verifyNodes( IteratorUtils.toList( textOutputNode.getOutputStreamFields().iterator() ),
+      testFieldNode( "File Name" ), testFieldNode( "Separator" ) );
+    assertEquals( 2, getIterableSize( textOutputNode.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( textOutputNode.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( textOutputNode.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 3, getIterableSize( textOutputNode.getAllOutNodes() ) );
+    assertEquals( 1, getIterableSize( textOutputNode.getOutNodes( LINK_HOPSTO ) ) );
 
-    // The template should "contain" 3 step nodes and no virtual nodes
-    final Map<String, FramedMetaverseNode> stepNodeMap = verifyTransformationSteps( templateTransNode,
-      new String[] { "My Generate Rows", "My Text file output", "My Text file output [2]" }, false );
+    // ETL Metadata injection
+    // verify the mdi node and connections to the node - since we are not streaming, the mdi node should have no
+    // output fields
+    assertEquals( metaInject, verifyMdiNode( stepNodeMap, subTransNode, new String[] {} ) );
 
-    final TransformationStepNode textOutputNode1 = (TransformationStepNode) stepNodeMap.get( "My Text file output" );
-    // verify that the output file name for the first file output node comes from the injector
-    final List<FileNode> writesToNodes1 = IteratorUtils.toList( textOutputNode1.getWritesToNodes().iterator() );
-    assertEquals( 1, writesToNodes1.size() );
-    assertTrue( writesToNodes1.get( 0 ).getPath().endsWith( "no_stream_tempalte.txt" ) );
-    // should have two output fields
-
-    final TransformationStepNode textOutputNode2 =
-      (TransformationStepNode) stepNodeMap.get( "My Text file output [2]" );
-    // verify that the output file name for the second file output node remains unchanged
-    final List<FileNode> writesToNodes2 = IteratorUtils.toList( textOutputNode1.getWritesToNodes().iterator() );
-    assertEquals( 1, writesToNodes2.size() );
-    assertTrue( writesToNodes2.get( 0 ).getPath().endsWith( "orig_no_stream_tempalte2.txt" ) );
-    // should have three output fields
-  }
-
-  @Test
-  public void testMdiInjectorNoStreamMap2Steps() throws Exception {
-
-    final TransformationNode injectorTransNode = verifyTransformationNode( "injector_no_stream_map_2_steps", false );
-    final TransformationNode templateSubTransNode = verifyTransformationNode( "template_no_stream_map_2_steps", true );
-
-    // The injector should "contain" 4 step nodes and no virtual nodes
-    final Map<String, FramedMetaverseNode> stepNodeMap = verifyTransformationSteps( injectorTransNode,
-      new String[] { "Text Output - Fields", "Text Output", "ETL Metadata Injection", "Text file output" }, false );
-
-    // the template subTransformation should "contain" no step nodes (non-virtual) and one virtual nodes
-    verifyTransformationSteps( templateSubTransNode, new String[] { "My Text file output",
-      "My Text file output [2]" }, true );
-
-    // verify that the MDI node has no output fields, we don't expect any when not reading directly from a template step
-    final TransformationStepNode mdiNode = verifyMdiNode( stepNodeMap, templateSubTransNode, null );
-
-    verifyInjectorTextFileOutputNode( mdiNode, "injector_no_stream_map_2_steps.txt", null, null );
-
+    verifyInjectorTextFileOutputNode( metaInject, "injector_no_stream_map_2_steps.txt", new String[] {},
+      myTextFileOutputNode );
     // verify all the expected mdi properties and links from fields to properties exist
-    final TransformationStepNode textOutputNode = (TransformationStepNode) stepNodeMap.get( "Text Output" );
-    verifyMdiInputs( mdiNode, textOutputNode, "My Text file output", ImmutableMap.of( "File Name", "FILENAME",
-      "Separator", "SEPARATOR" ) );
-    verifyMdiInputs( mdiNode, textOutputNode, "My Text file output [2]", ImmutableMap.of( "File Name", "",
-      "Separator", "SEPARATOR" ) );
-
-    final TransformationStepNode textOutputFieldsNode =
-      (TransformationStepNode) stepNodeMap.get( "Text Output - Fields" );
-    verifyMdiInputs( mdiNode, textOutputFieldsNode, "My Text file output", ImmutableMap.of( "Field Name",
+    verifyMdiInputs( metaInject, textOutputNode, myTextFileOutputNode.getName(),
+      ImmutableMap.of( "File Name", "FILENAME",
+        "Separator", "SEPARATOR" ) );
+    verifyMdiInputs( metaInject, textOutputFieldsNode, myTextFileOutputNode.getName(), ImmutableMap.of( "Field Name",
       "OUTPUT_FIELDNAME", "Trim Type", "OUTPUT_TRIM" ) );
-    verifyMdiInputs( mdiNode, textOutputFieldsNode, "My Text file output [2]", ImmutableMap.of( "Field Name",
-      "OUTPUT_FIELDNAME", "Trim Type", "" ) );
+
+    verifyNodes( IteratorUtils.toList( metaInject.getPreviousSteps().iterator() ),
+      testStepNode( textOutputNode.getName() ), testStepNode( textOutputFieldsNode.getName() ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getNextSteps().iterator() ),
+      testStepNode( textFileOutput.getName() ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getInputStreamFields().iterator() ),
+      testFieldNode( "File Name" ), testFieldNode( "Separator" ), testFieldNode( "Field Name" ),
+      testFieldNode( "Trim Type" ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getStreamFieldNodesUses().iterator() ),
+      testFieldNode( "File Name" ), testFieldNode( "Separator" ), testFieldNode( "Field Name" ),
+      testFieldNode( "Trim Type" ) );
+    verifyNodes( IteratorUtils.toList( metaInject.getOutputStreamFields().iterator() ) );
+    assertEquals( 8, getIterableSize( metaInject.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( metaInject.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( metaInject.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 6, getIterableSize( metaInject.getAllOutNodes() ) );
+    assertEquals( 1, getIterableSize( metaInject.getOutNodes( LINK_HOPSTO ) ) );
+    assertEquals( 1, getIterableSize( metaInject.getOutNodes( LINK_EXECUTES ) ) );
+
+    // Verify the following chains:
+    // Chain 1: Text Output > outputs > First Name > populates > My Text file output:FILENAME
+    // Chain 2: My Text file output > contains > FILENAME
+    // Chain 3: Text Output > outputs > Separator > populates > My Text file output:SEPARATOR (x2)
+    final FramedMetaverseNode textOutput_output_fileName = verifyLinkedNode(
+      textOutputNode, LINK_OUTPUTS, "File Name" );
+    final FramedMetaverseNode myTextFileOutput_property_fileName = verifyLinkedNode( myTextFileOutputNode,
+      LINK_CONTAINS, "FILENAME" );
+    assertEquals( myTextFileOutput_property_fileName, verifyLinkedNode( textOutput_output_fileName,
+      LINK_POPULATES, "FILENAME" ) );
+    final FramedMetaverseNode textOutput_output_separator = verifyLinkedNode(
+      textOutputNode, LINK_OUTPUTS, "Separator" );
+    final FramedMetaverseNode myTextFileOutput_property_separator = verifyLinkedNode( myTextFileOutputNode,
+      LINK_CONTAINS, "SEPARATOR" );
+    final List<FramedMetaverseNode> textOutput_property_separators = verifyLinkedNodes( textOutput_output_separator,
+      LINK_POPULATES, "SEPARATOR" );
+    assertEquals( 2, textOutput_property_separators.size() );
+    assertTrue( textOutput_property_separators.contains( myTextFileOutput_property_separator ) );
+
+    // Verify the following chains:
+    // Chain 1: Text Output - Fields > outputs > First Name > populates > My Text file output [2]:OUTPUT_FIELDNAME (x2)
+    // Chain 2: My Text file output [2] > contains > OUTPUT_FIELDNAME
+    final FramedMetaverseNode textOutputFields_output_fieldName = verifyLinkedNode(
+      textOutputFieldsNode, LINK_OUTPUTS, "Field Name" );
+    final FramedMetaverseNode myTextFileOutput_property_fieldName = verifyLinkedNode( myTextFileOutputNode,
+      LINK_CONTAINS, "OUTPUT_FIELDNAME" );
+    final List<FramedMetaverseNode> textOutputFields_property_fieldNames = verifyLinkedNodes(
+      textOutputFields_output_fieldName, LINK_POPULATES, "OUTPUT_FIELDNAME" );
+    assertEquals( 2, textOutputFields_property_fieldNames.size() );
+    assertTrue( textOutputFields_property_fieldNames.contains( myTextFileOutput_property_fieldName ) );
   }
 }
