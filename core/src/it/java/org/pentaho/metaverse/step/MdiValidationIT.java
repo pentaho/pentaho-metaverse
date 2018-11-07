@@ -322,6 +322,22 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
       "First Name" ) );
     assertEquals( textFileOutput, verifyLinkedNode( metaInject_output_firstName, LINK_INPUTS,
       textFileOutput.getName() ) );
+
+    // validate properties
+    verifyNodeProperties( metaInject, new ImmutableMap.Builder<String, Object>()
+      .put( PROPERTY_STEP_TYPE, SKIP ).put( "color", SKIP ).put( PROPERTY_PLUGIN_ID, SKIP ).put( PROPERTY_TYPE, SKIP )
+      .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
+      .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
+      .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP ).put( "runResultingTransformation", "true" )
+      .put( "streamTargetStepname", SKIP ).put( "streamSourceStepname", SKIP ).put( "targetFile", SKIP )
+      .put( "sourceStepName", SKIP )
+      .put( PROPERTY_VERBOSE_DETAILS, "mapping [1],ignored mapping [1],mapping [2],ignored mapping [2]" )
+      .put( "mapping [1]", "Text Output: Separator > [template_stream_same_as_mapping] My Text file output: SEPARATOR" )
+      .put( "mapping [2]", "Text Output: File Name > [template_stream_same_as_mapping] My Text file output: FILENAME" )
+      .put( "ignored mapping [1]", "Text Output - Fields: Trim Type > [template_stream_same_as_mapping] My Text file "
+        + "output: OUTPUT_TRIM" )
+      .put( "ignored mapping [2]", "Text Output - Fields: Field Name > [template_stream_same_as_mapping] My Text file"
+        + " output: OUTPUT_FIELDNAME" ).build() );
   }
 
   @Test
@@ -437,6 +453,22 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
       LINK_INPUTS, metaInject.getName() ) );
     assertEquals( metaInject_output_firstName, verifyLinkedNode( myTextFileOutput_output_firstName,
       LINK_DERIVES, "First Name" ) );
+
+    // validate properties
+    verifyNodeProperties( metaInject, new ImmutableMap.Builder<String, Object>()
+      .put( PROPERTY_STEP_TYPE, SKIP ).put( "color", SKIP ).put( PROPERTY_PLUGIN_ID, SKIP ).put( PROPERTY_TYPE, SKIP )
+      .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
+      .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
+      .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP ).put( "runResultingTransformation", "true" )
+      .put( "streamTargetStepname", SKIP ).put( "streamSourceStepname", SKIP ).put( "targetFile", SKIP )
+      .put( "sourceStepName", SKIP )
+      .put( PROPERTY_VERBOSE_DETAILS, "mapping [1],ignored mapping [1],mapping [2],ignored mapping [2]" )
+      .put( "mapping [1]", "Text Output: Separator > [template_stream_different_than_mapping] My Text file output: SEPARATOR" )
+      .put( "mapping [2]", "Text Output: File Name > [template_stream_different_than_mapping] My Text file output: FILENAME" )
+      .put( "ignored mapping [1]", "Text Output - Fields: Trim Type > [template_stream_different_than_mapping]"
+        + " My Text file output: OUTPUT_TRIM" )
+      .put( "ignored mapping [2]", "Text Output - Fields: Field Name > [template_stream_different_than_mapping]"
+        + " My Text file output: OUTPUT_FIELDNAME" ).build() );
   }
 
   @Test
@@ -555,5 +587,24 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
       textOutputFields_output_fieldName, LINK_POPULATES, "OUTPUT_FIELDNAME" );
     assertEquals( 2, textOutputFields_property_fieldNames.size() );
     assertTrue( textOutputFields_property_fieldNames.contains( myTextFileOutput_property_fieldName ) );
+
+    // validate properties
+    verifyNodeProperties( metaInject, new ImmutableMap.Builder<String, Object>()
+      .put( PROPERTY_STEP_TYPE, SKIP ).put( "color", SKIP ).put( PROPERTY_PLUGIN_ID, SKIP ).put( PROPERTY_TYPE, SKIP )
+      .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
+      .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
+      .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP ).put( "runResultingTransformation", "true" )
+      .put( "targetFile", SKIP )
+      .put( PROPERTY_VERBOSE_DETAILS, "mapping [1],mapping [2],mapping [3],mapping [4],mapping [5],mapping [6]" )
+      .put( "mapping [1]", "Text Output: Separator > [template_no_stream_map_2_steps] My Text file output: SEPARATOR" )
+      .put( "mapping [2]", "Text Output: Separator > [template_no_stream_map_2_steps] My Text file output [2]: "
+        + "SEPARATOR" )
+      .put( "mapping [3]", "Text Output - Fields: Trim Type > [template_no_stream_map_2_steps] My Text file output: "
+        + "OUTPUT_TRIM" )
+      .put( "mapping [4]", "Text Output - Fields: Field Name > [template_no_stream_map_2_steps] My Text file output: "
+        + "OUTPUT_FIELDNAME" )
+      .put( "mapping [5]", "Text Output: File Name > [template_no_stream_map_2_steps] My Text file output: FILENAME" )
+      .put( "mapping [6]", "Text Output - Fields: Field Name > [template_no_stream_map_2_steps] My Text file output "
+        + "[2]: OUTPUT_FIELDNAME" ).build() );
   }
 }
