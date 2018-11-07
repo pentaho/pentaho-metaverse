@@ -33,26 +33,19 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.blueprint.container.BlueprintContainer;
-import org.pentaho.di.base.AbstractMeta;
-import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.ChangeType;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IDocumentController;
-import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.IRequiresMetaverseBuilder;
 import org.pentaho.metaverse.api.MetaverseException;
-import org.pentaho.metaverse.api.Namespace;
-import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IOperation;
 import org.pentaho.metaverse.api.model.Operation;
 import org.pentaho.metaverse.api.model.Operations;
-import org.pentaho.metaverse.impl.MetaverseBuilder;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 import java.util.ArrayList;
@@ -188,31 +181,5 @@ public class MetaverseUtilTest {
     assertEquals( DictionaryConst.PROPERTY_MODIFIED, op.getName() );
     assertEquals( "name", op.getDescription() );
 
-  }
-
-  @Test
-  public void tesBuildDocument() throws MetaverseException {
-    final IMetaverseBuilder builder = new MetaverseBuilder( null );
-    final AbstractMeta transMeta = new TransMeta();
-    final String transName = "MyTransMeta";
-    transMeta.setName( transName );
-    final String id = "path.ktr";
-    final String namespaceId = "MyNamespace";
-    final INamespace namespace = new Namespace( namespaceId );
-
-    assertNull( MetaverseUtil.buildDocument( null, transMeta, id, namespace ) );
-
-    IDocument document = MetaverseUtil.buildDocument( builder, transMeta, id, namespace );
-    assertNotNull( document );
-    assertEquals( namespace, document.getNamespace() );
-    assertEquals( transMeta, document.getContent() );
-    assertEquals( id, document.getStringID() );
-    assertEquals( transName, document.getName() );
-    assertEquals( "ktr", document.getExtension() );
-    assertEquals( DictionaryConst.CONTEXT_RUNTIME, document.getContext().getContextName() );
-    assertEquals( document.getName(), document.getProperty( DictionaryConst.PROPERTY_NAME ) );
-    assertEquals( KettleAnalyzerUtil.normalizeFilePath( "path.ktr" ), document.getProperty( DictionaryConst
-      .PROPERTY_PATH ) );
-    assertEquals(namespaceId, document.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
   }
 }

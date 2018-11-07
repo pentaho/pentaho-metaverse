@@ -22,7 +22,6 @@
 
 package org.pentaho.metaverse;
 
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -38,7 +37,6 @@ import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IDocumentController;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
 import org.pentaho.metaverse.api.IMetaverseReader;
-import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.frames.Concept;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
@@ -54,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -183,14 +180,12 @@ public abstract  class BaseMetaverseValidationIT {
       DictionaryConst.NODE_TYPE_TRANS_STEP, stepNames );
 
     String transPath = transNode.getProperty( PROPERTY_PATH ).toString();
-    try {
-      transPath = KettleAnalyzerUtil.normalizeFilePath( transPath );
-    } catch ( final MetaverseException e ) {
-      // ignore
-    }
+    transPath = KettleAnalyzerUtil.normalizeFilePathSafely( transPath );
+
     // traverse each step node and verify namespace
     for ( final FramedMetaverseNode stepNode : stepNodes ) {
-      final String stepNamespace = stepNode.getProperty( PROPERTY_NAMESPACE ).toString().replaceAll( "\\\\/", "/" );
+      final String stepNamespace = stepNode.getProperty( PROPERTY_NAMESPACE ).toString().replaceAll( "\\\\/", "/" )
+        .replaceAll( "\\\\\\\\", "\\\\" );
       final String expectedStepNamespace = "{\"namespace\":{\"name\":\"" + REPO_ID + "\",\"type\":\"Locator\"},"
         + "\"path\":\"" + transPath + "\",\"type\":\"Transformation\"}";
       assertEquals( expectedStepNamespace, stepNamespace );
@@ -309,11 +304,14 @@ public abstract  class BaseMetaverseValidationIT {
       // output node
       FramedMetaverseNode outptuNode = findNode( outputs, link.getOutputNode() );
       assertNotNull( outptuNode );
-      // verify namespace
-      final String actualNamespace = outptuNode.getProperty( PROPERTY_NAMESPACE ).toString();
-      final String expectedNamespace = "{\"name\":\"" + stepName + "\",\"namespace\":" + stepNamespace + ",\"type"
-        + "\":\"" + NODE_TYPE_TRANS_STEP + "\"}";
-      assertEquals( expectedNamespace, actualNamespace );
+      // verify namespace on stream fields (file and db field namespace will be different)
+      final String outputNodeType = outptuNode.getProperty( PROPERTY_TYPE ).toString();
+      if ( NODE_TYPE_TRANS_FIELD.equals( outputNodeType ) ) {
+        final String actualNamespace = outptuNode.getProperty( PROPERTY_NAMESPACE ).toString();
+        final String expectedNamespace = "{\"name\":\"" + stepName + "\",\"namespace\":" + stepNamespace + ",\"type"
+          + "\":\"" + NODE_TYPE_TRANS_STEP + "\"}";
+        assertEquals( expectedNamespace, actualNamespace );
+      }
 
       final List<Concept> linkedNodes = IteratorUtils.toList(
         inputNode.getOutNodes( link.getLinkLabel() ).iterator() );
