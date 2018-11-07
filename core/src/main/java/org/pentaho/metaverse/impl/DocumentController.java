@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.impl;
 
 import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
 import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IDocumentController;
@@ -415,4 +416,8 @@ public class DocumentController implements IDocumentController, IDocumentListene
     return metaverseBuilder.addLink( fromNode, label, toNode );
   }
 
+  @Override
+  public void addLink( Vertex fromVertex, String label, Vertex toVertex ) {
+    metaverseBuilder.addLink( fromVertex, label, toVertex );
+  }
 }
