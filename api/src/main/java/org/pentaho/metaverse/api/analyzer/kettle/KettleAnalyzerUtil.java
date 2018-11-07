@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.api.analyzer.kettle;
 
 import org.apache.commons.vfs2.FileObject;
+import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
@@ -37,8 +38,18 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputStep;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.api.AnalysisContext;
+import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IDocument;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
+import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.metaverse.api.messages.Messages;
 import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.slf4j.Logger;
@@ -47,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,13 +91,17 @@ public class KettleAnalyzerUtil {
     }
   }
 
+  /**
+   * Normalizes the {@code filePath} safely, ignoring exceptions and returning the original string, if there is a
+   * problem with the normalization.
+   */
   public static String normalizeFilePathSafely( String filePath ) {
     try {
       return normalizeFilePath( filePath );
     } catch ( final MetaverseException e ) {
       log.error( e.getMessage() );
     }
-    return "";
+    return filePath;
   }
 
   public static Collection<IExternalResourceInfo> getResourcesFromMeta(
@@ -145,10 +161,9 @@ public class KettleAnalyzerUtil {
     TransMeta subTransMeta = null;
     switch ( meta.getSpecificationMethod() ) {
       case FILENAME:
-        String transPath = null;
+        String transPath = KettleAnalyzerUtil.normalizeFilePathSafely(
+          parentTransMeta.environmentSubstitute( meta.getFileName() ) );
         try {
-          transPath = KettleAnalyzerUtil.normalizeFilePath( parentTransMeta.environmentSubstitute(
-            meta.getFileName() ) );
           subTransMeta = getSubTransMeta( transPath );
         } catch ( Exception e ) {
           throw new MetaverseAnalyzerException( "Sub transformation can not be found - " + transPath, e );
@@ -192,12 +207,8 @@ public class KettleAnalyzerUtil {
     String transPath = null;
     switch ( meta.getSpecificationMethod() ) {
       case FILENAME:
-        try {
-          transPath = KettleAnalyzerUtil.normalizeFilePath( parentTransMeta.environmentSubstitute(
-            meta.getFileName() ) );
-        } catch ( Exception e ) {
-          throw new MetaverseAnalyzerException( "Sub transformation can not be found - " + transPath, e );
-        }
+        transPath = KettleAnalyzerUtil.normalizeFilePathSafely( parentTransMeta.environmentSubstitute(
+          meta.getFileName() ) );
         break;
       case REPOSITORY_BY_NAME:
         transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
@@ -206,11 +217,7 @@ public class KettleAnalyzerUtil {
         transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
         break;
     }
-    try {
-      transPath = KettleAnalyzerUtil.normalizeFilePath( transPath );
-    } catch ( final MetaverseException e ) {
-      // ignore
-    }
+    transPath = KettleAnalyzerUtil.normalizeFilePathSafely( transPath );
     return transPath;
   }
 
@@ -218,5 +225,108 @@ public class KettleAnalyzerUtil {
     KettleMissingPluginsException {
     FileInputStream fis = new FileInputStream( filePath );
     return new TransMeta( fis, null, true, null, null );
+  }
+
+  /**
+   * Builds a {@link IDocument} given the provided details.
+   *
+   * @param builder   the {@link IMetaverseBuilder}
+   * @param meta      the {@link AbstractMeta} (trans or job)
+   * @param id        the meta id (filename)
+   * @param namespace the {@link INamespace}
+   * @return a new {@link IDocument}
+   */
+  public static IDocument buildDocument( final IMetaverseBuilder builder, final AbstractMeta meta,
+                                         final String id, final INamespace namespace ) {
+
+    if ( builder == null || builder.getMetaverseObjectFactory() == null ) {
+      log.warn( Messages.getString( "WARN.UnableToBuildDocument" ) );
+      return null;
+    }
+
+    final IDocument metaverseDocument = builder.getMetaverseObjectFactory().createDocumentObject();
+    if ( metaverseDocument == null ) {
+      log.warn( Messages.getString( "WARN.UnableToBuildDocument" ) );
+      return null;
+    }
+
+    metaverseDocument.setNamespace( namespace );
+    metaverseDocument.setContent( meta );
+    metaverseDocument.setStringID( id );
+    metaverseDocument.setName( meta.getName() );
+    metaverseDocument.setExtension( meta.getDefaultExtension() );
+    metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor(
+      meta instanceof TransMeta ? "trans.ktr" : "job.kjb" ) );
+    metaverseDocument.setContext( new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
+    String normalizedPath = KettleAnalyzerUtil.normalizeFilePathSafely( id );
+    metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAME, meta.getName() );
+    metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, normalizedPath );
+    metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );
+
+    return metaverseDocument;
+  }
+
+  /**
+   * Returns the {@link TransMeta} file name.
+   *
+   * @param transMeta the {@link TransMeta} whose file name is being returnes
+   * @return the {@link TransMeta} file name
+   */
+  public static String getFilename( TransMeta transMeta ) {
+    if ( transMeta != null ) {
+      String filename = transMeta.getFilename();
+      if ( filename == null ) {
+        filename = transMeta.getPathAndName();
+        if ( transMeta.getDefaultExtension() != null ) {
+          filename = filename + "." + transMeta.getDefaultExtension();
+        }
+      }
+      return filename;
+    }
+    return null;
+  }
+
+  /**
+   * Analyzes in {@link StepAnalyzer} that is sub-transformation aware}
+   *
+   * @param analyzer  the {@link StepAnalyzer}
+   * @param transMeta the step's parent {@link TransMeta}
+   * @param meta      the step {@link ISubTransAwareMeta}
+   * @param rootNode  the {@link IMetaverseNode}
+   * @return the {@link IMetaverseNode} representing the sub-transformation
+   * @throws MetaverseAnalyzerException
+   */
+  public static IMetaverseNode analyze( final StepAnalyzer analyzer, final TransMeta transMeta,
+                                        final ISubTransAwareMeta meta,
+                                        final IMetaverseNode rootNode )
+    throws MetaverseAnalyzerException {
+
+    String transformationPath = KettleAnalyzerUtil.normalizeFilePathSafely(
+      transMeta.environmentSubstitute( meta.getFileName() ) );
+    rootNode.setProperty( "subTransformation", transformationPath );
+
+    final TransMeta subTransMeta = KettleAnalyzerUtil.getSubTransMeta( meta );
+    subTransMeta.setFilename( transformationPath );
+
+    final IMetaverseNode subTransNode = analyzer.getNode( subTransMeta.getName(), DictionaryConst.NODE_TYPE_TRANS,
+      analyzer.getDocumentDescriptor().getNamespace(), null, null );
+    subTransNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE,
+      analyzer.getDocumentDescriptor().getNamespace().getNamespaceId() );
+    subTransNode.setProperty( DictionaryConst.PROPERTY_PATH,
+      KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ) );
+    subTransNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
+
+    analyzer.getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_EXECUTES, subTransNode );
+
+    final String id = getFilename( subTransMeta );
+    final IDocument subTransDocument = buildDocument( analyzer.getMetaverseBuilder(), subTransMeta,
+      id, analyzer.getDocumentDescriptor().getNamespace() );
+    final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
+      subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, analyzer.getDocumentDescriptor().getNamespace(),
+      analyzer.getDescriptor().getContext() );
+
+    // analyze the sub-transformation
+    return analyzer.getDocumentAnalyzer().analyze( subtransDocumentDescriptor, subTransMeta, subTransNode,
+      KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ) );
   }
 }
