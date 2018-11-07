@@ -34,6 +34,7 @@ import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.resource.ResourceEntry;
 import org.pentaho.dictionary.DictionaryConst;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -68,11 +69,28 @@ public class ExternalResourceInfoFactoryTest {
     when( dbMeta.getAccessTypeDesc() ).thenReturn( "Native" );
     IExternalResourceInfo resourceInfo = ExternalResourceInfoFactory.createDatabaseResource( dbMeta );
     assertTrue( resourceInfo.isInput() );
+    assertThat( resourceInfo, instanceOf(JdbcResourceInfo.class) );
     resourceInfo = ExternalResourceInfoFactory.createDatabaseResource( dbMeta, false );
     assertFalse( resourceInfo.isInput() );
+    assertThat( resourceInfo, instanceOf(JdbcResourceInfo.class) );
+
     when( dbMeta.getAccessType() ).thenReturn( DatabaseMeta.TYPE_ACCESS_JNDI );
     when( dbMeta.getAccessTypeDesc() ).thenReturn( "JNDI" );
     resourceInfo = ExternalResourceInfoFactory.createDatabaseResource( dbMeta );
+    assertTrue( resourceInfo.isInput() );
+    assertThat( resourceInfo, instanceOf(JndiResourceInfo.class) );
+    resourceInfo = ExternalResourceInfoFactory.createDatabaseResource( dbMeta, false );
+    assertFalse( resourceInfo.isInput() );
+    assertThat( resourceInfo, instanceOf(JndiResourceInfo.class) );
+
+    when( dbMeta.getAccessType() ).thenReturn( DatabaseMeta.TYPE_ACCESS_OCI );
+    when( dbMeta.getAccessTypeDesc() ).thenReturn( "OCI" );
+    resourceInfo = ExternalResourceInfoFactory.createDatabaseResource( dbMeta );
+    assertTrue( resourceInfo.isInput() );
+    assertThat( resourceInfo, instanceOf(OCIResourceInfo.class) );
+    resourceInfo = ExternalResourceInfoFactory.createDatabaseResource( dbMeta, false );
+    assertFalse( resourceInfo.isInput() );
+    assertThat( resourceInfo, instanceOf(OCIResourceInfo.class) );
   }
 
   @Test
