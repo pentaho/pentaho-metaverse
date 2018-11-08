@@ -14,6 +14,36 @@
         <default_value>true</default_value>
         <description/>
       </parameter>
+      <parameter>
+        <name>db_host</name>
+        <default_value>localhost</default_value>
+        <description/>
+      </parameter>
+      <parameter>
+        <name>db_name</name>
+        <default_value>postgres</default_value>
+        <description/>
+      </parameter>
+      <parameter>
+        <name>db_password</name>
+        <default_value>postgres</default_value>
+        <description/>
+      </parameter>
+      <parameter>
+        <name>db_port</name>
+        <default_value>5432</default_value>
+        <description/>
+      </parameter>
+      <parameter>
+        <name>db_schem</name>
+        <default_value>public</default_value>
+        <description/>
+      </parameter>
+      <parameter>
+        <name>db_user</name>
+        <default_value>postgres</default_value>
+        <description/>
+      </parameter>
     </parameters>
     <log>
       <trans-log-table>
@@ -443,13 +473,13 @@
   </notepads>
   <connection>
     <name>Postgres - localhost</name>
-    <server>localhost</server>
+    <server>${db_host}</server>
     <type>POSTGRESQL</type>
     <access>Native</access>
-    <database>postgres</database>
-    <port>5432</port>
-    <username>postgres</username>
-    <password>Encrypted 2be98afc86aa7f2e4bb16bd64d980aac9</password>
+    <database>${db_name}</database>
+    <port>${db_port}</port>
+    <username>${db_user}</username>
+    <password>${db_password}</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -468,7 +498,7 @@
       </attribute>
       <attribute>
         <code>PORT_NUMBER</code>
-        <attribute>5432</attribute>
+        <attribute>${db_port}</attribute>
       </attribute>
       <attribute>
         <code>PRESERVE_RESERVED_WORD_CASE</code>
