@@ -67,13 +67,14 @@ public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseC
     int accessType = dbMeta.getAccessType();
     node.setProperty( "accessType", accessType );
 
-    String accessTypeDesc = dbMeta.getAccessTypeDesc();
+    String accessTypeDesc = dbMeta.environmentSubstitute( dbMeta.getAccessTypeDesc() );
     node.setProperty( "accessTypeDesc", accessTypeDesc );
 
-    String databaseName = dbMeta.getDatabaseName();
+    String databaseName = dbMeta.environmentSubstitute( dbMeta.getDatabaseName() );
     node.setProperty( "databaseName", databaseName );
 
-    node.setProperty( "name", dbMeta.getName() );
+    String connectionName = dbMeta.environmentSubstitute( dbMeta.getName() );
+    node.setProperty( "name", connectionName );
 
     DatabaseInterface dbInterface = dbMeta.getDatabaseInterface();
     node.setProperty( "databaseType",
@@ -81,13 +82,13 @@ public abstract class DatabaseConnectionAnalyzer<T> extends BaseKettleMetaverseC
         ? Const.NVL( dbInterface.getPluginName(), "Unknown" )
         : "Unknown" );
 
-    String port = dbMeta.getDatabasePortNumberString();
+    String port = dbMeta.environmentSubstitute( dbMeta.getDatabasePortNumberString() );
     node.setProperty( DictionaryConst.PROPERTY_PORT, port );
 
-    String host = dbMeta.getHostname();
+    String host = dbMeta.environmentSubstitute( dbMeta.getHostname() );
     node.setProperty( DictionaryConst.PROPERTY_HOST_NAME, host );
 
-    String user = dbMeta.getUsername();
+    String user = dbMeta.environmentSubstitute( dbMeta.getUsername() );
     node.setProperty( DictionaryConst.PROPERTY_USER_NAME, user );
 
     boolean shared = dbMeta.isShared();
