@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.singlethreader;
 
+import com.tinkerpop.blueprints.Vertex;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.singlethreader.SingleThreaderMeta;
@@ -34,9 +35,11 @@ import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class SingleThreaderStepAnalyzer extends StepAnalyzer<SingleThreaderMeta> {
+
   @Override protected Set<StepField> getUsedFields( SingleThreaderMeta meta ) {
     return null;
   }
@@ -44,30 +47,52 @@ public class SingleThreaderStepAnalyzer extends StepAnalyzer<SingleThreaderMeta>
   @Override protected void customAnalyze( SingleThreaderMeta meta, IMetaverseNode rootNode ) throws
     MetaverseAnalyzerException {
 
-    final String injectStepName = meta.getInjectStep();
-
     // Add the injector/retrieval step info to the root node properties as well as the batch size
-    rootNode.setProperty( "injectorStep", parentTransMeta.environmentSubstitute( injectStepName ) );
+    rootNode.setProperty( "injectorStep", parentTransMeta.environmentSubstitute( meta.getInjectStep() ) );
     rootNode.setProperty( "retrieveStep", parentTransMeta.environmentSubstitute( meta.getRetrieveStep() ) );
     rootNode.setProperty( "batchSize", parentTransMeta.environmentSubstitute( meta.getBatchSize() ) );
     rootNode.setProperty( "batchTime", parentTransMeta.environmentSubstitute( meta.getBatchTime() ) );
 
-    // Get the subtrans
+    KettleAnalyzerUtil.analyze( this, parentTransMeta, meta, rootNode );
+  }
+
+  @Override public void postAnalyze( final SingleThreaderMeta meta ) throws MetaverseAnalyzerException {
+
+    final String injectStepName = parentTransMeta.environmentSubstitute( meta.getInjectStep() );
+    final String retrieveStepName = parentTransMeta.environmentSubstitute( meta.getRetrieveStep() );
+
+    final String transformationPath = parentTransMeta.environmentSubstitute( meta.getFileName() );
     final TransMeta subTransMeta = KettleAnalyzerUtil.getSubTransMeta( meta );
+    subTransMeta.setFilename( transformationPath );
 
-    // Create a node for the subtrans
-    final IMetaverseNode subTransNode = getNode( subTransMeta.getName(), DictionaryConst.NODE_TYPE_TRANS,
-      descriptor.getNamespace(), null, null );
+    final List<Vertex> singleThreaderOutputFields = findFieldVertices( parentTransMeta, parentStepMeta.getName() );
 
-    // Set SubTrans file path and ID on subtrans node
-    subTransNode.setProperty( DictionaryConst.PROPERTY_PATH,
-      KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ) );
-    subTransNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
+    // traverse the output fields of this single threader step; for each output field add a "derives" link to an
+    // output step of the injectorStepVertex with the same field name get the vertex corresponding to this step
+    final List<Vertex> injectorOutputFields = findFieldVertices( subTransMeta, injectStepName );
+    for ( final Vertex outputField : singleThreaderOutputFields ) {
+      for ( final Vertex derivedField : injectorOutputFields ) {
+        if( outputField.getProperty( DictionaryConst.PROPERTY_NAME ).equals(
+          derivedField.getProperty( DictionaryConst.PROPERTY_NAME ) ) ) {
+          getMetaverseBuilder().addLink( outputField, DictionaryConst.LINK_DERIVES, derivedField );
+          break;
+        }
+      }
+    }
 
-    // Add the new subtrans node to the output
-    // TODO: Our static-y analyzers don't give us access to the subtrans data , this will need to be revisited
-    // when analyzers become more dynamic
-    metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_EXECUTES, subTransNode );
+    // traverse the output fields of the retriever step; for each output field add a "derives" link to each single
+    // threader output stpe with the same name as the retriever output field;
+    final List<Vertex> retrieverOutputFields = findFieldVertices( subTransMeta, retrieveStepName );
+    for ( final Vertex outputField : retrieverOutputFields ) {
+
+      for ( final Vertex derivedField : singleThreaderOutputFields ) {
+        if( outputField.getProperty( DictionaryConst.PROPERTY_NAME ).equals(
+          derivedField.getProperty( DictionaryConst.PROPERTY_NAME ) ) ) {
+          getMetaverseBuilder().addLink( outputField, DictionaryConst.LINK_DERIVES, derivedField );
+          break;
+        }
+      }
+    }
   }
 
   @Override public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
