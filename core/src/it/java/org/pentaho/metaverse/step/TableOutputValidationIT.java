@@ -27,6 +27,7 @@ import org.apache.commons.collections.IteratorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pentaho.metaverse.frames.DatasourceNode;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
@@ -35,9 +36,11 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.pentaho.dictionary.DictionaryConst.*;
 
 @RunWith( PowerMockRunner.class )
@@ -70,6 +73,16 @@ public class TableOutputValidationIT extends StepAnalyzerValidationIT {
       NODE_TYPE_DATA_COLUMN, Arrays.asList( new String[] { "first_name", "first_name", "last_name", "last_name" } ),
       NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "first_name", "first_name", "first_name", "last_name",
         "last_name", "last_name" } ) ) );
+
+    // verify the connection node
+    final List<DatasourceNode> dbConnections = IteratorUtils.toList( root.getDatasourceNodes().iterator() );
+    assertEquals( 1, dbConnections.size() );
+    final DatasourceNode dbConnection = dbConnections.get( 0 );
+    assertEquals( "localhost", dbConnection.getHostName() );
+    assertEquals( "postgres", dbConnection.getDatabaseName() );
+    assertEquals( "postgres", dbConnection.getUserName() );
+    assertEquals( "5432", dbConnection.getPort() );
+    assertNull( dbConnection.getPassword() ); // password should be null, do not include in graph
 
     // verify individual step nodes
     final Map<String, FramedMetaverseNode> stepNodeMap = verifyTransformationSteps( transformationNode,

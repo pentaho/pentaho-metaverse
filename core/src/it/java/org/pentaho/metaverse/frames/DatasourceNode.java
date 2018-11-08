@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -34,6 +34,8 @@ public interface DatasourceNode extends Concept {
   public String getPort();
   @Property( "host" )
   public String getHost();
+  @Property( "hostName" )
+  public String getHostName();
   @Property( "userName" )
   public String getUserName();
   @Property( "password" )
@@ -44,6 +46,8 @@ public interface DatasourceNode extends Concept {
   public String getAccessTypeDesc();
   @Property( "databaseName" )
   public String getDatabaseName();
+  @Property( "schema" )
+  public String getSchema();
 
   @Adjacency( label = "dependencyof", direction = Direction.OUT )
   public Iterable<TransformationStepNode> getTransformationStepNodes();
