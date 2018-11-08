@@ -121,9 +121,10 @@ public class IntegrationTestUtil {
 
   private static void registerKettlePlugins() throws KettlePluginException {
     registerKettlePlugin( MongoDbInputMeta.class.getName(), "MongoDbInput", "Big Data", "MongoDB Input" );
-    // TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved
+    // TODO: uncomment below once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved
     //registerKettlePlugin( MetaInjectMeta.class.getName(), "MetaInject", "Flow", "ETL metadata injection" );
     //registerKettlePlugin( CheckSumMeta.class.getName(), "CheckSum", "Transform", "Add a checksum" );
+    //registerKettlePlugin( JmsConsumerMeta.class.getName(), "Jms2Consumer", "Streaming", "JMS Consumer" );
   }
 
   public static void shutdownPentahoSystem() {

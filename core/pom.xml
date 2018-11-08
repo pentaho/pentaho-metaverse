@@ -305,6 +305,12 @@
       <artifactId>pdi-core-plugins-impl</artifactId>
       <version>${pdi.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.pentaho.di.plugins</groupId>
+      <artifactId>pentaho-streaming-jms-plugin</artifactId>
+      <version>${pdi.version}</version>
+      <scope>provided</scope>
     </dependency>-->
   </dependencies>
   <build>
