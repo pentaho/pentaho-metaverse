@@ -27,13 +27,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.pentaho.di.base.AbstractMeta;
+import org.pentaho.di.core.ObjectLocationSpecificationMethod;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
+import org.pentaho.di.trans.ISubTransAwareMeta;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.INamespace;
+import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
@@ -93,27 +97,6 @@ public class KettleAnalyzerUtilTest {
   }
 
   @Test
-  public void testGetFileName() {
-    assertNull( KettleAnalyzerUtil.getFilename( null ) );
-
-    final TransMeta transMeta = Mockito.mock( TransMeta.class );
-    assertNull( KettleAnalyzerUtil.getFilename( transMeta ) );
-
-    Mockito.doReturn( "my_file_name" ).when( transMeta ).getFilename();
-    assertEquals( "my_file_name", KettleAnalyzerUtil.getFilename( transMeta ) );
-
-    Mockito.doReturn( "path_and_file_name" ).when( transMeta ).getPathAndName();
-    // filename is still set and will be returned
-    assertEquals( "my_file_name", KettleAnalyzerUtil.getFilename( transMeta ) );
-    // when filename is null, pathAndFilename is returned
-    Mockito.doReturn( null ).when( transMeta ).getFilename();
-    assertEquals( "path_and_file_name", KettleAnalyzerUtil.getFilename( transMeta ) );
-
-    Mockito.doReturn( "my_ext" ).when( transMeta ).getDefaultExtension();
-    assertEquals( "path_and_file_name.my_ext", KettleAnalyzerUtil.getFilename( transMeta ) );
-  }
-
-  @Test
   public void tesBuildDocument() throws MetaverseException {
     final IMetaverseBuilder builder = new BaseMetaverseBuilder( null );
     final AbstractMeta transMeta = Mockito.mock( TransMeta.class );
@@ -138,5 +121,77 @@ public class KettleAnalyzerUtilTest {
     assertEquals( KettleAnalyzerUtil.normalizeFilePath( "path.ktr" ), document.getProperty( DictionaryConst
       .PROPERTY_PATH ) );
     assertEquals(namespaceId, document.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
+  }
+
+  @Test
+  public void testGetSubTransMetaPath() throws MetaverseAnalyzerException {
+
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( null, null ) );
+
+    final ISubTransAwareMeta meta = Mockito.mock( ISubTransAwareMeta.class );
+    final TransMeta subTransMeta = Mockito.mock( TransMeta.class );
+    final StepMeta parentStepMeta = Mockito.mock( StepMeta.class );
+    final TransMeta parentTransMeta = Mockito.mock( TransMeta.class );
+
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( meta, null ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( null, subTransMeta ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ) );
+
+    Mockito.doReturn( ObjectLocationSpecificationMethod.FILENAME ).when( meta ).getSpecificationMethod();
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( meta, null ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( null, subTransMeta ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ) );
+
+    Mockito.doReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_NAME ).when( meta ).getSpecificationMethod();
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( meta, null ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( null, subTransMeta ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ) );
+
+    Mockito.doReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_REFERENCE ).when( meta ).getSpecificationMethod();
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( meta, null ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( null, subTransMeta ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ) );
+
+    Mockito.doReturn( ObjectLocationSpecificationMethod.FILENAME ).when( meta ).getSpecificationMethod();
+    Mockito.doReturn( parentStepMeta ).when( meta ).getParentStepMeta();
+    Mockito.doReturn( "foo" ).when( meta ).getFileName();
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, null ).endsWith( File.separator + "foo" ) );;
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( null, subTransMeta ) );
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith( File.separator + "foo" ) );
+
+    Mockito.doReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_NAME ).when( meta ).getSpecificationMethod();
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, null ).endsWith( File.separator + "foo" ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( null, subTransMeta ) );
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith( File.separator + "foo" ) );
+
+    Mockito.doReturn( "dir/foe" ).when( subTransMeta ).getPathAndName();
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, null ).endsWith( File.separator + "foo" ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( null, subTransMeta ) );
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
+      File.separator + "dir" + File.separator + "foe" ) );
+
+    Mockito.doReturn( "ktr" ).when( subTransMeta ).getDefaultExtension();
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, null ).endsWith( File.separator + "foo" ) );
+    assertNull( KettleAnalyzerUtil.getSubTransMetaPath( null, subTransMeta ) );
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
+      File.separator + "dir" + File.separator + "foe.ktr" ) );
+
+    Mockito.doReturn( "${rootDir}/dir/foe" ).when( subTransMeta ).getPathAndName();
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
+      File.separator + "${rootDir}" + File.separator + "dir" + File.separator + "foe.ktr" ) );
+
+    // mimic variable replacement where the variable is missing, should be removed from results
+    Mockito.doReturn( parentTransMeta ).when( parentStepMeta ).getParentTransMeta();
+    Mockito.doReturn( "/dir/foe.ktr" ).when( parentTransMeta ).environmentSubstitute( Mockito.anyString()  );
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
+     File.separator + "dir" + File.separator + "foe.ktr" ) );
+    assertFalse( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
+      File.separator + "${rootDir}" + File.separator + "dir" + File.separator + "foe.ktr" ) );
+
+    // mimic variable replacement where the variable present
+    Mockito.doReturn( "myRootDir/dir/foe.ktr"  ).when( parentTransMeta ).environmentSubstitute( Mockito.anyString()  );
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
+      File.separator + "myRootDir" + File.separator + "dir" + File.separator + "foe.ktr" ) );
+
   }
 }

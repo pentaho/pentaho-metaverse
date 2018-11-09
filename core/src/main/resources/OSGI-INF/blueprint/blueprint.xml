@@ -309,11 +309,11 @@
            ref="SplitFieldsStepAnalyzer"/>
 
   <service id="transExecutorStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="TransExecutorStepAnalyzer"/>
 
   <service id="jobExecutorStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="JobExecutorStepAnalyzer"/>
 
   <service id="rowsToResultStepAnalyzerService"
@@ -384,7 +384,7 @@
         class="org.pentaho.metaverse.analyzer.kettle.jobentry.job.JobJobEntryAnalyzer"/>
 
   <service id="jobJobEntryAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer"
            ref="JobJobEntryAnalyzer"/>
 
   <reference-list id="jobEntryAnalyzerRefList"

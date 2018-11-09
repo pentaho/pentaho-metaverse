@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -39,13 +39,18 @@ import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.jobexecutor.JobExecutorMeta;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.JobAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +60,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class provides an analyzer for the "Execute Job" step
+ */
 public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
 
   public static final String JOB_TO_EXECUTE = "jobToExecute";
@@ -128,6 +136,7 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
         }
         break;
     }
+    subJobMeta.copyVariablesFrom( parentTransMeta );
 
     // analyze the sub trans?
 
@@ -142,6 +151,18 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
     jobNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
 
     metaverseBuilder.addLink( node, DictionaryConst.LINK_EXECUTES, jobNode );
+
+    final IDocument subTransDocument = KettleAnalyzerUtil.buildDocument( getMetaverseBuilder(), subJobMeta,
+      jobPath, getDocumentDescriptor().getNamespace() );
+    final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
+      subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, getDocumentDescriptor().getNamespace(),
+      getDescriptor().getContext() );
+
+    // analyze the sub-job
+    final JobAnalyzer jobAnalyzer = new JobAnalyzer();
+    jobAnalyzer.setJobEntryAnalyzerProvider( PentahoSystem.get( IJobEntryAnalyzerProvider.class ) );
+    jobAnalyzer.setMetaverseBuilder( getMetaverseBuilder() );
+    jobAnalyzer.analyze( subtransDocumentDescriptor, subJobMeta, jobNode, jobPath );
 
     connectToSubJobOutputFields( meta, subJobMeta, jobNode, descriptor );
 
@@ -228,4 +249,9 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
     return super.createFieldNode( fieldDescriptor, fieldMeta, targetStepName, addTheNode );
   }
   ////////
+
+  @Override
+  public IClonableStepAnalyzer newInstance() {
+    return new JobExecutorStepAnalyzer();
+  }
 }
