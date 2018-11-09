@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -32,10 +32,12 @@ import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
+import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.JobEntryAnalyzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,6 +114,7 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
         }
         break;
     }
+    subJobMeta.copyVariablesFrom( parentJobMeta );
 
     IComponentDescriptor ds =
       new MetaverseComponentDescriptor( subJobMeta.getName(), DictionaryConst.NODE_TYPE_JOB,
@@ -124,11 +127,27 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
 
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_EXECUTES, jobNode );
 
+    final IDocument subTransDocument = KettleAnalyzerUtil.buildDocument( getMetaverseBuilder(), subJobMeta,
+      jobPath, getDocumentDescriptor().getNamespace() );
+    if ( subTransDocument != null ) {
+      final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
+        subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, getDocumentDescriptor().getNamespace(),
+        getDescriptor().getContext() );
+
+      // analyze the sub-job
+      getDocumentAnalyzer().analyze( subtransDocumentDescriptor, subJobMeta, jobNode, jobPath );
+    }
+
   }
 
   protected JobMeta getSubJobMeta( String filePath ) throws FileNotFoundException, KettleXMLException,
     KettleMissingPluginsException {
     FileInputStream fis = new FileInputStream( filePath );
     return new JobMeta( fis, null, null );
+  }
+
+  @Override
+  public IClonableJobEntryAnalyzer newInstance() {
+    return new JobJobEntryAnalyzer();
   }
 }
