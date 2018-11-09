@@ -200,35 +200,6 @@ public class KettleAnalyzerUtil {
     return subTransMeta;
   }
 
-  /*
-    case REPOSITORY_BY_NAME:
-        if ( repo != null ) {
-          String dir = parentTransMeta.environmentSubstitute( meta.getDirectoryPath() );
-          String file = parentTransMeta.environmentSubstitute( meta.getTransName() );
-          try {
-            RepositoryDirectoryInterface rdi = repo.findDirectory( dir );
-            subTransMeta = repo.loadTransformation( file, rdi, null, true, null );
-          } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( "Sub transformation can not be found in repository - " + file, e );
-          }
-        } else {
-          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
-        }
-        break;
-      case REPOSITORY_BY_REFERENCE:
-        if ( repo != null ) {
-          try {
-            subTransMeta = repo.loadTransformation( meta.getTransObjectId(), null );
-          } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( "Sub transformation can not be found by reference - "
-              + meta.getTransObjectId(), e );
-          }
-        } else {
-          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
-        }
-        break;
-
-   */
   /**
    * Returns the meta path based on the specification method.
    */
