@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -91,6 +91,9 @@ public class TransJobEntryAnalyzerTest {
   @Mock
   private TransMeta childTransMeta;
 
+  @Mock
+  private IComponentDescriptor documentDescriptor;
+
   private TransJobEntryAnalyzer spyAnalyzer;
 
   @BeforeClass
@@ -123,6 +126,7 @@ public class TransJobEntryAnalyzerTest {
     spyAnalyzer.setMetaverseBuilder( metaverseBuilder );
     spyAnalyzer.setDescriptor( descriptor );
     doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( anyString() );
+    doReturn( documentDescriptor ).when( spyAnalyzer ).getDocumentDescriptor();
   }
 
   @Test

@@ -170,7 +170,6 @@
         <ref bean="StringOperationsStepAnalyzer"/>
         <ref bean="StringsCutStepAnalyzer"/>
         <ref bean="StringsReplaceStepAnalyzer"/>
-        <ref bean="TransExecutorStepAnalyzer"/>
         <ref bean="RowsToResultStepAnalyzer"/>
         <ref bean="RowsFromResultStepAnalyzer"/>
         <ref bean="FixedFileInputStepAnalyzer"/>
@@ -188,6 +187,8 @@
         <ref bean="MappingAnalyzer"/>
         <ref bean="SimpleMappingAnalyzer"/>
         <ref bean="SingleThreaderStepAnalyzer"/>
+        <ref bean="TransExecutorStepAnalyzer"/>
+        <ref bean="JobExecutorStepAnalyzer"/>
      </list>
     </property>
 
@@ -195,7 +196,7 @@
 
   <bean id="IJobEntryAnalyzerProvider" class="org.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider"
         scope="singleton">
-    <property name="jobEntryAnalyzers">
+    <property name="clonableJobEntryAnalyzers">
       <list>
         <ref bean="TransJobEntryAnalyzer"/>
         <ref bean="JobJobEntryAnalyzer"/>
