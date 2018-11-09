@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -56,6 +56,7 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
+import org.pentaho.metaverse.impl.MetaverseNode;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 import java.io.File;
@@ -110,6 +111,9 @@ public class TransExecutorStepAnalyzerTest {
   private IAnalysisContext analysisContext;
 
   @Mock
+  private IComponentDescriptor documentDescriptor;
+
+  @Mock
   private TransMeta childTransMeta;
 
   private String[] nextStepNames = new String[] { "results" };
@@ -131,6 +135,7 @@ public class TransExecutorStepAnalyzerTest {
 
     when( nextStepMeta_Results_input.getFieldNames() ).thenReturn( resultsFieldNames );
 
+
     when( parentTransMeta.environmentSubstitute( anyString() ) ).then( new Answer<String>() {
       @Override
       public String answer( InvocationOnMock invocationOnMock ) throws Throwable {
@@ -150,6 +155,7 @@ public class TransExecutorStepAnalyzerTest {
     spyAnalyzer.setParentTransMeta( parentTransMeta );
     spyAnalyzer.setParentStepMeta( parentStepMeta );
     spyAnalyzer.setDescriptor( descriptor );
+    doReturn( documentDescriptor ).when( spyAnalyzer ).getDocumentDescriptor();
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
@@ -162,7 +168,8 @@ public class TransExecutorStepAnalyzerTest {
 
   @Test
   public void testCustomAnalyze_fileName() throws Exception {
-    String filePath = "src/it/resources/repo/validation/transformation-executor/trans-executor-child.ktr".replace( "/", File.pathSeparator );
+    String filePath = "src/it/resources/repo/validation/transformation-executor/trans-executor-child.ktr"
+      .replace( "/", File.separator );
     doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( anyString() );
     when( meta.getFileName() ).thenReturn( filePath );
 
@@ -177,6 +184,18 @@ public class TransExecutorStepAnalyzerTest {
     doNothing().when( spyAnalyzer ).connectToSubTransOutputFields(
       eq( meta ), any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
+    doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( meta );
+    doReturn( Mockito.mock( IMetaverseNode.class ) ).when( spyAnalyzer ).analyzerSubTransformation( meta, node );
+
+    when( spyAnalyzer.analyzerSubTransformation( meta, node ) ).thenAnswer(
+      new Answer<IMetaverseNode>() {
+        public IMetaverseNode answer( InvocationOnMock invocation ) throws Throwable {
+          builder.addLink( node, DictionaryConst.LINK_EXECUTES, new MetaverseNode( null ) );
+          return new MetaverseNode( null );
+        }
+      }
+    );
+
     spyAnalyzer.customAnalyze( meta, node );
 
     verify( node ).setProperty( eq( TransExecutorStepAnalyzer.TRANSFORMATION_TO_EXECUTE ),
@@ -186,6 +205,9 @@ public class TransExecutorStepAnalyzerTest {
     verify( builder, times( 1 ) ).addLink( eq( node ), eq( DictionaryConst.LINK_EXECUTES ),
       any( IMetaverseNode.class ) );
   }
+
+  /*
+   */
 
   @Test( expected = MetaverseAnalyzerException.class )
   public void testCustomAnalyze_repoFile_ErrorFindingRepoDir() throws Exception {
@@ -233,10 +255,22 @@ public class TransExecutorStepAnalyzerTest {
     doNothing().when( spyAnalyzer ).connectToSubTransOutputFields(
       eq( meta ), any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
+    doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( meta );
+    doReturn( Mockito.mock( IMetaverseNode.class ) ).when( spyAnalyzer ).analyzerSubTransformation( meta, node );
+
+    when( spyAnalyzer.analyzerSubTransformation( meta, node ) ).thenAnswer(
+      new Answer<IMetaverseNode>() {
+        public IMetaverseNode answer( InvocationOnMock invocation ) throws Throwable {
+          builder.addLink( node, DictionaryConst.LINK_EXECUTES, new MetaverseNode( null ) );
+          return new MetaverseNode( null );
+        }
+      }
+    );
+
     spyAnalyzer.customAnalyze( meta, node );
 
     verify( node ).setProperty( eq( TransExecutorStepAnalyzer.TRANSFORMATION_TO_EXECUTE ),
-      Mockito.contains( "/home/admin/my.ktr" ) );
+      Mockito.contains( File.separator + "home" + File.separator + "admin" + File.separator + "my.ktr" ) );
 
     // we should have one link created that "executes" the sub transformation
     verify( builder, times( 1 ) ).addLink( eq( node ), eq( DictionaryConst.LINK_EXECUTES ),
@@ -284,10 +318,22 @@ public class TransExecutorStepAnalyzerTest {
     doNothing().when( spyAnalyzer ).connectToSubTransOutputFields(
       eq( meta ), any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
+    doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( meta );
+    doReturn( Mockito.mock( IMetaverseNode.class ) ).when( spyAnalyzer ).analyzerSubTransformation( meta, node );
+
+    when( spyAnalyzer.analyzerSubTransformation( meta, node ) ).thenAnswer(
+      new Answer<IMetaverseNode>() {
+        public IMetaverseNode answer( InvocationOnMock invocation ) throws Throwable {
+          builder.addLink( node, DictionaryConst.LINK_EXECUTES, new MetaverseNode( null ) );
+          return new MetaverseNode( null );
+        }
+      }
+    );
+
     spyAnalyzer.customAnalyze( meta, node );
 
     verify( node ).setProperty( eq( TransExecutorStepAnalyzer.TRANSFORMATION_TO_EXECUTE ),
-      Mockito.contains( "/home/admin/my.ktr" ) );
+      Mockito.contains( File.separator + "home" + File.separator + "admin" + File.separator + "my.ktr" ) );
 
     // we should have one link created that "executes" the sub transformation
     verify( builder, times( 1 ) ).addLink( eq( node ), eq( DictionaryConst.LINK_EXECUTES ),

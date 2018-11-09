@@ -32,13 +32,17 @@ import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
+import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.JobEntryAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +81,7 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
           String normalized = KettleAnalyzerUtil.normalizeFilePath( transPath );
 
           subTransMeta = getSubTransMeta( normalized );
+          entry.copyVariablesFrom( subTransMeta );
           transPath = normalized;
 
         } catch ( Exception e ) {
@@ -112,6 +117,7 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
         }
         break;
     }
+    subTransMeta.copyVariablesFrom( parentJobMeta );
 
     IComponentDescriptor ds =
       new MetaverseComponentDescriptor( subTransMeta.getName(), DictionaryConst.NODE_TYPE_TRANS,
@@ -125,6 +131,19 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
     rootNode.setProperty( DictionaryConst.PROPERTY_PATH, transPath );
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_EXECUTES, transformationNode );
 
+    final IDocument subTransDocument = KettleAnalyzerUtil.buildDocument( getMetaverseBuilder(), subTransMeta,
+      transPath, getDocumentDescriptor().getNamespace() );
+    if ( subTransDocument != null ) {
+      final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
+        subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, getDocumentDescriptor().getNamespace(),
+        getDescriptor().getContext() );
+
+      // analyze the sub-transformation
+      final TransformationAnalyzer transformationAnalyzer = new TransformationAnalyzer();
+      transformationAnalyzer.setStepAnalyzerProvider( PentahoSystem.get( IStepAnalyzerProvider.class ) );
+      transformationAnalyzer.setMetaverseBuilder( getMetaverseBuilder() );
+      transformationAnalyzer.analyze( subtransDocumentDescriptor, subTransMeta, transformationNode, transPath );
+    }
   }
 
   protected TransMeta getSubTransMeta( String filePath ) throws FileNotFoundException, KettleXMLException,

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -25,14 +25,11 @@ package org.pentaho.metaverse.analyzer.kettle.step.transexecutor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.ProgressNullMonitorListener;
-import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.repository.Repository;
-import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -46,11 +43,11 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,6 +55,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class provides an analyzer for the "Execute Transformation" step
+ */
 public class TransExecutorStepAnalyzer extends StepAnalyzer<TransExecutorMeta> {
 
   public static final String TRANSFORMATION_TO_EXECUTE = "transformationToExecute";
@@ -79,75 +79,32 @@ public class TransExecutorStepAnalyzer extends StepAnalyzer<TransExecutorMeta> {
     return false;
   }
 
+  protected IMetaverseNode analyzerSubTransformation( final TransExecutorMeta meta, IMetaverseNode node )
+    throws MetaverseAnalyzerException {
+    return KettleAnalyzerUtil.analyze( this, parentTransMeta, meta, node );
+  }
+
+  protected TransMeta getSubTransMeta( final TransExecutorMeta meta )
+    throws MetaverseAnalyzerException {
+    return KettleAnalyzerUtil.getSubTransMeta( meta );
+  }
+
   @Override
   protected void customAnalyze( TransExecutorMeta meta, IMetaverseNode node )
     throws MetaverseAnalyzerException {
 
-    String transPath = meta.getFileName();
-    TransMeta subTransMeta = null;
-    Repository repo = parentTransMeta.getRepository();
+    final IMetaverseNode subTransNode = analyzerSubTransformation( meta, node );
+    final TransMeta subTransMeta = getSubTransMeta( meta );
 
-    switch ( meta.getSpecificationMethod() ) {
-      case FILENAME:
-        transPath = parentTransMeta.environmentSubstitute( meta.getFileName() );
-        try {
-          String normalized = KettleAnalyzerUtil.normalizeFilePath( transPath );
-
-          subTransMeta = getSubTransMeta( normalized );
-          transPath = normalized;
-
-        } catch ( Exception e ) {
-          throw new MetaverseAnalyzerException( "Sub transformation can not be found - " + transPath, e );
-        }
-        break;
-      case REPOSITORY_BY_NAME:
-        if ( repo != null ) {
-          String dir = parentTransMeta.environmentSubstitute( meta.getDirectoryPath() );
-          String file = parentTransMeta.environmentSubstitute( meta.getTransName() );
-          try {
-            RepositoryDirectoryInterface rdi = repo.findDirectory( dir );
-            subTransMeta = repo.loadTransformation( file, rdi, null, true, null );
-            transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
-          } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( "Sub transformation can not be found in repository - " + file, e );
-          }
-        } else {
-          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
-        }
-        break;
-      case REPOSITORY_BY_REFERENCE:
-        if ( repo != null ) {
-          try {
-            subTransMeta = repo.loadTransformation( meta.getTransObjectId(), null );
-            transPath = subTransMeta.getPathAndName() + "." + subTransMeta.getDefaultExtension();
-          } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( "Sub transformation can not be found by reference - "
-              + meta.getTransObjectId(), e );
-          }
-        } else {
-          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
-        }
-        break;
+    String transformationPath = KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta );
+    if ( transformationPath != null ) {
+      transformationPath = parentTransMeta.environmentSubstitute( transformationPath );
     }
 
-    // analyze the sub trans?
+    connectToSubTransInputFields( meta, subTransMeta, subTransNode, descriptor );
+    connectToSubTransOutputFields( meta, subTransMeta, subTransNode, descriptor );
 
-    IComponentDescriptor ds = new MetaverseComponentDescriptor(
-      subTransMeta.getName(),
-      DictionaryConst.NODE_TYPE_TRANS,
-      descriptor.getNamespace().getParentNamespace() );
-
-    IMetaverseNode transformationNode = createNodeFromDescriptor( ds );
-    transformationNode.setProperty( DictionaryConst.PROPERTY_NAMESPACE, ds.getNamespaceId() );
-    transformationNode.setProperty( DictionaryConst.PROPERTY_PATH, transPath );
-    transformationNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
-
-    metaverseBuilder.addLink( node, DictionaryConst.LINK_EXECUTES, transformationNode );
-
-    connectToSubTransInputFields( meta, subTransMeta, transformationNode, descriptor );
-    connectToSubTransOutputFields( meta, subTransMeta, transformationNode, descriptor );
-
-    node.setProperty( TRANSFORMATION_TO_EXECUTE, transPath );
+    node.setProperty( TRANSFORMATION_TO_EXECUTE, transformationPath );
 
     if ( StringUtils.isNotEmpty( meta.getExecutionResultTargetStep() ) ) {
       node.setProperty( EXECUTION_RESULTS_TARGET, meta.getExecutionResultTargetStep() );
@@ -160,13 +117,11 @@ public class TransExecutorStepAnalyzer extends StepAnalyzer<TransExecutorMeta> {
     if ( StringUtils.isNotEmpty( meta.getResultFilesTargetStep() ) ) {
       node.setProperty( RESULT_FILES_TARGET, meta.getResultFilesTargetStep() );
     }
-
   }
 
   protected TransMeta getSubTransMeta( String filePath )
     throws FileNotFoundException, KettleXMLException, KettleMissingPluginsException {
-    FileInputStream fis = new FileInputStream( filePath );
-    return new TransMeta( fis, null, true, null, null );
+    return KettleAnalyzerUtil.getSubTransMeta( filePath );
   }
 
   protected void connectToSubTransOutputFields( TransExecutorMeta meta, TransMeta subTransMeta,
@@ -369,4 +324,9 @@ public class TransExecutorStepAnalyzer extends StepAnalyzer<TransExecutorMeta> {
     return super.createFieldNode( fieldDescriptor, fieldMeta, targetStepName, addTheNode );
   }
   ////////
+
+  @Override
+  public IClonableStepAnalyzer newInstance() {
+    return new TransExecutorStepAnalyzer();
+  }
 }
