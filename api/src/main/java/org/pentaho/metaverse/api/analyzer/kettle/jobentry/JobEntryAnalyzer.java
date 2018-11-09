@@ -258,6 +258,11 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
   }
 
   @Override
+  public IClonableDocumentAnalyzer getDocumentAnalyzer() {
+    return this.documentAnalyzer;
+  }
+
+  @Override
   public void setDocumentDescriptor( final IComponentDescriptor documentDescriptor ) {
     this.documentDescriptor = documentDescriptor;
   }
@@ -266,6 +271,12 @@ public abstract class JobEntryAnalyzer<T extends JobEntryInterface> extends Base
   public void setDocumentPath( final String documentPath ) {
     this.documentPath = documentPath;
   }
+
+  @Override
+  public IComponentDescriptor getDocumentDescriptor() {
+    return this.documentDescriptor;
+  }
+
 
 
 }

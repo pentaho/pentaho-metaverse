@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -58,13 +58,9 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit test for JobJobEntryAnalyzer
@@ -99,6 +95,9 @@ public class JobJobEntryAnalyzerTest {
   @Mock
   private JobMeta childJobMeta;
 
+  @Mock
+  private IComponentDescriptor documentDescriptor;
+
   private JobJobEntryAnalyzer spyAnalyzer;
 
   @BeforeClass
@@ -117,7 +116,6 @@ public class JobJobEntryAnalyzerTest {
     when( jobEntryJob.getParentJob() ).thenReturn( mockParentJob );
     when( mockParentJob.getJobMeta() ).thenReturn( mockParentJobMeta );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
-
     when( mockParentJobMeta.environmentSubstitute( anyString() ) ).thenAnswer( new Answer<String>() {
       @Override
       public String answer( InvocationOnMock invocation ) throws Throwable {
@@ -131,6 +129,7 @@ public class JobJobEntryAnalyzerTest {
     spyAnalyzer.setMetaverseBuilder( metaverseBuilder );
     spyAnalyzer.setDescriptor( descriptor );
     doReturn( childJobMeta ).when( spyAnalyzer ).getSubJobMeta( anyString() );
+    doReturn( documentDescriptor ).when( spyAnalyzer ).getDocumentDescriptor();
   }
 
   @Test
