@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -30,6 +30,7 @@ import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 
 import java.util.HashSet;
@@ -84,4 +85,13 @@ public class TextFileInputStepAnalyzer extends ExternalResourceStepAnalyzer<Text
   public boolean isInput() {
     return true;
   }
+
+  @Override protected IClonableStepAnalyzer newInstance() {
+    return new TextFileInputStepAnalyzer();
+  }
+
+  @Override public String toString() {
+    return this.getClass().getName();
+  }
+
 }
