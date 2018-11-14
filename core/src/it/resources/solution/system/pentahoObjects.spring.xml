@@ -37,6 +37,9 @@
   <bean id="SingleThreaderStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.singlethreader.SingleThreaderStepAnalyzer" />
 
+  <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
+  <!--<bean id="JMSConsumerStepAnalyzer" class="org.pentaho.di.trans.step.jms.analyzer.JmsConsumerAnalyzer" />-->
+
   <bean id="MappingAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.mapping.MappingAnalyzer" />
 
@@ -189,6 +192,8 @@
         <ref bean="SingleThreaderStepAnalyzer"/>
         <ref bean="TransExecutorStepAnalyzer"/>
         <ref bean="JobExecutorStepAnalyzer"/>
+        <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
+        <!--<ref bean="JMSConsumerStepAnalyzer"/>-->
      </list>
     </property>
 
