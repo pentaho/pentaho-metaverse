@@ -159,7 +159,6 @@
         <ref bean="TableOutputStepAnalyzer"/>
         <ref bean="tableInputStepAnalyzer"/>
         <ref bean="OldTextFileInputStepAnalyzer"/>
-        <ref bean="TextFileInputStepAnalyzer"/>
         <ref bean="NumberRangeStepAnalyzer"/>
         <ref bean="ValueMapperStepAnalyzer"/>
         <ref bean="TextFileOutputStepAnalyzer"/>
@@ -194,6 +193,7 @@
         <ref bean="JobExecutorStepAnalyzer"/>
         <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
         <!--<ref bean="JMSConsumerStepAnalyzer"/>-->
+        <ref bean="TextFileInputStepAnalyzer"/>
      </list>
     </property>
 

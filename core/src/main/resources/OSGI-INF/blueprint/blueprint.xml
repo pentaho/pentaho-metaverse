@@ -245,7 +245,7 @@
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="OldTextFileInputStepAnalyzer"/>
   <service id="textFileInputStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="TextFileInputStepAnalyzer"/>
 
   <service id="selectValuesStepAnalyzerService"

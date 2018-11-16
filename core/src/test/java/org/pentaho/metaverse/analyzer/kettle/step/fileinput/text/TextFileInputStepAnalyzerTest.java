@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -38,10 +38,12 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInput;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
@@ -53,12 +55,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @RunWith( MockitoJUnitRunner.class )
-public class TextFileInputStepAnalyzerTest {
+public class TextFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private TextFileInputStepAnalyzer analyzer;
 
@@ -195,5 +196,10 @@ public class TextFileInputStepAnalyzerTest {
     assertTrue( resources.isEmpty() );
 
     assertEquals( TextFileInputMeta.class, consumer.getMetaClass() );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new TextFileInputStepAnalyzer();
   }
 }
