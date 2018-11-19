@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -31,6 +31,7 @@ import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.model.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,4 +82,8 @@ public class FilterRowsStepAnalyzer extends StepAnalyzer<FilterRowsMeta> {
     return supportedSteps;
   }
 
+  @Override
+  public IClonableStepAnalyzer newInstance() {
+    return new FilterRowsStepAnalyzer();
+  }
 }

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -30,9 +30,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.groupby.GroupByMeta;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 
 import java.util.HashSet;
@@ -43,7 +45,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
-public class GroupByStepAnalyzerTest {
+public class GroupByStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private GroupByStepAnalyzer analyzer;
   @Mock
@@ -110,5 +112,10 @@ public class GroupByStepAnalyzerTest {
   public void testCustomAnalyze() throws Exception {
     // only for code coverage
     analyzer.customAnalyze( meta, mock( IMetaverseNode.class ) );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new GroupByStepAnalyzer();
   }
 }

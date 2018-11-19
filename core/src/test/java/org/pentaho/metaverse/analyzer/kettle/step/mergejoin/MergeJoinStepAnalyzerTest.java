@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -36,11 +36,13 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.errorhandling.StreamInterface;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.ChangeType;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 
 import java.util.Arrays;
@@ -54,7 +56,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
-public class MergeJoinStepAnalyzerTest {
+public class MergeJoinStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private MergeJoinStepAnalyzer analyzer;
   private static final String DEFAULT_STEP_NAME = "testStep";
@@ -260,5 +262,10 @@ public class MergeJoinStepAnalyzerTest {
     assertNotNull( types );
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( MergeJoinMeta.class ) );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new MergeJoinStepAnalyzer();
   }
 }

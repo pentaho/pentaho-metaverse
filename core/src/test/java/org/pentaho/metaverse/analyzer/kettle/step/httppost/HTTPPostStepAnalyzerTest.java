@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -36,11 +36,13 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.httppost.HTTPPOST;
 import org.pentaho.di.trans.steps.httppost.HTTPPOSTMeta;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -58,7 +60,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
-public class HTTPPostStepAnalyzerTest {
+public class HTTPPostStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private HTTPPostStepAnalyzer analyzer;
 
@@ -219,5 +221,10 @@ public class HTTPPostStepAnalyzerTest {
     assertTrue( resources.isEmpty() );
 
     assertEquals( HTTPPOSTMeta.class, consumer.getMetaClass() );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new HTTPPostStepAnalyzer();
   }
 }

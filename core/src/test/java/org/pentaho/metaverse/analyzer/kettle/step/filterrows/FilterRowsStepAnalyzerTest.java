@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -31,9 +31,11 @@ import org.pentaho.di.core.Condition;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.filterrows.FilterRowsMeta;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.StepField;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 
 import java.util.Set;
@@ -42,7 +44,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
-public class FilterRowsStepAnalyzerTest {
+public class FilterRowsStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private FilterRowsStepAnalyzer analyzer;
 
@@ -107,5 +109,10 @@ public class FilterRowsStepAnalyzerTest {
     Set<Class<? extends BaseStepMeta>> supportedSteps = analyzer.getSupportedSteps();
     assertNotNull( supportedSteps );
     assertTrue( supportedSteps.contains( FilterRowsMeta.class ) );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new FilterRowsStepAnalyzer();
   }
 }
