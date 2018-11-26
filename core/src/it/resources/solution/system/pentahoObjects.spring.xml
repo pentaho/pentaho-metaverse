@@ -379,4 +379,19 @@
       <constructor-arg value="src/it/resources/repo"/>
     </bean>
   -->
+
+  <bean id="MetaverseGraphImplPrototype" class="org.pentaho.metaverse.graph.SynchronizedGraphFactory" scope="prototype">
+    <constructor-arg>
+      <map>
+        <entry key="blueprints.graph" value="com.tinkerpop.blueprints.impls.tg.TinkerGraph"/>
+      </map>
+    </constructor-arg>
+  </bean>
+
+
+  <bean id="IMetaverseBuilderPrototype" class="org.pentaho.metaverse.impl.MetaverseBuilder" scope="prototype">
+    <constructor-arg ref="MetaverseGraphImplPrototype"/>
+  </bean>
+
+
 </beans>

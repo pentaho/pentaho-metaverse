@@ -46,11 +46,372 @@ import static org.pentaho.dictionary.DictionaryConst.*;
 public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
 
   private static final String VALUE = "value";
+  private static final String RANDOM_INT = "randomInt";
   private static final String RANDOM_VALUE = "randomValue";
   private static final String CHECKSUM = "checksum";
   private static final String NEW_CHECKSUM = "newChecksum";
   private static final String PARITY = "parity";
   private static final String NEW_PARITY = "newParity";
+
+  @Test
+  public void testOneOIWithMappingsExtraFields() throws Exception {
+
+    final String transNodeName = "oneOIWithMappingsExtraField";
+    initTest( transNodeName );
+
+    final TransformationNode transformationNode = verifyTransformationNode( transNodeName, false );
+    final TransformationNode subTransNode = verifyTransformationNode( "sub", true );
+
+    // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
+    // level nodes of expected types exist
+    assertEquals( "Unexpected number of nodes", 29, getIterableSize( framedGraph.getVertices() ) );
+    assertEquals( "Unexpected number of edges", 85, getIterableSize( framedGraph.getEdges() ) );
+    verifyNodesTypes( ImmutableMap.of(
+      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, "sub" } ),
+      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { RANDOM_INT, RANDOM_VALUE, RANDOM_VALUE, VALUE, VALUE, VALUE,
+        VALUE, VALUE, CHECKSUM, CHECKSUM, CHECKSUM, CHECKSUM, NEW_CHECKSUM, "value_value" } ) ) );
+
+    // verify individual step nodes
+    final Map<String, FramedMetaverseNode> parentStepNodeMap = verifyTransformationSteps( transformationNode,
+      new String[] { "Data grid", "calc checksum", "Write to log Checksum" }, false );
+
+    final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
+      new String[] { "Input checksum", "calc checksum", "Calculator", "Select values", "output checksum", }, false );
+
+    final TransformationStepNode dataGrid = (TransformationStepNode) parentStepNodeMap.get(
+      "Data grid" );
+    final TransformationStepNode calcChecksum = (TransformationStepNode) parentStepNodeMap.get(
+      "calc checksum" );
+    final TransformationStepNode writeToLogChecksum = (TransformationStepNode) parentStepNodeMap.get(
+      "Write to log Checksum" );
+
+    // sub-trans nodes within the parent graph
+    final TransformationStepNode inputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "Input checksum" );
+    final TransformationStepNode calcChecksumSubTrans = (TransformationStepNode) subTransStepNodeMap.get(
+      "calc checksum" );
+    final TransformationStepNode calculator = (TransformationStepNode) subTransStepNodeMap.get(
+      "Calculator" );
+    final TransformationStepNode selectValues = (TransformationStepNode) subTransStepNodeMap.get(
+      "Select values" );
+    final TransformationStepNode outputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "output checksum" );
+
+    // ---------- Data grid
+    verifyNodes( IteratorUtils.toList( dataGrid.getPreviousSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( dataGrid.getNextSteps().iterator() ), testLineageNode( calcChecksum ) );
+    verifyNodes( IteratorUtils.toList( dataGrid.getOutputStreamFields().iterator() ),
+      testFieldNode( RANDOM_VALUE, false ), testFieldNode( RANDOM_INT, false ) );
+    assertEquals( 2, getIterableSize( dataGrid.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( dataGrid.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( dataGrid.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 3, getIterableSize( dataGrid.getAllOutNodes() ) );
+
+    // ---------- calc checksum (Mapping step)
+    verifyNodes( IteratorUtils.toList( calcChecksum.getPreviousSteps().iterator() ),
+      testLineageNode( dataGrid ) );
+    verifyNodes( IteratorUtils.toList( calcChecksum.getNextSteps().iterator() ),
+      testLineageNode( writeToLogChecksum ) );
+    verifyNodes( IteratorUtils.toList( calcChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( RANDOM_VALUE, false ), testFieldNode( RANDOM_INT, false ) );
+    verifyNodes( IteratorUtils.toList( calcChecksum.getOutputStreamFields().iterator() ) );
+    assertEquals( 5, getIterableSize( calcChecksum.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( calcChecksum.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( calcChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( calcChecksum.getAllOutNodes() ) );
+    assertEquals( 1, getIterableSize( calcChecksum.getOutNodes( LINK_EXECUTES ) ) );
+
+    // verify properties
+    verifyNodeProperties( calcChecksum, new ImmutableMap.Builder<String, Object>()
+      .put( PROPERTY_STEP_TYPE, SKIP ).put( "color", SKIP ).put( PROPERTY_PLUGIN_ID, SKIP ).put( PROPERTY_TYPE, SKIP )
+      .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
+      .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
+      .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
+      .put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] update field names,input [1] rename [1],output [1],"
+        + "output [1] update field names,output [1] rename [1]" )
+      .put( "input [1]", "Data grid > [sub] Input checksum" )
+      .put( "input [1] update field names", "true" )
+      .put( "input [1] rename [1]", "randomValue > value" )
+      .put( "output [1]", "[sub] output checksum > Write to log Checksum" )
+      .put( "output [1] rename [1]", "checksum > newChecksum" )
+      .put( "output [1] update field names", "false" ).build() );
+
+    // ---------- Write to log Checksum
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getPreviousSteps().iterator() ),
+      testStepNode( calcChecksum.getName(), false ) );
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getNextSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getOutputStreamFields().iterator() ),
+      testFieldNode( NEW_CHECKSUM, false ), testFieldNode( RANDOM_VALUE, false ) );
+    verifyStepIOLinks( writeToLogChecksum,
+      testLineageLink( testFieldNode( CHECKSUM, false ), LINK_DERIVES, testFieldNode( NEW_CHECKSUM, false ) ),
+      testLineageLink( testFieldNode( VALUE, false ), LINK_DERIVES, testFieldNode( RANDOM_VALUE, false ) ) );
+    assertEquals( 5, getIterableSize( writeToLogChecksum.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( writeToLogChecksum.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( writeToLogChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( writeToLogChecksum.getAllOutNodes() ) );
+
+    // ---------- output checksum
+    verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ), testStepNode(
+      selectValues.getName(), false ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    assertEquals( 5, getIterableSize( outputChecksum.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( outputChecksum.getAllOutNodes() ) );
+
+    // Verify the following link chains
+    // - chain 1: Data drid > outputs > randomValue >  inputs > Input checksum > outputs > value > inputs >
+    //   calc checksum > outputs > value > inputs > Calculator > outputs > checksum > input > Select values >
+    // outputs > checksum > outputs > value > inputs > Write to log Checksum > outputs > randomValue
+    // - chain 2: Generate Random Int > outputs > randomValue > derives > Input Checksum:value > derives
+    //   > calc checksum:value > derives > output checksum:value > derives > Write to log Checksum:randomValue
+    final FramedMetaverseNode dataGrid_output_randomValue =
+      verifyLinkedNode( dataGrid, LINK_OUTPUTS, RANDOM_VALUE );
+    final FramedMetaverseNode inputChecksum_output_value = verifyLinkedNode( inputChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode calcChecksum_output_value = verifyLinkedNode( calcChecksumSubTrans, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode calculator_output_value = verifyLinkedNode( calculator, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode calculator_output_checksum = verifyLinkedNode( calculator, LINK_OUTPUTS, CHECKSUM );
+    final FramedMetaverseNode calculator_output_valueValue = verifyLinkedNode( calculator, LINK_OUTPUTS,
+      "value_value" );
+    final FramedMetaverseNode selectValues_output_value = verifyLinkedNode( selectValues, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode selectValues_output_checksum = verifyLinkedNode( selectValues, LINK_OUTPUTS, CHECKSUM );
+    final FramedMetaverseNode outputChecksum_output_value = verifyLinkedNode( outputChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode writeToLogChecksum_output_randomValue =
+      verifyLinkedNode( writeToLogChecksum, LINK_OUTPUTS, RANDOM_VALUE );
+
+    assertEquals( inputChecksum,
+      verifyLinkedNode( dataGrid_output_randomValue, LINK_INPUTS, inputChecksum.getName() ) );
+    assertEquals( calcChecksumSubTrans,
+      verifyLinkedNode( inputChecksum_output_value, LINK_INPUTS, calcChecksumSubTrans.getName() ) );
+    assertEquals( calculator,
+      verifyLinkedNode( calcChecksum_output_value, LINK_INPUTS, calculator.getName() ) );
+    assertEquals( selectValues,
+      verifyLinkedNode( calculator_output_value, LINK_INPUTS, selectValues.getName() ) );
+    assertEquals( outputChecksum,
+      verifyLinkedNode( selectValues_output_value, LINK_INPUTS, outputChecksum.getName() ) );
+    assertEquals( writeToLogChecksum,
+      verifyLinkedNode( outputChecksum_output_value, LINK_INPUTS, writeToLogChecksum.getName() ) );
+
+    assertEquals( inputChecksum_output_value,
+      verifyLinkedNode( dataGrid_output_randomValue, LINK_DERIVES, VALUE ) );
+    assertEquals( calcChecksum_output_value, verifyLinkedNode( inputChecksum_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( calculator_output_value, verifyLinkedNode( calcChecksum_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( calculator_output_valueValue, verifyLinkedNode( calcChecksum_output_value, LINK_DERIVES,
+      "value_value" ) );
+    assertEquals( outputChecksum_output_value, verifyLinkedNode( selectValues_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( writeToLogChecksum_output_randomValue,
+      verifyLinkedNode( outputChecksum_output_value, LINK_DERIVES, RANDOM_VALUE ) );
+
+    // Verify the following link chains
+    // - chain 1: calc checksum > outputs > checksum > inputs > calculator > outputs > checksum > inputs > Select
+    //   values > output > checksum > inputs > Write to log Checksum > outputs > newChecksum
+    // - chain 2: calc checksum:checksum > derives > output checksum:checksum > derives > Write to log
+    //   Checksum:newChecksum
+    final FramedMetaverseNode calcChecksum_output_checksum =
+      verifyLinkedNode( calcChecksumSubTrans, LINK_OUTPUTS, CHECKSUM );
+    final FramedMetaverseNode outputChecksum_output_checksum =
+      verifyLinkedNode( outputChecksum, LINK_OUTPUTS, CHECKSUM );
+    final FramedMetaverseNode writeToLogChecksum_output_newChecksum =
+      verifyLinkedNode( writeToLogChecksum, LINK_OUTPUTS, NEW_CHECKSUM );
+
+    assertEquals( calculator,
+      verifyLinkedNode( calcChecksum_output_checksum, LINK_INPUTS, calculator.getName() ) );
+    assertEquals( selectValues,
+      verifyLinkedNode( calculator_output_checksum, LINK_INPUTS, selectValues.getName() ) );
+    assertEquals( writeToLogChecksum,
+      verifyLinkedNode( outputChecksum_output_checksum, LINK_INPUTS, writeToLogChecksum.getName() ) );
+
+    assertEquals( calculator_output_checksum,
+      verifyLinkedNode( calcChecksum_output_checksum, LINK_DERIVES, CHECKSUM ) );
+    assertEquals( selectValues_output_checksum,
+      verifyLinkedNode( calculator_output_checksum, LINK_DERIVES, CHECKSUM ) );
+    assertEquals( outputChecksum_output_checksum,
+      verifyLinkedNode( selectValues_output_checksum, LINK_DERIVES, CHECKSUM ) );
+    assertEquals( writeToLogChecksum_output_newChecksum, verifyLinkedNode( outputChecksum_output_checksum,
+      LINK_DERIVES, NEW_CHECKSUM ) );
+  }
+
+  @Test
+  public void testOneOIFieldNoMappings() throws Exception {
+
+    final String transNodeName = "oneOINoFieldMappings";
+    initTest( transNodeName );
+
+    final TransformationNode transformationNode = verifyTransformationNode( transNodeName, false );
+    final TransformationNode subTransNode = verifyTransformationNode( "sub", true );
+
+    // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
+    // level nodes of expected types exist
+    assertEquals( "Unexpected number of nodes", 28, getIterableSize( framedGraph.getVertices() ) );
+    assertEquals( "Unexpected number of edges", 82, getIterableSize( framedGraph.getEdges() ) );
+    verifyNodesTypes( ImmutableMap.of(
+      NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, "sub" } ),
+      NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { VALUE, VALUE, VALUE, VALUE, VALUE,
+        VALUE, VALUE, CHECKSUM, CHECKSUM, CHECKSUM, CHECKSUM, CHECKSUM, "value_value" } ) ) );
+
+    // verify individual step nodes
+    final Map<String, FramedMetaverseNode> parentStepNodeMap = verifyTransformationSteps( transformationNode,
+      new String[] { "Data grid", "calc checksum", "Write to log Checksum" }, false );
+
+    final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
+      new String[] { "Input checksum", "calc checksum", "Calculator", "Select values", "output checksum", }, false );
+
+    final TransformationStepNode dataGrid = (TransformationStepNode) parentStepNodeMap.get(
+      "Data grid" );
+    final TransformationStepNode calcChecksum = (TransformationStepNode) parentStepNodeMap.get(
+      "calc checksum" );
+    final TransformationStepNode writeToLogChecksum = (TransformationStepNode) parentStepNodeMap.get(
+      "Write to log Checksum" );
+
+    // sub-trans nodes within the parent graph
+    final TransformationStepNode inputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "Input checksum" );
+    final TransformationStepNode calcChecksumSubTrans = (TransformationStepNode) subTransStepNodeMap.get(
+      "calc checksum" );
+    final TransformationStepNode calculator = (TransformationStepNode) subTransStepNodeMap.get(
+      "Calculator" );
+    final TransformationStepNode selectValues = (TransformationStepNode) subTransStepNodeMap.get(
+      "Select values" );
+    final TransformationStepNode outputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "output checksum" );
+
+    // ---------- Data grid
+    verifyNodes( IteratorUtils.toList( dataGrid.getPreviousSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( dataGrid.getNextSteps().iterator() ), testLineageNode( calcChecksum ) );
+    verifyNodes( IteratorUtils.toList( dataGrid.getOutputStreamFields().iterator() ),
+      testFieldNode( VALUE, false ) );
+    assertEquals( 2, getIterableSize( dataGrid.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( dataGrid.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( dataGrid.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( dataGrid.getAllOutNodes() ) );
+
+    // ---------- calc checksum (Mapping step)
+    verifyNodes( IteratorUtils.toList( calcChecksum.getPreviousSteps().iterator() ),
+      testLineageNode( dataGrid ) );
+    verifyNodes( IteratorUtils.toList( calcChecksum.getNextSteps().iterator() ),
+      testLineageNode( writeToLogChecksum ) );
+    verifyNodes( IteratorUtils.toList( calcChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( calcChecksum.getOutputStreamFields().iterator() ) );
+    assertEquals( 4, getIterableSize( calcChecksum.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( calcChecksum.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( calcChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( calcChecksum.getAllOutNodes() ) );
+    assertEquals( 1, getIterableSize( calcChecksum.getOutNodes( LINK_EXECUTES ) ) );
+
+    // verify properties
+    verifyNodeProperties( calcChecksum, new ImmutableMap.Builder<String, Object>()
+      .put( PROPERTY_STEP_TYPE, SKIP ).put( "color", SKIP ).put( PROPERTY_PLUGIN_ID, SKIP ).put( PROPERTY_TYPE, SKIP )
+      .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
+      .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
+      .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
+      .put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] update field names,output [1],output [1] update field names" )
+      .put( "input [1]", "Data grid > [sub] Input checksum" )
+      .put( "input [1] update field names", "false" )
+      .put( "output [1]", "[sub] output checksum > Write to log Checksum" )
+      .put( "output [1] update field names", "false" ).build() );
+
+    // ---------- Write to log Checksum
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getPreviousSteps().iterator() ),
+      testStepNode( calcChecksum.getName(), false ) );
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getNextSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( writeToLogChecksum.getOutputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    verifyStepIOLinks( writeToLogChecksum,
+      testLineageLink( testFieldNode( CHECKSUM, false ), LINK_DERIVES, testFieldNode( CHECKSUM, false ) ),
+      testLineageLink( testFieldNode( VALUE, false ), LINK_DERIVES, testFieldNode( VALUE, false ) ) );
+    assertEquals( 5, getIterableSize( writeToLogChecksum.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( writeToLogChecksum.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( writeToLogChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( writeToLogChecksum.getAllOutNodes() ) );
+
+    // ---------- output checksum
+    verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ), testStepNode(
+      selectValues.getName(), false ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ),
+      testFieldNode( CHECKSUM, false ), testFieldNode( VALUE, false ) );
+    assertEquals( 5, getIterableSize( outputChecksum.getAllInNodes() ) );
+    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_CONTAINS ) ) );
+    assertEquals( 1, getIterableSize( outputChecksum.getInNodes( LINK_TYPE_CONCEPT ) ) );
+    assertEquals( 2, getIterableSize( outputChecksum.getAllOutNodes() ) );
+
+    // Verify the following link chains
+    // - chain 1: Data drid > outputs > value >  inputs > Input checksum > outputs > value > inputs >
+    //   calc checksum > outputs > value > inputs > Calculator > outputs > checksum > input > Select values >
+    // outputs > checksum > outputs > value > inputs > Write to log Checksum > outputs > value
+    // - chain 2: Generate Random Int > outputs > value > derives > Input Checksum:value > derives
+    //   > calc checksum:value > derives > output checksum:value > derives > Write to log Checksum:value
+    final FramedMetaverseNode dataGrid_output_value = verifyLinkedNode( dataGrid, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode inputChecksum_output_value = verifyLinkedNode( inputChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode calcChecksum_output_value = verifyLinkedNode( calcChecksumSubTrans, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode calculator_output_value = verifyLinkedNode( calculator, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode calculator_output_checksum = verifyLinkedNode( calculator, LINK_OUTPUTS, CHECKSUM );
+    final FramedMetaverseNode calculator_output_valueValue = verifyLinkedNode( calculator, LINK_OUTPUTS,
+      "value_value" );
+    final FramedMetaverseNode selectValues_output_value = verifyLinkedNode( selectValues, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode selectValues_output_checksum = verifyLinkedNode( selectValues, LINK_OUTPUTS, CHECKSUM );
+    final FramedMetaverseNode outputChecksum_output_value = verifyLinkedNode( outputChecksum, LINK_OUTPUTS, VALUE );
+    final FramedMetaverseNode writeToLogChecksum_output_value =
+      verifyLinkedNode( writeToLogChecksum, LINK_OUTPUTS, VALUE );
+
+    assertEquals( inputChecksum,
+      verifyLinkedNode( dataGrid_output_value, LINK_INPUTS, inputChecksum.getName() ) );
+    assertEquals( calcChecksumSubTrans,
+      verifyLinkedNode( inputChecksum_output_value, LINK_INPUTS, calcChecksumSubTrans.getName() ) );
+    assertEquals( calculator,
+      verifyLinkedNode( calcChecksum_output_value, LINK_INPUTS, calculator.getName() ) );
+    assertEquals( selectValues,
+      verifyLinkedNode( calculator_output_value, LINK_INPUTS, selectValues.getName() ) );
+    assertEquals( outputChecksum,
+      verifyLinkedNode( selectValues_output_value, LINK_INPUTS, outputChecksum.getName() ) );
+    assertEquals( writeToLogChecksum,
+      verifyLinkedNode( outputChecksum_output_value, LINK_INPUTS, writeToLogChecksum.getName() ) );
+
+    assertEquals( inputChecksum_output_value,
+      verifyLinkedNode( dataGrid_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( calcChecksum_output_value, verifyLinkedNode( inputChecksum_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( calculator_output_value, verifyLinkedNode( calcChecksum_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( calculator_output_valueValue, verifyLinkedNode( calcChecksum_output_value, LINK_DERIVES,
+      "value_value" ) );
+    assertEquals( outputChecksum_output_value, verifyLinkedNode( selectValues_output_value, LINK_DERIVES, VALUE ) );
+    assertEquals( writeToLogChecksum_output_value,
+      verifyLinkedNode( outputChecksum_output_value, LINK_DERIVES, VALUE ) );
+
+    // Verify the following link chains
+    // - chain 1: calc checksum > outputs > checksum > inputs > calculator > outputs > checksum > inputs > Select
+    //   values > output > checksum > inputs > Write to log Checksum > outputs > checksum
+    // - chain 2: calc checksum:checksum > derives > output checksum:checksum > derives > Write to log
+    //   Checksum:checksum
+    final FramedMetaverseNode calcChecksum_output_checksum =
+      verifyLinkedNode( calcChecksumSubTrans, LINK_OUTPUTS, CHECKSUM );
+    final FramedMetaverseNode outputChecksum_output_checksum =
+      verifyLinkedNode( outputChecksum, LINK_OUTPUTS, CHECKSUM );
+    final FramedMetaverseNode writeToLogChecksum_output_checksum =
+      verifyLinkedNode( writeToLogChecksum, LINK_OUTPUTS, CHECKSUM );
+
+    assertEquals( calculator,
+      verifyLinkedNode( calcChecksum_output_checksum, LINK_INPUTS, calculator.getName() ) );
+    assertEquals( selectValues,
+      verifyLinkedNode( calculator_output_checksum, LINK_INPUTS, selectValues.getName() ) );
+    assertEquals( writeToLogChecksum,
+      verifyLinkedNode( outputChecksum_output_checksum, LINK_INPUTS, writeToLogChecksum.getName() ) );
+
+    assertEquals( calculator_output_checksum,
+      verifyLinkedNode( calcChecksum_output_checksum, LINK_DERIVES, CHECKSUM ) );
+    assertEquals( selectValues_output_checksum,
+      verifyLinkedNode( calculator_output_checksum, LINK_DERIVES, CHECKSUM ) );
+    assertEquals( outputChecksum_output_checksum,
+      verifyLinkedNode( selectValues_output_checksum, LINK_DERIVES, CHECKSUM ) );
+    assertEquals( writeToLogChecksum_output_checksum, verifyLinkedNode( outputChecksum_output_checksum,
+      LINK_DERIVES, CHECKSUM ) );
+  }
 
   @Test
   public void testOneOIWithMappings() throws Exception {
@@ -87,7 +448,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     final TransformationStepNode calcChecksumSubTrans = (TransformationStepNode) subTransStepNodeMap.get(
       "calc checksum" );
 
-    // virtual sub-trans nodes within the parent graph
+    // sub-trans nodes within the parent graph
     final TransformationStepNode inputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "Input checksum" );
     final TransformationStepNode outputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "output checksum" );
 
@@ -256,7 +617,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     final TransformationStepNode writeToLogDummy = (TransformationStepNode) parentStepNodeMap.get(
       "Write to log Dummy" );
 
-    // virtual sub-trans nodes within the parent graph
+    // sub-trans nodes within the parent graph
     final TransformationStepNode inputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "Input checksum" );
     final TransformationStepNode calcChecksum = (TransformationStepNode) subTransStepNodeMap.get( "calc checksum" );
     final TransformationStepNode outputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "output checksum" );
@@ -487,7 +848,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     final TransformationStepNode writeToLogParity = (TransformationStepNode) parentStepNodeMap.get(
       "Write to log Parity" );
 
-    // virtual sub-trans nodes within the parent graph
+    // sub-trans nodes within the parent graph
     final TransformationStepNode inputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "Input checksum" );
     final TransformationStepNode calcChecksum = (TransformationStepNode) subTransStepNodeMap.get( "calc checksum" );
     final TransformationStepNode outputChecksum = (TransformationStepNode) subTransStepNodeMap.get( "output checksum" );
