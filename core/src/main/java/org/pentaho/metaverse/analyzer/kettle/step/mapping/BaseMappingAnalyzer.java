@@ -24,6 +24,7 @@ package org.pentaho.metaverse.analyzer.kettle.step.mapping;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -94,7 +95,8 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
     //   "derives" links from the source step fields defined in the "fieldname from source step" column that belong
     //   to the input source steps to these new virtual fields
     final List<String> verboseProps = new ArrayList();
-    processInputMappings( subTransMeta, stepVertex, meta.getInputMappings(), verboseProps );
+    final Map<String, String> mappedInputFieldMap = processInputMappings( subTransMeta, stepVertex,
+      meta.getInputMappings(), verboseProps );
 
     // ----------- analyze outputs, for each output:
     // - create a virtual step node for the mapping source step, the step name is either defined "mapping source
@@ -105,18 +107,25 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
     // - create virtual field nodes for all fields defined in the "fieldname from mapping step" column and
     //   "derives" links from these new virtual fields to the fields defined in the "fieldsname to target step" that
     //   belong to the output target step
-    processOutputMappings( subTransMeta, stepVertex, meta.getOutputMappings(), verboseProps );
+    final Map<String, String> mappedOutputFieldMap = processOutputMappings( subTransMeta, stepVertex, meta
+      .getOutputMappings(), verboseProps );
 
     // When "Update mapped field names" is selected, the name of the parent field is used, rather than the sub-trans
     // field and vice versa
     createLinks( subTransMeta, meta );
 
-    // remove any output fields from this step vertex, as the mapping step should not have any output fields; fields
-    // flow to target steps through the mapped steps within the sub-transformation
+    // remove any output fields from this vertex that aren't mapped to inputs - if the input mapping  list is empty,
+    // then all fields are expected to be mapped
+    final List<String> mappedInputFieldNames = IteratorUtils.toList( mappedInputFieldMap.keySet().iterator() );
+    final List<String> mappedOutputFieldNames = IteratorUtils.toList( mappedOutputFieldMap.values().iterator() );
     final List<Vertex> outputFieldVertices = IteratorUtils.toList(
       stepVertex.getVertices( Direction.OUT, DictionaryConst.LINK_OUTPUTS ).iterator() );
     for ( final Vertex outputFieldVertex : outputFieldVertices ) {
-      outputFieldVertex.remove();
+      final String outputFieldName = outputFieldVertex.getProperty( DictionaryConst.PROPERTY_NAME );
+      if ( ( mappedInputFieldNames.isEmpty() && mappedOutputFieldNames.isEmpty() )
+        || mappedInputFieldNames.contains( outputFieldName ) || mappedOutputFieldNames.contains( outputFieldName ) ) {
+        outputFieldVertex.remove();
+      }
     }
     setPropertySafely( stepVertex, DictionaryConst.PROPERTY_VERBOSE_DETAILS, StringUtils.join(
       verboseProps, "," ) );
@@ -241,12 +250,25 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
         // is there a rename for this field?
         final MappingValueRename renameMapping = inputMapping.getValueRenames().stream().filter( rename ->
           inputSourceOutputFieldName.equals( rename.getSourceValueName() ) ).findAny().orElse( null );
+        // if renameMapping for this field is null, but renames DO exist for this input, then this field should not be
+        // passed into the target
+        if ( renameMapping == null && !CollectionUtils.isEmpty( inputMapping.getValueRenames() ) ) {
+          LOGGER.debug( Messages.getString( "DEBUG.UnmappedInputField", meta.getName(), inputSourceVertex.getProperty(
+            DictionaryConst.PROPERTY_NAME ), inputSourceOutputField.getProperty( DictionaryConst.PROPERTY_NAME ),
+            subTransMeta.getName(), inputTargetName ) );
+          continue;
+        }
         // if there is no rename for this field, we look for a field with the same name, otherwise we look for a field
         // that is the target of the rename mapping ( defined within the "Fieldname to mapping input step" column);
         // we look for this field within the sub-transformation and within the context of the input target step
         final String derivedFieldName = renameMapping == null ? inputSourceOutputFieldName
           : renameMapping.getTargetValueName();
         final Vertex derivedField = findFieldVertex( subTransMeta, inputTargetName, derivedFieldName );
+        if ( derivedField == null ) {
+          LOGGER.debug( Messages.getString( "WARN.TargetInputFieldNotFound", meta.getName(),
+            inputSourceVertex.getProperty( DictionaryConst.PROPERTY_NAME ), inputSourceOutputField.getProperty(
+            DictionaryConst.PROPERTY_NAME ), subTransMeta.getName(), inputTargetName ) );
+        }
         // add an "inputs" link from the field of the input source step to the input target step
         metaverseBuilder.addLink( inputSourceOutputField, DictionaryConst.LINK_INPUTS, inputTargetVertex );
         // add a "derives" link from the field of the input source step to the output field of the input target step
@@ -312,8 +334,12 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
     }
   }
 
-  private void processInputMappings( final TransMeta subTransMeta, final Vertex stepVertex,
+  /**
+   * Processes input mappings and returns a map of mapped fields ( parent source > sub-trans target ).
+   */
+  private Map<String, String> processInputMappings( final TransMeta subTransMeta, final Vertex stepVertex,
                                      final List<MappingIODefinition> inputMappings, final List<String> verboseProps ) {
+    final Map<String, String> mappedInputFields = new HashMap();
     int mappingIdx = 1;
     for ( final MappingIODefinition mapping : inputMappings ) {
       final String mappingKey = "input [" + mappingIdx + "]";
@@ -331,12 +357,20 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
         setPropertySafely( stepVertex, descriptionKey, mapping.getDescription() );
       }
       setCommonProps( stepVertex, mappingKey, mapping, mappingStr, verboseProps );
+      for ( final MappingValueRename rename : mapping.getValueRenames() ) {
+        mappedInputFields.put( rename.getSourceValueName(), rename.getTargetValueName() );
+      }
       mappingIdx++;
     }
+    return mappedInputFields;
   }
 
-  private void processOutputMappings( final TransMeta subTransMeta, final Vertex stepVertex,
+  /**
+   * Processes output mappings and returns a map of mapped fields ( parent source > sub-trans target ).
+   */
+  private Map<String, String> processOutputMappings( final TransMeta subTransMeta, final Vertex stepVertex,
                                       final List<MappingIODefinition> mappings, final List<String> verboseProps ) {
+    final Map<String, String> mappedOutputFields = new HashMap();
     int mappingIdx = 1;
     for ( final MappingIODefinition mapping : mappings ) {
       final String mappingKey = "output [" + mappingIdx + "]";
@@ -354,8 +388,12 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
         setPropertySafely( stepVertex, descriptionKey, mapping.getDescription() );
       }
       setCommonProps( stepVertex, mappingKey, mapping, mappingStr, verboseProps );
+      for ( final MappingValueRename rename : mapping.getValueRenames() ) {
+        mappedOutputFields.put( rename.getSourceValueName(), rename.getTargetValueName() );
+      }
       mappingIdx++;
     }
+    return mappedOutputFields;
   }
 
   private String getSourceStepName( final TransMeta subTransMeta, final MappingIODefinition mapping,

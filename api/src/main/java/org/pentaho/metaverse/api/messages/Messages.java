@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -36,7 +36,7 @@ public class Messages {
   private static final String BUNDLE_NAME = "org.pentaho.metaverse.api.messages.messages";
 
   private static final Map<Locale, ResourceBundle>
-  locales = Collections.synchronizedMap( new HashMap<Locale, ResourceBundle>() );
+    locales = Collections.synchronizedMap( new HashMap<Locale, ResourceBundle>() );
 
   protected static ResourceBundle getBundle() {
     Locale locale = LocaleHelper.getLocale();
@@ -71,6 +71,11 @@ public class Messages {
   public static String getString( final String key, final String param1, final String param2, final String param3,
                                   final String param4 ) {
     return MessageUtil.getString( Messages.getBundle(), key, param1, param2, param3, param4 );
+  }
+
+  public static String getString( final String key, final String param1, final String param2, final String param3,
+                                  final String param4, final String param5 ) {
+    return MessageUtil.getString( Messages.getBundle(), key, param1, param2, param3, param4, param5 );
   }
 
   public static String getErrorString( final String key ) {

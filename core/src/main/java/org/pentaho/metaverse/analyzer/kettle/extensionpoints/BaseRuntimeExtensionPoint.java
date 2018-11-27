@@ -125,7 +125,7 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
    */
   public boolean allowedAsync() {
     KettleClientEnvironment.ClientType client = KettleClientEnvironment.getInstance().getClient();
-    return !(
+    return client != null && !(
           ObjectUtils.equals( client, KettleClientEnvironment.ClientType.KITCHEN )
           || ObjectUtils.equals( client, KettleClientEnvironment.ClientType.PAN ) );
   }
