@@ -109,28 +109,16 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
 
     createLinks( subTransMeta, meta );
 
-    // if at least one of the output mappings specifies the source and target steps (main path is NOT selected) then
-    // we need to remove any output fields from this step, only when the main path is used, do we forward these
-    // fields to all the hops
-    if ( isMainPathOutput( meta ) ) {
-      final Iterator<Vertex> outputFieldVertices =  stepVertex.getVertices(
-        Direction.OUT, DictionaryConst.LINK_OUTPUTS ).iterator();
-      while ( outputFieldVertices.hasNext() ) {
-        outputFieldVertices.next().remove();
-      }
+    // this step should not have any output fields, it only redirects fields between steps within the parent and the
+    // sub-transformation
+    final Iterator<Vertex> outputFieldVertices =  stepVertex.getVertices(
+      Direction.OUT, DictionaryConst.LINK_OUTPUTS ).iterator();
+    while ( outputFieldVertices.hasNext() ) {
+      outputFieldVertices.next().remove();
     }
 
     setPropertySafely( stepVertex, DictionaryConst.PROPERTY_VERBOSE_DETAILS, StringUtils.join(
       verboseProps, "," ) );
-  }
-
-  private boolean isMainPathOutput( final StepWithMappingMeta meta ) {
-    for ( final MappingIODefinition outputMapping : meta.getOutputMappings() ) {
-      if ( outputMapping.isMainDataPath() ) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private boolean shouldRenameFields( final StepWithMappingMeta meta ) {
