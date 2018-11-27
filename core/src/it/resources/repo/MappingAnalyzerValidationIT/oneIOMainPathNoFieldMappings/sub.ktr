@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>oneOIWithMappingsExtraField</name>
+    <name>sub</name>
     <description/>
     <extended_description/>
     <trans_version/>
@@ -428,9 +428,9 @@
     <clusterschemas>
     </clusterschemas>
     <created_user/>
-    <created_date>2018/06/27 21:42:51.116</created_date>
+    <created_date>2018/10/25 09:57:25.183</created_date>
     <modified_user>-</modified_user>
-    <modified_date>2010/07/09 20:02:45.501</modified_date>
+    <modified_date>2010/07/09 20:52:25.968</modified_date>
     <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA=</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
@@ -438,19 +438,34 @@
   </notepads>
   <order>
     <hop>
-      <from>calc checksum</from>
-      <to>Write to log Checksum</to>
+      <from>Input checksum</from>
+      <to>calc checksum</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Data grid</from>
-      <to>calc checksum</to>
+      <from>Input checksum</from>
+      <to>Write to log - Input checksum</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>calc checksum</from>
+      <to>Write to log - calc checksum</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>calc checksum</from>
+      <to>output checksum</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>output checksum</from>
+      <to>Write to log - output checksum</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <step>
-    <name>Data grid</name>
-    <type>DataGrid</type>
+    <name>Input checksum</name>
+    <type>MappingInput</type>
     <description/>
     <distribute>N</distribute>
     <custom_distribution/>
@@ -461,34 +476,13 @@
     </partitioning>
     <fields>
       <field>
-        <name>randomInt</name>
+        <name>value</name>
         <type>Integer</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
         <length>-1</length>
         <precision>-1</precision>
-        <set_empty_string>N</set_empty_string>
       </field>
-      <field>
-        <name>randomValue</name>
-        <type>Integer</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <length>-1</length>
-        <precision>-1</precision>
-        <set_empty_string>N</set_empty_string>
-      </field>
+      <select_unspecified>Y</select_unspecified>
     </fields>
-    <data>
-      <line>
-        <item>123</item>
-        <item>456</item>
-      </line>
-    </data>
     <attributes/>
     <cluster_schema/>
     <remotesteps>
@@ -498,13 +492,13 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>224</xloc>
-      <yloc>128</yloc>
+      <xloc>135</xloc>
+      <yloc>194</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>Write to log Checksum</name>
+    <name>Write to log - Input checksum</name>
     <type>WriteToLog</type>
     <description/>
     <distribute>Y</distribute>
@@ -530,60 +524,29 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>576</xloc>
-      <yloc>128</yloc>
+      <xloc>224</xloc>
+      <yloc>320</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>calc checksum</name>
-    <type>Mapping</type>
+    <name>Write to log - calc checksum</name>
+    <type>WriteToLog</type>
     <description/>
-    <distribute>N</distribute>
+    <distribute>Y</distribute>
     <custom_distribution/>
     <copies>1</copies>
     <partitioning>
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <specification_method>filename</specification_method>
-    <trans_object_id/>
-    <trans_name/>
-    <filename>${Internal.Transformation.Filename.Directory}/sub.ktr</filename>
-    <directory_path/>
-    <mappings>
-      <input>
-        <mapping>
-          <input_step/>
-          <output_step/>
-          <main_path>Y</main_path>
-          <rename_on_output>Y</rename_on_output>
-          <description/>
-          <connector>
-            <parent>randomValue</parent>
-            <child>value</child>
-          </connector>
-        </mapping>
-      </input>
-      <output>
-        <mapping>
-          <input_step/>
-          <output_step/>
-          <main_path>Y</main_path>
-          <rename_on_output>N</rename_on_output>
-          <description/>
-          <connector>
-            <parent>checksum</parent>
-            <child>newChecksum</child>
-          </connector>
-        </mapping>
-      </output>
-      <parameters>
-        <inherit_all_vars>Y</inherit_all_vars>
-      </parameters>
-    </mappings>
-    <allow_multiple_input>Y</allow_multiple_input>
-    <allow_multiple_output>Y</allow_multiple_output>
+    <loglevel>log_level_basic</loglevel>
+    <displayHeader>Y</displayHeader>
+    <limitRows>N</limitRows>
+    <limitRowsNumber>0</limitRowsNumber>
+    <logmessage/>
+    <fields>
+      </fields>
     <attributes/>
     <cluster_schema/>
     <remotesteps>
@@ -593,8 +556,121 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>384</xloc>
-      <yloc>128</yloc>
+      <xloc>400</xloc>
+      <yloc>288</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Write to log - output checksum</name>
+    <type>WriteToLog</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <loglevel>log_level_basic</loglevel>
+    <displayHeader>Y</displayHeader>
+    <limitRows>N</limitRows>
+    <limitRowsNumber>0</limitRowsNumber>
+    <logmessage/>
+    <fields>
+      </fields>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>672</xloc>
+      <yloc>320</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>calc checksum</name>
+    <type>ScriptValueMod</type>
+    <description/>
+    <distribute>N</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel/>
+    <jsScripts>
+      <jsScript>
+        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+// calc checksum
+
+var checksum = 0;
+work = abs(value);
+
+while(work != 0){
+	checksum += work%10;
+	work = Math.floor(work / 10);
+}
+
+
+</jsScript_script>
+      </jsScript>
+    </jsScripts>
+    <fields>
+      <field>
+        <name>checksum</name>
+        <rename>checksum</rename>
+        <type>Integer</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>
+    </fields>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>314</xloc>
+      <yloc>194</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>output checksum</name>
+    <type>MappingOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>576</xloc>
+      <yloc>192</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -605,17 +681,7 @@
   <slave_transformation>N</slave_transformation>
   <attributes>
     <group>
-      <name>METASTORE.NamedClusters</name>
-      <attribute>
-        <key>NamedCluster</key>
-        <value>{"namespace":"NamedClusters","id":"NamedCluster","name":"NamedCluster","description":"A NamedCluster","metaStoreName":null}</value>
-      </attribute>
-    </group>
-    <group>
       <name>explorerState</name>
-    </group>
-    <group>
-      <name>{"_":"Embedded MetaStore Elements","namespace":"NamedClusters","type":"NamedCluster"}</name>
     </group>
   </attributes>
 </transformation>
