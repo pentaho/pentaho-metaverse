@@ -438,218 +438,31 @@
   </notepads>
   <order>
     <hop>
-      <from>Generate Rows</from>
-      <to>Generate random integer</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Generate random integer</from>
-      <to>calc parity &amp; checksum</to>
+      <from>calc parity &amp; checksum</from>
+      <to>Write to log Dummy</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
       <from>calc parity &amp; checksum</from>
-      <to>Write to file Parity</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Write to file Parity</from>
       <to>Write to log Parity</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
       <from>calc parity &amp; checksum</from>
-      <to>Write to file Checksum</to>
-      <enabled>Y</enabled>
-    </hop>
-    <hop>
-      <from>Write to file Checksum</from>
       <to>Write to log Checksum</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>calc parity &amp; checksum</from>
-      <to>Write to log Dummy</to>
+      <from>Data grid</from>
+      <to>calc parity &amp; checksum</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Data grid</from>
+      <to>Write to log - Data grid</to>
       <enabled>Y</enabled>
     </hop>
   </order>
-  <step>
-    <name>Generate Rows</name>
-    <type>RowGenerator</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <fields>
-    </fields>
-    <limit>1</limit>
-    <never_ending>N</never_ending>
-    <interval_in_ms/>
-    <row_time_field/>
-    <last_time_field/>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>52</xloc>
-      <yloc>109</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>Generate random integer</name>
-    <type>RandomValue</type>
-    <description/>
-    <distribute>N</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <fields>
-      <field>
-        <name>randomValue</name>
-        <type>random integer</type>
-      </field>
-    </fields>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>198</xloc>
-      <yloc>109</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>Write to file Checksum</name>
-    <type>TextFileOutput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <separator>;</separator>
-    <enclosure>"</enclosure>
-    <enclosure_forced>N</enclosure_forced>
-    <enclosure_fix_disabled>N</enclosure_fix_disabled>
-    <header>Y</header>
-    <footer>N</footer>
-    <format>DOS</format>
-    <compression>None</compression>
-    <encoding/>
-    <endedLine/>
-    <fileNameInField>N</fileNameInField>
-    <fileNameField/>
-    <create_parent_folder>Y</create_parent_folder>
-    <file>
-      <name>${Internal.Entry.Current.Directory}/output/checksum</name>
-      <servlet_output>N</servlet_output>
-      <do_not_open_new_file_init>N</do_not_open_new_file_init>
-      <extention>txt</extention>
-      <append>N</append>
-      <split>N</split>
-      <haspartno>N</haspartno>
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format/>
-      <add_to_result_filenames>Y</add_to_result_filenames>
-      <pad>N</pad>
-      <fast_dump>N</fast_dump>
-      <splitevery/>
-    </file>
-    <fields>
-    </fields>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>512</xloc>
-      <yloc>160</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>Write to file Parity</name>
-    <type>TextFileOutput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <separator>;</separator>
-    <enclosure>"</enclosure>
-    <enclosure_forced>N</enclosure_forced>
-    <enclosure_fix_disabled>N</enclosure_fix_disabled>
-    <header>Y</header>
-    <footer>N</footer>
-    <format>DOS</format>
-    <compression>None</compression>
-    <encoding/>
-    <endedLine/>
-    <fileNameInField>N</fileNameInField>
-    <fileNameField/>
-    <create_parent_folder>Y</create_parent_folder>
-    <file>
-      <name>${Internal.Entry.Current.Directory}/output/parity</name>
-      <servlet_output>N</servlet_output>
-      <do_not_open_new_file_init>N</do_not_open_new_file_init>
-      <extention>txt</extention>
-      <append>N</append>
-      <split>N</split>
-      <haspartno>N</haspartno>
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format/>
-      <add_to_result_filenames>Y</add_to_result_filenames>
-      <pad>N</pad>
-      <fast_dump>N</fast_dump>
-      <splitevery/>
-    </file>
-    <fields>
-    </fields>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>512</xloc>
-      <yloc>64</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
   <step>
     <name>Write to log Checksum</name>
     <type>WriteToLog</type>
@@ -679,6 +492,38 @@
     <GUI>
       <xloc>656</xloc>
       <yloc>160</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Write to log Dummy</name>
+    <type>WriteToLog</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <loglevel>log_level_basic</loglevel>
+    <displayHeader>Y</displayHeader>
+    <limitRows>N</limitRows>
+    <limitRowsNumber>0</limitRowsNumber>
+    <logmessage/>
+    <fields>
+      </fields>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>624</xloc>
+      <yloc>288</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -733,7 +578,7 @@
     <mappings>
       <input>
         <mapping>
-          <input_step>Generate random integer</input_step>
+          <input_step>Data grid</input_step>
           <output_step>Input checksum</output_step>
           <main_path>N</main_path>
           <rename_on_output>Y</rename_on_output>
@@ -744,7 +589,7 @@
           </connector>
         </mapping>
         <mapping>
-          <input_step>Generate random integer</input_step>
+          <input_step>Data grid</input_step>
           <output_step>Input parity</output_step>
           <main_path>N</main_path>
           <rename_on_output>Y</rename_on_output>
@@ -758,7 +603,7 @@
       <output>
         <mapping>
           <input_step>output parity</input_step>
-          <output_step>Write to file Parity</output_step>
+          <output_step>Write to log Parity</output_step>
           <main_path>N</main_path>
           <rename_on_output>N</rename_on_output>
           <description/>
@@ -769,7 +614,7 @@
         </mapping>
         <mapping>
           <input_step>output checksum</input_step>
-          <output_step>Write to file Checksum</output_step>
+          <output_step>Write to log Checksum</output_step>
           <main_path>N</main_path>
           <rename_on_output>N</rename_on_output>
           <description/>
@@ -800,7 +645,50 @@
     </GUI>
   </step>
   <step>
-    <name>Write to log Dummy</name>
+    <name>Data grid</name>
+    <type>DataGrid</type>
+    <description/>
+    <distribute>N</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <fields>
+      <field>
+        <name>randomValue</name>
+        <type>Integer</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>-1</length>
+        <precision>-1</precision>
+        <set_empty_string>N</set_empty_string>
+      </field>
+    </fields>
+    <data>
+      <line>
+        <item>456</item>
+      </line>
+    </data>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>192</xloc>
+      <yloc>112</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Write to log - Data grid</name>
     <type>WriteToLog</type>
     <description/>
     <distribute>Y</distribute>
@@ -826,8 +714,8 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>512</xloc>
-      <yloc>390</yloc>
+      <xloc>284</xloc>
+      <yloc>244</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -847,16 +735,12 @@
     <group>
       <name>explorerState</name>
       <attribute>
-        <key>Write to log Dummy</key>
+        <key>Write to log - Data grid</key>
         <value/>
       </attribute>
     </group>
     <group>
       <name>{"_":"Embedded MetaStore Elements","namespace":"NamedClusters","type":"NamedCluster"}</name>
-      <attribute>
-        <key>hdp26</key>
-        <value>{"children":[{"children":[],"id":"hdfsPassword","value":"cGFzc3dvcmQ="},{"children":[],"id":"oozieUrl","value":"http://svqxbdcn6hdp26n2.pentahoqa.com:11000"},{"children":[],"id":"mapr","value":"N"},{"children":[],"id":"useGateway","value":"N"},{"children":[],"id":"lastModifiedDate","value":"1531312119656"},{"children":[],"id":"jobTrackerHost","value":"svqxbdcn6hdp26n2.pentahoqa.com"},{"children":[],"id":"zooKeeperHost","value":"svqxbdcn6hdp26n1.pentahoqa.com"},{"children":[],"id":"shimIdentifier","value":null},{"children":[],"id":"gatewayUrl","value":null},{"children":[],"id":"jobTrackerPort","value":"8050"},{"children":[],"id":"zooKeeperPort","value":"2181"},{"children":[],"id":"name","value":"hdp26"},{"children":[],"id":"hdfsPort","value":"8020"},{"children":[],"id":"hdfsUsername","value":"devuser"},{"children":[],"id":"gatewayPassword","value":null},{"children":[],"id":"kafkaBootstrapServers","value":null},{"children":[],"id":"storageScheme","value":"hdfs"},{"children":[],"id":"hdfsHost","value":"svqxbdcn6hdp26n3.pentahoqa.com"},{"children":[],"id":"gatewayUsername","value":null}],"id":"hdp26","value":null,"name":"hdp26","owner":null,"ownerPermissionsList":[]}</value>
-      </attribute>
     </group>
   </attributes>
 </transformation>
