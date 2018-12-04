@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -39,6 +39,7 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.mongodbinput.MongoDbInputMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.dictionary.MetaverseTransientNode;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IConnectionAnalyzer;
@@ -48,6 +49,7 @@ import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.impl.model.MongoDbResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -65,7 +67,7 @@ import static org.mockito.Mockito.*;
  * User: RFellows Date: 3/6/15
  */
 @RunWith( MockitoJUnitRunner.class )
-public class MongoDbInputStepAnalyzerTest {
+public class MongoDbInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
   MongoDbInputStepAnalyzer analyzer;
 
   @Mock IMetaverseNode node;
@@ -269,6 +271,11 @@ public class MongoDbInputStepAnalyzerTest {
   @Test
   public void testIsInput() throws Exception {
     assertTrue( analyzer.isInput() );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new MongoDbInputStepAnalyzer();
   }
 }
 

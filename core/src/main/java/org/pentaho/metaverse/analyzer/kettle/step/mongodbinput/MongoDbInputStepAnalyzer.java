@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -34,6 +34,7 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.step.ConnectionExternalResourceStepAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.impl.model.MongoDbResourceInfo;
 import org.pentaho.mongo.wrapper.field.MongoField;
@@ -154,6 +155,13 @@ public class MongoDbInputStepAnalyzer extends ConnectionExternalResourceStepAnal
 
   @Override public boolean isInput() {
     return true;
+  }
+
+  @Override protected IClonableStepAnalyzer newInstance() {
+    return new MongoDbInputStepAnalyzer();
+  }
+  @Override public String toString() {
+    return this.getClass().getName();
   }
 
   ///////////// for unit testing

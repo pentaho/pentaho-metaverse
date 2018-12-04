@@ -285,7 +285,7 @@
            ref="GroupByStepAnalyzer"/>
 
   <service id="mongoDbInputStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="MongoDbInputStepAnalyzer"/>
 
   <service id="excelOutputStepAnalyzerService"
