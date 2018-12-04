@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -36,9 +36,11 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.fixedinput.FixedInput;
 import org.pentaho.di.trans.steps.fixedinput.FixedInputMeta;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
@@ -50,7 +52,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @RunWith( MockitoJUnitRunner.class )
-public class FixedFileInputStepAnalyzerTest {
+public class FixedFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private FixedFileInputStepAnalyzer analyzer;
 
@@ -145,5 +147,10 @@ public class FixedFileInputStepAnalyzerTest {
     assertTrue( resources.isEmpty() );
 
     assertEquals( FixedInputMeta.class, consumer.getMetaClass() );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new FixedFileInputStepAnalyzer();
   }
 }
