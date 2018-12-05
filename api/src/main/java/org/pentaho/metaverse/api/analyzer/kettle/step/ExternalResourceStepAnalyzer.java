@@ -59,6 +59,9 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
     // handle all of the external resources
     if ( getExternalResourceConsumer() != null ) {
       IAnalysisContext context = getDescriptor().getContext();
+      // Note that we should be fetching ALL resources here, from meta and from row, not just from meta - however,
+      // due to constraints imposed by the current API, we are calling the getResourcesFromMeta, which has been
+      // implemented to return ALL resources, from meta and those cached from row
       Collection<IExternalResourceInfo> resources = getExternalResourceConsumer().getResourcesFromMeta( meta, context );
       for ( IExternalResourceInfo resource : resources ) {
         try {

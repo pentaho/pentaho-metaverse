@@ -51,7 +51,6 @@ import org.pentaho.metaverse.api.model.IParamInfo;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.pentaho.metaverse.impl.MetaverseCompletionService;
-import org.pentaho.metaverse.impl.model.ExecutionData;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.impl.model.ParamInfo;
 import org.pentaho.metaverse.messages.Messages;
@@ -97,8 +96,18 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         return;
       }
       trans.addTransListener( this );
-    }
 
+      createExecutionProfile( logChannelInterface, trans );
+    }
+  }
+
+  @Override
+  protected LineageHolder getLineageHolder( final Object o ) {
+    if ( o instanceof Trans ) {
+      Trans trans = ( (Trans) o );
+      return TransLineageHolderMap.getInstance().getLineageHolder( trans );
+    }
+    return null;
   }
 
   /**
@@ -120,10 +129,6 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       return;
     }
 
-    // Create and populate an execution profile with what we know so far
-    ExecutionProfile executionProfile = new ExecutionProfile();
-    populateExecutionProfile( executionProfile, trans );
-
     IMetaverseBuilder builder = TransLineageHolderMap.getInstance().getMetaverseBuilder( trans );
     final LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
     IDocumentAnalyzer documentAnalyzer = getDocumentAnalyzer();
@@ -132,7 +137,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       documentAnalyzer.setMetaverseBuilder( builder );
 
       // Create a document for the Trans
-      final String clientName = executionProfile.getExecutionEngine().getName();
+      final String clientName = getExecutionEngineInfo().getName();
       final INamespace namespace = new Namespace( clientName );
 
       final IMetaverseNode designNode = builder.getMetaverseObjectFactory()
@@ -149,7 +154,6 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     }
 
     // Save the lineage objects for later
-    holder.setExecutionProfile( executionProfile );
     holder.setMetaverseBuilder( builder );
   }
 
@@ -187,11 +191,16 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     IExecutionData executionData = executionProfile.getExecutionData();
 
     // Store execution information (client, server, user, etc.)
-    executionData.setStartTime( new Timestamp( new Date().getTime() ) );
+    executionData.setEndTime( new Timestamp( new Date().getTime() ) );
     KettleClientEnvironment.ClientType clientType = KettleClientEnvironment.getInstance().getClient();
     executionData.setClientExecutor( clientType == null ? "DI Server" : clientType.name() );
     executionData.setExecutorUser( trans.getExecutingUser() );
     executionData.setExecutorServer( trans.getExecutingServer() );
+
+    Result result = trans.getResult();
+    if ( result != null ) {
+      executionData.setFailureCount( result.getNrErrors() );
+    }
 
     // Store variables
     List<String> vars = transMeta.getUsedVariables();
@@ -255,6 +264,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     }
 
     log.info( Messages.getString( "INFO.TransformationFinished", trans.getName() ) );
+    // TODO: are we essnetially running analyzers for sub-transformations multiple times unnecessarily? Aren't they
+    // run from within the parent trans/ktr customAnalyze > KettleAnalyzerUtil.analyze( subtrans... )?
     runAnalyzers( trans );
 
     if ( allowedAsync() ) {
@@ -296,18 +307,14 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       }
       IExecutionProfile executionProfile = holder.getExecutionProfile();
       if ( executionProfile == null ) {
+        // Note that this should NEVER happen, this is purely a preventative measure...
         // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
         // the same info, so populate a new ExecutionProfile using the current Trans
         // TODO: Beware duplicate profiles!
 
         executionProfile = new ExecutionProfile();
-        populateExecutionProfile( executionProfile, trans );
       }
-      ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
-      Result result = trans.getResult();
-      if ( result != null ) {
-        executionData.setFailureCount( result.getNrErrors() );
-      }
+      populateExecutionProfile( executionProfile, trans );
 
       // Export the lineage info (execution profile, lineage graph, etc.)
       try {
@@ -354,5 +361,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
       log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), t );
     }
+
+    // cleanup to prevent unnecessary memory usage - we no longer need this Trans in the TransLineageHolderMap
+    TransLineageHolderMap.getInstance().removeLineageHolder( trans );
   }
 }

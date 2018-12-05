@@ -25,6 +25,7 @@ package org.pentaho.metaverse.analyzer.kettle.extensionpoints;
 import org.apache.commons.lang.ObjectUtils;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
+import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.version.BuildVersion;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
@@ -35,11 +36,14 @@ import org.pentaho.metaverse.api.model.IExecutionEngine;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.impl.model.ExecutionEngine;
+import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.messages.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * A base class to provide common functionality among runtime extension points
@@ -157,4 +161,23 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
       return documentAnalyzer;
     }
   }
+
+  protected IExecutionProfile createExecutionProfile(
+    final LogChannelInterface logChannelInterface, final Object o ) {
+    // create the Execution profile and store within the LineageHolder so that it's available to any
+    // potential row listeners
+    final LineageHolder holder = getLineageHolder( o );
+    IExecutionProfile executionProfile = holder.getExecutionProfile();
+    if ( executionProfile == null ) {
+      executionProfile = new ExecutionProfile();
+      executionProfile.getExecutionData().setStartTime( new Timestamp( new Date().getTime() ) );
+      if ( logChannelInterface != null ) {
+        executionProfile.getExecutionData().setLoggingChannelId( logChannelInterface.getLogChannelId() );
+      }
+      holder.setExecutionProfile( executionProfile );
+    }
+    return executionProfile;
+  }
+
+  protected abstract LineageHolder getLineageHolder( final Object o );
 }

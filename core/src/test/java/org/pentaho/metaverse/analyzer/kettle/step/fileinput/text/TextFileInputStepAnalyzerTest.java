@@ -31,7 +31,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.fileinput.FileInputList;
 import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -50,11 +49,7 @@ import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 import java.util.Collection;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -159,7 +154,6 @@ public class TextFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
     assertTrue( types.contains( TextFileInputMeta.class ) );
   }
 
-
   @Test
   public void testTextFileInputExternalResourceConsumer() throws Exception {
     TextFileInputExternalResourceConsumer consumer = new TextFileInputExternalResourceConsumer();
@@ -169,31 +163,43 @@ public class TextFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
     when( meta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
     when( meta.getFileName() ).thenReturn( null );
-    when( meta.isAcceptingFilenames() ).thenReturn( false );
+    when( meta.writesToFile() ).thenReturn( true );
     String[] filePaths = { "/path/to/file1", "/another/path/to/file2" };
-    when( fileInputList.getFileStrings() ).thenReturn( filePaths );
-    when( meta.getFileInputList( Mockito.any( VariableSpace.class ) ) ).thenReturn( fileInputList );
+    when( meta.getFilePaths( false) ).thenReturn( filePaths );
 
-    assertFalse( consumer.isDataDriven( meta ) );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( meta );
+    when( meta.isAcceptingFilenames() ).thenReturn( true );
+    Collection<IExternalResourceInfo>  resources = consumer.getResourcesFromMeta( meta );
+    assertTrue( resources.isEmpty() );
+
+    when( meta.isAcceptingFilenames() ).thenReturn( false );
+    resources = consumer.getResourcesFromMeta( meta );
     assertFalse( resources.isEmpty() );
     assertEquals( 2, resources.size() );
 
-
     when( meta.isAcceptingFilenames() ).thenReturn( true );
     assertTrue( consumer.isDataDriven( meta ) );
-    assertTrue( consumer.getResourcesFromMeta( meta ).isEmpty() );
+    resources = consumer.getResourcesFromMeta( meta );
+    // resources will have been cached from the previous call to getResourcesFromMeta, so a call to
+    // getResourcesFromMeta will return 2 resources, even though we are accepting files from filename
+    assertFalse( resources.isEmpty() );
+    assertEquals( 2, resources.size() );
+
     when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenReturn( "/path/to/row/file" );
+    when( mockTextFileInput.environmentSubstitute( "/path/to/row/file" ) ).thenReturn( "/path/to/row/file" );
     when( mockTextFileInput.getStepMetaInterface() ).thenReturn( meta );
     resources = consumer.getResourcesFromRow( mockTextFileInput, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertFalse( resources.isEmpty() );
-    assertEquals( 1, resources.size() );
+    // resources will have been cached from the previous call to getResourcesFromMeta, so a call to
+    // getResourcesFromRow will return those 2 resources, as well as those from row
+    assertEquals( 3, resources.size() );
 
     when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenThrow( KettleException.class );
     resources = consumer.getResourcesFromRow( mockTextFileInput, mockRowMetaInterface, new String[]{ "id", "name" } );
-    assertTrue( resources.isEmpty() );
+    // even when the call to getString throws an exception, we can still get resources from the cache
+    assertFalse( resources.isEmpty() );
+    assertEquals( 3, resources.size() );
 
     assertEquals( TextFileInputMeta.class, consumer.getMetaClass() );
   }

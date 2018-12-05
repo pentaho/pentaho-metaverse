@@ -137,6 +137,7 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
         break;
     }
     subJobMeta.copyVariablesFrom( parentTransMeta );
+    subJobMeta.setFilename( jobPath );
 
     // analyze the sub trans?
 

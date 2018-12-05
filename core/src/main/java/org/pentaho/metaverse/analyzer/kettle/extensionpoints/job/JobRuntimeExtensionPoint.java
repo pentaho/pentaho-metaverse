@@ -51,7 +51,6 @@ import org.pentaho.metaverse.api.model.IParamInfo;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.pentaho.metaverse.impl.MetaverseCompletionService;
-import org.pentaho.metaverse.impl.model.ExecutionData;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.impl.model.ParamInfo;
 import org.pentaho.metaverse.messages.Messages;
@@ -99,7 +98,18 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
 
       // Add the job finished listener
       job.addJobListener( this );
+
+      createExecutionProfile( logChannelInterface, job );
     }
+  }
+
+  @Override
+  protected LineageHolder getLineageHolder( final Object o ) {
+    if ( o instanceof Job ) {
+      Job job = ( (Job) o );
+      return JobLineageHolderMap.getInstance().getLineageHolder( job );
+    }
+    return null;
   }
 
   private void runAnalyzers( final Job job ) throws KettleException {
@@ -107,9 +117,6 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     // If runtime lineage collection is disabled, don't run any lineage processes/methods
     if ( job != null && isRuntimeEnabled() ) {
 
-      // Create and populate an execution profile with what we know so far
-      ExecutionProfile executionProfile = new ExecutionProfile();
-      populateExecutionProfile( executionProfile, job );
 
       IMetaverseBuilder builder = JobLineageHolderMap.getInstance().getMetaverseBuilder( job );
       final LineageHolder holder = JobLineageHolderMap.getInstance().getLineageHolder( job );
@@ -119,7 +126,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         documentAnalyzer.setMetaverseBuilder( builder );
 
         // Create a document for the Trans
-        final String clientName = executionProfile.getExecutionEngine().getName();
+        final String clientName = getExecutionEngineInfo().getName();
         final INamespace namespace = new Namespace( clientName );
 
         final IMetaverseNode designNode = builder.getMetaverseObjectFactory()
@@ -150,7 +157,6 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       }
 
       // Save the lineage objects for later
-      holder.setExecutionProfile( executionProfile );
       holder.setMetaverseBuilder( builder );
     }
   }
@@ -211,17 +217,13 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       IExecutionProfile executionProfile =
         JobLineageHolderMap.getInstance().getLineageHolder( job ).getExecutionProfile();
       if ( executionProfile == null ) {
+        // Note that this should NEVER happen, this is purely a preventative measure...
         // Something's wrong here, the transStarted method didn't properly store the execution profile. We should know
         // the same info, so populate a new ExecutionProfile using the current Trans
 
         executionProfile = new ExecutionProfile();
-        populateExecutionProfile( executionProfile, job );
       }
-      ExecutionData executionData = (ExecutionData) executionProfile.getExecutionData();
-      Result result = job.getResult();
-      if ( result != null ) {
-        executionData.setFailureCount( result.getNrErrors() );
-      }
+      populateExecutionProfile( executionProfile, job );
 
       // Export the lineage info (execution profile, lineage graph, etc.)
       try {
@@ -267,6 +269,9 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
         Const.NVL( t.getLocalizedMessage(), "Unspecified" ) ) );
       log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), t );
     }
+    // cleanup to prevent unnecessary memory usage - we no longer need this Job in the JobLineageHolderMap
+    JobLineageHolderMap.getInstance().removeLineageHolder( job );
+
   }
 
   protected void populateExecutionProfile( IExecutionProfile executionProfile, Job job ) {
@@ -298,13 +303,18 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     IExecutionData executionData = executionProfile.getExecutionData();
 
     // Store execution information (client, server, user, etc.)
-    executionData.setStartTime( new Timestamp( new Date().getTime() ) );
+    executionData.setEndTime( new Timestamp( new Date().getTime() ) );
 
     KettleClientEnvironment.ClientType clientType = KettleClientEnvironment.getInstance().getClient();
     executionData.setClientExecutor( clientType == null ? "DI Server" : clientType.name() );
 
     executionData.setExecutorUser( job.getExecutingUser() );
     executionData.setExecutorServer( job.getExecutingServer() );
+
+    Result result = job.getResult();
+    if ( result != null ) {
+      executionData.setFailureCount( result.getNrErrors() );
+    }
 
     // Store variables
     List<String> vars = jobMeta.getUsedVariables();
