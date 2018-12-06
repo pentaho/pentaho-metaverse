@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.KettleEnvironment;
@@ -37,9 +38,12 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.ILineageWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -74,6 +78,9 @@ public class TransformationRuntimeExtensionPointTest {
   TransMeta transMeta;
   ILineageWriter lineageWriter;
 
+  @Mock
+  private IMetaverseBuilder mockBuilder;
+
   @BeforeClass
   public static void setUpBeforeClass() throws KettleException {
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
@@ -103,6 +110,20 @@ public class TransformationRuntimeExtensionPointTest {
 
   }
 
+  private TransLineageHolderMap mockBuilder() {
+    TransLineageHolderMap originalHolderMap = TransLineageHolderMap.getInstance();
+    TransLineageHolderMap transLineageHolderMap = spy( originalHolderMap );
+    when( transLineageHolderMap.getMetaverseBuilder( Mockito.any( Trans.class ) ) ).thenReturn( mockBuilder );
+    TransLineageHolderMap.setInstance( transLineageHolderMap );
+
+    final IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
+    final IDocument metaverseDocument = mock( IDocument.class );
+    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
+    when( objectFactory.createDocumentObject() ).thenReturn( metaverseDocument );
+
+    return originalHolderMap;
+  }
+
   @Test
   public void testCallExtensionPoint() throws Exception {
     transExtensionPoint.callExtensionPoint( null, trans );
@@ -114,11 +135,8 @@ public class TransformationRuntimeExtensionPointTest {
   @Test
   public void testTransStarted() throws Exception {
     TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
-    TransLineageHolderMap originalHolderMap = TransLineageHolderMap.getInstance();
-    TransLineageHolderMap transLineageHolderMap = spy( originalHolderMap );
-    when( transLineageHolderMap.getMetaverseBuilder( Mockito.any( Trans.class ) ) )
-      .thenReturn( mock( IMetaverseBuilder.class ) );
-    TransLineageHolderMap.setInstance( transLineageHolderMap );
+    TransLineageHolderMap originalHolderMap = mockBuilder();
+
     ext.transStarted( null );
     verify( ext, never() ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), Mockito.any( Trans.class ) );
@@ -150,15 +168,20 @@ public class TransformationRuntimeExtensionPointTest {
 
   @Test
   public void testTransFinishedNotAsync() throws Exception {
+    mockBuilder();
     TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
     when( ext.allowedAsync() ).thenReturn( false );
+
+    // mock the LineageHolder, since we remove it now at the end of jobFinished
+    final LineageHolder holder = Mockito.mock( LineageHolder.class );
+    when( TransLineageHolderMap.getInstance().getLineageHolder( trans ) ).thenReturn( holder );
+
     PowerMockito.mockStatic( ExtensionPointHandler.class );
     ext.transFinished( trans );
 
     verify( ext ).createLineGraph( trans );
     verify( ext, never() ).createLineGraphAsync( trans );
-    verify( lineageWriter, times( 1 ) ).outputLineageGraph(
-      TransLineageHolderMap.getInstance().getLineageHolder( trans ) );
+    verify( lineageWriter, times( 1 ) ).outputLineageGraph( holder );
 
     PowerMockito.verifyStatic();
     ExtensionPointHandler.callExtensionPoint( Mockito.any( LogChannelInterface.class ),

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,11 +24,13 @@ package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job;
 
 import com.google.common.collect.MapMaker;
 import org.pentaho.di.job.Job;
+import org.pentaho.di.trans.Trans;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.util.MetaverseBeanUtil;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -42,7 +44,8 @@ public class JobLineageHolderMap {
 
   private IMetaverseBuilder defaultMetaverseBuilder;
 
-  private Map<Job, LineageHolder> lineageHolderMap = new MapMaker().weakKeys().makeMap();
+  private Map<Job, LineageHolder> lineageHolderMap =
+    Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() );
 
   private JobLineageHolderMap() {
     // Private constructor to enforce Singleton pattern
@@ -72,6 +75,37 @@ public class JobLineageHolderMap {
 
   public void putLineageHolder( Job job, LineageHolder holder ) {
     lineageHolderMap.put( job, holder );
+  }
+
+  /**
+   * To be called ONLY assuming that {@link Job} {@code job} has no parents, or because its parent is being removed.
+   * @param job an instance of {@link Job} being removed from {@code lineageHolderMap}
+   * @return the {@link LineageHolder} beign removed from {@code lineageHolderMap}
+   */
+  public LineageHolder removeLineageHolderImpl( final Job job  ) {
+    final LineageHolder holder = lineageHolderMap.remove( job );
+
+    for ( final Object subExecutable : holder.getSubTransAndJobs() ) {
+      if ( subExecutable instanceof Trans ) {
+        TransLineageHolderMap.getInstance().removeLineageHolderImpl( (Trans) subExecutable );
+      } else if ( subExecutable instanceof  Job ) {
+        removeLineageHolderImpl( (Job) subExecutable );
+      }
+    }
+    return holder;
+  }
+
+  public LineageHolder removeLineageHolder( Job job  ) {
+    // remove the job only if it has no parent - if it does have a parent, the holder might be needed at a later time
+    // and will be removed when the parent is removed
+    if ( job.getParentTrans() == null && job.getParentJob() == null ) {
+      return removeLineageHolderImpl( job );
+    } else if ( job.getParentTrans() != null ) {
+      TransLineageHolderMap.getInstance().getLineageHolder( job.getParentTrans() ).addSubTransOrJob( job );
+    } else if ( job.getParentJob() != null ) {
+      getLineageHolder( job.getParentJob() ).addSubTransOrJob( job );
+    }
+    return null;
   }
 
   public IMetaverseBuilder getMetaverseBuilder( Job job ) {

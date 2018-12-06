@@ -118,6 +118,7 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
         break;
     }
     subTransMeta.copyVariablesFrom( parentJobMeta );
+    subTransMeta.setFilename( transPath );
 
     IComponentDescriptor ds =
       new MetaverseComponentDescriptor( subTransMeta.getName(), DictionaryConst.NODE_TYPE_TRANS,

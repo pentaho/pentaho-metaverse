@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,9 +22,14 @@
 
 package org.pentaho.metaverse.api.model;
 
+import org.pentaho.di.job.Job;
+import org.pentaho.di.trans.Trans;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IRequiresMetaverseBuilder;
+import org.pentaho.metaverse.api.messages.Messages;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -35,6 +40,8 @@ import java.util.concurrent.Future;
 public class LineageHolder implements IRequiresMetaverseBuilder {
 
   private String id;
+
+  private List<Object> subTransAndJobs = new ArrayList();
 
   private IExecutionProfile executionProfile;
 
@@ -99,4 +106,17 @@ public class LineageHolder implements IRequiresMetaverseBuilder {
   public void setId( String id ) {
     this.id = id;
   }
+
+  public void addSubTransOrJob( final Object executable ) {
+    if ( executable instanceof Trans || executable instanceof Job ) {
+      this.subTransAndJobs.add( executable );
+    } else {
+      throw new IllegalArgumentException( Messages.getString( "ERROR.NotATransOrJob" ) );
+    }
+  }
+
+  public List<Object> getSubTransAndJobs() {
+    return this.subTransAndJobs;
+  }
+
 }

@@ -44,6 +44,7 @@ import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -181,11 +182,15 @@ public class JobRuntimeExtensionPointTest {
 
     JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
     when( ext.allowedAsync() ).thenReturn( false );
+
+    // mock the LineageHolder, since we remove it now at the end of jobFinished
+    final LineageHolder holder = Mockito.mock( LineageHolder.class );
+    when( JobLineageHolderMap.getInstance().getLineageHolder( job ) ).thenReturn( holder );
     PowerMockito.mockStatic( ExtensionPointHandler.class );
     ext.jobFinished( job );
     verify( ext ).createLineGraph( job );
     verify( ext, never() ).createLineGraphAsync( job );
-    verify( lineageWriter, times( 1 ) ).outputLineageGraph( JobLineageHolderMap.getInstance().getLineageHolder( job ) );
+    verify( lineageWriter, times( 1 ) ).outputLineageGraph( holder );
 
     PowerMockito.verifyStatic();
     // the job doesn't have a parent, extension point should be called

@@ -115,6 +115,7 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
         break;
     }
     subJobMeta.copyVariablesFrom( parentJobMeta );
+    subJobMeta.setFilename( jobPath );
 
     IComponentDescriptor ds =
       new MetaverseComponentDescriptor( subJobMeta.getName(), DictionaryConst.NODE_TYPE_JOB,

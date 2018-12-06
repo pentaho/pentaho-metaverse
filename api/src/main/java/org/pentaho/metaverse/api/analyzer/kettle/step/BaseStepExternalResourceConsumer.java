@@ -34,7 +34,7 @@ import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
 
 /**
  * This class is a base implementation for StepExternalConsumer plugins. Subclasses should override the various methods
@@ -62,28 +62,24 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( final M meta, final IAnalysisContext context ) {
-    if ( !( meta instanceof BaseFileMeta ) || !fetchResources( meta ) || isDataDriven( meta ) ) {
-      return Collections.emptyList();
+  public Collection<IExternalResourceInfo> getResourcesFromMeta(
+    final M meta, final IAnalysisContext context ) {
+
+    if ( !( meta instanceof BaseFileMeta ) || !fetchResources( meta ) ) {
+      return new HashSet();
     }
 
-    return KettleAnalyzerUtil.getResourcesFromMeta( meta.getParentStepMeta(),
-      ( (BaseFileMeta) meta ).getFilePaths( false ) );
+    return KettleAnalyzerUtil.getResourcesFromMeta(
+      meta, isDataDriven( meta ) ? new String[]{} : ( (BaseFileMeta) meta ).getFilePaths( false ) );
   }
 
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromRow(
     final S step, final RowMetaInterface rowMeta, final Object[] row ) {
-    if ( !fetchResources( null ) ) {
-      return Collections.emptyList();
-    }
 
-    if ( step instanceof BaseFileInputStep ) {
-      Collection<IExternalResourceInfo> resourcesFromRow = KettleAnalyzerUtil.getResourcesFromRow(
-        (BaseFileInputStep) step, rowMeta, row );
-      return resourcesFromRow;
-    } else {
-      return Collections.emptyList();
+    if ( !fetchResources( null ) || !( step instanceof BaseFileInputStep ) ) {
+      return new HashSet();
     }
+    return KettleAnalyzerUtil.getResourcesFromRow( (BaseFileInputStep) step, rowMeta, row );
   }
 }

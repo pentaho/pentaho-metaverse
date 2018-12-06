@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -25,13 +25,15 @@ package org.pentaho.metaverse.api.model;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.job.Job;
+import org.pentaho.di.trans.Trans;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith( MockitoJUnitRunner.class )
@@ -82,8 +84,37 @@ public class LineageHolderTest {
 
   @Test
   public void testGetIdFromExecutionProfile() throws Exception {
+    lineageHolder = new LineageHolder();
     when( executionProfile.getPath() ).thenReturn( "profile/path" );
     lineageHolder = new LineageHolder( executionProfile, builder );
     assertEquals( "profile/path", lineageHolder.getId() );
+  }
+
+  @Test( expected = IllegalArgumentException.class )
+  public void testAddSubTransOrJobInvalid() {
+    lineageHolder = new LineageHolder();
+    lineageHolder.addSubTransOrJob( "dummy" );
+  }
+
+  @Test( expected = IllegalArgumentException.class )
+  public void testAddSubTransOrJobNull() {
+    lineageHolder = new LineageHolder();
+    lineageHolder.addSubTransOrJob( null );
+  }
+
+  @Test
+  public void testSubTransOrJob() {
+    lineageHolder = new LineageHolder();
+    assertNotNull( lineageHolder.getSubTransAndJobs().size() );
+    assertEquals( 0, lineageHolder.getSubTransAndJobs().size() );
+
+    final Trans trans = Mockito.mock( Trans.class );
+    final Job job = Mockito.mock( Job.class );
+    lineageHolder.addSubTransOrJob( trans );
+    lineageHolder.addSubTransOrJob( job );
+
+    assertEquals( 2, lineageHolder.getSubTransAndJobs().size() );
+    assertEquals( trans, lineageHolder.getSubTransAndJobs().get( 0 ) );
+    assertEquals( job, lineageHolder.getSubTransAndJobs().get( 1 ) );
   }
 }

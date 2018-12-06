@@ -22,7 +22,9 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle;
 
+import com.google.common.collect.MapMaker;
 import org.apache.commons.vfs2.FileObject;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -36,6 +38,7 @@ import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.trans.ISubTransAwareMeta;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputStep;
@@ -60,14 +63,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class KettleAnalyzerUtil {
 
   private static final Logger log = LoggerFactory.getLogger( KettleAnalyzerUtil.class );
+
+  private static final Map<String, Collection<IExternalResourceInfo>> resourceMap =
+    Collections.synchronizedMap( new MapMaker().weakValues().makeMap() );
 
   /**
    * Utility method for normalizing file paths used in Metaverse Id generation. It will convert a valid path into a
@@ -105,12 +111,42 @@ public class KettleAnalyzerUtil {
     return filePath;
   }
 
-  public static Collection<IExternalResourceInfo> getResourcesFromMeta(
-    final StepMeta parentStepMeta, final String[] filePaths ) {
-    Collection<IExternalResourceInfo> resources = Collections.emptyList();
+  public static void removeResources( final TransMeta transMeta ) {
+    final List<StepMeta> steps = transMeta.getSteps();
+    for ( final StepMeta step : steps ) {
+      KettleAnalyzerUtil.removeResources( step );
+    }
+  }
 
-    if ( parentStepMeta != null && filePaths != null && filePaths.length > 0 ) {
-      resources = new ArrayList<>( filePaths.length );
+  protected static Collection<IExternalResourceInfo> removeResources( final StepMeta meta ) {
+    if ( resourceMap != null ) {
+      return resourceMap.remove( getUniqueId( meta ) );
+    }
+    return null;
+  }
+
+  protected static String getUniqueId( final StepMeta meta ) {
+
+    final TransMeta transMeta = meta.getParentTransMeta();
+    if ( transMeta.getRepository() == null ) {
+      return normalizeFilePathSafely( transMeta.getFilename() ) + "::"  + meta.getName();
+    } else {
+      return meta.getParentTransMeta().getPathAndName() + "." + meta.getParentTransMeta().getDefaultExtension()
+        + "::"  + meta.getName();
+    }
+  }
+
+  public static Collection<IExternalResourceInfo> getResourcesFromMeta(
+    final BaseStepMeta meta, final String[] filePaths ) {
+
+    final String uniqueMetaId = getUniqueId( meta.getParentStepMeta() );
+    Collection<IExternalResourceInfo> resources = resourceMap.get( uniqueMetaId );
+    if ( resources == null ) {
+      resources = new ConcurrentHashSet();
+      resourceMap.put( uniqueMetaId, resources );
+    }
+
+    if ( meta != null && meta.getParentStepMeta() != null && filePaths != null && filePaths.length > 0 ) {
       for ( final String path : filePaths ) {
         if ( !Const.isEmpty( path ) ) {
           try {
@@ -134,11 +170,17 @@ public class KettleAnalyzerUtil {
   public static Collection<IExternalResourceInfo> getResourcesFromRow(
     BaseFileInputStep step, RowMetaInterface rowMeta, Object[] row ) {
 
-    Collection<IExternalResourceInfo> resources = new LinkedList<>();
     // For some reason the step doesn't return the StepMetaInterface directly, so go around it
     BaseFileInputMeta meta = (BaseFileInputMeta) step.getStepMetaInterface();
     if ( meta == null ) {
       meta = (BaseFileInputMeta) step.getStepMeta().getStepMetaInterface();
+    }
+
+    final String uniqueMetaId = getUniqueId( meta.getParentStepMeta() );
+    Collection<IExternalResourceInfo> resources = resourceMap.get( uniqueMetaId );
+    if ( resources == null ) {
+      resources = new ConcurrentHashSet();
+      resourceMap.put( uniqueMetaId, resources );
     }
 
     try {
@@ -197,6 +239,7 @@ public class KettleAnalyzerUtil {
         }
         break;
     }
+    subTransMeta.setFilename( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ) );
     return subTransMeta;
   }
 

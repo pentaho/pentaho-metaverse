@@ -25,7 +25,9 @@ package org.pentaho.metaverse.api.analyzer.kettle.step;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.file.BaseFileMeta;
 import org.pentaho.metaverse.api.analyzer.kettle.IExternalResourceConsumer;
 
@@ -72,9 +74,13 @@ public class BaseStepExternalResourceConsumerTest {
 
     // file meta
     meta = Mockito.mock( BaseFileMeta.class );
+    TransMeta transMeta = Mockito.mock( TransMeta.class );
+    StepMeta stepMeta = Mockito.mock( StepMeta.class );
     Mockito.when( ( (BaseFileMeta) meta ).writesToFile() ).thenReturn( true );
+    Mockito.when( meta.getParentStepMeta() ).thenReturn( stepMeta );
+    Mockito.when( stepMeta.getParentTransMeta() ).thenReturn( transMeta );
     consumer.getResourcesFromMeta( meta );
-    Mockito.verify( meta, Mockito.times( 1 ) ).getParentStepMeta();
+    Mockito.verify( meta, Mockito.times( 2 ) ).getParentStepMeta();
     Mockito.verify( (BaseFileMeta) meta, Mockito.times( 1 ) ).getFilePaths( false );
   }
 

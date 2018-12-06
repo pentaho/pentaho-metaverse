@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,20 +22,29 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job;
 
+import com.google.common.collect.MapMaker;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.job.Job;
+import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.trans.Trans;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.Map;
+
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for JobLineageHolderMap
@@ -57,11 +66,38 @@ public class JobLineageHolderMapTest {
   @Mock
   IExecutionProfile mockExecutionProfile;
 
+  @Mock
+  private Job job;
+
+  @Mock
+  private Trans parentTrans;
+
+  @Mock
+  private TransMeta parentTransMeta;
+
+  @Mock
+  private Job parentJob;
+
+  @Mock
+  private JobMeta jobMeta;
+
+  private void initMetas() {
+
+    when( job.getJobMeta() ).thenReturn( jobMeta );
+    when( parentTrans.getTransMeta() ).thenReturn( parentTransMeta );
+  }
+
   @Before
   public void setUp() throws Exception {
     jobLineageHolderMap = JobLineageHolderMap.getInstance();
     mockHolder = spy( new LineageHolder() );
     jobLineageHolderMap.setDefaultMetaverseBuilder( defaultBuilder );
+  }
+
+  @After
+  public void cleanUp() throws Exception {
+    Whitebox.setInternalState( jobLineageHolderMap, "lineageHolderMap",
+      Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
   }
 
   @Test
@@ -126,5 +162,64 @@ public class JobLineageHolderMapTest {
     builder = jobLineageHolderMap.getMetaverseBuilder( job );
     assertNotNull( builder );
 
+  }
+
+  @Test
+  public void testRemoveLineageHolderWithParentTrans() throws Exception {
+    initMetas();
+
+    // initialize the lineage holder for this transformation
+    jobLineageHolderMap.getLineageHolder( job );
+
+    // test with parent transformation being set
+    when( job.getParentTrans() ).thenReturn( parentTrans );
+
+    Field lineageHolderMapField = jobLineageHolderMap.getClass().getDeclaredField( "lineageHolderMap" );
+    lineageHolderMapField.setAccessible( true );
+
+    jobLineageHolderMap.removeLineageHolder( job );
+    // make sure the trans map entry was NOT removed and its resources were NOT removed from the
+    // KettleAnalyzerUtil.resourceMap, since trans has a parent
+    Map<Trans, LineageHolder> lineageHolderMap = (Map) lineageHolderMapField.get( jobLineageHolderMap );
+    assertNotNull( lineageHolderMap.get( job ) );
+    // lineageHolderMap will only have one member, the parent trans will be in the TransLineageHolderMap
+    assertEquals( 1, lineageHolderMap.size() );
+
+    // make sure that removing the parent trans removes it and its sub-transformations from the map and also removed
+    // sub-transformation resources from KettleAnalyzerUtil.resourceMap
+    TransLineageHolderMap.getInstance().removeLineageHolder( parentTrans );
+    lineageHolderMap = (Map) lineageHolderMapField.get( jobLineageHolderMap );
+    assertNull( lineageHolderMap.get( parentTrans ) );
+    assertNull( lineageHolderMap.get( job ) );
+    assertEquals( 0, lineageHolderMap.size() );
+  }
+
+  @Test
+  public void testRemoveLineageHolderWithParentJob() throws Exception {
+    initMetas();
+
+    // initialize the lineage holder for this transformation
+    jobLineageHolderMap.getLineageHolder( job );
+
+    // test with parent transformation being set
+    when( job.getParentJob() ).thenReturn( parentJob );
+
+    Field lineageHolderMapField = jobLineageHolderMap.getClass().getDeclaredField( "lineageHolderMap" );
+    lineageHolderMapField.setAccessible( true );
+
+    jobLineageHolderMap.removeLineageHolder( job );
+    // make sure the trans map entry was NOT removed and its resources were NOT removed from the
+    // KettleAnalyzerUtil.resourceMap, since trans has a parent
+    Map<Trans, LineageHolder> lineageHolderMap = (Map) lineageHolderMapField.get( jobLineageHolderMap );
+    assertNotNull( lineageHolderMap.get( job ) );
+    assertEquals( 2, lineageHolderMap.size() );
+
+    // make sure that removing the parent trans removes it and its sub-transformations from the map and also removed
+    // sub-transformation resources from KettleAnalyzerUtil.resourceMap
+    jobLineageHolderMap.removeLineageHolder( parentJob );
+    lineageHolderMap = (Map) lineageHolderMapField.get( jobLineageHolderMap );
+    assertNull( lineageHolderMap.get( parentJob ) );
+    assertNull( lineageHolderMap.get( job ) );
+    assertEquals( 0, lineageHolderMap.size() );
   }
 }
