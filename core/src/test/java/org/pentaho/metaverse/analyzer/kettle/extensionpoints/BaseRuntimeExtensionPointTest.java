@@ -25,9 +25,14 @@ package org.pentaho.metaverse.analyzer.kettle.extensionpoints;
 import com.tinkerpop.blueprints.Graph;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.LogChannelInterface;
+import org.pentaho.di.job.Job;
+import org.pentaho.di.trans.Trans;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolderMap;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageHolderMap;
 import org.pentaho.metaverse.api.IGraphWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionEngine;
@@ -41,19 +46,14 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class BaseRuntimeExtensionPointTest {
 
   BaseRuntimeExtensionPoint extensionPoint;
+
 
   final AtomicBoolean called = new AtomicBoolean( false );
 
@@ -69,6 +69,18 @@ public class BaseRuntimeExtensionPointTest {
         } else {
           called.set( false );
         }
+      }
+
+      @Override
+      protected LineageHolder getLineageHolder( final Object o ) {
+        if ( o instanceof Trans ) {
+          Trans trans = ( (Trans) o );
+          return TransLineageHolderMap.getInstance().getLineageHolder( trans );
+        } else if ( o instanceof Job ) {
+          Job job = ( (Job) o );
+          return JobLineageHolderMap.getInstance().getLineageHolder( job );
+        }
+        return null;
       }
     };
   }
@@ -106,6 +118,40 @@ public class BaseRuntimeExtensionPointTest {
     assertNotNull( engineInfo );
     assertEquals( DictionaryConst.EXECUTION_ENGINE_NAME, engineInfo.getName() );
     assertEquals( DictionaryConst.EXECUTION_ENGINE_DESCRIPTION, engineInfo.getDescription() );
+  }
+
+  @Test
+  public void testJobCreateExecutionProfile() throws Exception {
+    Job job = Mockito.mock( Job.class );
+    IExecutionProfile profile = extensionPoint.createExecutionProfile( null, job );
+    assertEquals( profile, JobLineageHolderMap.getInstance().getLineageHolder( job ).getExecutionProfile() );
+    assertNull( profile.getExecutionData().getLoggingChannelId() );
+
+    // reset the execution profile
+    JobLineageHolderMap.getInstance().getLineageHolder( job ).setExecutionProfile( null );
+
+    final String logChannelId = "channel-id";
+    LogChannelInterface logChannelInterface = Mockito.mock( LogChannelInterface .class );
+    when( logChannelInterface.getLogChannelId() ).thenReturn( logChannelId );
+    profile = extensionPoint.createExecutionProfile( logChannelInterface, job );
+    assertEquals( logChannelId, profile.getExecutionData().getLoggingChannelId() );
+  }
+
+  @Test
+  public void testTransCreateExecutionProfile() throws Exception {
+    Trans trans = Mockito.mock( Trans.class );
+    IExecutionProfile profile = extensionPoint.createExecutionProfile( null, trans );
+    assertEquals( profile, TransLineageHolderMap.getInstance().getLineageHolder( trans ).getExecutionProfile() );
+    assertNull( profile.getExecutionData().getLoggingChannelId() );
+
+    // reset the execution profile
+    TransLineageHolderMap.getInstance().getLineageHolder( trans ).setExecutionProfile( null );
+
+    final String logChannelId = "channel-id";
+    LogChannelInterface logChannelInterface = Mockito.mock( LogChannelInterface .class );
+    when( logChannelInterface.getLogChannelId() ).thenReturn( logChannelId );
+    profile = extensionPoint.createExecutionProfile( logChannelInterface, trans );
+    assertEquals( logChannelId, profile.getExecutionData().getLoggingChannelId() );
   }
 
   @Test

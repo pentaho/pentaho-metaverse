@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -32,10 +32,12 @@ import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsu
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class StepExternalConsumerRowListener extends RowAdapter {
 
@@ -70,12 +72,15 @@ public class StepExternalConsumerRowListener extends RowAdapter {
         String stepName = step.getStepname();
         Map<String, List<IExternalResourceInfo>> resourceMap =
           executionProfile.getExecutionData().getExternalResources();
-        List<IExternalResourceInfo> externalResources = resourceMap.get( stepName );
+        final List<IExternalResourceInfo> existingResources = resourceMap.get( stepName );
+        Set<IExternalResourceInfo> externalResources = existingResources == null ? new HashSet()
+          : new HashSet( resourceMap.get( stepName ) );
         if ( externalResources == null ) {
-          externalResources = new LinkedList<IExternalResourceInfo>();
+          externalResources = new HashSet();
         }
-        externalResources.addAll( resources );
-        resourceMap.put( stepName, externalResources );
+        // avoid adding duplicates
+        externalResources.addAll( new HashSet<>( resources ) );
+        resourceMap.put( stepName, new ArrayList( externalResources ) );
       }
     }
   }

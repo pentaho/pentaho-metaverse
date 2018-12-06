@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,13 +23,15 @@
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
 import com.google.common.collect.MapMaker;
-
+import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.util.MetaverseBeanUtil;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -41,7 +43,8 @@ public class TransLineageHolderMap {
 
   private static TransLineageHolderMap INSTANCE = new TransLineageHolderMap();
 
-  private Map<Trans, LineageHolder> lineageHolderMap = new MapMaker().weakKeys().makeMap();
+  private Map<Trans, LineageHolder> lineageHolderMap =
+    Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() );
 
   private IMetaverseBuilder defaultMetaverseBuilder;
 
@@ -73,6 +76,40 @@ public class TransLineageHolderMap {
 
   public void putLineageHolder( Trans t, LineageHolder holder ) {
     lineageHolderMap.put( t, holder );
+  }
+
+  /**
+   * To be called ONLY assuming that {@link Trans} {@cod t} has no parents, or because its parent is being removed.
+   * @param t an instance of {@link Trans} being removed from {@code lineageHolderMap}
+   * @return the {@link LineageHolder} beign removed from {@code lineageHolderMap}
+   */
+  public LineageHolder removeLineageHolderImpl( final Trans t  ) {
+    final LineageHolder holder = lineageHolderMap.remove( t );
+
+    // remove references to any external resources associated with this transformation, we no longer need them
+    KettleAnalyzerUtil.removeResources( t.getTransMeta() );
+
+    for ( final Object subExecutable : holder.getSubTransAndJobs() ) {
+      if ( subExecutable instanceof Trans ) {
+        removeLineageHolderImpl( (Trans) subExecutable );
+      } else if ( subExecutable instanceof  Job ) {
+        JobLineageHolderMap.getInstance().removeLineageHolderImpl( (Job) subExecutable );
+      }
+    }
+    return holder;
+  }
+
+  public LineageHolder removeLineageHolder( Trans t  ) {
+    // remove the trans only if it has no parent - if it does have a parent, the holder might be needed at a later time
+    // and will be removed when the parent is removed
+    if ( t.getParentTrans() == null && t.getParentJob() == null ) {
+      return removeLineageHolderImpl( t );
+    } else if ( t.getParentTrans() != null ) {
+      getLineageHolder( t.getParentTrans() ).addSubTransOrJob( t );
+    } else if ( t.getParentJob() != null ) {
+      JobLineageHolderMap.getInstance().getLineageHolder( t.getParentJob() ).addSubTransOrJob( t );
+    }
+    return null;
   }
 
   public IMetaverseBuilder getMetaverseBuilder( Trans trans ) {

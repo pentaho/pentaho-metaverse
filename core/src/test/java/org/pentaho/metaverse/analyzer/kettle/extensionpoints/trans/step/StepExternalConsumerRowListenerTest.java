@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.Trans;
@@ -32,9 +33,14 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageHolderMap;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
-import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.impl.model.ExecutionProfile;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
@@ -42,8 +48,9 @@ public class StepExternalConsumerRowListenerTest {
 
   @Test
   public void testStepExternalConsumerRowListener() throws Exception {
-    IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );
+
     BaseStep mockStep = mock( BaseStep.class, withSettings().extraInterfaces( StepInterface.class ) );
+    when( mockStep.getStepname() ).thenReturn( "my_step" );
     StepMeta mockStepMeta = mock( StepMeta.class );
     BaseStepMeta bsm = mock( BaseStepMeta.class, withSettings().extraInterfaces( StepMetaInterface.class ) );
     StepMetaInterface stepMetaInterface = (StepMetaInterface) bsm;
@@ -52,19 +59,53 @@ public class StepExternalConsumerRowListenerTest {
     Trans mockTrans = mock( Trans.class );
     when( mockStep.getTrans() ).thenReturn( mockTrans );
 
-    IExecutionProfile executionProfile = mock( IExecutionProfile.class );
-    IExecutionData executionData = mock( IExecutionData.class );
-    when( executionProfile.getExecutionData() ).thenReturn( executionData );
-    LineageHolder holder = new LineageHolder(  );
+    LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( mockStep.getTrans() );
+    IExecutionProfile executionProfile = new ExecutionProfile();
+
     holder.setExecutionProfile( executionProfile );
     TransLineageHolderMap.getInstance().putLineageHolder( mockTrans, holder );
 
-    StepExternalConsumerRowListener listener = new StepExternalConsumerRowListener( consumer, mockStep );
+    IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );
 
     RowMetaInterface rmi = mock( RowMetaInterface.class );
-    Object[] row = new Object[0];
+    Object[] row1 = new String[] { "val1a", "val1b" };
+    Object[] row2 = new String[] { "val21a", "val2b" };
 
-    listener.rowReadEvent( rmi, row );
+    StepExternalConsumerRowListener listener = new StepExternalConsumerRowListener( consumer, mockStep );
+
+    IExternalResourceInfo resource1 = mock( IExternalResourceInfo.class );
+    IExternalResourceInfo resource2 = mock( IExternalResourceInfo.class );
+    IExternalResourceInfo resource3 = mock( IExternalResourceInfo.class );
+    when( consumer.getResourcesFromRow( mockStep, rmi, row1 ) ).thenReturn(
+      Arrays.asList( new IExternalResourceInfo[] { resource1, resource2 } ) );
+    when( consumer.getResourcesFromRow( mockStep, rmi, row2 ) ).thenReturn(
+      Arrays.asList( new IExternalResourceInfo[] { resource2, resource3 } ) );
+
+    listener.rowReadEvent( rmi, row1 );
+    Map resourceMap = TransLineageHolderMap.getInstance().getLineageHolder( mockTrans ).getExecutionProfile()
+      .getExecutionData().getExternalResources();
+    Assert.assertNotNull( resourceMap );
+    Assert.assertEquals( 1, resourceMap.size() );
+    Assert.assertNotNull( resourceMap.get( "my_step" ) );
+    Assert.assertTrue( resourceMap.get( "my_step" ) instanceof List );
+    List resources = (List) resourceMap.get( "my_step" );
+    Assert.assertNotNull( resources );
+    Assert.assertEquals( 2, resources.size() );
+    Assert.assertTrue( resources.contains( resource1 ) );
+    Assert.assertTrue( resources.contains( resource2 ) );
+
+    listener.rowReadEvent( rmi, row2 );
+    resourceMap = TransLineageHolderMap.getInstance().getLineageHolder( mockTrans ).getExecutionProfile()
+      .getExecutionData().getExternalResources();
+    Assert.assertNotNull( resourceMap );
+    Assert.assertEquals( 1, resourceMap.size() );
+    Assert.assertNotNull( resourceMap.get( "my_step" ) );
+    Assert.assertTrue( resourceMap.get( "my_step" ) instanceof List );
+    resources = (List) resourceMap.get( "my_step" );
+    Assert.assertNotNull( resources );
+    Assert.assertEquals( 3, resources.size() );
+    Assert.assertTrue( resources.contains( resource1 ) );
+    Assert.assertTrue( resources.contains( resource2 ) );
+    Assert.assertTrue( resources.contains( resource3 ) );
   }
-
 }

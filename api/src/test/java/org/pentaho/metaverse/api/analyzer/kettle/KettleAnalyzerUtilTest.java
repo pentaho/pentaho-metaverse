@@ -25,6 +25,7 @@ package org.pentaho.metaverse.api.analyzer.kettle;
 import org.apache.commons.vfs2.FileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
@@ -33,6 +34,7 @@ import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.trans.ISubTransAwareMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
@@ -41,14 +43,21 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * User: RFellows Date: 8/14/14
@@ -192,6 +201,82 @@ public class KettleAnalyzerUtilTest {
     Mockito.doReturn( "myRootDir/dir/foe.ktr"  ).when( parentTransMeta ).environmentSubstitute( Mockito.anyString()  );
     assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
       File.separator + "myRootDir" + File.separator + "dir" + File.separator + "foe.ktr" ) );
+  }
 
+  @Mock
+  private BaseFileInputMeta meta;
+
+  @Mock
+  private BaseFileInputMeta meta2;
+
+  @Mock
+  private TransMeta transMeta;
+
+  private String path1 = "/path/to/file1";
+  private String path1a = "/another/path/to/file1a";
+  private String path2 = "/another/path/to/file2";
+  private String sharedPath = "/shared/file";
+
+  private String[] filePaths = { path1, path1a, sharedPath };
+  private String[] filePaths2 = { path2, sharedPath };
+
+  private StepMeta spyMeta;
+  private StepMeta spyMeta2;
+
+  private void initMetas() {
+
+    when( transMeta.getFilename() ).thenReturn( "my_file" );
+
+    spyMeta = spy( new StepMeta( "test", meta ) );
+    when( meta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( meta.writesToFile() ).thenReturn( true );
+    when( meta.getFilePaths( false) ).thenReturn( filePaths );
+
+    spyMeta2 = spy( new StepMeta( "test2", meta2 ) );
+    when( meta2.getParentStepMeta() ).thenReturn( spyMeta2 );
+    when( spyMeta2.getParentTransMeta() ).thenReturn( transMeta );
+    when( meta2.writesToFile() ).thenReturn( true );
+    when( meta2.getFilePaths( false) ).thenReturn( filePaths2 );
+  }
+
+  @Test
+  public void test_getResourcedFromMeta() throws Exception {
+    initMetas();
+    when( meta.isAcceptingFilenames() ).thenReturn( false );
+
+    Set<IExternalResourceInfo> resources = (Set<IExternalResourceInfo>) KettleAnalyzerUtil.getResourcesFromMeta( meta, filePaths );
+    assertFalse( resources.isEmpty() );
+    assertEquals( 3, resources.size() );
+
+    Field resourceMapField = KettleAnalyzerUtil.class.getDeclaredField( "resourceMap" );
+    resourceMapField.setAccessible( true );
+
+    Map<String, Collection<IExternalResourceInfo>> resourceMap = (Map) resourceMapField.get( null );
+    assertEquals( 1, resourceMap.size() );
+    assertEquals( 3, resourceMap.get( KettleAnalyzerUtil.getUniqueId( meta.getParentStepMeta() ) ).size() );
+
+    Set<IExternalResourceInfo> resources2 = (Set) KettleAnalyzerUtil.getResourcesFromMeta( meta2, filePaths2 );
+    assertFalse( resources2.isEmpty() );
+    assertEquals( 2, resources2.size() );
+    resourceMap = (Map) resourceMapField.get( null );
+    assertEquals( 2, resourceMap.size() );
+    assertEquals( 2, resourceMap.get( KettleAnalyzerUtil.getUniqueId( meta2.getParentStepMeta() ) ).size() );
+
+    // verify that resource removal form map works
+    KettleAnalyzerUtil.removeResources( spyMeta );
+    resourceMap = (Map) resourceMapField.get( null );
+    assertEquals( 1, resourceMap.size() );
+    KettleAnalyzerUtil.removeResources( spyMeta2 );
+    resourceMap = (Map) resourceMapField.get( null );
+    assertEquals( 0, resourceMap.size() );
+  }
+
+  @Test
+  public void test_getUniqueId() {
+    initMetas();
+
+    assertEquals( System.getProperty( "user.dir" ) + File.separator + "my_file::test",
+      KettleAnalyzerUtil.getUniqueId( meta.getParentStepMeta() ) );
   }
 }
