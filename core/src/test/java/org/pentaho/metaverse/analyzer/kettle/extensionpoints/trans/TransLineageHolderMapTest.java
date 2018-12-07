@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.Whitebox;
+import org.powermock.reflect.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
@@ -132,6 +132,12 @@ public class TransLineageHolderMapTest {
 
   @Before
   public void setUp() throws Exception {
+    Whitebox.setInternalState( JobLineageHolderMap.getInstance(), "lineageHolderMap",
+            Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
+    Whitebox.setInternalState( TransLineageHolderMap.getInstance(), "lineageHolderMap",
+            Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
+    Whitebox.setInternalState( KettleAnalyzerUtil.class, "resourceMap",
+            Collections.synchronizedMap( new MapMaker().weakValues().makeMap() ) );
     transLineageHolderMap = TransLineageHolderMap.getInstance();
     mockHolder = spy( new LineageHolder() );
     transLineageHolderMap.setDefaultMetaverseBuilder( defaultBuilder );
