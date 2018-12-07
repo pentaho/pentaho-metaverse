@@ -72,7 +72,7 @@ public class KettleAnalyzerUtil {
 
   private static final Logger log = LoggerFactory.getLogger( KettleAnalyzerUtil.class );
 
-  private static final Map<String, Collection<IExternalResourceInfo>> resourceMap =
+  private static Map<String, Collection<IExternalResourceInfo>> resourceMap =
     Collections.synchronizedMap( new MapMaker().weakValues().makeMap() );
 
   /**
