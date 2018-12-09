@@ -5,11 +5,11 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>pentaho-metaverse</artifactId>
-    <version>9.0.0.0-SNAPSHOT</version>
+    <version>8.3.0.0-SNAPSHOT</version>
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse-core</artifactId>
-  <version>9.0.0.0-SNAPSHOT</version>
+  <version>8.3.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Provides data lineage capabilities</description>
@@ -36,8 +36,8 @@
     <dependency.javax.jcr.jcr.version>2.0</dependency.javax.jcr.jcr.version>
     <dependency.commons-cli.version>1.2</dependency.commons-cli.version>
     <dependency.org.springFramework.spring.version>2.5.6</dependency.org.springFramework.spring.version>
-    <pentaho-mongodb-plugin.version>9.0.0.0-SNAPSHOT</pentaho-mongodb-plugin.version>
-    <platform.version>${project.version}</platform.version>
+    <pentaho-mongodb-plugin.version>8.3.0.0-SNAPSHOT</pentaho-mongodb-plugin.version>
+    <platform.version>8.3.0.0-SNAPSHOT</platform.version>
     <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
     <!--<pdi.version>${project.version}</pdi.version>-->
   </properties>
