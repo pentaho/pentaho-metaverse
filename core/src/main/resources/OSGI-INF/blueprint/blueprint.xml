@@ -349,7 +349,7 @@
            ref="HTTPPostStepAnalyzer"/>
 
   <service id="tableInputStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="tableInputStepAnalyzer"/>
 
   <service id="singleThreaderStepAnalyzerService"

@@ -30,6 +30,7 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.step.ConnectionExternalResourceStepAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.model.BaseDatabaseResourceInfo;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.slf4j.Logger;
@@ -117,6 +118,13 @@ public class TableInputStepAnalyzer extends ConnectionExternalResourceStepAnalyz
   protected void customAnalyze( TableInputMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
     super.customAnalyze( meta, rootNode );
     rootNode.setProperty( DictionaryConst.PROPERTY_QUERY, parentTransMeta.environmentSubstitute( meta.getSQL() ) );
+  }
+
+  @Override protected IClonableStepAnalyzer newInstance() {
+    return new TableInputStepAnalyzer();
+  }
+  @Override public String toString() {
+    return this.getClass().getName();
   }
 
 }
