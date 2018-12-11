@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -31,6 +31,7 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseNode;
@@ -38,6 +39,7 @@ import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.analyzer.kettle.DatabaseConnectionAnalyzer;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.model.BaseDatabaseResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
@@ -51,8 +53,8 @@ import static org.mockito.Mockito.*;
 /**
  * Created by rfellows on 5/29/15.
  */
-@RunWith(MockitoJUnitRunner.class)
-public class TableInputStepAnalyzerTest {
+@RunWith( MockitoJUnitRunner.class )
+public class TableInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   TableInputStepAnalyzer analyzer;
 
@@ -137,7 +139,7 @@ public class TableInputStepAnalyzerTest {
   }
 
   @Test
-  public void testSetBaseStepMeta() throws Exception{
+  public void testSetBaseStepMeta() throws Exception {
     analyzer.setBaseStepMeta( meta );
     DatabaseConnectionAnalyzer dbAnalyzer = mock( DatabaseConnectionAnalyzer.class );
     doReturn( dbAnalyzer ).when( analyzer ).getConnectionAnalyzer();
@@ -157,5 +159,10 @@ public class TableInputStepAnalyzerTest {
     verify( analyzer ).getConnectionAnalyzer();
     verify( dbAnalyzer ).analyze( descriptor, dbMeta );
     assertEquals( node, connectionNode );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new TableInputStepAnalyzer();
   }
 }

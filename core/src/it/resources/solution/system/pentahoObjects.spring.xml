@@ -46,7 +46,7 @@
   <bean id="SimpleMappingAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.simplemapping.SimpleMappingAnalyzer" />
 
-  <bean id="tableInputStepAnalyzer" class="org.pentaho.metaverse.analyzer.kettle.step.tableinput.TableInputStepAnalyzer">
+  <bean id="TableInputStepAnalyzer" class="org.pentaho.metaverse.analyzer.kettle.step.tableinput.TableInputStepAnalyzer">
     <property name="connectionAnalyzer" ref="stepDatabaseConnectionAnalyzer"/>
     <property name="externalResourceConsumer" ref="tableInputERC"/>
   </bean>
@@ -157,7 +157,6 @@
     <property name="stepAnalyzers">
       <list>
         <ref bean="TableOutputStepAnalyzer"/>
-        <ref bean="tableInputStepAnalyzer"/>
         <ref bean="OldTextFileInputStepAnalyzer"/>
         <ref bean="NumberRangeStepAnalyzer"/>
         <ref bean="ValueMapperStepAnalyzer"/>
@@ -194,6 +193,7 @@
         <ref bean="TextFileInputStepAnalyzer"/>
         <ref bean="FixedFileInputStepAnalyzer"/>
         <ref bean="MongoDbInputStepAnalyzer"/>
+        <ref bean="TableInputStepAnalyzer"/>
      </list>
     </property>
 
