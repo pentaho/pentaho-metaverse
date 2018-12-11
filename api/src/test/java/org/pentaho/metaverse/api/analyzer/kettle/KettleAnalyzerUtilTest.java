@@ -50,9 +50,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -244,39 +241,14 @@ public class KettleAnalyzerUtilTest {
   public void test_getResourcedFromMeta() throws Exception {
     initMetas();
     when( meta.isAcceptingFilenames() ).thenReturn( false );
-
-    Set<IExternalResourceInfo> resources = (Set<IExternalResourceInfo>) KettleAnalyzerUtil.getResourcesFromMeta( meta, filePaths );
+    Set<IExternalResourceInfo>
+      resources = (Set<IExternalResourceInfo>) KettleAnalyzerUtil.getResourcesFromMeta( meta, filePaths );
     assertFalse( resources.isEmpty() );
     assertEquals( 3, resources.size() );
-
-    Field resourceMapField = KettleAnalyzerUtil.class.getDeclaredField( "resourceMap" );
-    resourceMapField.setAccessible( true );
-
-    Map<String, Collection<IExternalResourceInfo>> resourceMap = (Map) resourceMapField.get( null );
-    assertEquals( 1, resourceMap.size() );
-    assertEquals( 3, resourceMap.get( KettleAnalyzerUtil.getUniqueId( meta.getParentStepMeta() ) ).size() );
 
     Set<IExternalResourceInfo> resources2 = (Set) KettleAnalyzerUtil.getResourcesFromMeta( meta2, filePaths2 );
     assertFalse( resources2.isEmpty() );
     assertEquals( 2, resources2.size() );
-    resourceMap = (Map) resourceMapField.get( null );
-    assertEquals( 2, resourceMap.size() );
-    assertEquals( 2, resourceMap.get( KettleAnalyzerUtil.getUniqueId( meta2.getParentStepMeta() ) ).size() );
-
-    // verify that resource removal form map works
-    KettleAnalyzerUtil.removeResources( spyMeta );
-    resourceMap = (Map) resourceMapField.get( null );
-    assertEquals( 1, resourceMap.size() );
-    KettleAnalyzerUtil.removeResources( spyMeta2 );
-    resourceMap = (Map) resourceMapField.get( null );
-    assertEquals( 0, resourceMap.size() );
   }
 
-  @Test
-  public void test_getUniqueId() {
-    initMetas();
-
-    assertEquals( System.getProperty( "user.dir" ) + File.separator + "my_file::test",
-      KettleAnalyzerUtil.getUniqueId( meta.getParentStepMeta() ) );
-  }
 }

@@ -179,10 +179,8 @@ public class TextFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
     when( meta.isAcceptingFilenames() ).thenReturn( true );
     assertTrue( consumer.isDataDriven( meta ) );
     resources = consumer.getResourcesFromMeta( meta );
-    // resources will have been cached from the previous call to getResourcesFromMeta, so a call to
-    // getResourcesFromMeta will return 2 resources, even though we are accepting files from filename
-    assertFalse( resources.isEmpty() );
-    assertEquals( 2, resources.size() );
+    // call to getResourcesFromMeta does not cache resources, only calls to getResourcesFromRow do
+    assertTrue( resources.isEmpty() );
 
     when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenReturn( "/path/to/row/file" );
@@ -190,16 +188,14 @@ public class TextFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
     when( mockTextFileInput.getStepMetaInterface() ).thenReturn( meta );
     resources = consumer.getResourcesFromRow( mockTextFileInput, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertFalse( resources.isEmpty() );
-    // resources will have been cached from the previous call to getResourcesFromMeta, so a call to
-    // getResourcesFromRow will return those 2 resources, as well as those from row
-    assertEquals( 3, resources.size() );
+    assertEquals( 1, resources.size() );
 
     when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenThrow( KettleException.class );
     resources = consumer.getResourcesFromRow( mockTextFileInput, mockRowMetaInterface, new String[]{ "id", "name" } );
     // even when the call to getString throws an exception, we can still get resources from the cache
     assertFalse( resources.isEmpty() );
-    assertEquals( 3, resources.size() );
+    assertEquals( 1, resources.size() );
 
     assertEquals( TextFileInputMeta.class, consumer.getMetaClass() );
   }
