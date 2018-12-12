@@ -27,7 +27,7 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
-import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
+import org.pentaho.metaverse.api.analyzer.kettle.ExternalResourceCache;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.util.MetaverseBeanUtil;
 
@@ -87,7 +87,7 @@ public class TransLineageHolderMap {
     final LineageHolder holder = lineageHolderMap.remove( t );
 
     // remove references to any external resources associated with this transformation, we no longer need them
-    KettleAnalyzerUtil.removeResources( t.getTransMeta() );
+    ExternalResourceCache.getInstance().removeCachedResources( t );
 
     for ( final Object subExecutable : holder.getSubTransAndJobs() ) {
       if ( subExecutable instanceof Trans ) {

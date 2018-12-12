@@ -28,25 +28,30 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.reflect.Whitebox;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
+import org.pentaho.di.trans.steps.file.BaseFileInputStep;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.analyzer.kettle.ExternalResourceCache;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.api.model.LineageHolder;
+import org.powermock.reflect.Whitebox;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -93,7 +98,13 @@ public class TransLineageHolderMapTest {
   private BaseFileInputMeta meta2;
 
   @Mock
+  private BaseFileInputStep input;
+
+  @Mock
   private TransMeta transMeta;
+
+  @Mock
+  private RowMetaInterface rowMetaInterface;
 
   private String path1 = "/path/to/file1";
   private String path1a = "/another/path/to/file1a";
@@ -128,6 +139,10 @@ public class TransLineageHolderMapTest {
     when( meta2.getFilePaths( false) ).thenReturn( filePaths2 );
 
     when( transMeta.getSteps() ).thenReturn( Arrays.asList( new StepMeta[] { spyMeta, spyMeta2 } ) );
+
+    when( input.getStepMetaInterface() ).thenReturn( meta );
+    when( input.getStepMeta() ).thenReturn( spyMeta );
+    when( input.getTrans() ).thenReturn( trans );
   }
 
   @Before
@@ -136,8 +151,8 @@ public class TransLineageHolderMapTest {
             Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
     Whitebox.setInternalState( TransLineageHolderMap.getInstance(), "lineageHolderMap",
             Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
-    Whitebox.setInternalState( KettleAnalyzerUtil.class, "resourceMap",
-            Collections.synchronizedMap( new MapMaker().weakValues().makeMap() ) );
+    Whitebox.setInternalState( ExternalResourceCache.getInstance(), "transMap", new ConcurrentHashMap() );
+    Whitebox.setInternalState( ExternalResourceCache.getInstance(), "resourceMap", new ConcurrentHashMap() );
     transLineageHolderMap = TransLineageHolderMap.getInstance();
     mockHolder = spy( new LineageHolder() );
     transLineageHolderMap.setDefaultMetaverseBuilder( defaultBuilder );
@@ -186,7 +201,7 @@ public class TransLineageHolderMapTest {
   @Test
   public void testRemoveLineageHolderWithParentTrans() throws Exception {
     initMetas();
-    when( meta.isAcceptingFilenames() ).thenReturn( false );
+    when( meta.isAcceptingFilenames() ).thenReturn( true );
 
     // initialize the lineage holder for this transformation
     transLineageHolderMap.getLineageHolder( trans );
@@ -194,42 +209,53 @@ public class TransLineageHolderMapTest {
     // test with parent transformation being set
     when( trans.getParentTrans() ).thenReturn( parentTrans );
 
-    KettleAnalyzerUtil.getResourcesFromMeta( meta, filePaths );
-    KettleAnalyzerUtil.getResourcesFromMeta( meta2, filePaths2 );
+    when( input.environmentSubstitute( Mockito.any( String.class ) ) ).thenReturn( "/path/to/row/file" );
 
-    Field resourceMapField = KettleAnalyzerUtil.class.getDeclaredField( "resourceMap" );
+    KettleAnalyzerUtil.getResourcesFromRow( input, rowMetaInterface, new String[] { "id", "name" } );
+
+    Field resourceMapField = ExternalResourceCache.class.getDeclaredField( "resourceMap" );
     resourceMapField.setAccessible( true );
+    Field transMapField = ExternalResourceCache.class.getDeclaredField( "transMap" );
+    transMapField.setAccessible( true );
 
-    Map<String, Collection<IExternalResourceInfo>> resourceMap = (Map) resourceMapField.get( null );
-    assertEquals( 2, resourceMap.size() );
+    Map<String, ExternalResourceCache.ExternalResourceValues> resourceMap = (Map) resourceMapField.get(
+      ExternalResourceCache.getInstance() );
+    Map<String, ExternalResourceCache.ExternalResourceValues> transMap = (Map) transMapField.get(
+      ExternalResourceCache.getInstance() );
+    assertEquals( 1, resourceMap.size() );
+    assertEquals( 1, transMap.size() );
 
     Field lineageHolderMapField = transLineageHolderMap.getClass().getDeclaredField( "lineageHolderMap" );
     lineageHolderMapField.setAccessible( true );
 
     transLineageHolderMap.removeLineageHolder( trans );
     // make sure the trans map entry was NOT removed and its resources were NOT removed from the
-    // KettleAnalyzerUtil.resourceMap, since trans has a parent
-    resourceMap = (Map) resourceMapField.get( null );
+    // ExternalResourceCache, since trans has a parent
+    resourceMap = (Map) resourceMapField.get( ExternalResourceCache.getInstance() );
+    transMap = (Map) transMapField.get( ExternalResourceCache.getInstance() );
     Map<Trans, LineageHolder> lineageHolderMap = (Map) lineageHolderMapField.get( transLineageHolderMap );
     assertNotNull( lineageHolderMap.get( trans ) );
-    assertEquals( 2, resourceMap.size() );
+    assertEquals( 1, resourceMap.size() ); // the resource map has only one resource
+    assertEquals( 1, transMap.size() );
     assertEquals( 2, lineageHolderMap.size() );
 
     // make sure that removing the parent trans removes it and its sub-transformations from the map and also removed
-    // sub-transformation resources from KettleAnalyzerUtil.resourceMap
+    // sub-transformation resources from ExternalResourceCache
     transLineageHolderMap.removeLineageHolder( parentTrans );
-    resourceMap = (Map) resourceMapField.get( null );
+    resourceMap = (Map) resourceMapField.get( ExternalResourceCache.getInstance() );
+    transMap = (Map) transMapField.get( ExternalResourceCache.getInstance() );
     lineageHolderMap = (Map) lineageHolderMapField.get( transLineageHolderMap );
     assertNull( lineageHolderMap.get( parentTrans ) );
     assertNull( lineageHolderMap.get( trans ) );
     assertEquals( 0, resourceMap.size() );
+    assertEquals( 0, transMap.size() );
     assertEquals( 0, lineageHolderMap.size() );
   }
 
   @Test
   public void testRemoveLineageHolderWithParentJob() throws Exception {
     initMetas();
-    when( meta.isAcceptingFilenames() ).thenReturn( false );
+    when( meta.isAcceptingFilenames() ).thenReturn( true );
 
     // initialize the lineage holder for this transformation
     transLineageHolderMap.getLineageHolder( trans );
@@ -237,36 +263,47 @@ public class TransLineageHolderMapTest {
     // test with parent transformation being set
     when( trans.getParentJob() ).thenReturn( parentJob );
 
-    KettleAnalyzerUtil.getResourcesFromMeta( meta, filePaths );
-    KettleAnalyzerUtil.getResourcesFromMeta( meta2, filePaths2 );
+    when( input.environmentSubstitute( Mockito.any( String.class ) ) ).thenReturn( "/path/to/row/file" );
 
-    Field resourceMapField = KettleAnalyzerUtil.class.getDeclaredField( "resourceMap" );
+    KettleAnalyzerUtil.getResourcesFromRow( input, rowMetaInterface, new String[] { "id", "name" } );
+
+    Field resourceMapField = ExternalResourceCache.class.getDeclaredField( "resourceMap" );
     resourceMapField.setAccessible( true );
+    Field transMapField = ExternalResourceCache.class.getDeclaredField( "transMap" );
+    transMapField.setAccessible( true );
 
-    Map<String, Collection<IExternalResourceInfo>> resourceMap = (Map) resourceMapField.get( null );
-    assertEquals( 2, resourceMap.size() );
+    Map<String, Collection<IExternalResourceInfo>> resourceMap = (Map) resourceMapField.get(
+      ExternalResourceCache.getInstance() );
+    Map<String, ExternalResourceCache.ExternalResourceValues> transMap = (Map) transMapField.get(
+      ExternalResourceCache.getInstance() );
+    assertEquals( 1, resourceMap.size() );
+    assertEquals( 1, transMap.size() );
 
     Field lineageHolderMapField = transLineageHolderMap.getClass().getDeclaredField( "lineageHolderMap" );
     lineageHolderMapField.setAccessible( true );
 
     transLineageHolderMap.removeLineageHolder( trans );
     // make sure the trans map entry was NOT removed and its resources were NOT removed from the
-    // KettleAnalyzerUtil.resourceMap, since trans has a parent
-    resourceMap = (Map) resourceMapField.get( null );
+    // ExternalResourceCache, since trans has a parent
+    resourceMap = (Map) resourceMapField.get( ExternalResourceCache.getInstance() );
+    transMap = (Map) transMapField.get( ExternalResourceCache.getInstance() );
     Map<Trans, LineageHolder> lineageHolderMap = (Map) lineageHolderMapField.get( transLineageHolderMap );
     assertNotNull( lineageHolderMap.get( trans ) );
-    assertEquals( 2, resourceMap.size() );
+    assertEquals( 1, resourceMap.size() ); // the resource map has only one resource
+    assertEquals( 1, transMap.size() );
     // lineageHolderMap will only have one member, the parent job will be in the JobLineageHolderMap
     assertEquals( 1, lineageHolderMap.size() );
 
     // make sure that removing the parent trans removes it and its sub-transformations from the map and also removed
     // sub-transformation resources from KettleAnalyzerUtil.resourceMap
     JobLineageHolderMap.getInstance().removeLineageHolder( parentJob );
-    resourceMap = (Map) resourceMapField.get( null );
+    resourceMap = (Map) resourceMapField.get( ExternalResourceCache.getInstance() );
+    transMap = (Map) transMapField.get( ExternalResourceCache.getInstance() );
     lineageHolderMap = (Map) lineageHolderMapField.get( transLineageHolderMap );
     assertNull( lineageHolderMap.get( parentJob ) );
     assertNull( lineageHolderMap.get( trans ) );
     assertEquals( 0, resourceMap.size() );
+    assertEquals( 0, transMap.size() );
     assertEquals( 0, lineageHolderMap.size() );
   }
 

@@ -28,7 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.reflect.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
@@ -36,13 +35,15 @@ import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
-import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
+import org.pentaho.metaverse.api.analyzer.kettle.ExternalResourceCache;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
+import org.powermock.reflect.Whitebox;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -94,8 +95,8 @@ public class JobLineageHolderMapTest {
             Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
     Whitebox.setInternalState( TransLineageHolderMap.getInstance(), "lineageHolderMap",
             Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
-    Whitebox.setInternalState( KettleAnalyzerUtil.class, "resourceMap",
-            Collections.synchronizedMap( new MapMaker().weakValues().makeMap() ) );
+    Whitebox.setInternalState( ExternalResourceCache.getInstance(), "transMap", new ConcurrentHashMap() );
+    Whitebox.setInternalState( ExternalResourceCache.getInstance(), "resourceMap", new ConcurrentHashMap() );
     jobLineageHolderMap = JobLineageHolderMap.getInstance();
     mockHolder = spy( new LineageHolder() );
     jobLineageHolderMap.setDefaultMetaverseBuilder( defaultBuilder );
