@@ -39,4 +39,12 @@ public interface IMetaverseConfig {
   void setResolveExternalResources( final boolean resolveExternalResources );
 
   boolean getResolveExternalResources();
+
+  void setGenerateSubGraphs( final boolean generateSubGraphs );
+
+  boolean getGenerateSubGraphs();
+
+  void setConsolidateSubGraphs( final boolean consolidateGraphs );
+
+  boolean getConsolidateSubGraphs();
 }

@@ -42,10 +42,12 @@ import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.ILineageWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseObjectFactory;
+import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
+import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -57,7 +59,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@PrepareForTest( { ExtensionPointHandler.class } )
+@PrepareForTest( { ExtensionPointHandler.class, MetaverseConfig.class, KettleAnalyzerUtil.class } )
 @RunWith( PowerMockRunner.class )
 public class JobRuntimeExtensionPointTest {
 
@@ -88,6 +90,10 @@ public class JobRuntimeExtensionPointTest {
 
   @Before
   public void setUp() throws Exception {
+
+    // (re)initialize the default state of MetaverseConfig
+    setupMetaverseConfig( true, true );
+
     jobExtensionPoint = new JobRuntimeExtensionPoint();
     jobExtensionPoint.setRuntimeEnabled( true );
     lineageWriter = mock( ILineageWriter.class );
@@ -188,7 +194,9 @@ public class JobRuntimeExtensionPointTest {
     when( JobLineageHolderMap.getInstance().getLineageHolder( job ) ).thenReturn( holder );
     PowerMockito.mockStatic( ExtensionPointHandler.class );
     ext.jobFinished( job );
-    verify( ext ).createLineGraph( job );
+    verify( ext, times( 1 ) ).populateExecutionProfile( Mockito.any( IExecutionProfile.class ), eq( job ) );
+    verify( ext, times( 1 ) ).runAnalyzers( eq( job ) );
+    verify( ext, times( 1 ) ).createLineGraph( job );
     verify( ext, never() ).createLineGraphAsync( job );
     verify( lineageWriter, times( 1 ) ).outputLineageGraph( holder );
 
@@ -202,18 +210,39 @@ public class JobRuntimeExtensionPointTest {
 
     // reset the lineageWriter mock, since we're going to be verifying calls on it again
     Mockito.reset( lineageWriter );
-    // set a parent job and verify that "lineageWriter.outputLineageGraph" never gets called
+    // set a parent trans  - since MetaverseConfig.generateSubGraph() returns true, lineageWriter.outputLineageGraph
+    // should still get called
     job.setParentJob( new Job() );
     ext.jobFinished( job );
+    verify( lineageWriter, times( 1 ) ).outputLineageGraph( JobLineageHolderMap.getInstance().getLineageHolder( job ) );
+
+    // configure MetaverseConfig.generateSubGraph() to returns false, lineageWriter.outputLineageGraph should never
+    // be called
+    setupMetaverseConfig( true, false );
+    // reset the lineageWriter mock, since we're going to be verifying calls on it again
+    Mockito.reset( lineageWriter );
+
+    ext.jobFinished( job );
     verify( lineageWriter, never() ).outputLineageGraph( JobLineageHolderMap.getInstance().getLineageHolder( job ) );
+
     Whitebox.setInternalState( job, "parentJob", (Object[]) null );
+
+    setupMetaverseConfig( true, true );
+    // set a parent trans  - since MetaverseConfig.generateSubGraph() returns true, lineageWriter.outputLineageGraph
+    // should still get called
+    job.setParentTrans( new Trans() );
+    ext.jobFinished( job );
+    verify( lineageWriter, times( 1 ) )
+      .outputLineageGraph( JobLineageHolderMap.getInstance().getLineageHolder( job ) );
 
     // reset the lineageWriter mock, since we're going to be verifying calls on it again
     Mockito.reset( lineageWriter );
-    // set a parent trans and verify that "lineageWriter.outputLineageGraph" never gets called
-    job.setParentTrans( new Trans() );
+    // configure MetaverseConfig.generateSubGraph() to returns false, lineageWriter.outputLineageGraph should never
+    // be called
+    setupMetaverseConfig( true, false );
     ext.jobFinished( job );
-    verify( lineageWriter, never() ).outputLineageGraph( JobLineageHolderMap.getInstance().getLineageHolder( job ) );
+    verify( lineageWriter, never() )
+      .outputLineageGraph( JobLineageHolderMap.getInstance().getLineageHolder( job ) );
   }
 
   @Test
@@ -250,5 +279,13 @@ public class JobRuntimeExtensionPointTest {
     IExecutionData executionData = mock( IExecutionData.class );
     when( executionProfile.getExecutionData() ).thenReturn( executionData );
     JobLineageHolderMap.getInstance().getLineageHolder( job ).setExecutionProfile( executionProfile );
+  }
+
+  private void setupMetaverseConfig( final boolean consolidateSubGraphs, final boolean generateSubGraphs ) {
+    PowerMockito.mockStatic( MetaverseConfig.class );
+    Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( consolidateSubGraphs );
+    Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( generateSubGraphs );
+    PowerMockito.mockStatic( KettleAnalyzerUtil.class );
+    Mockito.when( KettleAnalyzerUtil.consolidateSubGraphs() ).thenReturn( consolidateSubGraphs );
   }
 }

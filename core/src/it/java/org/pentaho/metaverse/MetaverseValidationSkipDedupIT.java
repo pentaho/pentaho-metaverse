@@ -46,6 +46,8 @@ public class MetaverseValidationSkipDedupIT extends MetaverseValidationIT {
     // expecting to deduplicate by default - need to mock to return false
     Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( false );
     Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( false );
+    Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( true );
+    Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( true );
 
     MetaverseValidationIT.init();
   }

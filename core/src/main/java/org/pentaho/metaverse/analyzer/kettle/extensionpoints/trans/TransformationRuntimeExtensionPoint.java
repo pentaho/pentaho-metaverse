@@ -32,7 +32,6 @@ import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
-import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
@@ -121,7 +120,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
   }
 
-  private void runAnalyzers( Trans trans ) throws KettleException {
+  protected void runAnalyzers( Trans trans ) throws KettleException {
 
     // Only generate lineage/execution information for "real" transformations, not the preview or debug ones. Whether
     // in Preview or Debug mode in Spoon, trans.isPreview() returns true, so just check that.
@@ -264,7 +263,9 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     }
 
     log.info( Messages.getString( "INFO.TransformationFinished", trans.getName() ) );
-    runAnalyzers( trans );
+    if ( shouldCreateGraph( trans ) ) {
+      runAnalyzers( trans );
+    }
 
     if ( allowedAsync() ) {
       createLineGraphAsync( trans );
@@ -332,13 +333,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       }
 
       try {
-        final Job parentJob = trans.getParentJob();
-        final Trans parentTrans = trans.getParentTrans();
-
-        // Create a lineage graph for this transformation only if it has no parent. Otherwise, the parent will incorporate
-        // the lineage information into its own graph
-        if ( parentJob == null && parentTrans == null ) {
-
+        if ( shouldCreateGraph( trans ) ) {
           // Add the execution profile information to the lineage graph
           addRuntimeLineageInfo( holder );
 
