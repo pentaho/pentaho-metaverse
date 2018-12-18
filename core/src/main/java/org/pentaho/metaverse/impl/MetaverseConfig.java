@@ -36,6 +36,8 @@ public class MetaverseConfig implements IMetaverseConfig {
   private boolean resolveExternalResources = true;
   private boolean deduplicateTransformationFields = true;
   private boolean adjustExternalResourceFields = true;
+  private boolean generateSubGraphs = true;
+  private boolean consolidateSubGraphs = true;
 
   // Used for testing ONLY, to verify that any listeners waiting for lineage to be written aren't invoked until
   // graphml has been written
@@ -109,5 +111,31 @@ public class MetaverseConfig implements IMetaverseConfig {
 
   public int getLineageDelay() {
     return this.lineageDelay;
+  }
+
+  public void setGenerateSubGraphs( final boolean generateSubGraphs ) {
+    this.generateSubGraphs = generateSubGraphs;
+  }
+
+  public boolean getGenerateSubGraphs() {
+    return this.generateSubGraphs;
+  }
+
+  public static boolean generateSubGraphs() {
+    final MetaverseConfig config = getInstance();
+    return config != null && config.getGenerateSubGraphs();
+  }
+
+  public void setConsolidateSubGraphs( final boolean consolidateSubGraphs ) {
+    this.consolidateSubGraphs = consolidateSubGraphs;
+  }
+
+  public boolean getConsolidateSubGraphs() {
+    return this.consolidateSubGraphs;
+  }
+
+  public static boolean consolidateSubGraphs() {
+    final MetaverseConfig config = getInstance();
+    return config != null && config.getConsolidateSubGraphs();
   }
 }
