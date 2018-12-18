@@ -26,7 +26,6 @@ import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleStepException;
@@ -1603,5 +1602,18 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   protected boolean shouldCleanupInstance() {
     return false;
   }
+/*
+  @Before
+  public void setupDefaultMetaverseConfig() {
+    setupMetaverseConfig( true, true );
+  }
 
+  private void setupMetaverseConfig( final boolean consolidateSubGraphs, final boolean generateSubGraphs ) {
+    PowerMockito.mockStatic( MetaverseConfig.class );
+    Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( consolidateSubGraphs );
+    Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( generateSubGraphs );
+    PowerMockito.mockStatic( KettleAnalyzerUtil.class );
+    Mockito.when( KettleAnalyzerUtil.consolidateSubGraphs() ).thenReturn( consolidateSubGraphs );
+    int dummy = 0;
+  }*/
 }

@@ -26,6 +26,8 @@ import org.apache.commons.lang.ObjectUtils;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.logging.LogChannelInterface;
+import org.pentaho.di.job.Job;
+import org.pentaho.di.trans.Trans;
 import org.pentaho.di.version.BuildVersion;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
@@ -35,6 +37,7 @@ import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionEngine;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.pentaho.metaverse.impl.model.ExecutionEngine;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.messages.Messages;
@@ -180,4 +183,21 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
   }
 
   protected abstract LineageHolder getLineageHolder( final Object o );
+
+  public boolean shouldCreateGraph( final Job job ) {
+    final Job parentJob = job.getParentJob();
+    final Trans parentTrans = job.getParentTrans();
+    // Create a lineage graph for this job only if it has no parent. Otherwise, the parent will incorporate
+    // the lineage information into its own graph
+    return MetaverseConfig.generateSubGraphs() || ( parentJob == null && parentTrans == null );
+  }
+
+  public boolean shouldCreateGraph( final Trans trans ) {
+    final Job parentJob = trans.getParentJob();
+    final Trans parentTrans = trans.getParentTrans();
+    // Create a lineage graph for this transformation only if it has no parent. Otherwise, the parent will incorporate
+    // the lineage information into its own graph
+    return MetaverseConfig.generateSubGraphs() || ( parentJob == null && parentTrans == null );
+  }
+
 }
