@@ -40,6 +40,7 @@ import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.JobEntryAnalyzer;
 import org.pentaho.metaverse.impl.MetaverseConfig;
+import org.pentaho.metaverse.api.messages.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,7 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
 
     Repository repo = parentJobMeta.getRepository();
     String jobPath = null;
+    MetaverseAnalyzerException exception = null;
     switch ( entry.getSpecificationMethod() ) {
       case FILENAME:
         try {
@@ -81,7 +83,8 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
           jobPath = normalized;
 
         } catch ( Exception e ) {
-          throw new MetaverseAnalyzerException( "Sub job can not be found - " + jobPath, e );
+          exception = new MetaverseAnalyzerException( Messages.getString( "ERROR.SubJobNotFoundInParentJob", jobPath,
+            parentJobMeta.toString() ), e );
         }
         break;
       case REPOSITORY_BY_NAME:
@@ -94,10 +97,12 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
             String filename = subJobMeta.getFilename() == null ? subJobMeta.toString() : subJobMeta.getFilename();
             jobPath = filename + "." + subJobMeta.getDefaultExtension();
           } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( "Sub job can not be found in repository - " + file, e );
+            exception = new MetaverseAnalyzerException( Messages.getString( "ERROR.SubJobNotFoundInParentJob", file,
+              parentJobMeta.toString() ), e );
           }
         } else {
-          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the job" );
+          exception = new MetaverseAnalyzerException( Messages.getString( "ERROR.MissingConnectionForJobSubJob",
+            parentJobMeta.toString() ) );
         }
         break;
       case REPOSITORY_BY_REFERENCE:
@@ -107,14 +112,22 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
             String filename = subJobMeta.getFilename() == null ? subJobMeta.toString() : subJobMeta.getFilename();
             jobPath = filename + "." + subJobMeta.getDefaultExtension();
           } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( "Sub job can not be found by reference - "
-              + entry.getJobObjectId(), e );
+            exception = new MetaverseAnalyzerException( Messages.getString( "ERROR.SubJobsNotFoundInParentJob",
+              ( entry.getJobObjectId() == null ? "N/A" : entry.getJobObjectId().toString() ),
+              parentJobMeta.toString() ), e );
           }
         } else {
-          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the job" );
+          exception = new MetaverseAnalyzerException( Messages.getString( "ERROR.MissingConnectionForJobSubJob",
+            parentJobMeta.toString() ) );
         }
         break;
     }
+    rootNode.setProperty( DictionaryConst.PROPERTY_PATH, jobPath );
+
+    if ( exception != null ) {
+      throw exception;
+    }
+
     subJobMeta.copyVariablesFrom( parentJobMeta );
 
     IComponentDescriptor ds =
@@ -126,7 +139,6 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
     jobNode.setProperty( DictionaryConst.PROPERTY_PATH, jobPath );
     jobNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
 
-    rootNode.setProperty( DictionaryConst.PROPERTY_PATH, jobPath );
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_EXECUTES, jobNode );
 
     // pull in the sub-job lineage only if the consolidateSubGraphs flag is set to true
