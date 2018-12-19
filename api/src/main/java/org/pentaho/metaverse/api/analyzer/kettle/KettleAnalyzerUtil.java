@@ -176,7 +176,8 @@ public class KettleAnalyzerUtil {
         try {
           subTransMeta = getSubTransMeta( transPath );
         } catch ( Exception e ) {
-          throw new MetaverseAnalyzerException( "Sub transformation can not be found - " + transPath, e );
+          throw new MetaverseAnalyzerException( Messages.getString( "ERROR.SubTransNotFoundInParentTrans",
+            transPath, parentTransMeta.toString() ), e );
         }
         break;
       case REPOSITORY_BY_NAME:
@@ -187,10 +188,12 @@ public class KettleAnalyzerUtil {
             RepositoryDirectoryInterface rdi = repo.findDirectory( dir );
             subTransMeta = repo.loadTransformation( file, rdi, null, true, null );
           } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( "Sub transformation can not be found in repository - " + file, e );
+            throw new MetaverseAnalyzerException( Messages.getString( "ERROR.SubTransNotFoundInParentTrans",
+              file, parentTransMeta.toString() ), e );
           }
         } else {
-          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
+          throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MissingConnectionForTransSubTrans",
+            parentTransMeta.toString() ) );
         }
         break;
       case REPOSITORY_BY_REFERENCE:
@@ -198,11 +201,13 @@ public class KettleAnalyzerUtil {
           try {
             subTransMeta = repo.loadTransformation( meta.getTransObjectId(), null );
           } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( "Sub transformation can not be found by reference - "
-              + meta.getTransObjectId(), e );
+            throw new MetaverseAnalyzerException( Messages.getString( "ERROR.SubTransNotFoundInParentTrans",
+              ( meta.getTransObjectId() == null ? "N/A" : meta.getTransObjectId().toString() ), parentTransMeta
+                .toString() ), e );
           }
         } else {
-          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
+          throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MissingConnectionForTransSubTrans",
+            parentTransMeta.toString() ) );
         }
         break;
     }
