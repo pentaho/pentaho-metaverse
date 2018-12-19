@@ -17,7 +17,7 @@
       <cm:property name="lineage.deduplicate.transformation.fields" value="true"/>
       <cm:property name="lineage.adjust.external.resource.fields" value="true"/>
       <cm:property name="lineage.generate.subgraphs" value="true"/>
-      <cm:property name="lineage.consolidate.graphs" value="true"/>
+      <cm:property name="lineage.consolidate.subgraphs" value="true"/>
       <!-- Used for testing ONLY - write delay in seconds -->
       <cm:property name="lineage.delay" value="0"/>
     </cm:default-properties>
