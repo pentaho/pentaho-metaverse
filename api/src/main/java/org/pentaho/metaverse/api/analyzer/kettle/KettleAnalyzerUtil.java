@@ -44,6 +44,7 @@ import org.pentaho.metaverse.api.AnalysisContext;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IMetaverseConfig;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
@@ -53,6 +54,7 @@ import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import org.pentaho.metaverse.api.messages.Messages;
 import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -327,6 +329,7 @@ public class KettleAnalyzerUtil {
     final String subTransMetaPath = getSubTransMetaPath( meta, subTransMeta );
     subTransMeta.setFilename( subTransMetaPath );
     rootNode.setProperty( "subTransformation", subTransMetaPath );
+    rootNode.setProperty( DictionaryConst.PROPERTY_PATH, subTransMetaPath );
 
     final IMetaverseNode subTransNode = analyzer.getNode( subTransMeta.getName(), DictionaryConst.NODE_TYPE_TRANS,
       analyzer.getDocumentDescriptor().getNamespace(), null, null );
@@ -337,18 +340,27 @@ public class KettleAnalyzerUtil {
 
     analyzer.getMetaverseBuilder().addLink( rootNode, DictionaryConst.LINK_EXECUTES, subTransNode );
 
-    final IDocument subTransDocument = buildDocument( analyzer.getMetaverseBuilder(), subTransMeta,
-      subTransMetaPath, analyzer.getDocumentDescriptor().getNamespace() );
-    if ( subTransDocument != null ) {
-      final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
-        subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS,
-        analyzer.getDocumentDescriptor().getNamespace(),
-        analyzer.getDescriptor().getContext() );
+    // pull in the sub-job lineage only if the consolidateSubGraphs flag is set to true
+    if ( consolidateSubGraphs() ) {
+      final IDocument subTransDocument = buildDocument( analyzer.getMetaverseBuilder(), subTransMeta,
+        subTransMetaPath, analyzer.getDocumentDescriptor().getNamespace() );
+      if ( subTransDocument != null ) {
+        final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
+          subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS,
+          analyzer.getDocumentDescriptor().getNamespace(),
+          analyzer.getDescriptor().getContext() );
 
-      // analyze the sub-transformation
-      return analyzer.getDocumentAnalyzer().analyze( subtransDocumentDescriptor, subTransMeta, subTransNode,
-        subTransMetaPath );
+        // analyze the sub-transformation
+        return analyzer.getDocumentAnalyzer().analyze( subtransDocumentDescriptor, subTransMeta, subTransNode,
+          subTransMetaPath );
+      }
     }
     return null;
+  }
+
+  public static boolean consolidateSubGraphs() {
+    final IMetaverseConfig config = PentahoSystem.get( IMetaverseConfig.class );
+    // return true by default (if config is null)
+    return config == null || config.getConsolidateSubGraphs();
   }
 }

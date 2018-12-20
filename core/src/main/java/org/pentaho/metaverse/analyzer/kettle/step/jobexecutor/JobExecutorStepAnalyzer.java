@@ -50,6 +50,7 @@ import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,34 +151,34 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
     jobNode.setProperty( DictionaryConst.PROPERTY_PATH, jobPath );
     jobNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
 
+    rootNode.setProperty( DictionaryConst.PROPERTY_PATH, jobPath );
     metaverseBuilder.addLink( node, DictionaryConst.LINK_EXECUTES, jobNode );
 
     final IDocument subTransDocument = KettleAnalyzerUtil.buildDocument( getMetaverseBuilder(), subJobMeta,
       jobPath, getDocumentDescriptor().getNamespace() );
-    final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
-      subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, getDocumentDescriptor().getNamespace(),
-      getDescriptor().getContext() );
-
-    // analyze the sub-job
-    final JobAnalyzer jobAnalyzer = new JobAnalyzer();
-    jobAnalyzer.setJobEntryAnalyzerProvider( PentahoSystem.get( IJobEntryAnalyzerProvider.class ) );
-    jobAnalyzer.setMetaverseBuilder( getMetaverseBuilder() );
-    jobAnalyzer.analyze( subtransDocumentDescriptor, subJobMeta, jobNode, jobPath );
-
-    connectToSubJobOutputFields( meta, subJobMeta, jobNode, descriptor );
-
     node.setProperty( JOB_TO_EXECUTE, jobPath );
 
     if ( StringUtils.isNotEmpty( meta.getExecutionResultTargetStep() ) ) {
       node.setProperty( EXECUTION_RESULTS_TARGET, meta.getExecutionResultTargetStep() );
     }
 
-    /* TODO remove? if ( StringUtils.isNotEmpty( meta.getOutputRowsSourceStep() ) ) {
-      node.setProperty( OUTPUT_ROWS_TARGET, meta.getOutputRowsSourceStep() );
-    }*/
-
     if ( StringUtils.isNotEmpty( meta.getResultFilesTargetStep() ) ) {
       node.setProperty( RESULT_FILES_TARGET, meta.getResultFilesTargetStep() );
+    }
+
+    // pull in the sub-job lineage only if the consolidateGraphs flag is set to true
+    if ( MetaverseConfig.consolidateSubGraphs() ) {
+      final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
+        subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, getDocumentDescriptor().getNamespace(),
+        getDescriptor().getContext() );
+
+      // analyze the sub-job
+      final JobAnalyzer jobAnalyzer = new JobAnalyzer();
+      jobAnalyzer.setJobEntryAnalyzerProvider( PentahoSystem.get( IJobEntryAnalyzerProvider.class ) );
+      jobAnalyzer.setMetaverseBuilder( getMetaverseBuilder() );
+      jobAnalyzer.analyze( subtransDocumentDescriptor, subJobMeta, jobNode, jobPath );
+
+      connectToSubJobOutputFields( meta, subJobMeta, jobNode, descriptor );
     }
 
   }

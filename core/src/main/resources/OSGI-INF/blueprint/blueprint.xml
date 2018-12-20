@@ -16,11 +16,12 @@
       <cm:property name="lineage.resolve.external.resources" value="true"/>
       <cm:property name="lineage.deduplicate.transformation.fields" value="true"/>
       <cm:property name="lineage.adjust.external.resource.fields" value="true"/>
+      <cm:property name="lineage.generate.subgraphs" value="true"/>
+      <cm:property name="lineage.consolidate.graphs" value="true"/>
       <!-- Used for testing ONLY - write delay in seconds -->
       <cm:property name="lineage.delay" value="0"/>
     </cm:default-properties>
   </cm:property-placeholder>
-
 
   <!-- Configure our graph using the SynchronizedGraphFactory and a configuration file -->
   <bean id="MetaverseGraphImpl" class="org.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open">
@@ -39,6 +40,8 @@
     <property name="resolveExternalResources" value="${lineage.resolve.external.resources}"/>
     <property name="deduplicateTransformationFields" value="${lineage.deduplicate.transformation.fields}"/>
     <property name="adjustExternalResourceFields" value="${lineage.adjust.external.resource.fields}"/>
+    <property name="generateSubGraphs" value="${lineage.generate.subgraphs}"/>
+    <property name="consolidateSubGraphs" value="${lineage.consolidate.subgraphs}"/>
     <!-- Used for testing ONLY - write delay in seconds -->
     <property name="lineageDelay" value="${lineage.delay}"/>
   </bean>

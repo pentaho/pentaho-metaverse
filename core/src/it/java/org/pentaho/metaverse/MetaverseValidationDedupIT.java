@@ -51,6 +51,8 @@ public class MetaverseValidationDedupIT extends MetaverseValidationIT {
     PowerMockito.mockStatic( MetaverseConfig.class );
     Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( true );
     Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
+    Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( true );
+    Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( true );
 
     MetaverseValidationIT.init();
   }
@@ -71,5 +73,11 @@ public class MetaverseValidationDedupIT extends MetaverseValidationIT {
     Assert.assertTrue( nodeNames.contains( "longitude" ) );
     Assert.assertTrue( nodeNames.contains( "latitude" ) );
     Assert.assertTrue( nodeNames.contains( "address" ) );
+  }
+
+  @Test
+  @Override
+  public void testTransformationStepNodes() throws Exception {
+    super.testTransformationStepNodes();
   }
 }

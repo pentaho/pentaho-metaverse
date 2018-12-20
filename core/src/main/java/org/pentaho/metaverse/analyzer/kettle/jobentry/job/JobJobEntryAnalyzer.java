@@ -39,6 +39,7 @@ import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.JobEntryAnalyzer;
+import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,19 +126,22 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
     jobNode.setProperty( DictionaryConst.PROPERTY_PATH, jobPath );
     jobNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_DOCUMENT );
 
+    rootNode.setProperty( DictionaryConst.PROPERTY_PATH, jobPath );
     metaverseBuilder.addLink( rootNode, DictionaryConst.LINK_EXECUTES, jobNode );
 
-    final IDocument subTransDocument = KettleAnalyzerUtil.buildDocument( getMetaverseBuilder(), subJobMeta,
-      jobPath, getDocumentDescriptor().getNamespace() );
-    if ( subTransDocument != null ) {
-      final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
-        subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, getDocumentDescriptor().getNamespace(),
-        getDescriptor().getContext() );
+    // pull in the sub-job lineage only if the consolidateSubGraphs flag is set to true
+    if ( MetaverseConfig.consolidateSubGraphs() ) {
+      final IDocument subTransDocument = KettleAnalyzerUtil.buildDocument( getMetaverseBuilder(), subJobMeta,
+        jobPath, getDocumentDescriptor().getNamespace() );
+      if ( subTransDocument != null ) {
+        final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
+          subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, getDocumentDescriptor().getNamespace(),
+          getDescriptor().getContext() );
 
-      // analyze the sub-job
-      getDocumentAnalyzer().analyze( subtransDocumentDescriptor, subJobMeta, jobNode, jobPath );
+        // analyze the sub-job
+        getDocumentAnalyzer().analyze( subtransDocumentDescriptor, subJobMeta, jobNode, jobPath );
+      }
     }
-
   }
 
   protected JobMeta getSubJobMeta( String filePath ) throws FileNotFoundException, KettleXMLException,
