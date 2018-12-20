@@ -50,6 +50,8 @@ import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
+import org.pentaho.metaverse.impl.MetaverseConfig;
+import org.pentaho.metaverse.api.messages.Messages;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +94,7 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
     JobMeta subJobMeta = null;
     Repository repo = parentTransMeta.getRepository();
 
+    MetaverseAnalyzerException exception = null;
     switch ( meta.getSpecificationMethod() ) {
       case FILENAME:
         jobPath = parentTransMeta.environmentSubstitute( meta.getFileName() );
@@ -102,7 +105,8 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
           jobPath = normalized;
 
         } catch ( Exception e ) {
-          throw new MetaverseAnalyzerException( "Sub transformation can not be found - " + jobPath, e );
+          exception = new MetaverseAnalyzerException( Messages.getString( "ERROR.SubJobNotFoundInParentTrans",
+            jobPath, parentTransMeta.toString() ), e );
         }
         break;
       case REPOSITORY_BY_NAME:
@@ -115,10 +119,12 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
             String filename = subJobMeta.getFilename() == null ? subJobMeta.toString() : subJobMeta.getFilename();
             jobPath = filename + "." + subJobMeta.getDefaultExtension();
           } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( "Sub transformation can not be found in repository - " + file, e );
+            exception = new MetaverseAnalyzerException( Messages.getString( "ERROR.SubJobNotFoundInParentTrans",
+              file, parentTransMeta.toString() ), e );
           }
         } else {
-          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
+          exception = new MetaverseAnalyzerException( Messages.getString( "ERROR.MissingConnectionForTransSubJob",
+            parentTransMeta.toString() ) );
         }
         break;
       case REPOSITORY_BY_REFERENCE:
@@ -128,14 +134,22 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
             String filename = subJobMeta.getFilename() == null ? subJobMeta.toString() : subJobMeta.getFilename();
             jobPath = filename + "." + subJobMeta.getDefaultExtension();
           } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( "Sub transformation can not be found by reference - "
-              + meta.getJobObjectId(), e );
+            exception = new MetaverseAnalyzerException( Messages.getString( "ERROR.SubJobNotFoundInParentTrans",
+              ( meta.getJobObjectId() == null ? "N/A" : meta.getJobObjectId().toString() ),
+              parentTransMeta.toString() ), e );
           }
         } else {
-          throw new MetaverseAnalyzerException( "Not connected to a repository, can't get the transformation" );
+          exception = new MetaverseAnalyzerException( Messages.getString( "ERROR.MissingConnectionForTransSubJob",
+            parentTransMeta.toString() ) );
         }
         break;
     }
+    rootNode.setProperty( DictionaryConst.PROPERTY_PATH, jobPath );
+
+    if ( exception != null ) {
+      throw exception;
+    }
+
     subJobMeta.copyVariablesFrom( parentTransMeta );
 
     // analyze the sub trans?
@@ -154,30 +168,29 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
 
     final IDocument subTransDocument = KettleAnalyzerUtil.buildDocument( getMetaverseBuilder(), subJobMeta,
       jobPath, getDocumentDescriptor().getNamespace() );
-    final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
-      subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, getDocumentDescriptor().getNamespace(),
-      getDescriptor().getContext() );
-
-    // analyze the sub-job
-    final JobAnalyzer jobAnalyzer = new JobAnalyzer();
-    jobAnalyzer.setJobEntryAnalyzerProvider( PentahoSystem.get( IJobEntryAnalyzerProvider.class ) );
-    jobAnalyzer.setMetaverseBuilder( getMetaverseBuilder() );
-    jobAnalyzer.analyze( subtransDocumentDescriptor, subJobMeta, jobNode, jobPath );
-
-    connectToSubJobOutputFields( meta, subJobMeta, jobNode, descriptor );
-
     node.setProperty( JOB_TO_EXECUTE, jobPath );
 
     if ( StringUtils.isNotEmpty( meta.getExecutionResultTargetStep() ) ) {
       node.setProperty( EXECUTION_RESULTS_TARGET, meta.getExecutionResultTargetStep() );
     }
 
-    /* TODO remove? if ( StringUtils.isNotEmpty( meta.getOutputRowsSourceStep() ) ) {
-      node.setProperty( OUTPUT_ROWS_TARGET, meta.getOutputRowsSourceStep() );
-    }*/
-
     if ( StringUtils.isNotEmpty( meta.getResultFilesTargetStep() ) ) {
       node.setProperty( RESULT_FILES_TARGET, meta.getResultFilesTargetStep() );
+    }
+
+    // pull in the sub-job lineage only if the consolidateGraphs flag is set to true
+    if ( MetaverseConfig.consolidateSubGraphs() ) {
+      final IComponentDescriptor subtransDocumentDescriptor = new MetaverseComponentDescriptor(
+        subTransDocument.getStringID(), DictionaryConst.NODE_TYPE_TRANS, getDocumentDescriptor().getNamespace(),
+        getDescriptor().getContext() );
+
+      // analyze the sub-job
+      final JobAnalyzer jobAnalyzer = new JobAnalyzer();
+      jobAnalyzer.setJobEntryAnalyzerProvider( PentahoSystem.get( IJobEntryAnalyzerProvider.class ) );
+      jobAnalyzer.setMetaverseBuilder( getMetaverseBuilder() );
+      jobAnalyzer.analyze( subtransDocumentDescriptor, subJobMeta, jobNode, jobPath );
+
+      connectToSubJobOutputFields( meta, subJobMeta, jobNode, descriptor );
     }
 
   }

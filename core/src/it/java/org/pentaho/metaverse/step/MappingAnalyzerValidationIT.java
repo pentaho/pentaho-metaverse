@@ -121,7 +121,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
       .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
       .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
       .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
-      .put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] update field names,input [1] rename [1],output [1],"
+      .put( PROPERTY_PATH, SKIP ).put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] update field names,input [1] rename [1],output [1],"
         + "output [1] update field names,output [1] rename [1]" )
       .put( "input [1]", "Generate random integer > [sub] Input checksum" )
       .put( "input [1] update field names", "true" )
@@ -308,7 +308,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
       .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
       .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
       .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
-      .put( PROPERTY_VERBOSE_DETAILS,
+      .put( PROPERTY_PATH, SKIP ).put( PROPERTY_VERBOSE_DETAILS,
         "input [1],input [1] description,input [1] update field names,input [1] rename [1],"
           + "input [2],input [2] description,input [2] update field names,input [2] rename [1],output [1],"
           + "output [1] description,output [1] update field names,output [1] rename [1],output [2],"
@@ -538,7 +538,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
       .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
       .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
       .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
-      .put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] description,input [1] update field names,input [1] rename "
+      .put( PROPERTY_PATH, SKIP ).put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] description,input [1] update field names,input [1] rename "
         + "[1],input [2],input [2] description,input [2] update field names,input [2] rename [1],output [1],"
         + "output [1] description,output [1] update field names,output [2],"
         + "output [2] description,output [2] update field names" )

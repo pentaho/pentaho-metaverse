@@ -41,6 +41,8 @@ public abstract class StepAnalyzerValidationIT extends BaseMetaverseValidationIT
     PowerMockito.mockStatic( MetaverseConfig.class );
     Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( true );
     Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
+    Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( true );
+    Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( true );
   }
 
   @Override

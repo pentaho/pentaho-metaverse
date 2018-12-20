@@ -116,7 +116,7 @@ public class SimpleMappingAnalyzerValidationIT extends StepAnalyzerValidationIT 
       .put( PROPERTY_STEP_TYPE, SKIP ).put( "color", SKIP ).put( PROPERTY_PLUGIN_ID, SKIP ).put( PROPERTY_TYPE, SKIP )
       .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
       .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
-      .put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
+      .put( PROPERTY_PATH, SKIP ).put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
       .put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] update field names,input [1] rename [1],output [1],output [1] "
         + "update field names,output [1] rename [1]" )
       .put( "input [1]", "Generate random integer > [simple_sub] Input parity" )

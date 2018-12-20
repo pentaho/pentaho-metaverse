@@ -35,7 +35,6 @@ import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.trans.Trans;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
 import org.pentaho.metaverse.api.IDocument;
@@ -102,7 +101,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     }
   }
 
-  private void runAnalyzers( final Job job ) throws KettleException {
+  protected void runAnalyzers( final Job job ) throws KettleException {
 
     // If runtime lineage collection is disabled, don't run any lineage processes/methods
     if ( job != null && isRuntimeEnabled() ) {
@@ -169,7 +168,9 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     }
 
     log.info( Messages.getString( "INFO.JobFinished", job.getJobname() ) );
-    runAnalyzers( job );
+    if ( shouldCreateGraph( job ) ) {
+      runAnalyzers( job );
+    }
 
     if ( allowedAsync() ) {
       createLineGraphAsync( job );
@@ -192,7 +193,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
   }
 
   protected void createLineGraph( final Job job ) {
-    log.info( Messages.getString( "INFO.WrittingGraphForJobn", job.getJobname() ) );
+    log.info( Messages.getString( "INFO.WrittingGraphForJob", job.getJobname() ) );
     try {
       // Get the current execution profile for this transformation
       LineageHolder holder = JobLineageHolderMap.getInstance().getLineageHolder( job );
@@ -240,12 +241,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       }
 
       try {
-        final Job parentJob = job.getParentJob();
-        final Trans parentTrans = job.getParentTrans();
-
-        // Create a lineage graph for this job only if it has no parent. Otherwise, the parent will incorporate
-        // the lineage information into its own graph
-        if ( parentJob == null && parentTrans == null ) {
+        if ( shouldCreateGraph( job ) ) {
           // Add the execution profile information to the lineage graph
           addRuntimeLineageInfo( holder );
 
