@@ -174,7 +174,6 @@
         <ref bean="RowsFromResultStepAnalyzer"/>
         <ref bean="FilterRowsStepAnalyzer"/>
         <ref bean="HTTPClientStepAnalyzer"/>
-        <ref bean="RestClientStepAnalyzer"/>
         <ref bean="HTTPPostStepAnalyzer"/>
       </list>
     </property>
@@ -194,6 +193,7 @@
         <ref bean="FixedFileInputStepAnalyzer"/>
         <ref bean="MongoDbInputStepAnalyzer"/>
         <ref bean="TableInputStepAnalyzer"/>
+        <ref bean="RestClientStepAnalyzer"/>
      </list>
     </property>
 
