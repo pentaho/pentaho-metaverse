@@ -344,7 +344,7 @@
            ref="HTTPClientStepAnalyzer"/>
 
   <service id="restClientStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="RestClientStepAnalyzer"/>
 
   <service id="httpPostStepAnalyzerService"
