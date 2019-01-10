@@ -540,6 +540,11 @@ public class DictionaryConst {
   public static final String CATEGORY_REPOSITORY = "repository";
 
   /**
+   * The category for Message Queues, like Kafka, MQTT, JMS
+   */
+  public static final String CATEGORY_MESSAGE_QUEUE = "messageQueue";
+
+  /**
    * The category for other node types
    */
   public static final String CATEGORY_OTHER = "other";

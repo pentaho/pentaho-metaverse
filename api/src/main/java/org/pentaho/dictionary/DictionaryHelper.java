@@ -58,7 +58,7 @@ public class DictionaryHelper {
   public static final Set<String> DATAFLOW_LINK_TYPES = new HashSet<String>();
 
   private static Map<String, String> categoryColorMap = new HashMap<String, String>();
-  private static Map<String, String> typeCategoryMap = new HashMap<String, String>();
+  public static Map<String, String> typeCategoryMap = new HashMap<String, String>();
   private static Map<String, Map<String, String>> entityTypeLinks = new HashMap<>();
 
   /**
