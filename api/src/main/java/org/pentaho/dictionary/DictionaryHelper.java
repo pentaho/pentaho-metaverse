@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -32,33 +32,79 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.pentaho.dictionary.DictionaryConst.*;
+import static org.pentaho.dictionary.DictionaryConst.CATEGORY_ABSTRACT;
+import static org.pentaho.dictionary.DictionaryConst.CATEGORY_DATASOURCE;
+import static org.pentaho.dictionary.DictionaryConst.CATEGORY_DOCUMENT;
+import static org.pentaho.dictionary.DictionaryConst.CATEGORY_DOCUMENT_ELEMENT;
+import static org.pentaho.dictionary.DictionaryConst.CATEGORY_FIELD;
+import static org.pentaho.dictionary.DictionaryConst.CATEGORY_FIELD_COLLECTION;
+import static org.pentaho.dictionary.DictionaryConst.CATEGORY_OTHER;
+import static org.pentaho.dictionary.DictionaryConst.CATEGORY_REPOSITORY;
+import static org.pentaho.dictionary.DictionaryConst.COLOR_ABSTRACT;
+import static org.pentaho.dictionary.DictionaryConst.COLOR_DATASOURCE;
+import static org.pentaho.dictionary.DictionaryConst.COLOR_DOCUMENT;
+import static org.pentaho.dictionary.DictionaryConst.COLOR_DOCUMENT_ELEMENT;
+import static org.pentaho.dictionary.DictionaryConst.COLOR_FIELD;
+import static org.pentaho.dictionary.DictionaryConst.COLOR_FIELD_COLLECTION;
+import static org.pentaho.dictionary.DictionaryConst.COLOR_OTHER;
+import static org.pentaho.dictionary.DictionaryConst.COLOR_REPOSITORY;
+import static org.pentaho.dictionary.DictionaryConst.LINK_CONTAINS;
+import static org.pentaho.dictionary.DictionaryConst.LINK_CONTAINS_CONCEPT;
+import static org.pentaho.dictionary.DictionaryConst.LINK_DEFINES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_DEPENDENCYOF;
+import static org.pentaho.dictionary.DictionaryConst.LINK_DERIVES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_EXECUTES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_PARENT_CONCEPT;
+import static org.pentaho.dictionary.DictionaryConst.LINK_POPULATES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_READBY;
+import static org.pentaho.dictionary.DictionaryConst.LINK_TYPE_CONCEPT;
+import static org.pentaho.dictionary.DictionaryConst.LINK_WRITESTO;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_DATASOURCE;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_DATA_COLUMN;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_DATA_TABLE;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_ENTITY;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_EXTERNAL_CONNECTION;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_FILE;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_FILE_FIELD;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_JOB;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_JOB_ENTRY;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_LOCATOR;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_LOGICAL_MODEL;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_MONGODB_COLLECTION;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_MONGODB_CONNECTION;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_ROOT_ENTITY;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_STEP_PROPERTY;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS_FIELD;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS_STEP;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_USER_CONTENT;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_WEBSERVICE;
 
 /**
  * A helper class for the Hitachi Vantara Dictionary
  *
  * @author jdixon
  */
-@SuppressWarnings( "rawtypes" )
+@SuppressWarnings( { "rawtypes", "WeakerAccess", "Duplicates" } )
 public class DictionaryHelper {
 
   /**
    * The set of structural link types
    */
-  public static final Set<String> STRUCTURAL_LINK_TYPES = new HashSet<String>();
+  public static final Set<String> STRUCTURAL_LINK_TYPES = new HashSet<>();
 
   /**
    * The set of entity node types
    */
-  public static final Set<String> ENTITY_NODE_TYPES = new HashSet<String>();
+  public static final Set<String> ENTITY_NODE_TYPES = new HashSet<>();
 
   /**
    * The set of data flow link types
    */
-  public static final Set<String> DATAFLOW_LINK_TYPES = new HashSet<String>();
+  public static final Set<String> DATAFLOW_LINK_TYPES = new HashSet<>();
 
-  private static Map<String, String> categoryColorMap = new HashMap<String, String>();
-  public static Map<String, String> typeCategoryMap = new HashMap<String, String>();
+  private static Map<String, String> categoryColorMap = new HashMap<>();
+  public static Map<String, String> typeCategoryMap = new HashMap<>();
   private static Map<String, Map<String, String>> entityTypeLinks = new HashMap<>();
 
   /**
@@ -90,12 +136,8 @@ public class DictionaryHelper {
     final String linkType, final String entityType, final String parentEntityType ) {
     if ( linkType != null ) {
       // are any links of this type already registered?
-      Map<String, String> links = entityTypeLinks.get( linkType );
-      if ( links == null ) {
-        // this is the first link of this type
-        links = new HashMap<>();
-        entityTypeLinks.put( linkType, links );
-      }
+      Map<String, String> links = entityTypeLinks.computeIfAbsent( linkType, k -> new HashMap<>() );
+      // this is the first link of this type
       // register the link between of entityType and parentNodeType - allow null values intentionally to mark links to
       // the root node
       links.put( entityType, parentEntityType );
