@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -31,7 +31,7 @@ import org.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
  *
  * @author jdixon
  */
-public class DictionaryConst {
+@SuppressWarnings( { "unused", "WeakerAccess" } ) public class DictionaryConst {
 
   public static final String EXECUTION_ENGINE_NAME = "Pentaho Data Integration";
 
@@ -540,6 +540,11 @@ public class DictionaryConst {
   public static final String CATEGORY_REPOSITORY = "repository";
 
   /**
+   * The category for Message Queues, like Kafka, MQTT, JMS
+   */
+  public static final String CATEGORY_MESSAGE_QUEUE = "messageQueue";
+
+  /**
    * The category for other node types
    */
   public static final String CATEGORY_OTHER = "other";
@@ -599,64 +604,49 @@ public class DictionaryConst {
    */
   public static final String CONTEXT_DEFAULT = CONTEXT_STATIC;
 
-  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DEFAULT = new MetaverseLogicalIdGenerator( new String[] {
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DEFAULT = new MetaverseLogicalIdGenerator(
+    PROPERTY_NAMESPACE,
+    PROPERTY_TYPE,
+    PROPERTY_NAME );
+
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_TARGET_AWARE = new MetaverseLogicalIdGenerator(
     PROPERTY_NAMESPACE,
     PROPERTY_TYPE,
     PROPERTY_NAME,
-  } );
+    PROPERTY_TARGET_STEP );
 
-  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_TARGET_AWARE = new MetaverseLogicalIdGenerator( new String[] {
-    PROPERTY_NAMESPACE,
-    PROPERTY_TYPE,
-    PROPERTY_NAME,
-    PROPERTY_TARGET_STEP } );
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_FILE = new MetaverseLogicalIdGenerator( PROPERTY_PATH,
+    PROPERTY_NAMESPACE );
 
-  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_FILE = new MetaverseLogicalIdGenerator( new String[] {
-    PROPERTY_PATH,
-    PROPERTY_NAMESPACE
-  } );
-
-  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_JDBC = new MetaverseLogicalIdGenerator( new String[] {
-    PROPERTY_TYPE,
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_JDBC = new MetaverseLogicalIdGenerator( PROPERTY_TYPE,
     PROPERTY_HOST_NAME,
     PROPERTY_USER_NAME,
     PROPERTY_PORT,
     PROPERTY_DATABASE_NAME,
-    "accessTypeDesc"
-  } );
+    "accessTypeDesc" );
 
-  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_JNDI = new MetaverseLogicalIdGenerator( new String[] {
-    PROPERTY_TYPE,
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_JNDI = new MetaverseLogicalIdGenerator( PROPERTY_TYPE,
     PROPERTY_NAME,
-    "accessTypeDesc"
-  } );
+    "accessTypeDesc" );
 
-  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_LOCATOR = new MetaverseLogicalIdGenerator( new String[] {
-    PROPERTY_TYPE,
-    PROPERTY_NAME
-  } );
+  public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_LOCATOR = new MetaverseLogicalIdGenerator( PROPERTY_TYPE,
+    PROPERTY_NAME );
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DOCUMENT =
-    new MetaverseLogicalIdGenerator( new String[] {
-      PROPERTY_TYPE,
+    new MetaverseLogicalIdGenerator( PROPERTY_TYPE,
       PROPERTY_PATH,
-      PROPERTY_NAMESPACE
-    } );
+      PROPERTY_NAMESPACE );
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_TABLE =
-    new MetaverseLogicalIdGenerator( new String[] {
-      PROPERTY_NAMESPACE,
+    new MetaverseLogicalIdGenerator( PROPERTY_NAMESPACE,
       PROPERTY_TYPE,
       PROPERTY_NAME,
-      PROPERTY_SCHEMA
-    } );
+      PROPERTY_SCHEMA );
 
   public static final ILogicalIdGenerator LOGICAL_ID_GENERATOR_DB_QUERY =
-    new MetaverseLogicalIdGenerator( new String[] {
-      PROPERTY_NAMESPACE,
+    new MetaverseLogicalIdGenerator( PROPERTY_NAMESPACE,
       PROPERTY_TYPE,
-      PROPERTY_QUERY
-    } );
+      PROPERTY_QUERY );
 
   /**
    * Hides the constructor so that this class cannot be instanced
