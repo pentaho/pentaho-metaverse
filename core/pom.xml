@@ -40,6 +40,7 @@
     <platform.version>8.3.0.0-SNAPSHOT</platform.version>
     <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
     <!--<pdi.version>${project.version}</pdi.version>-->
+    <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
   </properties>
   <dependencies>
     <dependency>
@@ -409,6 +410,23 @@
           </arguments>
           <systemProperties></systemProperties>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <phase>post-integration-test</phase>
+            <configuration>
+              <testClassesDirectory>target/it-classes</testClassesDirectory>
+              <skipIfEmpty>true</skipIfEmpty>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
