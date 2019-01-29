@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
@@ -56,8 +55,10 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
+import org.pentaho.metaverse.api.analyzer.kettle.step.SubtransAnalyzer;
 import org.pentaho.metaverse.impl.MetaverseNode;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -65,21 +66,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by rfellows on 4/2/15.
  */
-@RunWith( MockitoJUnitRunner.class )
+@SuppressWarnings( { "deprecation", "ResultOfMethodCallIgnored" } ) @RunWith( MockitoJUnitRunner.class )
 public class TransExecutorStepAnalyzerTest {
-
-  private TransExecutorStepAnalyzer analyzer;
 
   @Mock
   private TransExecutorMeta meta;
@@ -100,25 +109,21 @@ public class TransExecutorStepAnalyzerTest {
   @Mock
   private TransMeta parentTransMeta;
   @Mock
-  private RowMetaInterface inputRowMeta;
-  @Mock
-  private RowMetaInterface outputRowMeta;
-  @Mock
   private StepMeta nextStepMeta_Results;
   @Mock
   private RowMetaInterface nextStepMeta_Results_input;
   @Mock
   private IAnalysisContext analysisContext;
-
   @Mock
   private IComponentDescriptor documentDescriptor;
-
   @Mock
   private TransMeta childTransMeta;
+  @Mock private Logger log;
 
   private String[] nextStepNames = new String[] { "results" };
   private String[] resultsFieldNames = new String[] { "one", "two" };
   private TransExecutorStepAnalyzer spyAnalyzer;
+  private SubtransAnalyzer<TransExecutorMeta> spyHelper;
 
   @Before
   public void setUp() throws Exception {
@@ -136,12 +141,8 @@ public class TransExecutorStepAnalyzerTest {
     when( nextStepMeta_Results_input.getFieldNames() ).thenReturn( resultsFieldNames );
 
 
-    when( parentTransMeta.environmentSubstitute( anyString() ) ).then( new Answer<String>() {
-      @Override
-      public String answer( InvocationOnMock invocationOnMock ) throws Throwable {
-        return invocationOnMock.getArguments()[ 0 ].toString();
-      }
-    } );
+    when( parentTransMeta.environmentSubstitute( anyString() ) ).then(
+      (Answer<String>) invocationOnMock -> invocationOnMock.getArguments()[ 0 ].toString() );
 
     when( childTransMeta.getName() ).thenReturn( "child" );
     when( descriptor.getNamespace() ).thenReturn( namespace );
@@ -149,8 +150,11 @@ public class TransExecutorStepAnalyzerTest {
 
     when( descriptor.getContext() ).thenReturn( analysisContext );
 
-    analyzer = new TransExecutorStepAnalyzer();
+    TransExecutorStepAnalyzer analyzer = new TransExecutorStepAnalyzer();
     spyAnalyzer = spy( analyzer );
+    SubtransAnalyzer<TransExecutorMeta> subtransAnalyzer = new SubtransAnalyzer<>( spyAnalyzer, log );
+    spyHelper = spy( subtransAnalyzer );
+    spyAnalyzer.setSubtransAnalyzer( spyHelper );
     spyAnalyzer.setMetaverseBuilder( builder );
     spyAnalyzer.setParentTransMeta( parentTransMeta );
     spyAnalyzer.setParentStepMeta( parentStepMeta );
@@ -180,7 +184,7 @@ public class TransExecutorStepAnalyzerTest {
 
     // don't bother running the connectX methods, we'll test those later
     doNothing().when( spyAnalyzer ).connectToSubTransInputFields(
-      eq( meta ), any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
+      any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
     doNothing().when( spyAnalyzer ).connectToSubTransOutputFields(
       eq( meta ), any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
@@ -188,11 +192,9 @@ public class TransExecutorStepAnalyzerTest {
     doReturn( Mockito.mock( IMetaverseNode.class ) ).when( spyAnalyzer ).analyzerSubTransformation( meta, node );
 
     when( spyAnalyzer.analyzerSubTransformation( meta, node ) ).thenAnswer(
-      new Answer<IMetaverseNode>() {
-        public IMetaverseNode answer( InvocationOnMock invocation ) throws Throwable {
-          builder.addLink( node, DictionaryConst.LINK_EXECUTES, new MetaverseNode( null ) );
-          return new MetaverseNode( null );
-        }
+      (Answer<IMetaverseNode>) invocation -> {
+        builder.addLink( node, DictionaryConst.LINK_EXECUTES, new MetaverseNode( null ) );
+        return new MetaverseNode( null );
       }
     );
 
@@ -226,8 +228,7 @@ public class TransExecutorStepAnalyzerTest {
     // we should get an exception if the sub transformation isn't found in the repo
     when( meta.getDirectoryPath() ).thenReturn( "/home/admin" );
     when( meta.getTransName() ).thenReturn( "my.ktr" );
-    Repository repo = null;
-    when( parentTransMeta.getRepository() ).thenReturn( repo );
+    when( parentTransMeta.getRepository() ).thenReturn( null );
     when( meta.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_NAME );
     spyAnalyzer.customAnalyze( meta, node );
   }
@@ -251,7 +252,7 @@ public class TransExecutorStepAnalyzerTest {
 
     // don't bother running the connectX methods, we'll test those later
     doNothing().when( spyAnalyzer ).connectToSubTransInputFields(
-      eq( meta ), any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
+      any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
     doNothing().when( spyAnalyzer ).connectToSubTransOutputFields(
       eq( meta ), any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
@@ -259,11 +260,9 @@ public class TransExecutorStepAnalyzerTest {
     doReturn( Mockito.mock( IMetaverseNode.class ) ).when( spyAnalyzer ).analyzerSubTransformation( meta, node );
 
     when( spyAnalyzer.analyzerSubTransformation( meta, node ) ).thenAnswer(
-      new Answer<IMetaverseNode>() {
-        public IMetaverseNode answer( InvocationOnMock invocation ) throws Throwable {
-          builder.addLink( node, DictionaryConst.LINK_EXECUTES, new MetaverseNode( null ) );
-          return new MetaverseNode( null );
-        }
+      (Answer<IMetaverseNode>) invocation -> {
+        builder.addLink( node, DictionaryConst.LINK_EXECUTES, new MetaverseNode( null ) );
+        return new MetaverseNode( null );
       }
     );
 
@@ -292,8 +291,7 @@ public class TransExecutorStepAnalyzerTest {
   public void testCustomAnalyze_repoRepo_NoRepo() throws Exception {
     // we should get an exception if the sub transformation isn't found on the filesystem
     when( meta.getTransObjectId() ).thenReturn( mock( ObjectId.class ) );
-    Repository repo = null;
-    when( parentTransMeta.getRepository() ).thenReturn( repo );
+    when( parentTransMeta.getRepository() ).thenReturn( null );
     when( meta.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_REFERENCE );
     spyAnalyzer.customAnalyze( meta, node );
   }
@@ -314,7 +312,7 @@ public class TransExecutorStepAnalyzerTest {
 
     // don't bother running the connectX methods, we'll test those later
     doNothing().when( spyAnalyzer ).connectToSubTransInputFields(
-      eq( meta ), any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
+      any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
     doNothing().when( spyAnalyzer ).connectToSubTransOutputFields(
       eq( meta ), any( TransMeta.class ), any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
@@ -322,11 +320,9 @@ public class TransExecutorStepAnalyzerTest {
     doReturn( Mockito.mock( IMetaverseNode.class ) ).when( spyAnalyzer ).analyzerSubTransformation( meta, node );
 
     when( spyAnalyzer.analyzerSubTransformation( meta, node ) ).thenAnswer(
-      new Answer<IMetaverseNode>() {
-        public IMetaverseNode answer( InvocationOnMock invocation ) throws Throwable {
-          builder.addLink( node, DictionaryConst.LINK_EXECUTES, new MetaverseNode( null ) );
-          return new MetaverseNode( null );
-        }
+      (Answer<IMetaverseNode>) invocation -> {
+        builder.addLink( node, DictionaryConst.LINK_EXECUTES, new MetaverseNode( null ) );
+        return new MetaverseNode( null );
       }
     );
 
@@ -349,7 +345,7 @@ public class TransExecutorStepAnalyzerTest {
   }
 
   @Test
-  public void testConnectToSubTransOutputFields() throws Exception {
+  public void testConnectToSubTransOutputFields() {
     when( meta.getOutputRowsSourceStep() ).thenReturn( "outputRowsStepName" );
     when( meta.getExecutorsOutputStep() ).thenReturn( null );
     String[] outputFields = new String[]{ "first", "last" };
@@ -362,20 +358,20 @@ public class TransExecutorStepAnalyzerTest {
     doReturn( outputs ).when( spyAnalyzer ).getOutputs();
 
     // we'll test this in it's own test
-    doNothing().when( spyAnalyzer ).linkResultFieldToSubTrans( any( IMetaverseNode.class ), any( TransMeta.class ),
+    doNothing().when( spyHelper ).linkResultFieldToSubTrans( any( IMetaverseNode.class ), any( TransMeta.class ),
       any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
     IMetaverseNode childTransNode = mock( IMetaverseNode.class );
     spyAnalyzer.connectToSubTransOutputFields( meta, childTransMeta, childTransNode, descriptor );
 
-    verify( spyAnalyzer, times( outputFields.length ) ).linkResultFieldToSubTrans( any( IMetaverseNode.class ),
+    verify( spyHelper, times( outputFields.length ) ).linkResultFieldToSubTrans( any( IMetaverseNode.class ),
       any( TransMeta.class ),
       any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
   }
 
   @Test
-  public void testConnectToSubTransOutputFields_MainOutput() throws Exception {
+  public void testConnectToSubTransOutputFields_MainOutput() {
     when( meta.getOutputRowsSourceStep() ).thenReturn( null );
     when( meta.getExecutorsOutputStep() ).thenReturn( "outputRowsStepName" );
     String[] outputFields = new String[]{ "first", "last" };
@@ -388,20 +384,20 @@ public class TransExecutorStepAnalyzerTest {
     doReturn( outputs ).when( spyAnalyzer ).getOutputs();
 
     // we'll test this in it's own test
-    doNothing().when( spyAnalyzer ).linkResultFieldToSubTrans( any( IMetaverseNode.class ), any( TransMeta.class ),
+    doNothing().when( spyHelper ).linkResultFieldToSubTrans( any( IMetaverseNode.class ), any( TransMeta.class ),
       any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
     IMetaverseNode childTransNode = mock( IMetaverseNode.class );
     spyAnalyzer.connectToSubTransOutputFields( meta, childTransMeta, childTransNode, descriptor );
 
-    verify( spyAnalyzer, times( outputFields.length ) ).linkResultFieldToSubTrans( any( IMetaverseNode.class ),
+    verify( spyHelper, times( outputFields.length ) ).linkResultFieldToSubTrans( any( IMetaverseNode.class ),
       any( TransMeta.class ),
       any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
   }
 
   @Test
-  public void testConnectToSubTransInputFields() throws Exception {
+  public void testConnectToSubTransInputFields() {
     IMetaverseNode childTransNode = mock( IMetaverseNode.class );
     IMetaverseNode outNode = mock( IMetaverseNode.class );
 
@@ -410,30 +406,30 @@ public class TransExecutorStepAnalyzerTest {
     inputs.addNode( "previousStep", "last", outNode );
     doReturn( inputs ).when( spyAnalyzer ).getInputs();
 
-    doNothing().when( spyAnalyzer).linkUsedFieldToSubTrans( any( IMetaverseNode.class ), any( TransMeta.class ),
+    doNothing().when( spyHelper ).linkUsedFieldToSubTrans( any( IMetaverseNode.class ), any( TransMeta.class ),
       any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
-    spyAnalyzer.connectToSubTransInputFields( meta, childTransMeta, childTransNode, descriptor );
+    spyAnalyzer.connectToSubTransInputFields( childTransMeta, childTransNode, descriptor );
 
-    verify( spyAnalyzer, times( inputs.getFieldNames().size() ) ).linkUsedFieldToSubTrans( any( IMetaverseNode.class ),
+    verify( spyHelper, times( inputs.getFieldNames().size() ) ).linkUsedFieldToSubTrans( any( IMetaverseNode.class ),
       any( TransMeta.class ),
       any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
   }
 
   @Test
-  public void testConnectToSubTransInputFields_noPrevFields() throws Exception {
+  public void testConnectToSubTransInputFields_noPrevFields() {
     IMetaverseNode childTransNode = mock( IMetaverseNode.class );
 
     StepNodes inputs = new StepNodes();
     doReturn( inputs ).when( spyAnalyzer ).getInputs();
 
-    doNothing().when( spyAnalyzer).linkUsedFieldToSubTrans( any( IMetaverseNode.class ), any( TransMeta.class ),
+    doNothing().when( spyHelper ).linkUsedFieldToSubTrans( any( IMetaverseNode.class ), any( TransMeta.class ),
       any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
-    spyAnalyzer.connectToSubTransInputFields( meta, childTransMeta, childTransNode, descriptor );
+    spyAnalyzer.connectToSubTransInputFields( childTransMeta, childTransNode, descriptor );
 
-    verify( spyAnalyzer, never() ).linkUsedFieldToSubTrans( any( IMetaverseNode.class ),
+    verify( spyHelper, never() ).linkUsedFieldToSubTrans( any( IMetaverseNode.class ),
       any( TransMeta.class ),
       any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
 
@@ -446,7 +442,7 @@ public class TransExecutorStepAnalyzerTest {
     IMetaverseNode fieldNode = mock( IMetaverseNode.class );
     when( fieldNode.getName() ).thenReturn( resultsFieldNames[ 1 ] );
 
-    List<StepMeta> childTransSteps = new ArrayList<StepMeta>();
+    List<StepMeta> childTransSteps = new ArrayList<>();
 
     StepMeta dummy = mock( StepMeta.class );
     when( dummy.getStepMetaInterface() ).thenReturn( mock( DummyTransMeta.class ) );
@@ -473,7 +469,7 @@ public class TransExecutorStepAnalyzerTest {
       eq( StepAnalyzer.NONE ),
       eq( false ) );
 
-    spyAnalyzer.linkResultFieldToSubTrans( fieldNode, childTransMeta, childTransNode, descriptor );
+    spyHelper.linkResultFieldToSubTrans( fieldNode, childTransMeta, childTransNode, descriptor );
 
     verify( spyAnalyzer ).createFieldNode( any( IComponentDescriptor.class ),
       any( ValueMetaInterface.class ),
@@ -486,13 +482,13 @@ public class TransExecutorStepAnalyzerTest {
   }
 
   @Test
-  public void testConnectResultFieldToSubTrans_noChildTransSteps() throws Exception {
+  public void testConnectResultFieldToSubTrans_noChildTransSteps() {
     IMetaverseNode childTransNode = mock( IMetaverseNode.class );
     IMetaverseNode rootNode = mock( IMetaverseNode.class );
 
     when( childTransMeta.getSteps() ).thenReturn( null );
 
-    spyAnalyzer.linkResultFieldToSubTrans( rootNode, childTransMeta, childTransNode, descriptor );
+    spyHelper.linkResultFieldToSubTrans( rootNode, childTransMeta, childTransNode, descriptor );
 
     verify( builder, never() )
       .addLink( any( IMetaverseNode.class ), eq( DictionaryConst.LINK_DERIVES ), any( IMetaverseNode.class ) );
@@ -505,7 +501,7 @@ public class TransExecutorStepAnalyzerTest {
     IMetaverseNode originalFieldNode = mock( IMetaverseNode.class );
     when( originalFieldNode.getName() ).thenReturn( resultsFieldNames[ 1 ] );
 
-    List<StepMeta> childTransSteps = new ArrayList<StepMeta>();
+    List<StepMeta> childTransSteps = new ArrayList<>();
 
     StepMeta dummy = mock( StepMeta.class );
     when( dummy.getStepMetaInterface() ).thenReturn( mock( DummyTransMeta.class ) );
@@ -537,7 +533,7 @@ public class TransExecutorStepAnalyzerTest {
       any( ValueMetaInterface.class ),
       eq( "stepName" ), eq( false ) );
 
-    spyAnalyzer.linkUsedFieldToSubTrans( originalFieldNode, childTransMeta, childTransNode, descriptor );
+    spyHelper.linkUsedFieldToSubTrans( originalFieldNode, childTransMeta, childTransNode, descriptor );
 
     verify( spyAnalyzer ).createFieldNode( any( IComponentDescriptor.class ),
       any( ValueMetaInterface.class ),
@@ -549,13 +545,13 @@ public class TransExecutorStepAnalyzerTest {
   }
 
   @Test
-  public void testConnectUsedFieldToSubTrans_noChildTransSteps() throws Exception {
+  public void testConnectUsedFieldToSubTrans_noChildTransSteps() {
     IMetaverseNode childTransNode = mock( IMetaverseNode.class );
     IMetaverseNode rootNode = mock( IMetaverseNode.class );
 
     when( childTransMeta.getSteps() ).thenReturn( null );
 
-    spyAnalyzer.linkUsedFieldToSubTrans( rootNode, childTransMeta, childTransNode, descriptor );
+    spyHelper.linkUsedFieldToSubTrans( rootNode, childTransMeta, childTransNode, descriptor );
 
     verify( spyAnalyzer, never() ).createFieldNode( any( IComponentDescriptor.class ),
       any( ValueMetaInterface.class ),
@@ -568,10 +564,10 @@ public class TransExecutorStepAnalyzerTest {
   }
 
   @Test
-  public void testConnectUsedFieldToSubTrans_noChildRowsFromResultStep() throws Exception {
+  public void testConnectUsedFieldToSubTrans_noChildRowsFromResultStep() {
     IMetaverseNode childTransNode = mock( IMetaverseNode.class );
     IMetaverseNode rootNode = mock( IMetaverseNode.class );
-    List<StepMeta> childTransSteps = new ArrayList<StepMeta>();
+    List<StepMeta> childTransSteps = new ArrayList<>();
 
     StepMeta dummy = mock( StepMeta.class );
     when( dummy.getStepMetaInterface() ).thenReturn( mock( DummyTransMeta.class ) );
@@ -579,7 +575,7 @@ public class TransExecutorStepAnalyzerTest {
 
     when( childTransMeta.getSteps() ).thenReturn( childTransSteps );
 
-    spyAnalyzer.linkUsedFieldToSubTrans( rootNode, childTransMeta, childTransNode, descriptor );
+    spyHelper.linkUsedFieldToSubTrans( rootNode, childTransMeta, childTransNode, descriptor );
 
     verify( spyAnalyzer, never() ).createFieldNode( any( IComponentDescriptor.class ),
       any( ValueMetaInterface.class ),
@@ -592,19 +588,19 @@ public class TransExecutorStepAnalyzerTest {
   }
 
   @Test
-  public void testGetOutputRowMetaInterfaces() throws Exception {
+  public void testGetOutputRowMetaInterfaces() {
     Map<String, RowMetaInterface> rowMetaInterfaces = spyAnalyzer.getOutputRowMetaInterfaces( meta );
     assertTrue( MapUtils.isNotEmpty( rowMetaInterfaces ) );
   }
 
   @Test
-  public void testIsPassthrough() throws Exception {
+  public void testIsPassthrough() {
     StepField stepField = new StepField( "previousStep", "one" );
     assertFalse( spyAnalyzer.isPassthrough( stepField ) );
   }
 
   @Test
-  public void testGetUsedFields() throws Exception {
+  public void testGetUsedFields() {
     IMetaverseNode outNode = mock( IMetaverseNode.class );
     StepNodes inputs = new StepNodes();
     inputs.addNode( "previousStep", "one", outNode );
