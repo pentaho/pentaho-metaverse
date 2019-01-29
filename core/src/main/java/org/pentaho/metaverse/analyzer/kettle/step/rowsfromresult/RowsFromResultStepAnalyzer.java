@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,6 +26,7 @@ import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.steps.recordsfromstream.RecordsFromStreamMeta;
 import org.pentaho.di.trans.steps.rowsfromresult.RowsFromResultMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IMetaverseNode;
@@ -83,6 +84,7 @@ public class RowsFromResultStepAnalyzer extends StepAnalyzer<RowsFromResultMeta>
   public Set<Class<? extends BaseStepMeta>> getSupportedSteps() {
     Set<Class<? extends BaseStepMeta>> supportedSteps = new HashSet<Class<? extends BaseStepMeta>>( 1 );
     supportedSteps.add( RowsFromResultMeta.class );
+    supportedSteps.add( RecordsFromStreamMeta.class );
     return supportedSteps;
   }
 }
