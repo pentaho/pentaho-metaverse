@@ -33,6 +33,7 @@ import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.metaverse.api.messages.Messages;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -49,8 +50,7 @@ public class SubtransAnalyzer<T extends BaseStepMeta> {
 
   public void linkUsedFieldToSubTrans( IMetaverseNode originalFieldNode, TransMeta subTransMeta,
                                        IMetaverseNode subTransNode, IComponentDescriptor descriptor ) {
-    linkUsedFieldToSubTrans(
-      originalFieldNode, subTransMeta, subTransNode, descriptor,
+    linkUsedFieldToSubTrans( originalFieldNode, subTransMeta, subTransNode, descriptor,
       fieldName -> originalFieldNode.getName().equals( fieldName ) );
   }
 
@@ -75,7 +75,7 @@ public class SubtransAnalyzer<T extends BaseStepMeta> {
 
           // Create a new descriptor for the RowsFromResult step.
           IComponentDescriptor stepDescriptor = new MetaverseComponentDescriptor( StepAnalyzer.NONE,
-            DictionaryConst.NODE_TYPE_TRANS_STEP, subTransNode, descriptor.getContext() );
+                  DictionaryConst.NODE_TYPE_TRANS_STEP, subTransNode, descriptor.getContext() );
 
           // Create a new node for the step, to be used as the parent of the the field we want to link to
           IMetaverseNode subTransStepNode = stepAnalyzer.createNodeFromDescriptor( stepDescriptor );
@@ -87,11 +87,11 @@ public class SubtransAnalyzer<T extends BaseStepMeta> {
               if ( fieldPredicate.test( field ) ) {
                 // Create the descriptor for the trans field that is derived from the incoming result field
                 IComponentDescriptor stepFieldDescriptor = new MetaverseComponentDescriptor( field,
-                  DictionaryConst.NODE_TYPE_TRANS_FIELD, subTransStepNode, descriptor.getContext() );
+                        DictionaryConst.NODE_TYPE_TRANS_FIELD, subTransStepNode, descriptor.getContext() );
 
                 // Create the node
                 IMetaverseNode subTransField =
-                  stepAnalyzer.createFieldNode( stepFieldDescriptor, rowMetaInterface.getValueMeta( i ), step.getName(), false );
+                        stepAnalyzer.createFieldNode( stepFieldDescriptor, rowMetaInterface.getValueMeta( i ), step.getName(), false );
 
                 // Add the link
                 stepAnalyzer.getMetaverseBuilder().addLink( originalFieldNode, DictionaryConst.LINK_DERIVES, subTransField );
@@ -101,8 +101,8 @@ public class SubtransAnalyzer<T extends BaseStepMeta> {
               }
             }
           } catch ( KettleStepException e ) {
-            log.warn( "Could not get step fields of RowsFromResult step in sub transformation - "
-              + subTransMeta.getName(), e );
+            log.warn( Messages.getString( "WARN.SubtransAnalyzer.RowsFromResultNotFound", subTransMeta.getName() ),
+                    e );
           }
         }
       }
@@ -130,7 +130,7 @@ public class SubtransAnalyzer<T extends BaseStepMeta> {
 
           // Create a new descriptor for the RowsToResult step.
           IComponentDescriptor stepDescriptor = new MetaverseComponentDescriptor( step.getName(),
-            DictionaryConst.NODE_TYPE_TRANS_STEP, subTransNode, descriptor.getContext() );
+                  DictionaryConst.NODE_TYPE_TRANS_STEP, subTransNode, descriptor.getContext() );
 
           // Create a new node for the step, to be used as the parent of the the field we want to link to
           IMetaverseNode subTransStepNode = stepAnalyzer.createNodeFromDescriptor( stepDescriptor );
@@ -142,24 +142,75 @@ public class SubtransAnalyzer<T extends BaseStepMeta> {
               if ( streamFieldNode.getName().equals( field ) ) {
                 // Create the descriptor for the trans field that is derived from the incoming result field
                 IComponentDescriptor stepFieldDescriptor = new MetaverseComponentDescriptor( field,
-                  DictionaryConst.NODE_TYPE_TRANS_FIELD, subTransStepNode, descriptor.getContext() );
+                        DictionaryConst.NODE_TYPE_TRANS_FIELD, subTransStepNode, descriptor.getContext() );
 
                 // Create the node
-                //IMetaverseNode subTransField = createNodeFromDescriptor( stepFieldDescriptor );
                 IMetaverseNode subTransField = stepAnalyzer.createFieldNode( stepFieldDescriptor, rowMetaInterface.getValueMeta( i ),
-                  StepAnalyzer.NONE, false );
+                        StepAnalyzer.NONE, false );
 
                 // Add the link
                 stepAnalyzer.getMetaverseBuilder().addLink( subTransField, DictionaryConst.LINK_DERIVES, streamFieldNode );
-
-                // no need to keep looking for a match on field name, we just handled it.
-                continue;
-
               }
             }
           } catch ( KettleStepException e ) {
-            log.warn( "Could not get step fields of RowsToResult step in sub transformation - "
-              + subTransMeta.getName(), e );
+            log.warn( Messages.getString( "WARN.SubtransAnalyzer.RowsToResultNotFound", subTransMeta.getName() ),
+                    e );
+          }
+
+        }
+      }
+    }
+
+  }
+
+  /**
+   * Checks to see if the sub trans has the specified step name in it.
+   * If so, it will link the fields it outputs to the fields created by this step and are sent to the
+   * "target step for output rows".
+   *
+   * @param streamFieldNode stream field node sent to the step defined as "target step for output rows"
+   * @param subTransMeta TransMeta of the transformation to be executed by the TransExecutor step
+   * @param subTransNode IMetaverseNode representing the sub-transformation to be executed
+   * @param descriptor Descriptor to use as a basis for any nodes created
+   * @param resultStepName Name of step whose outputs need to connect to parent trans/step
+   */
+  public void linkResultFieldToSubTrans( IMetaverseNode streamFieldNode, TransMeta subTransMeta,
+                                         IMetaverseNode subTransNode, IComponentDescriptor descriptor,
+                                         String resultStepName ) {
+
+    List<StepMeta> steps = subTransMeta.getSteps();
+    if ( !CollectionUtils.isEmpty( steps ) ) {
+      for ( StepMeta step : steps ) {
+        if ( step.getName().equals( resultStepName ) ) {
+          BaseStepMeta baseStepMeta = (BaseStepMeta) step.getStepMetaInterface();
+
+          // Create a new descriptor for the RowsToResult step.
+          IComponentDescriptor stepDescriptor = new MetaverseComponentDescriptor( step.getName(),
+                  DictionaryConst.NODE_TYPE_TRANS_STEP, subTransNode, descriptor.getContext() );
+
+          // Create a new node for the step, to be used as the parent of the the field we want to link to
+          IMetaverseNode subTransStepNode = stepAnalyzer.createNodeFromDescriptor( stepDescriptor );
+
+          try {
+            RowMetaInterface rowMetaInterface = baseStepMeta.getParentStepMeta().getParentTransMeta().getStepFields( step );
+            for ( int i = 0; i < rowMetaInterface.getFieldNames().length; i++ ) {
+              String field = rowMetaInterface.getFieldNames()[ i ];
+              if ( streamFieldNode.getName().equals( field ) ) {
+                // Create the descriptor for the trans field that is derived from the incoming result field
+                IComponentDescriptor stepFieldDescriptor = new MetaverseComponentDescriptor( field,
+                        DictionaryConst.NODE_TYPE_TRANS_FIELD, subTransStepNode, descriptor.getContext() );
+
+                // Create the node
+                IMetaverseNode subTransField = stepAnalyzer.createFieldNode( stepFieldDescriptor, rowMetaInterface.getValueMeta( i ),
+                        StepAnalyzer.NONE, false );
+
+                // Add the link
+                stepAnalyzer.getMetaverseBuilder().addLink( subTransField, DictionaryConst.LINK_DERIVES, streamFieldNode );
+              }
+            }
+          } catch ( KettleStepException e ) {
+            log.warn( Messages.getString( "WARN.SubtransAnalyzer.StepNotFound", resultStepName,
+                    subTransMeta.getName() ), e );
           }
 
         }
