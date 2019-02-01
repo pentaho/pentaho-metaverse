@@ -22,6 +22,7 @@
 
 package org.pentaho.dictionary;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.metaverse.api.IMetaverseNode;
 
@@ -85,7 +86,7 @@ import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_WEBSERVICE;
  *
  * @author jdixon
  */
-@SuppressWarnings( { "rawtypes", "WeakerAccess", "Duplicates" } )
+@SuppressWarnings ( { "rawtypes", "WeakerAccess", "Duplicates" } )
 public class DictionaryHelper {
 
   /**
@@ -145,6 +146,12 @@ public class DictionaryHelper {
     if ( !StringUtils.isBlank( entityType ) ) {
       ENTITY_NODE_TYPES.add( entityType );
     }
+  }
+
+  @VisibleForTesting
+  public static void clearEntityRegistry() {
+    entityTypeLinks.clear();
+    ENTITY_NODE_TYPES.clear();
   }
 
   /**
