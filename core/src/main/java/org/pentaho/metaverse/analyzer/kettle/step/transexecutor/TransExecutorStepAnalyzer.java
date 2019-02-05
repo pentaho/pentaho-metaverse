@@ -71,8 +71,6 @@ public class TransExecutorStepAnalyzer extends StepAnalyzer<TransExecutorMeta> {
     this.subtransAnalyzer = subtransAnalyzer;
   }
 
-
-
   @Override
   protected Set<StepField> getUsedFields( TransExecutorMeta meta ) {
     // add uses links to all incoming fields
