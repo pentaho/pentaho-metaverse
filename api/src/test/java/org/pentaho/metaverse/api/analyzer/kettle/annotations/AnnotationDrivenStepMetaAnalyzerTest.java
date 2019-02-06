@@ -35,6 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.exception.KettleStepException;
+import org.pentaho.di.core.injection.InjectionDeep;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaString;
@@ -100,34 +101,14 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
   private TestableAnnotationDrivenAnalyzer analyzer;
 
   @Before
-  public void before() throws KettleStepException {
-    meta = new TestStepMeta(); // step meta with metaverse annotations
-
+  public void before() {
     inputRowMeta = new RowMeta();
-    inputRowMeta.addValueMeta( new ValueMetaString( "usedField" ) );
-    inputRowMeta.addValueMeta( new ValueMetaString( "usedField1" ) );
-    inputRowMeta.addValueMeta( new ValueMetaString( "usedField2" ) );
-    inputRowMeta.addValueMeta( new ValueMetaString( "messageField" ) );
-    inputRowMeta.addValueMeta( new ValueMetaString( "substitutedField" ) );
 
-    StepMeta parentStepMeta = new StepMeta();
-    final Variables variables = new Variables();
-    variables.setVariable( "substitute", "substitutedField" );
-
-    TransMeta transMeta = spy( new TransMeta( variables ) );
-    // stub out previous step input
-    when( transMeta.getPrevStepFields( any(), any(), any() ) ).thenReturn( inputRowMeta );
-
-    meta.setParentStepMeta( parentStepMeta );
-    parentStepMeta.setStepMetaInterface( meta );
-    StepIOMeta stepIOMeta = new StepIOMeta( true, true, true,
-      false, false, false );
-
-    ( (BaseStepMeta) meta ).setStepIOMeta( stepIOMeta );
-    transMeta.addStep( parentStepMeta );
+    this.meta = getTestStepMeta( inputRowMeta );
 
     analyzer = new TestableAnnotationDrivenAnalyzer( new TestStepMeta(), typeCategoryMap, entityRegister );
   }
+
 
   @After
   public void after() {
@@ -168,9 +149,13 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
     Vertex externalResourceV = e.getVertex( Direction.OUT );
     assertThat( externalResourceV.getProperty( "server" ), equalTo( "ServernameOrWhatever" ) );
     assertThat( externalResourceV.getProperty( "port" ), equalTo( "123" ) );
-    assertThat( externalResourceV.getProperty( "isssl" ), equalTo( "true" ) );
+    assertThat( externalResourceV.getProperty( "isSsl" ), equalTo( "true" ) );
     assertThat( externalResourceV.getProperty( "name" ), equalTo( "ServernameOrWhatever" ) );
     assertThat( externalResourceV.getProperty( "type" ), equalTo( TEST_TYPE ) );
+
+    // nested properties in referenced class
+    assertThat( externalResourceV.getProperty( "SUBPROP" ), equalTo( "subProp1" ) );
+    assertThat( externalResourceV.getProperty( "subProp2" ), equalTo( "123" ) );
 
     edges = getEdgesWithLabell( graph, LINK_DEPENDENCYOF );
     assertThat( edges.size(), equalTo( 1 ) );
@@ -220,6 +205,7 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
     assertThat( analyzer.getSupportedSteps(), equalTo( singleton( meta.getClass() ) ) );
   }
 
+
   private IMetaverseBuilder getBuilder( IMetaverseNode rootNode ) {
     IComponentDescriptor descriptor = new MetaverseComponentDescriptor( "descriptor", "someType", rootNode );
     analyzer.setDescriptor( descriptor );
@@ -257,6 +243,37 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
     }
   }
 
+  static TestStepMeta getTestStepMeta( RowMeta inputRowMeta ) {
+    TestStepMeta meta = new TestStepMeta(); // step meta with metaverse annotations
+
+    inputRowMeta.addValueMeta( new ValueMetaString( "usedField" ) );
+    inputRowMeta.addValueMeta( new ValueMetaString( "usedField1" ) );
+    inputRowMeta.addValueMeta( new ValueMetaString( "usedField2" ) );
+    inputRowMeta.addValueMeta( new ValueMetaString( "messageField" ) );
+    inputRowMeta.addValueMeta( new ValueMetaString( "substitutedField" ) );
+
+    StepMeta parentStepMeta = new StepMeta();
+    final Variables variables = new Variables();
+    variables.setVariable( "substitute", "substitutedField" );
+
+    TransMeta transMeta = spy( new TransMeta( variables ) );
+    // stub out previous step input
+    try {
+      when( transMeta.getPrevStepFields( any(), any(), any() ) ).thenReturn( inputRowMeta );
+    } catch ( KettleStepException e ) {
+      throw new IllegalStateException( e );
+    }
+
+    meta.setParentStepMeta( parentStepMeta );
+    parentStepMeta.setStepMetaInterface( meta );
+    StepIOMeta stepIOMeta = new StepIOMeta( true, true, true,
+      false, false, false );
+
+    meta.setStepIOMeta( stepIOMeta );
+    transMeta.addStep( parentStepMeta );
+    return meta;
+  }
+
 
   @Metaverse.CategoryMap ( entity = CONN_TYPE, category = CATEGORY_DATASOURCE )
   @Metaverse.CategoryMap ( entity = TEST_TYPE, category = CATEGORY_OTHER )
@@ -276,6 +293,9 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
     @Metaverse.Property public String envSubstituteAttr = "${substitute}";
     public String otherMeta;
     public String otherMeta2;
+
+    @InjectionDeep
+    public SubMeta subMeta = new SubMeta();
 
     @Metaverse.Node ( link = LINK_READBY, type = TEST_TYPE, name = "test_name" )
     @Metaverse.Property ( name = "server", parentNodeName = "test_name" ) public String serverER =
@@ -306,5 +326,21 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
     @Override public StepDataInterface getStepData() {
       return null;
     }
+  }
+
+  /**
+   * Used to test meta elements in referenced objects.
+   * (similar to @InjectionDeep with Metadata injection
+   */
+  @Metaverse
+  @SuppressWarnings ( "unused" )
+  static class SubMeta {
+
+    @Metaverse.Property ( name = "SUBPROP", parentNodeName = "test_name" )
+    public String someSubProp = "subProp1";
+
+    @Metaverse.Property ( name = "subProp2", parentNodeName = "test_name" )
+    public int subPropNum2 = 123;
+
   }
 }

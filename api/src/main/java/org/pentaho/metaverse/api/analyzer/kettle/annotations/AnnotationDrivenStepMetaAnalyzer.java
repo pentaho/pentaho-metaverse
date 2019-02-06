@@ -22,7 +22,6 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle.annotations;
 
-import com.google.common.base.Strings;
 import com.tinkerpop.blueprints.Direction;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -36,8 +35,6 @@ import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -45,10 +42,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer.RESOURCE;
 
@@ -76,30 +73,31 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
     registerTypes();
   }
 
+  /**
+   * Graph updates are mostly driven by this method.  It handles
+   *
+   * 1)  Creating nodes specified with @Metaverse.Node
+   * 2)  Linking any nodes marked with @Metaverse.LinkNode
+   * 3)  Updating all node properties (@Metaverse.Property).
+   */
   @Override
   protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
     loadStreamFields( meta );
+    AnnotatedClassFields annoFields = new AnnotatedClassFields( meta );
 
     // handles any @Metaverse.Node annotations in the meta, generating a map of nodeName->node
-    Map<String, IMetaverseNode> externalNodes = getFieldStream( meta, Metaverse.Node.class )
-      .map( field -> attachNodes( meta, rootNode, field ) )
-      .collect( Collectors.toMap( Pair::left, Pair::right ) );
+    Map<AnnotatedClassField<Metaverse.Node>, IMetaverseNode> externalNodes = annoFields.nodes()
+      .map( field -> attachNodes( rootNode, field, annoFields ) )
+      .collect( toMap( Pair::left, Pair::right ) );
 
     // attach resource fields
-    getFieldStream( meta, Metaverse.NodeLink.class )
-      .map( field -> field.getAnnotation( Metaverse.NodeLink.class ) )
-      .filter( attribute -> !attribute.parentNodelink().isEmpty() )
-      .forEach( attribute -> linkResourceFieldToNode( externalNodes, attribute ) );
+    annoFields.links()
+      .forEach( nodeLink -> linkResourceFieldToNode( externalNodes, nodeLink.annotation, annoFields ) );
 
     // set stepnode properties
     rootNode.setProperties(
-      getFieldStream( meta, Metaverse.Property.class )
-        .collect( Collectors.toMap( this::getPropertyName, field -> getMetaFieldValue( meta, field ) ) ) );
-  }
-
-  private Stream<Field> getFieldStream( BaseStepMeta meta, Class<? extends Annotation> annotation ) {
-    return stream( meta.getClass().getFields() )
-      .filter( field -> field.isAnnotationPresent( annotation ) );
+      annoFields.props()
+        .collect( toMap( AnnotatedClassField::name, AnnotatedClassField::val ) ) );
   }
 
   @Override
@@ -110,8 +108,8 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
   @Override
   protected Set<StepField> getUsedFields( BaseStepMeta meta ) {
     loadStreamFields( meta );
-    return getFieldStream( meta, Metaverse.Property.class )
-      .map( field -> getMetaFieldValue( meta, field ) )
+    return new AnnotatedClassFields( meta ).props()
+      .map( AnnotatedClassField::val )
       .map( this::stepNameFieldName )
       .filter( Optional::isPresent )
       .map( Optional::get )
@@ -126,13 +124,13 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
   @Override protected Map<String, RowMetaInterface> getOutputRowMetaInterfaces( BaseStepMeta meta ) {
     Map<String, RowMetaInterface> rowMetas = super.getOutputRowMetaInterfaces( meta );
 
-    RowMeta resoureRowMeta = new RowMeta();
-    stream( meta.getClass().getFields() )
-      .filter( this::isLinked )
-      .forEach( field -> resoureRowMeta.addValueMeta( new ValueMetaNone( getPropertyName( field ) ) ) );
+    RowMeta resourceRowMeta = new RowMeta();
+    new AnnotatedClassFields( meta )
+      .links()
+      .forEach( field -> resourceRowMeta.addValueMeta( new ValueMetaNone( field.name ) ) );
 
-    if ( resoureRowMeta.size() > 0 ) {
-      rowMetas.put( RESOURCE, resoureRowMeta );
+    if ( resourceRowMeta.size() > 0 ) {
+      rowMetas.put( RESOURCE, resourceRowMeta );
     }
     return rowMetas;
   }
@@ -167,34 +165,30 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
 
   }
 
-  private void linkResourceFieldToNode( Map<String, IMetaverseNode> resourceNodes, Metaverse.NodeLink attribute ) {
-    StepNodes stepNodes = isOutLink( attribute ) ? getOutputs() : getInputs();
+  private void linkResourceFieldToNode( Map<AnnotatedClassField<Metaverse.Node>, IMetaverseNode> resourceNodes,
+                                        Metaverse.NodeLink nodeLink,
+                                        AnnotatedClassFields annoFields ) {
+    StepNodes stepNodes = isOutLink( nodeLink ) ? getOutputs() : getInputs();
     if ( stepNodes == null ) {
       return;  // nothing to link
     }
-    IMetaverseNode resourceFieldNode = stepNodes.findNode( RESOURCE, attribute.nodeName() );
-    resourceNodes.entrySet().stream()
-      .filter( entry -> entry.getKey().equals( attribute.parentNodeName() ) )
-      .findFirst()
-      .ifPresent( entry -> addLink( attribute, resourceFieldNode, entry.getValue() ) );
+    IMetaverseNode resourceFieldNode = stepNodes.findNode( RESOURCE, nodeLink.nodeName() );
 
+    annoFields.node( nodeLink.parentNodeName() )
+      .map( resourceNodes::get )
+      .ifPresent( parentNode -> addLink( nodeLink, resourceFieldNode, parentNode ) );
   }
 
   /**
    * Adds link with correct direction based on IN or OUT
    */
   private void addLink( Metaverse.NodeLink attribute, IMetaverseNode resourceFieldNode,
-                                     IMetaverseNode resourceNode ) {
+                        IMetaverseNode resourceNode ) {
     if ( isOutLink( attribute ) ) {
       getMetaverseBuilder().addLink( resourceNode, attribute.parentNodelink(), resourceFieldNode );
     } else {
       getMetaverseBuilder().addLink( resourceFieldNode, attribute.parentNodelink(), resourceNode );
     }
-  }
-
-
-  private boolean isLinked( Field field ) {
-    return field.isAnnotationPresent( Metaverse.NodeLink.class );
   }
 
   private boolean isOutLink( Metaverse.NodeLink attribute ) {
@@ -222,64 +216,30 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
     return Optional.of( new Pair<>( fieldMatches.get( 0 ).getKey(), fieldName ) );
   }
 
-  private Pair<String, IMetaverseNode> attachNodes( BaseStepMeta meta, IMetaverseNode rootNode, Field resource ) {
-    Metaverse.Node nodeAnnotation = resource.getAnnotation( Metaverse.Node.class );
-    IMetaverseNode node = createNode( rootNode, nodeAnnotation, resource, meta );
+  private Pair<AnnotatedClassField<Metaverse.Node>, IMetaverseNode> attachNodes( IMetaverseNode rootNode,
+                                                                                 AnnotatedClassField<Metaverse.Node> resource,
+                                                                                 AnnotatedClassFields annoFields ) {
+    Metaverse.Node nodeAnno = resource.annotation;
+    IMetaverseNode node = createNode( rootNode, resource );
 
     // set the node properties from annotated meta
     node.setProperties(
-      stream( meta.getClass().getFields() )
-        .filter( field -> fieldAnnotatedSameType( field, nodeAnnotation.name() ) )
-        .collect( Collectors.toMap( this::getPropertyName, field -> getMetaFieldValue( meta, field ) ) ) );
+      annoFields.props()
+        .filter( field -> field.annotation.parentNodeName().equals( nodeAnno.name() ) )
+        .collect( toMap( AnnotatedClassField::name, AnnotatedClassField::val ) ) );
 
     // link the node to the graph
     getMetaverseBuilder()
       .addNode( node )
-      .addLink( node, nodeAnnotation.link(), rootNode );
+      .addLink( node, nodeAnno.link(), rootNode );
 
-    return new Pair<>( nodeAnnotation.name(), node );
+    return new Pair<>( resource, node );
   }
 
-  private IMetaverseNode createNode( IMetaverseNode rootNode, Metaverse.Node annotation,
-                                     Field externalResource, BaseStepMeta meta ) {
-    MetaverseComponentDescriptor componentDescriptor = new MetaverseComponentDescriptor(
-      getNodeName( externalResource, meta ), annotation.type(),
-      rootNode, getDescriptor().getContext() );
-    return createNodeFromDescriptor( componentDescriptor );
-  }
-
-  /**
-   * Name is the value of the field in the meta.
-   * If there is no assigned value to the field, uses the property name.
-   */
-  private String getNodeName( Field nodeField, BaseStepMeta meta ) {
-    String metaFieldValue = getMetaFieldValue( meta, nodeField );
-    if ( Strings.isNullOrEmpty( metaFieldValue ) ) {
-      metaFieldValue = getPropertyName( nodeField );
-    }
-    return metaFieldValue;
-  }
-
-  private boolean fieldAnnotatedSameType( Field field, String externalResourceName ) {
-    return field.isAnnotationPresent( Metaverse.Property.class )
-      && field.getAnnotation( Metaverse.Property.class ).parentNodeName().equals( externalResourceName );
-  }
-
-  private String getMetaFieldValue( BaseStepMeta meta, Field field ) {
-    try {
-      String value = field.get( meta ).toString();
-      return meta.getParentStepMeta().getParentTransMeta().environmentSubstitute( value );
-    } catch ( IllegalAccessException e ) {
-      throw new IllegalStateException( e );
-    }
-  }
-
-  private String getPropertyName( Field field ) {
-    String annotatedName = field.getAnnotation( Metaverse.Property.class ).name();
-    if ( Strings.isNullOrEmpty( annotatedName ) ) {
-      annotatedName = field.getName();
-    }
-    return annotatedName.toLowerCase();
+  private IMetaverseNode createNode( IMetaverseNode rootNode, AnnotatedClassField<Metaverse.Node> field ) {
+    return createNodeFromDescriptor(
+      new MetaverseComponentDescriptor(
+        field.name, field.annotation.type(), rootNode, getDescriptor().getContext() ) );
   }
 
   /**
@@ -307,5 +267,4 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
       return right;
     }
   }
-
 }
