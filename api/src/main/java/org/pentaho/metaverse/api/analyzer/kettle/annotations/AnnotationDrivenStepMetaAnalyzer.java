@@ -229,9 +229,15 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
         .collect( toMap( AnnotatedClassField::name, AnnotatedClassField::val ) ) );
 
     // link the node to the graph
-    getMetaverseBuilder()
-      .addNode( node )
-      .addLink( node, nodeAnno.link(), rootNode );
+    if ( nodeAnno.linkDirection().equals( Direction.OUT.name() ) ) {
+      getMetaverseBuilder()
+        .addNode( node )
+        .addLink( node, nodeAnno.link(), rootNode );
+    } else {
+      getMetaverseBuilder()
+        .addNode( node )
+        .addLink( rootNode, nodeAnno.link(), node );
+    }
 
     return new Pair<>( resource, node );
   }

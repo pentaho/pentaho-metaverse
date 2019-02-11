@@ -60,6 +60,7 @@ import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -178,10 +179,15 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
 
     List<Edge> edges = getEdgesWithLabell( graph, LINK_WRITESTO );
 
-    assertThat( edges.size(), equalTo( 1 ) );
-    assertThat( edges.get( 0 ).getVertex( Direction.IN ).getProperty( "name" ), equalTo( "message" ) );
-    assertThat( edges.get( 0 ).getVertex( Direction.OUT ).getProperty( "name" ),
-      equalTo( "ServernameOrWhatever" ) );
+    assertThat( edges.size(), equalTo( 2 ) );
+    edges.sort( Comparator.comparing( e -> e.getVertex( Direction.IN ).getProperty( "name" ) ) );
+    assertEdge( edges.get( 0 ), "Bora Bora", "name" );
+    assertEdge( edges.get( 1 ), "message", "ServernameOrWhatever" );
+  }
+
+  private void assertEdge( Edge edge, String from, String to ) {
+    assertThat( edge.getVertex( Direction.IN ).getProperty( "name" ), equalTo( from ) );
+    assertThat( edge.getVertex( Direction.OUT ).getProperty( "name" ), equalTo( to ) );
   }
 
   @Test
@@ -308,6 +314,9 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
     @Metaverse.NodeLink ( nodeName = "message", parentNodeName = "test_name", parentNodelink = LINK_WRITESTO,
       linkDirection = "OUT" )
     public String message = "messageField";
+
+    @Metaverse.Node ( name = "vacataion_spot", type = TEST_TYPE, link = LINK_WRITESTO, linkDirection = "IN" )
+    public String destination = "Bora Bora";
 
     @Metaverse.Node ( type = CONN_TYPE, name = "test_conn_name" )
     @Metaverse.Property ( name = "dbaddress", parentNodeName = "test_conn_name" ) public String dbaddress =

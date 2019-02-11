@@ -38,7 +38,7 @@ public class AnnotatedClassFieldsTest {
 
   @Test public void checkCounts() {
     assertThat( fields.props().count(), equalTo( 11L ) );
-    assertThat( fields.nodes().count(), equalTo( 3L ) );
+    assertThat( fields.nodes().count(), equalTo( 4L ) );
     assertThat( fields.links().count(), equalTo( 1L ) );
   }
 

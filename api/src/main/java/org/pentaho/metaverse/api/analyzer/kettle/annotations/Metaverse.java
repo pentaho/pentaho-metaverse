@@ -48,6 +48,8 @@ public @interface Metaverse {
     String type();
 
     String link() default LINK_DEPENDENCYOF; // link to step node
+
+    String linkDirection() default "OUT";
   }
 
   @Target ( { FIELD, METHOD } )
