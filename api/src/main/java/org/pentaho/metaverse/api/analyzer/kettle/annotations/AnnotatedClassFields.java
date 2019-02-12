@@ -26,7 +26,10 @@ import org.pentaho.di.core.injection.InjectionDeep;
 import org.pentaho.di.trans.step.BaseStepMeta;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -65,60 +68,68 @@ class AnnotatedClassFields {
   }
 
   private <T extends Annotation> Stream<AnnotatedClassField<T>> recurseObjectTree( Object object, Class<T> anno ) {
-    return stream( object.getClass().getFields() )
+    return Stream.concat( stream( object.getClass().getFields() ), stream( object.getClass().getMethods() ) )
       .flatMap( field -> getAnnotatedFieldStream( object, anno, field ) );
   }
 
   private <T extends Annotation> Stream<? extends AnnotatedClassField<T>> getAnnotatedFieldStream(
-    Object object, Class<T> annotation, Field field ) {
-    if ( field.isAnnotationPresent( InjectionDeep.class ) ) {
+    Object object, Class<T> annotation, AccessibleObject accessibleObject ) {
+    if ( accessibleObject.isAnnotationPresent( InjectionDeep.class ) ) {
       try {
-        return recurseObjectTree( field.get( object ), annotation );
-      } catch ( IllegalAccessException e ) {
+        return recurseObjectTree( accessibleValue( object, accessibleObject ), annotation );
+      } catch ( IllegalAccessException | InvocationTargetException e ) {
         throw new IllegalStateException( e );
       }
-    } else if ( field.isAnnotationPresent( annotation ) ) {
+    } else if ( accessibleObject.isAnnotationPresent( annotation ) ) {
       return Stream.of( new AnnotatedClassField<>(
-        field.getAnnotation( annotation ),
-        getName( object, field, annotation ),
-        getValue( object, field ) ) );
+        accessibleObject.getAnnotation( annotation ),
+        getName( object, accessibleObject, annotation ),
+        getValue( object, accessibleObject ) ) );
     } else {
       return Stream.empty();
     }
   }
 
-  private boolean isProperty( Field field ) {
-    return field.isAnnotationPresent( Metaverse.Property.class );
+  private boolean isProperty( AccessibleObject accessibleObject ) {
+    return accessibleObject.isAnnotationPresent( Metaverse.Property.class );
   }
 
-  private boolean isNode( Field field ) {
-    return field.isAnnotationPresent( Metaverse.Node.class );
+  private boolean isNode( AccessibleObject accessibleObject ) {
+    return accessibleObject.isAnnotationPresent( Metaverse.Node.class );
   }
 
-  private String getValue( Object object, Field field ) {
+  private String getValue( Object object, AccessibleObject field ) {
     try {
-      String value = field.get( object ).toString();
+      Object accessibleValue = accessibleValue( object, field );
+      String value = accessibleValue.toString();
       return meta.getParentStepMeta().getParentTransMeta().environmentSubstitute( value );
-    } catch ( IllegalAccessException e ) {
+    } catch ( IllegalAccessException | InvocationTargetException e ) {
       throw new IllegalStateException( e );
     }
   }
 
-  private String getName( Object object, Field field,
+  private Object accessibleValue( Object object, AccessibleObject accessibleObject )
+    throws IllegalAccessException, InvocationTargetException {
+    return accessibleObject instanceof Field
+      ? ( (Field) accessibleObject ).get( object )
+      : ( (Method) accessibleObject ).invoke( object );
+  }
+
+  private String getName( Object object, AccessibleObject accessibleObject,
                           Class<? extends Annotation> annotation ) {
-    if ( isNode( field ) && annotation == Metaverse.Node.class ) {
+    if ( isNode( accessibleObject ) && annotation == Metaverse.Node.class ) {
       // nodes will default to being named based on the field's value,
       // if it has been populated.
-      return getNodeName( field, object );
+      return getNodeName( accessibleObject, object );
     } else {
-      return deriveName( object, field );
+      return deriveName( object, accessibleObject );
     }
   }
 
-  private String getNodeName( Field nodeField, Object object ) {
-    String metaFieldValue = getValue( object, nodeField );
+  private String getNodeName( AccessibleObject accessibleObject, Object object ) {
+    String metaFieldValue = getValue( object, accessibleObject );
     if ( isNullOrEmpty( metaFieldValue ) ) {
-      metaFieldValue = deriveName( object, nodeField );
+      metaFieldValue = deriveName( object, accessibleObject );
     }
     return metaFieldValue;
   }
@@ -130,7 +141,7 @@ class AnnotatedClassFields {
    *   - field val
    *   - field name
    */
-  private String deriveName( Object object, Field field ) {
+  private String deriveName( Object object, AccessibleObject field ) {
     String annotatedName = null;
     if ( isProperty( field ) ) {
       annotatedName = field.getAnnotation( Metaverse.Property.class ).name();
@@ -139,7 +150,10 @@ class AnnotatedClassFields {
       annotatedName = getValue( object, field );
     }
     if ( isNullOrEmpty( annotatedName ) ) {
-      annotatedName = field.getName().toLowerCase();
+      String name = field instanceof Field
+        ? ( (Field) field ).getName()
+        : ( (Method) field ).getName();
+      annotatedName = name.toLowerCase();
     }
     return annotatedName;
   }
