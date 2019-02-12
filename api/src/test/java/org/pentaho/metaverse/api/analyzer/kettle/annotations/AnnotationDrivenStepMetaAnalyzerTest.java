@@ -78,6 +78,7 @@ import static org.mockito.Mockito.when;
 import static org.pentaho.dictionary.DictionaryConst.CATEGORY_DATASOURCE;
 import static org.pentaho.dictionary.DictionaryConst.CATEGORY_MESSAGE_QUEUE;
 import static org.pentaho.dictionary.DictionaryConst.CATEGORY_OTHER;
+import static org.pentaho.dictionary.DictionaryConst.LINK_CONTAINS;
 import static org.pentaho.dictionary.DictionaryConst.LINK_CONTAINS_CONCEPT;
 import static org.pentaho.dictionary.DictionaryConst.LINK_DEFINES;
 import static org.pentaho.dictionary.DictionaryConst.LINK_DEPENDENCYOF;
@@ -158,6 +159,8 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
     assertThat( externalResourceV.getProperty( "SUBPROP" ), equalTo( "subProp1" ) );
     assertThat( externalResourceV.getProperty( "subProp2" ), equalTo( "123" ) );
 
+    assertThat( externalResourceV.getProperty( "method-property" ), equalTo( "blah" ) );
+
     edges = getEdgesWithLabell( graph, LINK_DEPENDENCYOF );
     assertThat( edges.size(), equalTo( 1 ) );
     e = edges.get( 0 );
@@ -183,6 +186,11 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
     edges.sort( Comparator.comparing( e -> e.getVertex( Direction.IN ).getProperty( "name" ) ) );
     assertEdge( edges.get( 0 ), "Bora Bora", "name" );
     assertEdge( edges.get( 1 ), "message", "ServernameOrWhatever" );
+
+    edges = getEdgesWithLabell( graph, LINK_CONTAINS );
+    assertThat( edges.size(), equalTo( 1 ) );
+    assertEdge( edges.get( 0 ), "name", "private-field-value" );
+
   }
 
   private void assertEdge( Edge edge, String from, String to ) {
@@ -321,6 +329,16 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
     @Metaverse.Node ( type = CONN_TYPE, name = "test_conn_name" )
     @Metaverse.Property ( name = "dbaddress", parentNodeName = "test_conn_name" ) public String dbaddress =
       "127.0.0.1:3363";
+
+    @Metaverse.Property ( name = "method-property", parentNodeName = "test_name" )
+    public String methodProperty() {
+      return "blah";
+    }
+
+    @Metaverse.Node ( name = "method-node", type = "otherType", link = LINK_CONTAINS )
+    public String methodNode() {
+      return "private-field-value";
+    }
 
     @Override public void setDefault() {
 
