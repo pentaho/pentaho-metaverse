@@ -20,7 +20,6 @@
     <karaf-maven-plugin.version>3.0.3</karaf-maven-plugin.version>
     <dependency.com.sun.jersey.jersey-client.version>1.19.1</dependency.com.sun.jersey.jersey-client.version>
     <exec-maven-plugin.version>1.3.2</exec-maven-plugin.version>
-    <dependency.osgi.version>4.3.1</dependency.osgi.version>
     <dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>3.0.13</dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>
     <platform.plugin.name>platform</platform.plugin.name>
     <maven-pmd-plugin.version>3.2</maven-pmd-plugin.version>
@@ -163,14 +162,10 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>${dependency.osgi.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-      <version>${dependency.osgi.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
