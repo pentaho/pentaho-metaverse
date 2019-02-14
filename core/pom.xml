@@ -162,12 +162,10 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
