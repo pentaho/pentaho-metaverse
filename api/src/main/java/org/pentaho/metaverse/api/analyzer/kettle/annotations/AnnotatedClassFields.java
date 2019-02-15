@@ -117,10 +117,15 @@ class AnnotatedClassFields {
 
   private String getName( Object object, AccessibleObject accessibleObject,
                           Class<? extends Annotation> annotation ) {
+
     if ( isNode( accessibleObject ) && annotation == Metaverse.Node.class ) {
-      // nodes will default to being named based on the field's value,
-      // if it has been populated.
-      return getNodeName( accessibleObject, object );
+      if ( ( (Metaverse.Node) accessibleObject.getAnnotation( annotation )).nameFromValue().equals( Metaverse.TRUE ) ) {
+        // nodes will default to being named based on the field's value,
+        // if it has been populated.
+        return getNodeName( accessibleObject, object );
+      } else {
+        return ( (Metaverse.Node) accessibleObject.getAnnotation( annotation ) ).name();
+      }
     } else {
       return deriveName( object, accessibleObject );
     }

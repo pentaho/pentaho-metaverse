@@ -41,6 +41,12 @@ import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS_FIELD;
  */
 public @interface Metaverse {
 
+  String SUBTRANS_INPUT = "SUBTRANS_INPUT";
+  String SUBTRANS_OUTPUT = "SUBTRANS_OUTPUT";
+  String SUBTRANS_NONE = "SUBTRANS_NONE";
+  String TRUE = "TRUE";
+  String FALSE = "FALSE";
+
   @Target ( { FIELD, METHOD } )
   @Retention ( RUNTIME ) @interface Node {
     String name();
@@ -50,9 +56,14 @@ public @interface Metaverse {
     String link() default LINK_DEPENDENCYOF; // link to step node
 
     String linkDirection() default "OUT";
+
+    String nameFromValue() default TRUE; // name in field value will be the name of the metaverse node by default
+
+    String subTransLink() default SUBTRANS_NONE; // indicates if this field should be linked to subtrans INPUT or OUTPUT
   }
 
   @Target ( { FIELD, METHOD } )
+  @Repeatable( NodeLinks.class )
   @Retention ( RUNTIME ) @interface NodeLink {
     String nodeName() default "";
 
@@ -61,6 +72,11 @@ public @interface Metaverse {
     String parentNodelink() default LINK_CONTAINS;
 
     String linkDirection() default "IN";  // Direction.OUT / IN
+  }
+
+  @Target ( { FIELD, METHOD } )
+  @Retention ( RUNTIME ) @interface NodeLinks {
+    NodeLink[] value();
   }
 
   @Target ( { FIELD, METHOD } )
