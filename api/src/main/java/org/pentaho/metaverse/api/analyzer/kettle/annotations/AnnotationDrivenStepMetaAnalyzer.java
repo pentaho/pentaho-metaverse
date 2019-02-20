@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -73,7 +72,6 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
   private final transient Logger log = LoggerFactory.getLogger( AnnotationDrivenStepMetaAnalyzer.class );
 
   private final transient Class<? extends BaseStepMeta> stepClass;
-  private final AtomicBoolean streamFieldsLoaded = new AtomicBoolean( false );
 
   private final Map<String, String> typeCategoryMap;
   private final transient EntityRegister register;
@@ -106,7 +104,6 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
    */
   @Override
   protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
-    loadStreamFields( meta );
     AnnotatedClassFields annoFields = new AnnotatedClassFields( meta );
 
     // handles any @Metaverse.Node annotations in the meta, generating a map of nodeName->node
@@ -306,10 +303,8 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
   /**
    * loads the prevFields and stepFields collections in {@link StepAnalyzer}
    */
-  private void loadStreamFields( BaseStepMeta meta ) {
-    if ( !streamFieldsLoaded.getAndSet( true ) ) {
-      loadInputAndOutputStreamFields( meta );
-    }
+  void loadStreamFields( BaseStepMeta meta ) {
+    loadInputAndOutputStreamFields( meta );
   }
 
   private Optional<Pair<String, String>> stepNameFieldName( String fieldName ) {
