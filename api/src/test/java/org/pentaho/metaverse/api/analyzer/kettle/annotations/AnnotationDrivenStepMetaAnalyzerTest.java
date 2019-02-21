@@ -35,16 +35,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
 import org.pentaho.di.core.ProgressMonitorListener;
-import org.pentaho.di.core.Props;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.injection.InjectionDeep;
 import org.pentaho.di.core.plugins.PluginRegistry;
-import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -55,7 +52,6 @@ import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectory;
 import org.pentaho.di.trans.ISubTransAwareMeta;
-import org.pentaho.di.trans.StepWithMappingMeta;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransHopMeta;
 import org.pentaho.di.trans.TransMeta;
@@ -66,19 +62,16 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.rowsfromresult.RowsFromResultMeta;
-import org.pentaho.di.trans.steps.transexecutor.TransExecutorMeta;
 import org.pentaho.di.trans.steps.writetolog.WriteToLogMeta;
 import org.pentaho.di.trans.streaming.common.BaseStreamStepMeta;
 import org.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.dictionary.MetaverseTransientNode;
-import org.pentaho.metastore.api.IMetaStore;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.MetaverseObjectFactory;
-import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
@@ -90,7 +83,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +93,6 @@ import java.util.stream.StreamSupport;
 
 import static java.util.Collections.singleton;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -204,7 +195,8 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
   @Test
   public void testCustomAnalyze() throws MetaverseAnalyzerException {
     IMetaverseBuilder builder = getBuilder( root );
-    ///analyzer.processInputs();
+
+    analyzer.loadInputAndOutputStreamFields( (BaseStepMeta) meta );
     analyzer.customAnalyze( (BaseStepMeta) meta, root );
     Graph graph = builder.getGraph();
 
@@ -240,6 +232,7 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
 
     this.mappingMeta = getTestStepMappingMeta( inputRowMeta, outputRowMeta );
 
+    analyzer.loadInputAndOutputStreamFields( (BaseStepMeta) mappingMeta );
     analyzer.customAnalyze( (BaseStepMeta) mappingMeta, root );
     Graph graph = builder.getGraph();
 
