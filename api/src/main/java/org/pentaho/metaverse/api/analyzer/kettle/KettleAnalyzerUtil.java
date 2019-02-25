@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -171,26 +171,11 @@ public class KettleAnalyzerUtil {
     TransMeta subTransMeta = null;
     switch ( meta.getSpecificationMethod() ) {
       case FILENAME:
-        String transPath = KettleAnalyzerUtil.normalizeFilePathSafely(
-          parentTransMeta.environmentSubstitute( meta.getFileName() ) );
-        try {
-          subTransMeta = getSubTransMeta( transPath );
-        } catch ( Exception e ) {
-          throw new MetaverseAnalyzerException( Messages.getString( "ERROR.SubTransNotFoundInParentTrans",
-            transPath, parentTransMeta.toString() ), e );
-        }
+        subTransMeta = getSubTransByFilename( meta, parentTransMeta, repo, subTransMeta );
         break;
       case REPOSITORY_BY_NAME:
         if ( repo != null ) {
-          String dir = parentTransMeta.environmentSubstitute( meta.getDirectoryPath() );
-          String file = parentTransMeta.environmentSubstitute( meta.getTransName() );
-          try {
-            RepositoryDirectoryInterface rdi = repo.findDirectory( dir );
-            subTransMeta = repo.loadTransformation( file, rdi, null, true, null );
-          } catch ( KettleException e ) {
-            throw new MetaverseAnalyzerException( Messages.getString( "ERROR.SubTransNotFoundInParentTrans",
-              file, parentTransMeta.toString() ), e );
-          }
+          subTransMeta = getTransMetaFromRepo( meta, parentTransMeta, repo );
         } else {
           throw new MetaverseAnalyzerException( Messages.getString( "ERROR.MissingConnectionForTransSubTrans",
             parentTransMeta.toString() ) );
@@ -213,6 +198,49 @@ public class KettleAnalyzerUtil {
     }
     subTransMeta.setFilename( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ) );
     return subTransMeta;
+  }
+
+  private static TransMeta getSubTransByFilename( ISubTransAwareMeta meta, TransMeta parentTransMeta, Repository repo,
+                                                  TransMeta subTransMeta ) throws MetaverseAnalyzerException {
+    String transPath = KettleAnalyzerUtil.normalizeFilePathSafely(
+      parentTransMeta.environmentSubstitute( meta.getFileName() ) );
+
+    // if repository is not null, try it first
+    if ( repo != null ) {
+      String dir = transPath.substring( 0, transPath.lastIndexOf( '/' ) );
+      String file = transPath.substring( transPath.lastIndexOf( '/' ) + 1 );
+      subTransMeta = getFileFromRepo( parentTransMeta, repo, dir, file );
+    }
+    // couldn't find in repo or no repo present, look in file system
+    if ( null == subTransMeta ) {
+      try {
+        subTransMeta = getSubTransMeta( transPath );
+      } catch ( Exception e ) {
+        throw new MetaverseAnalyzerException( Messages.getString( "ERROR.SubTransNotFoundInParentTrans",
+          transPath, parentTransMeta.toString() ), e );
+      }
+    }
+    return subTransMeta;
+  }
+
+  private static TransMeta getFileFromRepo( TransMeta parentTransMeta, Repository repo, String dir, String file )
+    throws MetaverseAnalyzerException {
+    TransMeta subTransMeta;
+    try {
+      RepositoryDirectoryInterface rdi = repo.findDirectory( dir );
+      subTransMeta = repo.loadTransformation( file, rdi, null, true, null );
+    } catch ( KettleException e ) {
+      throw new MetaverseAnalyzerException( Messages.getString( "ERROR.SubTransNotFoundInParentTrans",
+        file, parentTransMeta.toString() ), e );
+    }
+    return subTransMeta;
+  }
+
+  private static TransMeta getTransMetaFromRepo( ISubTransAwareMeta meta, TransMeta parentTransMeta, Repository repo )
+    throws MetaverseAnalyzerException {
+    String dir = parentTransMeta.environmentSubstitute( meta.getDirectoryPath() );
+    String file = parentTransMeta.environmentSubstitute( meta.getTransName() );
+    return getFileFromRepo( parentTransMeta, repo, dir, file );
   }
 
   /**
