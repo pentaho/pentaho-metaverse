@@ -20,8 +20,27 @@
     <enunciate.version>1.27</enunciate.version>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <maven-pmd-plugin.version>3.2</maven-pmd-plugin.version>
+    <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
   </properties>
   <dependencies>
+    <!-- we are excluding javax.ws.rs:jsr311-api bellow,
+         but better be safe and have this at the top -->
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+      <version>${javax.ws.rs-api.version}</version>
+    </dependency>
+
+    <dependency>
+      <!-- test time runtime dependency -->
+      <!-- this need to come at the top so its javax.ws.rs.core.Response implementation
+           doesn't get overriden by another -->
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+      <version>${cxf.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-metaverse-api</artifactId>
@@ -33,10 +52,12 @@
       <artifactId>pentaho-metaverse-core</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>jsr311-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
@@ -51,32 +72,21 @@
           <artifactId>jackson-xc</artifactId>
           <groupId>org.codehaus.jackson</groupId>
         </exclusion>
+        <exclusion>
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>jsr311-api</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-jaxrs-json-provider</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-jaxb-annotations</artifactId>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-core-annotations</artifactId>
+      <version>${enunciate.version}</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <version>${dependency.org.mockito.mockito-all.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-apache-client</artifactId>
-      <version>1.19.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.0.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
