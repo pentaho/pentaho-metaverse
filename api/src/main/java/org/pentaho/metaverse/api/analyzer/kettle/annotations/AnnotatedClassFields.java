@@ -40,11 +40,11 @@ import static java.util.Arrays.stream;
  * Convenience class for navigating the @Metaverse.Node, @Metaverse.Property,
  * and @Metaverse.NodeLink annotations in a class.
  */
-class AnnotatedClassFields {
+public class AnnotatedClassFields {
 
   private final BaseStepMeta meta;
 
-  AnnotatedClassFields( BaseStepMeta meta ) {
+  public AnnotatedClassFields( BaseStepMeta meta ) {
     this.meta = meta;
   }
 
@@ -70,6 +70,10 @@ class AnnotatedClassFields {
   private <T extends Annotation> Stream<AnnotatedClassField<T>> recurseObjectTree( Object object, Class<T> anno ) {
     return Stream.concat( stream( object.getClass().getFields() ), stream( object.getClass().getMethods() ) )
       .flatMap( field -> getAnnotatedFieldStream( object, anno, field ) );
+  }
+
+  public boolean hasMetaverseAnnotations() {
+    return props().count() > 0 || nodes().count() > 0 || links().count() > 0;
   }
 
   private <T extends Annotation> Stream<? extends AnnotatedClassField<T>> getAnnotatedFieldStream(

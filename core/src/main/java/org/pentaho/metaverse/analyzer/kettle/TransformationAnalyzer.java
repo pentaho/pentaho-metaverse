@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -44,6 +44,8 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.PropertiesHolder;
+import org.pentaho.metaverse.api.analyzer.kettle.annotations.AnnotatedClassFields;
+import org.pentaho.metaverse.api.analyzer.kettle.annotations.AnnotationDrivenStepMetaAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
@@ -209,6 +211,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
           IComponentDescriptor stepDescriptor = new MetaverseComponentDescriptor( stepMeta.getName(),
             DictionaryConst.NODE_TYPE_TRANS_STEP, node, documentDescriptor.getContext() );
           Set<IStepAnalyzer> stepAnalyzers = getStepAnalyzers( stepMeta );
+          final BaseStepMeta baseStepMeta = getBaseStepMetaFromStepMeta( stepMeta );
           if ( stepAnalyzers != null && !stepAnalyzers.isEmpty() ) {
             for ( IStepAnalyzer stepAnalyzer : stepAnalyzers ) {
               // the analyzers provided by the provider are singletons created at startup time - in order to be able
@@ -224,10 +227,15 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
                 log.debug( Messages.getString( "WARNING.CannotCloneAnalyzer" ), stepAnalyzer );
               }
               stepAnalyzer.setMetaverseBuilder( metaverseBuilder );
-              final BaseStepMeta baseStepMeta = getBaseStepMetaFromStepMeta( stepMeta );
               stepNode = (IMetaverseNode) stepAnalyzer.analyze( stepDescriptor, baseStepMeta );
               analyzerHolders.add( new AnalyzerHolder( stepAnalyzer, baseStepMeta, stepNode ) );
             }
+          } else if ( ( new AnnotatedClassFields( baseStepMeta ) ).hasMetaverseAnnotations() ) {
+            AnnotationDrivenStepMetaAnalyzer annotationDrivenStepMetaAnalyzer =
+              new AnnotationDrivenStepMetaAnalyzer( baseStepMeta );
+            annotationDrivenStepMetaAnalyzer.setMetaverseBuilder( metaverseBuilder );
+            stepNode = annotationDrivenStepMetaAnalyzer.analyze( stepDescriptor, baseStepMeta );
+            analyzerHolders.add( new AnalyzerHolder( annotationDrivenStepMetaAnalyzer, baseStepMeta, stepNode ) );
           } else {
             GenericStepMetaAnalyzer defaultStepAnalyzer = new GenericStepMetaAnalyzer();
             defaultStepAnalyzer.setMetaverseBuilder( metaverseBuilder );
