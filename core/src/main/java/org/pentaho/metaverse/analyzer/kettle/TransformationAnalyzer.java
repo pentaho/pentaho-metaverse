@@ -234,6 +234,9 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
             AnnotationDrivenStepMetaAnalyzer annotationDrivenStepMetaAnalyzer =
               new AnnotationDrivenStepMetaAnalyzer( baseStepMeta );
             annotationDrivenStepMetaAnalyzer.setMetaverseBuilder( metaverseBuilder );
+            annotationDrivenStepMetaAnalyzer.setDocumentAnalyzer( this );
+            annotationDrivenStepMetaAnalyzer.setDocumentDescriptor( documentDescriptor );
+            annotationDrivenStepMetaAnalyzer.setDocumentPath( documentPath );
             stepNode = annotationDrivenStepMetaAnalyzer.analyze( stepDescriptor, baseStepMeta );
             analyzerHolders.add( new AnalyzerHolder( annotationDrivenStepMetaAnalyzer, baseStepMeta, stepNode ) );
           } else {
