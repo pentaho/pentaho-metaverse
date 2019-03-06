@@ -268,7 +268,7 @@
            ref="TextFileOutputStepAnalyzer"/>
 
   <service id="mergeJoinStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="MergeJoinStepAnalyzer"/>
 
   <service id="streamLookupStepAnalyzerService"
@@ -280,11 +280,11 @@
            ref="CalculatorStepAnalyzer"/>
 
   <service id="excelInputStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="ExcelInputStepAnalyzer"/>
 
   <service id="groupByStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="GroupByStepAnalyzer"/>
 
   <service id="mongoDbInputStepAnalyzerService"
@@ -320,7 +320,7 @@
            ref="JobExecutorStepAnalyzer"/>
 
   <service id="rowsToResultStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="RowsToResultStepAnalyzer"/>
 
   <service id="rowsFromResultStepAnalyzerService"
@@ -336,11 +336,11 @@
   		   ref="FixedFileInputStepAnalyzer"/>
   		   
   <service id="filterRowsStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="FilterRowsStepAnalyzer"/>
 
   <service id="httpClientStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="HTTPClientStepAnalyzer"/>
 
   <service id="restClientStepAnalyzerService"
@@ -348,7 +348,7 @@
            ref="RestClientStepAnalyzer"/>
 
   <service id="httpPostStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="HTTPPostStepAnalyzer"/>
 
   <service id="tableInputStepAnalyzerService"

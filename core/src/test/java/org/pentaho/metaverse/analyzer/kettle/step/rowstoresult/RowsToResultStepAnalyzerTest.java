@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,7 +29,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.rowstoresult.RowsToResultMeta;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IMetaverseNode;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 
 import java.util.Set;
 
@@ -39,7 +41,7 @@ import static org.junit.Assert.*;
  * Created by rfellows on 4/3/15.
  */
 @RunWith( MockitoJUnitRunner.class )
-public class RowsToResultStepAnalyzerTest {
+public class RowsToResultStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   protected RowsToResultStepAnalyzer analyzer;
 
@@ -69,5 +71,10 @@ public class RowsToResultStepAnalyzerTest {
     assertNotNull( types );
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( RowsToResultMeta.class ) );
+  }
+
+  @Override
+  protected IClonableStepAnalyzer newInstance() {
+    return new RowsToResultStepAnalyzer();
   }
 }
