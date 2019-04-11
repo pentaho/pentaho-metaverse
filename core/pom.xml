@@ -5,11 +5,11 @@
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>pentaho-metaverse</artifactId>
-    <version>7.1-SNAPSHOT</version>
+    <version>7.1.0.23-197</version>
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse-core</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1.0.23-197</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Provides data lineage capabilities</description>
@@ -23,7 +23,7 @@
     <dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>3.0.13</dependency.org.apache.cxf.cxf-rt-frontend-jaxrs.version>
     <dependency.osgi.version>4.3.1</dependency.osgi.version>
     <platform.plugin.name>platform</platform.plugin.name>
-    <dependency.pentaho-platform.revision>7.1-SNAPSHOT</dependency.pentaho-platform.revision>
+    <dependency.pentaho-platform.revision>7.1.0.23-197</dependency.pentaho-platform.revision>
     <maven-pmd-plugin.version>3.2</maven-pmd-plugin.version>
     <pmd.rulesets.url>https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/pmd/rulesets/java</pmd.rulesets.url>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
@@ -38,7 +38,7 @@
     <dependency.commons-cli.version>1.2</dependency.commons-cli.version>
     <dependency.javax.jcr.jcr.version>2.0</dependency.javax.jcr.jcr.version>
     <dependency.org.springFramework.spring.version>2.5.6</dependency.org.springFramework.spring.version>
-    <dependency.pentaho-mongodb-plugin.revision>7.1-SNAPSHOT</dependency.pentaho-mongodb-plugin.revision>
+    <dependency.pentaho-mongodb-plugin.revision>7.1.0.23-197</dependency.pentaho-mongodb-plugin.revision>
   </properties>
   <dependencies>
     <dependency>
