@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -56,6 +56,7 @@ public class VfsLineageWriter implements ILineageWriter {
   public static final String DEFAULT_OUTPUT_FOLDER = "tmp://dir";
 
   private static final Logger log = LoggerFactory.getLogger( VfsLineageWriter.class );
+  private static final String UNKNOWN_ARTIFACT = "unknown_artifact";
 
   private IGraphWriter graphWriter = new GraphMLWriter();
   private String outputFolder = DEFAULT_OUTPUT_FOLDER;
@@ -117,8 +118,7 @@ public class VfsLineageWriter implements ILineageWriter {
   /**
    * Sets the graph writer associated with this lineage writer object
    *
-   * @param graphWriter
-   *          an IGraphWriter instance
+   * @param graphWriter an IGraphWriter instance
    */
   public void setGraphWriter( IGraphWriter graphWriter ) {
     this.graphWriter = graphWriter;
@@ -145,8 +145,7 @@ public class VfsLineageWriter implements ILineageWriter {
   /**
    * Sets the output folder for this writer
    *
-   * @param outputFolder
-   *          The String output folder to write to
+   * @param outputFolder The String output folder to write to
    */
   public void setOutputFolder( String outputFolder ) {
     int seperatorIndex = outputFolder.indexOf( ":" );
@@ -195,19 +194,14 @@ public class VfsLineageWriter implements ILineageWriter {
     try {
       FileObject dateRootFolder = getDateFolder( holder );
       dateRootFolder.createFolder();
-      String id = holder.getId() == null ? "unknown_artifact" : holder.getId();
-      if ( id.startsWith( File.separator ) ) { // For *nix
-        id = id.substring( 1 );
-      } else if ( Const.isWindows() && id.charAt( 1 ) == ':' ) { // For windows
-        id = id.replaceFirst( Pattern.quote( ":" ), "" );
-      }
+      String id = getFilenameForHolder( dateRootFolder, holder );
       try {
         FileObject folder = dateRootFolder.resolveFile( id );
         folder.createFolder();
         if ( folder.isFile() ) {
           // must be a folder
           throw new IllegalStateException( Messages.getErrorString( "ERROR.OutputFolderWrongType", folder.getName()
-              .getPath() ) );
+            .getPath() ) );
         }
         return folder;
       } catch ( Exception e ) {
@@ -218,6 +212,23 @@ public class VfsLineageWriter implements ILineageWriter {
       log.error( Messages.getErrorString( "ERROR.CouldNotCreateFile" ), e );
       throw new IllegalStateException( e );
     }
+  }
+
+  private String getFilenameForHolder( FileObject root, LineageHolder holder ) {
+    String filename = holder.getId() == null ? UNKNOWN_ARTIFACT : holder.getId();
+    if ( filename.startsWith( File.separator ) ) { // For *nix
+      filename = filename.substring( 1 );
+    } else if ( Const.isWindows() && filename.charAt( 1 ) == ':' ) { // For windows
+      filename = filename.replaceFirst( Pattern.quote( ":" ), "" );
+    }
+    try {
+      // attempt to resolve.  This can fail if the filename we're attempting to use is invalid,
+      // in which case we'll fall back to the "unknown" name.
+      root.resolveFile( filename );
+    } catch ( FileSystemException e ) {
+      return UNKNOWN_ARTIFACT;
+    }
+    return filename;
   }
 
   protected FileObject getDateFolder( LineageHolder holder ) throws KettleFileException, FileSystemException {
@@ -262,8 +273,7 @@ public class VfsLineageWriter implements ILineageWriter {
   /**
    * Sets the output strategy (all, latest, none) for this writer
    *
-   * @param strategy
-   *          The strategy to use when outputting lineage information
+   * @param strategy The strategy to use when outputting lineage information
    */
   @Override
   public void setOutputStrategy( String strategy ) {
