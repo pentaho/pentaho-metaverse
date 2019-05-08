@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,18 +22,8 @@
 
 package org.pentaho.metaverse.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.spy;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Date;
-import java.util.Random;
-
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
@@ -54,8 +44,19 @@ import org.pentaho.metaverse.graph.GraphSONWriter;
 import org.pentaho.metaverse.impl.model.ExecutionData;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.Random;
+
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.spy;
 
 /**
  * Created by wseyler on 4/1/15.
@@ -91,9 +92,9 @@ public class VfsLineageWriterTest {
     holder.setExecutionProfile( profile );
 
     BAD_OUTPUT_FOLDER =
-        FilenameUtils.separatorsToSystem( "file://" + basePath + BAD_OUTPUT_FOLDER_DEFAULT + random.nextInt() );
+      FilenameUtils.separatorsToSystem( "file://" + basePath + BAD_OUTPUT_FOLDER_DEFAULT + random.nextInt() );
     GOOD_OUTPUT_FOLDER =
-        FilenameUtils.separatorsToSystem( "file://" + basePath + GOOD_OUTPUT_FOLDER_DEFAULT + random.nextInt() );
+      FilenameUtils.separatorsToSystem( "file://" + basePath + GOOD_OUTPUT_FOLDER_DEFAULT + random.nextInt() );
 
     writer.setOutputFolder( GOOD_OUTPUT_FOLDER );
   }
@@ -197,4 +198,22 @@ public class VfsLineageWriterTest {
       assertNotNull( graphOutputStream );
     }
   }
+
+  @Test
+  public void testGetOutputDirectoryAsFile() {
+    holder.setId( "foobarbaz" );
+    FileObject fo = writer.getOutputDirectoryAsFile( holder );
+    assertThat( fo.getName().getPath(), endsWith( "foobarbaz" ) );
+
+    // Use the style of name created by DET for transient dataservice ktrs
+    holder.setId( "transient:L1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3Ry"
+      + ":bG9jYWw6UHl0aG9uIEV4ZWN1dG9yIDI= - SQL - select "
+      + "\"transient:L1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3Ry:bG9jYW" );
+
+    fo = writer.getOutputDirectoryAsFile( holder );
+    assertThat( fo.getName().getPath(), endsWith( "unknown_artifact" ) );
+
+
+  }
+
 }
