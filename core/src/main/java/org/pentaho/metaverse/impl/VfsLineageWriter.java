@@ -48,6 +48,8 @@ import org.pentaho.metaverse.util.MetaverseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.lang.Math.min;
+
 /**
  * Created by wseyler on 10/27/15.
  */
@@ -57,6 +59,7 @@ public class VfsLineageWriter implements ILineageWriter {
 
   private static final Logger log = LoggerFactory.getLogger( VfsLineageWriter.class );
   private static final String UNKNOWN_ARTIFACT = "unknown_artifact";
+  private static final int MAX_NAME_LEN = 150;  // should be a safe, conservative number
 
   private IGraphWriter graphWriter = new GraphMLWriter();
   private String outputFolder = DEFAULT_OUTPUT_FOLDER;
@@ -177,7 +180,7 @@ public class VfsLineageWriter implements ILineageWriter {
         IExecutionProfile profile = holder.getExecutionProfile();
         String timestampString = Long.toString( profile.getExecutionData().getStartTime().getTime() );
         FileObject destFolder = getOutputDirectoryAsFile( holder );
-        String name = Const.NVL( profile.getName(), "unknown" );
+        String name = cleanseName( Const.NVL( profile.getName(), "unknown" ) );
         FileObject file = destFolder.resolveFile( timestampString + "_" + name + extension );
         FileContent content = file.getContent();
         return content.getOutputStream();
@@ -194,7 +197,7 @@ public class VfsLineageWriter implements ILineageWriter {
     try {
       FileObject dateRootFolder = getDateFolder( holder );
       dateRootFolder.createFolder();
-      String id = getFilenameForHolder( dateRootFolder, holder );
+      String id = getNameForHolder( dateRootFolder, holder );
       try {
         FileObject folder = dateRootFolder.resolveFile( id );
         folder.createFolder();
@@ -214,21 +217,28 @@ public class VfsLineageWriter implements ILineageWriter {
     }
   }
 
-  private String getFilenameForHolder( FileObject root, LineageHolder holder ) {
-    String filename = holder.getId() == null ? UNKNOWN_ARTIFACT : holder.getId();
-    if ( filename.startsWith( File.separator ) ) { // For *nix
-      filename = filename.substring( 1 );
-    } else if ( Const.isWindows() && filename.charAt( 1 ) == ':' ) { // For windows
-      filename = filename.replaceFirst( Pattern.quote( ":" ), "" );
+  private String getNameForHolder( FileObject root, LineageHolder holder ) {
+    String name = holder.getId() == null ? UNKNOWN_ARTIFACT : holder.getId();
+    if ( name.startsWith( File.separator ) ) { // For *nix
+      name = name.substring( 1 );
+    } else if ( Const.isWindows() && name.charAt( 1 ) == ':' ) { // For windows
+      name = name.replaceFirst( Pattern.quote( ":" ), "" );
     }
+    name = cleanseName( name );
     try {
       // attempt to resolve.  This can fail if the filename we're attempting to use is invalid,
       // in which case we'll fall back to the "unknown" name.
-      root.resolveFile( filename );
+      root.resolveFile( name );
     } catch ( FileSystemException e ) {
       return UNKNOWN_ARTIFACT;
     }
-    return filename;
+    return name;
+  }
+
+  private String cleanseName( String name ) {
+    return name
+      .replace( ":", "" )  // colons are misparsed by vfs FileObject in some cases
+      .substring( 0, min( name.length(), MAX_NAME_LEN ) );
   }
 
   protected FileObject getDateFolder( LineageHolder holder ) throws KettleFileException, FileSystemException {
