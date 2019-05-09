@@ -66,8 +66,6 @@ public class VfsLineageWriterTest {
   private static String BAD_OUTPUT_FOLDER = "/target/outputfiles/doesnt_exist";
   private static String GOOD_OUTPUT_FOLDER = "/target/outputfiles";
 
-  private static String BAD_OUTPUT_FOLDER_DEFAULT = "/target/outputfiles/doesnt_exist";
-  private static String GOOD_OUTPUT_FOLDER_DEFAULT = "/target/outputfiles";
   private static Random random = new Random();
   private VfsLineageWriter writer;
 
@@ -92,17 +90,15 @@ public class VfsLineageWriterTest {
     holder.setExecutionProfile( profile );
 
     BAD_OUTPUT_FOLDER =
-      FilenameUtils.separatorsToSystem( "file://" + basePath + BAD_OUTPUT_FOLDER_DEFAULT + random.nextInt() );
+      FilenameUtils.separatorsToSystem(
+        "file://" + basePath + "/target/outputfiles/doesnt_exist" + random.nextInt() );
     GOOD_OUTPUT_FOLDER =
-      FilenameUtils.separatorsToSystem( "file://" + basePath + GOOD_OUTPUT_FOLDER_DEFAULT + random.nextInt() );
+      FilenameUtils.separatorsToSystem(
+        "file://" + basePath + "/target/outputfiles" + random.nextInt() );
 
     writer.setOutputFolder( GOOD_OUTPUT_FOLDER );
   }
 
-  /**
-   * @throws FileSystemException
-   * @throws java.lang.Exception
-   */
   @After
   public void tearDown() throws FileSystemException {
     FileSystemManager fsManager = VFS.getManager();
@@ -120,7 +116,7 @@ public class VfsLineageWriterTest {
   }
 
   @Test
-  public void testGetSetGraphWriter() throws Exception {
+  public void testGetSetGraphWriter() {
     IGraphWriter graphWriter = writer.getGraphWriter();
     assertNotNull( graphWriter );
     writer.setGraphWriter( null );
@@ -128,7 +124,7 @@ public class VfsLineageWriterTest {
   }
 
   @Test
-  public void testGetSetOutputFolder() throws Exception {
+  public void testGetSetOutputFolder() {
     assertEquals( GOOD_OUTPUT_FOLDER, writer.getOutputFolder() );
     writer.setOutputFolder( "./path/to/folder" );
     assertTrue( writer.getOutputFolder().endsWith( "/path/to/folder" ) );
@@ -211,9 +207,13 @@ public class VfsLineageWriterTest {
       + "\"transient:L1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3Ry:bG9jYW" );
 
     fo = writer.getOutputDirectoryAsFile( holder );
+    assertThat( fo.getName().getPath(), endsWith(
+      "transientL1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3RybG9jYWw6UHl0aG9uIEV4ZWN1dG9yIDI= "
+        + "- SQL - select \"transientL1VzZXJzL21hdGN" ) );
+
+    holder.setId( "invalidChar %  invalidChar" );
+    fo = writer.getOutputDirectoryAsFile( holder );
     assertThat( fo.getName().getPath(), endsWith( "unknown_artifact" ) );
-
-
   }
 
 }
