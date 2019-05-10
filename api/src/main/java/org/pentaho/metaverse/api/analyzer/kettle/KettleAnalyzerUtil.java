@@ -202,8 +202,7 @@ public class KettleAnalyzerUtil {
 
   private static TransMeta getSubTransByFilename( ISubTransAwareMeta meta, TransMeta parentTransMeta, Repository repo,
                                                   TransMeta subTransMeta ) throws MetaverseAnalyzerException {
-    String transPath = KettleAnalyzerUtil.normalizeFilePathSafely(
-      parentTransMeta.environmentSubstitute( meta.getFileName() ) );
+    String transPath = parentTransMeta.environmentSubstitute( meta.getFileName() );
 
     // if repository is not null, try it first
     if ( repo != null ) {
@@ -214,7 +213,7 @@ public class KettleAnalyzerUtil {
     // couldn't find in repo or no repo present, look in file system
     if ( null == subTransMeta ) {
       try {
-        subTransMeta = getSubTransMeta( transPath );
+        subTransMeta = getSubTransMeta( normalizeFilePathSafely( transPath ) );
       } catch ( Exception e ) {
         throw new MetaverseAnalyzerException( Messages.getString( "ERROR.SubTransNotFoundInParentTrans",
           transPath, parentTransMeta.toString() ), e );
