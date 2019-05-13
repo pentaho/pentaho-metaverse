@@ -237,7 +237,7 @@ public class VfsLineageWriter implements ILineageWriter {
 
   private String cleanseName( String name ) {
     return name
-      .replace( ":", "" )  // colons are misparsed by vfs FileObject in some cases
+      .replace( ":", "-" )  // colons are misparsed by vfs FileObject in some cases
       .substring( 0, min( name.length(), MAX_NAME_LEN ) );
   }
 

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -72,7 +72,8 @@ public class ExternalResourceCache {
     }
     final TransMeta transMeta = meta.getParentTransMeta();
     if ( transMeta.getRepository() == null ) {
-      return KettleAnalyzerUtil.normalizeFilePathSafely( transMeta.getFilename() ) + "::" + meta.getName();
+      String transName = transMeta.getFilename() == null ? transMeta.getName() : transMeta.getFilename();
+      return KettleAnalyzerUtil.normalizeFilePathSafely( transName ) + "::" + meta.getName();
     } else {
       return transMeta.getPathAndName() + "." + transMeta.getDefaultExtension()
         + "::" + meta.getName();

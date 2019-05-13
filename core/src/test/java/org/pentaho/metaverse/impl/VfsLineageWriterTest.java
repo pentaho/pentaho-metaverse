@@ -208,8 +208,8 @@ public class VfsLineageWriterTest {
 
     fo = writer.getOutputDirectoryAsFile( holder );
     assertThat( fo.getName().getPath(), endsWith(
-      "transientL1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3RybG9jYWw6UHl0aG9uIEV4ZWN1dG9yIDI= "
-        + "- SQL - select \"transientL1VzZXJzL21hdGN" ) );
+      "transient-L1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3Ry-bG9jYWw6UHl0aG9uIEV4ZWN1dG9yIDI= "
+        + "- SQL - select \"transient-L1VzZXJzL21h" ) );
 
     holder.setId( "invalidChar %  invalidChar" );
     fo = writer.getOutputDirectoryAsFile( holder );
