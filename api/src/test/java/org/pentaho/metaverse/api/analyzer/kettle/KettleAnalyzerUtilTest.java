@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,8 +29,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
+import org.pentaho.di.repository.Repository;
+import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.trans.ISubTransAwareMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -49,6 +52,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Set;
 
@@ -198,6 +202,28 @@ public class KettleAnalyzerUtilTest {
     Mockito.doReturn( "myRootDir/dir/foe.ktr"  ).when( parentTransMeta ).environmentSubstitute( Mockito.anyString()  );
     assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
       File.separator + "myRootDir" + File.separator + "dir" + File.separator + "foe.ktr" ) );
+  }
+
+  @Test
+  public void testGetSubTransMeta() throws MetaverseAnalyzerException, KettleException {
+
+    final ISubTransAwareMeta meta = Mockito.mock( ISubTransAwareMeta.class );
+    final TransMeta subTransMeta = Mockito.mock( TransMeta.class );
+    final StepMeta parentStepMeta = Mockito.mock( StepMeta.class );
+    final TransMeta parentTransMeta = Mockito.mock( TransMeta.class );
+    final Repository repo = Mockito.mock( Repository.class );
+    final RepositoryDirectoryInterface repositoryDirectoryInterface = Mockito.mock( RepositoryDirectoryInterface.class );
+
+    // test file in repository
+    Mockito.doReturn( ObjectLocationSpecificationMethod.FILENAME ).when( meta ).getSpecificationMethod();
+    Mockito.doReturn( parentStepMeta ).when( meta ).getParentStepMeta();
+    Mockito.doReturn( parentTransMeta ).when( parentStepMeta ).getParentTransMeta();
+    Mockito.doReturn( repo ).when( parentTransMeta ).getRepository();
+    Mockito.doReturn( "/some/path/to/foo" ).when( meta ).getFileName();
+    Mockito.doReturn( repositoryDirectoryInterface ).when( repo ).findDirectory( "/some/path/to" );
+    Mockito.doReturn( subTransMeta ).when( repo ).loadTransformation( "foo", repositoryDirectoryInterface, null, true, null );
+    Mockito.doReturn( "/some/path/to/foo" ).when( parentTransMeta ).environmentSubstitute( "/some/path/to/foo" );
+    assertTrue( KettleAnalyzerUtil.getSubTransMeta( meta ).equals( subTransMeta ) );
   }
 
   @Mock
