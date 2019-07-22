@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -30,6 +30,7 @@ import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
+import org.pentaho.di.core.logging.LogChannel;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.trans.Trans;
@@ -74,6 +75,11 @@ import java.util.concurrent.Future;
 public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements TransListener {
 
   private static final Logger log = LogManager.getLogger( TransformationRuntimeExtensionPoint.class );
+
+  /**
+   * logger for spoon console
+   */
+  private static final LogChannelInterface  consoleLog = new LogChannel( Messages.getString( "TITLE.Metaverse" ) );
 
   /**
    * Callback when a transformation is about to be started
@@ -262,7 +268,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       return;
     }
 
-    log.info( Messages.getString( "INFO.TransformationFinished", trans.getName() ) );
+    log.warn( Messages.getString( "INFO.TransformationAnalyzeStarting", trans.getName() ) );
+    consoleLog.logMinimal( Messages.getString( "INFO.TransformationAnalyzeStarting", trans.getName() ));
     if ( shouldCreateGraph( trans ) ) {
       runAnalyzers( trans );
     }
@@ -357,5 +364,9 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
 
     // cleanup to prevent unnecessary memory usage - we no longer need this Trans in the TransLineageHolderMap
     TransLineageHolderMap.getInstance().removeLineageHolder( trans );
+
+    log.warn( Messages.getString( "INFO.TransformationAnalyzeFinished", trans.getName() ) );
+    consoleLog.logMinimal( Messages.getString( "INFO.TransformationAnalyzeFinished", trans.getName() )  );
+
   }
 }

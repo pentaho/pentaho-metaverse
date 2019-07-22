@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -30,6 +30,7 @@ import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
+import org.pentaho.di.core.logging.LogChannel;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.job.Job;
@@ -75,6 +76,11 @@ import java.util.concurrent.Future;
 public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements JobListener {
 
   private static final Logger log = LogManager.getLogger( JobRuntimeExtensionPoint.class );
+
+  /**
+   * logger for spoon console
+   */
+  private static final LogChannelInterface  consoleLog = new LogChannel( Messages.getString( "TITLE.Metaverse" ) );
 
   /**
    * Callback when a job is about to be started
@@ -173,7 +179,9 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
       return;
     }
 
-    log.info( Messages.getString( "INFO.JobFinished", job.getJobname() ) );
+    log.warn( Messages.getString( "INFO.JobAnalyzeStarting", job.getJobname() ) );
+    consoleLog.logMinimal( Messages.getString( "INFO.JobAnalyzeStarting", job.getJobname() ) );
+
     if ( shouldCreateGraph( job ) ) {
       runAnalyzers( job );
     }
@@ -267,6 +275,9 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     }
     // cleanup to prevent unnecessary memory usage - we no longer need this Job in the JobLineageHolderMap
     JobLineageHolderMap.getInstance().removeLineageHolder( job );
+
+    log.warn( Messages.getString( "INFO.JobAnalyzeFinished", job.getJobname() ) );
+    consoleLog.logMinimal( Messages.getString( "INFO.JobAnalyzeFinished", job.getJobname() ) );
 
   }
 

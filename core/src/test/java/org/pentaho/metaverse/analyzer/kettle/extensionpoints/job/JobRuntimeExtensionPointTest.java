@@ -26,9 +26,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.pentaho.di.core.KettleClientEnvironment;
+import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
@@ -37,6 +39,7 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.Trans;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.ILineageWriter;
@@ -86,6 +89,7 @@ public class JobRuntimeExtensionPointTest {
   @BeforeClass
   public static void setUpBeforeClass() throws KettleException {
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
+    KettleEnvironment.init(); // init LogChannelInterface instance in test class
   }
 
   @Before
@@ -160,26 +164,23 @@ public class JobRuntimeExtensionPointTest {
 
   @Test
   public void testJobFinished() throws Exception {
-    JobLineageHolderMap originalHolderMap = mockBuilder();
-
     JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
     ext.jobFinished( null );
     verify( ext, never() ).populateExecutionProfile(
-      Mockito.any( IExecutionProfile.class ), Mockito.any( Job.class ) );
+            Mockito.any( IExecutionProfile.class ), eq( job ) );
 
     ext.jobFinished( job );
-    // The logic in jobFinished() is now in a thread, so we can't verify methods were called
+    verify( ext, times( 1 ) ).populateExecutionProfile( Mockito.any( IExecutionProfile.class ), eq( job ) );
+    verify( ext, times( 1 ) ).runAnalyzers( eq( job ) );
+    verify( ext, times( 2 ) ).shouldCreateGraph( eq( job ) );
+    verify( lineageWriter, times( 1 ) ).outputLineageGraph( Matchers.any( LineageHolder.class ) );
 
+    // Restore the original holder map
     Job mockJob = spy( job );
     Result result = mock( Result.class );
     when( mockJob.getResult() ).thenReturn( result );
     ext.jobFinished( mockJob );
-    // The logic in jobFinished() is now in a thread, so we can't verify methods were called
-
-    // Exception handling test removed because jobFinished() logic is in a thread and can't throw checked exceptions
-
-    // Restore original JobLineageHolderMap for use by others
-    JobLineageHolderMap.setInstance( originalHolderMap );
+    verify( ext, times( 1 ) ).populateExecutionProfile( Mockito.any( IExecutionProfile.class ), eq( mockJob ) );
   }
 
   @Test
