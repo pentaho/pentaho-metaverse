@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -46,9 +46,17 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 public class BaseRuntimeExtensionPointTest {
 
@@ -179,6 +187,22 @@ public class BaseRuntimeExtensionPointTest {
     assertFalse( extensionPoint.isRuntimeEnabled() );
     extensionPoint.callExtensionPoint( null, null );
     assertFalse( called.get() );
+  }
+
+  @Test
+  public void testLogMinimal() throws Exception {
+    LogChannelInterface logChannelMock = Mockito.mock( LogChannelInterface.class );
+    String message = "I am test log message";
+
+    // TEST case: consoleLog is null
+    extensionPoint.logMinimal(message);
+    verify( logChannelMock, times( 0 ) ).logMinimal( any() );
+
+    // TEST case: consoleLog is set
+    extensionPoint.setConsoleLog( logChannelMock );
+    extensionPoint.logMinimal(message);
+    verify( logChannelMock, times( 1 ) ).logMinimal( message );
+
   }
 
 }

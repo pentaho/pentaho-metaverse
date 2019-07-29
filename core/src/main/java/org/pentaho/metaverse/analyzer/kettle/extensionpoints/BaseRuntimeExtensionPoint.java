@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -60,6 +60,11 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
   protected ILineageWriter lineageWriter;
 
   protected boolean runtimeEnabled;
+
+  /**
+   * logger for console
+   */
+  protected LogChannelInterface consoleLog;
 
   public void writeLineageInfo( LineageHolder holder ) throws IOException {
     if ( lineageWriter != null ) {
@@ -198,6 +203,32 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
     // Create a lineage graph for this transformation only if it has no parent. Otherwise, the parent will incorporate
     // the lineage information into its own graph
     return MetaverseConfig.generateSubGraphs() || ( parentJob == null && parentTrans == null );
+  }
+
+  /**
+   *  set {@link #consoleLog}
+   * @param logChannel
+   */
+  protected void setConsoleLog( LogChannelInterface logChannel ) {
+    this.consoleLog = logChannel;
+  }
+
+  /**
+   * get {@link #consoleLog}
+   * @return
+   */
+  protected LogChannelInterface getConsoleLog() {
+    return this.consoleLog;
+  }
+
+  /**
+   * log message to user facing console log.
+   * @param message
+   */
+  protected void logMinimal( String message ) {
+    if ( getConsoleLog() != null ) {
+      getConsoleLog().logMinimal( message );
+    }
   }
 
 }
