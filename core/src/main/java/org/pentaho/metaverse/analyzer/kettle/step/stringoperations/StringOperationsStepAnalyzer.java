@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.analyzer.kettle.step.stringoperations;
 
 import org.pentaho.di.core.Const;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.stringoperations.StringOperationsMeta;
 import org.pentaho.dictionary.DictionaryConst;
@@ -57,14 +58,13 @@ public class StringOperationsStepAnalyzer extends StepAnalyzer<StringOperationsM
         fieldOutString = fieldInString;
       }
       final ComponentDerivationRecord changeRecord = new ComponentDerivationRecord( fieldInString, fieldOutString, ChangeType.DATA );
-      String trimTypeDescription = StringOperationsMeta.getTrimTypeDesc( stringOperationsMeta.getTrimType()[i] );
-      String lowerUpperDescription = StringOperationsMeta.getLowerUpperDesc( stringOperationsMeta.getLowerUpper()[i] );
-      String initCapDescription = StringOperationsMeta.getInitCapDesc( stringOperationsMeta.getInitCap()[i] );
-      String digitsDescription = StringOperationsMeta.getDigitsDesc( stringOperationsMeta.getDigits()[i] );
-      String maskXMLDescription = StringOperationsMeta.getMaskXMLDesc( stringOperationsMeta.getMaskXML()[i] );
-      String paddingDescription = StringOperationsMeta.getPaddingDesc( stringOperationsMeta.getPaddingType()[i] );
-      String specialCharactersDescription =
-        StringOperationsMeta.getRemoveSpecialCharactersDesc( stringOperationsMeta.getRemoveSpecialCharacters()[i] );
+      String trimTypeDescription = stringOperationsMeta.getTrimType()[i];
+      String lowerUpperDescription = stringOperationsMeta.getLowerUpper()[i];
+      String initCapDescription = stringOperationsMeta.getInitCap()[i];
+      String digitsDescription = stringOperationsMeta.getDigits()[i];
+      String maskXMLDescription = stringOperationsMeta.getMaskXML()[i];
+      String paddingDescription = stringOperationsMeta.getPaddingType()[i];
+      String specialCharactersDescription = stringOperationsMeta.getRemoveSpecialCharacters()[i];
 
       String changeOperation = fieldOutString;
       changeOperation += " { trim = [ " + trimTypeDescription + " ] && ";
@@ -72,8 +72,11 @@ public class StringOperationsStepAnalyzer extends StepAnalyzer<StringOperationsM
       changeOperation +=
         "padding = [ "
           + paddingDescription
-          + ( stringOperationsMeta.getPaddingType()[i] == StringOperationsMeta.PADDING_NONE ? "" : ", "
-          + stringOperationsMeta.getPadChar()[i] ) + ", " + stringOperationsMeta.getPadLen()[i]
+          + ( stringOperationsMeta.getPaddingType()[i]
+                .equals( StringOperationsMeta.getPaddingCode( StringOperationsMeta.PADDING_NONE ) )
+                  ? ""
+                  : ", " + stringOperationsMeta.getPadChar()[i] )
+                + ", " + stringOperationsMeta.getPadLen()[i]
           + " ] && ";
       changeOperation += "cap = [ " + initCapDescription + " ] && ";
       changeOperation += "maskXML = [ " + maskXMLDescription + " ] && ";

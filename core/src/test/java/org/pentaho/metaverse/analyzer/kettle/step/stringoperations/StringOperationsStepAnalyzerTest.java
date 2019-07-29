@@ -59,25 +59,49 @@ public class StringOperationsStepAnalyzerTest {
     when( stringOperationsMeta.getFieldInStream() ).thenReturn( new String[]{ "firstName", "middleName", "lastName" } );
     when( stringOperationsMeta.getFieldOutStream() ).thenReturn( new String[]{ "", "MN", "" } );
     when( stringOperationsMeta.getTrimType() ).thenReturn(
-      new int[]{ StringOperationsMeta.TRIM_BOTH, StringOperationsMeta.TRIM_NONE, StringOperationsMeta.TRIM_NONE } );
+      new String[]{
+              getTrimTypeCode( StringOperationsMeta.TRIM_BOTH ),
+              getTrimTypeCode( StringOperationsMeta.TRIM_NONE ),
+              getTrimTypeCode( StringOperationsMeta.TRIM_NONE)
+        });
     when( stringOperationsMeta.getLowerUpper() ).thenReturn(
-      new int[]{ StringOperationsMeta.LOWER_UPPER_NONE, StringOperationsMeta.LOWER_UPPER_UPPER,
-        StringOperationsMeta.LOWER_UPPER_NONE } );
+      new String[]{
+              getLowerUpperCode( StringOperationsMeta.LOWER_UPPER_NONE ),
+              getLowerUpperCode( StringOperationsMeta.LOWER_UPPER_UPPER ),
+              getLowerUpperCode( StringOperationsMeta.LOWER_UPPER_NONE )
+        });
     when( stringOperationsMeta.getInitCap() ).thenReturn(
-      new int[]{ StringOperationsMeta.INIT_CAP_NO, StringOperationsMeta.INIT_CAP_NO,
-        StringOperationsMeta.INIT_CAP_YES } );
+      new String[]{
+              getInitCapCode( StringOperationsMeta.INIT_CAP_NO ),
+              getInitCapCode( StringOperationsMeta.INIT_CAP_NO ),
+              getInitCapCode( StringOperationsMeta.INIT_CAP_YES )
+        });
     when( stringOperationsMeta.getDigits() ).thenReturn(
-      new int[]{ StringOperationsMeta.DIGITS_NONE, StringOperationsMeta.DIGITS_NONE,
-        StringOperationsMeta.DIGITS_NONE } );
+      new String[]{
+              getDigitsCode( StringOperationsMeta.DIGITS_NONE ),
+              getDigitsCode( StringOperationsMeta.DIGITS_NONE ),
+              getDigitsCode( StringOperationsMeta.DIGITS_NONE )
+        });
     when( stringOperationsMeta.getMaskXML() ).thenReturn(
-      new int[]{ StringOperationsMeta.MASK_NONE, StringOperationsMeta.MASK_NONE, StringOperationsMeta.MASK_NONE } );
+      new String[]{
+              getMaskXMLCode( StringOperationsMeta.MASK_NONE ),
+              getMaskXMLCode( StringOperationsMeta.MASK_NONE ),
+              getMaskXMLCode( StringOperationsMeta.MASK_NONE )
+        });
     when( stringOperationsMeta.getPaddingType() ).thenReturn(
-      new int[]{ StringOperationsMeta.PADDING_NONE, StringOperationsMeta.PADDING_NONE,
-        StringOperationsMeta.PADDING_NONE } );
+      new String[]{
+              getPaddingCode( StringOperationsMeta.PADDING_NONE ),
+              getPaddingCode( StringOperationsMeta.PADDING_NONE ),
+              getPaddingCode( StringOperationsMeta.PADDING_NONE )
+        });
     when( stringOperationsMeta.getPadChar() ).thenReturn( new String[]{ "", "", "" } );
     when( stringOperationsMeta.getPadLen() ).thenReturn( new String[]{ "", "", "" } );
     when( stringOperationsMeta.getRemoveSpecialCharacters() ).thenReturn(
-      new int[]{ StringOperationsMeta.MASK_NONE, StringOperationsMeta.MASK_NONE, StringOperationsMeta.MASK_NONE } );
+      new String[]{
+              getRemoveSpecialCharactersCode( StringOperationsMeta.MASK_NONE ),
+              getRemoveSpecialCharactersCode( StringOperationsMeta.MASK_NONE ),
+              getRemoveSpecialCharactersCode( StringOperationsMeta.MASK_NONE )
+        });
 
     analyzer = spy( new StringOperationsStepAnalyzer() );
 
@@ -128,4 +152,33 @@ public class StringOperationsStepAnalyzerTest {
     assertEquals( types.size(), 1 );
     assertTrue( types.contains( StringOperationsMeta.class ) );
   }
+
+  private String getTrimTypeCode( int i ) {
+    return StringOperationsMeta.getTrimTypeCode( i );
+  }
+
+  private String getLowerUpperCode( int i ) {
+    return StringOperationsMeta.getLowerUpperCode( i );
+  }
+
+  private String getInitCapCode( int i ) {
+    return StringOperationsMeta.getInitCapCode( i );
+  }
+
+  private String getDigitsCode( int i ) {
+    return StringOperationsMeta.getDigitsCode( i );
+  }
+
+  private String getMaskXMLCode( int i ) {
+    return StringOperationsMeta.getMaskXMLCode( i );
+  }
+
+  private String getPaddingCode( int i ) {
+    return StringOperationsMeta.getPaddingCode( i );
+  }
+
+  private static String getRemoveSpecialCharactersCode( int i ) {
+    return StringOperationsMeta.getRemoveSpecialCharactersCode( i );
+  }
+
 }
