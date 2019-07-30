@@ -30,7 +30,6 @@ import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
-import org.pentaho.di.core.logging.LogChannel;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.trans.Trans;
@@ -77,11 +76,6 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
   private static final Logger log = LogManager.getLogger( TransformationRuntimeExtensionPoint.class );
 
   /**
-   * logger for spoon console
-   */
-  private static final LogChannelInterface  consoleLog = new LogChannel( Messages.getString( "TITLE.Metaverse" ) );
-
-  /**
    * Callback when a transformation is about to be started
    *
    * @param logChannelInterface A reference to the log in this context (the Trans object's log)
@@ -103,6 +97,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       trans.addTransListener( this );
 
       createExecutionProfile( logChannelInterface, trans );
+
+      setConsoleLog( logChannelInterface );
     }
   }
 
@@ -269,7 +265,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     }
 
     log.warn( Messages.getString( "INFO.TransformationAnalyzeStarting", trans.getName() ) );
-    consoleLog.logMinimal( Messages.getString( "INFO.TransformationAnalyzeStarting", trans.getName() ));
+    logMinimal( Messages.getString( "INFO.TransformationAnalyzeStarting", trans.getName() ) );
     if ( shouldCreateGraph( trans ) ) {
       runAnalyzers( trans );
     }
@@ -366,7 +362,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     TransLineageHolderMap.getInstance().removeLineageHolder( trans );
 
     log.warn( Messages.getString( "INFO.TransformationAnalyzeFinished", trans.getName() ) );
-    consoleLog.logMinimal( Messages.getString( "INFO.TransformationAnalyzeFinished", trans.getName() )  );
+    logMinimal( Messages.getString( "INFO.TransformationAnalyzeFinished", trans.getName() ) );
 
   }
+
 }
