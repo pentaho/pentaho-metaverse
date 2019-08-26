@@ -376,7 +376,7 @@ public class AnnotationDrivenStepMetaAnalyzerTest {
 
     TestableAnnotationDrivenAnalyzer( BaseStepMeta meta, Map<String, String> typeCategoryMap,
                                       EntityRegister register ) {
-      super( meta, typeCategoryMap, register );
+      super( meta, typeCategoryMap, register, new Variables() );
     }
 
     {

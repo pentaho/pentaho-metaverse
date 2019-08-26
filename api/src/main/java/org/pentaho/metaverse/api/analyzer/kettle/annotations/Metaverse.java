@@ -90,6 +90,9 @@ public @interface Metaverse {
     String parentNodeName() default "";
   }
 
+  @Target ( { METHOD } )
+  @Retention ( RUNTIME ) @interface InternalStepMeta {
+  }
 
   @Target ( TYPE )
   @Repeatable ( CategoryMaps.class )
