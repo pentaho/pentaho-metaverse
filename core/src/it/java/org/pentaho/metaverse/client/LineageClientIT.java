@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,6 +28,7 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
@@ -56,6 +57,7 @@ import java.util.concurrent.Future;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class LineageClientIT {
 
   private static final String ROOT_FOLDER = "src/it/resources/repo/validation";
