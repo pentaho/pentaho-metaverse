@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,7 @@ package org.pentaho.metaverse.step;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.IteratorUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.TransformationNode;
@@ -35,6 +36,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.pentaho.dictionary.DictionaryConst.*;
 
+@Ignore
 public class SingleThreaderStepAnalyzerValidationIT extends StepAnalyzerValidationIT {
 
   @Test

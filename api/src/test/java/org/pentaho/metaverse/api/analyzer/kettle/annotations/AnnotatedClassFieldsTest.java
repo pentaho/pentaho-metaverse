@@ -22,8 +22,12 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle.annotations;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.pentaho.di.core.KettleClientEnvironment;
+import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.row.RowMeta;
+import org.pentaho.di.core.row.value.ValueMetaPluginType;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -35,6 +39,12 @@ public class AnnotatedClassFieldsTest {
 
   private AnnotatedClassFields fields = new AnnotatedClassFields( getTestStepMeta( new RowMeta() ) );
 
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    KettleClientEnvironment.init();
+    PluginRegistry.addPluginType( ValueMetaPluginType.getInstance() );
+    PluginRegistry.init();
+  }
 
   @Test public void checkCounts() {
     assertThat( fields.props().count(), equalTo( 12L ) );
