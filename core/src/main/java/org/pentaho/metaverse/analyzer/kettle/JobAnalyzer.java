@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -42,6 +42,8 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.PropertiesHolder;
+import org.pentaho.metaverse.api.analyzer.kettle.annotations.AnnotatedClassFields;
+import org.pentaho.metaverse.api.analyzer.kettle.annotations.AnnotationDrivenJobAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvider;
@@ -51,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,11 +68,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
   /**
    * A set of types supported by this analyzer
    */
-  protected static final Set<String> defaultSupportedTypes = new HashSet<String>() {
-    {
-      add( "kjb" );
-    }
-  };
+  protected static final Set<String> defaultSupportedTypes = Collections.singleton( "kjb" );
 
   /**
    * A reference to the job entry analyzer provider
@@ -221,6 +220,14 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
               jobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
               jobEntryNode = (IMetaverseNode) jobEntryAnalyzer.analyze( entryDescriptor, entry.getEntry() );
             }
+          } else if ( new AnnotatedClassFields( jobEntryInterface, jobEntryInterface.getParentJobMeta() )
+            .hasMetaverseAnnotations() ) {
+            AnnotationDrivenJobAnalyzer annotationDrivenJobAnalyzer = new AnnotationDrivenJobAnalyzer( jobEntryInterface );
+            annotationDrivenJobAnalyzer.setMetaverseBuilder( metaverseBuilder );
+            annotationDrivenJobAnalyzer.setDocumentAnalyzer( this );
+            annotationDrivenJobAnalyzer.setDocumentDescriptor( documentDescriptor );
+            annotationDrivenJobAnalyzer.setDocumentPath( documentPath );
+            jobEntryNode = annotationDrivenJobAnalyzer.analyze( entryDescriptor, jobEntryInterface );
           } else {
             GenericJobEntryMetaAnalyzer defaultJobEntryAnalyzer = new GenericJobEntryMetaAnalyzer();
             defaultJobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
@@ -230,7 +237,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
             metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, jobEntryNode );
           }
         }
-      } catch ( Throwable mae ) {
+      } catch ( Exception mae ) {
         //Don't throw an exception, just log and carry on
         log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", entry.getName(),
           Const.NVL( mae.getLocalizedMessage(), "Unspecified" ) ) );

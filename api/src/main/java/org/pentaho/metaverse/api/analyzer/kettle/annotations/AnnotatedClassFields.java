@@ -23,7 +23,9 @@
 package org.pentaho.metaverse.api.analyzer.kettle.annotations;
 
 import org.pentaho.di.core.injection.InjectionDeep;
+import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.metaverse.api.analyzer.kettle.annotations.Metaverse.InternalStepMeta;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
@@ -42,10 +44,17 @@ import static java.util.Arrays.stream;
  */
 public class AnnotatedClassFields {
 
-  private final BaseStepMeta meta;
+  private final Object meta;
+  private final VariableSpace variableSpace;
 
   public AnnotatedClassFields( BaseStepMeta meta ) {
     this.meta = meta;
+    variableSpace = meta.getParentStepMeta().getParentTransMeta();
+  }
+
+  public AnnotatedClassFields( Object meta, VariableSpace variableSpace ) {
+    this.meta = meta;
+    this.variableSpace = variableSpace;
   }
 
   Stream<AnnotatedClassField<Metaverse.Node>> nodes() {
@@ -78,7 +87,8 @@ public class AnnotatedClassFields {
 
   private <T extends Annotation> Stream<? extends AnnotatedClassField<T>> getAnnotatedFieldStream(
     Object object, Class<T> annotation, AccessibleObject accessibleObject ) {
-    if ( accessibleObject.isAnnotationPresent( InjectionDeep.class ) ) {
+    if ( accessibleObject.isAnnotationPresent( InjectionDeep.class )
+      || accessibleObject.isAnnotationPresent( InternalStepMeta.class ) ) {
       try {
         return recurseObjectTree( accessibleValue( object, accessibleObject ), annotation );
       } catch ( IllegalAccessException | InvocationTargetException e ) {
@@ -106,7 +116,7 @@ public class AnnotatedClassFields {
     try {
       Object accessibleValue = accessibleValue( object, field );
       String value = accessibleValue.toString();
-      return meta.getParentStepMeta().getParentTransMeta().environmentSubstitute( value );
+      return variableSpace.environmentSubstitute( value );
     } catch ( IllegalAccessException | InvocationTargetException e ) {
       throw new IllegalStateException( e );
     }

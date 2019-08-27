@@ -28,6 +28,7 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaNone;
+import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.ISubTransAwareMeta;
 import org.pentaho.di.trans.StepWithMappingMeta;
 import org.pentaho.di.trans.TransMeta;
@@ -75,18 +76,23 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
 
   private final Map<String, String> typeCategoryMap;
   private final transient EntityRegister register;
+  private final transient VariableSpace space;
   private final transient BaseStepMeta meta;
 
-  @SuppressWarnings ( "unused" )
   public AnnotationDrivenStepMetaAnalyzer( BaseStepMeta meta ) {
-    this( meta, DictionaryHelper.typeCategoryMap, DictionaryHelper::registerEntityType );
+    this( meta, DictionaryHelper.typeCategoryMap, DictionaryHelper::registerEntityType, meta.getParentStepMeta().getParentTransMeta() );
   }
 
-  AnnotationDrivenStepMetaAnalyzer( BaseStepMeta meta, Map<String, String> typeCategoryMap, EntityRegister register ) {
+  public AnnotationDrivenStepMetaAnalyzer( BaseStepMeta meta, VariableSpace space ) {
+    this( meta, DictionaryHelper.typeCategoryMap, DictionaryHelper::registerEntityType, space );
+  }
+
+  AnnotationDrivenStepMetaAnalyzer( BaseStepMeta meta, Map<String, String> typeCategoryMap, EntityRegister register, VariableSpace space ) {
     this.meta = meta;
     this.stepClass = meta.getClass();
     this.typeCategoryMap = typeCategoryMap;
     this.register = register;
+    this.space = space;
     registerTypes();
   }
 
@@ -104,7 +110,7 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
    */
   @Override
   protected void customAnalyze( BaseStepMeta meta, IMetaverseNode rootNode ) throws MetaverseAnalyzerException {
-    AnnotatedClassFields annoFields = new AnnotatedClassFields( meta );
+    AnnotatedClassFields annoFields = new AnnotatedClassFields( meta, space );
 
     // handles any @Metaverse.Node annotations in the meta, generating a map of nodeName->node
     Map<AnnotatedClassField<Metaverse.Node>, IMetaverseNode> externalNodes = annoFields.nodes()
