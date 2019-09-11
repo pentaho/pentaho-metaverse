@@ -25,11 +25,16 @@ package org.pentaho.metaverse.step;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.plugins.StepPluginType;
+import org.pentaho.di.trans.steps.addsequence.AddSequenceMeta;
 import org.pentaho.metaverse.BaseMetaverseValidationIT;
 import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.util.Collections;
 
 @RunWith( PowerMockRunner.class )
 @PrepareForTest( MetaverseConfig.class )
@@ -43,6 +48,14 @@ public abstract class StepAnalyzerValidationIT extends BaseMetaverseValidationIT
     Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
     Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( true );
     Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( true );
+
+    // register step "Add Sequence"
+    // for src/it/resources/repo/validation/transformation-executor/trans-executor-parent.ktr
+    PluginRegistry.addPluginType( StepPluginType.getInstance() );
+    StepPluginType.getInstance().handlePluginAnnotation(
+            AddSequenceMeta.class,
+            AddSequenceMeta.class.getAnnotation( org.pentaho.di.core.annotations.Step.class ),
+            Collections.emptyList(), false, null );
   }
 
   @Override
