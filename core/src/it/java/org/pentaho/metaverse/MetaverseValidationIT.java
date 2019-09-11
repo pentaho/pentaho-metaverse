@@ -26,10 +26,11 @@ import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleStepException;
+import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.job.JobMeta;
@@ -38,6 +39,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.addsequence.AddSequenceMeta;
 import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
 import org.pentaho.di.trans.steps.calculator.CalculatorMetaFunction;
 import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
@@ -80,6 +82,7 @@ import org.pentaho.metaverse.frames.HttpClientStepNode;
 import org.pentaho.metaverse.frames.HttpPostStepNode;
 import org.pentaho.metaverse.frames.JobEntryNode;
 import org.pentaho.metaverse.frames.JobNode;
+import org.pentaho.metaverse.frames.KettleNode;
 import org.pentaho.metaverse.frames.LocatorNode;
 import org.pentaho.metaverse.frames.MergeJoinStepNode;
 import org.pentaho.metaverse.frames.MongoConnectionNode;
@@ -104,13 +107,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * User: RFellows Date: 8/20/14
@@ -124,6 +134,15 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
    * Call in the child class's BeforeClass method.
    */
   public static void init() throws Exception {
+
+    // register step "Add Sequence"
+    // for src/it/resources/repo/validation/transformation-executor/trans-executor-parent.ktr
+    PluginRegistry.addPluginType( StepPluginType.getInstance() );
+    StepPluginType.getInstance().handlePluginAnnotation(
+            AddSequenceMeta.class,
+            AddSequenceMeta.class.getAnnotation( org.pentaho.di.core.annotations.Step.class ),
+            Collections.emptyList(), false, null );
+
     BaseMetaverseValidationIT.init( ROOT_FOLDER, OUTPUT_FILE );
   }
 
@@ -166,12 +185,12 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
     assertNotNull( node.getDescription() );
     assertNotNull( node.getUrl() );
     assertNotNull( node.getLastScan() );
-    int countDocuments = getIterableSize( node.getDocuments() );
 
     File folder = new File( ROOT_FOLDER );
-    int fileCount = FileUtils.listFiles( folder, new String[] { "ktr", "kjb" }, true ).size();
 
-    assertEquals( fileCount, countDocuments );
+    assertFileNameEquals(
+            FileUtils.listFiles( folder, new String[] { "ktr", "kjb" }, true ),
+            node.getDocuments());
   }
 
   @Test
@@ -586,7 +605,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   public void testTableOutputStepNode(
-    final TableOutputStepNode node, final String expectedTableName ) throws Exception {
+          final TableOutputStepNode node, final String expectedTableName ) throws Exception {
 
     // check the table that it writes to
     TableOutputMeta meta = (TableOutputMeta) getStepMeta( node );
@@ -1602,6 +1621,42 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   @Override
   protected boolean shouldCleanupInstance() {
     return false;
+  }
+
+  private void assertFileNameEquals(Collection<File> expectedFiles, Iterable<KettleNode> actualKettleNodes)
+  {
+    Set<String> expectedSet = getSortedSet(getFileNamesFromFile(expectedFiles));
+    Set<String> actualSet = getSortedSet(getFileNamesFromKettleNode(getCollection(actualKettleNodes)));
+
+    Iterator actualSetIterator = actualSet.iterator();
+    while( actualSetIterator.hasNext())
+    {
+      expectedSet.remove( actualSetIterator.next());
+      actualSetIterator.remove();
+    }
+
+    assertTrue("Missing expected files : " + expectedSet + " and/or Extra actual files: " + actualSet,
+            expectedSet.isEmpty() && actualSet.isEmpty());
+
+  }
+
+  private Collection<String> getFileNamesFromFile(Collection<File> files)
+  {
+    return files.stream().map(File::getName).collect(Collectors.toList());
+  }
+
+  private Collection<String> getFileNamesFromKettleNode(Collection<KettleNode> kettleNodes)
+  {
+    return kettleNodes.stream().map(KettleNode::getPath)
+            .map( s -> s.substring(s.lastIndexOf('/') + 1) )
+            .collect(Collectors.toList());
+  }
+
+  private Set<String> getSortedSet(Collection<String> collection)
+  {
+    TreeSet<String> set = new TreeSet<>();
+    set.addAll(collection);
+    return set;
   }
 
 }

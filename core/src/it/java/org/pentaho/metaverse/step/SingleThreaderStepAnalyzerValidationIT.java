@@ -24,7 +24,6 @@ package org.pentaho.metaverse.step;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.IteratorUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.TransformationNode;
@@ -34,9 +33,14 @@ import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.pentaho.dictionary.DictionaryConst.*;
+import static org.pentaho.dictionary.DictionaryConst.LINK_CONTAINS;
+import static org.pentaho.dictionary.DictionaryConst.LINK_DERIVES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_EXECUTES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_OUTPUTS;
+import static org.pentaho.dictionary.DictionaryConst.LINK_TYPE_CONCEPT;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS_FIELD;
 
-@Ignore
 public class SingleThreaderStepAnalyzerValidationIT extends StepAnalyzerValidationIT {
 
   @Test
