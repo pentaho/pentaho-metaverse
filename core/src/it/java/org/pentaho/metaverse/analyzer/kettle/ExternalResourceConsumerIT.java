@@ -29,14 +29,18 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.KettleEnvironment;
+import org.pentaho.di.core.Result;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.extension.ExtensionPointPluginType;
 import org.pentaho.di.core.extension.KettleExtensionPoint;
+import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.steps.concatfields.ConcatFieldsMeta;
 import org.pentaho.metaverse.IntegrationTestUtil;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry.JobEntryExternalResourceConsumerListener;
@@ -46,8 +50,11 @@ import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step.StepExte
 import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by mburgess on 12/9/14.
@@ -118,6 +125,12 @@ public class ExternalResourceConsumerIT {
 
     KettleEnvironment.init( false );
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
+
+    PluginRegistry.addPluginType( StepPluginType.getInstance() );
+    StepPluginType.getInstance().handlePluginAnnotation(
+            ConcatFieldsMeta.class,
+            ConcatFieldsMeta.class.getAnnotation( org.pentaho.di.core.annotations.Step.class ),
+            Collections.emptyList(), false, null );
   }
 
   @AfterClass
@@ -146,6 +159,8 @@ public class ExternalResourceConsumerIT {
 
       trans.execute( null );
       trans.waitUntilFinished();
+
+      assertEquals("Found errors", 0, trans.getResult().getNrErrors());
     } else {
       KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.KITCHEN );
       JobMeta jm = new JobMeta( new Variables(), transOrJobPath, null, null, null );
@@ -163,8 +178,9 @@ public class ExternalResourceConsumerIT {
 
       // We have to call the extension point ourselves -- don't ask :(
       ExtensionPointHandler.callExtensionPoint( job.getLogChannel(), KettleExtensionPoint.JobStart.id, job );
-      job.execute( 0, null );
+      Result result = job.execute( 0, null );
       job.fireJobFinishListeners();
+      assertEquals("Found errors", 0, result.getNrErrors());
     }
   }
 }
