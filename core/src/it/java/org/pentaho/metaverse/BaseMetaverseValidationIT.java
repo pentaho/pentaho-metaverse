@@ -50,7 +50,6 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -133,17 +132,13 @@ public abstract  class BaseMetaverseValidationIT {
   }
 
   protected static int getIterableSize( final Iterable<?> iterable ) {
-    return getCollection(iterable).size();
-  }
-
-  protected static Collection getCollection( final Iterable<?> iterable ) {
-    Collection col = new ArrayList<>();
+    int count = 0;
     for ( Object o : iterable ) {
       if ( o != null ) {
-        col.add( o );
+        count++;
       }
     }
-    return col;
+    return count;
   }
 
   /**
