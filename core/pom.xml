@@ -285,6 +285,8 @@
             <Import-Package>org.pentaho.dictionary,
               org.pentaho.metaverse.api,
               org.pentaho.metaverse.api.*,
+              !org.pentaho.metaverse.analyzer.kettle.*,
+              !org.pentaho.metaverse.messages,
               *</Import-Package>
             <Export-Package>org.pentaho.metaverse.client,
               org.pentaho.metaverse.analyzer.kettle,
