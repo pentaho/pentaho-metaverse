@@ -258,25 +258,6 @@
       <version>${pdi.version}</version>
       <scope>provided</scope>
     </dependency>-->
-    <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>pentaho-mongo-utils</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- add in the rest of core components such as steps -->
-    <dependency>
-      <groupId>org.pentaho.di.plugins</groupId>
-      <artifactId>pdi-core-plugins-impl</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <version>1.3.171</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
