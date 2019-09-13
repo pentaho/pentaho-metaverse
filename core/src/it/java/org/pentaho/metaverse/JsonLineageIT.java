@@ -26,7 +26,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
@@ -41,7 +40,6 @@ import static org.junit.Assert.assertTrue;
 /**
  * User: RFellows Date: 10/31/14
  */
-@Ignore
 public class JsonLineageIT {
 
   private KettleObjectMapper mapper;

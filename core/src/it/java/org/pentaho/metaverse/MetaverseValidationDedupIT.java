@@ -24,7 +24,6 @@ package org.pentaho.metaverse;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -44,7 +43,6 @@ import java.util.List;
  */
 @RunWith( PowerMockRunner.class )
 @PrepareForTest( MetaverseConfig.class )
-@Ignore
 public class MetaverseValidationDedupIT extends MetaverseValidationIT {
 
   @BeforeClass

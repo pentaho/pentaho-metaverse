@@ -22,37 +22,45 @@
 
 package org.pentaho.dictionary;
 
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pentaho.di.trans.Trans;
 import org.pentaho.metaverse.api.IMetaverseNode;
 
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class DictionaryHelperTest {
 
-  @Before
-  public void init() {
-    Set<Class> classes = new HashSet<>();
-    classes.add( Trans.class );
-    Set<String> types = new HashSet<>();
-    types.add( DictionaryConst.NODE_TYPE_TRANS );
-    classes = new HashSet<>();
-    classes.add( Object.class );
-    types = new HashSet<>();
-    types.add( DictionaryConst.NODE_TYPE_TRANS_STEP );
-    types.add( DictionaryConst.NODE_TYPE_TRANS_FIELD );
-    types.add( DictionaryConst.NODE_TYPE_JOB );
-    types.add( DictionaryConst.NODE_TYPE_JOB_ENTRY );
-    types.add( DictionaryConst.NODE_TYPE_DATASOURCE );
-    types.add( DictionaryConst.NODE_TYPE_DATA_TABLE );
-    types.add( DictionaryConst.NODE_TYPE_DATA_COLUMN );
-    types.add( DictionaryConst.NODE_TYPE_FILE );
-    types.add( DictionaryConst.NODE_TYPE_FILE_FIELD );
+  protected static Set saveStateEntityTypes;
+
+  /**
+   * Current tests rely on state of {@link DictionaryHelper#ENTITY_NODE_TYPES}.
+   * External tests modify the statically accessible state of the member variable, the saving and restoring state
+   * is to prevent side effects.
+   */
+  @BeforeClass
+  public static void beforeAll() {
+    saveStateEntityTypes = new HashSet<>(DictionaryHelper.ENTITY_NODE_TYPES);
+    DictionaryHelper.ENTITY_NODE_TYPES.clear();
+  }
+
+  /**
+   * Current tests rely on state of {@link DictionaryHelper#ENTITY_NODE_TYPES}.
+   * External tests modify the statically accessible state of the member variable, the saving and restoring state
+   * is to prevent side effects.
+   */
+  @AfterClass
+  public static void afterAll() {
+    DictionaryHelper.ENTITY_NODE_TYPES.clear();
+    DictionaryHelper.ENTITY_NODE_TYPES.addAll( saveStateEntityTypes );
   }
 
   @Test( expected = UnsupportedOperationException.class )
@@ -171,4 +179,5 @@ public class DictionaryHelperTest {
     assertFalse( DictionaryHelper.linksToRoot( "contains", "Field" ) );
 
   }
+
 }
