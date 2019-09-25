@@ -24,7 +24,6 @@ package org.pentaho.metaverse.step;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.IteratorUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.TransformationNode;
@@ -34,9 +33,14 @@ import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.pentaho.dictionary.DictionaryConst.*;
+import static org.pentaho.dictionary.DictionaryConst.LINK_CONTAINS;
+import static org.pentaho.dictionary.DictionaryConst.LINK_DERIVES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_EXECUTES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_OUTPUTS;
+import static org.pentaho.dictionary.DictionaryConst.LINK_TYPE_CONCEPT;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS_FIELD;
 
-@Ignore
 public class SingleThreaderStepAnalyzerValidationIT extends StepAnalyzerValidationIT {
 
   @Test
@@ -61,7 +65,7 @@ public class SingleThreaderStepAnalyzerValidationIT extends StepAnalyzerValidati
 
     // verify individual step nodes
     final Map<String, FramedMetaverseNode> parentStepNodeMap = verifyTransformationSteps( transformationNode,
-      new String[] { "Data grid", "Add sequence", "Single threader", "Write to log", "Write to log 2" }, false );
+      new String[] { "Data grid", "Add constants", "Single threader", "Write to log", "Write to log 2" }, false );
 
     final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
       new String[] { "Mapping input specification", "String operations", "Mapping output specification", }, false );
@@ -81,7 +85,7 @@ public class SingleThreaderStepAnalyzerValidationIT extends StepAnalyzerValidati
       "Mapping output specification" );
 
     // ---------- Generate Random Int
-    verifyNodes( IteratorUtils.toList( singleThreader.getPreviousSteps().iterator() ), testStepNode( "Add sequence" ) );
+    verifyNodes( IteratorUtils.toList( singleThreader.getPreviousSteps().iterator() ), testStepNode( "Add constants" ) );
     verifyNodes( IteratorUtils.toList( singleThreader.getNextSteps().iterator() ),
       testStepNode( writeToLog.getName() ), testStepNode( writeToLog2.getName() ) );
     verifyNodes( IteratorUtils.toList( singleThreader.getInputStreamFields().iterator() ),

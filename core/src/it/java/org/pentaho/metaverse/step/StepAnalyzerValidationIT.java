@@ -25,6 +25,7 @@ package org.pentaho.metaverse.step;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+
 import org.pentaho.metaverse.BaseMetaverseValidationIT;
 import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.powermock.api.mockito.PowerMockito;
@@ -43,6 +44,7 @@ public abstract class StepAnalyzerValidationIT extends BaseMetaverseValidationIT
     Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
     Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( true );
     Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( true );
+
   }
 
   @Override
