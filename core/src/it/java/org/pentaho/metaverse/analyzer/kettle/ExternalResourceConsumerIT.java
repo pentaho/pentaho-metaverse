@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -51,6 +52,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by mburgess on 12/9/14.
@@ -62,6 +64,8 @@ public class ExternalResourceConsumerIT {
 
   private String transOrJobPath;
   private Map<String, String> variables;
+  private static String JAVA_IO_TMPDIR = "java.io.tmpdir";
+
 
   @Parameterized.Parameters( name = "{0}" )
   public static Collection props() {
@@ -89,6 +93,7 @@ public class ExternalResourceConsumerIT {
         new HashMap<String, String>() {{
           put( "Internal.Transformation.Filename.Directory", REPO_PATH + "/process all tables" );
           put( "Internal.Job.Filename.Directory", REPO_PATH + "/process all tables" );
+          put( JAVA_IO_TMPDIR, System.getProperty( JAVA_IO_TMPDIR ) );
         }}
       }
     };
@@ -121,7 +126,9 @@ public class ExternalResourceConsumerIT {
 
     KettleEnvironment.init( false );
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
-    
+
+    assertTrue( "System property \"" + JAVA_IO_TMPDIR + "\" needs to be set for kettle files",
+      StringUtils.isNotBlank( System.getProperty( JAVA_IO_TMPDIR ) ) );
   }
 
   @AfterClass
@@ -151,10 +158,10 @@ public class ExternalResourceConsumerIT {
       trans.execute( null );
       trans.waitUntilFinished();
 
-      assertEquals("Found errors", 0, trans.getResult().getNrErrors());
+      assertEquals( "Found errors", 0, trans.getResult().getNrErrors() );
     } else {
       KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.KITCHEN );
-      JobMeta jm = new JobMeta( new Variables(), transOrJobPath, null, null, null );
+      JobMeta jm = new JobMeta( vars, transOrJobPath, null, null, null );
       jm.setFilename( jm.getName() );
       Job job = new Job( null, jm );
       Variables variables = new Variables();
@@ -171,7 +178,7 @@ public class ExternalResourceConsumerIT {
       ExtensionPointHandler.callExtensionPoint( job.getLogChannel(), KettleExtensionPoint.JobStart.id, job );
       Result result = job.execute( 0, null );
       job.fireJobFinishListeners();
-      assertEquals("Found errors", 0, result.getNrErrors());
+      assertEquals( "Found errors", 0, result.getNrErrors() );
     }
   }
 }

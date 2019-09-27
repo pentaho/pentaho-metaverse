@@ -112,6 +112,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -277,7 +278,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
       TransMeta tm = new TransMeta( new FileInputStream( transNode.getPath() ), null, true, null, null );
 
       List<StepMeta> transMetaSteps = tm.getSteps();
-      int stepCount = getIterableSize( transNode.getStepNodes() );
+
       int matchCount = 0;
 
       for ( StepMeta transMetaStep : transMetaSteps ) {
@@ -286,15 +287,24 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
         assertNotNull( stepNode );
         assertEquals( "Incorrect type", DictionaryConst.NODE_TYPE_TRANS_STEP, stepNode.getType() );
         assertEquals( "Incorrect entity type", DictionaryConst.NODE_TYPE_TRANS_STEP, stepNode.getEntity().getName() );
-        matchCount++;
+        ++matchCount;
       }
 
-      assertEquals( "Not all transformation steps are modeled in the graph for [" + tm.getName() + "]", transMetaSteps
-        .size(), matchCount );
+      assertEquals( "Not all transformation steps are modeled in the graph for [" + tm.getName() + "]",
+          transMetaSteps.size(), matchCount );
 
-      assertEquals( "Incorrect number of Steps in the graph for transformation [" + tm.getName() + "]", transMetaSteps
-        .size(), stepCount );
+      Collection<String> expectedStepNames =  new TreeSet<>(
+          transMetaSteps.stream().map( sm -> sm.getName() )
+            .collect( Collectors.toList() )
+      );
+      Collection<String> actualStepNames =  new TreeSet<>(
+          StreamSupport.stream( transNode.getStepNodes().spliterator(), false )
+            .map( tsn -> tsn.asVertex().getProperty( "name" )
+            .toString() ).collect( Collectors.toList() )
+      );
 
+      assertEquals( "Incorrect number of Steps in the graph for transformation ["
+        + tm.getName() + "]", expectedStepNames, actualStepNames );
     }
   }
 
@@ -440,7 +450,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
       FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
       assertNotNull( fieldPopulatesMe );
       assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
-      assertEquals( fileInputStepNode, fieldPopulatesMe.getStepThatInputsMe() );
+      assertEquals( fileInputStepNode.getProperty( "name" ), fieldPopulatesMe.getStepThatInputsMe().getProperty( "name" ) );
       fileFieldCount++;
     }
     assertEquals( countInputs, fileFieldCount );
@@ -607,7 +617,23 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
     Iterable<StreamFieldNode> inputs = node.getInputStreamFields();
     Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
 
-    assertEquals( getIterableSize( inputs ) + meta.getFieldDatabase().length, getIterableSize( outputs ) );
+    Collection<String> expectedNames = new TreeSet<>(
+        StreamSupport.stream( inputs.spliterator(), false )
+          .map( sfn -> sfn.getProperty( "name" ).toString() )
+          .collect( Collectors.toList() )
+    );
+
+    expectedNames.addAll( Arrays.asList( meta.getFieldDatabase() ) );
+
+    Collection<String> actualNames = new TreeSet<>(
+        StreamSupport.stream( outputs.spliterator(), false )
+          .map( sfn -> sfn.getProperty( "name" ).toString() )
+          .collect( Collectors.toList() )
+    );
+
+    actualNames = new TreeSet<>( actualNames );
+
+    assertEquals( "Stream field names do not match, meta field database fields: " + meta.getFieldDatabase() , expectedNames, actualNames );
 
     for ( StreamFieldNode input : inputs ) {
       assertEquals( input.getName(), ( (FramedMetaverseNode) IteratorUtils.toList(
@@ -1611,39 +1637,34 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
     return false;
   }
 
-  private void assertFileNameEquals(Collection<File> expectedFiles, Iterable<KettleNode> actualKettleNodes)
-  {
+  private void assertFileNameEquals( Collection<File> expectedFiles, Iterable<KettleNode> actualKettleNodes ) {
     Set<String> expectedSet = getSortedSet(getFileNamesFromFile(expectedFiles));
     Set<String> actualSet = getSortedSet(getFileNamesFromKettleNode(getCollection(actualKettleNodes)));
 
     Iterator actualSetIterator = actualSet.iterator();
-    while( actualSetIterator.hasNext())
-    {
+    while ( actualSetIterator.hasNext() ) {
       expectedSet.remove( actualSetIterator.next());
       actualSetIterator.remove();
     }
 
-    assertTrue("Missing expected files : " + expectedSet + " and/or Extra actual files: " + actualSet,
-            expectedSet.isEmpty() && actualSet.isEmpty());
+    assertTrue( "Missing expected files : " + expectedSet + " and/or Extra actual files: " + actualSet,
+            expectedSet.isEmpty() && actualSet.isEmpty() );
 
   }
 
-  private Collection<String> getFileNamesFromFile(Collection<File> files)
-  {
-    return files.stream().map(File::getName).collect(Collectors.toList());
+  private Collection<String> getFileNamesFromFile( Collection<File> files ) {
+    return files.stream().map( File::getName ).collect( Collectors.toList() );
   }
 
-  private Collection<String> getFileNamesFromKettleNode(Collection<KettleNode> kettleNodes)
-  {
-    return kettleNodes.stream().map(KettleNode::getPath)
-            .map( s -> s.substring(s.lastIndexOf('/') + 1) )
-            .collect(Collectors.toList());
+  private Collection<String> getFileNamesFromKettleNode( Collection<KettleNode> kettleNodes ) {
+    return kettleNodes.stream().map( KettleNode::getPath )
+            .map( s -> s.substring( s.lastIndexOf( '/' ) + 1 ) )
+            .collect( Collectors.toList() );
   }
 
-  private Set<String> getSortedSet(Collection<String> collection)
-  {
+  private Set<String> getSortedSet( Collection<String> collection ) {
     TreeSet<String> set = new TreeSet<>();
-    set.addAll(collection);
+    set.addAll( collection );
     return set;
   }
 
