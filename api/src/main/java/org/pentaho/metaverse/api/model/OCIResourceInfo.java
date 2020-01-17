@@ -22,46 +22,64 @@
 
 package org.pentaho.metaverse.api.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.pentaho.di.core.database.DatabaseMeta;
 
-public class JdbcResourceInfo extends DbcResourceInfo implements IExternalResourceInfo {
+public class OCIResourceInfo extends DbcResourceInfo implements IExternalResourceInfo {
 
-  public static final String JDBC = "JDBC";
+  public static final String OCI = "OCI";
 
+  public static final String JSON_PROPERTY_DATA_TABLESPACE = "data_tablespace";
+  public static final String JSON_PROPERTY_INDEX_TABLESPACE = "index_tablespace";
 
-  public JdbcResourceInfo() {
-  }
+  private String dataTablespace;
+  private String indexTablespace;
+
 
   @Override
   public String getType() {
-    return JDBC;
+    return OCI;
   }
 
-  public JdbcResourceInfo( DatabaseMeta databaseMeta ) {
+  public OCIResourceInfo() {
+  }
+
+  public OCIResourceInfo( DatabaseMeta databaseMeta ) {
     super( databaseMeta );
-    if ( "Native".equals( databaseMeta.getAccessTypeDesc() ) ) {
-      setServer( databaseMeta.environmentSubstitute( databaseMeta.getHostname() ) );
-      String portString = databaseMeta.environmentSubstitute( databaseMeta.getDatabasePortNumberString() );
-      if ( portString != null ) {
-        try {
-          setPort( Integer.valueOf( portString ) );
-        } catch ( NumberFormatException e ) {
-          // leave null
-        }
-      }
+    if ( "OCI".equals( databaseMeta.getAccessTypeDesc() ) ) {
       setUsername( databaseMeta.environmentSubstitute( databaseMeta.getUsername() ) );
       setPassword( databaseMeta.environmentSubstitute( databaseMeta.getPassword() ) );
       setDatabaseName( databaseMeta.environmentSubstitute( databaseMeta.getDatabaseName() ) );
+      setDataTablespace( databaseMeta.environmentSubstitute( databaseMeta.getDataTablespace() ) );
+      setIndexTablespace( databaseMeta.environmentSubstitute( databaseMeta.getIndexTablespace() ) );
     } else {
-      throw new IllegalArgumentException( "DatabaseMeta is not JDBC, it is " + databaseMeta.getAccessTypeDesc() );
+      throw new IllegalArgumentException( "DatabaseMeta is not OCI, it is " + databaseMeta.getAccessTypeDesc() );
     }
   }
 
-  public JdbcResourceInfo( String server, String databaseName, Integer port, String username, String password ) {
-    this.server = server;
+  public OCIResourceInfo( String databaseName, String username, String password ) {
     this.databaseName = databaseName;
-    this.port = port;
     this.username = username;
     this.password = password;
   }
+
+  @JsonProperty( JSON_PROPERTY_DATA_TABLESPACE )
+  public String getDataTablespace() {
+    return dataTablespace;
+  }
+
+  public void setDataTablespace( String dataTablespace ) {
+    this.dataTablespace = dataTablespace;
+  }
+
+  @JsonProperty( JSON_PROPERTY_INDEX_TABLESPACE )
+  public String getIndexTablespace() {
+    return indexTablespace;
+  }
+
+  public void setIndexTablespace( String indexTablespace ) {
+    this.indexTablespace = indexTablespace;
+  }
+
 }
