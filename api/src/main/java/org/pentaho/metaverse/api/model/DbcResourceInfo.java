@@ -26,6 +26,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.encryption.Encr;
 
+import java.util.Objects;
+
 public abstract class DbcResourceInfo extends BaseDatabaseResourceInfo implements IExternalResourceInfo {
 
   public static final String JSON_PROPERTY_PORT = "port";
@@ -98,5 +100,28 @@ public abstract class DbcResourceInfo extends BaseDatabaseResourceInfo implement
 
   public void setDatabaseName( String databaseName ) {
     this.databaseName = databaseName;
+  }
+
+  @Override
+  public boolean equals( Object o ) {
+    if ( this == o ) {
+      return true;
+    }
+    if ( o == null || getClass() != o.getClass() ) {
+      return false;
+    }
+    if ( !super.equals( o ) ) {
+      return false;
+    }
+    DbcResourceInfo that = (DbcResourceInfo) o;
+    return Objects.equals( port, that.port )
+      && Objects.equals( server, that.server )
+      && Objects.equals( username, that.username )
+      && Objects.equals( password, that.password )
+      && Objects.equals( databaseName, that.databaseName );
+  }
+
+  @Override public int hashCode() {
+    return Objects.hash( super.hashCode(), port, server, username, password, databaseName );
   }
 }

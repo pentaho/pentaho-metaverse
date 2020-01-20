@@ -26,6 +26,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.pentaho.di.core.database.DatabaseMeta;
 
+import java.util.Objects;
+
 public class OCIResourceInfo extends DbcResourceInfo implements IExternalResourceInfo {
 
   public static final String OCI = "OCI";
@@ -82,4 +84,24 @@ public class OCIResourceInfo extends DbcResourceInfo implements IExternalResourc
     this.indexTablespace = indexTablespace;
   }
 
+  @Override
+  public boolean equals( Object o ) {
+    if ( this == o ) {
+      return true;
+    }
+    if ( o == null || getClass() != o.getClass() ) {
+      return false;
+    }
+    if ( !super.equals( o ) ) {
+      return false;
+    }
+    OCIResourceInfo that = (OCIResourceInfo) o;
+    return Objects.equals( dataTablespace, that.dataTablespace )
+      && Objects.equals( indexTablespace, that.indexTablespace );
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash( super.hashCode(), dataTablespace, indexTablespace );
+  }
 }
