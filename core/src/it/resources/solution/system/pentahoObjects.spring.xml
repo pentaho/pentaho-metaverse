@@ -192,7 +192,7 @@
         <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
         <!--<ref bean="JMSConsumerStepAnalyzer"/>-->
         <ref bean="TextFileInputStepAnalyzer"/>
-
+        <ref bean="ExcelOutputStepAnalyzer"/>
         <ref bean="FixedFileInputStepAnalyzer"/>
         <ref bean="MongoDbInputStepAnalyzer"/>
         <ref bean="TableInputStepAnalyzer"/>

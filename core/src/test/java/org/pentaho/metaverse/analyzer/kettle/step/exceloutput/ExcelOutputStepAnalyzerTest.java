@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -40,10 +40,12 @@ import org.pentaho.di.trans.steps.exceloutput.ExcelOutput;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputData;
 import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
+import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
@@ -55,7 +57,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith( MockitoJUnitRunner.class )
-public class ExcelOutputStepAnalyzerTest {
+public class ExcelOutputStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private ExcelOutputStepAnalyzer analyzer;
 
@@ -191,5 +193,9 @@ public class ExcelOutputStepAnalyzerTest {
     for ( ExcelField outputField : outputFields ) {
       assertTrue( outputResourceFields.contains( outputField.getName() ) );
     }
+  }
+
+  @Override protected IClonableStepAnalyzer newInstance() {
+    return new ExcelOutputStepAnalyzer();
   }
 }

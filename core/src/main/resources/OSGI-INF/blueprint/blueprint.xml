@@ -292,7 +292,7 @@
            ref="MongoDbInputStepAnalyzer"/>
 
   <service id="excelOutputStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
+           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="ExcelOutputStepAnalyzer"/>
            
   <service id="stringOperationsStepAnalyzer"
