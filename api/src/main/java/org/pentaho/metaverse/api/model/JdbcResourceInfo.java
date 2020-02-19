@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,34 +22,19 @@
 
 package org.pentaho.metaverse.api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.core.encryption.Encr;
 
-public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExternalResourceInfo {
+public class JdbcResourceInfo extends DbcResourceInfo implements IExternalResourceInfo {
 
   public static final String JDBC = "JDBC";
 
-  public static final String JSON_PROPERTY_PORT = "port";
-  public static final String JSON_PROPERTY_SERVER = "server";
-  public static final String JSON_PROPERTY_USERNAME = "username";
-  public static final String JSON_PROPERTY_PASSWORD = "password";
-  public static final String JSON_PROPERTY_DATABASE_NAME = "databaseName";
 
-  private Integer port;
-  private String server;
-  private String username;
-  private String password;
-  private String databaseName;
+  public JdbcResourceInfo() {
+  }
 
   @Override
   public String getType() {
     return JDBC;
-  }
-
-  public JdbcResourceInfo() {
   }
 
   public JdbcResourceInfo( DatabaseMeta databaseMeta ) {
@@ -79,58 +64,4 @@ public class JdbcResourceInfo extends BaseDatabaseResourceInfo implements IExter
     this.username = username;
     this.password = password;
   }
-
-
-  @JsonProperty( JSON_PROPERTY_PORT )
-  public Integer getPort() {
-    return port;
-  }
-
-  public void setPort( Integer port ) {
-    this.port = port;
-  }
-
-  @JsonProperty( JSON_PROPERTY_SERVER )
-  public String getServer() {
-    return server;
-  }
-
-  public void setServer( String server ) {
-    this.server = server;
-  }
-
-  @JsonProperty( JSON_PROPERTY_USERNAME )
-  public String getUsername() {
-    return username;
-  }
-
-  public void setUsername( String username ) {
-    this.username = username;
-  }
-
-  @JsonIgnore
-  public String getPassword() {
-    return password;
-  }
-
-  @JsonProperty( JSON_PROPERTY_PASSWORD )
-  public void setPassword( String password ) {
-    this.password = Encr.decryptPasswordOptionallyEncrypted( password );
-  }
-
-  @JsonProperty( JSON_PROPERTY_PASSWORD )
-  protected String getEncryptedPassword() {
-    // Need "Encrypted prefix for decryptPasswordOptionallyEncrypted() to operate properly
-    return Encr.PASSWORD_ENCRYPTED_PREFIX + Encr.encryptPassword( password );
-  }
-
-  @JsonProperty( JSON_PROPERTY_DATABASE_NAME )
-  public String getDatabaseName() {
-    return databaseName;
-  }
-
-  public void setDatabaseName( String databaseName ) {
-    this.databaseName = databaseName;
-  }
-
 }
