@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -47,6 +47,8 @@ public class ExternalResourceInfoFactory {
     BaseDatabaseResourceInfo resourceInfo;
     if ( "Native".equals( databaseMeta.getAccessTypeDesc() ) ) {
       resourceInfo = new JdbcResourceInfo( databaseMeta );
+    } else if ( "OCI".equals( databaseMeta.getAccessTypeDesc() ) ) {
+      resourceInfo = new OCIResourceInfo( databaseMeta );
     } else {
       resourceInfo = new JndiResourceInfo( databaseMeta );
     }
