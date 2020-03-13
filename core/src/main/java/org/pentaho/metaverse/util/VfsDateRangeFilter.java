@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -100,8 +100,8 @@ public class VfsDateRangeFilter extends FileDepthSelector {
 
   @Override
   public boolean includeFile( FileSelectInfo fileInfo ) {
+    boolean result = super.includeFile( fileInfo );
     try {
-      boolean result = super.includeFile( fileInfo );
       if ( fileInfo.getFile().getType() == FileType.FOLDER ) {
 
         Date folderDate = format.parse( fileInfo.getFile().getName().getBaseName() );
@@ -122,9 +122,8 @@ public class VfsDateRangeFilter extends FileDepthSelector {
       } else {
         return false;
       }
-    } catch ( Exception e ) {
+    } catch ( ParseException | FileSystemException e ) {
       // folder name is not a valid date string, reject it
-      // [PDI-17775] Doing a full exception catch due to the extended class throwing a general exception
       return false;
     }
   }
