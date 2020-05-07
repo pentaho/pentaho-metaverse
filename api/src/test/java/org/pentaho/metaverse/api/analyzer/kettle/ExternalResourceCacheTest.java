@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2020 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -54,10 +54,12 @@ public class ExternalResourceCacheTest {
   private Trans trans2;
 
   @Mock
-  private TransMeta transMeta;
-
+  private TransMeta transMeta1;
   @Mock
   private TransMeta transMeta2;
+
+  @Mock
+  private TransMeta transMeta;
 
   @Mock
   private BaseFileInputMeta meta;
@@ -76,10 +78,15 @@ public class ExternalResourceCacheTest {
     when( meta.getParentStepMeta() ).thenReturn( spyMeta );
     when( transMeta.getFilename() ).thenReturn( "my_file" );
 
+    when( trans.getName() ).thenReturn( "my_trans" );
+    when( trans.getFilename() ).thenReturn( "my_file" );
+
     when( trans.getTransMeta() ).thenReturn( transMeta );
     when( transMeta.getSteps() ).thenReturn( Arrays.asList( new StepMeta[] { spyMeta } ) );
 
     when( trans2.getTransMeta() ).thenReturn( transMeta2 );
+    when( trans2.getName() ).thenReturn( "my_trans2" );
+    when( trans2.getFilename() ).thenReturn( "my_file2" );
     when( transMeta2.getSteps() ).thenReturn( Arrays.asList( new StepMeta[] { spyMeta } ) );
   }
 
@@ -185,7 +192,18 @@ public class ExternalResourceCacheTest {
   @Test
   public void test_ExternalResourceTransValues() {
     final Trans trans1 = new Trans();
+    trans1.setTransMeta( transMeta1 );
+    when( transMeta1.getName() ).thenReturn( "trans1file" );
+    when( transMeta1.getFilename() ).thenReturn( "trans1file.ktr" );
+
     final Trans trans2 = new Trans();
+    trans2.setTransMeta( transMeta2 );
+    when( transMeta2.getName() ).thenReturn( "trans2file" );
+    when( transMeta2.getFilename() ).thenReturn( "trans2file.ktr" );
+
+    final Trans trans3 = new Trans();
+    trans3.setTransMeta( transMeta1 );
+
     final ExternalResourceCache.Resources transValues = ExternalResourceCache.getInstance().new TransValues();
     assertEquals( 0, transValues.size() );
     transValues.add( trans1 );
@@ -194,6 +212,9 @@ public class ExternalResourceCacheTest {
     transValues.add( trans2 );
     assertEquals( 2, transValues.size() );
     assertTrue( transValues.contains( trans2 ) );
+    transValues.add( trans3 );
+    assertEquals( 2, transValues.size() );
+    assertFalse( transValues.contains( trans3 ) );
 
     transValues.remove( trans1 );
     assertEquals( 1, transValues.size() );

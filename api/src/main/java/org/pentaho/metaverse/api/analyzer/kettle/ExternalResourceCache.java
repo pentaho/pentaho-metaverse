@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2019-2020 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -162,6 +162,16 @@ public class ExternalResourceCache {
   }
 
   public class TransValues extends Resources<Trans> {
+
+    @Override
+    public void add( final Trans value ) {
+      for ( Trans t : internal ) {
+        if ( t.getTransMeta().equals( value.getTransMeta() ) ) {
+          return;
+        }
+      }
+      super.add( value );
+    }
   }
 
   /**
