@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -120,7 +120,14 @@ public class TransLineageHolderMapTest {
   private void initMetas() {
 
     when( trans.getTransMeta() ).thenReturn( transMeta );
+    when( trans.getName() ).thenReturn( "trans" );
+    when( trans.getFilename() ).thenReturn( "trans.ktr" );
     when( parentTrans.getTransMeta() ).thenReturn( parentTransMeta );
+    when( parentTrans.getName() ).thenReturn( "parentTrans" );
+    when( parentTrans.getFilename() ).thenReturn( "parentTrans.ktr" );
+
+    when( parentJob.getJobname() ).thenReturn( "parentJob" );
+    when( parentJob.getFilename() ).thenReturn( "parentJob.kjb" );
 
     when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
 

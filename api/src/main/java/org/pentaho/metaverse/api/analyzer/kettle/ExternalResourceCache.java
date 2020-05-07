@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2019-2020 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -31,6 +31,7 @@ import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -162,6 +163,18 @@ public class ExternalResourceCache {
   }
 
   public class TransValues extends Resources<Trans> {
+
+    @Override
+    public void add ( final Trans value ) {
+      List<Trans> internalList = new ArrayList<>();
+      internalList.addAll( internal );
+      for ( Trans t : internalList ) {
+        if ( t.getTransMeta().equals( value.getTransMeta() ) ) {
+          return;
+        }
+      }
+      super.add( value );
+    }
   }
 
   /**
