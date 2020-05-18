@@ -73,6 +73,8 @@ public class VfsLineageWriterTest {
 
   private static final Date now = new Date();
 
+  private static final String OS_NAME = System.getProperty( "os.name", "unknown" );
+
   @Before
   public void setUp() throws Exception {
     String basePath = new File( "." ).getCanonicalPath();
@@ -127,7 +129,7 @@ public class VfsLineageWriterTest {
   public void testGetSetOutputFolder() {
     assertEquals( GOOD_OUTPUT_FOLDER, writer.getOutputFolder() );
     writer.setOutputFolder( "./path/to/folder" );
-    assertTrue( writer.getOutputFolder().endsWith( "/path/to/folder" ) );
+    assertTrue( writer.getOutputFolder().replace( '\\', '/').endsWith( "/path/to/folder" ) );
   }
 
   @Test
@@ -165,7 +167,11 @@ public class VfsLineageWriterTest {
     FileObject folder = writer.getDateFolder( holder );
     assertNotNull( folder );
     assertTrue( folder.getName().getPath().endsWith( VfsLineageWriter.dateFolderFormat.format( now ) ) );
-    writer.setOutputFolder( "file://root" );
+    if ( isWindows() ) {
+      writer.setOutputFolder( "file:///c:/root" );
+    } else {
+      writer.setOutputFolder( "file://root" );
+    }
     folder = writer.getDateFolder( holder );
     assertTrue( folder.getName().getPath().endsWith( "root" + "/" + VfsLineageWriter.dateFolderFormat.format( now ) ) );
   }
@@ -201,19 +207,27 @@ public class VfsLineageWriterTest {
     FileObject fo = writer.getOutputDirectoryAsFile( holder );
     assertThat( fo.getName().getPath(), endsWith( "foobarbaz" ) );
 
-    // Use the style of name created by DET for transient dataservice ktrs
-    holder.setId( "transient:L1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3Ry"
-      + ":bG9jYWw6UHl0aG9uIEV4ZWN1dG9yIDI= - SQL - select "
-      + "\"transient:L1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3Ry:bG9jYW" );
+    //Skipping next test for windows because colon breaks it
+    if ( !isWindows() ) {
+      // Use the style of name created by DET for transient dataservice ktrs
+      holder.setId( "transient:L1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3Ry"
+        + ":bG9jYWw6UHl0aG9uIEV4ZWN1dG9yIDI= - SQL - select "
+        + "\"transient:L1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3Ry:bG9jYW" );
 
-    fo = writer.getOutputDirectoryAsFile( holder );
-    assertThat( fo.getName().getPath(), endsWith(
-      "transient-L1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3Ry-bG9jYWw6UHl0aG9uIEV4ZWN1dG9yIDI= "
-        + "- SQL - select \"transient-L1VzZXJzL21h" ) );
+      fo = writer.getOutputDirectoryAsFile( holder );
+      assertThat( fo.getName().getPath(), endsWith(
+        "transient-L1VzZXJzL21hdGNhbXBiZWxsL0Rvd25sb2Fkcy9Db25zdW1lckNvbXBsYWludHMua3Ry-bG9jYWw6UHl0aG9uIEV4ZWN1dG9yIDI= "
+          + "- SQL - select \"transient-L1VzZXJzL21h" ) );
+
+    }
 
     holder.setId( "invalidChar %  invalidChar" );
     fo = writer.getOutputDirectoryAsFile( holder );
     assertThat( fo.getName().getPath(), endsWith( "unknown_artifact" ) );
+  }
+
+  protected static boolean isWindows() {
+    return OS_NAME.startsWith( "Windows" );
   }
 
 }
