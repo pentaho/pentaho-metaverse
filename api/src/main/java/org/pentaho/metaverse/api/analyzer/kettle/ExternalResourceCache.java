@@ -22,12 +22,16 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.metaverse.api.IMetaverseConfig;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A cache of resources encountered when a transformation is run that can be used to access these run-time resources at
@@ -45,9 +49,9 @@ public class ExternalResourceCache {
 
   private static final Logger log = LoggerFactory.getLogger( ExternalResourceCache.class );
 
-  protected volatile Map<String, TransValues> transMap = new ConcurrentHashMap();
+  protected static final long DEFAULT_TIMEOUT_SECONDS = 6 * 60 * 60; // 6 hours
 
-  protected volatile Map<String, ExternalResourceValues> resourceMap = new ConcurrentHashMap();
+  protected volatile Cache<String, ExternalResourceValues> resourceCache;
 
   private static ExternalResourceCache INSTANCE;
 
@@ -63,6 +67,22 @@ public class ExternalResourceCache {
   }
 
   private ExternalResourceCache() {
+    this( PentahoSystem.get( IMetaverseConfig.class ) );
+  }
+
+  protected ExternalResourceCache( IMetaverseConfig config ) {
+    long cacheExpireTime = getCacheExpireTime( config );
+    initCache( cacheExpireTime, TimeUnit.SECONDS );
+  }
+
+  protected long getCacheExpireTime( IMetaverseConfig config ) {
+    String expireTime = ( config != null ) ? config.getExternalResourceCacheExpireTime() : null;
+    return ( expireTime != null ) ? Long.parseLong( expireTime ) : DEFAULT_TIMEOUT_SECONDS;
+  }
+
+  void initCache( long time, TimeUnit timeUnit ) {
+    resourceCache = CacheBuilder.newBuilder().expireAfterAccess( time, timeUnit ).build();
+    log.debug( this.getClass().getSimpleName() + " cache expire time set to " + time + " " + timeUnit );
   }
 
   protected String getUniqueId( final StepMeta meta ) {
@@ -85,17 +105,7 @@ public class ExternalResourceCache {
     final List<StepMeta> steps = transMeta.getSteps();
     for ( final StepMeta step : steps ) {
       final String uniqueMetaId = getUniqueId( step );
-
-      Resources<Trans> transformations = transMap.get( uniqueMetaId );
-      if ( transformations != null && transformations.contains( trans ) ) {
-        transformations.remove( trans );
-      }
-      // are there any other potentially running transformations that might be using this resource? If not, the
-      // resource can be removed, otherwise keep it
-      if ( transformations == null || transformations.size() == 0 ) {
-        resourceMap.remove( uniqueMetaId );
-        transMap.remove( uniqueMetaId );
-      }
+      resourceCache.invalidate( uniqueMetaId );
     }
   }
 
@@ -103,40 +113,24 @@ public class ExternalResourceCache {
     if ( meta == null ) {
       return null;
     }
-    cacheTrans( trans, meta );
     final String uniqueMetaId = getUniqueId( meta.getParentStepMeta() );
-    return resourceMap.get( uniqueMetaId );
-  }
-
-  private void cacheTrans( final Trans trans, final BaseStepMeta meta ) {
-    if ( trans != null ) {
-      final String uniqueMetaId = getUniqueId( meta.getParentStepMeta() );
-      TransValues transformations = transMap.get( uniqueMetaId );
-      if ( transformations == null ) {
-        transformations = new TransValues();
-        transMap.put( uniqueMetaId, transformations );
-      }
-      transformations.add( trans );
-    }
+    return resourceCache.getIfPresent( uniqueMetaId );
   }
 
   public void cache( final Trans trans, final BaseStepMeta meta, final ExternalResourceValues resources ) {
-    cacheTrans( trans, meta );
     final String uniqueMetaId = getUniqueId( meta.getParentStepMeta() );
-    resourceMap.put( uniqueMetaId, resources );
+    resourceCache.put( uniqueMetaId, resources );
   }
 
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder();
 
-    for ( Map.Entry<String, ExternalResourceValues> entry : resourceMap.entrySet() ) {
-      sb.append( " ---- " + entry.getKey() + ": " + entry.getValue().size() + "\n" );
-      sb.append( entry.getValue().toString() );
-    }
-    for ( Map.Entry<String, TransValues> entry : transMap.entrySet() ) {
-      sb.append( " ---- " + entry.getKey() + ": " + entry.getValue().size() + "\n" );
-      sb.append( entry.getValue().toString() );
+    if ( resourceCache != null ) {
+      for ( Map.Entry<String, ExternalResourceValues> entry : resourceCache.asMap().entrySet() ) {
+        sb.append( " ---- " + entry.getKey() + ": " + entry.getValue().size() + "\n" );
+        sb.append( entry.getValue().toString() );
+      }
     }
 
     log.debug( "\n" + sb.toString() );

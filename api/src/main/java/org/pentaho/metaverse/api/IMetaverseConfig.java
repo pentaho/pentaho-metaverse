@@ -47,4 +47,8 @@ public interface IMetaverseConfig {
   void setConsolidateSubGraphs( final boolean consolidateGraphs );
 
   boolean getConsolidateSubGraphs();
+
+  void setExternalResourceCacheExpireTime( final String cacheExpire );
+
+  String getExternalResourceCacheExpireTime();
 }

@@ -33,6 +33,7 @@ public class MetaverseConfig implements IMetaverseConfig {
   private String executionRuntime = "off";
   private String extecutionOutputFolder = "./pentaho-lineage-output";
   private String executionGenerationStrategy = "latest";
+  private String externalResourceCacheExpireTime = "21600";
   private boolean resolveExternalResources = true;
   private boolean deduplicateTransformationFields = true;
   private boolean adjustExternalResourceFields = true;
@@ -132,6 +133,14 @@ public class MetaverseConfig implements IMetaverseConfig {
 
   public boolean getConsolidateSubGraphs() {
     return this.consolidateSubGraphs;
+  }
+
+  public void setExternalResourceCacheExpireTime( final String externalResourceCacheExpireTime ) {
+    this.externalResourceCacheExpireTime = externalResourceCacheExpireTime;
+  }
+
+  public String getExternalResourceCacheExpireTime() {
+    return this.externalResourceCacheExpireTime;
   }
 
   public static boolean consolidateSubGraphs() {
