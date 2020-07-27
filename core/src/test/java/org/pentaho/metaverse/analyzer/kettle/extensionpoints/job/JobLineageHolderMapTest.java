@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -95,8 +95,6 @@ public class JobLineageHolderMapTest {
             Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
     Whitebox.setInternalState( TransLineageHolderMap.getInstance(), "lineageHolderMap",
             Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
-    Whitebox.setInternalState( ExternalResourceCache.getInstance(), "transMap", new ConcurrentHashMap() );
-    Whitebox.setInternalState( ExternalResourceCache.getInstance(), "resourceMap", new ConcurrentHashMap() );
     jobLineageHolderMap = JobLineageHolderMap.getInstance();
     mockHolder = spy( new LineageHolder() );
     jobLineageHolderMap.setDefaultMetaverseBuilder( defaultBuilder );
