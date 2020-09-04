@@ -109,7 +109,7 @@ public class KettleAnalyzerUtil {
   public static Collection<IExternalResourceInfo> getResourcesFromMeta(
     final BaseStepMeta meta, final String[] filePaths ) {
 
-    ExternalResourceCache.Resources resources = rowResourceCache.get( null, meta );
+    ExternalResourceCache.Resources resources = rowResourceCache.get( meta );
     if ( resources == null ) {
       resources = rowResourceCache.newExternalResourceValues();
     }
@@ -144,10 +144,10 @@ public class KettleAnalyzerUtil {
       meta = (BaseFileInputMeta) step.getStepMeta().getStepMetaInterface();
     }
     ExternalResourceCache.ExternalResourceValues resources =
-      (ExternalResourceCache.ExternalResourceValues) rowResourceCache.get( step.getTrans(), meta );
+      (ExternalResourceCache.ExternalResourceValues) rowResourceCache.get( meta );
     if ( resources == null ) {
       resources = rowResourceCache.newExternalResourceValues();
-      rowResourceCache.cache( step.getTrans(), meta, resources );
+      rowResourceCache.cache( meta, resources );
     }
 
     try {
