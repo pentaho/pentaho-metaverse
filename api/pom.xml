@@ -9,14 +9,14 @@
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse-api</artifactId>
-  <version>8.3.0.8-718</version>
+  <version>8.3.0.8-C248</version>
   <name>pentaho-metaverse-api Bundle</name>
   <description>pentaho-metaverse-api OSGi bundle project.</description>
   <dependencies>
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <version>8.3.0.8-718</version>
       <exclusions>
         <exclusion>
           <artifactId>xercesImpl</artifactId>
@@ -27,7 +27,7 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-engine</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <version>8.3.0.8-718</version>
       <exclusions>
         <exclusion>
           <groupId>com.sun.jersey</groupId>
@@ -75,7 +75,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <version>${dependency.pentaho.pentaho-platform-core.version}</version>
+      <version>8.3.0.8-718</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
