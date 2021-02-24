@@ -9,7 +9,7 @@
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse-core</artifactId>
-  <version>8.3.0.8-718</version>
+  <version>8.3.0.8-C248-v2</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Provides data lineage capabilities</description>
@@ -49,12 +49,12 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-api</artifactId>
-      <version>${platform.version}</version>
+      <version>8.3.0.8-718</version>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>metastore</artifactId>
-      <version>${metastore.version}</version>
+      <version>8.3.0.8-718</version>
     </dependency>
     <dependency>
       <groupId>com.tinkerpop.blueprints</groupId>
@@ -134,7 +134,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <version>${dependency.pentaho.pentaho-platform-core.version}</version>
+      <version>8.3.0.8-718</version>
       <exclusions>
         <exclusion>
           <artifactId>xercesImpl</artifactId>
@@ -145,7 +145,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
-      <version>${dependency.pentaho.pentaho-platform-repository.version}</version>
+      <version>8.3.0.8-718</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -169,7 +169,7 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <version>8.3.0.8-718</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -181,7 +181,7 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-engine</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <version>8.3.0.8-718</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

@@ -9,7 +9,7 @@
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse-api</artifactId>
-  <version>8.3.0.8-C248</version>
+  <version>8.3.0.8-C248-v2</version>
   <name>pentaho-metaverse-api Bundle</name>
   <description>pentaho-metaverse-api OSGi bundle project.</description>
   <dependencies>
@@ -123,14 +123,14 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
-      <version>${project.version}</version>
+      <version>8.3.0.8-718</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <version>${project.version}</version>
+      <version>8.3.0.8-718</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
