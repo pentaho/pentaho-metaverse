@@ -622,8 +622,17 @@
   <bean id="graphCsvWriter" class="org.pentaho.metaverse.graph.GraphCsvWriter"/>
   <bean id="graphSONWriter" class="org.pentaho.metaverse.graph.GraphSONWriter"/>
   <bean id="graphMLWriter" class="org.pentaho.metaverse.graph.GraphMLWriter"/>
+  <bean id="graphCatalogWriter" class="org.pentaho.metaverse.graph.GraphCatalogWriter">
+    <argument value="${lineage.catalog.url}"/>
+    <argument value="${lineage.catalog.username}"/>
+    <argument value="${lineage.catalog.password}"/>
+    <argument value="${lineage.catalog.token.url}"/>
+    <argument value="${lineage.catalog.client.id}"/>
+    <argument value="${lineage.catalog.client.secret}"/>
+  </bean>
 
   <bean id="lineageWriter" class="org.pentaho.metaverse.impl.VfsLineageWriter" scope="prototype">
+    <property name="catalogWriter" ref="graphCatalogWriter"/>
     <property name="graphWriter" ref="graphMLWriter"/>
     <property name="outputFolder" value="${lineage.execution.output.folder}"/>
     <property name="outputStrategy" value="${lineage.execution.generation.strategy}"/>
