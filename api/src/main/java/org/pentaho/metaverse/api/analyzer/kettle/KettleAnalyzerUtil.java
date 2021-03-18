@@ -98,6 +98,21 @@ public class KettleAnalyzerUtil {
   }
 
   /**
+   *
+   * @param filePath
+   * @return
+   * @throws MetaverseException
+   */
+  public static String getFilePathScheme( String filePath ) throws MetaverseException {
+    try {
+      FileObject fo = KettleVFS.getFileObject( filePath );
+      return fo.getURI().getScheme();
+    } catch ( KettleFileException e ) {
+      throw new MetaverseException( e );
+    }
+  }
+
+  /**
    * Normalizes the {@code filePath} safely, ignoring exceptions and returning the original string, if there is a
    * problem with the normalization.
    */
