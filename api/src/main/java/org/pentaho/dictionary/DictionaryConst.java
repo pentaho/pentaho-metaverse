@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -104,6 +104,11 @@ import org.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
    * Property key for the path to a document, instance, etc.
    */
   public static final String PROPERTY_PATH = "path";
+
+  /**
+   * Property key for a file URI's schema, e.g. hdfs, s3
+   */
+  public static final String PROPERTY_FILE_SCHEME = "fileScheme";
 
   /**
    * Property key for suggested "color" for a node when a graph is visualized
