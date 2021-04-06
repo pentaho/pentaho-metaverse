@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,6 +23,8 @@
 package org.pentaho.metaverse.api.analyzer.kettle;
 
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.provider.UriParser;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -82,7 +84,7 @@ public class KettleAnalyzerUtil {
       String path = filePath;
       FileObject fo = KettleVFS.getFileObject( filePath );
       try {
-        path = fo.getURL().getPath();
+        path = getDecodedUriString( fo.getURL().getPath() );
       } catch ( Throwable t ) {
         // Something went wrong with VFS, just try the filePath
       }
@@ -240,6 +242,15 @@ public class KettleAnalyzerUtil {
     String dir = parentTransMeta.environmentSubstitute( meta.getDirectoryPath() );
     String file = parentTransMeta.environmentSubstitute( meta.getTransName() );
     return getFileFromRepo( parentTransMeta, repo, dir, file );
+  }
+
+  private static String getDecodedUriString( String uri ) {
+    try {
+      return UriParser.decode( uri );
+    } catch ( FileSystemException e ) {
+      // return the raw string if the URI is malformed (bad escape sequence)
+      return uri;
+    }
   }
 
   /**
