@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -31,6 +31,8 @@ import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
@@ -38,6 +40,7 @@ import org.pentaho.di.trans.ISubTransAwareMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
+import org.pentaho.di.trans.steps.file.BaseFileInputStep;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
@@ -46,17 +49,24 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseException;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
+import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -130,7 +140,7 @@ public class KettleAnalyzerUtilTest {
     assertEquals( document.getName(), document.getProperty( DictionaryConst.PROPERTY_NAME ) );
     assertEquals( KettleAnalyzerUtil.normalizeFilePath( "path.ktr" ), document.getProperty( DictionaryConst
       .PROPERTY_PATH ) );
-    assertEquals(namespaceId, document.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
+    assertEquals( namespaceId, document.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
   }
 
   @Test
@@ -165,7 +175,7 @@ public class KettleAnalyzerUtilTest {
     Mockito.doReturn( ObjectLocationSpecificationMethod.FILENAME ).when( meta ).getSpecificationMethod();
     Mockito.doReturn( parentStepMeta ).when( meta ).getParentStepMeta();
     Mockito.doReturn( "foo" ).when( meta ).getFileName();
-    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, null ).endsWith( File.separator + "foo" ) );;
+    assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, null ).endsWith( File.separator + "foo" ) );
     assertNull( KettleAnalyzerUtil.getSubTransMetaPath( null, subTransMeta ) );
     assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith( File.separator + "foo" ) );
 
@@ -194,7 +204,7 @@ public class KettleAnalyzerUtilTest {
     Mockito.doReturn( parentTransMeta ).when( parentStepMeta ).getParentTransMeta();
     Mockito.doReturn( "/dir/foe.ktr" ).when( parentTransMeta ).environmentSubstitute( Mockito.anyString()  );
     assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
-     File.separator + "dir" + File.separator + "foe.ktr" ) );
+      File.separator + "dir" + File.separator + "foe.ktr" ) );
     assertFalse( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
       File.separator + "${rootDir}" + File.separator + "dir" + File.separator + "foe.ktr" ) );
 
@@ -254,13 +264,13 @@ public class KettleAnalyzerUtilTest {
     when( meta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
     when( meta.writesToFile() ).thenReturn( true );
-    when( meta.getFilePaths( false) ).thenReturn( filePaths );
+    when( meta.getFilePaths( false ) ).thenReturn( filePaths );
 
     spyMeta2 = spy( new StepMeta( "test2", meta2 ) );
     when( meta2.getParentStepMeta() ).thenReturn( spyMeta2 );
     when( spyMeta2.getParentTransMeta() ).thenReturn( transMeta );
     when( meta2.writesToFile() ).thenReturn( true );
-    when( meta2.getFilePaths( false) ).thenReturn( filePaths2 );
+    when( meta2.getFilePaths( false ) ).thenReturn( filePaths2 );
   }
 
   @Test
@@ -277,4 +287,58 @@ public class KettleAnalyzerUtilTest {
     assertEquals( 2, resources2.size() );
   }
 
+  @Test
+  public void getResourcesFromRowFileContentTest() {
+    String filename = "filename";
+    BaseFileInputStep step = mock( BaseFileInputStep.class );
+    RowMetaInterface rowMeta = mock( RowMetaInterface.class );
+    Object[] row = new Object[]{};
+    IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
+    assertFalse( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+  }
+
+  @Test
+  public void getResourcesFromRowFileWithSchemeTest() throws Exception {
+    String filename = "file://filename";
+    BaseFileInputStep step = mock( BaseFileInputStep.class );
+    RowMetaInterface rowMeta = mock( RowMetaInterface.class );
+    Object[] row = new Object[]{};
+    IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
+    assertTrue( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+  }
+
+  @Test
+  public void getResourcesFromRowEmptyFileTest() throws Exception {
+    String filename = "";
+    BaseFileInputStep step = mock( BaseFileInputStep.class );
+    RowMetaInterface rowMeta = mock( RowMetaInterface.class );
+    Object[] row = new Object[]{};
+    IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
+    assertFalse( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+  }
+
+  @Test
+  public void getResourcesFromRowFullPathFileTest() throws Exception {
+    String filename = "/filefolder/filename";
+    BaseFileInputStep step = mock( BaseFileInputStep.class );
+    RowMetaInterface rowMeta = mock( RowMetaInterface.class );
+    Object[] row = new Object[]{};
+    IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
+    assertTrue( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+  }
+
+  private IExternalResourceInfo initMocksForGetResourcesFromRowTest( String filename, BaseFileInputStep step ) {
+    StepMeta stepMeta = mock( StepMeta.class );
+    TransMeta transMeta = mock( TransMeta.class );
+    FileObject fileObject = mock( FileObject.class );
+    when( fileObject.getPublicURIString() ).thenReturn( filename );
+    PowerMockito.stub( PowerMockito.method( KettleVFS.class, "getFileObject", String.class, VariableSpace.class ) ).toReturn( fileObject );
+    when( step.getStepMetaInterface() ).thenReturn( meta );
+    when( meta.getParentStepMeta() ).thenReturn( stepMeta );
+    when( stepMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( transMeta.getName() ).thenReturn( "transName" );
+    when( stepMeta.getName() ).thenReturn( "stepName" );
+    when( step.environmentSubstitute( anyString() ) ).thenReturn( filename );
+    return ExternalResourceInfoFactory.createFileResource( fileObject, true );
+  }
 }

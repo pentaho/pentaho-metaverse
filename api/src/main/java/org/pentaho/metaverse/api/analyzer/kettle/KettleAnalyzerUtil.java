@@ -32,6 +32,8 @@ import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.util.FileUtil;
+import org.pentaho.di.core.util.Utils;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.Repository;
@@ -129,7 +131,7 @@ public class KettleAnalyzerUtil {
               throw new KettleFileException( "Error getting file resource!" );
             }
           } catch ( KettleFileException kfe ) {
-            // TODO throw or ignore?
+            log.error( kfe.getMessage() );
           }
         }
       }
@@ -155,12 +157,12 @@ public class KettleAnalyzerUtil {
     try {
       String filename = meta == null ? null : step.environmentSubstitute(
         rowMeta.getString( row, meta.getAcceptingField(), null ) );
-      if ( !Const.isEmpty( filename ) ) {
+      if ( !Utils.isEmpty( filename ) && ( KettleVFS.startsWithScheme( filename ) || FileUtil.isFullyQualified( filename ) ) ) {
         FileObject fileObject = KettleVFS.getFileObject( filename, step );
         resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, true ) );
       }
     } catch ( KettleException kve ) {
-      // TODO throw exception or ignore?
+      log.error( kve.getMessage() );
     }
     return resources.getInternal();
   }
