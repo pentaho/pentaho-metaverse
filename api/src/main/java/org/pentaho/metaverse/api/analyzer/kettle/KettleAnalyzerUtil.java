@@ -131,7 +131,9 @@ public class KettleAnalyzerUtil {
               throw new KettleFileException( "Error getting file resource!" );
             }
           } catch ( KettleFileException kfe ) {
-            log.error( kfe.getMessage() );
+            if ( log.isDebugEnabled() ) {
+              log.debug( kfe.getMessage() );
+            }
           }
         }
       }
@@ -162,7 +164,9 @@ public class KettleAnalyzerUtil {
         resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, true ) );
       }
     } catch ( KettleException kve ) {
-      log.error( kve.getMessage() );
+      if ( log.isDebugEnabled() ) {
+        log.debug( kve.getMessage() );
+      }
     }
     return resources.getInternal();
   }
