@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,6 +29,7 @@ import org.pentaho.di.core.listeners.ContentChangedListener;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.impl.MetaverseConfig;
 
 /**
  * An extension point to maintain a lineage graph for an active transformation
@@ -49,10 +50,12 @@ public class TransChangedExtensionPoint implements ExtensionPointInterface, Cont
   @Override
   public void callExtensionPoint( final LogChannelInterface log, Object object ) throws KettleException {
 
-    if ( object != null && object instanceof TransMeta ) {
-      TransMeta transMeta = (TransMeta) object;
-      if ( !transMeta.getContentChangedListeners().contains( this ) ) {
-        transMeta.addContentChangedListener( this );
+    if ( !MetaverseConfig.getInstance().getExecutionRuntime().equalsIgnoreCase( MetaverseConfig.EXECUTION_RUNTIME_OFF ) ) {
+      if ( object != null && object instanceof TransMeta ) {
+        TransMeta transMeta = (TransMeta) object;
+        if ( !transMeta.getContentChangedListeners().contains( this ) ) {
+          transMeta.addContentChangedListener( this );
+        }
       }
     }
   }

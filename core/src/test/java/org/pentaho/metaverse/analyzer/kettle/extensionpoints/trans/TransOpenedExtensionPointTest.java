@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,19 +26,31 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.metaverse.impl.MetaverseBuilder;
+import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.pentaho.metaverse.util.MetaverseUtil;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@PrepareForTest( { MetaverseConfig.class, TransExtensionPointUtil.class } )
+@RunWith( PowerMockRunner.class )
 public class TransOpenedExtensionPointTest {
 
   @Mock
   TransMeta transMeta;
+  @Mock
+  MetaverseConfig metaverseConfig;
+  @Mock
+  MetaverseBuilder metaverseBuilder;
 
   @Before
   public void setUp() throws Exception {
@@ -46,12 +58,24 @@ public class TransOpenedExtensionPointTest {
     when( transMeta.getFilename() ).thenReturn( "/path/to/file.ktr" );
     when( transMeta.getName() ).thenReturn( "testTrans" );
     MetaverseUtil.setDocumentController( MetaverseTestUtils.getDocumentController() );
+    PowerMockito.mockStatic( MetaverseConfig.class );
+    when( MetaverseConfig.getInstance() ).thenReturn( metaverseConfig );
+    PowerMockito.whenNew( MetaverseBuilder.class ).withAnyArguments().thenReturn( metaverseBuilder );
   }
 
   @Test
-  public void testCallExtensionPoint() throws Exception {
+  public void testCallExtensionWithLineageOnPoint() throws Exception {
+    when( metaverseConfig.getExecutionRuntime() ).thenReturn( "on" );
     TransOpenedExtensionPoint extensionPoint = new TransOpenedExtensionPoint();
-    extensionPoint.callExtensionPoint( null, null );
     extensionPoint.callExtensionPoint( null, transMeta );
+    verify( metaverseBuilder, times( 1 ) ).addNode( anyObject() );
+  }
+
+  @Test
+  public void testCallExtensionWithLineageOffPoint() throws Exception {
+    when( metaverseConfig.getExecutionRuntime() ).thenReturn( "off" );
+    TransOpenedExtensionPoint extensionPoint = new TransOpenedExtensionPoint();
+    extensionPoint.callExtensionPoint( null, transMeta );
+    verify( metaverseBuilder, times( 0 ) ).addNode( anyObject() );
   }
 }

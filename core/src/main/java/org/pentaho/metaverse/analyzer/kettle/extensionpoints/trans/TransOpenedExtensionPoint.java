@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,6 +28,7 @@ import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.pentaho.metaverse.messages.Messages;
 
 /**
@@ -49,13 +50,15 @@ public class TransOpenedExtensionPoint implements ExtensionPointInterface {
   @Override
   public void callExtensionPoint( final LogChannelInterface log, Object object ) throws KettleException {
 
-    if ( object instanceof TransMeta ) {
-      try {
-        TransMeta transMeta = (TransMeta) object;
-        TransExtensionPointUtil.addLineageGraph( transMeta );
-      } catch ( MetaverseException me ) {
-        if ( log != null && log.isDebug() ) {
-          log.logDebug( Messages.getString( "ERROR.Graph.CouldNotCreate", me.getMessage() ) );
+    if ( !MetaverseConfig.getInstance().getExecutionRuntime().equalsIgnoreCase( MetaverseConfig.EXECUTION_RUNTIME_OFF ) ) {
+      if ( object instanceof TransMeta ) {
+        try {
+          TransMeta transMeta = (TransMeta) object;
+          TransExtensionPointUtil.addLineageGraph( transMeta );
+        } catch ( MetaverseException me ) {
+          if ( log != null && log.isDebug() ) {
+            log.logDebug( Messages.getString( "ERROR.Graph.CouldNotCreate", me.getMessage() ) );
+          }
         }
       }
     }
