@@ -49,13 +49,10 @@ public class TransChangedExtensionPoint implements ExtensionPointInterface, Cont
    */
   @Override
   public void callExtensionPoint( final LogChannelInterface log, Object object ) throws KettleException {
-
-    if ( !MetaverseConfig.getInstance().getExecutionRuntime().equalsIgnoreCase( MetaverseConfig.EXECUTION_RUNTIME_OFF ) ) {
-      if ( object != null && object instanceof TransMeta ) {
-        TransMeta transMeta = (TransMeta) object;
-        if ( !transMeta.getContentChangedListeners().contains( this ) ) {
-          transMeta.addContentChangedListener( this );
-        }
+    if ( isLineageExecutionEnabled() && object != null && object instanceof TransMeta ) {
+      TransMeta transMeta = (TransMeta) object;
+      if ( !transMeta.getContentChangedListeners().contains( this ) ) {
+        transMeta.addContentChangedListener( this );
       }
     }
   }
@@ -81,7 +78,7 @@ public class TransChangedExtensionPoint implements ExtensionPointInterface, Cont
   }
 
   protected void updateLineage( Object object ) {
-    if ( object != null && object instanceof TransMeta ) {
+    if ( object instanceof TransMeta ) {
       try {
         TransMeta transMeta = (TransMeta) object;
         TransExtensionPointUtil.addLineageGraph( transMeta );
@@ -89,5 +86,9 @@ public class TransChangedExtensionPoint implements ExtensionPointInterface, Cont
         // Nothing we can do here
       }
     }
+  }
+
+  private boolean isLineageExecutionEnabled() {
+    return !MetaverseConfig.getInstance().getExecutionRuntime().equalsIgnoreCase( MetaverseConfig.EXECUTION_RUNTIME_OFF );
   }
 }
