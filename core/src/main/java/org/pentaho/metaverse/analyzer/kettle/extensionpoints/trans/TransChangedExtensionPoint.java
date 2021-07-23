@@ -49,7 +49,7 @@ public class TransChangedExtensionPoint implements ExtensionPointInterface, Cont
    */
   @Override
   public void callExtensionPoint( final LogChannelInterface log, Object object ) throws KettleException {
-    if ( isLineageExecutionEnabled() && object != null && object instanceof TransMeta ) {
+    if ( isLineageExecutionEnabled() && object instanceof TransMeta ) {
       TransMeta transMeta = (TransMeta) object;
       if ( !transMeta.getContentChangedListeners().contains( this ) ) {
         transMeta.addContentChangedListener( this );
