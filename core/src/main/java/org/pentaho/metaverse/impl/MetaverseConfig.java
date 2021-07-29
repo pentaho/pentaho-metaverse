@@ -30,6 +30,8 @@ import org.pentaho.metaverse.util.MetaverseBeanUtil;
  */
 public class MetaverseConfig implements IMetaverseConfig {
 
+  public static final String EXECUTION_RUNTIME_OFF = "off";
+
   private String executionRuntime = EXECUTION_RUNTIME_OFF;
   private String extecutionOutputFolder = "./pentaho-lineage-output";
   private String executionGenerationStrategy = "latest";
@@ -43,8 +45,6 @@ public class MetaverseConfig implements IMetaverseConfig {
   // Used for testing ONLY, to verify that any listeners waiting for lineage to be written aren't invoked until
   // graphml has been written
   private int lineageDelay = 0;
-
-  public static final String EXECUTION_RUNTIME_OFF = "off";
 
   public static MetaverseConfig getInstance() {
     return (MetaverseConfig) MetaverseBeanUtil.getInstance().get( "metaverseConfig" );

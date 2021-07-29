@@ -49,7 +49,10 @@ public class TransOpenedExtensionPoint implements ExtensionPointInterface {
    */
   @Override
   public void callExtensionPoint( final LogChannelInterface log, Object object ) throws KettleException {
-    if ( isLineageExecutionEnabled() && object instanceof TransMeta ) {
+    if ( !isLineageExecutionEnabled() ) {
+      return;
+    }
+    if ( object instanceof TransMeta ) {
       try {
         TransMeta transMeta = (TransMeta) object;
         TransExtensionPointUtil.addLineageGraph( transMeta );
@@ -62,6 +65,6 @@ public class TransOpenedExtensionPoint implements ExtensionPointInterface {
   }
 
   private boolean isLineageExecutionEnabled() {
-    return !MetaverseConfig.getInstance().getExecutionRuntime().equalsIgnoreCase( MetaverseConfig.EXECUTION_RUNTIME_OFF );
+    return !MetaverseConfig.EXECUTION_RUNTIME_OFF.equalsIgnoreCase( MetaverseConfig.getInstance().getExecutionRuntime() );
   }
 }
