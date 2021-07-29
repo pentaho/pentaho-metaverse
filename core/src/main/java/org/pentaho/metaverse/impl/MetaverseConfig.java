@@ -30,8 +30,7 @@ import org.pentaho.metaverse.util.MetaverseBeanUtil;
  */
 public class MetaverseConfig implements IMetaverseConfig {
 
-  public static final String EXECUTION_RUNTIME_OFF = "off";
-
+  private static final String EXECUTION_RUNTIME_OFF = "off";
   private String executionRuntime = EXECUTION_RUNTIME_OFF;
   private String extecutionOutputFolder = "./pentaho-lineage-output";
   private String executionGenerationStrategy = "latest";
@@ -148,5 +147,10 @@ public class MetaverseConfig implements IMetaverseConfig {
   public static boolean consolidateSubGraphs() {
     final MetaverseConfig config = getInstance();
     return config != null && config.getConsolidateSubGraphs();
+  }
+
+  public static boolean isLineageExecutionEnabled() {
+    final MetaverseConfig instance = getInstance();
+    return instance != null && !EXECUTION_RUNTIME_OFF.equalsIgnoreCase( instance.getExecutionRuntime() );
   }
 }

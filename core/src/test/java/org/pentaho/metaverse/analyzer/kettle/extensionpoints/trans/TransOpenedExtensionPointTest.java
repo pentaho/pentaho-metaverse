@@ -48,8 +48,6 @@ public class TransOpenedExtensionPointTest {
   @Mock
   TransMeta transMeta;
   @Mock
-  MetaverseConfig metaverseConfig;
-  @Mock
   MetaverseBuilder metaverseBuilder;
 
   @Before
@@ -59,13 +57,12 @@ public class TransOpenedExtensionPointTest {
     when( transMeta.getName() ).thenReturn( "testTrans" );
     MetaverseUtil.setDocumentController( MetaverseTestUtils.getDocumentController() );
     PowerMockito.mockStatic( MetaverseConfig.class );
-    when( MetaverseConfig.getInstance() ).thenReturn( metaverseConfig );
     PowerMockito.whenNew( MetaverseBuilder.class ).withAnyArguments().thenReturn( metaverseBuilder );
   }
 
   @Test
   public void testCallExtensionWithLineageOnPoint() throws Exception {
-    when( metaverseConfig.getExecutionRuntime() ).thenReturn( "on" );
+    when( MetaverseConfig.isLineageExecutionEnabled() ).thenReturn( true );
     TransOpenedExtensionPoint extensionPoint = new TransOpenedExtensionPoint();
     extensionPoint.callExtensionPoint( null, transMeta );
     verify( metaverseBuilder, times( 1 ) ).addNode( anyObject() );
@@ -73,7 +70,7 @@ public class TransOpenedExtensionPointTest {
 
   @Test
   public void testCallExtensionWithLineageOffPoint() throws Exception {
-    when( metaverseConfig.getExecutionRuntime() ).thenReturn( "off" );
+    when( MetaverseConfig.isLineageExecutionEnabled() ).thenReturn( false );
     TransOpenedExtensionPoint extensionPoint = new TransOpenedExtensionPoint();
     extensionPoint.callExtensionPoint( null, transMeta );
     verify( metaverseBuilder, times( 0 ) ).addNode( anyObject() );
