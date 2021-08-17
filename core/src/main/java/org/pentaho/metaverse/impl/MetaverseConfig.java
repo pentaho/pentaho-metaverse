@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -30,7 +30,8 @@ import org.pentaho.metaverse.util.MetaverseBeanUtil;
  */
 public class MetaverseConfig implements IMetaverseConfig {
 
-  private String executionRuntime = "off";
+  private static final String EXECUTION_RUNTIME_OFF = "off";
+  private String executionRuntime = EXECUTION_RUNTIME_OFF;
   private String extecutionOutputFolder = "./pentaho-lineage-output";
   private String executionGenerationStrategy = "latest";
   private String externalResourceCacheExpireTime = "21600";
@@ -146,5 +147,10 @@ public class MetaverseConfig implements IMetaverseConfig {
   public static boolean consolidateSubGraphs() {
     final MetaverseConfig config = getInstance();
     return config != null && config.getConsolidateSubGraphs();
+  }
+
+  public static boolean isLineageExecutionEnabled() {
+    final MetaverseConfig instance = getInstance();
+    return instance != null && !EXECUTION_RUNTIME_OFF.equalsIgnoreCase( instance.getExecutionRuntime() );
   }
 }
