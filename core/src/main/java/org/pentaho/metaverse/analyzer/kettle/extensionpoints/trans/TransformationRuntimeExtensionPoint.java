@@ -44,10 +44,7 @@ import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
-import org.pentaho.metaverse.api.model.IExecutionData;
-import org.pentaho.metaverse.api.model.IExecutionProfile;
-import org.pentaho.metaverse.api.model.IParamInfo;
-import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.model.*;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
@@ -290,11 +287,24 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     lineageWorker.start();
   }
 
+  private void removeSensitiveDataFromHolder(LineageHolder holder){
+    if(holder.getExecutionProfile() != null) {
+      JdbcResourceInfo resourceInfo =
+        (JdbcResourceInfo) holder.getExecutionProfile().getExecutionData().getExternalResources().get( "Table output" )
+          .get( 0 );
+      resourceInfo.setPassword( "" );
+      resourceInfo.setDatabaseName( "" );
+      resourceInfo.setUsername( "" );
+      resourceInfo.setServer( "" );
+    }
+  }
+
   protected void createLineGraph( final Trans trans ) {
     log.info( Messages.getString( "INFO.WrittingGraphForTransformation", trans.getName() ) );
     try {
       // Get the current execution profile for this transformation
       LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
+
       Future lineageTask = holder.getLineageTask();
       if ( lineageTask != null ) {
         try {
@@ -317,7 +327,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         executionProfile = new ExecutionProfile();
       }
       populateExecutionProfile( executionProfile, trans );
-
+      removeSensitiveDataFromHolder(holder);
       // Export the lineage info (execution profile, lineage graph, etc.)
       try {
         if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
