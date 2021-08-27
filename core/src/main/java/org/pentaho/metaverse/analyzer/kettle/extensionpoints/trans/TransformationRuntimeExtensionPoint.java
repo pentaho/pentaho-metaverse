@@ -331,7 +331,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         executionProfile = new ExecutionProfile();
       }
       populateExecutionProfile( executionProfile, trans );
-      removeSensitiveDataFromHolder(holder);
+      removeSensitiveDataFromHolder( holder );
       // Export the lineage info (execution profile, lineage graph, etc.)
       try {
         if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
