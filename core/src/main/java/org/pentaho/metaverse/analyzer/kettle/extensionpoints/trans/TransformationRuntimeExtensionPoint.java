@@ -297,9 +297,6 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         (JdbcResourceInfo) holder.getExecutionProfile().getExecutionData().getExternalResources().get( "Table output" )
           .get( 0 );
       resourceInfo.setPassword( "" );
-      resourceInfo.setDatabaseName( "" );
-      resourceInfo.setUsername( "" );
-      resourceInfo.setServer( "" );
     }
   }
 
