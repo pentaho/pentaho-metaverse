@@ -44,7 +44,11 @@ import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
-import org.pentaho.metaverse.api.model.*;
+import org.pentaho.metaverse.api.model.IExecutionData;
+import org.pentaho.metaverse.api.model.IExecutionProfile;
+import org.pentaho.metaverse.api.model.IParamInfo;
+import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.model.JdbcResourceInfo;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
@@ -287,8 +291,8 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     lineageWorker.start();
   }
 
-  private void removeSensitiveDataFromHolder(LineageHolder holder){
-    if(holder.getExecutionProfile() != null) {
+  private void removeSensitiveDataFromHolder( LineageHolder holder ) {
+    if ( holder.getExecutionProfile() != null ) {
       JdbcResourceInfo resourceInfo =
         (JdbcResourceInfo) holder.getExecutionProfile().getExecutionData().getExternalResources().get( "Table output" )
           .get( 0 );
