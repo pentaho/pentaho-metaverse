@@ -48,6 +48,8 @@ import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.IParamInfo;
 import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.model.JdbcResourceInfo;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
