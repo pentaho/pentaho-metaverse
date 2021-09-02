@@ -104,7 +104,7 @@ public abstract class DbcResourceInfo extends BaseDatabaseResourceInfo implement
 
   @Override
   public void cleanupSensitiveData() {
-    password = "";
+    password = null;
   }
 
   @Override

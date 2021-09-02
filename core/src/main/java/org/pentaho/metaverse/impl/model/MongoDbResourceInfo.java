@@ -196,6 +196,6 @@ public class MongoDbResourceInfo extends BaseResourceInfo implements IExternalRe
 
   @Override
   public void cleanupSensitiveData() {
-    password = "";
+    password = null;
   }
 }
