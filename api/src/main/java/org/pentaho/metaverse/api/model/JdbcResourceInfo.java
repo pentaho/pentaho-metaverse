@@ -64,4 +64,9 @@ public class JdbcResourceInfo extends DbcResourceInfo implements IExternalResour
     this.username = username;
     this.password = password;
   }
+
+  @Override
+  public void cleanupSensitiveData() {
+    password = "";
+  }
 }

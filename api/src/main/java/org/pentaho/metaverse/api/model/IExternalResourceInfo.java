@@ -45,4 +45,9 @@ public interface IExternalResourceInfo extends IInfo {
   @JsonProperty( JSON_PROPERTY_ATTRIBUTES )
   public Map<Object, Object> getAttributes();
 
+  /**
+   * Cleaning sensitive data
+   */
+  default void cleanupSensitiveData() {
+  }
 }

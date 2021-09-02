@@ -103,6 +103,11 @@ public abstract class DbcResourceInfo extends BaseDatabaseResourceInfo implement
   }
 
   @Override
+  public void cleanupSensitiveData() {
+    password = "";
+  }
+
+  @Override
   public boolean equals( Object o ) {
     if ( this == o ) {
       return true;

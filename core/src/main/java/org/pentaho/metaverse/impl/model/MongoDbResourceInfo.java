@@ -189,4 +189,9 @@ public class MongoDbResourceInfo extends BaseResourceInfo implements IExternalRe
   public void setCollection( String collection ) {
     this.collection = collection;
   }
+
+  @Override
+  public void cleanupSensitiveData() {
+    password = "";
+  }
 }

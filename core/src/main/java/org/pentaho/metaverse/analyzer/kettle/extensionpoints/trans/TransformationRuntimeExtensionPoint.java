@@ -299,9 +299,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       map.entrySet().stream().forEach( list -> {
         if ( list != null ) {
           list.getValue().forEach( resourceInfo -> {
-            if ( resourceInfo instanceof JdbcResourceInfo ) {
-              ( (JdbcResourceInfo) resourceInfo ).setPassword( "" );
-            }
+            resourceInfo.cleanupSensitiveData();
           } );
         }
       } );
