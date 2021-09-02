@@ -302,9 +302,9 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
       if ( list == null ) {
         return;
       }
-      list.getValue().forEach( resourceInfo -> {
-        resourceInfo.cleanupSensitiveData();
-      } );
+      list.getValue().forEach( resourceInfo ->
+        resourceInfo.cleanupSensitiveData()
+      );
 
     } );
   }
