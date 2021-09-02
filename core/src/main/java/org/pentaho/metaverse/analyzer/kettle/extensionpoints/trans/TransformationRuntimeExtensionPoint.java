@@ -48,6 +48,7 @@ import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.IParamInfo;
 import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.api.model.JdbcResourceInfo;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.pentaho.metaverse.impl.MetaverseCompletionService;
@@ -292,12 +293,20 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
   }
 
   private void removeSensitiveDataFromHolder( LineageHolder holder ) {
-    if ( holder.getExecutionProfile() != null ) {
-      JdbcResourceInfo resourceInfo =
-        (JdbcResourceInfo) holder.getExecutionProfile().getExecutionData().getExternalResources().get( "Table output" )
-          .get( 0 );
-      resourceInfo.setPassword( "" );
+    if ( holder.getExecutionProfile() == null ) {
+      return;
     }
+    Map<String, List<IExternalResourceInfo>> map =
+      holder.getExecutionProfile().getExecutionData().getExternalResources();
+    map.entrySet().stream().forEach( list -> {
+      if ( list == null ) {
+        return;
+      }
+      list.getValue().forEach( resourceInfo ->
+        resourceInfo.cleanupSensitiveData()
+      );
+
+    } );
   }
 
   protected void createLineGraph( final Trans trans ) {
