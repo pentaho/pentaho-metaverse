@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,26 +22,11 @@
 
 package org.pentaho.metaverse.api.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+public interface ISensitiveDataCleanable {
 
-import java.util.Map;
-
-public interface IExternalResourceInfo extends IInfo, ISensitiveDataCleanable {
-
-  String JSON_PROPERTY_TYPE = "type";
-  String JSON_PROPERTY_INPUT = "input";
-  String JSON_PROPERTY_OUTPUT = "output";
-  String JSON_PROPERTY_ATTRIBUTES = "attributes";
-
-  @JsonProperty( JSON_PROPERTY_TYPE )
-  String getType();
-
-  @JsonProperty( JSON_PROPERTY_INPUT )
-  boolean isInput();
-
-  @JsonProperty( JSON_PROPERTY_OUTPUT )
-  boolean isOutput();
-
-  @JsonProperty( JSON_PROPERTY_ATTRIBUTES )
-  Map<Object, Object> getAttributes();
+  /**
+   * Cleaning sensitive data
+   */
+  default void cleanupSensitiveData() {
+  }
 }

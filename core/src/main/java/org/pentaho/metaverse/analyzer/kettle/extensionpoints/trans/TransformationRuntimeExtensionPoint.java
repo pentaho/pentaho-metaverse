@@ -293,17 +293,20 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
   }
 
   private void removeSensitiveDataFromHolder( LineageHolder holder ) {
-    if ( holder.getExecutionProfile() != null ) {
-      Map<String, List<IExternalResourceInfo>> map =
-        holder.getExecutionProfile().getExecutionData().getExternalResources();
-      map.entrySet().stream().forEach( list -> {
-        if ( list != null ) {
-          list.getValue().forEach( resourceInfo -> {
-            resourceInfo.cleanupSensitiveData();
-          } );
-        }
-      } );
+    if ( holder.getExecutionProfile() == null ) {
+      return;
     }
+    Map<String, List<IExternalResourceInfo>> map =
+      holder.getExecutionProfile().getExecutionData().getExternalResources();
+    map.entrySet().stream().forEach( list -> {
+      if ( list == null ) {
+        return;
+      }
+      list.getValue().forEach( resourceInfo -> {
+        resourceInfo.cleanupSensitiveData();
+      } );
+
+    } );
   }
 
   protected void createLineGraph( final Trans trans ) {
