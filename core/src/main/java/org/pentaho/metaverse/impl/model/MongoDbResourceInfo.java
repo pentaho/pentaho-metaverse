@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.impl.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
 import org.pentaho.dictionary.DictionaryConst;
@@ -177,6 +178,9 @@ public class MongoDbResourceInfo extends BaseResourceInfo implements IExternalRe
 
   @JsonProperty( JSON_PROPERTY_PASSWORD )
   protected String getEncryptedPassword() {
+    if ( StringUtils.isEmpty( password ) ) {
+      return StringUtils.EMPTY;
+    }
     // Need "Encrypted prefix for decryptPasswordOptionallyEncrypted() to operate properly
     return Encr.PASSWORD_ENCRYPTED_PREFIX + Encr.encryptPassword( password );
   }
