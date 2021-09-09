@@ -42,6 +42,8 @@ public class LineageDataResource {
   private String dbHost;
   private String dbName;
   private String dbPort;
+  private String hdfsHost;
+  private String hdfsPort;
 
   public LineageDataResource(String name ) {
     this.name = name;
@@ -52,6 +54,8 @@ public class LineageDataResource {
     dbHost = "";
     dbName = "";
     dbPort = "";
+    hdfsHost = "";
+    hdfsPort = "";
   }
 
   public String getName() {
@@ -130,6 +134,22 @@ public class LineageDataResource {
     this.dbPort = dbPort;
   }
 
+  public String getHdfsPort() {
+    return hdfsPort;
+  }
+
+  public void setHdfsPort( String hdfsPort ) {
+    this.hdfsPort = hdfsPort;
+  }
+
+  public String getHdfsHost() {
+    return hdfsHost;
+  }
+
+  public void setHdfsHost( String hdfsHost ) {
+    this.hdfsHost = hdfsHost;
+  }
+
   @Override
   public String toString() {
     return "name: ".concat( name )
@@ -137,7 +157,9 @@ public class LineageDataResource {
       .concat( " catalogResourceId: " ).concat( catalogResourceID )
       .concat( " dbHost: " ).concat( dbHost )
       .concat( " dbPort: " ).concat( dbPort )
-      .concat( " dbSchema: " ).concat( dbSchema );
+      .concat( " dbSchema: " ).concat( dbSchema )
+      .concat( " hdfsHost: " ).concat( hdfsHost )
+      .concat( " hdfsPort: " ).concat( hdfsPort );
   }
 
   @Override
@@ -158,13 +180,14 @@ public class LineageDataResource {
       && safeStringMatch( this.getDbHost(), r2.getDbHost() )
       && safeStringMatch( this.getDbPort(), r2.getDbPort() )
       && safeStringMatch( this.getDbName(), r2.getDbName() )
+      && safeStringMatch( this.getHdfsHost(), r2.getHdfsHost() )
+      && safeStringMatch( this.getHdfsPort(), r2.getHdfsPort() )
       && safeListMatch( this.getFields(), r2.getFields() )
       && safeStringMatch( this.getCatalogResourceID(), r2.getCatalogResourceID() );
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash( name, path, fields, fieldRelationships, catalogResourceID, vertexId, dbSchema, dbName, dbHost, dbPort );
+    return Objects.hash( name, path, fields, fieldRelationships, catalogResourceID, vertexId, dbSchema, dbName, dbHost, dbPort, hdfsHost, hdfsPort );
   }
-
 }

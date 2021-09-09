@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The GraphMLWriter class contains methods for writing a metaverse graph model in GraphML format
@@ -51,6 +53,8 @@ import java.util.Map;
 public class GraphCatalogWriter extends BaseGraphWriter {
 
   private static final Logger log = LogManager.getLogger( GraphCatalogWriter.class );
+  private final Pattern hdfsPathPattern = Pattern.compile( "/?(\\w+\\:.+\\@)?([\\w\\.]+)(\\:(\\d+))?/.*" );
+  // eg. of path from an HDFS source as presented in a lineage graph: /devuser:***@hdp31n1.pentaho.net:8020/user/prinehart/waterline/sales_data.csv
 
   private CatalogLineageClient lineageClient;
 
@@ -99,6 +103,7 @@ public class GraphCatalogWriter extends BaseGraphWriter {
       String sourceName = vertex.getProperty( DictionaryConst.PROPERTY_PATH );
       if ( propertyPopulated( sourceName ) ) {
         LineageDataResource dataResource = new LineageDataResource( getSourceName( sourceName ) );
+        parseHdfsHost( sourceName, dataResource );
         dataResource.setVertexId( vertex.getId() );
         dataResource.setPath( sourceName );
         dataResource.setFields( getDatasourceFields( sourceName, graph ) );
@@ -183,6 +188,7 @@ public class GraphCatalogWriter extends BaseGraphWriter {
             Vertex dbNode = tableEdge.getVertex( Direction.OUT );
             dataResource.setDbHost( dbNode.getProperty( DictionaryConst.PROPERTY_HOST_NAME ) );
             dataResource.setDbName( dbNode.getProperty( DictionaryConst.PROPERTY_DATABASE_NAME ) );
+            dataResource.setDbPort( dbNode.getProperty( DictionaryConst.PROPERTY_PORT ) );
           }
         }
       }
@@ -199,6 +205,19 @@ public class GraphCatalogWriter extends BaseGraphWriter {
       sourceName = fullName;
     }
     return sourceName;
+  }
+
+  @VisibleForTesting
+  protected void parseHdfsHost( String path, LineageDataResource dataResource ) {
+    Matcher m = hdfsPathPattern.matcher( path );
+    if ( !m.matches() ) {
+      log.info( String.format( "Did not find an hdfs file path match on path %s", path ) );
+    } else {
+      String host = m.group( 2 );
+      String port = m.group( 4 );
+      dataResource.setHdfsPort( null == port ? "" : port );
+      dataResource.setHdfsHost( null == host ? "" : host );
+    }
   }
 
   private List<String> getDatasourceFields( String sourceName, Graph graph ) {

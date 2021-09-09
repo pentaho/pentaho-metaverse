@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.pentaho.di.plugins.catalog.api.CatalogClient;
 import com.pentaho.di.plugins.catalog.api.CatalogClientException;
+import com.pentaho.di.plugins.catalog.api.authentication.AuthenticationType;
 import com.pentaho.di.plugins.catalog.api.entities.DataResource;
 import com.pentaho.di.plugins.catalog.api.entities.DataSource;
 import com.pentaho.di.plugins.catalog.api.entities.search.Facet;
@@ -43,6 +44,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -67,6 +69,7 @@ public class CatalogLineageClient {
   private final String catalogTokenUrl;
   private final String catalogClientId;
   private final String catalogClientSecret;
+  private static final String noTokenUrl = "${lineage.catalog.token.url}";
 
   public CatalogLineageClient( String catalogUrl,
                                   String catalogUsername,
@@ -145,9 +148,9 @@ public class CatalogLineageClient {
     } else {
       log.error( String.format( "Multiple matches for resource %s in catalog: ", lineageDataResource.getName() ) );
       for ( DataResource dataResource : catalogMatchResource ) {
-        log.error( String.format( "key: %s path: %s tableName: %s schema: %s dbName: %s dataSource: %s"
-          , dataResource.getKey(), dataResource.getResourcePath(), dataResource.getTableName()
-          , dataResource.getDataSchemaName(), dataResource.getDatabaseName(), dataResource.getDataSourceName() ) );
+        log.error( String.format( "key: %s path: %s tableName: %s schema: %s dbName: %s dataSource: %s",
+          dataResource.getKey(), dataResource.getResourcePath(), dataResource.getTableName(),
+          dataResource.getDataSchemaName(), dataResource.getDatabaseName(), dataResource.getDataSourceName() ) );
       }
     }
   }
@@ -164,16 +167,23 @@ public class CatalogLineageClient {
     throws CatalogClientException {
     if ( null != lineageDataResource.getDbHost() ) {
       DataSource dataSource = getCatalogClient().getDataSources().read( catalogDataResource.getDataSourceKey() );
-      log.debug( String.format( "Checking catalog resource jdbcUrl %s, dbName %s, schemaName %s, tableName %s"
-        , dataSource.getJdbcUrl(), catalogDataResource.getDatabaseName(), catalogDataResource.getDataSchemaName(), catalogDataResource.getTableName() ) );
-      //TODO: this search likely needs further refinement; need to understand how db resources are populated
-      return dataSource.getJdbcUrl().contains( lineageDataResource.getDbHost() + ":" + lineageDataResource.getDbPort() )
-        && catalogDataResource.getDatabaseName().equals( lineageDataResource.getDbName() )
-        && catalogDataResource.getDataSchemaName().equals( lineageDataResource.getDbSchema() )
-        && catalogDataResource.getTableName().equals( lineageDataResource.getName() );
+      log.debug( String.format( "Checking catalog resource jdbcUrl %s, schemaName %s",
+        dataSource.getJdbcUrl(), dataSource.getSourcePath() ) );
+      return //dataSource.getJdbcUrl().contains( lineageDataResource.getDbHost() + ":" + lineageDataResource.getDbPort() )
+       // &&
+      dataSource.getSourcePath().equalsIgnoreCase( getCatalogDataSourcePath( lineageDataResource ) )
+        && catalogDataResource.getResourcePath().equalsIgnoreCase( getCatalogResourcePath( lineageDataResource ) );
     } else {
       return false;
     }
+  }
+
+  private String getCatalogResourcePath( LineageDataResource lineageDataResource ) {
+    return "/" + lineageDataResource.getDbSchema() + "." + lineageDataResource.getName();
+  }
+
+  private String getCatalogDataSourcePath( LineageDataResource lineageDataResource ) {
+    return "/" + lineageDataResource.getDbSchema();
   }
 
   private List<DataResource> getResourcesByName( String resourceName ) {
@@ -379,13 +389,17 @@ public class CatalogLineageClient {
 
   private CatalogClient getCatalogClient() throws CatalogClientException {
     CatalogDetails catalogDetails = new CatalogDetails();
-    catalogDetails.setAuthType( "1" );
+    AuthenticationType authenticationType = catalogTokenUrl.isEmpty() || noTokenUrl.equals( catalogTokenUrl ) ?
+      AuthenticationType.BASIC_AUTH : AuthenticationType.OAUTH_2;
+    catalogDetails.setAuthType( String.valueOf( authenticationType.getValue() ) );
     catalogDetails.setUrl( catalogUrl );
     catalogDetails.setUsername( catalogUsername );
     catalogDetails.setPassword( catalogPassword );
-    catalogDetails.setTokenUrl( catalogTokenUrl );
-    catalogDetails.setClientId( catalogClientId );
-    catalogDetails.setClientSecret( catalogClientSecret );
+    if ( !AuthenticationType.BASIC_AUTH.equals( authenticationType ) ) {
+      catalogDetails.setTokenUrl( catalogTokenUrl );
+      catalogDetails.setClientId( catalogClientId );
+      catalogDetails.setClientSecret( catalogClientSecret );
+    }
 
     CatalogClient catalogClient;
     CatalogClientBuilderUtil catalogClientBuilderUtil = new CatalogClientBuilderUtil( catalogDetails );
