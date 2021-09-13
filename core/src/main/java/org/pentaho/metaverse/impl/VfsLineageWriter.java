@@ -40,6 +40,7 @@ import org.pentaho.metaverse.api.ILineageWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.graph.GraphCatalogWriter;
 import org.pentaho.metaverse.graph.GraphMLWriter;
 import org.pentaho.metaverse.graph.GraphSONWriter;
 import org.pentaho.metaverse.impl.model.ExecutionProfileUtil;
@@ -62,10 +63,20 @@ public class VfsLineageWriter implements ILineageWriter {
   private static final int MAX_NAME_LEN = 150;  // should be a safe, conservative number
 
   private IGraphWriter graphWriter = new GraphMLWriter();
+  private GraphCatalogWriter catalogWriter
+    = new GraphCatalogWriter( "", "", "", "", "", "" );
   private String outputFolder = DEFAULT_OUTPUT_FOLDER;
   private String outputStrategy = DEFAULT_OUTPUT_STRATEGY;
 
   protected static SimpleDateFormat dateFolderFormat = new SimpleDateFormat( "YYYYMMdd" );
+
+  public GraphCatalogWriter getCatalogWriter() {
+    return catalogWriter;
+  }
+
+  public void setCatalogWriter( GraphCatalogWriter catalogWriter ) {
+    this.catalogWriter = catalogWriter;
+  }
 
   private static enum VFS_Prefixes {
     BZIP2, FILE, FTP, FTPS, GZIP, HDFS, HTTP, HTTPS, JAR, RAM, RES, SFTP, TAR, TEMP, WEBDAV, ZIP
@@ -97,6 +108,9 @@ public class VfsLineageWriter implements ILineageWriter {
       if ( builder != null ) {
         // no-op by default, can be used to introduce an artificial delay in the graphml file, for testing purposes
         MetaverseUtil.delay();
+        if ( catalogWriter.clientConfigured() ) {
+          catalogWriter.outputGraph( builder.getGraph(), null );
+        }
         try ( OutputStream fos = getGraphOutputStream( holder ) ) {
           if ( fos != null ) {
             graphWriter.outputGraph( builder.getGraph(), fos );
