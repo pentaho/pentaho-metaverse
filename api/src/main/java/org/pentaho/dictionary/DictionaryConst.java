@@ -106,11 +106,6 @@ import org.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
   public static final String PROPERTY_PATH = "path";
 
   /**
-   * Property key for a file URI's schema, e.g. hdfs, s3
-   */
-  public static final String PROPERTY_FILE_SCHEME = "fileScheme";
-
-  /**
    * Property key for suggested "color" for a node when a graph is visualized
    */
   public static final String PROPERTY_COLOR = "color";

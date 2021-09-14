@@ -240,12 +240,4 @@ public class MetaverseUtil {
       }
     }
   }
-
-  public static boolean safeStringMatch( String s1, String s2 ) {
-    return ( s1 != null && s1.equals( s2 ) ) || ( s1 == null && s2 == null );
-  }
-
-  public static boolean safeListMatch( List l1, List l2 ) {
-    return ( l1 != null && l2 != null && l1.containsAll( l2 ) && l2.containsAll( l1 ) ) || ( l1 == null && l2 == null );
-  }
 }
