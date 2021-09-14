@@ -275,18 +275,6 @@
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
-      <dependency>
-        <groupId>com.pentaho.di.plugins</groupId>
-        <artifactId>catalog-plugin-api</artifactId>
-        <version>${project.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.pentaho.di.plugins</groupId>
-        <artifactId>catalog-plugin-core</artifactId>
-        <version>${project.version}</version>
-        <scope>provided</scope>
-      </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -299,7 +287,6 @@
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>
-            <DynamicImport-Package>*</DynamicImport-Package>
             <Import-Package>org.pentaho.dictionary,
               org.pentaho.metaverse.api,
               org.pentaho.metaverse.api.*,

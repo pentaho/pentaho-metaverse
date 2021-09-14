@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -111,12 +111,10 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     throws MetaverseException {
 
     String normalized;
-    String scheme;
     IMetaverseNode fileNode = null;
 
     if ( fileName != null && descriptor != null ) {
       normalized = normalizeFilePath() ? KettleAnalyzerUtil.normalizeFilePath( fileName ) : fileName;
-      scheme = KettleAnalyzerUtil.getFilePathScheme( fileName );
 
       INamespace ns = descriptor.getNamespace();
       INamespace parentNs = ns.getParentNamespace();
@@ -124,7 +122,6 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
       fileNode = getMetaverseObjectFactory().createNodeObject( parentNs == null ? ns : parentNs, normalized, nodeType );
 
       fileNode.setProperty( DictionaryConst.PROPERTY_PATH, normalized );
-      fileNode.setProperty( DictionaryConst.PROPERTY_FILE_SCHEME, scheme );
       fileNode.setLogicalIdGenerator( DictionaryConst.LOGICAL_ID_GENERATOR_FILE );
     }
     return fileNode;
