@@ -67,6 +67,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.URLConnection;
 import java.util.Collection;
+import java.util.List;
 
 public class KettleAnalyzerUtil {
 
@@ -93,6 +94,21 @@ public class KettleAnalyzerUtil {
       File f = new File( path );
       return f.getAbsolutePath();
     } catch ( Exception e ) {
+      throw new MetaverseException( e );
+    }
+  }
+
+  /**
+   *
+   * @param filePath
+   * @return
+   * @throws MetaverseException
+   */
+  public static String getFilePathScheme( String filePath ) throws MetaverseException {
+    try {
+      FileObject fo = KettleVFS.getFileObject( filePath );
+      return fo.getURI().getScheme();
+    } catch ( KettleFileException e ) {
       throw new MetaverseException( e );
     }
   }
@@ -419,5 +435,13 @@ public class KettleAnalyzerUtil {
     final IMetaverseConfig config = PentahoSystem.get( IMetaverseConfig.class );
     // return true by default (if config is null)
     return config == null || config.getConsolidateSubGraphs();
+  }
+
+  public static boolean safeStringMatch( String s1, String s2 ) {
+    return ( s1 != null && s1.equals( s2 ) ) || ( s1 == null && s2 == null );
+  }
+
+  public static boolean safeListMatch( List l1, List l2 ) {
+    return ( l1 != null && l2 != null && l1.containsAll( l2 ) && l2.containsAll( l1 ) ) || ( l1 == null && l2 == null );
   }
 }

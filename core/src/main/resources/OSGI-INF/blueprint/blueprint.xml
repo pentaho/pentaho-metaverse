@@ -618,12 +618,26 @@
 
   <service id="IMetaverseReaderService" interface="org.pentaho.metaverse.api.IMetaverseReader" ref="IMetaverseReader"/>
 
+  <reference id="catalogLineageClientProviderRef"
+             interface="org.pentaho.metaverse.api.ICatalogLineageClientProvider"
+             availability="optional"/>
+
   <!-- Lineage writers -->
   <bean id="graphCsvWriter" class="org.pentaho.metaverse.graph.GraphCsvWriter"/>
   <bean id="graphSONWriter" class="org.pentaho.metaverse.graph.GraphSONWriter"/>
   <bean id="graphMLWriter" class="org.pentaho.metaverse.graph.GraphMLWriter"/>
+  <bean id="graphCatalogWriter" class="org.pentaho.metaverse.graph.GraphCatalogWriter">
+    <argument value="${lineage.catalog.url}"/>
+    <argument value="${lineage.catalog.username}"/>
+    <argument value="${lineage.catalog.password}"/>
+    <argument value="${lineage.catalog.token.url}"/>
+    <argument value="${lineage.catalog.client.id}"/>
+    <argument value="${lineage.catalog.client.secret}"/>
+    <property name="catalogLineageClientProvider" ref="catalogLineageClientProviderRef"/>
+  </bean>
 
   <bean id="lineageWriter" class="org.pentaho.metaverse.impl.VfsLineageWriter" scope="prototype">
+    <property name="catalogWriter" ref="graphCatalogWriter"/>
     <property name="graphWriter" ref="graphMLWriter"/>
     <property name="outputFolder" value="${lineage.execution.output.folder}"/>
     <property name="outputStrategy" value="${lineage.execution.generation.strategy}"/>
