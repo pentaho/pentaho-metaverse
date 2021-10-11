@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -35,6 +35,7 @@ import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
 import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ import static org.junit.Assert.*;
 import static org.pentaho.dictionary.DictionaryConst.*;
 
 @RunWith( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 @PrepareForTest( MetaverseConfig.class )
 // TODO: Ignored for now, remove the @Ignore annotation once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved
 @Ignore

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -33,6 +33,7 @@ import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
 import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
@@ -44,6 +45,7 @@ import static org.junit.Assert.assertNull;
 import static org.pentaho.dictionary.DictionaryConst.*;
 
 @RunWith( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 @PrepareForTest( MetaverseConfig.class )
 // TODO: Ignore the test for now, as it will not run succesfully on a node that does not have the required DB configured
 @Ignore
