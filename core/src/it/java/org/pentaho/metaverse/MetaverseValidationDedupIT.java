@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -32,6 +32,7 @@ import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ import java.util.List;
  * the {@code deduplicateTransformationFields} graph dedupping turned on.
  */
 @RunWith( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 @PrepareForTest( MetaverseConfig.class )
 public class MetaverseValidationDedupIT extends MetaverseValidationIT {
 

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -78,6 +78,7 @@ import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.pentaho.metaverse.api.analyzer.kettle.step.SubtransAnalyzer;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -126,6 +127,7 @@ import static org.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceSte
 
 
 @RunWith ( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 @PrepareForTest( KettleAnalyzerUtil.class )
 public class AnnotationDrivenStepMetaAnalyzerTest {
 

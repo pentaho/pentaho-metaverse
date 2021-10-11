@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018-2020 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -34,6 +34,7 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.metaverse.api.IMetaverseConfig;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
@@ -49,6 +50,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
 @RunWith( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 public class ExternalResourceCacheTest {
 
   @Mock

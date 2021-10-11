@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -39,7 +39,6 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.Trans;
-import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.ILineageWriter;
@@ -52,6 +51,7 @@ import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -64,6 +64,7 @@ import static org.mockito.Mockito.*;
 
 @PrepareForTest( { ExtensionPointHandler.class, MetaverseConfig.class, KettleAnalyzerUtil.class } )
 @RunWith( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 public class JobRuntimeExtensionPointTest {
 
   private static final String TEST_SERVER = "test.pentaho.com";

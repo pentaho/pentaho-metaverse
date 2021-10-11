@@ -52,6 +52,7 @@ import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
 import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -74,6 +75,7 @@ import static org.mockito.Mockito.when;
  * User: RFellows Date: 8/14/14
  */
 @RunWith( PowerMockRunner.class )
+@PowerMockIgnore( "jdk.internal.reflect.*" )
 @PrepareForTest( KettleVFS.class )
 public class KettleAnalyzerUtilTest {
 
