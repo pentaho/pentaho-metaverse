@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -64,4 +64,5 @@ public class JdbcResourceInfo extends DbcResourceInfo implements IExternalResour
     this.username = username;
     this.password = password;
   }
+
 }

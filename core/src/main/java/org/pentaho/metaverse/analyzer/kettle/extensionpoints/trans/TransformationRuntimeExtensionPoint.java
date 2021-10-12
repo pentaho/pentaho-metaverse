@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -48,6 +48,8 @@ import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.IParamInfo;
 import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.api.model.IExternalResourceInfo;
+import org.pentaho.metaverse.api.model.JdbcResourceInfo;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
 import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
@@ -287,11 +289,29 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     lineageWorker.start();
   }
 
+  private void removeSensitiveDataFromHolder( LineageHolder holder ) {
+    if ( holder.getExecutionProfile() == null ) {
+      return;
+    }
+    Map<String, List<IExternalResourceInfo>> map =
+      holder.getExecutionProfile().getExecutionData().getExternalResources();
+    map.entrySet().stream().forEach( list -> {
+      if ( list == null ) {
+        return;
+      }
+      list.getValue().forEach( resourceInfo ->
+        resourceInfo.cleanupSensitiveData()
+      );
+
+    } );
+  }
+
   protected void createLineGraph( final Trans trans ) {
     log.info( Messages.getString( "INFO.WrittingGraphForTransformation", trans.getName() ) );
     try {
       // Get the current execution profile for this transformation
       LineageHolder holder = TransLineageHolderMap.getInstance().getLineageHolder( trans );
+
       Future lineageTask = holder.getLineageTask();
       if ( lineageTask != null ) {
         try {
@@ -314,7 +334,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
         executionProfile = new ExecutionProfile();
       }
       populateExecutionProfile( executionProfile, trans );
-
+      removeSensitiveDataFromHolder( holder );
       // Export the lineage info (execution profile, lineage graph, etc.)
       try {
         if ( lineageWriter != null && !"none".equals( lineageWriter.getOutputStrategy() ) ) {
