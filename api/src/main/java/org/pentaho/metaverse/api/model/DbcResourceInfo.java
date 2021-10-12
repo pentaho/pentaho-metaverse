@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2020 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2020-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -100,6 +100,11 @@ public abstract class DbcResourceInfo extends BaseDatabaseResourceInfo implement
 
   public void setDatabaseName( String databaseName ) {
     this.databaseName = databaseName;
+  }
+
+  @Override
+  public void cleanupSensitiveData() {
+    password = null;
   }
 
   @Override
