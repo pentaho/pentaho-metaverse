@@ -324,7 +324,7 @@ public abstract  class BaseMetaverseValidationIT {
       // find a match
       boolean matchFound = false;
       for ( final Concept linkedNode : linkedNodes ) {
-        if ( linkedNode.equals( outptuNode ) ) {
+        if ( String.valueOf( outptuNode ).equals( String.valueOf( linkedNode ) ) ) {
           matchFound = true;
           break;
         }

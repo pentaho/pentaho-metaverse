@@ -908,7 +908,7 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <filename>/Users/aramos/Documents/Hitachi/REPOS/R2D2-DEV/CatalogTestKTR/person.csv</filename>
+    <filename>src/it/resources/person.csv</filename>
     <filename_field/>
     <rownum_field/>
     <include_filename>N</include_filename>
@@ -982,7 +982,7 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <filename>/Users/aramos/Documents/Hitachi/REPOS/R2D2-DEV/CatalogTestKTR/person_details.csv</filename>
+    <filename>src/it/resources/person_details.csv</filename>
     <filename_field/>
     <rownum_field/>
     <include_filename>N</include_filename>
