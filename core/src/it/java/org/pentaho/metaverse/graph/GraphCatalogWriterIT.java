@@ -35,6 +35,8 @@ import org.pentaho.metaverse.api.model.catalog.FieldLevelRelationship;
 import org.pentaho.metaverse.api.model.catalog.LineageDataResource;
 import org.pentaho.metaverse.step.StepAnalyzerValidationIT;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,12 +65,15 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
 
     graphCatalogWriter.outputGraphImpl( graph, null );
 
+    Path personCsvPath = Paths.get("src", "it", "resources", "person.csv");
+    Path personDetailsCsvPath = Paths.get("src", "it", "resources", "person_details.csv");
+
     LineageDataResource personCsv = new LineageDataResource( "person.csv" );
-    personCsv.setPath( "/Users/aramos/Documents/Hitachi/REPOS/R2D2-DEV/CatalogTestKTR/person.csv" );
+    personCsv.setPath( personCsvPath.toAbsolutePath().toString() );
     List<String> personFields = Arrays.asList( "first_name", "id", "last_name" );
     personCsv.setFields( personFields );
     LineageDataResource personDetailsCsv = new LineageDataResource( "person_details.csv" );
-    personDetailsCsv.setPath( "/Users/aramos/Documents/Hitachi/REPOS/R2D2-DEV/CatalogTestKTR/person_details.csv" );
+    personDetailsCsv.setPath( personDetailsCsvPath.toAbsolutePath().toString() );
     List<String> personDetailsFields = Arrays.asList( "gender", "ip_address", "id", "age", "email" );
     personDetailsCsv.setFields( personDetailsFields );
     LineageDataResource outputTarget = new LineageDataResource( "CombinedCsvToTextOut.csv" );
@@ -131,8 +136,9 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
 
     graphCatalogWriter.outputGraphImpl( graph, null );
 
+    Path personCsvPath = Paths.get("src", "it", "resources", "person.csv");
     LineageDataResource personCsv = new LineageDataResource( "person.csv" );
-    personCsv.setPath( "/mnt/c/Users/prinehart/Downloads/person.csv" );
+    personCsv.setPath( personCsvPath.toAbsolutePath().toString() );
     List<String> personFields = Arrays.asList( "first_name", "id", "last_name" );
     personCsv.setFields( personFields );
     LineageDataResource outputTarget = new LineageDataResource( "silly_test" );

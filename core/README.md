@@ -31,6 +31,13 @@ mvn test
 mvn integration-test
 ```
 
+**Install integration test**
+
+*Note that the big-data-plugin/kettle-plugin/kafka project's integration tests rely on this project's integration test artifacts.
+```
+mvn install -DrunITs
+```
+
 **Run the unit tests with code coverage.** This will output an html report here: `target/site/cobertura/index.html`
 ```
 mvn clean compile test-compile cobertura:cobertura

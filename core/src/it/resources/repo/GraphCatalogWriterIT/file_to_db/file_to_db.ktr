@@ -645,7 +645,7 @@
     <length>Characters</length>
     <add_to_result_filenames>Y</add_to_result_filenames>
     <file>
-      <name>/mnt/c/Users/prinehart/Downloads/person.csv</name>
+      <name>src/it/resources/person.csv</name>
       <filemask/>
       <exclude_filemask/>
       <file_required>N</file_required>
