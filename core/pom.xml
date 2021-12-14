@@ -1,15 +1,14 @@
-<?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>pentaho</groupId>
     <artifactId>pentaho-metaverse</artifactId>
-    <version>9.3.0.0-SNAPSHOT</version>
+    <version>9.3.0.0-14</version>
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse-core</artifactId>
-  <version>9.3.0.0-SNAPSHOT</version>
+  <version>9.3.0.0-14</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Provides data lineage capabilities</description>
@@ -26,9 +25,9 @@
     <pdi.plugin.name>pdi</pdi.plugin.name>
     <dependency.commons-io.commons-io.version>2.4</dependency.commons-io.commons-io.version>
     <dependency.com.google.guava.guava.version>17.0</dependency.com.google.guava.guava.version>
-    <pentaho-mongodb-plugin.version>9.3.0.0-SNAPSHOT</pentaho-mongodb-plugin.version>
-    <platform.version>9.3.0.0-SNAPSHOT</platform.version>
-    <metastore.version>9.3.0.0-SNAPSHOT</metastore.version>
+    <pentaho-mongodb-plugin.version>9.3.0.0-14</pentaho-mongodb-plugin.version>
+    <platform.version>9.3.0.0-14</platform.version>
+    <metastore.version>9.3.0.0-14</metastore.version>
     <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
     <!--<pdi.version>${project.version}</pdi.version>-->
     <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
@@ -362,7 +361,7 @@
           <arguments>
             <argument>src/it/resources/metaverse-pdi.groovy</argument>
           </arguments>
-          <systemProperties></systemProperties>
+          <systemProperties/>
         </configuration>
       </plugin>
       <plugin>
