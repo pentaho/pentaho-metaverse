@@ -28,9 +28,8 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.Tokens;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.osgi.service.blueprint.container.ServiceUnavailableException;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.ICatalogLineageClient;
@@ -170,7 +169,7 @@ public class GraphCatalogWriter extends BaseGraphWriter {
     }
   }
 
-  @NotNull private LineageDataResource getLineageDataResourceFromTableVertex( Graph graph, Vertex vertex, String tableName ) {
+  private LineageDataResource getLineageDataResourceFromTableVertex( Graph graph, Vertex vertex, String tableName ) {
     LineageDataResource dataResource = new LineageDataResource( tableName );
     dataResource.setVertexId( vertex.getId() );
     findDbConnectionProperties( vertex, dataResource, DictionaryConst.LINK_WRITESTO );
@@ -195,7 +194,7 @@ public class GraphCatalogWriter extends BaseGraphWriter {
     }
   }
 
-  @NotNull private LineageDataResource getLineageDataResourceFromQueryVertex( Graph graph, Vertex vertex, String queryString ) {
+  private LineageDataResource getLineageDataResourceFromQueryVertex( Graph graph, Vertex vertex, String queryString ) {
     LineageDataResource dataResource = new LineageDataResource( queryString );
     dataResource.setVertexId( vertex.getId() );
     findDbConnectionProperties( vertex, dataResource, DictionaryConst.LINK_READBY );
@@ -203,7 +202,7 @@ public class GraphCatalogWriter extends BaseGraphWriter {
     return dataResource;
   }
 
-  @NotNull private LineageDataResource getLineageDataResourceFromFileVertex( Graph graph, Vertex vertex, String path ) {
+  private LineageDataResource getLineageDataResourceFromFileVertex( Graph graph, Vertex vertex, String path ) {
     LineageDataResource dataResource = new LineageDataResource( getSourceName( path ) );
     String fileScheme = vertex.getProperty( DictionaryConst.PROPERTY_FILE_SCHEME );
     if ( null != fileScheme ) {
