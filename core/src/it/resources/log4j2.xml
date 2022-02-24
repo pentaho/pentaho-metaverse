@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+  <Appenders>
+    <Console name="consoleAppender">
+      <PatternLayout>
+        <Pattern>%d{ABSOLUTE} %-5p [%c{1}] %m%n</Pattern>
+      </PatternLayout>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Logger name="org.pentaho.metaverse" level="DEBUG" additivity="false">
+      <AppenderRef ref="consoleAppender" />
+    </Logger>
+  </Loggers>
+  <Root level="WARN">
+    <AppenderRef ref="consoleAppender" />
+  </Root>
+</Configuration>
