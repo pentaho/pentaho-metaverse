@@ -24,7 +24,6 @@
     <enunciate.version>1.27</enunciate.version>
     <gremlin-java.version>2.6.0</gremlin-java.version>
     <pdi.plugin.name>pdi</pdi.plugin.name>
-    <dependency.commons-io.commons-io.version>2.4</dependency.commons-io.commons-io.version>
     <dependency.com.google.guava.guava.version>17.0</dependency.com.google.guava.guava.version>
     <pentaho-mongodb-plugin.version>9.3.0.0-SNAPSHOT</pentaho-mongodb-plugin.version>
     <platform.version>9.3.0.0-SNAPSHOT</platform.version>
@@ -75,7 +74,7 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>${dependency.commons-io.commons-io.version}</version>
+      <version>${commons-io.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
