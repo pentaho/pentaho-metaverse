@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.httpclient;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.ArrayUtils;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -44,6 +45,19 @@ import java.util.LinkedList;
 
 public class HTTPClientExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<HTTP, HTTPMeta> {
+
+  private static HTTPClientExternalResourceConsumer instance;
+
+  @VisibleForTesting
+  protected HTTPClientExternalResourceConsumer() {
+  }
+
+  public static HTTPClientExternalResourceConsumer getInstance() {
+    if ( null == instance ) {
+      instance = new HTTPClientExternalResourceConsumer();
+    }
+    return instance;
+  }
 
   @Override
   public boolean isDataDriven( HTTPMeta meta ) {

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -38,7 +38,8 @@ public class StepExternalResourceConsumerProviderTest {
 
   @Before
   public void setUp() throws Exception {
-    stepExternalResourceConsumerProvider = new StepExternalResourceConsumerProvider();
+    StepExternalResourceConsumerProvider.clearInstance();
+    stepExternalResourceConsumerProvider = StepExternalResourceConsumerProvider.getInstance();
   }
 
   @Test

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,13 +23,15 @@
 package org.pentaho.metaverse.analyzer.kettle.jobentry;
 
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +48,24 @@ public class JobEntryExternalResourceConsumerProvider implements IJobEntryExtern
 
   private Map<Class<? extends JobEntryBase>, Set<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap;
 
+  private static JobEntryExternalResourceConsumerProvider instance;
 
-  public JobEntryExternalResourceConsumerProvider() {
+  public static JobEntryExternalResourceConsumerProvider getInstance() {
+    if ( null == instance ) {
+      instance = new JobEntryExternalResourceConsumerProvider();
+    }
+    return instance;
+  }
+
+  @VisibleForTesting
+  public static void clearInstance() {
+    instance = null;
+  }
+
+  private JobEntryExternalResourceConsumerProvider() {
     jobEntryConsumerMap =
-      new ConcurrentHashMap<Class<? extends JobEntryBase>, Set<IJobEntryExternalResourceConsumer>>();
+      new ConcurrentHashMap<>();
+    jobEntryExternalResourceConsumers = Collections.synchronizedList( new ArrayList<>() );
   }
 
   /**
@@ -69,6 +85,10 @@ public class JobEntryExternalResourceConsumerProvider implements IJobEntryExtern
    */
   @Override
   public List<IJobEntryExternalResourceConsumer> getExternalResourceConsumers() {
+    if ( null == jobEntryExternalResourceConsumers || jobEntryExternalResourceConsumers.isEmpty() ) {
+      jobEntryExternalResourceConsumers = Collections.synchronizedList( new ArrayList<>() );
+      jobEntryExternalResourceConsumers.addAll( PentahoSystem.getAll( IJobEntryExternalResourceConsumer.class ) );
+    }
     return jobEntryExternalResourceConsumers;
   }
 
@@ -82,14 +102,13 @@ public class JobEntryExternalResourceConsumerProvider implements IJobEntryExtern
   public List<IJobEntryExternalResourceConsumer> getExternalResourceConsumers( Collection<Class<?>> types ) {
     List<IJobEntryExternalResourceConsumer> jobEntryConsumers = getExternalResourceConsumers();
     if ( types != null ) {
-      final Set<IJobEntryExternalResourceConsumer> specificJobEntryAnalyzers =
-        new HashSet<IJobEntryExternalResourceConsumer>();
+      final Set<IJobEntryExternalResourceConsumer> specificJobEntryAnalyzers = new HashSet<>();
       for ( Class<?> clazz : types ) {
-        if ( jobEntryConsumerMap.containsKey( clazz ) ) {
-          specificJobEntryAnalyzers.addAll( jobEntryConsumerMap.get( clazz ) );
+        if ( getJobEntryConsumerMap().containsKey( clazz ) ) {
+          specificJobEntryAnalyzers.addAll( getJobEntryConsumerMap().get( clazz ) );
         }
       }
-      jobEntryConsumers = new ArrayList<IJobEntryExternalResourceConsumer>( specificJobEntryAnalyzers );
+      jobEntryConsumers = new ArrayList<>( specificJobEntryAnalyzers );
     }
     return jobEntryConsumers;
   }
@@ -107,13 +126,7 @@ public class JobEntryExternalResourceConsumerProvider implements IJobEntryExtern
 
     Class<? extends JobEntryBase> metaClass = externalResourceConsumer.getMetaClass();
     if ( metaClass != null ) {
-      Set<IJobEntryExternalResourceConsumer> consumerSet = null;
-      if ( jobEntryConsumerMap.containsKey( metaClass ) ) {
-        consumerSet = jobEntryConsumerMap.get( metaClass );
-      } else {
-        consumerSet = new HashSet<IJobEntryExternalResourceConsumer>();
-
-      }
+      Set<IJobEntryExternalResourceConsumer> consumerSet = jobEntryConsumerMap.computeIfAbsent( metaClass, k -> new HashSet<>() );
       consumerSet.add( externalResourceConsumer );
       jobEntryConsumerMap.put( metaClass, consumerSet );
     }
@@ -150,6 +163,18 @@ public class JobEntryExternalResourceConsumerProvider implements IJobEntryExtern
   }
 
   public Map<Class<? extends JobEntryBase>, Set<IJobEntryExternalResourceConsumer>> getJobEntryConsumerMap() {
+    if ( null == jobEntryConsumerMap || jobEntryConsumerMap.isEmpty() ) {
+      jobEntryConsumerMap = new ConcurrentHashMap<>();
+      List<IJobEntryExternalResourceConsumer> consumerList = getExternalResourceConsumers();
+      for ( IJobEntryExternalResourceConsumer consumer : consumerList ) {
+        Class<? extends JobEntryBase> metaClass = consumer.getMetaClass();
+        if ( metaClass != null ) {
+          Set<IJobEntryExternalResourceConsumer> consumerSet = jobEntryConsumerMap.computeIfAbsent( metaClass, k -> new HashSet<>() );
+          consumerSet.add( consumer );
+          jobEntryConsumerMap.put( metaClass, consumerSet );
+        }
+      }
+    }
     return jobEntryConsumerMap;
   }
 
@@ -157,11 +182,6 @@ public class JobEntryExternalResourceConsumerProvider implements IJobEntryExtern
    * Loads up a Map of document types to supporting IJobEntryAnalyzer(s)
    */
   protected void loadJobEntryExternalResourceConsumerMap() {
-    jobEntryConsumerMap = new HashMap<Class<? extends JobEntryBase>, Set<IJobEntryExternalResourceConsumer>>();
-    if ( jobEntryExternalResourceConsumers != null ) {
-      for ( IJobEntryExternalResourceConsumer jobEntryConsumer : jobEntryExternalResourceConsumers ) {
-        addExternalResourceConsumer( jobEntryConsumer );
-      }
-    }
+    jobEntryConsumerMap = getJobEntryConsumerMap();
   }
 }

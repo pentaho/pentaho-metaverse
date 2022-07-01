@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,13 +22,9 @@
 
 package org.pentaho.metaverse.util;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.blueprint.container.BlueprintContainer;
-
-import java.util.Collection;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * MetaverseBeanUtil is a type of object factory that allows users to get blueprint-injected instances of objects
@@ -36,8 +32,7 @@ import java.util.Collection;
 public class MetaverseBeanUtil {
 
   private static MetaverseBeanUtil INSTANCE = new MetaverseBeanUtil();
-
-  private BundleContext bundleContext;
+  private Logger logger = LoggerFactory.getLogger( MetaverseBeanUtil.class );
 
   private MetaverseBeanUtil() {
     // private for singleton pattern
@@ -47,35 +42,18 @@ public class MetaverseBeanUtil {
     return INSTANCE;
   }
 
-  public void setBundleContext( BundleContext bundleContext ) {
-    this.bundleContext = bundleContext;
+  public Object get( String id ) {
+    Object service = null;
+    try {
+      service = PentahoSystem.get( Class.forName( id ) );
+    } catch ( ClassNotFoundException e ) {
+      logger.error( "Error getting service", e );
+    }
+    return service;
   }
 
-  public Object get( String id ) {
-    BlueprintContainer service = null;
-    if ( bundleContext == null ) {
-      return null;
-    } else {
-      try {
-        Bundle bundle = bundleContext.getBundle();
-        if ( bundle == null ) {
-          return null;
-        }
-        Collection<ServiceReference<BlueprintContainer>> serviceReferences =
-          bundleContext.getServiceReferences( BlueprintContainer.class,
-            "(osgi.blueprint.container.symbolicname=" + bundle.getSymbolicName() + ")" );
-        if ( serviceReferences.size() != 0 ) {
-          ServiceReference<BlueprintContainer> reference = serviceReferences.iterator().next();
-          service = bundleContext.getService( reference );
-        }
-      } catch ( InvalidSyntaxException e ) {
-        // No-op, service will be null
-      }
-      if ( service == null ) {
-        return null;
-      }
-      return service.getComponentInstance( id );
-    }
+  public Object get( Class clazz ) {
+    return PentahoSystem.get( clazz );
   }
 
 }

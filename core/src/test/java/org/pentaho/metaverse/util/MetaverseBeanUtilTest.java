@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,18 +24,10 @@ package org.pentaho.metaverse.util;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.blueprint.container.BlueprintContainer;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
-import java.util.Collections;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class MetaverseBeanUtilTest {
 
@@ -43,7 +35,6 @@ public class MetaverseBeanUtilTest {
 
   @Before
   public void setUp() throws Exception {
-
   }
 
   @Test
@@ -52,45 +43,13 @@ public class MetaverseBeanUtilTest {
   }
 
   @Test
-  public void testSetBundleContext() throws Exception {
-    BundleContext bundleContext = mock( BundleContext.class );
-    MetaverseBeanUtil.getInstance().setBundleContext( bundleContext );
-  }
-
-  @Test
   public void testGet() throws Exception {
-    MetaverseBeanUtil instance = MetaverseBeanUtil.getInstance();
-    BundleContext bundleContext = mock( BundleContext.class );
-    Bundle bundle = mock( Bundle.class );
-    when( bundleContext.getBundle() ).thenReturn( bundle );
-    instance.setBundleContext( bundleContext );
-    assertNull( instance.get( BEAN_NAME ) );
-
-    ServiceReference serviceReference = mock( ServiceReference.class );
-    when( bundleContext.getServiceReferences( Mockito.any( Class.class ), Mockito.anyString() ) )
-      .thenReturn( Collections.singletonList( serviceReference ) );
-    assertNull( instance.get( BEAN_NAME ) );
-
-    BlueprintContainer service = mock( BlueprintContainer.class );
-    when( bundleContext.getService( Mockito.any( ServiceReference.class ) ) ).thenReturn( service );
-    Object testObject = new Object();
-    when( service.getComponentInstance( BEAN_NAME ) ).thenReturn( testObject );
-    assertEquals( testObject, instance.get( BEAN_NAME ) );
-
-    when( bundleContext.getServiceReferences( Mockito.any( Class.class ), Mockito.anyString() ) )
-      .thenThrow( InvalidSyntaxException.class );
-    assertNull( MetaverseBeanUtil.getInstance().get( BEAN_NAME ) );
-
-
+    TestObject testObject = new TestObject();
+    PentahoSystem.registerObject( testObject );
+    assertEquals( MetaverseBeanUtil.getInstance().get( TestInterface.class ), testObject );
   }
 
-  @Test
-  public void testGetNullBundle() throws Exception {
-    MetaverseBeanUtil instance = MetaverseBeanUtil.getInstance();
-    BundleContext bundleContext = mock( BundleContext.class );
-    when( bundleContext.getBundle() ).thenReturn( null );
-    instance.setBundleContext( bundleContext );
-    assertNull( instance.get( BEAN_NAME ) );
-    assertNull( MetaverseBeanUtil.getInstance().get( BEAN_NAME ) );
-  }
+  public interface TestInterface {}
+
+  public class TestObject implements TestInterface {}
 }

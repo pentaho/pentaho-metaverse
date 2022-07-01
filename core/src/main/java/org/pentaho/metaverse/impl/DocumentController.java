@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -53,6 +53,15 @@ import java.util.concurrent.Future;
  * Coordinates passing IDocumentEvent's to the appropriate IDocumentAnalyzer's
  */
 public class DocumentController implements IDocumentController, IDocumentListener, IRequiresMetaverseBuilder {
+
+  private static DocumentController instance;
+
+  public static DocumentController getInstance() {
+    if ( null == instance ) {
+      instance = new DocumentController();
+    }
+    return instance;
+  }
 
   /**
    * The metaverse builder.

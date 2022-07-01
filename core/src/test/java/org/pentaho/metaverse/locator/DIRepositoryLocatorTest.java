@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -51,8 +51,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for the DIRepositoryLocator
@@ -92,13 +98,13 @@ public class DIRepositoryLocatorTest implements IDocumentListener {
     DIRepositoryLocator locator = new DIRepositoryLocator();
     assertEquals( locator.getLocatorType(), DIRepositoryLocator.LOCATOR_TYPE );
     assertNotNull( locator.listeners );
-    assertTrue( locator.listeners.isEmpty() );
+    assertFalse( locator.listeners.isEmpty() );
   }
 
   @Test
   public void testConstructorWithListeners() {
     assertNotNull( spyLocator.listeners );
-    assertTrue( spyLocator.listeners.isEmpty() );
+    assertFalse( spyLocator.listeners.isEmpty() );
     List<IDocumentListener> listeners = new ArrayList<IDocumentListener>();
     listeners.add( mock( IDocumentListener.class ) );
     DIRepositoryLocator locator = new DIRepositoryLocator( listeners );

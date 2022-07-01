@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -57,8 +57,18 @@ import org.powermock.reflect.Whitebox;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @PrepareForTest( { ExtensionPointHandler.class, MetaverseConfig.class, KettleAnalyzerUtil.class } )
 @RunWith( PowerMockRunner.class )
@@ -164,6 +174,7 @@ public class TransformationRuntimeExtensionPointTest {
     verify( ext, never() ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), eq( trans ) );
 
+    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) ).thenReturn( mock( IDocument.class ) );
     ext.transFinished( trans );
     verify( ext, times( 1 ) ).populateExecutionProfile( Mockito.any( IExecutionProfile.class ), eq( trans ) );
     verify( ext, times( 1 ) ).runAnalyzers( eq( trans ) );
@@ -197,6 +208,7 @@ public class TransformationRuntimeExtensionPointTest {
     when( ext.allowedAsync() ).thenReturn( false );
 
     PowerMockito.mockStatic( ExtensionPointHandler.class );
+    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) ).thenReturn( mock( IDocument.class ) );
     ext.transFinished( trans );
 
     verify( ext ).createLineGraph( trans );
@@ -229,6 +241,7 @@ public class TransformationRuntimeExtensionPointTest {
     Mockito.reset( lineageWriter );
 
     setupMetaverseConfig( true, true );
+    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) ).thenReturn( mock( IDocument.class ) );
     // set a parent trans  - since MetaverseConfig.generateSubGraph() returns true, lineageWriter.outputLineageGraph
     // should still get called
     trans.setParentTrans( new Trans() );
@@ -241,6 +254,7 @@ public class TransformationRuntimeExtensionPointTest {
     // configure MetaverseConfig.generateSubGraph() to returns false, lineageWriter.outputLineageGraph should never
     // be called
     setupMetaverseConfig( true, false );
+    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) ).thenReturn( mock( IDocument.class ) );
     ext.transFinished( trans );
     verify( lineageWriter, never() )
       .outputLineageGraph( TransLineageHolderMap.getInstance().getLineageHolder( trans ) );
@@ -250,6 +264,7 @@ public class TransformationRuntimeExtensionPointTest {
   public void testTransFinishedAsync() throws Exception {
     TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
     when( ext.allowedAsync() ).thenReturn( true );
+    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) ).thenReturn( mock( IDocument.class ) );
     ext.transFinished( trans );
 
     verify( ext ).createLineGraphAsync( trans );
@@ -283,6 +298,7 @@ public class TransformationRuntimeExtensionPointTest {
     PowerMockito.mockStatic( MetaverseConfig.class );
     Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( consolidateSubGraphs );
     Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( generateSubGraphs );
+    Mockito.when( MetaverseConfig.getInstance() ).thenCallRealMethod();
     PowerMockito.mockStatic( KettleAnalyzerUtil.class );
     Mockito.when( KettleAnalyzerUtil.consolidateSubGraphs() ).thenReturn( consolidateSubGraphs );
   }

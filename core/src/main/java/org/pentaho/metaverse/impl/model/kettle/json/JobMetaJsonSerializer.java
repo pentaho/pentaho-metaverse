@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,7 @@ package org.pentaho.metaverse.impl.model.kettle.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobHopMeta;
@@ -46,17 +47,35 @@ import java.util.List;
  * User: RFellows Date: 12/15/14
  */
 public class JobMetaJsonSerializer extends AbstractMetaJsonSerializer<JobMeta> {
+
+  private static JobMetaJsonSerializer instance;
+
+  private JobMetaJsonSerializer() {
+    this( JobMeta.class );
+    this.setLineageRepository( LineageRepository.getInstance() );
+  }
+
+  public static JobMetaJsonSerializer getInstance() {
+    if ( null == instance ) {
+      instance = new JobMetaJsonSerializer();
+    }
+    return instance;
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger( JobMetaJsonSerializer.class );
 
-  public JobMetaJsonSerializer( Class<JobMeta> aClass ) {
+  @VisibleForTesting
+  JobMetaJsonSerializer( Class<JobMeta> aClass ) {
     super( aClass );
   }
 
-  public JobMetaJsonSerializer( JavaType javaType ) {
+  @VisibleForTesting
+  JobMetaJsonSerializer( JavaType javaType ) {
     super( javaType );
   }
 
-  public JobMetaJsonSerializer( Class<?> aClass, boolean b ) {
+  @VisibleForTesting
+  JobMetaJsonSerializer( Class<?> aClass, boolean b ) {
     super( aClass, b );
   }
 

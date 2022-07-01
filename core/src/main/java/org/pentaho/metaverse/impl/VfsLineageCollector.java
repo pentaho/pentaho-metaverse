@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,16 +22,6 @@
 
 package org.pentaho.metaverse.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileDepthSelector;
 import org.apache.commons.vfs2.FileObject;
@@ -46,6 +36,16 @@ import org.pentaho.metaverse.util.VfsDateRangeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 public class VfsLineageCollector implements ILineageCollector {
 
   public static final String DEFAULT_OUTPUT_FOLDER = "tmp://dir";
@@ -56,6 +56,7 @@ public class VfsLineageCollector implements ILineageCollector {
 
   public VfsLineageCollector() {
     format.setLenient( false );
+    this.setOutputFolder( MetaverseConfig.getInstance().getExecutionOutputFolder() );
   }
 
   /**

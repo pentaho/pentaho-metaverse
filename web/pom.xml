@@ -32,6 +32,19 @@
     </dependency>
 
     <dependency>
+      <groupId>pentaho-kettle</groupId>
+      <artifactId>kettle-engine</artifactId>
+      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
       <!-- test time runtime dependency -->
       <!-- this need to come at the top so its javax.ws.rs.core.Response implementation
            doesn't get overriden by another -->
@@ -58,6 +71,23 @@
           <artifactId>jsr311-api</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-platform-core</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>jsr311-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
@@ -114,6 +144,8 @@
                             com.fasterxml.jackson.module.jaxb.deser,
                             com.fasterxml.jackson.module.jaxb.ser,
                             !org.codehaus.jackson.jaxrs,
+                            !org.pentaho.metaverse.impl,
+                            !org.pentaho.metaverse.messages,
                             *</Import-Package>
           </instructions>
         </configuration>

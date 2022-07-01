@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.parameters.DuplicateParamException;
@@ -46,6 +47,7 @@ import org.pentaho.metaverse.api.model.JdbcResourceInfo;
 import org.pentaho.metaverse.api.model.JndiResourceInfo;
 import org.pentaho.metaverse.api.model.kettle.HopInfo;
 import org.pentaho.metaverse.impl.model.ParamInfo;
+import org.pentaho.metaverse.impl.model.kettle.LineageRepository;
 import org.pentaho.metaverse.messages.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,13 +64,29 @@ import java.util.Map;
  */
 public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
 
+  private static TransMetaJsonDeserializer instance;
+
+  private TransMetaJsonDeserializer() {
+    this( TransMeta.class, LineageRepository.getInstance() );
+  }
+
+  public static TransMetaJsonDeserializer getInstance() {
+    if ( null == instance ) {
+      instance = new TransMetaJsonDeserializer();
+    }
+    return instance;
+  }
+
   private Repository repository;
   private static final Logger LOGGER = LoggerFactory.getLogger( TransMetaJsonDeserializer.class );
 
-  public TransMetaJsonDeserializer( Class<?> aClass ) {
+  @VisibleForTesting
+  TransMetaJsonDeserializer( Class<?> aClass ) {
     super( aClass );
   }
-  public TransMetaJsonDeserializer( Class<?> aClass, Repository repository ) {
+
+  @VisibleForTesting
+  TransMetaJsonDeserializer( Class<?> aClass, Repository repository ) {
     super( aClass );
     setRepository( repository );
   }

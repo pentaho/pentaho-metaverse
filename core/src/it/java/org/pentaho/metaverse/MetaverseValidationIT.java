@@ -39,9 +39,6 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.calculator.CalculatorMeta;
 import org.pentaho.di.trans.steps.calculator.CalculatorMetaFunction;
-import org.pentaho.di.trans.steps.excelinput.ExcelInputMeta;
-import org.pentaho.di.trans.steps.exceloutput.ExcelField;
-import org.pentaho.di.trans.steps.exceloutput.ExcelOutputMeta;
 import org.pentaho.di.trans.steps.fieldsplitter.FieldSplitterMeta;
 import org.pentaho.di.trans.steps.filterrows.FilterRowsMeta;
 import org.pentaho.di.trans.steps.groupby.GroupByMeta;
@@ -66,8 +63,6 @@ import org.pentaho.metaverse.frames.CsvFileInputStepNode;
 import org.pentaho.metaverse.frames.DatabaseColumnNode;
 import org.pentaho.metaverse.frames.DatabaseTableNode;
 import org.pentaho.metaverse.frames.DatasourceNode;
-import org.pentaho.metaverse.frames.ExcelInputStepNode;
-import org.pentaho.metaverse.frames.ExcelOutputStepNode;
 import org.pentaho.metaverse.frames.FieldNode;
 import org.pentaho.metaverse.frames.FileInputStepNode;
 import org.pentaho.metaverse.frames.FilterRowsStepNode;
@@ -336,85 +331,6 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
         assertNotNull( deriveNode );
       }
 
-    }
-  }
-
-  @Test
-  public void testExcelInputStep() throws Exception {
-    // this is testing a specific TextFileInputStep instance
-    ExcelInputStepNode excelInputStepNode = root.getExcelInputStepNode();
-    assertNotNull( excelInputStepNode );
-
-    Iterable<FramedMetaverseNode> inputFiles = excelInputStepNode.getInputFiles();
-    int countInputFiles = getIterableSize( inputFiles );
-    assertEquals( 1, countInputFiles );
-    for ( FramedMetaverseNode inputFile : inputFiles ) {
-      assertTrue( inputFile.getName().endsWith( "SacramentoCrime.xls" ) );
-    }
-
-    assertEquals( "Microsoft Excel input", excelInputStepNode.getStepType() );
-
-    int countUses = getIterableSize( excelInputStepNode.getFileFieldNodesUses() );
-    int countInputs = getIterableSize( excelInputStepNode.getInputStreamFields() );
-
-    assertEquals( 0, countUses );
-    int fileFieldCount = 0;
-    Iterable<StreamFieldNode> outFields = excelInputStepNode.getOutputStreamFields();
-    int countOutputs = getIterableSize( outFields );
-    for ( StreamFieldNode outField : outFields ) {
-      assertNotNull( outField.getKettleType() );
-      FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
-      assertNotNull( fieldPopulatesMe );
-      assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
-      assertEquals( excelInputStepNode, fieldPopulatesMe.getStepThatInputsMe() );
-      fileFieldCount++;
-    }
-    assertEquals( countInputs, fileFieldCount );
-    assertEquals( countOutputs, fileFieldCount );
-
-  }
-
-  @Test
-  public void testExcelInputStep_filenameFromField() throws Exception {
-    // this is testing a specific TextFileInputStep instance
-    ExcelInputStepNode excelInputStepNode = root.getExcelInputFileNameFromFieldStepNode();
-    assertNotNull( excelInputStepNode );
-
-    int countUses = getIterableSize( excelInputStepNode.getFileFieldNodesUses() );
-    int countInputs = getIterableSize( excelInputStepNode.getInputStreamFields() );
-
-    assertEquals( 1, countUses );
-
-    int fileFieldCount = 0;
-    Iterable<StreamFieldNode> outFields = excelInputStepNode.getOutputStreamFields();
-    int countOutputs = getIterableSize( outFields );
-    for ( StreamFieldNode outField : outFields ) {
-      assertNotNull( outField.getKettleType() );
-      if ( !outField.getName().equals( "filename" ) ) {
-        FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
-        assertNotNull( fieldPopulatesMe );
-        assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
-        assertEquals( excelInputStepNode, fieldPopulatesMe.getStepThatInputsMe() );
-        fileFieldCount++;
-      }
-    }
-    // we should have one more input than file fields since we are reading it off of the input stream
-    assertEquals( countInputs - 1, fileFieldCount );
-    assertEquals( countOutputs - 1, fileFieldCount );
-
-    String filenameField = null;
-    TransMeta tm =
-      new TransMeta( new FileInputStream( excelInputStepNode.getTransNode().getPath() ), null, true, null, null );
-    for ( StepMeta stepMeta : tm.getSteps() ) {
-      if ( stepMeta.getName().equals( excelInputStepNode.getName() ) ) {
-        ExcelInputMeta meta = (ExcelInputMeta) getBaseStepMetaFromStepMeta( stepMeta );
-        assertTrue( meta.isAcceptingFilenames() );
-        filenameField = meta.getAcceptingField();
-        assertNotNull( filenameField );
-        assertEquals( filenameField, excelInputStepNode.getFileFieldNodesUses().iterator().next().getName() );
-        // this was the one we cared about...
-        break;
-      }
     }
   }
 
@@ -965,43 +881,6 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
 
     int expectedUsesLinksCount = meta.getSubjectField().length + meta.getGroupField().length;
     assertEquals( expectedUsesLinksCount, countUses );
-  }
-
-  @Test
-  public void testExcelOutputStepNode() throws Exception {
-    ExcelOutputStepNode excelOutputStepNode = root.getExcelOutputStepNode();
-    assertNotNull( excelOutputStepNode );
-
-    ExcelOutputMeta meta = (ExcelOutputMeta) getStepMeta( excelOutputStepNode );
-    TransMeta tm = meta.getParentStepMeta().getParentTransMeta();
-    String[] fileNames = meta.getFiles( tm );
-
-    RowMetaInterface incomingFields = tm.getStepFields( meta.getParentStepMeta() );
-    ExcelField[] outputFields = meta.getOutputFields();
-
-    // should write to one file
-    Iterable<FramedMetaverseNode> outputFiles = excelOutputStepNode.getOutputFiles();
-    assertEquals( fileNames.length, getIterableSize( outputFiles ) );
-    int i = 0;
-    for ( FramedMetaverseNode node : outputFiles ) {
-      assertEquals( normalizeFilePath( fileNames[ i++ ] ), normalizeFilePath( node.getName() ) );
-    }
-
-    Iterable<StreamFieldNode> outFields = excelOutputStepNode.getOutputStreamFields();
-    int outFieldCount = getIterableSize( outFields );
-    // should have output stream nodes as well as file nodes
-    assertEquals( outputFields.length * 2, outFieldCount );
-
-    int fileFieldCount = 0;
-    for ( StreamFieldNode outField : outFields ) {
-      if ( DictionaryConst.NODE_TYPE_FILE_FIELD.equals( outField.getType() ) ) {
-        ValueMetaInterface vmi = incomingFields.searchValueMeta( outField.getName() );
-        assertEquals( vmi.getName(), outField.getFieldPopulatesMe().getName() );
-        fileFieldCount++;
-      }
-    }
-    assertEquals( fileFieldCount, outFieldCount / 2 );
-
   }
 
   @Test
