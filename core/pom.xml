@@ -180,18 +180,6 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.pentaho.di</groupId>
-      <artifactId>pdi-plugins</artifactId>
-      <version>${dependency.pentaho-kettle.pdi-plugins.version}</version>
-      <type>zip</type>
-      <exclusions>
-        <exclusion>
-          <groupId>*</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-engine</artifactId>
       <version>${dependency.pentaho-kettle.kettle-core.version}</version>
@@ -395,24 +383,6 @@
             <configuration>
               <testClassesDirectory>target/it-classes</testClassesDirectory>
               <skipIfEmpty>true</skipIfEmpty>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <!-- unpack pdi-core-ee  -->
-          <execution>
-            <id>unpack-pdi-core-ee</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeGroupIds>org.pentaho.di</includeGroupIds>
-              <includeArtifactIds>pdi-plugins</includeArtifactIds>
-              <outputDirectory>${project.build.directory}/img-content</outputDirectory>
             </configuration>
           </execution>
         </executions>
