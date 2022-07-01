@@ -66,7 +66,6 @@
     <dependency.org.mockito.mockito-all.version>1.10.19</dependency.org.mockito.mockito-all.version>
     <dependency.org.powermock.version>1.7.4</dependency.org.powermock.version>
     <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
-    <dependency.pentaho-kettle.pdi-plugins.version>${project.version}</dependency.pentaho-kettle.pdi-plugins.version>
     <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
   </properties>
   <profiles>
