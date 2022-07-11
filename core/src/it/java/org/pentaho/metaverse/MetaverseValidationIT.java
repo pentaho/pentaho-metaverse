@@ -48,7 +48,6 @@ import org.pentaho.di.trans.steps.groupby.GroupByMeta;
 import org.pentaho.di.trans.steps.http.HTTPMeta;
 import org.pentaho.di.trans.steps.httppost.HTTPPOSTMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
-import org.pentaho.di.trans.steps.mongodb.MongoDbMeta;
 import org.pentaho.di.trans.steps.numberrange.NumberRangeMeta;
 import org.pentaho.di.trans.steps.rest.RestMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
@@ -82,9 +81,6 @@ import org.pentaho.metaverse.frames.JobNode;
 import org.pentaho.metaverse.frames.KettleNode;
 import org.pentaho.metaverse.frames.LocatorNode;
 import org.pentaho.metaverse.frames.MergeJoinStepNode;
-import org.pentaho.metaverse.frames.MongoConnectionNode;
-import org.pentaho.metaverse.frames.MongoDbDatasourceNode;
-import org.pentaho.metaverse.frames.MongoDbInputStepNode;
 import org.pentaho.metaverse.frames.RestClientStepNode;
 import org.pentaho.metaverse.frames.RowsToResultStepNode;
 import org.pentaho.metaverse.frames.SelectValuesTransStepNode;
@@ -564,22 +560,6 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
       assertNotNull( ds.getAccessTypeDesc() );
     }
     assertTrue( countDatasources > 0 );
-  }
-
-  @Test
-  public void testMongoDbConnections() throws Exception {
-    int countMongoConnections = getIterableSize( root.getMongoDbDatasourceNodes() );
-    for ( MongoDbDatasourceNode ds : root.getMongoDbDatasourceNodes() ) {
-      // make sure at least one step uses the connection
-      int countUsedSteps = getIterableSize( ds.getTransformationStepNodes() );
-      assertTrue( countUsedSteps > 0 );
-
-      assertEquals( DictionaryConst.NODE_TYPE_MONGODB_CONNECTION, ds.getEntity().getName() );
-      assertNotNull( ds.getName() );
-      assertNotNull( ds.getDatabaseName() );
-      assertNotNull( ds.getPort() );
-    }
-    assertTrue( countMongoConnections > 0 );
   }
 
   @Test
@@ -1531,35 +1511,6 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
         assertNull( ops.get( ChangeType.METADATA ) );
       }
     }
-  }
-
-  @Test
-  public void testMongoDbInput() throws Exception {
-    MongoDbInputStepNode node = root.getMongoDbInputStepNode();
-    assertNotNull( node );
-    MongoDbMeta meta = (MongoDbMeta) getStepMeta( node );
-    assertEquals( meta.getCollection(), node.getCollection().getName() );
-    assertEquals( meta.getDbName(), node.getDatasource( meta.getDbName() ).getName() );
-
-    Iterable<StreamFieldNode> inputs = node.getInputStreamFields();
-    Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
-
-    assertEquals( getIterableSize( inputs ), getIterableSize( outputs ) );
-
-    for ( StreamFieldNode output : outputs ) {
-      assertEquals( output.getName(), output.getFieldPopulatesMe().getName() );
-    }
-
-    MongoConnectionNode datasource = node.getDatasource( meta.getDbName() );
-    assertEquals( meta.getHostnames(), datasource.getHost() );
-    assertEquals( meta.getPort(), datasource.getPort() );
-    assertEquals( meta.getAuthenticationUser(), datasource.getUserName() );
-    assertEquals( meta.getDbName(), datasource.getDatabaseName() );
-    assertEquals( DictionaryConst.NODE_TYPE_MONGODB_CONNECTION, datasource.getType() );
-
-    FramedMetaverseNode collection = node.getCollection();
-    assertEquals( meta.getCollection(), collection.getName() );
-    assertEquals( DictionaryConst.NODE_TYPE_MONGODB_COLLECTION, collection.getType() );
   }
 
   @Test
