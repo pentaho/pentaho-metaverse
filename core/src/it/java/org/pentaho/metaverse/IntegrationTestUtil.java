@@ -30,7 +30,6 @@ import org.pentaho.di.core.plugins.Plugin;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.trans.steps.mongodbinput.MongoDbInputMeta;
 import org.pentaho.metaverse.api.IDocumentLocator;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
 import org.pentaho.metaverse.api.IMetaverseReader;
@@ -120,7 +119,6 @@ public class IntegrationTestUtil {
   }
 
   private static void registerKettlePlugins() throws KettlePluginException {
-    registerKettlePlugin( MongoDbInputMeta.class.getName(), "MongoDbInput", "Big Data", "MongoDB Input" );
     // TODO: uncomment below once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved
     //registerKettlePlugin( MetaInjectMeta.class.getName(), "MetaInject", "Flow", "ETL metadata injection" );
     //registerKettlePlugin( CheckSumMeta.class.getName(), "CheckSum", "Transform", "Add a checksum" );
