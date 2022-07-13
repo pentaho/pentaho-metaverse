@@ -43,7 +43,7 @@ public class KettleObjectMapperTest {
     "  \"lastmodified\" : 1422284845742,\n" +
     "  \"createdby\" : \"-\",\n" +
     "  \"lastmodifiedby\" : \"-\",\n" +
-    "  \"path\" : \"src/it/resources/repo/validation/mongo_input.ktr\",\n" +
+    "  \"path\" : \"src/test/resources/mongo_input.ktr\",\n" +
     "  \"parameters\" : [ ],\n" +
     "  \"variables\" : [ ],\n" +
     "  \"steps\" : [ ],\n" +

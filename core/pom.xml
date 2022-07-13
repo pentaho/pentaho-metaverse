@@ -200,12 +200,6 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>pentaho-mongodb-plugin</artifactId>
-      <version>${pentaho-mongodb-plugin.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>com.tinkerpop</groupId>
       <artifactId>frames</artifactId>
       <version>${dependency.com.tinkerpop.frames.version}</version>

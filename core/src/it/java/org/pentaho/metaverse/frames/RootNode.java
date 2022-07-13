@@ -136,9 +136,6 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Group by').as('step').in('contains').has('name', T.eq, 'group_by').back('step')" )
   GroupByStepNode getGroupByStepNode();
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'External Connection').out.has('name', T.eq, 'MongoDB Connection').out()" )
-  Iterable<MongoDbDatasourceNode> getMongoDbDatasourceNodes();
-
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Microsoft Excel Output').as('step').in('contains').has('name', T.eq, 'excel_output').back('step')" )
   ExcelOutputStepNode getExcelOutputStepNode();
 
@@ -177,9 +174,6 @@ public interface RootNode extends FramedMetaverseNode {
     @GremlinParam( "transformationName" ) String transformationName,
     @GremlinParam( "stepName" ) String stepName );
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, stepName).as('step').in('contains').has('name', T.eq, 'rest_client').back('step')" )
+  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transormation Step').out('typeconcept').has('name', T.eq, stepName).as('step').in('contains').has('name', T.eq, 'rest_client').back('step')" )
   RestClientStepNode getRestClientStepNode( @GremlinParam( "stepName" ) String stepName );
-
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'MongoDB Input').as('step').in('contains').has('name', T.eq, 'mongo_input').back('step')" )
-  MongoDbInputStepNode getMongoDbInputStepNode();
 }
