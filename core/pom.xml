@@ -20,7 +20,6 @@
     <platform.plugin.name>platform</platform.plugin.name>
     <maven-pmd-plugin.version>3.2</maven-pmd-plugin.version>
     <pmd.rulesets.url>https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/pmd/rulesets/java</pmd.rulesets.url>
-    <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <enunciate.version>1.27</enunciate.version>
     <gremlin-java.version>2.6.0</gremlin-java.version>
     <pdi.plugin.name>pdi</pdi.plugin.name>
@@ -280,7 +279,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>${maven-bundle-plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
