@@ -165,15 +165,7 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.streamlookup.StreamLookupStepAnalyzer"/>
   <bean id="CalculatorStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.calculator.CalculatorStepAnalyzer"/>
-  <bean id="ExcelInputStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer">
-    <property name="externalResourceConsumer" ref="excelInputERC"/>
-  </bean>
   <bean id="GroupByStepAnalyzer" class="org.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer"/>
-  <bean id="ExcelOutputStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer">
-    <property name="externalResourceConsumer" ref="excelOutputERC"/>
-  </bean>
   <bean id="SplitFieldsStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.splitfields.SplitFieldsStepAnalyzer"/>
   <bean id="TransExecutorStepAnalyzer"
@@ -272,18 +264,10 @@
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="CalculatorStepAnalyzer"/>
 
-  <service id="excelInputStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
-           ref="ExcelInputStepAnalyzer"/>
-
   <service id="groupByStepAnalyzerService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
            ref="GroupByStepAnalyzer"/>
 
-  <service id="excelOutputStepAnalyzerService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer"
-           ref="ExcelOutputStepAnalyzer"/>
-           
   <service id="stringOperationsStepAnalyzer"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer"
            ref="StringOperationsStepAnalyzer"/>
@@ -405,10 +389,6 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.fileinput.text.TextFileInputExternalResourceConsumer"/>
   <bean id="textFileOutputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputExternalResourceConsumer"/>
-  <bean id="excelInputERC" scope="singleton"
-        class="org.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputExternalResourceConsumer"/>
-  <bean id="excelOutputERC" scope="singleton"
-        class="org.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputExternalResourceConsumer"/>
   <bean id="csvInputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
   <bean id="fixedFileInputERC" scope="singleton"
@@ -436,14 +416,6 @@
   <service id="textFileOutputERCService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
            ref="textFileOutputERC"/>
-
-  <service id="excelInputERCService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
-           ref="excelInputERC"/>
-
-  <service id="excelOutputERCService"
-           interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"
-           ref="excelOutputERC"/>
 
   <service id="csvInputERCService"
            interface="org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer"

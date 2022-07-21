@@ -127,17 +127,9 @@ public interface RootNode extends FramedMetaverseNode {
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'CSV file input').as('step').in('contains').has('name', T.eq, 'CSV Input').back('step')" )
   CsvFileInputStepNode getCsvFileInputStepNode();
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Microsoft Excel Input').as('step').in('contains').has('name', T.eq, 'excel_input').back('step')" )
-  ExcelInputStepNode getExcelInputStepNode();
-
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Microsoft Excel Input').as('step').in('contains').has('name', T.eq, 'Excel input - filename from field').back('step')" )
-  ExcelInputStepNode getExcelInputFileNameFromFieldStepNode();
-
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Group by').as('step').in('contains').has('name', T.eq, 'group_by').back('step')" )
   GroupByStepNode getGroupByStepNode();
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Microsoft Excel Output').as('step').in('contains').has('name', T.eq, 'excel_output').back('step')" )
-  ExcelOutputStepNode getExcelOutputStepNode();
 
   @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, stepName).as('step').in('contains').has('name', T.eq, 'splitFields').back('step')" )
   SplitFieldsStepNode getSplitFieldsStepNodeByName( @GremlinParam( "stepName" ) String stepName );
