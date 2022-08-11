@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
+import com.cronutils.utils.VisibleForTesting;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutput;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -38,6 +39,19 @@ import java.util.Set;
 
 public class TableOutputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<TableOutput, TableOutputMeta> {
+
+  private static TableOutputExternalResourceConsumer instance;
+
+  @VisibleForTesting
+  protected TableOutputExternalResourceConsumer() {
+  }
+
+  public static TableOutputExternalResourceConsumer getInstance() {
+    if ( null == instance ) {
+      instance = new TableOutputExternalResourceConsumer();
+    }
+    return instance;
+  }
 
   @Override
   public Class<TableOutputMeta> getMetaClass() {

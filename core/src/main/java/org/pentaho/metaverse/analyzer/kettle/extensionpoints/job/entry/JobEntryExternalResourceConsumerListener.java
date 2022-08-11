@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -64,7 +64,7 @@ public class JobEntryExternalResourceConsumerListener implements ExtensionPointI
   public void callExtensionPoint( LogChannelInterface log, Object object ) throws KettleException {
     if ( jobEntryConsumerProvider == null ) {
       jobEntryConsumerProvider = (IJobEntryExternalResourceConsumerProvider)
-        MetaverseBeanUtil.getInstance().get( "IJobEntryExternalResourceConsumerProvider" );
+        MetaverseBeanUtil.getInstance().get( IJobEntryExternalResourceConsumerProvider.class );
     }
     JobExecutionExtension jobExec = (JobExecutionExtension) object;
     JobEntryCopy jobEntryCopy = jobExec.jobEntryCopy;

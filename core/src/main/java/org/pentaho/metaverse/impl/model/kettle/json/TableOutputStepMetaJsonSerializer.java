@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -25,6 +25,7 @@ package org.pentaho.metaverse.impl.model.kettle.json;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.metaverse.impl.model.kettle.LineageRepository;
 
@@ -34,11 +35,27 @@ import java.io.IOException;
  * User: RFellows Date: 11/17/14
  */
 public class TableOutputStepMetaJsonSerializer extends AbstractStepMetaJsonSerializer<TableOutputMeta> {
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass ) {
+
+  private static TableOutputStepMetaJsonSerializer instance;
+
+  private TableOutputStepMetaJsonSerializer() {
+    this( TableOutputMeta.class, LineageRepository.getInstance() );
+  }
+
+  public static TableOutputStepMetaJsonSerializer getInstance() {
+    if ( null == instance ) {
+      instance = new TableOutputStepMetaJsonSerializer();
+    }
+    return instance;
+  }
+
+  @VisibleForTesting
+  TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass ) {
     super( aClass );
   }
 
-  public TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass, LineageRepository repo ) {
+  @VisibleForTesting
+  TableOutputStepMetaJsonSerializer( Class<TableOutputMeta> aClass, LineageRepository repo ) {
     super( aClass, repo );
   }
 

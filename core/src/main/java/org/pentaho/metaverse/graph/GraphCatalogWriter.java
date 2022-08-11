@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2021-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -30,7 +30,6 @@ import com.tinkerpop.gremlin.Tokens;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.osgi.service.blueprint.container.ServiceUnavailableException;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.ICatalogLineageClient;
 import org.pentaho.metaverse.api.ICatalogLineageClientProvider;
@@ -90,7 +89,7 @@ public class GraphCatalogWriter extends BaseGraphWriter {
           catalogTokenUrl,
           catalogClientId,
           catalogClientSecret );
-      } catch ( ServiceUnavailableException e ) {
+      } catch ( Exception e ) {
         // logging at debug level because this could happen if the catalog service isn't loaded yet, or the service
         // may not exist or be enabled in this profile
         log.debug( e );

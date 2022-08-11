@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -40,12 +40,21 @@ import java.util.ResourceBundle;
  * com.tinkerpop.blueprints.KeyIndexableGraph} </p>
  */
 public class BaseSynchronizedGraphFactory {
+  private static final Map<String, String> configMap = new HashMap<>();
+
+  static {
+    configMap.put( "blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph" );
+  }
 
   /**
    * Hides the constructor so that this class cannot be instanced
    */
   protected BaseSynchronizedGraphFactory() {
     throw new UnsupportedOperationException();
+  }
+
+  public static Graph getDefaultGraph() {
+    return open( configMap );
   }
 
   /**
@@ -67,7 +76,7 @@ public class BaseSynchronizedGraphFactory {
    * @return {@link BaseSynchronizedGraph} instance {@link com.tinkerpop.blueprints.KeyIndexableGraph}
    * @see com.tinkerpop.blueprints.GraphFactory#open(java.util.Map)
    */
-  public static Graph open( final Map configuration ) {
+  public static Graph open( final Map<String, String> configuration ) {
     Graph graph = com.tinkerpop.blueprints.GraphFactory.open( configuration );
     return wrapGraph( graph );
   }
@@ -111,7 +120,7 @@ public class BaseSynchronizedGraphFactory {
   public static Graph wrapGraph( Graph graph ) {
     if ( graph instanceof KeyIndexableGraph ) {
       KeyIndexableGraph keyIndexableGraph = (KeyIndexableGraph) graph;
-      IdGraph<KeyIndexableGraph> idGraph = new IdGraph<KeyIndexableGraph>( keyIndexableGraph );
+      IdGraph<KeyIndexableGraph> idGraph = new IdGraph<>( keyIndexableGraph );
       return new BaseSynchronizedGraph( idGraph );
     } else {
       throw new IllegalArgumentException( Messages.getString( "ERROR.BackingGraph.MustImplement.KeyIndexableGraph" ) );

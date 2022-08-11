@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -65,6 +65,7 @@ public class VfsLineageWriter implements ILineageWriter {
   private IGraphWriter graphWriter = new GraphMLWriter();
   private GraphCatalogWriter catalogWriter
     = new GraphCatalogWriter( "", "", "", "", "", "" );
+  //TODO: try to get these properties from kettle first, fallback to defaults
   private String outputFolder = DEFAULT_OUTPUT_FOLDER;
   private String outputStrategy = DEFAULT_OUTPUT_STRATEGY;
 
@@ -83,6 +84,7 @@ public class VfsLineageWriter implements ILineageWriter {
   }
 
   public VfsLineageWriter() {
+    this.setOutputStrategy( MetaverseConfig.getInstance().getExecutionGenerationStrategy() );
   }
 
   @Override

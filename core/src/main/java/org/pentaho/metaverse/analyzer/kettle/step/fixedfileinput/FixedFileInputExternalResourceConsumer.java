@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.fixedfileinput;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
@@ -39,6 +40,19 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class FixedFileInputExternalResourceConsumer extends BaseStepExternalResourceConsumer<FixedInput, FixedInputMeta> {
+
+  private static FixedFileInputExternalResourceConsumer instance;
+
+  @VisibleForTesting
+  protected FixedFileInputExternalResourceConsumer() {
+  }
+
+  public static FixedFileInputExternalResourceConsumer getInstance() {
+    if ( null == instance ) {
+      instance = new FixedFileInputExternalResourceConsumer();
+    }
+    return instance;
+  }
 
   @Override
   public boolean isDataDriven( FixedInputMeta meta ) {

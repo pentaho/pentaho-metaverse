@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -33,6 +33,7 @@ import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
+import org.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider;
 import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
@@ -73,7 +74,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
   /**
    * A reference to the job entry analyzer provider
    */
-  private IJobEntryAnalyzerProvider jobEntryAnalyzerProvider;
+  private IJobEntryAnalyzerProvider jobEntryAnalyzerProvider = JobEntryAnalyzerProvider.getInstance();
 
   private static final Logger log = LoggerFactory.getLogger( JobAnalyzer.class );
 

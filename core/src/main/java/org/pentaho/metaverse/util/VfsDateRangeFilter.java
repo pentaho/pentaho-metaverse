@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,15 +22,14 @@
 
 package org.pentaho.metaverse.util;
 
+import org.apache.commons.vfs2.FileDepthSelector;
+import org.apache.commons.vfs2.FileSelectInfo;
+import org.apache.commons.vfs2.FileType;
+import org.pentaho.metaverse.messages.Messages;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import org.apache.commons.vfs2.FileDepthSelector;
-import org.apache.commons.vfs2.FileSelectInfo;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileType;
-import org.pentaho.metaverse.messages.Messages;
 
 public class VfsDateRangeFilter extends FileDepthSelector {
 

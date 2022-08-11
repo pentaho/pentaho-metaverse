@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.textfileinput;
 
+import com.cronutils.utils.VisibleForTesting;
 import org.apache.commons.vfs2.FileObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -32,6 +33,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInput;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
+import org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputExternalResourceConsumer;
 import org.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
@@ -47,6 +49,19 @@ import java.util.LinkedList;
 @SuppressWarnings( "deprecation" )
 public class TextFileInputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<TextFileInput, TextFileInputMeta> {
+
+  private static TextFileInputExternalResourceConsumer instance;
+
+  @VisibleForTesting
+  protected TextFileInputExternalResourceConsumer() {
+  }
+
+  public static TextFileInputExternalResourceConsumer getInstance() {
+    if ( null == instance ) {
+      instance = new TextFileInputExternalResourceConsumer();
+    }
+    return instance;
+  }
 
   @Override
   public boolean isDataDriven( TextFileInputMeta meta ) {
