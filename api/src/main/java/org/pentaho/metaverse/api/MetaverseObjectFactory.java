@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.dictionary.MetaverseLink;
 import org.pentaho.dictionary.MetaverseTransientNode;
@@ -30,6 +31,19 @@ import java.util.Map;
 import java.util.UUID;
 
 public class MetaverseObjectFactory implements IMetaverseObjectFactory {
+
+  private static MetaverseObjectFactory instance;
+
+  @VisibleForTesting
+  public MetaverseObjectFactory() {
+  }
+
+  public static MetaverseObjectFactory getInstance() {
+    if ( null == instance ) {
+      instance = new MetaverseObjectFactory();
+    }
+    return instance;
+  }
 
   @Override
   public IDocument createDocumentObject() {

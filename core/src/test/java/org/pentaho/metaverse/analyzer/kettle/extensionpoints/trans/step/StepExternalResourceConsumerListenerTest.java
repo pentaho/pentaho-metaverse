@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -46,7 +46,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 /**
  * Created by mburgess on 12/11/14.
@@ -65,8 +67,9 @@ public class StepExternalResourceConsumerListenerTest {
     stepCombi.stepMeta = mock( StepMeta.class );
 
     stepExtensionPoint.callExtensionPoint( null, stepCombi );
+    StepExternalResourceConsumerProvider.clearInstance();
     Map<Class<? extends BaseStepMeta>, Set<IStepExternalResourceConsumer>> stepConsumerMap =
-      new StepExternalResourceConsumerProvider().getStepConsumerMap();
+      StepExternalResourceConsumerProvider.getInstance().getStepConsumerMap();
     Set<IStepExternalResourceConsumer> consumers = new HashSet<IStepExternalResourceConsumer>();
     stepConsumerMap.put( bsm.getClass(), consumers );
     stepExtensionPoint.callExtensionPoint( null, stepCombi );

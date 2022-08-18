@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.textfileoutput;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.vfs2.FileObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -45,6 +46,19 @@ import java.util.LinkedList;
 
 public class TextFileOutputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<TextFileOutput, TextFileOutputMeta> {
+
+  private static TextFileOutputExternalResourceConsumer instance;
+
+  @VisibleForTesting
+  protected TextFileOutputExternalResourceConsumer() {
+  }
+
+  public static TextFileOutputExternalResourceConsumer getInstance() {
+    if ( null == instance ) {
+      instance = new TextFileOutputExternalResourceConsumer();
+    }
+    return instance;
+  }
 
   @Override
   public boolean isDataDriven( TextFileOutputMeta meta ) {

@@ -10,7 +10,7 @@
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse-core</artifactId>
   <version>9.4.0.0-SNAPSHOT</version>
-  <packaging>bundle</packaging>
+  <packaging>jar</packaging>
   <name>${project.artifactId}</name>
   <description>Provides data lineage capabilities</description>
   <url>http://www.pentaho.com</url>
@@ -47,11 +47,13 @@
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-api</artifactId>
       <version>${platform.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>metastore</artifactId>
       <version>${metastore.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.tinkerpop.blueprints</groupId>
@@ -75,37 +77,45 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${commons-io.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <version>${log4j.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
       <version>${log4j.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
       <version>${commons-lang.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-vfs2</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.tinkerpop</groupId>
@@ -131,11 +141,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
       <version>${dependency.pentaho.pentaho-platform-core.version}</version>
+      <scope>provided</scope>
       <exclusions>
         <exclusion>
           <artifactId>xercesImpl</artifactId>
@@ -147,7 +159,7 @@
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
       <version>${dependency.pentaho.pentaho-platform-repository.version}</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
       <exclusions>
         <exclusion>
           <artifactId>jackson-jaxrs</artifactId>
@@ -171,7 +183,7 @@
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
       <version>${dependency.pentaho-kettle.kettle-core.version}</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
       <exclusions>
         <exclusion>
           <artifactId>xercesImpl</artifactId>
@@ -183,15 +195,11 @@
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-engine</artifactId>
       <version>${dependency.pentaho-kettle.kettle-core.version}</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
       <groupId>com.tinkerpop</groupId>
@@ -277,34 +285,6 @@
   </dependencies>
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>${maven-bundle-plugin.version}</version>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Bundle-Version>${project.version}</Bundle-Version>
-            <DynamicImport-Package>*</DynamicImport-Package>
-            <Import-Package>org.pentaho.dictionary,
-              org.pentaho.metaverse.api,
-              org.pentaho.metaverse.api.*,
-              !org.pentaho.metaverse.analyzer.kettle.*,
-              !org.pentaho.metaverse.messages,
-              *</Import-Package>
-            <Export-Package>org.pentaho.metaverse.client,
-              org.pentaho.metaverse.analyzer.kettle,
-              org.pentaho.metaverse.analyzer.kettle.*,
-              org.pentaho.metaverse.util,
-              org.pentaho.metaverse.graph,
-              org.pentaho.metaverse.impl,
-              org.pentaho.metaverse.messages,
-              org.pentaho.metaverse.locator</Export-Package>
-            <Bundle-Activator>org.pentaho.metaverse.util.MetaverseBundleActivator</Bundle-Activator>
-          </instructions>
-        </configuration>
-      </plugin>
       <plugin>
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${maven-pmd-plugin.version}</version>

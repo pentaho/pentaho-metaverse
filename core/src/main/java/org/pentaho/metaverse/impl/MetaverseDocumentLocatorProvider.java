@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,8 +22,10 @@
 
 package org.pentaho.metaverse.impl;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.metaverse.api.IDocumentLocator;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
+import org.pentaho.metaverse.locator.DIRepositoryLocator;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,18 +38,29 @@ public class MetaverseDocumentLocatorProvider implements IDocumentLocatorProvide
 
   private Set<IDocumentLocator> documentLocators;
 
+  private static MetaverseDocumentLocatorProvider instance;
+
+  public static MetaverseDocumentLocatorProvider getInstance() {
+    if ( null == instance ) {
+      instance = new MetaverseDocumentLocatorProvider();
+      instance.addDocumentLocator( new DIRepositoryLocator() );
+    }
+    return instance;
+  }
+
   /**
    * Default constructor
    */
-  public MetaverseDocumentLocatorProvider() {
-    documentLocators = new HashSet<IDocumentLocator>();
+  MetaverseDocumentLocatorProvider() {
+    documentLocators = new HashSet<>();
   }
 
   /**
    * Constructor that initializes with a provided set of locators
    * @param documentLocators locators to initialize with
    */
-  public MetaverseDocumentLocatorProvider( Set<IDocumentLocator> documentLocators ) {
+  @VisibleForTesting
+  MetaverseDocumentLocatorProvider( Set<IDocumentLocator> documentLocators ) {
     setDocumentLocators( documentLocators );
   }
 

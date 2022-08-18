@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -44,7 +44,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 public class JobEntryExternalResourceConsumerListenerTest {
   @Test
@@ -62,8 +64,9 @@ public class JobEntryExternalResourceConsumerListenerTest {
     jobEntryExtensionPoint.callExtensionPoint( null, jobExec );
 
     // Adda consumer
+    JobEntryExternalResourceConsumerProvider.clearInstance();
     Map<Class<? extends JobEntryBase>, Set<IJobEntryExternalResourceConsumer>> jobEntryConsumerMap =
-      new JobEntryExternalResourceConsumerProvider().getJobEntryConsumerMap();
+      JobEntryExternalResourceConsumerProvider.getInstance().getJobEntryConsumerMap();
     Set<IJobEntryExternalResourceConsumer> consumers = new HashSet<IJobEntryExternalResourceConsumer>();
     jobEntryConsumerMap.put( jobEntryBase.getClass(), consumers );
     jobEntryExtensionPoint.callExtensionPoint( null, jobExec );

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,7 +29,7 @@ import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolde
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.analyzer.kettle.ExternalResourceCache;
 import org.pentaho.metaverse.api.model.LineageHolder;
-import org.pentaho.metaverse.util.MetaverseBeanUtil;
+import org.pentaho.metaverse.impl.MetaverseBuilder;
 
 import java.util.Collections;
 import java.util.Map;
@@ -136,7 +136,7 @@ public class TransLineageHolderMap {
 
   protected IMetaverseBuilder getDefaultMetaverseBuilder() {
     // always try to get a new builder if this method is called. otherwise we will end up with overlapping graphs
-    IMetaverseBuilder newBuilder = (IMetaverseBuilder) MetaverseBeanUtil.getInstance().get( "IMetaverseBuilderPrototype" );
+    IMetaverseBuilder newBuilder = new MetaverseBuilder();
     if ( newBuilder == null ) {
       return defaultMetaverseBuilder;
     } else {

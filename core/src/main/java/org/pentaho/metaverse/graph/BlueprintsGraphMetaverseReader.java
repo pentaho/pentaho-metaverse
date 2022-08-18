@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.graph;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -62,12 +63,22 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   private Graph graph;
 
+  private static BlueprintsGraphMetaverseReader instance;
+
+  public static BlueprintsGraphMetaverseReader getInstance() {
+    if ( null == instance ) {
+      instance = new BlueprintsGraphMetaverseReader( SynchronizedGraphFactory.getDefaultGraph() );
+    }
+    return instance;
+  }
+
   /**
    * Constructor that accepts a Graph
    *
    * @param graph the Graph to read from
    */
-  public BlueprintsGraphMetaverseReader( Graph graph ) {
+  @VisibleForTesting
+  BlueprintsGraphMetaverseReader( Graph graph ) {
     this.graph = graph;
   }
 

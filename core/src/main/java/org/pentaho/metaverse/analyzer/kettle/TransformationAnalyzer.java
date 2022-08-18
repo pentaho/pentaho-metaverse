@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -34,6 +34,7 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
+import org.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider;
 import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
@@ -82,7 +83,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     }
   };
 
-  private IStepAnalyzerProvider stepAnalyzerProvider;
+  private IStepAnalyzerProvider stepAnalyzerProvider = StepAnalyzerProvider.getInstance();
 
   private static final Logger log = LoggerFactory.getLogger( TransformationAnalyzer.class );
 

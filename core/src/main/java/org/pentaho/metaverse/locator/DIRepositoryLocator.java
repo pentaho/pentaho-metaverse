@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -31,6 +31,8 @@ import org.pentaho.di.www.CarteSingleton;
 import org.pentaho.di.www.SlaveServerConfig;
 import org.pentaho.di.www.TransformationMap;
 import org.pentaho.metaverse.api.IDocumentListener;
+import org.pentaho.metaverse.impl.DocumentController;
+import org.pentaho.metaverse.impl.MetaverseBuilder;
 import org.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
@@ -74,7 +76,10 @@ public class DIRepositoryLocator extends RepositoryLocator {
    */
   public DIRepositoryLocator() {
     super();
+    setRepositoryId( "DI_REPO" );
     setLocatorType( LOCATOR_TYPE );
+    setMetaverseBuilder( MetaverseBuilder.getInstance() );
+    this.addDocumentListener( DocumentController.getInstance() );
   }
 
   /**

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,12 +22,26 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.fileinput.text;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInput;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta;
 import org.pentaho.metaverse.api.analyzer.kettle.step.BaseStepExternalResourceConsumer;
 
 public class TextFileInputExternalResourceConsumer
   extends BaseStepExternalResourceConsumer<TextFileInput, TextFileInputMeta> {
+
+  private static TextFileInputExternalResourceConsumer instance;
+
+  @VisibleForTesting
+  protected TextFileInputExternalResourceConsumer() {
+  }
+
+  public static TextFileInputExternalResourceConsumer getInstance() {
+    if ( null == instance ) {
+      instance = new TextFileInputExternalResourceConsumer();
+    }
+    return instance;
+  }
 
   @Override
   public boolean isDataDriven( TextFileInputMeta meta ) {

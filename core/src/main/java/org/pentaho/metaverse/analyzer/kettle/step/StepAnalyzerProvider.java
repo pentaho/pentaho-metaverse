@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,14 +22,18 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step;
 
+import com.google.common.annotations.VisibleForTesting;
+import org.jaxen.expr.Step;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +44,19 @@ import java.util.Set;
  * StepAnalyzerProvider maintains a collection of analyzer objects capable of analyzing various PDI steps
  */
 public class StepAnalyzerProvider extends BaseKettleMetaverseComponent implements IStepAnalyzerProvider {
+
+  private static StepAnalyzerProvider instance;
+
+  @VisibleForTesting
+  StepAnalyzerProvider() {
+  }
+
+  public static StepAnalyzerProvider getInstance() {
+    if ( null == instance ) {
+      instance = new StepAnalyzerProvider();
+    }
+    return instance;
+  }
 
   /**
    * The set of step analyzers.
@@ -58,6 +75,13 @@ public class StepAnalyzerProvider extends BaseKettleMetaverseComponent implement
    */
   @Override
   public List<IStepAnalyzer> getAnalyzers() {
+    if ( null == stepAnalyzers || stepAnalyzers.isEmpty() ) {
+      // could be the first time this has been invoked after startup; see who registered
+      // this obviously does not support dynamically adding/removing analyzers at runtime
+      stepAnalyzers = Collections.synchronizedList( new ArrayList<>() );
+      stepAnalyzers.addAll( PentahoSystem.getAll( IStepAnalyzer.class ) );
+      loadAnalyzerTypeMap();
+    }
     return stepAnalyzers;
   }
 
