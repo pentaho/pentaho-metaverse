@@ -76,15 +76,7 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputStepAnalyzer">
     <property name="externalResourceConsumer" ref="csvInputERC"/>
   </bean>
-  <bean id="ExcelInputStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputStepAnalyzer">
-    <property name="externalResourceConsumer" ref="excelInputERC"/>
-  </bean>
   <bean id="GroupByStepAnalyzer" class="org.pentaho.metaverse.analyzer.kettle.step.groupby.GroupByStepAnalyzer"/>
-  <bean id="ExcelOutputStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputStepAnalyzer">
-    <property name="externalResourceConsumer" ref="excelOutputERC"/>
-  </bean>
   <bean id="SplitFieldsStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.splitfields.SplitFieldsStepAnalyzer"/>
   <bean id="TransExecutorStepAnalyzer"
@@ -155,9 +147,7 @@
         <ref bean="TextFileOutputStepAnalyzer"/>
 	<ref bean="MergeJoinStepAnalyzer"/>
         <ref bean="StreamLookupStepAnalyzer"/>
-        <ref bean="ExcelInputStepAnalyzer"/>
         <ref bean="GroupByStepAnalyzer"/>
-        <ref bean="ExcelOutputStepAnalyzer"/>
         <ref bean="SplitFieldsStepAnalyzer"/>
         <ref bean="StringOperationsStepAnalyzer"/>
         <ref bean="StringsCutStepAnalyzer"/>
@@ -184,7 +174,6 @@
         <!-- TODO: uncomment once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved -->
         <!--<ref bean="JMSConsumerStepAnalyzer"/>-->
         <ref bean="TextFileInputStepAnalyzer"/>
-        <ref bean="ExcelOutputStepAnalyzer"/>
         <ref bean="FixedFileInputStepAnalyzer"/>
         <ref bean="TableInputStepAnalyzer"/>
      </list>
@@ -210,10 +199,6 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.fileinput.text.TextFileInputExternalResourceConsumer"/>
   <bean id="textFileOutputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.textfileoutput.TextFileOutputExternalResourceConsumer"/>
-  <bean id="excelInputERC" scope="singleton"
-        class="org.pentaho.metaverse.analyzer.kettle.step.excelinput.ExcelInputExternalResourceConsumer"/>
-  <bean id="excelOutputERC" scope="singleton"
-        class="org.pentaho.metaverse.analyzer.kettle.step.exceloutput.ExcelOutputExternalResourceConsumer"/>
   <bean id="csvInputERC" scope="singleton"
         class="org.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
   <bean id="httpClientERC" scope="singleton"
@@ -236,8 +221,6 @@
         <ref bean="oldTextFileInputERC"/>
         <ref bean="textFileInputERC"/>
         <ref bean="textFileOutputERC"/>
-        <ref bean="excelInputERC"/>
-        <ref bean="excelOutputERC"/>
         <ref bean="csvInputERC"/>
         <ref bean="httpClientERC"/>
         <ref bean="restClientERC"/>

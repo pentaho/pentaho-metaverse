@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -75,7 +75,7 @@ public class MetaverseUtil {
       return documentController;
     }
     try {
-      documentController = (IDocumentController) MetaverseBeanUtil.getInstance().get( "IDocumentController" );
+      documentController = (IDocumentController) MetaverseBeanUtil.getInstance().get( IDocumentController.class );
     } catch ( Exception e ) {
       // Just return null
     }

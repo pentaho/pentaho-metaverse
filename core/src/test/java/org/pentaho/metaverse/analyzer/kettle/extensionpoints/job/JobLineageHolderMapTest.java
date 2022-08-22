@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -35,7 +35,6 @@ import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
-import org.pentaho.metaverse.api.analyzer.kettle.ExternalResourceCache;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.powermock.reflect.Whitebox;
@@ -43,10 +42,16 @@ import org.powermock.reflect.Whitebox;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for JobLineageHolderMap
@@ -162,7 +167,9 @@ public class JobLineageHolderMapTest {
     jobLineageHolderMap.putLineageHolder( parentJob, mockParentHolder );
     mockParentHolder.setMetaverseBuilder( null );
 
-    assertEquals( defaultBuilder, jobLineageHolderMap.getMetaverseBuilder( job ) );
+    // getting a new builder in JobLineageHolderMap.getDefaultBuilder should never fail now
+    // unsure how it could in the first place other than unit tests
+    assertNotEquals( defaultBuilder, jobLineageHolderMap.getMetaverseBuilder( job ) );
 
     mockParentHolder.setMetaverseBuilder( mockParentBuilder );
     builder = jobLineageHolderMap.getMetaverseBuilder( job );

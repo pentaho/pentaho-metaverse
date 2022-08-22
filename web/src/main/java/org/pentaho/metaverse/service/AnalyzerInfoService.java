@@ -83,7 +83,7 @@ public class AnalyzerInfoService {
    *
    * <p><b>Example Response:</b></p>
    *    <pre function="syntax.js">
-   *      [ { meta: "CalculatorMeta" }, { meta: "CsvInputMeta" }, { meta: "ExcelInputMeta" } ]
+   *      [ { meta: "CalculatorMeta" }, { meta: "CsvInputMeta" } ]
    *    </pre>
    */
   @GET

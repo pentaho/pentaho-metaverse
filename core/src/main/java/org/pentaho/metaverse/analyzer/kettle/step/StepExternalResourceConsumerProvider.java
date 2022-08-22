@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,13 +22,15 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,10 +47,24 @@ public class StepExternalResourceConsumerProvider implements IStepExternalResour
 
   private Map<Class<? extends BaseStepMeta>, Set<IStepExternalResourceConsumer>> stepConsumerMap;
 
+  private static StepExternalResourceConsumerProvider instance;
 
-  public StepExternalResourceConsumerProvider() {
-    stepConsumerMap =
-      new ConcurrentHashMap<Class<? extends BaseStepMeta>, Set<IStepExternalResourceConsumer>>();
+  public static StepExternalResourceConsumerProvider getInstance() {
+    if ( null == instance ) {
+      instance = new StepExternalResourceConsumerProvider();
+    }
+    return instance;
+  }
+
+  @VisibleForTesting
+  public static void clearInstance() {
+    instance = null;
+  }
+
+  @VisibleForTesting
+  private StepExternalResourceConsumerProvider() {
+    stepConsumerMap = new ConcurrentHashMap<>();
+    stepConsumers = Collections.synchronizedList( new ArrayList<>() );
   }
 
   public void setExternalResourceConsumers( List<IStepExternalResourceConsumer> stepConsumers ) {
@@ -63,6 +79,11 @@ public class StepExternalResourceConsumerProvider implements IStepExternalResour
    */
   @Override
   public List<IStepExternalResourceConsumer> getExternalResourceConsumers() {
+    if ( null == stepConsumers || stepConsumers.isEmpty() ) {
+      stepConsumers = Collections.synchronizedList( new ArrayList<>() );
+      // need to check this at runtime vs during startup in case external plugins have registered StepExternalResourceConsumers
+      stepConsumers.addAll( PentahoSystem.getAll( IStepExternalResourceConsumer.class ) );
+    }
     return stepConsumers;
   }
 
@@ -76,13 +97,13 @@ public class StepExternalResourceConsumerProvider implements IStepExternalResour
   public List<IStepExternalResourceConsumer> getExternalResourceConsumers( Collection<Class<?>> types ) {
     List<IStepExternalResourceConsumer> stepExternalResourceConsumers = getExternalResourceConsumers();
     if ( types != null ) {
-      final Set<IStepExternalResourceConsumer> specificStepAnalyzers = new HashSet<IStepExternalResourceConsumer>();
+      final Set<IStepExternalResourceConsumer> specificStepAnalyzers = new HashSet<>();
       for ( Class<?> clazz : types ) {
-        if ( stepConsumerMap.containsKey( clazz ) ) {
-          specificStepAnalyzers.addAll( stepConsumerMap.get( clazz ) );
+        if ( getStepConsumerMap().containsKey( clazz ) ) {
+          specificStepAnalyzers.addAll( getStepConsumerMap().get( clazz ) );
         }
       }
-      stepExternalResourceConsumers = new ArrayList<IStepExternalResourceConsumer>( specificStepAnalyzers );
+      stepExternalResourceConsumers = new ArrayList<>( specificStepAnalyzers );
     }
     return stepExternalResourceConsumers;
   }
@@ -100,13 +121,7 @@ public class StepExternalResourceConsumerProvider implements IStepExternalResour
 
     Class<? extends BaseStepMeta> metaClass = externalResourceConsumer.getMetaClass();
     if ( metaClass != null ) {
-      Set<IStepExternalResourceConsumer> consumerSet = null;
-      if ( stepConsumerMap.containsKey( metaClass ) ) {
-        consumerSet = stepConsumerMap.get( metaClass );
-      } else {
-        consumerSet = new HashSet<IStepExternalResourceConsumer>();
-
-      }
+      Set<IStepExternalResourceConsumer> consumerSet = stepConsumerMap.computeIfAbsent( metaClass, k -> new HashSet<>() );
       consumerSet.add( externalResourceConsumer );
       stepConsumerMap.put( metaClass, consumerSet );
     }
@@ -143,6 +158,18 @@ public class StepExternalResourceConsumerProvider implements IStepExternalResour
   }
 
   public Map<Class<? extends BaseStepMeta>, Set<IStepExternalResourceConsumer>> getStepConsumerMap() {
+    if ( null == stepConsumerMap || stepConsumerMap.isEmpty() ) {
+      stepConsumerMap = new ConcurrentHashMap<>();
+      List<IStepExternalResourceConsumer> consumerList = getExternalResourceConsumers();
+      for ( IStepExternalResourceConsumer consumer : consumerList ) {
+        Class<? extends BaseStepMeta> metaClass = consumer.getMetaClass();
+        if ( metaClass != null ) {
+          Set<IStepExternalResourceConsumer> consumerSet = stepConsumerMap.computeIfAbsent( metaClass, k -> new HashSet<>() );
+          consumerSet.add( consumer );
+          stepConsumerMap.put( metaClass, consumerSet );
+        }
+      }
+    }
     return stepConsumerMap;
   }
 
@@ -150,11 +177,6 @@ public class StepExternalResourceConsumerProvider implements IStepExternalResour
    * Loads up a Map of document types to supporting IStepAnalyzer(s)
    */
   protected void loadStepExternalResourceConsumerMap() {
-    stepConsumerMap = new HashMap<Class<? extends BaseStepMeta>, Set<IStepExternalResourceConsumer>>();
-    if ( stepConsumers != null ) {
-      for ( IStepExternalResourceConsumer stepConsumer : stepConsumers ) {
-        addExternalResourceConsumer( stepConsumer );
-      }
-    }
+    stepConsumerMap = getStepConsumerMap();
   }
 }

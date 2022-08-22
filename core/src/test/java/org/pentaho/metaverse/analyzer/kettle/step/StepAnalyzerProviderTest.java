@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -32,6 +32,7 @@ import org.mockito.internal.util.collections.Sets;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
 
 import java.util.ArrayList;
@@ -39,7 +40,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -85,17 +90,19 @@ public class StepAnalyzerProviderTest {
     provider.analyzerTypeMap.put( BaseStepMeta.class, baseStepAnalyzerSet );
     // Return the tableOutputStepAnalyzerSet set if TableOutputMeta analyzers are requested
     provider.analyzerTypeMap.put( TableOutputMeta.class, tableOutputStepAnalyzerSet );
+    provider.addAnalyzer( mock( GenericStepMetaAnalyzer.class ) );
+    provider.addAnalyzer( mock( TableOutputStepAnalyzer.class ) );
 
     List<IStepAnalyzer> analyzers = provider.getAnalyzers( new ArrayList() {{
       add( BaseStepMeta.class );
       add( TableOutputMeta.class );
     }} );
-    assertEquals( analyzers.size(), 2 );
+    assertEquals( 2, analyzers.size() );
 
     analyzers = provider.getAnalyzers( new HashSet() {{
       add( TableOutputMeta.class );
     }} );
-    assertEquals( analyzers.size(), 1 );
+    assertEquals( 1, analyzers.size() );
   }
 
   @Test
@@ -205,7 +212,7 @@ public class StepAnalyzerProviderTest {
     assertEquals( 2, provider.getAnalyzers().size() );
 
     provider.setStepAnalyzers( null );
-    assertNull( provider.getAnalyzers() );
+    assertTrue( provider.getAnalyzers().isEmpty() );
 
     // verify that "clonable" analyzers are added to the main analyzers list
     provider.setClonableStepAnalyzers( analyzers );
@@ -215,6 +222,6 @@ public class StepAnalyzerProviderTest {
     assertEquals( 2, provider.getAnalyzers().size() );
 
     provider.setClonableStepAnalyzers( null );
-    assertNull( provider.getAnalyzers() );
+    assertTrue( provider.getAnalyzers().isEmpty() );
   }
 }

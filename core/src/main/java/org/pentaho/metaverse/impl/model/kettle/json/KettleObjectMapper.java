@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,9 +29,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,7 +44,34 @@ public class KettleObjectMapper {
   private ObjectMapper mapper;
   private SimpleModule transModule;
 
-  public KettleObjectMapper( List<StdSerializer> serializers, List<StdDeserializer> deserializers ) {
+  private static KettleObjectMapper instance;
+
+  public static KettleObjectMapper getInstance() {
+    if ( null == instance ) {
+      instance = new KettleObjectMapper();
+    }
+    return instance;
+  }
+
+  private KettleObjectMapper() {
+    List<StdSerializer> serializers = new ArrayList<>();
+    serializers.add( BaseStepMetaJsonSerializer.getInstance() );
+    serializers.add( TableOutputStepMetaJsonSerializer.getInstance() );
+    serializers.add( TransMetaJsonSerializer.getInstance() );
+    serializers.add( JobEntryBaseJsonSerializer.getInstance() );
+    serializers.add( JobMetaJsonSerializer.getInstance() );
+
+    List<StdDeserializer> deserializers = new ArrayList<>();
+    deserializers.add( TransMetaJsonDeserializer.getInstance() );
+    doInit( serializers, deserializers );
+  }
+
+  @VisibleForTesting
+  KettleObjectMapper( List<StdSerializer> serializers, List<StdDeserializer> deserializers ) {
+    doInit( serializers, deserializers );
+  }
+
+  private void doInit( List<StdSerializer> serializers, List<StdDeserializer> deserializers ) {
     mapper = new ObjectMapper();
     mapper.enable( SerializationFeature.INDENT_OUTPUT );
     mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );

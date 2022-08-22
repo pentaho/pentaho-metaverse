@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.rest;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.exception.KettleValueException;
@@ -46,6 +47,19 @@ import java.util.Set;
  * Created by rfellows on 5/11/15.
  */
 public class RestClientExternalResourceConsumer extends BaseStepExternalResourceConsumer<Rest, RestMeta> {
+
+  private static RestClientExternalResourceConsumer instance;
+
+  @VisibleForTesting
+  protected RestClientExternalResourceConsumer() {
+  }
+
+  public static RestClientExternalResourceConsumer getInstance() {
+    if ( null == instance ) {
+      instance = new RestClientExternalResourceConsumer();
+    }
+    return instance;
+  }
 
   private Logger log = LoggerFactory.getLogger( RestClientExternalResourceConsumer.class );
 

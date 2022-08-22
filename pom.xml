@@ -50,6 +50,7 @@
     <module>core</module>
     <module>web</module>
     <module>sample</module>
+    <module>assemblies</module>
   </modules>
   <scm>
     <connection>scm:git:git@github.com:pentaho/${project.artifactId}.git</connection>
@@ -67,6 +68,7 @@
     <dependency.org.powermock.version>1.7.4</dependency.org.powermock.version>
     <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
     <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
+    <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
   </properties>
   <profiles>
     <profile>

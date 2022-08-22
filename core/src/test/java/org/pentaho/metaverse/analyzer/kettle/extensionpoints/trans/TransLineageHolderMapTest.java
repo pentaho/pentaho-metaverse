@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -39,22 +39,25 @@ import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputStep;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolderMap;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
-import org.pentaho.metaverse.api.analyzer.kettle.ExternalResourceCache;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
-import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.powermock.reflect.Whitebox;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for TransLineageHolderMap
@@ -297,7 +300,9 @@ public class TransLineageHolderMapTest {
     transLineageHolderMap.putLineageHolder( parentTrans, mockParentHolder );
     mockParentHolder.setMetaverseBuilder( null );
 
-    assertEquals( defaultBuilder, transLineageHolderMap.getMetaverseBuilder( trans ) );
+    // getting a new builder in TransLineageHolderMap.getDefaultBuilder should never fail now
+    // unsure how it could in the first place other than unit tests
+    assertNotEquals( defaultBuilder, transLineageHolderMap.getMetaverseBuilder( trans ) );
 
     mockParentHolder.setMetaverseBuilder( mockParentBuilder );
     builder = transLineageHolderMap.getMetaverseBuilder( trans );

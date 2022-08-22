@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,7 @@ package org.pentaho.metaverse.impl.model.kettle.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.StringObjectId;
@@ -46,17 +47,34 @@ import java.util.List;
  */
 public class TransMetaJsonSerializer extends AbstractMetaJsonSerializer<TransMeta> {
 
+  private static TransMetaJsonSerializer instance;
+
+  private TransMetaJsonSerializer() {
+    this( TransMeta.class );
+    this.setLineageRepository( LineageRepository.getInstance() );
+  }
+
+  public static TransMetaJsonSerializer getInstance() {
+    if ( null == instance ) {
+      instance = new TransMetaJsonSerializer();
+    }
+    return instance;
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger( TransMetaJsonSerializer.class );
 
-  public TransMetaJsonSerializer( Class<TransMeta> aClass ) {
+  @VisibleForTesting
+  TransMetaJsonSerializer( Class<TransMeta> aClass ) {
     super( aClass );
   }
 
-  public TransMetaJsonSerializer( JavaType javaType ) {
+  @VisibleForTesting
+  TransMetaJsonSerializer( JavaType javaType ) {
     super( javaType );
   }
 
-  public TransMetaJsonSerializer( Class<?> aClass, boolean b ) {
+  @VisibleForTesting
+  TransMetaJsonSerializer( Class<?> aClass, boolean b ) {
     super( aClass, b );
   }
 

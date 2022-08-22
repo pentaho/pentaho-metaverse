@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,7 @@ package org.pentaho.metaverse.impl;
 
 import com.tinkerpop.blueprints.Graph;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
+import org.pentaho.metaverse.graph.SynchronizedGraphFactory;
 
 /**
  * This is the reference implementation for IMetaverseBuilder, offering the ability to add nodes, links, etc. to an
@@ -35,7 +36,20 @@ public class MetaverseBuilder extends BaseMetaverseBuilder {
    *
    * @param graph the Graph to write to
    */
+  private static MetaverseBuilder instance;
+
+  public static MetaverseBuilder getInstance() {
+    if ( null == instance ) {
+      instance = new MetaverseBuilder( SynchronizedGraphFactory.getDefaultGraph() );
+    }
+    return instance;
+  }
+
   public MetaverseBuilder( Graph graph ) {
     super( graph );
+  }
+
+  public MetaverseBuilder() {
+    super( SynchronizedGraphFactory.getDefaultGraph() );
   }
 }

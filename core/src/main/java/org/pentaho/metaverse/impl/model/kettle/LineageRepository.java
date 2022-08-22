@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.impl.model.kettle;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.core.Condition;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
@@ -44,11 +45,29 @@ public class LineageRepository extends SimpleRepository {
   Map<ObjectId, Map<String, Object>> jobEntryAttributeCache;
   Map<ObjectId, List<Map<String, Object>>> jobEntryFieldCache;
 
+  private static LineageRepository instance;
+  private static LineageRepository readInstance;
+
+  public static LineageRepository getInstance() {
+    if ( null == instance ) {
+      instance = new LineageRepository();
+    }
+    return instance;
+  }
+
+  public static LineageRepository getReadInstance() {
+    if ( null == readInstance ) {
+      readInstance = new LineageRepository();
+    }
+    return readInstance;
+  }
+
+  @VisibleForTesting
   public LineageRepository() {
-    stepAttributeCache = new HashMap<ObjectId, Map<String, Object>>();
-    stepFieldCache = new HashMap<ObjectId, List<Map<String, Object>>>();
-    jobEntryAttributeCache = new HashMap<ObjectId, Map<String, Object>>();
-    jobEntryFieldCache = new HashMap<ObjectId, List<Map<String, Object>>>();
+    stepAttributeCache = new HashMap<>();
+    stepFieldCache = new HashMap<>();
+    jobEntryAttributeCache = new HashMap<>();
+    jobEntryFieldCache = new HashMap<>();
   }
 
   @Override public boolean getStepAttributeBoolean( ObjectId id_step, int nr, String code, boolean def )

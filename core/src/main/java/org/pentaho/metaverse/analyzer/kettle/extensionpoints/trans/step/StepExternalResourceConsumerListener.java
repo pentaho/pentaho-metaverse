@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -64,7 +64,7 @@ public class StepExternalResourceConsumerListener implements ExtensionPointInter
   public void callExtensionPoint( LogChannelInterface log, Object object ) throws KettleException {
     if ( stepConsumerProvider == null ) {
       stepConsumerProvider = (IStepExternalResourceConsumerProvider)
-        MetaverseBeanUtil.getInstance().get( "IStepExternalResourceConsumerProvider" );
+        MetaverseBeanUtil.getInstance().get( IStepExternalResourceConsumerProvider.class );
     }
     StepMetaDataCombi stepCombi = (StepMetaDataCombi) object;
     if ( stepCombi != null ) {

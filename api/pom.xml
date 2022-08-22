@@ -17,6 +17,7 @@
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
       <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <scope>provided</scope>
       <exclusions>
         <exclusion>
           <groupId>org.javassist</groupId>
@@ -32,6 +33,7 @@
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-engine</artifactId>
       <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <scope>provided</scope>
       <exclusions>
         <exclusion>
           <groupId>com.sun.jersey</groupId>
@@ -75,12 +77,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
       <version>${dependency.pentaho.pentaho-platform-core.version}</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
       <exclusions>
         <exclusion>
           <artifactId>xercesImpl</artifactId>

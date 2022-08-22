@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.jobentry;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.metaverse.api.analyzer.kettle.BaseKettleMetaverseComponent;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IClonableJobEntryAnalyzer;
@@ -41,6 +42,17 @@ import java.util.Set;
  */
 public class JobEntryAnalyzerProvider extends BaseKettleMetaverseComponent implements IJobEntryAnalyzerProvider {
 
+  private static JobEntryAnalyzerProvider instance;
+
+  @VisibleForTesting
+  JobEntryAnalyzerProvider() {
+  }
+  public static JobEntryAnalyzerProvider getInstance() {
+    if ( null == instance ) {
+      instance = new JobEntryAnalyzerProvider();
+    }
+    return instance;
+  }
   /**
    * The set of step analyzers.
    */

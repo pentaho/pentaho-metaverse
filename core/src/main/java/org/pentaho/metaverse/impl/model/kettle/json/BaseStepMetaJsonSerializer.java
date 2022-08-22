@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -25,6 +25,7 @@ package org.pentaho.metaverse.impl.model.kettle.json;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.metaverse.impl.model.kettle.LineageRepository;
 
@@ -34,11 +35,27 @@ import java.io.IOException;
  * User: RFellows Date: 11/17/14
  */
 public class BaseStepMetaJsonSerializer extends AbstractStepMetaJsonSerializer<BaseStepMeta> {
-  public BaseStepMetaJsonSerializer( Class<BaseStepMeta> aClass ) {
+
+  private static BaseStepMetaJsonSerializer instance;
+
+  private BaseStepMetaJsonSerializer() {
+    this( BaseStepMeta.class, LineageRepository.getInstance() );
+  }
+
+  public static BaseStepMetaJsonSerializer getInstance() {
+    if ( null == instance ) {
+      instance = new BaseStepMetaJsonSerializer();
+    }
+    return instance;
+  }
+
+  @VisibleForTesting
+  BaseStepMetaJsonSerializer( Class<BaseStepMeta> aClass ) {
     super( aClass );
   }
 
-  public BaseStepMetaJsonSerializer( Class<BaseStepMeta> aClass, LineageRepository repo ) {
+  @VisibleForTesting
+  BaseStepMetaJsonSerializer( Class<BaseStepMeta> aClass, LineageRepository repo ) {
     super( aClass, repo );
   }
 

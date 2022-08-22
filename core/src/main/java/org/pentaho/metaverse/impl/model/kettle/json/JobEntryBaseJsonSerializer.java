@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -25,7 +25,9 @@ package org.pentaho.metaverse.impl.model.kettle.json;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.job.entry.JobEntryBase;
+import org.pentaho.metaverse.impl.model.kettle.LineageRepository;
 
 import java.io.IOException;
 
@@ -33,15 +35,34 @@ import java.io.IOException;
  * User: RFellows Date: 12/15/14
  */
 public class JobEntryBaseJsonSerializer extends AbstractJobEntryJsonSerializer<JobEntryBase> {
-  public JobEntryBaseJsonSerializer( Class<JobEntryBase> aClass ) {
+
+
+  private static JobEntryBaseJsonSerializer instance;
+
+  private JobEntryBaseJsonSerializer() {
+    this( JobEntryBase.class );
+    this.setLineageRepository( LineageRepository.getInstance() );
+  }
+
+  public static JobEntryBaseJsonSerializer getInstance() {
+    if ( null == instance ) {
+      instance = new JobEntryBaseJsonSerializer();
+    }
+    return instance;
+  }
+
+  @VisibleForTesting
+  JobEntryBaseJsonSerializer( Class<JobEntryBase> aClass ) {
     super( aClass );
   }
 
-  public JobEntryBaseJsonSerializer( JavaType javaType ) {
+  @VisibleForTesting
+  JobEntryBaseJsonSerializer( JavaType javaType ) {
     super( javaType );
   }
 
-  public JobEntryBaseJsonSerializer( Class<?> aClass, boolean b ) {
+  @VisibleForTesting
+  JobEntryBaseJsonSerializer( Class<?> aClass, boolean b ) {
     super( aClass, b );
   }
 
