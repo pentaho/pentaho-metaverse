@@ -176,7 +176,7 @@
         <exclusion>
           <artifactId>jackson-mapper-asl</artifactId>
           <groupId>org.codehaus.jackson</groupId>
-        </exclusion>		
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -196,12 +196,6 @@
       <artifactId>kettle-engine</artifactId>
       <version>${dependency.pentaho-kettle.kettle-core.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.pentaho.di.plugins</groupId>
-      <artifactId>excel-plugins-impl</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
