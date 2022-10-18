@@ -91,8 +91,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     lineageWriter.setCatalogWriter( new GraphCatalogWriter( "", "", "", "", "", "" ) );
     lineageWriter.setOutputFolder( MetaverseConfig.getInstance().getExecutionOutputFolder() );
     this.setLineageWriter( lineageWriter );
-    //TODO: get this property from kettle properties file
-    this.setRuntimeEnabled( true );
+    this.setRuntimeEnabled( MetaverseConfig.isLineageExecutionEnabled() );
   }
 
   /**
