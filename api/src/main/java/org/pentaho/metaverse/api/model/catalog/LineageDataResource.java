@@ -43,6 +43,18 @@ public class LineageDataResource {
   private List<String> fields;
   private final List<FieldLevelRelationship> fieldRelationships = new ArrayList<>();
   private String catalogResourceID;
+  private String catalogResourcePath;
+  private String catalogDataSourceName;
+
+  public String getCatalogResourceLogicalPath() {
+    return catalogResourceLogicalPath;
+  }
+
+  public void setCatalogResourceLogicalPath( String catalogResourceLogicalPath ) {
+    this.catalogResourceLogicalPath = catalogResourceLogicalPath;
+  }
+
+  private String catalogResourceLogicalPath;
   private Object vertexId;
   private String dbSchema;
   private String dbHost;
@@ -99,6 +111,21 @@ public class LineageDataResource {
 
   public String getCatalogResourceID() {
     return catalogResourceID;
+  }
+
+  public void setCatalogDataSourceName( String catalogDataSourceName ) {
+    this.catalogDataSourceName = catalogDataSourceName;
+  }
+
+  public String getCatalogDataSourceName() {
+    return catalogDataSourceName;
+  }
+  public void setCatalogResourcePath( String catalogResourcePath ) {
+    this.catalogResourcePath = catalogResourcePath;
+  }
+
+  public String getCatalogResourcePath() {
+    return catalogResourcePath;
   }
 
   public Object getVertexId() {

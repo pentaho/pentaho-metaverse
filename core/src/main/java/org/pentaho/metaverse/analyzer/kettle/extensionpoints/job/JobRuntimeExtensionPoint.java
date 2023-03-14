@@ -24,26 +24,31 @@ package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.pentaho.di.connections.ConnectionDetails;
+import org.pentaho.di.connections.ConnectionManager;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettlePluginException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.parameters.UnknownParamException;
+import org.pentaho.di.core.service.PluginServiceLoader;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.JobAnalyzer;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
-import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
-import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.Namespace;
+import org.pentaho.metaverse.api.ICatalogLineageClientProvider;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
+import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
@@ -63,35 +68,35 @@ import org.pentaho.metaverse.util.MetaverseUtil;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.function.Supplier;
 
 /**
  * An extension point to gather runtime data for an execution of a job into an ExecutionProfile object
  */
 @ExtensionPoint(
-  description = "Job Runtime metadata extractor",
-  extensionPointId = "JobStart",
-  id = "jobRuntimeMetaverse" )
+        description = "Job Runtime metadata extractor",
+        extensionPointId = "JobStart",
+        id = "jobRuntimeMetaverse" )
 public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implements JobListener {
 
   private static final Logger log = LogManager.getLogger( JobRuntimeExtensionPoint.class );
+  private static final String DEFAULT_CATALOG_CONNECTION_NAME = "catalog-vfs-connection";
+  private static final String KETTLE_CATALOG_LINEAGE_CONNECTION_NAME = "KETTLE_CATALOG_LINEAGE_CONNECTION_NAME";
+
+  private ICatalogLineageClientProvider catalogLineageClientProvider;
 
   public JobRuntimeExtensionPoint() {
     super();
     this.setDocumentAnalyzer( new JobAnalyzer() );
-    VfsLineageWriter lineageWriter = new VfsLineageWriter();
-    lineageWriter.setGraphWriter( new GraphMLWriter() );
-    //TODO: get these properties from the config file
-    //TODO: catalog step needs to expose the ICatalogLineageProvider as a service via kettle plugin system
-    lineageWriter.setCatalogWriter( new GraphCatalogWriter( "", "", "", "", "", "" ) );
-    lineageWriter.setOutputFolder( MetaverseConfig.getInstance().getExecutionOutputFolder() );
-    this.setLineageWriter( lineageWriter );
-    this.setRuntimeEnabled( MetaverseConfig.isLineageExecutionEnabled() );
+    this.setupLinageWriter();
   }
 
   /**
