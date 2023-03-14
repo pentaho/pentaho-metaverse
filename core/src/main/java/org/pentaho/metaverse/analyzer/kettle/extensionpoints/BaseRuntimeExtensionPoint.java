@@ -23,13 +23,20 @@
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
 import org.apache.commons.lang.ObjectUtils;
+import org.apache.logging.log4j.LogManager;
+import org.pentaho.di.connections.ConnectionDetails;
+import org.pentaho.di.connections.ConnectionManager;
 import org.pentaho.di.core.KettleClientEnvironment;
+import org.pentaho.di.core.exception.KettlePluginException;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.logging.LogChannelInterface;
+import org.pentaho.di.core.service.PluginServiceLoader;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.version.BuildVersion;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransformationRuntimeExtensionPoint;
+import org.pentaho.metaverse.api.ICatalogLineageClientProvider;
 import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.ILineageWriter;
@@ -37,7 +44,10 @@ import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionEngine;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
+import org.pentaho.metaverse.graph.GraphCatalogWriter;
+import org.pentaho.metaverse.graph.GraphMLWriter;
 import org.pentaho.metaverse.impl.MetaverseConfig;
+import org.pentaho.metaverse.impl.VfsLineageWriter;
 import org.pentaho.metaverse.impl.model.ExecutionEngine;
 import org.pentaho.metaverse.impl.model.ExecutionProfile;
 import org.pentaho.metaverse.messages.Messages;
@@ -46,7 +56,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A base class to provide common functionality among runtime extension points
@@ -54,6 +68,18 @@ import java.util.Date;
 public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterface {
 
   private static final Logger log = LoggerFactory.getLogger( BaseRuntimeExtensionPoint.class );
+  public static final String DEFAULT_CATALOG_CONNECTION_NAME = "catalog-vfs-connection";
+  private static final String KETTLE_CATALOG_LINEAGE_CONNECTION_NAME = "KETTLE_CATALOG_LINEAGE_CONNECTION_NAME";
+
+  public ICatalogLineageClientProvider getCatalogLineageClientProvider() {
+    return catalogLineageClientProvider;
+  }
+
+  public void setCatalogLineageClientProvider( ICatalogLineageClientProvider catalogLineageClientProvider ) {
+    this.catalogLineageClientProvider = catalogLineageClientProvider;
+  }
+
+  private  ICatalogLineageClientProvider catalogLineageClientProvider;
 
   private IDocumentAnalyzer documentAnalyzer;
 
@@ -66,6 +92,35 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
    */
   protected LogChannelInterface consoleLog;
 
+  protected void setupLinageWriter() {
+    VfsLineageWriter lineageWriter = new VfsLineageWriter();
+    lineageWriter.setGraphWriter( new GraphMLWriter() );
+    Supplier<ConnectionManager> connectionManagerSupplier = ConnectionManager::getInstance;
+    String catalogConnectionName = System.getProperty( KETTLE_CATALOG_LINEAGE_CONNECTION_NAME, DEFAULT_CATALOG_CONNECTION_NAME );
+    ConnectionDetails connectionDetails = connectionManagerSupplier.get().getConnectionDetails( catalogConnectionName );
+    if ( connectionDetails != null ) {
+      Map<String, String> connectionInfo = connectionDetails.getProperties();
+      try {
+        Collection<ICatalogLineageClientProvider> catalogLineageClientProviders = PluginServiceLoader.loadServices( ICatalogLineageClientProvider.class );
+        Optional<ICatalogLineageClientProvider> kettleRepositoryLocatorOptional = catalogLineageClientProviders.stream().findFirst();
+        if ( kettleRepositoryLocatorOptional.isPresent() ) {
+          catalogLineageClientProvider = catalogLineageClientProviders.stream().findFirst().orElse( null );
+        }
+        GraphCatalogWriter graphCatalogWriter = new GraphCatalogWriter( connectionInfo.get( "url" ), connectionInfo.get( "username" ), connectionInfo.get( "password" ), connectionInfo.get( "tokenUrl" ), connectionInfo.get( "clientId" ), connectionInfo.get( "clientSecret" ) );
+        graphCatalogWriter.setCatalogLineageClientProvider( catalogLineageClientProvider );
+        lineageWriter.setCatalogWriter( graphCatalogWriter );
+      } catch ( KettlePluginException e ) {
+        // TODO Localize the message
+        log.warn( "Unable to obtain service for ICatalogLineageClientProvider. Unable to create a catalog lineage writer. Cause [ " + e.getLocalizedMessage() + " ]" );
+      }
+    } else {
+      // TODO Localize the message
+      log.warn( "Unable to find a catalog connection to configuration. Unable to create a catalog lineage writer" );
+    }
+    lineageWriter.setOutputFolder( MetaverseConfig.getInstance().getExecutionOutputFolder() );
+    this.setLineageWriter( lineageWriter );
+    this.setRuntimeEnabled( MetaverseConfig.isLineageExecutionEnabled() );
+  }
   public void writeLineageInfo( LineageHolder holder ) throws IOException {
     if ( lineageWriter != null ) {
       String strategy = lineageWriter.getOutputStrategy();

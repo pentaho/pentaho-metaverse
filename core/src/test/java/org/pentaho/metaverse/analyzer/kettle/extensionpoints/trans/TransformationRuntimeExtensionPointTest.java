@@ -29,6 +29,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.pentaho.di.connections.ConnectionDetails;
+import org.pentaho.di.connections.ConnectionManager;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.Result;
@@ -39,6 +41,10 @@ import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransListener;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.metastore.stores.memory.MemoryMetaStore;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.BaseRuntimeExtensionPoint;
+import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobRuntimeExtensionPoint;
+import org.pentaho.metaverse.api.ICatalogLineageClientProvider;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.ILineageWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
@@ -55,7 +61,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -95,6 +103,12 @@ public class TransformationRuntimeExtensionPointTest {
 
   @Mock
   private IMetaverseBuilder mockBuilder;
+  @Mock
+  private ICatalogLineageClientProvider clientProvider;
+  @Mock
+  ConnectionDetails connectionDetails;
+
+  @Mock ConnectionManager connectionManager;
 
   @BeforeClass
   public static void setUpBeforeClass() throws KettleException {
@@ -105,10 +119,28 @@ public class TransformationRuntimeExtensionPointTest {
   @Before
   public void setUp() throws Exception {
 
+    MemoryMetaStore metaStore = new MemoryMetaStore();
+    connectionManager = ConnectionManager.getInstance();
+    connectionManager.setMetastoreSupplier( () -> metaStore );
+
+    // (re)initialize the default state of MetaverseConfig
+    setupMetaverseConfig( true, true );
+    connectionManager = spy (connectionManager );
+    when (  connectionManager.getConnectionDetails( BaseRuntimeExtensionPoint.DEFAULT_CATALOG_CONNECTION_NAME ) ).thenReturn( connectionDetails );
+    Map<String, String> map = new HashMap<>();
+    map.put("url", "someurl" );
+    map.put("username", "devuser" );
+    map.put("password", "password" );
+    map.put("tokenUrl", "someurl" );
+    map.put("clientId", "id" );
+    map.put("clientSecret", "" );
+    when ( connectionDetails.getProperties() ).thenReturn( map );
+
     // (re)initialize the default state of MetaverseConfig
     setupMetaverseConfig( true, true );
 
     transExtensionPoint = new TransformationRuntimeExtensionPoint();
+    transExtensionPoint.setCatalogLineageClientProvider( clientProvider );
     transExtensionPoint.setRuntimeEnabled( true );
     lineageWriter = mock( ILineageWriter.class );
     transExtensionPoint.setLineageWriter( lineageWriter );
