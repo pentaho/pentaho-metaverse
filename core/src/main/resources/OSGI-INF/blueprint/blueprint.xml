@@ -204,11 +204,6 @@
     <property name="externalResourceConsumer" ref="httpClientERC"/>
   </bean>
 
-  <bean id="RestClientStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer">
-    <property name="externalResourceConsumer" ref="restClientERC"/>
-  </bean>
-
   <bean id="HTTPPostStepAnalyzer"
         class="org.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostStepAnalyzer">
     <property name="externalResourceConsumer" ref="httpPostERC"/>

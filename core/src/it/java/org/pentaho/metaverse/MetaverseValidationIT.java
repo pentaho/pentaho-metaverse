@@ -25,8 +25,7 @@ package org.pentaho.metaverse;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.*;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -1214,6 +1213,8 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
     assertEquals( getExpectedOutputFieldCount( stepMeta ), getIterableSize( outputs ) );
   }
 
+  // BACKLOG-37696 Moving the Rest to its own plugin
+  @Ignore
   @Test
   public void testRestClientStepNode() throws Exception {
     RestClientStepNode node = root.getRestClientStepNode( "REST Client" );
@@ -1246,7 +1247,10 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
     }
   }
 
+  // BACKLOG-37696 Moving the Rest to its own plugin
+  @Ignore
   @Test
+
   public void testRestClientStepNode_urlFromField() throws Exception {
     RestClientStepNode node = root.getRestClientStepNode( "REST Client - parameterized" );
     assertNotNull( node );

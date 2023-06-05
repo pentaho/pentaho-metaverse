@@ -46,8 +46,6 @@ import org.pentaho.metaverse.analyzer.kettle.step.jobexecutor.JobExecutorStepAna
 import org.pentaho.metaverse.analyzer.kettle.step.mapping.MappingAnalyzer;
 import org.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer;
 import org.pentaho.metaverse.analyzer.kettle.step.numberrange.NumberRangeStepAnalyzer;
-import org.pentaho.metaverse.analyzer.kettle.step.rest.RestClientExternalResourceConsumer;
-import org.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer;
 import org.pentaho.metaverse.analyzer.kettle.step.rowsfromresult.RowsFromResultStepAnalyzer;
 import org.pentaho.metaverse.analyzer.kettle.step.rowstoresult.RowsToResultStepAnalyzer;
 import org.pentaho.metaverse.analyzer.kettle.step.selectvalues.SelectValuesStepAnalyzer;
@@ -151,10 +149,6 @@ public class MetaversePluginLifecycleListener implements KettleLifecycleListener
     HTTPClientStepAnalyzer httpClientStepAnalyzer = new HTTPClientStepAnalyzer();
     httpClientStepAnalyzer.setExternalResourceConsumer( HTTPClientExternalResourceConsumer.getInstance() );
     PentahoSystem.registerObject( httpClientStepAnalyzer );
-
-    RestClientStepAnalyzer restClientStepAnalyzer = new RestClientStepAnalyzer();
-    restClientStepAnalyzer.setExternalResourceConsumer( RestClientExternalResourceConsumer.getInstance() );
-    PentahoSystem.registerObject( restClientStepAnalyzer );
 
     HTTPPostStepAnalyzer httpPostStepAnalyzer = new HTTPPostStepAnalyzer();
     httpPostStepAnalyzer.setExternalResourceConsumer( HTTPPostExternalResourceConsumer.getInstance() );
