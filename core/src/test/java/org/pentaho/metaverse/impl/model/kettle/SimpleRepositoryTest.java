@@ -629,6 +629,6 @@ public class SimpleRepositoryTest {
 
   @Test( expected=UnsupportedOperationException.class )
   public void testGetMetaStore() throws Exception {
-    repo.getMetaStore();
+    repo.getRepositoryMetaStore();
   }
 }

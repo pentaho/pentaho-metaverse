@@ -714,7 +714,7 @@ public class SimpleRepository implements Repository {
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
 
-  @Override public IMetaStore getMetaStore() {
+  @Override public IMetaStore getRepositoryMetaStore() {
     // TODO - Implement this
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
