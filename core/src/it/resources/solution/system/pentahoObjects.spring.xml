@@ -110,11 +110,6 @@
     <property name="externalResourceConsumer" ref="httpPostERC"/>
   </bean>
 
-  <bean id="RestClientStepAnalyzer"
-        class="org.pentaho.metaverse.analyzer.kettle.step.rest.RestClientStepAnalyzer">
-    <property name="externalResourceConsumer" ref="restClientERC"/>
-  </bean>
-
   <bean id="IDocumentListener" class="org.pentaho.metaverse.impl.DocumentController" scope="singleton">
     <property name="metaverseBuilder" ref="IMetaverseBuilder"/>
     <property name="documentAnalyzers">
@@ -145,21 +140,19 @@
         <ref bean="NumberRangeStepAnalyzer"/>
         <ref bean="ValueMapperStepAnalyzer"/>
         <ref bean="TextFileOutputStepAnalyzer"/>
-	<ref bean="MergeJoinStepAnalyzer"/>
+	    <ref bean="MergeJoinStepAnalyzer"/>
         <ref bean="StreamLookupStepAnalyzer"/>
         <ref bean="GroupByStepAnalyzer"/>
         <ref bean="SplitFieldsStepAnalyzer"/>
         <ref bean="StringOperationsStepAnalyzer"/>
         <ref bean="StringsCutStepAnalyzer"/>
         <ref bean="StringsReplaceStepAnalyzer"/>
-	<ref bean="RowsToResultStepAnalyzer"/>
+	    <ref bean="RowsToResultStepAnalyzer"/>
         <ref bean="RowsFromResultStepAnalyzer"/>
         <ref bean="FilterRowsStepAnalyzer"/>
         <ref bean="HTTPClientStepAnalyzer"/>
-        <ref bean="RestClientStepAnalyzer"/>
         <ref bean="HTTPPostStepAnalyzer"/>
-	<ref bean="RestClientStepAnalyzer"/>
-      </list>
+	  </list>
     </property>
     <property name="clonableStepAnalyzers">
       <list>
@@ -203,8 +196,6 @@
         class="org.pentaho.metaverse.analyzer.kettle.step.csvfileinput.CsvFileInputExternalResourceConsumer"/>
   <bean id="httpClientERC" scope="singleton"
 		    class="org.pentaho.metaverse.analyzer.kettle.step.httpclient.HTTPClientExternalResourceConsumer"/>
-  <bean id="restClientERC" scope="singleton"
-        class="org.pentaho.metaverse.analyzer.kettle.step.rest.RestClientExternalResourceConsumer"/>
   <bean id="httpPostERC" scope="singleton"
 		    class="org.pentaho.metaverse.analyzer.kettle.step.httppost.HTTPPostExternalResourceConsumer"/>
   <bean id="fixedFileInputERC" scope="singleton"
@@ -223,7 +214,6 @@
         <ref bean="textFileOutputERC"/>
         <ref bean="csvInputERC"/>
         <ref bean="httpClientERC"/>
-        <ref bean="restClientERC"/>
         <ref bean="httpPostERC"/>
         <ref bean="fixedFileInputERC"/>
         <ref bean="tableInputERC"/>
