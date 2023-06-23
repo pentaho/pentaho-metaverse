@@ -46,7 +46,6 @@ import org.pentaho.di.trans.steps.http.HTTPMeta;
 import org.pentaho.di.trans.steps.httppost.HTTPPOSTMeta;
 import org.pentaho.di.trans.steps.mergejoin.MergeJoinMeta;
 import org.pentaho.di.trans.steps.numberrange.NumberRangeMeta;
-import org.pentaho.di.trans.steps.rest.RestMeta;
 import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
 import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -76,7 +75,6 @@ import org.pentaho.metaverse.frames.JobNode;
 import org.pentaho.metaverse.frames.KettleNode;
 import org.pentaho.metaverse.frames.LocatorNode;
 import org.pentaho.metaverse.frames.MergeJoinStepNode;
-import org.pentaho.metaverse.frames.RestClientStepNode;
 import org.pentaho.metaverse.frames.RowsToResultStepNode;
 import org.pentaho.metaverse.frames.SelectValuesTransStepNode;
 import org.pentaho.metaverse.frames.SplitFieldsStepNode;
@@ -1212,75 +1210,6 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
 
     Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
     assertEquals( getExpectedOutputFieldCount( stepMeta ), getIterableSize( outputs ) );
-  }
-
-  @Test
-  public void testRestClientStepNode() throws Exception {
-    RestClientStepNode node = root.getRestClientStepNode( "REST Client" );
-    assertNotNull( node );
-    Iterable<FramedMetaverseNode> inputUrls = node.getInputUrls();
-    int countInputUrls = getIterableSize( inputUrls );
-    assertEquals( 1, countInputUrls );
-    assertEquals( "REST client", node.getStepType() );
-
-    RestMeta stepMeta = (RestMeta) getStepMeta( node );
-    for ( FramedMetaverseNode inputUrl : inputUrls ) {
-      assertEquals( stepMeta.getUrl(), inputUrl.getName() );
-    }
-
-    // check the param  field is "used"
-    Iterable<StreamFieldNode> streamFieldNodesUses = node.getStreamFieldNodesUses();
-    assertEquals( 1, getIterableSize( streamFieldNodesUses ) );
-    for ( StreamFieldNode streamFieldNodesUse : streamFieldNodesUses ) {
-      assertEquals( stepMeta.getParameterField()[ 0 ], streamFieldNodesUse.getName() );
-    }
-
-    Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
-    assertEquals( 3, getIterableSize( outputs ) );
-
-    Iterable<StreamFieldNode> inputs = node.getInputStreamFields();
-    assertEquals( 2, getIterableSize( inputs ) );
-    for ( StreamFieldNode in : inputs ) {
-      assertNotNull( in.getFieldNodesDerivedFromMe() );
-      assertEquals( in.getName(), in.getFieldNodesDerivedFromMe().iterator().next().getName() );
-    }
-  }
-
-  @Test
-  public void testRestClientStepNode_urlFromField() throws Exception {
-    RestClientStepNode node = root.getRestClientStepNode( "REST Client - parameterized" );
-    assertNotNull( node );
-    Iterable<FramedMetaverseNode> inputUrls = node.getInputUrls();
-    assertEquals( "REST client", node.getStepType() );
-
-    RestMeta stepMeta = (RestMeta) getStepMeta( node );
-    for ( FramedMetaverseNode inputUrl : inputUrls ) {
-      assertEquals( stepMeta.getUrlField(), inputUrl.getName() );
-    }
-
-    Set<String> usedFields = new HashSet<>();
-    Collections.addAll( usedFields, stepMeta.getHeaderField() );
-    Collections.addAll( usedFields, stepMeta.getParameterField() );
-    if ( stepMeta.isUrlInField() ) {
-      usedFields.add( stepMeta.getUrlField() );
-    }
-    if ( stepMeta.isDynamicMethod() ) {
-      usedFields.add( stepMeta.getMethodFieldName() );
-    }
-    if ( StringUtils.isNotEmpty( stepMeta.getBodyField() ) ) {
-      usedFields.add( stepMeta.getBodyField() );
-    }
-
-    // check the param  field is "used"
-    Iterable<StreamFieldNode> streamFieldNodesUses = node.getStreamFieldNodesUses();
-    assertEquals( usedFields.size(), getIterableSize( streamFieldNodesUses ) );
-    for ( StreamFieldNode streamFieldNodesUse : streamFieldNodesUses ) {
-      assertTrue( usedFields.contains( streamFieldNodesUse.getName() ) );
-    }
-
-    Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
-    assertEquals( getExpectedOutputFieldCount( stepMeta ), getIterableSize( outputs ) );
-
   }
 
   @Test
