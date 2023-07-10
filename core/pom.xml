@@ -24,7 +24,6 @@
     <enunciate.version>1.27</enunciate.version>
     <gremlin-java.version>2.6.0</gremlin-java.version>
     <pdi.plugin.name>pdi</pdi.plugin.name>
-    <dependency.com.google.guava.guava.version>17.0</dependency.com.google.guava.guava.version>
     <pentaho-mongodb-plugin.version>9.6.0.0-SNAPSHOT</pentaho-mongodb-plugin.version>
     <platform.version>9.6.0.0-SNAPSHOT</platform.version>
     <metastore.version>9.6.0.0-SNAPSHOT</metastore.version>
@@ -70,7 +69,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>${dependency.com.google.guava.guava.version}</version>
+      <version>${guava.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
