@@ -120,6 +120,12 @@
       <groupId>com.tinkerpop</groupId>
       <artifactId>pipes</artifactId>
       <version>${dependency.com.tinkerpop.pipes.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-beanutils</groupId>
+          <artifactId>commons-beanutils-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>
