@@ -90,8 +90,8 @@ public class JobEntryBaseJsonSerializerTest {
   @Test
   public void testWriteRepoAttributes() throws Exception {
     serializer.writeRepoAttributes( meta, json );
-    verify( json, atLeastOnce() ).writeObjectField( JobEntryBaseJsonSerializer.JSON_PROPERTY_FIELDS, anyList() );
-    verify( json, atLeastOnce() ).writeObjectField( JobEntryBaseJsonSerializer.JSON_PROPERTY_ATTRIBUTES, anyMap() );
+    verify( json, atLeastOnce() ).writeObjectField( eq( JobEntryBaseJsonSerializer.JSON_PROPERTY_FIELDS ), anyList() );
+    verify( json, atLeastOnce() ).writeObjectField( eq( JobEntryBaseJsonSerializer.JSON_PROPERTY_ATTRIBUTES ), anyMap() );
   }
 
   @Test
