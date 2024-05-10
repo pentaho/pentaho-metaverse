@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,13 +22,15 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.connections.ConnectionDetails;
 import org.pentaho.di.connections.ConnectionManager;
 import org.pentaho.di.core.KettleClientEnvironment;
@@ -36,7 +38,6 @@ import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
-import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobListener;
 import org.pentaho.di.job.JobMeta;
@@ -54,37 +55,30 @@ import org.pentaho.metaverse.api.model.IExecutionData;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
 import org.pentaho.metaverse.api.model.kettle.MetaverseExtensionPoint;
-import org.pentaho.metaverse.graph.GraphCatalogWriter;
 import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@PrepareForTest( { ExtensionPointHandler.class, MetaverseConfig.class, KettleAnalyzerUtil.class } )
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class JobRuntimeExtensionPointTest {
 
   private static final String TEST_SERVER = "test.pentaho.com";
@@ -112,6 +106,9 @@ public class JobRuntimeExtensionPointTest {
 
   @Mock ConnectionManager connectionManager;
 
+  MockedStatic<MetaverseConfig> mockedMetaverseConfig;
+  MockedStatic<KettleAnalyzerUtil> mockedKettleAnalyzerUtil;
+
   @BeforeClass
   public static void setUpBeforeClass() throws KettleException {
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
@@ -125,9 +122,12 @@ public class JobRuntimeExtensionPointTest {
     connectionManager.setMetastoreSupplier( () -> metaStore );
 
     // (re)initialize the default state of MetaverseConfig
+    mockedMetaverseConfig = mockStatic( MetaverseConfig.class );
+    mockedKettleAnalyzerUtil = mockStatic( KettleAnalyzerUtil.class );
     setupMetaverseConfig( true, true );
+
     connectionManager = spy (connectionManager );
-    when (  connectionManager.getConnectionDetails( BaseRuntimeExtensionPoint.DEFAULT_CATALOG_CONNECTION_NAME ) ).thenReturn( connectionDetails );
+    lenient().when (  connectionManager.getConnectionDetails( BaseRuntimeExtensionPoint.DEFAULT_CATALOG_CONNECTION_NAME ) ).thenReturn( connectionDetails );
     Map<String, String> map = new HashMap<>();
     map.put("url", "someurl" );
     map.put("username", "devuser" );
@@ -135,7 +135,7 @@ public class JobRuntimeExtensionPointTest {
     map.put("tokenUrl", "someurl" );
     map.put("clientId", "id" );
     map.put("clientSecret", "" );
-    when ( connectionDetails.getProperties() ).thenReturn( map );
+    lenient().when ( connectionDetails.getProperties() ).thenReturn( map );
     jobExtensionPoint = new JobRuntimeExtensionPoint();
     jobExtensionPoint.setCatalogLineageClientProvider( clientProvider );
     jobExtensionPoint.setRuntimeEnabled( true );
@@ -165,9 +165,15 @@ public class JobRuntimeExtensionPointTest {
     final IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
     final IDocument metaverseDocument = mock( IDocument.class );
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
-    when( objectFactory.createDocumentObject() ).thenReturn( metaverseDocument );
+    lenient().when( objectFactory.createDocumentObject() ).thenReturn( metaverseDocument );
 
     return originalHolderMap;
+  }
+
+  @After
+  public void teardown(){
+    mockedMetaverseConfig.close();
+    mockedKettleAnalyzerUtil.close();
   }
 
   @Test
@@ -190,9 +196,9 @@ public class JobRuntimeExtensionPointTest {
     IDocumentAnalyzer documentAnalyzer = Mockito.mock( IDocumentAnalyzer.class );
 
     final IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
-    when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
+    lenient().when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
     final IDocument document = mock( IDocument.class );
-    when( objectFactory.createDocumentObject() ).thenReturn( document );
+    lenient().when( objectFactory.createDocumentObject() ).thenReturn( document );
     job.setVariable( "dontloseme", "okipromise" );
     extensionPoint.callExtensionPoint( null, job );
     assertEquals( "okipromise", job.getVariable( "dontloseme" ) );
@@ -232,18 +238,18 @@ public class JobRuntimeExtensionPointTest {
     // mock the LineageHolder, since we remove it now at the end of jobFinished
     final LineageHolder holder = Mockito.mock( LineageHolder.class );
     when( JobLineageHolderMap.getInstance().getLineageHolder( job ) ).thenReturn( holder );
-    PowerMockito.mockStatic( ExtensionPointHandler.class );
-    ext.jobFinished( job );
-    verify( ext, times( 1 ) ).populateExecutionProfile( any( IExecutionProfile.class ), eq( job ) );
-    verify( ext, times( 1 ) ).runAnalyzers( eq( job ) );
-    verify( ext, times( 1 ) ).createLineGraph( job );
-    verify( ext, never() ).createLineGraphAsync( job );
-    verify( lineageWriter, times( 1 ) ).outputLineageGraph( holder );
 
-    PowerMockito.verifyStatic();
+    try (MockedStatic<ExtensionPointHandler> mockedExtensionPointHandler = mockStatic( ExtensionPointHandler.class ) ) {
+      ext.jobFinished( job );
+      verify( ext, times( 1 ) ).populateExecutionProfile( any( IExecutionProfile.class ), eq( job ) );
+      verify( ext, times( 1 ) ).runAnalyzers( eq( job ) );
+      verify( ext, times( 1 ) ).createLineGraph( job );
+      verify( ext, never() ).createLineGraphAsync( job );
+      verify( lineageWriter, times( 1 ) ).outputLineageGraph( holder );
+    }
+
     // the job doesn't have a parent, extension point should be called
-    ExtensionPointHandler.callExtensionPoint( any( LogChannelInterface.class ),
-      Mockito.eq( MetaverseExtensionPoint.JobLineageWriteEnd.id ), eq( job ) );
+    ExtensionPointHandler.callExtensionPoint( null, MetaverseExtensionPoint.JobLineageWriteEnd.id, job );
 
     // Restore original JobLineageHolderMap for use by others
     JobLineageHolderMap.setInstance( originalHolderMap );
@@ -265,7 +271,7 @@ public class JobRuntimeExtensionPointTest {
     ext.jobFinished( job );
     verify( lineageWriter, never() ).outputLineageGraph( JobLineageHolderMap.getInstance().getLineageHolder( job ) );
 
-    Whitebox.setInternalState( job, "parentJob", (Object[]) null );
+    ReflectionTestUtils.setField( job, "parentJob", (Object[]) null );
 
     setupMetaverseConfig( true, true );
     // set a parent trans  - since MetaverseConfig.generateSubGraph() returns true, lineageWriter.outputLineageGraph
@@ -322,11 +328,9 @@ public class JobRuntimeExtensionPointTest {
   }
 
   private void setupMetaverseConfig( final boolean consolidateSubGraphs, final boolean generateSubGraphs ) {
-    PowerMockito.mockStatic( MetaverseConfig.class );
-    Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( consolidateSubGraphs );
-    Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( generateSubGraphs );
-    Mockito.when( MetaverseConfig.getInstance() ).thenCallRealMethod();
-    PowerMockito.mockStatic( KettleAnalyzerUtil.class );
-    Mockito.when( KettleAnalyzerUtil.consolidateSubGraphs() ).thenReturn( consolidateSubGraphs );
+    mockedMetaverseConfig.when( MetaverseConfig::consolidateSubGraphs ).thenReturn( consolidateSubGraphs );
+    mockedMetaverseConfig.when( MetaverseConfig::generateSubGraphs ).thenReturn( generateSubGraphs );
+    mockedMetaverseConfig.when( MetaverseConfig::getInstance ).thenCallRealMethod();
+    mockedKettleAnalyzerUtil.when( KettleAnalyzerUtil::consolidateSubGraphs ).thenReturn( consolidateSubGraphs );
   }
 }

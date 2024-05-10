@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,26 +26,32 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.stringoperations.StringOperationsMeta;
 import org.pentaho.metaverse.api.ChangeType;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class StringOperationsStepAnalyzerTest {
 
   private StringOperationsStepAnalyzer analyzer;
@@ -94,7 +100,7 @@ public class StringOperationsStepAnalyzerTest {
               getPaddingCode( StringOperationsMeta.PADDING_NONE ),
               getPaddingCode( StringOperationsMeta.PADDING_NONE )
         });
-    when( stringOperationsMeta.getPadChar() ).thenReturn( new String[]{ "", "", "" } );
+//    when( stringOperationsMeta.getPadChar() ).thenReturn( new String[]{ "", "", "" } );
     when( stringOperationsMeta.getPadLen() ).thenReturn( new String[]{ "", "", "" } );
     when( stringOperationsMeta.getRemoveSpecialCharacters() ).thenReturn(
       new String[]{
@@ -127,7 +133,7 @@ public class StringOperationsStepAnalyzerTest {
     fields.add( new StepField( "prev", "firstName" ) );
     fields.add( new StepField( "prev", "middleName" ) );
     fields.add( new StepField( "prev", "lastName" ) );
-    doReturn( fields ).when( analyzer ).createStepFields( anyString(), any( StepNodes.class ) );
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), any() );
     Set<StepField> usedFields = analyzer.getUsedFields( stringOperationsMeta );
     List<String> inFields = Arrays.asList( stringOperationsMeta.getFieldInStream() );
     // This test class uses all incoming fields

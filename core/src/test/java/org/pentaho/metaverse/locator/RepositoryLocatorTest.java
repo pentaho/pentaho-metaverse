@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.metaverse.api.IDocumentListener;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseNode;
@@ -46,10 +46,13 @@ import java.util.ArrayList;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 
 public class RepositoryLocatorTest {
 
@@ -98,9 +101,9 @@ public class RepositoryLocatorTest {
     };
     loc.setMetaverseBuilder( metaverseBuilder );
     baseLocator = spy( loc );
-    when( baseLocator.getMetaverseBuilder() ).thenReturn( metaverseBuilder );
-    when( metaverseBuilder.getMetaverseObjectFactory() ).thenReturn( metaverseObjectFactory );
-    when( metaverseObjectFactory.createDocumentObject() ).thenReturn( new MetaverseDocument() );
+    lenient().when( baseLocator.getMetaverseBuilder() ).thenReturn( metaverseBuilder );
+    lenient().when( metaverseBuilder.getMetaverseObjectFactory() ).thenReturn( metaverseObjectFactory );
+    lenient().when( metaverseObjectFactory.createDocumentObject() ).thenReturn( new MetaverseDocument() );
   }
 
   @Test
@@ -140,7 +143,7 @@ public class RepositoryLocatorTest {
 
   @Test
   public void testStartScan() throws Exception {
-    when( baseLocator.getUnifiedRepository( any( IPentahoSession.class ) ) ).thenReturn( repository );
+    when( baseLocator.getUnifiedRepository( any() ) ).thenReturn( repository );
     when( repository.getTree( any( RepositoryRequest.class ) ) ).thenReturn( mock( RepositoryFileTree.class ) );
 
     baseLocator.startScan();
@@ -148,7 +151,7 @@ public class RepositoryLocatorTest {
 
   @Test( expected = MetaverseLocatorException.class )
   public void testStartScanAlreadyExecuting() throws Exception {
-    when( baseLocator.getUnifiedRepository( any( IPentahoSession.class ) ) ).thenReturn( repository );
+    when( baseLocator.getUnifiedRepository( any() ) ).thenReturn( repository );
     when( repository.getTree( any( RepositoryRequest.class ) ) ).thenReturn( mock( RepositoryFileTree.class ) );
     baseLocator.futureTask = futureTask;
     baseLocator.startScan();
@@ -156,7 +159,7 @@ public class RepositoryLocatorTest {
 
   @Test( expected = MetaverseLocatorException.class )
   public void testStartScanException() throws Exception {
-    when( baseLocator.getUnifiedRepository( any( IPentahoSession.class ) ) ).thenThrow( Exception.class );
+    when( baseLocator.getUnifiedRepository( any() ) ).thenThrow( Exception.class );
     baseLocator.startScan();
   }
 }

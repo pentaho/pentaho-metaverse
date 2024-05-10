@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,18 +27,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
-import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryInterface;
-import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -57,11 +56,19 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TransJobEntryAnalyzerTest {
 
   private static final String TEST_FILE_NAME = "file.ktr";
@@ -104,16 +111,14 @@ public class TransJobEntryAnalyzerTest {
   @Before
   public void setUp() throws Exception {
     when( metaverseBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
-    when( objectFactory.createNodeObject( anyString(), anyString(),
-      anyString() ) ).thenReturn( new MetaverseTransientNode( "name" ) );
-    when( jobEntryTrans.getName() ).thenReturn( "job entry" );
+    when( objectFactory.createNodeObject( Mockito.<String>any(), any(), any() ) ).thenReturn( new MetaverseTransientNode( "name" ) );
     when( jobEntryTrans.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.FILENAME );
     when( jobEntryTrans.getFilename() ).thenReturn( TEST_FILE_NAME );
     when( jobEntryTrans.getParentJob() ).thenReturn( mockParentJob );
     when( mockParentJob.getJobMeta() ).thenReturn( mockParentJobMeta );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
 
-    when( mockParentJobMeta.environmentSubstitute( anyString() ) ).thenAnswer( new Answer<String>() {
+    when( mockParentJobMeta.environmentSubstitute( Mockito.<String>any() ) ).thenAnswer( new Answer<String>() {
       @Override
       public String answer( InvocationOnMock invocation ) throws Throwable {
         return (String) invocation.getArguments()[0];
@@ -186,7 +191,7 @@ public class TransJobEntryAnalyzerTest {
     when( mockParentJobMeta.getRepository() ).thenReturn( repo );
     when( jobEntryTrans.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_NAME );
     // Test exception
-    when( repo.findDirectory( anyString() ) ).thenThrow( new KettleException() );
+    when( repo.findDirectory( Mockito.<String>any() ) ).thenThrow( new KettleException() );
     spyAnalyzer.analyze( descriptor, jobEntryTrans );
   }
 
@@ -203,9 +208,8 @@ public class TransJobEntryAnalyzerTest {
     RepositoryDirectoryInterface repoDir = mock( RepositoryDirectoryInterface.class );
     when( mockParentJobMeta.getRepository() ).thenReturn( repo );
     when( jobEntryTrans.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_NAME );
-    when( repo.findDirectory( anyString() ) ).thenReturn( repoDir );
-    when( repo.loadTransformation( anyString(), eq( repoDir ), any( ProgressMonitorListener.class ), anyBoolean(), anyString() ) )
-      .thenReturn( childTransMeta );
+    when( repo.findDirectory( Mockito.<String>any() ) ).thenReturn( repoDir );
+    when( repo.loadTransformation( any(), eq( repoDir ), any(), anyBoolean(), any() ) ).thenReturn( childTransMeta );
     spyAnalyzer.analyze( descriptor, jobEntryTrans );
   }
 
@@ -215,7 +219,7 @@ public class TransJobEntryAnalyzerTest {
     when( mockParentJobMeta.getRepository() ).thenReturn( repo );
     when( jobEntryTrans.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_REFERENCE );
     // Test exception
-    when( repo.loadTransformation( any( ObjectId.class ), anyString() ) ).thenThrow( new KettleException() );
+    when( repo.loadTransformation( any(), any() ) ).thenThrow( new KettleException() );
     spyAnalyzer.analyze( descriptor, jobEntryTrans );
   }
 
@@ -231,7 +235,7 @@ public class TransJobEntryAnalyzerTest {
     Repository repo = mock( Repository.class );
     when( mockParentJobMeta.getRepository() ).thenReturn( repo );
     when( jobEntryTrans.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_REFERENCE );
-    when( repo.loadTransformation( any( ObjectId.class ), anyString() ) ).thenReturn( childTransMeta );
+    when( repo.loadTransformation( any(), any() ) ).thenReturn( childTransMeta );
     when( childTransMeta.getPathAndName() ).thenReturn( "/path/to/test" );
     when( childTransMeta.getDefaultExtension() ).thenReturn( "ktr" );
     spyAnalyzer.analyze( descriptor, jobEntryTrans );

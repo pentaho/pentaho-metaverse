@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,7 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.parameters.UnknownParamException;
@@ -57,9 +57,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -67,7 +71,7 @@ import static org.mockito.Mockito.when;
  * @See com.pentaho.analyzer.kettle.MetaverseDocumentAnalyzerTest for base JobAnalyzer tests. Tests here
  * are specific to the JobAnalyzer.
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class JobAnalyzerTest {
 
   private JobAnalyzer analyzer;
@@ -130,9 +134,9 @@ public class JobAnalyzerTest {
 
     analyzer = new JobAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
+    lenient().when( namespace.getParentNamespace() ).thenReturn( namespace );
 
-    when( mockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );
+    lenient().when( mockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );
     when( mockJobDoc.getContent() ).thenReturn( mockContent );
     when( mockJobDoc.getNamespace() ).thenReturn( namespace );
 
@@ -144,7 +148,7 @@ public class JobAnalyzerTest {
 
     when( mockJob.getJobMeta() ).thenReturn( mockContent );
 
-    when( mockContent.listVariables() ).thenReturn( new String[] { } );
+    lenient().when( mockContent.listVariables() ).thenReturn( new String[] { } );
     final String PARAM = "param1";
     when( mockContent.listParameters() ).thenReturn( new String[] { PARAM } );
     when( mockContent.getParameterDefault( PARAM ) ).thenReturn( "default" );
@@ -172,7 +176,7 @@ public class JobAnalyzerTest {
 
     JobEntryCopy mockToEntryMeta = mock( JobEntryCopy.class );
     when( mockToEntryMeta.getEntry() ).thenReturn( mockJobEntryInterface );
-    when( mockToEntryMeta.getParentJobMeta() ).thenReturn( mockContent );
+    lenient().when( mockToEntryMeta.getParentJobMeta() ).thenReturn( mockContent );
 
     when( mockContent.nrJobEntries() ).thenReturn( 2 );
     when( mockContent.getJobEntry( 0 ) ).thenReturn( mockJobEntry );
@@ -229,7 +233,7 @@ public class JobAnalyzerTest {
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeWithBadXML() throws MetaverseAnalyzerException {
     IDocument newMockJobDoc = mock( IDocument.class );
-    when( newMockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );
+    lenient().when( newMockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );
     when( newMockJobDoc.getContent() ).thenReturn(
         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
             "<job>This is not a valid JobMeta doc!" );

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.Trans;
@@ -37,7 +37,7 @@ import org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.TransLineageH
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -49,6 +49,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -56,7 +57,7 @@ import static org.mockito.Mockito.when;
 /**
  * Unit tests for JobLineageHolderMap
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class JobLineageHolderMapTest {
 
   JobLineageHolderMap jobLineageHolderMap;
@@ -89,16 +90,15 @@ public class JobLineageHolderMapTest {
   private JobMeta jobMeta;
 
   private void initMetas() {
-
-    when( job.getJobMeta() ).thenReturn( jobMeta );
-    when( parentTrans.getTransMeta() ).thenReturn( parentTransMeta );
+    lenient().when( job.getJobMeta() ).thenReturn( jobMeta );
+    lenient().when( parentTrans.getTransMeta() ).thenReturn( parentTransMeta );
   }
 
   @Before
   public void setUp() throws Exception {
-    Whitebox.setInternalState( JobLineageHolderMap.getInstance(), "lineageHolderMap",
+    ReflectionTestUtils.setField( JobLineageHolderMap.getInstance(), "lineageHolderMap",
             Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
-    Whitebox.setInternalState( TransLineageHolderMap.getInstance(), "lineageHolderMap",
+    ReflectionTestUtils.setField( TransLineageHolderMap.getInstance(), "lineageHolderMap",
             Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
     jobLineageHolderMap = JobLineageHolderMap.getInstance();
     mockHolder = spy( new LineageHolder() );
@@ -107,7 +107,7 @@ public class JobLineageHolderMapTest {
 
   @After
   public void cleanUp() throws Exception {
-    Whitebox.setInternalState( jobLineageHolderMap, "lineageHolderMap",
+    ReflectionTestUtils.setField( jobLineageHolderMap, "lineageHolderMap",
       Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
   }
 

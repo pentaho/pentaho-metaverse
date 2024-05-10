@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,8 +27,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.exception.KettleException;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -53,13 +53,23 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class HTTPPostStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private HTTPPostStepAnalyzer analyzer;
@@ -84,8 +94,8 @@ public class HTTPPostStepAnalyzerTest extends ClonableStepAnalyzerTest {
     analyzer.setObjectFactory( MetaverseTestUtils.getMetaverseObjectFactory() );
 
     when( mockHTTPPost.getStepMetaInterface() ).thenReturn( meta );
-    when( mockHTTPPost.getStepMeta() ).thenReturn( mockStepMeta );
-    when( mockStepMeta.getStepMetaInterface() ).thenReturn( meta );
+    lenient().when( mockHTTPPost.getStepMeta() ).thenReturn( mockStepMeta );
+    lenient().when( mockStepMeta.getStepMetaInterface() ).thenReturn( meta );
   }
 
   @Test
@@ -209,14 +219,14 @@ public class HTTPPostStepAnalyzerTest extends ClonableStepAnalyzerTest {
     when( this.meta.isUrlInField() ).thenReturn( true );
     assertTrue( consumer.isDataDriven( this.meta ) );
     assertTrue( consumer.getResourcesFromMeta( this.meta ).isEmpty() );
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.any(), Mockito.any() ) )
       .thenReturn( "/path/to/row/file" );
     resources = consumer.getResourcesFromRow( mockHTTPPost, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
-      .thenThrow( KettleException.class );
+    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.any(), Mockito.any() ) )
+      .thenThrow( KettleValueException.class );
     resources = consumer.getResourcesFromRow( mockHTTPPost, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertTrue( resources.isEmpty() );
 

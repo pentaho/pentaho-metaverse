@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryInterface;
@@ -41,10 +41,10 @@ import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class GenericJobEntryMetaAnalyzerTest {
 
   private GenericJobEntryMetaAnalyzer analyzer = new GenericJobEntryMetaAnalyzer();
@@ -74,7 +74,6 @@ public class GenericJobEntryMetaAnalyzerTest {
     when( metaverseBuilder.getMetaverseObjectFactory() ).thenReturn( objectFactory );
     when( objectFactory.createNodeObject( anyString(), anyString(),
         anyString() ) ).thenReturn( new MetaverseTransientNode( "name" ) );
-    when( mockJobEntry.getName() ).thenReturn( "job entry" );
     when( mockJobEntry.getParentJob() ).thenReturn( mockParentJob );
     when( mockParentJob.getJobMeta() ).thenReturn( mockParentJobMeta );
 

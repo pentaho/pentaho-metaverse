@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -30,7 +30,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
@@ -42,7 +42,6 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.dummytrans.DummyTransMeta;
-import org.pentaho.metastore.api.IMetaStore;
 import org.pentaho.metaverse.api.model.BaseResourceInfo;
 import org.pentaho.metaverse.api.model.IInfo;
 import org.pentaho.metaverse.api.model.IParamInfo;
@@ -54,12 +53,18 @@ import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * User: RFellows Date: 12/1/14
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TransMetaJsonSerializerTest {
 
   TransMetaJsonSerializer serializer;
@@ -167,19 +172,15 @@ public class TransMetaJsonSerializerTest {
     when( spyStep2.getStepMetaInterface() ).thenReturn( spyDummy2 );
     when( spyStep3.getStepMetaInterface() ).thenReturn( spyDummy3 );
 
-    doThrow( new KettleException() ).when( spyDummy3 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
-      any( ObjectId.class ), any( ObjectId.class ) );
+    doThrow( new KettleException() ).when( spyDummy3 ).saveRep( any( Repository.class ), any( ), any(), any( ObjectId.class ) );
 
     serializer.serializeSteps( transMeta, json );
 
     verify( json ).writeArrayFieldStart( TransMetaJsonSerializer.JSON_PROPERTY_STEPS );
     // make sure we call the saveRep method for each step to collect the common attribute stuff
-    verify( spyDummy1 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
-      any( ObjectId.class ), any( ObjectId.class ) );
-    verify( spyDummy2 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
-      any( ObjectId.class ), any( ObjectId.class ) );
-    verify( spyDummy3 ).saveRep( any( Repository.class ), any( IMetaStore.class ),
-      any( ObjectId.class ), any( ObjectId.class ) );
+    verify( spyDummy1 ).saveRep( any( Repository.class ), any( ), any(), any( ObjectId.class ) );
+    verify( spyDummy2 ).saveRep( any( Repository.class ), any( ), any(), any( ObjectId.class ) );
+    verify( spyDummy3 ).saveRep( any( Repository.class ), any( ), any(), any( ObjectId.class ) );
 
     // make sure we are writing out each step
     verify( json ).writeObject( spyDummy1 );
@@ -201,7 +202,6 @@ public class TransMetaJsonSerializerTest {
     when( db1.getAccessTypeDesc() ).thenReturn( "Native" );
     when( db1.getName() ).thenReturn( "DB1" );
     when( db1.getDatabasePortNumberString() ).thenReturn( "5432" );
-    when( db1.getServername() ).thenReturn( "localhost" );
     when( db1.getDescription() ).thenReturn( null );
     when( db1.getUsername() ).thenReturn( "user" );
     when( db1.getPassword() ).thenReturn( "password" );

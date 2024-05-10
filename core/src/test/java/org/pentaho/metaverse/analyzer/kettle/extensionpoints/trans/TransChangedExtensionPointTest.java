@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,24 +26,21 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.pentaho.metaverse.util.MetaverseUtil;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TransChangedExtensionPointTest {
 
   @Mock
@@ -52,29 +49,32 @@ public class TransChangedExtensionPointTest {
   @Before
   public void setUp() throws Exception {
     KettleClientEnvironment.getInstance().setClient( KettleClientEnvironment.ClientType.PAN );
-    when( transMeta.getFilename() ).thenReturn( "/path/to/file.ktr" );
-    when( transMeta.getName() ).thenReturn( "testTrans" );
+    lenient().when( transMeta.getFilename() ).thenReturn( "/path/to/file.ktr" );
+    lenient().when( transMeta.getName() ).thenReturn( "testTrans" );
     MetaverseUtil.setDocumentController( MetaverseTestUtils.getDocumentController() );
-    PowerMockito.mockStatic( MetaverseConfig.class );
   }
 
   @Test
   public void testCallExtensionWithLineageOnPoint() throws Exception {
-    when( MetaverseConfig.isLineageExecutionEnabled() ).thenReturn( true );
-    TransChangedExtensionPoint extensionPoint = new TransChangedExtensionPoint();
-    extensionPoint.callExtensionPoint( null, null );
-    verify( transMeta, times( 0 ) ).addContentChangedListener( any() );
-    extensionPoint.callExtensionPoint( null, transMeta );
-    verify( transMeta, times( 1 ) ).addContentChangedListener( any() );
+    try ( MockedStatic<MetaverseConfig> mockedMetaverseConfig = mockStatic( MetaverseConfig.class ) ) {
+      mockedMetaverseConfig.when( MetaverseConfig::isLineageExecutionEnabled ).thenReturn( true );
+      TransChangedExtensionPoint extensionPoint = new TransChangedExtensionPoint();
+      extensionPoint.callExtensionPoint( null, null );
+      verify( transMeta, times( 0 ) ).addContentChangedListener( any() );
+      extensionPoint.callExtensionPoint( null, transMeta );
+      verify( transMeta, times( 1 ) ).addContentChangedListener( any() );
+    }
   }
 
   @Test
   public void testCallExtensionWithLineageOffPoint() throws Exception {
-    when( MetaverseConfig.isLineageExecutionEnabled() ).thenReturn( false );
-    TransChangedExtensionPoint extensionPoint = new TransChangedExtensionPoint();
-    extensionPoint.callExtensionPoint( null, null );
-    verify( transMeta, times( 0 ) ).addContentChangedListener( any() );
-    extensionPoint.callExtensionPoint( null, transMeta );
-    verify( transMeta, times( 0 ) ).addContentChangedListener( any() );
+    try ( MockedStatic<MetaverseConfig> mockedMetaverseConfig = mockStatic( MetaverseConfig.class ) ) {
+      mockedMetaverseConfig.when( MetaverseConfig::isLineageExecutionEnabled ).thenReturn( false );
+      TransChangedExtensionPoint extensionPoint = new TransChangedExtensionPoint();
+      extensionPoint.callExtensionPoint( null, null );
+      verify( transMeta, times( 0 ) ).addContentChangedListener( any() );
+      extensionPoint.callExtensionPoint( null, transMeta );
+      verify( transMeta, times( 0 ) ).addContentChangedListener( any() );
+    }
   }
 }
