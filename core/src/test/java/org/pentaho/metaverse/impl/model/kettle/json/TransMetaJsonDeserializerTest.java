@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -33,7 +33,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
@@ -57,16 +57,22 @@ import java.util.Map;
 
 import static com.tinkerpop.frames.util.Validate.assertNotNull;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * User: RFellows Date: 12/2/14
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TransMetaJsonDeserializerTest {
 
   TransMetaJsonDeserializer deserializer;
@@ -236,13 +242,13 @@ public class TransMetaJsonDeserializerTest {
   @Test
   public void testDeserializeHops() throws Exception {
     transMeta = spy( new TransMeta() );
-    when( transMeta.findStep( "from" ) ).thenReturn( fromStep );
-    when( transMeta.findStep( "to" ) ).thenReturn( toStep );
-    when( mapper.readValue( "to be mocked", HopInfo.class ) ).thenReturn( hop0 );
-    when( root_hopsArray_hop0.toString() ).thenReturn( "to be mocked" ); // mocked, value does not matter
-    when( hop0.isEnabled() ).thenReturn( true );
-    when( hop0.getFromStepName() ).thenReturn( "from" );
-    when( hop0.getToStepName() ).thenReturn( "to" );
+    doReturn( fromStep ).when( transMeta).findStep( "from" );
+    doReturn( toStep ).when( transMeta).findStep( "to" );
+    doReturn( hop0 ).when( mapper).readValue( "to be mocked", HopInfo.class );
+    doReturn( "to be mocked" ).when( root_hopsArray_hop0).toString();
+    doReturn( true ).when( hop0).isEnabled();
+    doReturn( "from" ).when( hop0).getFromStepName();
+    doReturn( "to" ).when( hop0).getToStepName();
 
     deserializer.deserializeHops( transMeta, root, mapper );
 
@@ -325,11 +331,12 @@ public class TransMetaJsonDeserializerTest {
     verify( repo ).saveStepAttribute( null, stepId, 0, "name", "Test 1" );
     verify( repo ).saveStepAttribute( null, stepId, 1, "name", "Test 2" );
 
-    verify( repo, times( 2 ) ).saveStepAttribute( any( ObjectId.class ), eq( stepId ), anyInt(), eq( "int" ), anyInt() );
-    verify( repo, times( 2 ) ).saveStepAttribute( any( ObjectId.class ), eq( stepId ), anyInt(), eq( "long" ), eq( 3L ) );
-    verify( repo, times( 2 ) ).saveStepAttribute( any( ObjectId.class ), eq( stepId ), anyInt(), eq( "double" ), eq( 3.0D ) );
-    verify( repo, times( 2 ) ).saveStepAttribute( any( ObjectId.class ), eq( stepId ), anyInt(), eq( "bool" ), eq( true ) );
-    verify( repo, times( 2 ) ).saveStepAttribute( any( ObjectId.class ), eq( stepId ), anyInt(), eq( "null" ), anyString() ) ;
+    // Matching on a Long for first "int" verify because of new mocking behavior -- there is no overload of Repository.saveStepAttribute() with an Integer argument
+    verify( repo, times( 2 ) ).saveStepAttribute( any(), eq( stepId ), anyInt(), eq( "int" ), eq( 2L ) );
+    verify( repo, times( 2 ) ).saveStepAttribute( any(), eq( stepId ), anyInt(), eq( "long" ), eq( 3L ) );
+    verify( repo, times( 2 ) ).saveStepAttribute( any(), eq( stepId ), anyInt(), eq( "double" ), eq( 3.0D ) );
+    verify( repo, times( 2 ) ).saveStepAttribute( any(), eq( stepId ), anyInt(), eq( "bool" ), eq( true ) );
+    verify( repo, times( 2 ) ).saveStepAttribute( any(), eq( stepId ), anyInt(), eq( "null" ), isNull() ) ;
   }
 
   @Test

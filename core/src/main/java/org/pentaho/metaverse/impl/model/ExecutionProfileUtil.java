@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.impl.model;
 
+import com.cronutils.utils.VisibleForTesting;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -43,7 +44,12 @@ public class ExecutionProfileUtil {
 
   public static void outputExecutionProfile( OutputStream outputStream, IExecutionProfile executionProfile )
     throws IOException {
+    outputExecutionProfile( outputStream, executionProfile, new ObjectMapper() );
+  }
 
+  @VisibleForTesting
+  protected static void outputExecutionProfile( OutputStream outputStream, IExecutionProfile executionProfile, ObjectMapper mapper )
+    throws IOException {
     PrintStream out = null;
     try {
       if ( outputStream instanceof PrintStream ) {
@@ -51,7 +57,6 @@ public class ExecutionProfileUtil {
       } else {
         out = new PrintStream( outputStream );
       }
-      ObjectMapper mapper = new ObjectMapper();
       mapper.enable( SerializationFeature.INDENT_OUTPUT );
       mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );
       mapper.enable( SerializationFeature.WRAP_EXCEPTIONS );

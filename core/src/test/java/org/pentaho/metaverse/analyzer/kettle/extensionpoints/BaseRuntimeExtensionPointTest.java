@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,7 +22,6 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
-import com.tinkerpop.blueprints.Graph;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -48,15 +47,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class BaseRuntimeExtensionPointTest {
 
@@ -117,7 +116,7 @@ public class BaseRuntimeExtensionPointTest {
     assertNotEquals( 0, baos.size() );
     assertTrue( baos.toString().contains( "testName" ) );
 
-    verify( graphWriter, times( 1 ) ).outputGraph( any( Graph.class ), any( OutputStream.class ) );
+    verify( graphWriter, times( 1 ) ).outputGraph( any(), any( OutputStream.class ) );
   }
 
   @Test

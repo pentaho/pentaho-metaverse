@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
@@ -34,8 +35,6 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.file.BaseFileInputMeta;
 import org.pentaho.metaverse.api.IMetaverseConfig;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.util.Arrays;
@@ -45,12 +44,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mock;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class ExternalResourceCacheTest {
 
   @Mock
@@ -89,15 +88,15 @@ public class ExternalResourceCacheTest {
     when( meta2.getParentStepMeta() ).thenReturn(spyMeta2);
     when( transMeta2.getFilename() ).thenReturn( "my_file2" );
 
-    when( trans.getName() ).thenReturn( "my_trans" );
-    when( trans.getFilename() ).thenReturn( "my_file" );
+    lenient().when( trans.getName() ).thenReturn( "my_trans" );
+    lenient().when( trans.getFilename() ).thenReturn( "my_file" );
 
     when( trans.getTransMeta() ).thenReturn( transMeta );
     when( transMeta.getSteps() ).thenReturn( Arrays.asList( new StepMeta[] {spyMeta1} ) );
 
     when( trans2.getTransMeta() ).thenReturn( transMeta2 );
-    when( trans2.getName() ).thenReturn( "my_trans2" );
-    when( trans2.getFilename() ).thenReturn( "my_file2" );
+    lenient().when( trans2.getName() ).thenReturn( "my_trans2" );
+    lenient().when( trans2.getFilename() ).thenReturn( "my_file2" );
     when( transMeta2.getSteps() ).thenReturn( Arrays.asList( new StepMeta[] {spyMeta2} ) );
   }
 

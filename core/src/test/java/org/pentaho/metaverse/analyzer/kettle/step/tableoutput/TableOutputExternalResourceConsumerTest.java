@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.TransMeta;
@@ -39,9 +39,10 @@ import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-@RunWith(MockitoJUnitRunner.class)
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TableOutputExternalResourceConsumerTest {
 
   TableOutputExternalResourceConsumer consumer;
@@ -71,9 +72,9 @@ public class TableOutputExternalResourceConsumerTest {
     when( meta.getSchemaName() ).thenReturn( "schemaName" );
 
     when( meta.getParentStepMeta() ).thenReturn( parentStepMeta );
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
-    when( parentTransMeta.environmentSubstitute( "tableName" ) ).thenReturn( "tableName" );
-    when( parentTransMeta.environmentSubstitute( "schemaName" ) ).thenReturn( "schemaName" );
+    lenient().when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
+    lenient().when( parentTransMeta.environmentSubstitute( "tableName" ) ).thenReturn( "tableName" );
+    lenient().when( parentTransMeta.environmentSubstitute( "schemaName" ) ).thenReturn( "schemaName" );
 
     when( dbMeta.getAccessTypeDesc() ).thenReturn( "JNDI" );
     when( dbMeta.getName() ).thenReturn( "TestConnection" );
@@ -90,7 +91,6 @@ public class TableOutputExternalResourceConsumerTest {
 
     assertEquals( "tableName", res.getAttributes().get( DictionaryConst.PROPERTY_TABLE ) );
     assertEquals( "schemaName", res.getAttributes().get( DictionaryConst.PROPERTY_SCHEMA ) );
-
   }
 
   @Test
@@ -103,10 +103,10 @@ public class TableOutputExternalResourceConsumerTest {
     when( meta.getTableName() ).thenReturn( "tableName" );
     when( meta.getSchemaName() ).thenReturn( "schemaName" );
 
-    when( meta.getParentStepMeta() ).thenReturn( parentStepMeta );
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
-    when( parentTransMeta.environmentSubstitute( "tableName" ) ).thenReturn( "tableName" );
-    when( parentTransMeta.environmentSubstitute( "schemaName" ) ).thenReturn( "schemaName" );
+    lenient().when( meta.getParentStepMeta() ).thenReturn( parentStepMeta );
+    lenient().when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
+    lenient().when( parentTransMeta.environmentSubstitute( "tableName" ) ).thenReturn( "tableName" );
+    lenient().when( parentTransMeta.environmentSubstitute( "schemaName" ) ).thenReturn( "schemaName" );
 
     when( dbMeta.getAccessTypeDesc() ).thenReturn( "JNDI" );
     when( dbMeta.getName() ).thenReturn( "TestConnection" );

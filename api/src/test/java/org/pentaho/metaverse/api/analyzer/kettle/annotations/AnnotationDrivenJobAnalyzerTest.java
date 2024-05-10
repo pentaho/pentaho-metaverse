@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2019-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
@@ -40,11 +40,11 @@ import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.any;
 import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_FILE;
 
 
-@RunWith ( MockitoJUnitRunner.class )
+@RunWith ( MockitoJUnitRunner.StrictStubs.class )
 public class AnnotationDrivenJobAnalyzerTest {
 
   @Mock AnnotationDrivenStepMetaAnalyzer stepAnalyzer;

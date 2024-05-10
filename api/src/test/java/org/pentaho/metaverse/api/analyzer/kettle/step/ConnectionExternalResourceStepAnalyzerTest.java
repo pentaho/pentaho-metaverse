@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -47,12 +47,21 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by rfellows on 5/26/15.
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class ConnectionExternalResourceStepAnalyzerTest {
 
   ConnectionExternalResourceStepAnalyzer analyzer;
@@ -110,7 +119,7 @@ public class ConnectionExternalResourceStepAnalyzerTest {
     IMetaverseNode connectionNode = mock( IMetaverseNode.class );
     IConnectionAnalyzer connectionAnalyzer = mock( IConnectionAnalyzer.class );
     doReturn( connectionAnalyzer ).when( analyzer ).getConnectionAnalyzer();
-    when( connectionAnalyzer.analyze( descriptor, meta ) ).thenReturn( connectionNode );
+    when( connectionAnalyzer.analyze( eq( descriptor ), any() ) ).thenReturn( connectionNode );
     analyzer.setExternalResourceConsumer( null );
     analyzer.customAnalyze( meta, node );
     verify( builder, never() ).addNode( resourceNode );
@@ -120,20 +129,19 @@ public class ConnectionExternalResourceStepAnalyzerTest {
   @Test
   public void testCustomAnalyze_input() throws Exception {
     // fake the super.analyze call
-    doReturn( node ).when( (StepAnalyzer<BaseStepMeta>)analyzer ).analyze( descriptor, meta );
+    lenient().doReturn( node ).when( (StepAnalyzer<BaseStepMeta>)analyzer ).analyze( descriptor, meta );
     analyzer.setExternalResourceConsumer( erc );
 
     List<IExternalResourceInfo> resources = new ArrayList<>();
     IExternalResourceInfo resInfo = mock( IExternalResourceInfo.class );
     resources.add( resInfo );
-    when( resInfo.isInput() ).thenReturn( true );
 
     when( erc.getResourcesFromMeta( meta, context ) ).thenReturn( resources );
 
     IMetaverseNode connectionNode = mock( IMetaverseNode.class );
     doReturn( connectionNode ).when( analyzer ).getConnectionNode();
 
-    doReturn( resourceNode ).when( analyzer ).createResourceNode( any( IExternalResourceInfo.class ) );
+    doReturn( resourceNode ).when( analyzer ).createResourceNode( eq(meta), any( IExternalResourceInfo.class ) );
 
     analyzer.customAnalyze( meta, node );
 
@@ -147,16 +155,14 @@ public class ConnectionExternalResourceStepAnalyzerTest {
   public void testCreateResourceNode_inputs() throws Exception {
     IExternalResourceInfo resInfo = mock( IExternalResourceInfo.class );
     StepNodes inputs = mock( StepNodes.class );
-    StepNodes outputs = null;
     doReturn( inputs ).when( analyzer ).getInputs();
-    doReturn( outputs ).when( analyzer ).getOutputs();
     doReturn( tableNode ).when( analyzer ).createTableNode( resInfo );
     doReturn( true ).when( analyzer ).isInput();
 
     IMetaverseNode resourceNode = analyzer.createResourceNode( resInfo );
     assertEquals( tableNode, resourceNode );
     verify( analyzer ).linkResourceToFields( inputs );
-    verify( analyzer, never() ).linkResourceToFields( outputs );
+    verify( analyzer, never() ).linkResourceToFields( null );
 
     assertEquals( tableNode, analyzer.getTableNode() );
 
@@ -165,9 +171,7 @@ public class ConnectionExternalResourceStepAnalyzerTest {
   @Test
   public void testCreateResourceNode_outputs() throws Exception {
     IExternalResourceInfo resInfo = mock( IExternalResourceInfo.class );
-    StepNodes inputs = null;
     StepNodes outputs = mock( StepNodes.class );
-    doReturn( inputs ).when( analyzer ).getInputs();
     doReturn( outputs ).when( analyzer ).getOutputs();
     doReturn( tableNode ).when( analyzer ).createTableNode( resInfo );
     doReturn( false ).when( analyzer ).isInput();
@@ -175,7 +179,7 @@ public class ConnectionExternalResourceStepAnalyzerTest {
     IMetaverseNode resourceNode = analyzer.createResourceNode( resInfo );
     assertEquals( tableNode, resourceNode );
     verify( analyzer ).linkResourceToFields( outputs );
-    verify( analyzer, never() ).linkResourceToFields( inputs );
+    verify( analyzer, never() ).linkResourceToFields( null );
   }
 
   @Test

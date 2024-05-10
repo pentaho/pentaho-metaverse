@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,7 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -48,13 +49,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class StreamLookupStepAnalyzerTest {
 
   private StreamLookupStepAnalyzer analyzer;
@@ -136,22 +146,22 @@ public class StreamLookupStepAnalyzerTest {
 
     when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
 
-    when( stepIoMeta.getInfoStreams() ).thenReturn( streams );
-    when( stepMeta1.getName() ).thenReturn( "step1" );
-    when( stepMeta2.getName() ).thenReturn( "step2" );
-    when( stream1.getStepMeta() ).thenReturn( stepMeta1 );
-    when( stream1.getStepname() ).thenReturn( "step1" );
-    when( stream2.getStepMeta() ).thenReturn( stepMeta2 );
-    when( stream2.getStepname() ).thenReturn( "step2" );
-    when( parentTransMeta.getStepFields( stepMeta1 ) ).thenReturn( rowMeta1 );
-    when( parentTransMeta.getStepFields( stepMeta2 ) ).thenReturn( rowMeta2 );
-    when( parentTransMeta.getStepFields( parentStepMeta ) ).thenReturn( stepRowMeta );
-    when( parentTransMeta.getStepFields( "step1" ) ).thenReturn( step1RowMeta );
-    when( parentTransMeta.getStepFields( "step2" ) ).thenReturn( step2RowMeta );
-    when( step1RowMeta.searchValueMeta( anyString() ) ).thenReturn( mock( ValueMetaInterface.class ) );
+    lenient().when( stepIoMeta.getInfoStreams() ).thenReturn( streams );
+    lenient().when( stepMeta1.getName() ).thenReturn( "step1" );
+    lenient().when( stepMeta2.getName() ).thenReturn( "step2" );
+    lenient().when( stream1.getStepMeta() ).thenReturn( stepMeta1 );
+    lenient().when( stream1.getStepname() ).thenReturn( "step1" );
+    lenient().when( stream2.getStepMeta() ).thenReturn( stepMeta2 );
+    lenient().when( stream2.getStepname() ).thenReturn( "step2" );
+    lenient().when( parentTransMeta.getStepFields( eq( stepMeta1 ), any() ) ).thenReturn( rowMeta1 );
+    lenient().when( parentTransMeta.getStepFields( eq( stepMeta2 ), any() ) ).thenReturn( rowMeta2 );
+    lenient().when( parentTransMeta.getStepFields( eq( parentStepMeta ), any() ) ).thenReturn( stepRowMeta );
+    lenient().when( parentTransMeta.getStepFields( "step1" ) ).thenReturn( step1RowMeta );
+    lenient().when( parentTransMeta.getStepFields( "step2" ) ).thenReturn( step2RowMeta );
+    lenient().when( step1RowMeta.searchValueMeta( anyString() ) ).thenReturn( mock( ValueMetaInterface.class ) );
     String[] stepNames = { "step1", "step2" };
-    when( parentTransMeta.getPrevStepNames( any( StepMeta.class ) ) ).thenReturn( stepNames );
-    when( parentTransMeta.getPrevStepNames( anyString() ) ).thenReturn( stepNames );
+    when( parentTransMeta.getPrevStepNames( Mockito.<StepMeta>any() ) ).thenReturn( stepNames );
+    when( parentTransMeta.getPrevStepNames( Mockito.<String>any() ) ).thenReturn( stepNames );
 
     analyzer = spy( new StreamLookupStepAnalyzer() );
     analyzer.setParentStepMeta( parentStepMeta );
@@ -164,11 +174,11 @@ public class StreamLookupStepAnalyzerTest {
 
     when( analyzer.getInputs() ).thenReturn( inputs );
 
-    when( analyzer.getOutputFields( any( StreamLookupMeta.class ) ) ).thenReturn( outputRowMeta );
+    lenient().when( analyzer.getOutputFields( any( StreamLookupMeta.class ) ) ).thenReturn( outputRowMeta );
     ValueMetaInterface searchFieldResult = mock( ValueMetaInterface.class );
-    when( outputRowMeta.searchValueMeta( anyString() ) ).thenReturn( searchFieldResult );
-    when( searchFieldResult.getOrigin() ).thenReturn( "step1" );
-    when( searchFieldResult.getName() ).thenReturn( "country_code" );
+    lenient().when( outputRowMeta.searchValueMeta( anyString() ) ).thenReturn( searchFieldResult );
+    lenient().when( searchFieldResult.getOrigin() ).thenReturn( "step1" );
+    lenient().when( searchFieldResult.getName() ).thenReturn( "country_code" );
   }
 
   @Test
@@ -176,8 +186,8 @@ public class StreamLookupStepAnalyzerTest {
 
     analyzer.customAnalyze( streamLookupMeta, node );
 
-    verify( builder, times( 2 * mockKeylookup.length ) ).addLink( any( IMetaverseNode.class ),
-      eq( DictionaryConst.LINK_JOINS ), any( IMetaverseNode.class ) );
+    verify( builder, times( 2 * mockKeylookup.length ) ).addLink( Mockito.<IMetaverseNode>any(),
+      eq( DictionaryConst.LINK_JOINS ), Mockito.<IMetaverseNode>any() );
 
   }
 

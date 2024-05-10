@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
 import org.pentaho.di.core.ProgressMonitorListener;
@@ -70,13 +70,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -87,7 +88,7 @@ import static org.mockito.Mockito.when;
 /**
  * Created by rfellows on 4/2/15.
  */
-@SuppressWarnings( { "deprecation", "ResultOfMethodCallIgnored" } ) @RunWith( MockitoJUnitRunner.class )
+@SuppressWarnings( { "deprecation", "ResultOfMethodCallIgnored" } ) @RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TransExecutorStepAnalyzerTest {
 
   @Mock
@@ -138,15 +139,15 @@ public class TransExecutorStepAnalyzerTest {
     when( parentTransMeta.getPrevStepFields( eq( nextStepMeta_Results ), any( ProgressMonitorListener.class ) ) )
       .thenReturn( nextStepMeta_Results_input );
 
-    when( nextStepMeta_Results_input.getFieldNames() ).thenReturn( resultsFieldNames );
+    lenient().when( nextStepMeta_Results_input.getFieldNames() ).thenReturn( resultsFieldNames );
 
 
     when( parentTransMeta.environmentSubstitute( anyString() ) ).then(
       (Answer<String>) invocationOnMock -> invocationOnMock.getArguments()[ 0 ].toString() );
 
-    when( childTransMeta.getName() ).thenReturn( "child" );
-    when( descriptor.getNamespace() ).thenReturn( namespace );
-    when( namespace.getParentNamespace() ).thenReturn( parentNamespace );
+    lenient().when( childTransMeta.getName() ).thenReturn( "child" );
+    lenient().when( descriptor.getNamespace() ).thenReturn( namespace );
+    lenient().when( namespace.getParentNamespace() ).thenReturn( parentNamespace );
 
     when( descriptor.getContext() ).thenReturn( analysisContext );
 
@@ -159,7 +160,7 @@ public class TransExecutorStepAnalyzerTest {
     spyAnalyzer.setParentTransMeta( parentTransMeta );
     spyAnalyzer.setParentStepMeta( parentStepMeta );
     spyAnalyzer.setDescriptor( descriptor );
-    doReturn( documentDescriptor ).when( spyAnalyzer ).getDocumentDescriptor();
+    lenient().doReturn( documentDescriptor ).when( spyAnalyzer ).getDocumentDescriptor();
   }
 
   @Test( expected = MetaverseAnalyzerException.class )
@@ -174,7 +175,6 @@ public class TransExecutorStepAnalyzerTest {
   public void testCustomAnalyze_fileName() throws Exception {
     String filePath = "src/it/resources/repo/validation/transformation-executor/trans-executor-child.ktr"
       .replace( "/", File.separator );
-    doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( anyString() );
     when( meta.getFileName() ).thenReturn( filePath );
 
     when( meta.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.FILENAME );
@@ -226,8 +226,6 @@ public class TransExecutorStepAnalyzerTest {
   @Test( expected = MetaverseAnalyzerException.class )
   public void testCustomAnalyze_repoFile_NoRepo() throws Exception {
     // we should get an exception if the sub transformation isn't found in the repo
-    when( meta.getDirectoryPath() ).thenReturn( "/home/admin" );
-    when( meta.getTransName() ).thenReturn( "my.ktr" );
     when( parentTransMeta.getRepository() ).thenReturn( null );
     when( meta.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_NAME );
     spyAnalyzer.customAnalyze( meta, node );
@@ -235,19 +233,19 @@ public class TransExecutorStepAnalyzerTest {
 
   @Test
   public void testCustomAnalyze_repoFile() throws Exception {
-    when( meta.getDirectoryPath() ).thenReturn( "/home/admin" );
-    when( meta.getTransName() ).thenReturn( "my" );
+    lenient().when( meta.getDirectoryPath() ).thenReturn( "/home/admin" );
+    lenient().when( meta.getTransName() ).thenReturn( "my" );
     Repository repo = mock( Repository.class );
     RepositoryDirectoryInterface repoDir = mock( RepositoryDirectoryInterface.class );
-    when( repo.findDirectory( anyString() ) ).thenReturn( repoDir );
-    when( repo.loadTransformation( anyString(), eq( repoDir ), any( ProgressMonitorListener.class ),
+    lenient().when( repo.findDirectory( anyString() ) ).thenReturn( repoDir );
+    lenient().when( repo.loadTransformation( anyString(), eq( repoDir ), any( ProgressMonitorListener.class ),
       anyBoolean(), anyString() ) ).thenReturn( childTransMeta );
-    when( parentTransMeta.getRepository() ).thenReturn( repo );
+    lenient().when( parentTransMeta.getRepository() ).thenReturn( repo );
 
-    doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( anyString() );
-    when( childTransMeta.getPathAndName() ).thenReturn( "/home/admin/my" );
-    when( childTransMeta.getDefaultExtension() ).thenReturn( "ktr" );
-    when( meta.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_NAME );
+    lenient().doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( anyString() );
+    lenient().when( childTransMeta.getPathAndName() ).thenReturn( "/home/admin/my" );
+    lenient().when( childTransMeta.getDefaultExtension() ).thenReturn( "ktr" );
+    lenient().when( meta.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_NAME );
 
 
     // don't bother running the connectX methods, we'll test those later
@@ -282,7 +280,7 @@ public class TransExecutorStepAnalyzerTest {
     when( meta.getTransObjectId() ).thenReturn( mock( ObjectId.class ) );
     Repository repo = mock( Repository.class );
     when( parentTransMeta.getRepository() ).thenReturn( repo );
-    when( repo.loadTransformation( any( ObjectId.class ), anyString() ) ).thenThrow( new KettleException() );
+    when( repo.loadTransformation( any( ObjectId.class ), any() ) ).thenThrow( new KettleException() );
     when( meta.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_REFERENCE );
     spyAnalyzer.customAnalyze( meta, node );
   }
@@ -290,7 +288,6 @@ public class TransExecutorStepAnalyzerTest {
   @Test( expected = MetaverseAnalyzerException.class )
   public void testCustomAnalyze_repoRepo_NoRepo() throws Exception {
     // we should get an exception if the sub transformation isn't found on the filesystem
-    when( meta.getTransObjectId() ).thenReturn( mock( ObjectId.class ) );
     when( parentTransMeta.getRepository() ).thenReturn( null );
     when( meta.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_REFERENCE );
     spyAnalyzer.customAnalyze( meta, node );
@@ -298,14 +295,14 @@ public class TransExecutorStepAnalyzerTest {
 
   @Test
   public void testCustomAnalyze_repoRef() throws Exception {
-    when( meta.getTransObjectId() ).thenReturn( mock( ObjectId.class ) );
+    lenient().when( meta.getTransObjectId() ).thenReturn( mock( ObjectId.class ) );
     Repository repo = mock( Repository.class );
     RepositoryDirectoryInterface repoDir = mock( RepositoryDirectoryInterface.class );
-    when( repo.findDirectory( anyString() ) ).thenReturn( repoDir );
-    when( repo.loadTransformation( any( ObjectId.class ), anyString() ) ).thenReturn( childTransMeta );
-    when( parentTransMeta.getRepository() ).thenReturn( repo );
+    lenient().when( repo.findDirectory( anyString() ) ).thenReturn( repoDir );
+    lenient().when( repo.loadTransformation( any( ObjectId.class ), anyString() ) ).thenReturn( childTransMeta );
+    lenient().when( parentTransMeta.getRepository() ).thenReturn( repo );
 
-    doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( anyString() );
+    lenient().doReturn( childTransMeta ).when( spyAnalyzer ).getSubTransMeta( anyString() );
     when( childTransMeta.getPathAndName() ).thenReturn( "/home/admin/my" );
     when( childTransMeta.getDefaultExtension() ).thenReturn( "ktr" );
     when( meta.getSpecificationMethod() ).thenReturn( ObjectLocationSpecificationMethod.REPOSITORY_BY_REFERENCE );
@@ -424,9 +421,6 @@ public class TransExecutorStepAnalyzerTest {
     StepNodes inputs = new StepNodes();
     doReturn( inputs ).when( spyAnalyzer ).getInputs();
 
-    doNothing().when( spyHelper ).linkUsedFieldToSubTrans( any( IMetaverseNode.class ), any( TransMeta.class ),
-      any( IMetaverseNode.class ), any( IComponentDescriptor.class ) );
-
     spyAnalyzer.connectToSubTransInputFields( childTransMeta, childTransNode, descriptor );
 
     verify( spyHelper, never() ).linkUsedFieldToSubTrans( any( IMetaverseNode.class ),
@@ -455,7 +449,6 @@ public class TransExecutorStepAnalyzerTest {
     RowsToResultMeta mockRowsToResultMeta = mock( RowsToResultMeta.class );
     when( rowsFromResult.getStepMetaInterface() ).thenReturn( mockRowsToResultMeta );
     when( mockRowsToResultMeta.getParentStepMeta() ).thenReturn( parentStepMeta );
-    when( mockRowsToResultMeta.getName() ).thenReturn( "stepName" );
     childTransSteps.add( rowsFromResult );
 
     RowMetaInterface rowMetaInterface = mock( RowMetaInterface.class );
@@ -465,14 +458,14 @@ public class TransExecutorStepAnalyzerTest {
 
     IMetaverseNode subFieldNode = mock( IMetaverseNode.class );
     doReturn( subFieldNode ).when( spyAnalyzer ).createFieldNode( any( IComponentDescriptor.class ),
-      any( ValueMetaInterface.class ),
+      any(),
       eq( StepAnalyzer.NONE ),
       eq( false ) );
 
     spyHelper.linkResultFieldToSubTrans( fieldNode, childTransMeta, childTransNode, descriptor );
 
     verify( spyAnalyzer ).createFieldNode( any( IComponentDescriptor.class ),
-      any( ValueMetaInterface.class ),
+      any(),
       eq( StepAnalyzer.NONE ),
       eq( false ) );
 
@@ -512,8 +505,6 @@ public class TransExecutorStepAnalyzerTest {
     when( rowsFromResult.getStepMetaInterface() ).thenReturn( mockRowsFromResultMeta );
     when( rowsFromResult.getName() ).thenReturn( "stepName" );
     childTransSteps.add( rowsFromResult );
-
-    when( mockRowsFromResultMeta.getFieldname() ).thenReturn( resultsFieldNames );
 
     StepMeta rowsParentStepMeta = mock( StepMeta.class );
     TransMeta rowsParentTransMeta = mock( TransMeta.class );

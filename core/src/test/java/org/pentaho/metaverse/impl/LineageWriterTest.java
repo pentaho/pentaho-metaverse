@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,8 +24,10 @@ package org.pentaho.metaverse.impl;
 
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 import org.pentaho.metaverse.api.IGraphWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExecutionData;
@@ -38,8 +40,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 
 /**
@@ -70,10 +75,17 @@ public class LineageWriterTest {
 
   @Test
   public void testOutputExecutionProfile() throws Exception {
-    writer.setProfileOutputStream( System.out );
+    writer.setProfileOutputStream( mock( OutputStream.class ) );
     writer.outputExecutionProfile( holder );
-    writer.setProfileOutputStream( null );
-    writer.outputExecutionProfile( holder );
+
+    // We need the static mock for the null case because getProfileOutputStream() has the
+    // side-effect of changing profileOutputStream to System.out if it is set to null.
+    // Later on, outputExecutionProfile() calls IOUtils.closeQuietly on the output stream,
+    // and closing System.out causes issues with other tests in some scenarios
+    try( MockedStatic<IOUtils> mocked = mockStatic( IOUtils.class ) ) {
+      writer.setProfileOutputStream( null );
+      writer.outputExecutionProfile( holder );
+    }
   }
 
   @Test

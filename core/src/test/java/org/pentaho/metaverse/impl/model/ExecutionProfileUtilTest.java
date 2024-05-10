@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,16 +23,20 @@
 package org.pentaho.metaverse.impl.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.MockedStatic;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 
 import java.io.IOException;
 import java.io.PrintStream;
 
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 public class ExecutionProfileUtilTest {
   IExecutionProfile executionProfile;
@@ -49,14 +53,18 @@ public class ExecutionProfileUtilTest {
 
   @Test
   public void testOutputExecutionProfile() throws Exception {
-    ExecutionProfileUtil.outputExecutionProfile( System.out, null );
-    ExecutionProfileUtil.outputExecutionProfile( System.out, executionProfile );
+    // Avoid issues with System.out getting closed, see LineageWriterTest.testOutputExecutionProfile()
+    try( MockedStatic<IOUtils> mocked = mockStatic( IOUtils.class ) ) {
+      ExecutionProfileUtil.outputExecutionProfile( System.out, null );
+      ExecutionProfileUtil.outputExecutionProfile( System.out, executionProfile );
+    }
   }
 
   @Test( expected = IOException.class )
   public void testOutputExecutionProfileWithException() throws IOException {
     PrintStream mockStream = mock( PrintStream.class );
-    doThrow( JsonProcessingException.class ).when( mockStream ).println( Mockito.anyString() );
-    ExecutionProfileUtil.outputExecutionProfile( mockStream, executionProfile );
+    ObjectMapper mapper = mock( ObjectMapper.class );
+    when( mapper.writeValueAsString( any() ) ).thenThrow( JsonProcessingException.class );
+    ExecutionProfileUtil.outputExecutionProfile( mockStream, executionProfile, mapper );
   }
 }
