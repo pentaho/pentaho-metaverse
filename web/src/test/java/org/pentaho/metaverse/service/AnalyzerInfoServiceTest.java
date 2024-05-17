@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.metaverse.analyzer.kettle.jobentry.transjob.TransJobEntryAnalyzer;
 import org.pentaho.metaverse.analyzer.kettle.step.mergejoin.MergeJoinStepAnalyzer;
 import org.pentaho.metaverse.analyzer.kettle.step.stringscut.StringsCutStepAnalyzer;
@@ -36,14 +36,15 @@ import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
 
 import javax.ws.rs.core.Response;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class AnalyzerInfoServiceTest {
 
   AnalyzerInfoService service;

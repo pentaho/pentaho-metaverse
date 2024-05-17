@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,8 +29,8 @@ import org.pentaho.metaverse.api.MetaverseObjectFactory;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author mburgess
@@ -46,9 +46,9 @@ public class MetaverseTestUtils {
   public static IDocumentController getDocumentController() {
     IDocumentController documentController = mock( IDocumentController.class );
     IMetaverseBuilder metaverseBuilder = mock( IMetaverseBuilder.class );
-    when( metaverseBuilder.getMetaverseObjectFactory() ).thenReturn( getMetaverseObjectFactory() );
-    when( documentController.getMetaverseObjectFactory() ).thenReturn( getMetaverseObjectFactory() );
-    when( documentController.getMetaverseBuilder() ).thenReturn( metaverseBuilder );
+    lenient().when( metaverseBuilder.getMetaverseObjectFactory() ).thenReturn( getMetaverseObjectFactory() );
+    lenient().when( documentController.getMetaverseObjectFactory() ).thenReturn( getMetaverseObjectFactory() );
+    lenient().when( documentController.getMetaverseBuilder() ).thenReturn( metaverseBuilder );
     return documentController;
   }
 

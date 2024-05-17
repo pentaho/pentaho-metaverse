@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.groupby.GroupByMeta;
@@ -35,16 +35,23 @@ import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
-import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class GroupByStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private GroupByStepAnalyzer analyzer;
@@ -92,11 +99,11 @@ public class GroupByStepAnalyzerTest extends ClonableStepAnalyzerTest {
     fields.add( new StepField( "prev", "donation" ) );
     fields.add( new StepField( "prev", "state" ) );
     fields.add( new StepField( "prev", "country" ) );
-    doReturn( fields ).when( analyzer ).createStepFields( anyString(), any( StepNodes.class ) );
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), any() );
     Set<StepField> usedFields = analyzer.getUsedFields( meta );
     int expectedUsedFieldCount = mockAggregateFields.length + mockSubjectFields.length;
     assertEquals( expectedUsedFieldCount, usedFields.size() );
-    verify( analyzer, times( expectedUsedFieldCount ) ).createStepFields( anyString(), any( StepNodes.class ) );
+    verify( analyzer, times( expectedUsedFieldCount ) ).createStepFields( anyString(), any() );
   }
 
   @Test

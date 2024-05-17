@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -25,37 +25,13 @@ package org.pentaho.metaverse.api.analyzer.kettle.annotations;
 //  is to comment it out completely and revisit a permanent solution in the future. The getTestStepMeta(...) method
 //  is needed for other tests so it is left oncommented along with any associated code.
 //import com.google.common.collect.ImmutableMap;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.pentaho.di.core.KettleClientEnvironment;
-import org.pentaho.di.core.ObjectLocationSpecificationMethod;
-import org.pentaho.di.core.ProgressMonitorListener;
-import org.pentaho.di.core.exception.KettleException;
+
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.injection.InjectionDeep;
-import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.row.RowMeta;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.row.ValueMetaInterface;
-import org.pentaho.di.core.row.value.ValueMetaPluginType;
 import org.pentaho.di.core.row.value.ValueMetaString;
-import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.variables.Variables;
-import org.pentaho.di.repository.Repository;
-import org.pentaho.di.repository.RepositoryDirectory;
-import org.pentaho.di.trans.ISubTransAwareMeta;
 import org.pentaho.di.trans.Trans;
-import org.pentaho.di.trans.TransHopMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepDataInterface;
@@ -63,68 +39,15 @@ import org.pentaho.di.trans.step.StepIOMeta;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.trans.steps.rowsfromresult.RowsFromResultMeta;
-import org.pentaho.di.trans.steps.writetolog.WriteToLogMeta;
-import org.pentaho.di.trans.streaming.common.BaseStreamStepMeta;
-import org.pentaho.dictionary.DictionaryHelper;
-import org.pentaho.dictionary.MetaverseTransientNode;
-import org.pentaho.metaverse.api.IComponentDescriptor;
-import org.pentaho.metaverse.api.IMetaverseBuilder;
-import org.pentaho.metaverse.api.IMetaverseNode;
-import org.pentaho.metaverse.api.MetaverseAnalyzerException;
-import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
-import org.pentaho.metaverse.api.MetaverseObjectFactory;
-import org.pentaho.metaverse.api.StepField;
-import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
-import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
-import org.pentaho.metaverse.api.analyzer.kettle.step.SubtransAnalyzer;
-import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import static java.util.Collections.singleton;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pentaho.dictionary.DictionaryConst.CATEGORY_DATASOURCE;
 import static org.pentaho.dictionary.DictionaryConst.CATEGORY_MESSAGE_QUEUE;
-import static org.pentaho.dictionary.DictionaryConst.CATEGORY_OTHER;
 import static org.pentaho.dictionary.DictionaryConst.LINK_CONTAINS;
-import static org.pentaho.dictionary.DictionaryConst.LINK_CONTAINS_CONCEPT;
 import static org.pentaho.dictionary.DictionaryConst.LINK_DEFINES;
-import static org.pentaho.dictionary.DictionaryConst.LINK_DEPENDENCYOF;
-import static org.pentaho.dictionary.DictionaryConst.LINK_INPUTS;
-import static org.pentaho.dictionary.DictionaryConst.LINK_PARENT_CONCEPT;
 import static org.pentaho.dictionary.DictionaryConst.LINK_READBY;
 import static org.pentaho.dictionary.DictionaryConst.LINK_WRITESTO;
-import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_EXTERNAL_CONNECTION;
-import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS_FIELD;
-import static org.pentaho.dictionary.DictionaryConst.PROPERTY_NAME;
-import static org.pentaho.dictionary.DictionaryConst.PROPERTY_TYPE;
-import static org.pentaho.metaverse.api.analyzer.kettle.annotations.AnnotationDrivenStepMetaAnalyzerTest.TestStepMeta.CONN_TYPE;
-import static org.pentaho.metaverse.api.analyzer.kettle.annotations.AnnotationDrivenStepMetaAnalyzerTest.TestStepMeta.TEST_TYPE;
-import static org.pentaho.metaverse.api.analyzer.kettle.annotations.Metaverse.FALSE;
-import static org.pentaho.metaverse.api.analyzer.kettle.annotations.Metaverse.SUBTRANS_INPUT;
 import static org.pentaho.metaverse.api.analyzer.kettle.step.ExternalResourceStepAnalyzer.RESOURCE;
 
 

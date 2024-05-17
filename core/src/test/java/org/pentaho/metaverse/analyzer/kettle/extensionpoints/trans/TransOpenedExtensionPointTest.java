@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,35 +22,33 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metaverse.impl.MetaverseBuilder;
 import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.pentaho.metaverse.util.MetaverseUtil;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@PrepareForTest( { MetaverseConfig.class, TransExtensionPointUtil.class } )
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TransOpenedExtensionPointTest {
 
   @Mock
   TransMeta transMeta;
-  @Mock
-  MetaverseBuilder metaverseBuilder;
 
   @Before
   public void setUp() throws Exception {
@@ -58,23 +56,28 @@ public class TransOpenedExtensionPointTest {
     when( transMeta.getFilename() ).thenReturn( "/path/to/file.ktr" );
     when( transMeta.getName() ).thenReturn( "testTrans" );
     MetaverseUtil.setDocumentController( MetaverseTestUtils.getDocumentController() );
-    PowerMockito.mockStatic( MetaverseConfig.class );
-    PowerMockito.whenNew( MetaverseBuilder.class ).withAnyArguments().thenReturn( metaverseBuilder );
   }
 
   @Test
   public void testCallExtensionWithLineageOnPoint() throws Exception {
-    when( MetaverseConfig.isLineageExecutionEnabled() ).thenReturn( true );
-    TransOpenedExtensionPoint extensionPoint = new TransOpenedExtensionPoint();
-    extensionPoint.callExtensionPoint( null, transMeta );
-    verify( metaverseBuilder, times( 1 ) ).addNode( anyObject() );
+    try ( MockedStatic<MetaverseConfig> mockedMetaverseConfig = mockStatic( MetaverseConfig.class );
+          MockedConstruction<MetaverseBuilder> mockedMetaverseBuilderConstruction = mockConstruction( MetaverseBuilder.class ) ) {
+      mockedMetaverseConfig.when( MetaverseConfig::isLineageExecutionEnabled ).thenReturn( true );
+      TransOpenedExtensionPoint extensionPoint = new TransOpenedExtensionPoint();
+      extensionPoint.callExtensionPoint( null, transMeta );
+      verify( mockedMetaverseBuilderConstruction.constructed().get( 0 ), times( 1 ) ).addNode( any() );
+    }
   }
 
   @Test
   public void testCallExtensionWithLineageOffPoint() throws Exception {
-    when( MetaverseConfig.isLineageExecutionEnabled() ).thenReturn( false );
-    TransOpenedExtensionPoint extensionPoint = new TransOpenedExtensionPoint();
-    extensionPoint.callExtensionPoint( null, transMeta );
-    verify( metaverseBuilder, times( 0 ) ).addNode( anyObject() );
+    try ( MockedStatic<MetaverseConfig> mockedMetaverseConfig = mockStatic( MetaverseConfig.class );
+          MockedConstruction<MetaverseBuilder> mockedMetaverseBuilderConstruction = mockConstruction( MetaverseBuilder.class ) ) {
+      mockedMetaverseConfig.when( MetaverseConfig::isLineageExecutionEnabled ).thenReturn( false );
+      TransOpenedExtensionPoint extensionPoint = new TransOpenedExtensionPoint();
+      extensionPoint.callExtensionPoint( null, transMeta );
+
+      Assert.assertEquals( mockedMetaverseBuilderConstruction.constructed().size(), 0 );
+    }
   }
 }

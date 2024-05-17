@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,7 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
@@ -46,9 +46,17 @@ import org.pentaho.metaverse.api.testutils.MetaverseTestUtils;
 import java.util.Set;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+
+// Running this test with the "silent" runner to avoid an odd warning about an unused mock
+// that isn't actually a mock.
+@RunWith( MockitoJUnitRunner.Silent.class )
 public class JobEntryAnalyzerTest {
 
   JobEntryAnalyzer analyzer;
@@ -108,13 +116,13 @@ public class JobEntryAnalyzerTest {
           protected void customAnalyze( JobEntryInterface entry, IMetaverseNode rootNode )
             throws MetaverseAnalyzerException {
             // TODO Auto-generated method stub
-            
+
           }
         };
     analyzer = spy( baseAnalyzer );
 
     analyzer.setMetaverseBuilder( mockBuilder );
-    when( mockEntry.getEntry() ).thenReturn( mockJobEntryInterface );
+    lenient().when( mockEntry.getEntry() ).thenReturn( mockJobEntryInterface );
     when( mockJobEntryInterface.getPluginId() ).thenReturn( "Base job entry" );
     when( mockJobEntryInterface.getParentJob() ).thenReturn( mockJob );
     when( mockJob.getJobMeta() ).thenReturn( mockJobMeta );
@@ -141,7 +149,7 @@ public class JobEntryAnalyzerTest {
   @Test
   public void testAnalyzeWithDatabaseMeta() throws MetaverseAnalyzerException {
     DatabaseMeta[] dbs = new DatabaseMeta[] { mockDatabaseMeta };
-    when( mockJobEntryInterface.getUsedDatabaseConnections() ).thenReturn( dbs );
+    lenient().when( mockJobEntryInterface.getUsedDatabaseConnections() ).thenReturn( dbs );
     assertNotNull( analyzer.analyze( mockDescriptor, mockJobEntryInterface ) );
   }
 
@@ -159,7 +167,8 @@ public class JobEntryAnalyzerTest {
   @Test
   public void testAddConnectionNodesException() throws MetaverseAnalyzerException {
     analyzer.jobEntryInterface = mock( JobEntryInterface.class );
-    when( mockDescriptor.getContext() ).thenThrow( Exception.class );
+    analyzer.connectionAnalyzer = mock( JobEntryDatabaseConnectionAnalyzer.class );
+    doThrow( new MetaverseAnalyzerException() ).when( analyzer.connectionAnalyzer ).analyze( any(), any() );
     analyzer.addConnectionNodes( mockDescriptor );
   }
 
@@ -172,7 +181,6 @@ public class JobEntryAnalyzerTest {
     dbAnalyzer.setMetaverseBuilder( mockBuilder );
 
     analyzer.setConnectionAnalyzer( dbAnalyzer );
-    when( analyzer.getConnectionAnalyzer() ).thenReturn( dbAnalyzer );
     when( mockJobEntryInterface.getUsedDatabaseConnections() ).thenReturn( dbs );
 
     analyzer.addConnectionNodes( mockDescriptor );

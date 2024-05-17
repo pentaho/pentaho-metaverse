@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,7 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -61,13 +61,21 @@ import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 /**
  * User: RFellows Date: 12/1/14
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class AbstractStepMetaJsonSerializerTest {
 
   public static final String STEP_META_NAME = "StepMetaName";
@@ -113,7 +121,7 @@ public class AbstractStepMetaJsonSerializerTest {
     verify( json ).writeStartObject();
     verify( json ).writeStringField( IInfo.JSON_PROPERTY_CLASS, spyMeta.getClass().getName() );
     verify( json ).writeStringField( IInfo.JSON_PROPERTY_NAME, spyParent.getName() );
-    verify( json ).writeStringField( eq( AbstractStepMetaJsonSerializer.JSON_PROPERTY_TYPE ), anyString() );
+    verify( json ).writeStringField( eq( AbstractStepMetaJsonSerializer.JSON_PROPERTY_TYPE ), any() );
 
     // make sure the templated methods are called
     verify( spySerializer ).writeRepoAttributes( spyMeta, json );
@@ -158,8 +166,6 @@ public class AbstractStepMetaJsonSerializerTest {
   public void testWriteInputFields() throws Exception {
     serializer = new BaseStepMetaJsonSerializer( BaseStepMeta.class );
     serializer.setLineageRepository( repo );
-
-    when( spyParent.getParentTransMeta() ).thenReturn( spyParentTrans );
 
     IFieldLineageMetadataProvider mapper = mock( IFieldLineageMetadataProvider.class );
     AbstractStepMetaJsonSerializer spy = spy( serializer );
@@ -218,7 +224,7 @@ public class AbstractStepMetaJsonSerializerTest {
     externalResources.add( info );
 
     IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );
-    when( consumer.getResourcesFromMeta( anyObject() ) ).thenReturn( externalResources );
+    when( consumer.getResourcesFromMeta( any() ) ).thenReturn( externalResources );
     consumers.add( consumer );
 
     Class<? extends BaseStepMeta> stepMetaClass = BaseStepMeta.class;
@@ -230,7 +236,7 @@ public class AbstractStepMetaJsonSerializerTest {
 
     verify( mockConsumerMap ).getExternalResourceConsumers( any( Collection.class ) );
     verify( json ).writeArrayFieldStart( AbstractStepMetaJsonSerializer.JSON_PROPERTY_EXTERNAL_RESOURCES );
-    verify( consumer ).getResourcesFromMeta( anyObject() );
+    verify( consumer ).getResourcesFromMeta( any() );
     verify( json, times( externalResources.size() ) ).writeObject( any( IExternalResourceInfo.class ) );
     verify( json ).writeEndArray();
   }

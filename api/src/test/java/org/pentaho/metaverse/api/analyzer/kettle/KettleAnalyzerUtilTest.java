@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,7 +26,9 @@ import org.apache.commons.vfs2.FileObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
 import org.pentaho.di.core.exception.KettleException;
@@ -51,33 +53,30 @@ import org.pentaho.metaverse.api.Namespace;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
 import org.pentaho.metaverse.api.model.ExternalResourceInfoFactory;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 /**
  * User: RFellows Date: 8/14/14
  */
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( KettleVFS.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class KettleAnalyzerUtilTest {
+  @Mock FileObject fileObject;
 
   @Test
   public void testDefaultConstructor() {
@@ -113,9 +112,10 @@ public class KettleAnalyzerUtilTest {
     assertTrue( KettleAnalyzerUtil.normalizeFilePathSafely( path ).endsWith( "temp" + File.separator + "foo" ) );
 
     // verify that when an exception is thrown, the original value is returned
-    PowerMockito.mockStatic( KettleVFS.class );
-    Mockito.when( KettleVFS.getFileObject( path ) ).thenThrow( new KettleFileException( "mockedException" ) );
-    assertEquals( "temp/foo", KettleAnalyzerUtil.normalizeFilePathSafely( path ) );
+    try( MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
+      mockedKettleVFS.when( () -> KettleVFS.getFileObject( path ) ).thenThrow( new KettleFileException( "mockedException" ) );
+      assertEquals( "temp/foo", KettleAnalyzerUtil.normalizeFilePathSafely( path ) );
+    }
   }
 
   @Test
@@ -265,20 +265,20 @@ public class KettleAnalyzerUtilTest {
     spyMeta = spy( new StepMeta( "test", meta ) );
     when( meta.getParentStepMeta() ).thenReturn( spyMeta );
     when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
-    when( meta.writesToFile() ).thenReturn( true );
-    when( meta.getFilePaths( false ) ).thenReturn( filePaths );
+    lenient().when( meta.writesToFile() ).thenReturn( true );
+    lenient().when( meta.getFilePaths( false ) ).thenReturn( filePaths );
 
     spyMeta2 = spy( new StepMeta( "test2", meta2 ) );
-    when( meta2.getParentStepMeta() ).thenReturn( spyMeta2 );
-    when( spyMeta2.getParentTransMeta() ).thenReturn( transMeta );
-    when( meta2.writesToFile() ).thenReturn( true );
-    when( meta2.getFilePaths( false ) ).thenReturn( filePaths2 );
+    lenient().when( meta2.getParentStepMeta() ).thenReturn( spyMeta2 );
+    lenient().when( spyMeta2.getParentTransMeta() ).thenReturn( transMeta );
+    lenient().when( meta2.writesToFile() ).thenReturn( true );
+    lenient().when( meta2.getFilePaths( false ) ).thenReturn( filePaths2 );
   }
 
   @Test
   public void test_getResourcedFromMeta() throws Exception {
     initMetas();
-    when( meta.isAcceptingFilenames() ).thenReturn( false );
+    lenient().when( meta.isAcceptingFilenames() ).thenReturn( false );
     Set<IExternalResourceInfo>
       resources = (Set<IExternalResourceInfo>) KettleAnalyzerUtil.getResourcesFromMeta( meta, filePaths );
     assertFalse( resources.isEmpty() );
@@ -296,7 +296,11 @@ public class KettleAnalyzerUtilTest {
     RowMetaInterface rowMeta = mock( RowMetaInterface.class );
     Object[] row = new Object[]{};
     IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
-    assertFalse( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+
+    try(MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
+      mockedKettleVFS.when( () -> KettleVFS.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
+      assertFalse( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+    }
   }
 
   @Test
@@ -306,7 +310,13 @@ public class KettleAnalyzerUtilTest {
     RowMetaInterface rowMeta = mock( RowMetaInterface.class );
     Object[] row = new Object[]{};
     IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
-    assertTrue( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+
+    try(MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
+      mockedKettleVFS.when( () -> KettleVFS.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
+      mockedKettleVFS.when( () -> KettleVFS.startsWithScheme( anyString() )).thenCallRealMethod();
+      mockedKettleVFS.when( KettleVFS::getInstance ).thenCallRealMethod();
+      assertTrue( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+    }
   }
 
   @Test
@@ -316,7 +326,11 @@ public class KettleAnalyzerUtilTest {
     RowMetaInterface rowMeta = mock( RowMetaInterface.class );
     Object[] row = new Object[]{};
     IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
-    assertFalse( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+
+    try(MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
+      mockedKettleVFS.when( () -> KettleVFS.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
+      assertFalse( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+    }
   }
 
   @Test
@@ -326,21 +340,23 @@ public class KettleAnalyzerUtilTest {
     RowMetaInterface rowMeta = mock( RowMetaInterface.class );
     Object[] row = new Object[]{};
     IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
-    assertTrue( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+
+    try(MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
+      mockedKettleVFS.when( () -> KettleVFS.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
+      assertTrue( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+    }
   }
 
   private IExternalResourceInfo initMocksForGetResourcesFromRowTest( String filename, BaseFileInputStep step ) {
     StepMeta stepMeta = mock( StepMeta.class );
     TransMeta transMeta = mock( TransMeta.class );
-    FileObject fileObject = mock( FileObject.class );
     when( fileObject.getPublicURIString() ).thenReturn( filename );
-    PowerMockito.stub( PowerMockito.method( KettleVFS.class, "getFileObject", String.class, VariableSpace.class ) ).toReturn( fileObject );
     when( step.getStepMetaInterface() ).thenReturn( meta );
     when( meta.getParentStepMeta() ).thenReturn( stepMeta );
     when( stepMeta.getParentTransMeta() ).thenReturn( transMeta );
     when( transMeta.getName() ).thenReturn( "transName" );
     when( stepMeta.getName() ).thenReturn( "stepName" );
-    when( step.environmentSubstitute( anyString() ) ).thenReturn( filename );
+    when( step.environmentSubstitute( Mockito.<String>any() ) ).thenReturn( filename );
     return ExternalResourceInfoFactory.createFileResource( fileObject, true );
   }
 }

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
@@ -42,7 +42,7 @@ import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.analyzer.kettle.KettleAnalyzerUtil;
 import org.pentaho.metaverse.api.model.IExecutionProfile;
 import org.pentaho.metaverse.api.model.LineageHolder;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -55,6 +55,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -62,7 +63,7 @@ import static org.mockito.Mockito.when;
 /**
  * Unit tests for TransLineageHolderMap
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TransLineageHolderMapTest {
 
   TransLineageHolderMap transLineageHolderMap;
@@ -121,45 +122,44 @@ public class TransLineageHolderMapTest {
   private StepMeta spyMeta2;
 
   private void initMetas() {
+    lenient().when( trans.getTransMeta() ).thenReturn( transMeta );
+    lenient().when( trans.getName() ).thenReturn( "trans" );
+    lenient().when( trans.getFilename() ).thenReturn( "trans.ktr" );
+    lenient().when( parentTrans.getTransMeta() ).thenReturn( parentTransMeta );
+    lenient().when( parentTrans.getName() ).thenReturn( "parentTrans" );
+    lenient().when( parentTrans.getFilename() ).thenReturn( "parentTrans.ktr" );
 
-    when( trans.getTransMeta() ).thenReturn( transMeta );
-    when( trans.getName() ).thenReturn( "trans" );
-    when( trans.getFilename() ).thenReturn( "trans.ktr" );
-    when( parentTrans.getTransMeta() ).thenReturn( parentTransMeta );
-    when( parentTrans.getName() ).thenReturn( "parentTrans" );
-    when( parentTrans.getFilename() ).thenReturn( "parentTrans.ktr" );
+    lenient().when( parentJob.getJobname() ).thenReturn( "parentJob" );
+    lenient().when( parentJob.getFilename() ).thenReturn( "parentJob.kjb" );
 
-    when( parentJob.getJobname() ).thenReturn( "parentJob" );
-    when( parentJob.getFilename() ).thenReturn( "parentJob.kjb" );
+    lenient().when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
 
-    when( parentStepMeta.getParentTransMeta() ).thenReturn( parentTransMeta );
-
-    when( transMeta.getFilename() ).thenReturn( "my_file" );
+    lenient().when( transMeta.getFilename() ).thenReturn( "my_file" );
 
     spyMeta = spy( new StepMeta( "test", meta ) );
-    when( meta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
-    when( meta.writesToFile() ).thenReturn( true );
-    when( meta.getFilePaths( false) ).thenReturn( filePaths );
+    lenient().when( meta.getParentStepMeta() ).thenReturn( spyMeta );
+    lenient().when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    lenient().when( meta.writesToFile() ).thenReturn( true );
+    lenient().when( meta.getFilePaths( false) ).thenReturn( filePaths );
 
     spyMeta2 = spy( new StepMeta( "test2", meta2 ) );
-    when( meta2.getParentStepMeta() ).thenReturn( spyMeta2 );
-    when( spyMeta2.getParentTransMeta() ).thenReturn( transMeta );
-    when( meta2.writesToFile() ).thenReturn( true );
-    when( meta2.getFilePaths( false) ).thenReturn( filePaths2 );
+    lenient().when( meta2.getParentStepMeta() ).thenReturn( spyMeta2 );
+    lenient().when( spyMeta2.getParentTransMeta() ).thenReturn( transMeta );
+    lenient().when( meta2.writesToFile() ).thenReturn( true );
+    lenient().when( meta2.getFilePaths( false) ).thenReturn( filePaths2 );
 
-    when( transMeta.getSteps() ).thenReturn( Arrays.asList( new StepMeta[] { spyMeta, spyMeta2 } ) );
+    lenient().when( transMeta.getSteps() ).thenReturn( Arrays.asList( new StepMeta[] { spyMeta, spyMeta2 } ) );
 
-    when( input.getStepMetaInterface() ).thenReturn( meta );
-    when( input.getStepMeta() ).thenReturn( spyMeta );
-    when( input.getTrans() ).thenReturn( trans );
+    lenient().when( input.getStepMetaInterface() ).thenReturn( meta );
+    lenient().when( input.getStepMeta() ).thenReturn( spyMeta );
+    lenient().when( input.getTrans() ).thenReturn( trans );
   }
 
   @Before
   public void setUp() throws Exception {
-    Whitebox.setInternalState( JobLineageHolderMap.getInstance(), "lineageHolderMap",
-            Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
-    Whitebox.setInternalState( TransLineageHolderMap.getInstance(), "lineageHolderMap",
+    ReflectionTestUtils.setField( JobLineageHolderMap.getInstance(), "lineageHolderMap",
+      Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
+    ReflectionTestUtils.setField( TransLineageHolderMap.getInstance(), "lineageHolderMap",
             Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
     transLineageHolderMap = TransLineageHolderMap.getInstance();
     mockHolder = spy( new LineageHolder() );
@@ -168,7 +168,7 @@ public class TransLineageHolderMapTest {
 
   @After
   public void cleanUp() throws Exception {
-    Whitebox.setInternalState( transLineageHolderMap, "lineageHolderMap",
+    ReflectionTestUtils.setField( transLineageHolderMap, "lineageHolderMap",
       Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
   }
 
@@ -209,7 +209,6 @@ public class TransLineageHolderMapTest {
   @Test
   public void testRemoveLineageHolderWithParentTrans() throws Exception {
     initMetas();
-    when( meta.isAcceptingFilenames() ).thenReturn( true );
 
     // initialize the lineage holder for this transformation
     transLineageHolderMap.getLineageHolder( trans );
@@ -217,7 +216,7 @@ public class TransLineageHolderMapTest {
     // test with parent transformation being set
     when( trans.getParentTrans() ).thenReturn( parentTrans );
 
-    when( input.environmentSubstitute( Mockito.any( String.class ) ) ).thenReturn( "/path/to/row/file" );
+    when( input.environmentSubstitute( Mockito.<String>any() ) ).thenReturn( "/path/to/row/file" );
 
     KettleAnalyzerUtil.getResourcesFromRow( input, rowMetaInterface, new String[] { "id", "name" } );
 
@@ -242,7 +241,6 @@ public class TransLineageHolderMapTest {
   @Test
   public void testRemoveLineageHolderWithParentJob() throws Exception {
     initMetas();
-    when( meta.isAcceptingFilenames() ).thenReturn( true );
 
     // initialize the lineage holder for this transformation
     transLineageHolderMap.getLineageHolder( trans );
@@ -250,7 +248,7 @@ public class TransLineageHolderMapTest {
     // test with parent transformation being set
     when( trans.getParentJob() ).thenReturn( parentJob );
 
-    when( input.environmentSubstitute( Mockito.any( String.class ) ) ).thenReturn( "/path/to/row/file" );
+    when( input.environmentSubstitute( Mockito.<String>any() ) ).thenReturn( "/path/to/row/file" );
 
     KettleAnalyzerUtil.getResourcesFromRow( input, rowMetaInterface, new String[] { "id", "name" } );
 
