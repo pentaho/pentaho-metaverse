@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,7 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
@@ -53,13 +54,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by rfellows on 5/14/15.
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class ExternalResourceStepAnalyzerTest {
 
   ExternalResourceStepAnalyzer analyzer;
@@ -121,18 +133,18 @@ public class ExternalResourceStepAnalyzerTest {
   @Test
   public void testAnalyze_input() throws Exception {
     // fake the super.analyze call
-    doReturn( node ).when( (StepAnalyzer<BaseStepMeta>)analyzer ).analyze( descriptor, meta );
+    lenient().doReturn( node ).when( (StepAnalyzer<BaseStepMeta>)analyzer ).analyze( descriptor, meta );
     analyzer.setExternalResourceConsumer( erc );
 
     List<IExternalResourceInfo> resources = new ArrayList<>();
     IExternalResourceInfo resInfo = mock( IExternalResourceInfo.class );
     resources.add( resInfo );
-    when( resInfo.isInput() ).thenReturn( true );
-    when( resInfo.isOutput() ).thenReturn( false );
+    lenient().when( resInfo.isInput() ).thenReturn( true );
+    lenient().when( resInfo.isOutput() ).thenReturn( false );
     when( analyzer.isInput() ).thenReturn( true );
     when( analyzer.isOutput() ).thenReturn( false );
 
-    when( erc.getResourcesFromMeta( eq( meta ), any( IAnalysisContext.class ) ) ).thenReturn( resources );
+    when( erc.getResourcesFromMeta( eq( meta ), any() ) ).thenReturn( resources );
 
     analyzer.customAnalyze( meta, node );
 
@@ -143,19 +155,19 @@ public class ExternalResourceStepAnalyzerTest {
   @Test
   public void testAnalyze_output() throws Exception {
     // fake the super.analyze call
-    doReturn( node ).when( (StepAnalyzer<BaseStepMeta>)analyzer ).analyze( descriptor, meta );
+    lenient().doReturn( node ).when( (StepAnalyzer<BaseStepMeta>)analyzer ).analyze( descriptor, meta );
     analyzer.setExternalResourceConsumer( erc );
 
     List<IExternalResourceInfo> resources = new ArrayList<>();
     IExternalResourceInfo resInfo = mock( IExternalResourceInfo.class );
     resources.add( resInfo );
-    when( resInfo.isInput() ).thenReturn( false );
-    when( resInfo.isOutput() ).thenReturn( true );
+    lenient().when( resInfo.isInput() ).thenReturn( false );
+    lenient().when( resInfo.isOutput() ).thenReturn( true );
 
     when( analyzer.isInput() ).thenReturn( false );
     when( analyzer.isOutput() ).thenReturn( true );
 
-    when( erc.getResourcesFromMeta( eq( meta ), any( IAnalysisContext.class ) ) ).thenReturn( resources );
+    when( erc.getResourcesFromMeta( eq( meta ), any() ) ).thenReturn( resources );
 
     analyzer.customAnalyze( meta, node );
 
@@ -165,7 +177,7 @@ public class ExternalResourceStepAnalyzerTest {
 
   @Test
   public void testGetInputRowMetaInterfaces_isInput() throws Exception {
-    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( null );
+    when( parentTransMeta.getPrevStepNames( Mockito.<StepMeta>any() ) ).thenReturn( null );
 
     RowMetaInterface rowMetaInterface = mock( RowMetaInterface.class );
     doReturn( rowMetaInterface ).when( analyzer ).getOutputFields( meta );
@@ -177,7 +189,7 @@ public class ExternalResourceStepAnalyzerTest {
 
   @Test
   public void testGetInputRowMetaInterfaces_isInputNullOutputFields() throws Exception {
-    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( null );
+    when( parentTransMeta.getPrevStepNames( Mockito.<StepMeta>any() ) ).thenReturn( null );
 
     doReturn( null ).when( analyzer ).getOutputFields( meta );
     doReturn( true ).when( analyzer ).isInput();
@@ -198,7 +210,7 @@ public class ExternalResourceStepAnalyzerTest {
     when( inputRmi.getValueMetaList() ).thenReturn( vmis );
     inputs.put( "test", inputRmi );
     doReturn( inputs ).when( analyzer ).getInputFields( meta );
-    when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( null );
+    lenient().when( parentTransMeta.getPrevStepNames( parentStepMeta ) ).thenReturn( null );
 
     RowMetaInterface rowMetaInterface = new RowMeta();
     rowMetaInterface.addValueMeta( vmi );
@@ -274,7 +286,7 @@ public class ExternalResourceStepAnalyzerTest {
     IAnalysisContext context = mock( IAnalysisContext.class );
     doReturn( "thisStepName" ).when( analyzer ).getStepName();
     analyzer.rootNode = node;
-    when( node.getLogicalId() ).thenReturn( "logical id" );
+    lenient().when( node.getLogicalId() ).thenReturn( "logical id" );
     ValueMetaInterface vmi = new ValueMeta( "name", 1 );
 
     IMetaverseNode inputFieldNode = analyzer.createInputFieldNode(
@@ -297,7 +309,7 @@ public class ExternalResourceStepAnalyzerTest {
   @Test
   public void testCreateOutputFieldNode_resource() throws Exception {
     IAnalysisContext context = mock( IAnalysisContext.class );
-    doReturn( "thisStepName" ).when( analyzer ).getStepName();
+    lenient().doReturn( "thisStepName" ).when( analyzer ).getStepName();
     analyzer.rootNode = node;
     when( node.getLogicalId() ).thenReturn( "logical id" );
     ValueMetaInterface vmi = new ValueMeta( "name", 1 );
@@ -323,7 +335,7 @@ public class ExternalResourceStepAnalyzerTest {
   @Test
   public void testCreateOutputFieldNode() throws Exception {
     IAnalysisContext context = mock( IAnalysisContext.class );
-    doReturn( "thisStepName" ).when( analyzer ).getStepName();
+    lenient().doReturn( "thisStepName" ).when( analyzer ).getStepName();
     analyzer.rootNode = node;
     when( node.getLogicalId() ).thenReturn( "logical id" );
     ValueMetaInterface vmi = new ValueMeta( "name", 1 );
@@ -369,8 +381,8 @@ public class ExternalResourceStepAnalyzerTest {
     when( inputNode.getType() ).thenReturn( "A" );
     when( outputNode.getType() ).thenReturn( "B" );
 
-    doReturn( true ).when( analyzer ).isInput();
-    doReturn( false ).when( analyzer ).isOutput();
+    lenient().doReturn( true ).when( analyzer ).isInput();
+    lenient().doReturn( false ).when( analyzer ).isOutput();
 
     analyzer.linkChangeNodes( inputNode, outputNode );
     verify( builder ).addLink( inputNode, DictionaryConst.LINK_POPULATES, outputNode );
@@ -385,8 +397,8 @@ public class ExternalResourceStepAnalyzerTest {
     when( inputNode.getType() ).thenReturn( "A" );
     when( outputNode.getType() ).thenReturn( "A" );
 
-    doReturn( true ).when( analyzer ).isInput();
-    doReturn( false ).when( analyzer ).isOutput();
+    lenient().doReturn( true ).when( analyzer ).isInput();
+    lenient().doReturn( false ).when( analyzer ).isOutput();
 
     analyzer.linkChangeNodes( inputNode, outputNode );
     verify( builder, never() ).addLink( inputNode, DictionaryConst.LINK_POPULATES, outputNode );
@@ -396,7 +408,7 @@ public class ExternalResourceStepAnalyzerTest {
   @Test
   public void testGetInputFieldsToIgnore() {
 
-    doReturn( true ).when( analyzer ).isInput();
+    lenient().doReturn( true ).when( analyzer ).isInput();
 
     // setup input fields
     RowMetaInterface inputFieldRowMeta = mock( RowMetaInterface.class );

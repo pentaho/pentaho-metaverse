@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,12 +27,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.metaverse.listener.MetaversePluginLifecycleListener;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class MetaversePluginLifecycleListenerTest {
 
   @Mock private Graph mockGraph;
@@ -55,8 +57,8 @@ public class MetaversePluginLifecycleListenerTest {
   @Test
   public void testUnload_NullGraph() throws Exception {
     MetaversePluginLifecycleListener spyListener = spy( metaversePluginLifecycleListener );
-    when( spyListener.getGraph() ).thenReturn( null );
-    metaversePluginLifecycleListener.unLoaded();
+    doReturn( null ).when( spyListener ).getGraph();
+    spyListener.unLoaded();
 
     verify( mockGraph, times ( 0 ) ).shutdown();
   }

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.dictionary.DictionaryConst;
 
 import java.util.Calendar;
@@ -37,14 +37,16 @@ import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * User: RFellows Date: 9/24/14
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class MetaverseLogicalIdGeneratorTest {
 
   MetaverseLogicalIdGenerator idGenerator;
@@ -221,6 +223,7 @@ public class MetaverseLogicalIdGeneratorTest {
 
   @Test
   public void testGenerateLogicalId_notAllRequiredPropertiesAvailable() throws Exception {
+    when( node.getProperty( anyString() )).thenReturn( null );
     when( node.getProperty( "name" ) ).thenReturn( "john doe" );
     when( node.getProperty( "age" ) ).thenReturn( 30 );
 

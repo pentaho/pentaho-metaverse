@@ -60,12 +60,11 @@
   <properties>
     <dependency.net.sf.flexjson.flexjson.version>2.1</dependency.net.sf.flexjson.flexjson.version>
     <dependency.pentaho.pentaho-platform-repository.version>${project.version}</dependency.pentaho.pentaho-platform-repository.version>
-    <dependency.junit.junit.version>4.11</dependency.junit.junit.version>
+    <dependency.junit.junit.version>4.13.2</dependency.junit.junit.version>
     <dependency.com.tinkerpop.blueprints.version>2.6.0</dependency.com.tinkerpop.blueprints.version>
     <dependency.commons-configuration.commons-configuration.version>1.9</dependency.commons-configuration.commons-configuration.version>
     <dependency.commons-collections.commons-collections.version>3.2.1</dependency.commons-collections.commons-collections.version>
-    <dependency.org.mockito.mockito-all.version>1.10.19</dependency.org.mockito.mockito-all.version>
-    <dependency.org.powermock.version>1.7.4</dependency.org.powermock.version>
+    <dependency.org.mockito.mockito-core.version>5.10.0</dependency.org.mockito.mockito-core.version>
     <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
     <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
     <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,13 +26,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutput;
@@ -42,11 +44,16 @@ import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 
 import java.util.Collection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TextFileOutputExternalResourceConsumerTest {
 
   TextFileOutputExternalResourceConsumer consumer;
@@ -85,7 +92,7 @@ public class TextFileOutputExternalResourceConsumerTest {
 
 
     when( meta.isFileNameInField() ).thenReturn( true );
-    when( meta.getExtension() ).thenReturn( "txt" );
+    lenient().when( meta.getExtension() ).thenReturn( "txt" );
 
     assertTrue( consumer.isDataDriven( meta ) );
     assertTrue( consumer.getResourcesFromMeta( meta ).isEmpty() );
@@ -104,9 +111,11 @@ public class TextFileOutputExternalResourceConsumerTest {
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
-    when( data.fileName ).thenThrow( KettleException.class );
-    resources = consumer.getResourcesFromRow( tfo, rmi, new String[]{ "id", "name" } );
-    assertTrue( resources.isEmpty() );
+    try( MockedStatic<KettleVFS> mocked = mockStatic( KettleVFS.class ) ) {
+      mocked.when( () -> KettleVFS.getFileObject( any() ) ).thenThrow( new KettleFileException() );
+      resources = consumer.getResourcesFromRow( tfo, rmi, new String[]{ "id", "name" } );
+      assertTrue( resources.isEmpty() );
+    }
 
     assertEquals( TextFileOutputMeta.class, consumer.getMetaClass() );
   }

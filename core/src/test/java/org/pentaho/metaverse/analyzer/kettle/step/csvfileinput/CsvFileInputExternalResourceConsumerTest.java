@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,8 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.exception.KettleException;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.TransMeta;
@@ -38,11 +37,13 @@ import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 
 import java.util.Collection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class CsvFileInputExternalResourceConsumerTest {
 
   @Mock CsvInputMeta meta;
@@ -66,8 +67,6 @@ public class CsvFileInputExternalResourceConsumerTest {
     assertFalse( resources.isEmpty() );
     assertEquals( 2, resources.size() );
 
-    when( rmi.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
-      .thenThrow( KettleException.class );
     resources = consumer.getResourcesFromRow( input, rmi, new String[]{ "id", "name" } );
     assertTrue( resources.isEmpty() );
 

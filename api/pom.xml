@@ -99,20 +99,8 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>${dependency.org.mockito.mockito-all.version}</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>xerces</artifactId>
-          <groupId>xerces</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-core</artifactId>
-      <version>${dependency.org.powermock.version}</version>
+      <artifactId>mockito-core</artifactId>
+      <version>${dependency.org.mockito.mockito-core.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -124,18 +112,6 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
       <version>${log4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-module-junit4</artifactId>
-      <version>${dependency.org.powermock.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-api-mockito</artifactId>
-      <version>${dependency.org.powermock.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>pentaho-kettle</groupId>

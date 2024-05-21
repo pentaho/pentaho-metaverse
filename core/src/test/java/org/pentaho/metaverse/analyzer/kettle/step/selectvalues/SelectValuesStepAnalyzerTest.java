@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -46,10 +46,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class SelectValuesStepAnalyzerTest extends ClonableStepAnalyzerTest {
 
   private static final String DEFAULT_STEP_NAME = "testStep";
@@ -139,13 +147,13 @@ public class SelectValuesStepAnalyzerTest extends ClonableStepAnalyzerTest {
     when( rmi.searchValueMeta( "first" ) ).thenReturn( vmiFirst );
     when( rmi.searchValueMeta( "last" ) ).thenReturn( vmiLast );
 
-    when( vmiFirst.getName() ).thenReturn( "first" );
-    when( vmiFirst.getCurrencySymbol() ).thenReturn( "$" );
-    when( vmiFirst.getStorageType() ).thenReturn( ValueMetaInterface.STORAGE_TYPE_NORMAL );
-    when( vmiLast.getDateFormatLocale() ).thenReturn( Locale.US );
-    when( vmiLast.getGroupingSymbol() ).thenReturn( "," );
+    lenient().when( vmiFirst.getName() ).thenReturn( "first" );
+    lenient().when( vmiFirst.getCurrencySymbol() ).thenReturn( "$" );
+    lenient().when( vmiFirst.getStorageType() ).thenReturn( ValueMetaInterface.STORAGE_TYPE_NORMAL );
+    lenient().when( vmiLast.getDateFormatLocale() ).thenReturn( Locale.US );
+    lenient().when( vmiLast.getGroupingSymbol() ).thenReturn( "," );
 
-    when( vmiLast.getName() ).thenReturn( "last" );
+    lenient().when( vmiLast.getName() ).thenReturn( "last" );
     when( vmiLast.getConversionMask() ).thenReturn( "000.##" );
     when( vmiLast.getDateFormatTimeZone() ).thenReturn( TimeZone.getDefault() );
     when( vmiLast.getDecimalSymbol() ).thenReturn( "." );
@@ -209,9 +217,9 @@ public class SelectValuesStepAnalyzerTest extends ClonableStepAnalyzerTest {
     String[] selected = new String[] { "AGE" };
     SelectMetadataChange[] changed = new SelectMetadataChange[] { testChange1, testChange2 };
 
-    when( selectValuesMeta.getDeleteName() ).thenReturn( deleted );
-    when( selectValuesMeta.getSelectName() ).thenReturn( selected );
-    when( selectValuesMeta.getMeta() ).thenReturn( changed );
+    lenient().when( selectValuesMeta.getDeleteName() ).thenReturn( deleted );
+    lenient().when( selectValuesMeta.getSelectName() ).thenReturn( selected );
+    lenient().when( selectValuesMeta.getMeta() ).thenReturn( changed );
 
     StepField stepField = new StepField( "previousStep", "first" );
     assertFalse( analyzer.isPassthrough( stepField ) );

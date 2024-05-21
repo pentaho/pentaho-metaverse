@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,14 +26,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.valuemapper.ValueMapperMeta;
 import org.pentaho.metaverse.api.ChangeType;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.analyzer.kettle.ComponentDerivationRecord;
-import org.pentaho.metaverse.api.analyzer.kettle.step.StepNodes;
 import org.pentaho.metaverse.api.model.IOperation;
 import org.pentaho.metaverse.api.model.Operations;
 
@@ -41,12 +40,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class ValueMapperStepAnalyzerTest {
 
   private ValueMapperStepAnalyzer analyzer = null;
@@ -69,18 +75,18 @@ public class ValueMapperStepAnalyzerTest {
   @Test
   public void testCustomAnalyze() throws Exception {
     analyzer.customAnalyze( meta, node );
-    verify( node ).setProperty( eq( "defaultValue" ), anyString() );
+    verify( node ).setProperty( eq( "defaultValue" ), any() );
   }
 
   @Test
   public void testGetUsedFields() throws Exception {
     Set<StepField> fields = new HashSet<>();
     fields.add( new StepField( "prev", "inField" ) );
-    doReturn( fields ).when( analyzer ).createStepFields( anyString(), any( StepNodes.class ) );
+    doReturn( fields ).when( analyzer ).createStepFields( anyString(), any() );
     Set<StepField> usedFields = analyzer.getUsedFields( meta );
     int expectedUsedFieldCount = 1;
     assertEquals( expectedUsedFieldCount, usedFields.size() );
-    verify( analyzer, times( expectedUsedFieldCount ) ).createStepFields( anyString(), any( StepNodes.class ) );
+    verify( analyzer, times( expectedUsedFieldCount ) ).createStepFields( anyString(), any() );
   }
 
   @Test

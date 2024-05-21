@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,8 +27,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.pentaho.di.core.exception.KettleException;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.TransMeta;
@@ -47,11 +47,16 @@ import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 import java.util.Collection;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TextFileInputStepAnalyzerTest {
 
   private TextFileInputStepAnalyzer analyzer;
@@ -78,21 +83,21 @@ public class TextFileInputStepAnalyzerTest {
 
     mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
     when( mockBuilder.getMetaverseObjectFactory() ).thenReturn( mockFactory );
-    when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
+    lenient().when( mockNamespace.getParentNamespace() ).thenReturn( mockNamespace );
 
     analyzer = new TextFileInputStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
 
-    when( mockTextFileInput.getStepMetaInterface() ).thenReturn( meta );
-    when( mockTextFileInput.getStepMeta() ).thenReturn( mockStepMeta );
-    when( mockStepMeta.getStepMetaInterface() ).thenReturn( meta );
+    lenient().when( mockTextFileInput.getStepMetaInterface() ).thenReturn( meta );
+    lenient().when( mockTextFileInput.getStepMeta() ).thenReturn( mockStepMeta );
+    lenient().when( mockStepMeta.getStepMetaInterface() ).thenReturn( meta );
   }
 
   @Test
   public void testGetUsedFields_fileNameFromField() throws Exception {
-    when( meta.isAcceptingFilenames() ).thenReturn( true );
-    when( meta.getAcceptingField() ).thenReturn( "filename" );
-    when( meta.getAcceptingStepName() ).thenReturn( "previousStep" );
+    lenient().when( meta.isAcceptingFilenames() ).thenReturn( true );
+    lenient().when( meta.getAcceptingField() ).thenReturn( "filename" );
+    lenient().when( meta.getAcceptingStepName() ).thenReturn( "previousStep" );
     Set<StepField> usedFields = analyzer.getUsedFields( meta );
     assertNotNull( usedFields );
     assertEquals( 1, usedFields.size() );
@@ -103,9 +108,9 @@ public class TextFileInputStepAnalyzerTest {
 
   @Test
   public void testGetUsedFields_isNotAcceptingFilenames() throws Exception {
-    when( meta.isAcceptingFilenames() ).thenReturn( false );
-    when( meta.getAcceptingField() ).thenReturn( "filename" );
-    when( meta.getAcceptingStepName() ).thenReturn( "previousStep" );
+    lenient().when( meta.isAcceptingFilenames() ).thenReturn( false );
+    lenient().when( meta.getAcceptingField() ).thenReturn( "filename" );
+    lenient().when( meta.getAcceptingStepName() ).thenReturn( "previousStep" );
     Set<StepField> usedFields = analyzer.getUsedFields( meta );
     assertNotNull( usedFields );
     assertEquals( 0, usedFields.size() );
@@ -113,9 +118,9 @@ public class TextFileInputStepAnalyzerTest {
 
   @Test
   public void testGetUsedFields_isAcceptingFilenamesButNoStepName() throws Exception {
-    when( meta.isAcceptingFilenames() ).thenReturn( true );
-    when( meta.getAcceptingField() ).thenReturn( "filename" );
-    when( meta.getAcceptingStepName() ).thenReturn( null );
+    lenient().when( meta.isAcceptingFilenames() ).thenReturn( true );
+    lenient().when( meta.getAcceptingField() ).thenReturn( "filename" );
+    lenient().when( meta.getAcceptingStepName() ).thenReturn( null );
     Set<StepField> usedFields = analyzer.getUsedFields( meta );
     assertNotNull( usedFields );
     assertEquals( 0, usedFields.size() );
@@ -158,8 +163,8 @@ public class TextFileInputStepAnalyzerTest {
     StepMeta spyMeta = spy( new StepMeta( "test", meta ) );
 
     when( meta.getParentStepMeta() ).thenReturn( spyMeta );
-    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
-    when( meta.getFileName() ).thenReturn( null );
+    lenient().when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    lenient().when( meta.getFileName() ).thenReturn( null );
     when( meta.isAcceptingFilenames() ).thenReturn( false );
     String[] filePaths = { "/path/to/file1", "/another/path/to/file2" };
     when( meta.getFilePaths( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
@@ -173,15 +178,15 @@ public class TextFileInputStepAnalyzerTest {
     when( meta.isAcceptingFilenames() ).thenReturn( true );
     assertTrue( consumer.isDataDriven( meta ) );
     assertTrue( consumer.getResourcesFromMeta( meta ).isEmpty() );
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
+    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.any(), Mockito.any() ) )
       .thenReturn( "/path/to/row/file" );
     when( mockTextFileInput.getStepMetaInterface() ).thenReturn( meta );
     resources = consumer.getResourcesFromRow( mockTextFileInput, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
-    when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
-      .thenThrow( KettleException.class );
+    when( mockRowMetaInterface.getString( Mockito.any(), Mockito.any(), Mockito.any() ) )
+      .thenThrow( KettleValueException.class );
     resources = consumer.getResourcesFromRow( mockTextFileInput, mockRowMetaInterface, new String[]{ "id", "name" } );
     assertTrue( resources.isEmpty() );
 

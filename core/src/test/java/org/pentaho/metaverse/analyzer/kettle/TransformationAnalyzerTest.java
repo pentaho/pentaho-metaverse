@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,7 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.parameters.UnknownParamException;
@@ -57,15 +57,21 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * @See com.pentaho.analyzer.kettle.MetaverseDocumentAnalyzerTest for base TransformationAnalyzer tests. Tests here
  * are specific to the TransformationAnalyzer.
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TransformationAnalyzerTest {
 
   private TransformationAnalyzer analyzer;
@@ -127,9 +133,8 @@ public class TransformationAnalyzerTest {
 
     analyzer = new TransformationAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
-    when( namespace.getParentNamespace() ).thenReturn( namespace );
+    lenient().when( namespace.getParentNamespace() ).thenReturn( namespace );
 
-    when( mockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( mockTransDoc.getContent() ).thenReturn( mockContent );
     when( mockTransDoc.getNamespace() ).thenReturn( namespace );
 
@@ -214,7 +219,6 @@ public class TransformationAnalyzerTest {
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeWithBadXML() throws MetaverseAnalyzerException {
     IDocument newMockTransDoc = mock( IDocument.class );
-    when( newMockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( newMockTransDoc.getContent() ).thenReturn(
       "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
         "<transformation>This is not a valid TransMeta doc!" );
@@ -224,7 +228,6 @@ public class TransformationAnalyzerTest {
   @Test( expected = MetaverseAnalyzerException.class )
   public void testAnalyzeWithMissingPlugin() throws MetaverseAnalyzerException {
     IDocument newMockTransDoc = mock( IDocument.class );
-    when( newMockTransDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_TRANS );
     when( newMockTransDoc.getContent() ).thenReturn(
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?><transformation><step><name>Load text from file</name>"
         + "<type>LoadTextFromFile</type></step></transformation>" );

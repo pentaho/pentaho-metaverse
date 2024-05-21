@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,13 +26,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.metaverse.api.IDocumentLocator;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
 import org.pentaho.metaverse.api.ILineageCollector;
 import org.pentaho.metaverse.api.IMetaverseReader;
 import org.pentaho.metaverse.api.MetaverseLocatorException;
 import org.pentaho.metaverse.api.model.LineageRequest;
+import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.messages.Messages;
 
 import javax.ws.rs.BadRequestException;
@@ -47,10 +49,17 @@ import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class MetaverseServiceTest {
 
   @Mock
@@ -194,7 +203,6 @@ public class MetaverseServiceTest {
 
   @Test
   public void testExport_NullReader() throws Exception {
-    when( mockReader.exportFormat( anyString() ) ).thenReturn( TEST_XML );
     when( mockProvider.getDocumentLocators() ).thenReturn( locators );
 
     service = new MetaverseService( null, mockProvider );
@@ -222,27 +230,43 @@ public class MetaverseServiceTest {
   }
 
   @Test
-  public void testPrepareMetaverse_Exception() {
+  public void testPrepareMetaverse_Exception() throws MetaverseLocatorException {
     service = new MetaverseService( mockReader, mockProvider );
+
     // Set up for exception
-    when( mockProvider.getDocumentLocators() ).thenThrow( MetaverseLocatorException.class );
+    IDocumentLocator mockLocator = mock( IDocumentLocator.class );
+    doThrow( new MetaverseLocatorException() ).when( mockLocator ).startScan();
+    when( mockProvider.getDocumentLocators() ).thenReturn( Set.of( mockLocator ) );
+
     service.prepareMetaverse();
   }
 
   @Test
-  public void testPrepareMetaverse_InterruptedException() {
-    service = new MetaverseService( mockReader, mockProvider );
-    // Set up for exception
-    when( mockProvider.getDocumentLocators() ).thenThrow( InterruptedException.class );
-    service.prepareMetaverse();
+  public void testPrepareMetaverse_InterruptedException() throws ExecutionException, InterruptedException {
+    try( MockedStatic<MetaverseCompletionService> mockCompletionService = mockStatic( MetaverseCompletionService.class ) ) {
+      service = new MetaverseService( mockReader, mockProvider );
+
+      // Set up for exception
+      MetaverseCompletionService mockCompletionServiceInstance = mock( MetaverseCompletionService.class );
+      doThrow( new InterruptedException() ).when( mockCompletionServiceInstance ).waitTillEmpty();
+      mockCompletionService.when( MetaverseCompletionService::getInstance ).thenReturn( mockCompletionServiceInstance );
+
+      service.prepareMetaverse();
+    }
   }
 
   @Test
-  public void testPrepareMetaverse_ExecutionException() {
-    service = new MetaverseService( mockReader, mockProvider );
-    // Set up for exception
-    when( mockProvider.getDocumentLocators() ).thenThrow( ExecutionException.class );
-    service.prepareMetaverse();
+  public void testPrepareMetaverse_ExecutionException() throws ExecutionException, InterruptedException {
+    try( MockedStatic<MetaverseCompletionService> mockCompletionService = mockStatic( MetaverseCompletionService.class ) ) {
+      service = new MetaverseService( mockReader, mockProvider );
+
+      // Set up for exception
+      MetaverseCompletionService mockCompletionServiceInstance = mock( MetaverseCompletionService.class );
+      doThrow( ExecutionException.class ).when( mockCompletionServiceInstance ).waitTillEmpty();
+      mockCompletionService.when( MetaverseCompletionService::getInstance ).thenReturn( mockCompletionServiceInstance );
+
+      service.prepareMetaverse();
+    }
   }
 
   @Test
@@ -250,7 +274,7 @@ public class MetaverseServiceTest {
     service.setLineageCollector( mockCollector );
 
     List<String> paths = new ArrayList<>();
-    when( mockCollector.listArtifacts() ).thenReturn( paths );
+    when( mockCollector.listArtifacts(any(), any()) ).thenReturn( paths );
 
     Response response = service.download();
     assertNotNull( response );
@@ -278,7 +302,7 @@ public class MetaverseServiceTest {
 
     List<String> paths = new ArrayList<>();
     String dateString = "20150707";
-    when( mockCollector.listArtifacts( dateString ) ).thenReturn( paths );
+    when( mockCollector.listArtifacts( eq( dateString ), any() ) ).thenReturn( paths );
 
     Response response = service.download( dateString );
     assertNotNull( response );
@@ -287,7 +311,7 @@ public class MetaverseServiceTest {
     assertEquals( "inline; filename=pentaho-lineage_" + dateString + ".zip",
       response.getHeaderString( "Content-Disposition" ) );
 
-    verify( mockCollector ).listArtifacts( eq( dateString ), anyString() );
+    verify( mockCollector ).listArtifacts( eq( dateString ), any() );
   }
 
   @Test
@@ -337,7 +361,7 @@ public class MetaverseServiceTest {
 
     List<String> paths = new ArrayList<>();
     String path = "/tmp/test/some.ktr";
-    when( mockCollector.listArtifactsForFile( path ) ).thenReturn( paths );
+    when( mockCollector.listArtifactsForFile( eq( path ), any(), any() ) ).thenReturn( paths );
 
     LineageRequest request = new LineageRequest();
     request.setPath( path );
@@ -370,7 +394,7 @@ public class MetaverseServiceTest {
     List<String> paths = new ArrayList<>();
     String path = "/tmp/test/some.ktr";
     String dateString = "20150707";
-    when( mockCollector.listArtifactsForFile( path, dateString ) ).thenReturn( paths );
+    when( mockCollector.listArtifactsForFile( eq( path ), eq( dateString ), any() ) ).thenReturn( paths );
 
     LineageRequest request = new LineageRequest();
     request.setPath( path );

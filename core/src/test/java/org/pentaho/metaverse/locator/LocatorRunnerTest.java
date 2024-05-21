@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,24 +28,30 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentEvent;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.INamespace;
-import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseDocument;
 import org.pentaho.metaverse.api.MetaverseException;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-@RunWith( MockitoJUnitRunner.class )
+@RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class LocatorRunnerTest {
 
   @Mock
@@ -65,9 +71,9 @@ public class LocatorRunnerTest {
 
   @Before
   public void setUp() throws Exception {
-    when( baseLocator.getMetaverseBuilder() ).thenReturn( metaverseBuilder );
-    when( metaverseBuilder.getMetaverseObjectFactory() ).thenReturn( metaverseObjectFactory );
-    when( metaverseObjectFactory.createDocumentObject() ).thenReturn( new MetaverseDocument() );
+    lenient().when( baseLocator.getMetaverseBuilder() ).thenReturn( metaverseBuilder );
+    lenient().when( metaverseBuilder.getMetaverseObjectFactory() ).thenReturn( metaverseObjectFactory );
+    lenient().when( metaverseObjectFactory.createDocumentObject() ).thenReturn( new MetaverseDocument() );
   }
 
   LocatorRunner<String> stringLocatorRunner = new LocatorRunner<String>() {
@@ -121,7 +127,6 @@ public class LocatorRunnerTest {
 
   @Test
   public void testProcessFileStopping() throws Exception {
-    when( baseLocator.getMetaverseBuilder() ).thenThrow( MetaverseAnalyzerException.class );
     stringLocatorRunner.setLocator( baseLocator );
     stringLocatorRunner.stop();
     stringLocatorRunner.processFile( namespace, null, null, null );
@@ -129,7 +134,6 @@ public class LocatorRunnerTest {
 
   @Test
   public void testProcessFileNoExtension() throws Exception {
-    when( baseLocator.getMetaverseBuilder() ).thenThrow( MetaverseAnalyzerException.class );
     stringLocatorRunner.setLocator( baseLocator );
     stringLocatorRunner.processFile( namespace, "", null, null );
   }
