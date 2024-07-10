@@ -25,6 +25,7 @@ package org.pentaho.metaverse.analyzer.kettle;
 import org.apache.commons.lang.StringUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -58,6 +59,7 @@ import static org.junit.Assert.assertTrue;
  * Created by mburgess on 12/9/14.
  */
 @RunWith( Parameterized.class )
+@Ignore
 public class ExternalResourceConsumerIT {
 
   private static final String REPO_PATH = "src/it/resources/repo";

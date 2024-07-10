@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,31 +22,34 @@
 
 package org.pentaho.metaverse.step;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.metaverse.BaseMetaverseValidationIT;
 import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
+@RunWith( MockitoJUnitRunner.class )
 public abstract class StepAnalyzerValidationIT extends BaseMetaverseValidationIT {
+
+  MockedStatic<MetaverseConfig> metaverseConfigMockedStatic;
 
   @Before
   public void init() throws Exception {
 
-    PowerMockito.mockStatic( MetaverseConfig.class );
-    Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( true );
+    metaverseConfigMockedStatic = Mockito.mockStatic( MetaverseConfig.class );
+    MockedStatic<MetaverseConfig> metaverseConfigMockedStatic = Mockito.mockStatic( MetaverseConfig.class );
+    metaverseConfigMockedStatic.when( MetaverseConfig::adjustExternalResourceFields ).thenReturn( true );
+    metaverseConfigMockedStatic.when( MetaverseConfig::deduplicateTransformationFields ).thenReturn( true );
+    metaverseConfigMockedStatic.when( MetaverseConfig::consolidateSubGraphs ).thenReturn( true );
+    metaverseConfigMockedStatic.when( MetaverseConfig::generateSubGraphs ).thenReturn( true );
+  }
 
+  @After
+  public void cleanup() {
+    metaverseConfigMockedStatic.close();
   }
 
   @Override
