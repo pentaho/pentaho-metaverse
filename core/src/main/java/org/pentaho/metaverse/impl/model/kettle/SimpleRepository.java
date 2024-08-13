@@ -46,7 +46,6 @@ import org.pentaho.di.repository.RepositoryObject;
 import org.pentaho.di.repository.RepositoryObjectType;
 import org.pentaho.di.repository.RepositorySecurityManager;
 import org.pentaho.di.repository.RepositorySecurityProvider;
-import org.pentaho.di.shared.SharedObjects;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metastore.api.IMetaStore;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
@@ -182,7 +181,7 @@ public class SimpleRepository implements Repository {
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
 
-  @Override public SharedObjects readTransSharedObjects( TransMeta transMeta ) throws KettleException {
+  @Override public void readTransSharedObjects( TransMeta transMeta ) throws KettleException {
     // TODO - Implement this
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
@@ -216,7 +215,7 @@ public class SimpleRepository implements Repository {
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
 
-  @Override public SharedObjects readJobMetaSharedObjects( JobMeta jobMeta ) throws KettleException {
+  @Override public void readJobMetaSharedObjects( JobMeta jobMeta ) throws KettleException {
     // TODO - Implement this
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
