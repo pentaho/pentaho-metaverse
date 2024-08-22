@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.locator;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -30,6 +31,8 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.bowl.DefaultBowl;
+import org.pentaho.di.shared.MemorySharedObjectsIO;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentEvent;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
@@ -68,6 +71,12 @@ public class LocatorRunnerTest {
 
   @Mock
   INamespace namespace;
+
+  @BeforeClass
+  public static void init() throws Exception {
+    DefaultBowl.getInstance().setSharedObjectsIO( new MemorySharedObjectsIO() );
+    DefaultBowl.getInstance().clearManagers();
+  }
 
   @Before
   public void setUp() throws Exception {
