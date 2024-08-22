@@ -34,12 +34,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.StringObjectId;
+import org.pentaho.di.shared.MemorySharedObjectsIO;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.dummytrans.DummyTransMeta;
@@ -134,6 +136,8 @@ public class TransMetaJsonDeserializerTest {
   @BeforeClass
   public static void init() throws KettleException {
     KettleEnvironment.init();
+    DefaultBowl.getInstance().setSharedObjectsIO( new MemorySharedObjectsIO() );
+    DefaultBowl.getInstance().clearManagers();
   }
 
   @Before
@@ -345,6 +349,7 @@ public class TransMetaJsonDeserializerTest {
     jndi.setPluginId( "ORACLE" );
     JdbcResourceInfo jdbc = new JdbcResourceInfo( "localhost", "test", 5432, "sa", "password" );
     jdbc.setPluginId( "POSTGRESQL" );
+    jdbc.setName( "jdbc" );
 
     transMeta = spy( new TransMeta() );
 
