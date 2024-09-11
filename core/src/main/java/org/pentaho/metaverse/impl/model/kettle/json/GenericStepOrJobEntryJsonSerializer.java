@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,6 +27,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.pentaho.di.core.bowl.Bowl;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumerProvider;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepExternalResourceConsumerProvider;
 import org.pentaho.metaverse.impl.model.kettle.LineageRepository;
@@ -89,7 +91,8 @@ public abstract class GenericStepOrJobEntryJsonSerializer<T> extends StdSerializ
     json.writeStartObject();
     writeBasicInfo( meta, json );
     writeRepoAttributes( meta, json );
-    writeExternalResources( meta, json, serializerProvider );
+    // Serializers are static/global instances. Can only write to global vfs locations
+    writeExternalResources( DefaultBowl.getInstance(), meta, json, serializerProvider );
     writeCustom( meta, json, serializerProvider );
     json.writeEndObject();
   }
@@ -97,8 +100,8 @@ public abstract class GenericStepOrJobEntryJsonSerializer<T> extends StdSerializ
   protected abstract void writeCustom( T meta, JsonGenerator json, SerializerProvider serializerProvider )
     throws IOException;
 
-  protected abstract void writeExternalResources( T meta, JsonGenerator json, SerializerProvider serializerProvider )
-    throws IOException;
+  protected abstract void writeExternalResources( Bowl bowl, T meta, JsonGenerator json,
+    SerializerProvider serializerProvider ) throws IOException;
 
   protected abstract void writeRepoAttributes( T meta, JsonGenerator json ) throws IOException;
 

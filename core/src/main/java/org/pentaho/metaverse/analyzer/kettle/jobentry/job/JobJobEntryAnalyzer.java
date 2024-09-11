@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -77,7 +77,7 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
       case FILENAME:
         try {
           jobPath = parentJobMeta.environmentSubstitute( entry.getFilename() );
-          String normalized = KettleAnalyzerUtil.normalizeFilePath( jobPath );
+          String normalized = KettleAnalyzerUtil.normalizeFilePath( parentJobMeta.getBowl(), jobPath );
 
           subJobMeta = getSubJobMeta( normalized );
           jobPath = normalized;

@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryBase;
@@ -77,7 +78,7 @@ public class JobEntryBaseJsonSerializerTest {
 
     verify( json ).writeStartObject();
     verify( spySerializer ).writeBasicInfo( meta, json );
-    verify( spySerializer ).writeExternalResources( meta, json, provider );
+    verify( spySerializer ).writeExternalResources( DefaultBowl.getInstance(), meta, json, provider );
     verify( spySerializer ).writeRepoAttributes( meta, json );
     verify( spySerializer ).writeCustom( meta, json, provider );
     verify( json ).writeEndObject();
@@ -119,7 +120,7 @@ public class JobEntryBaseJsonSerializerTest {
 
     when( meta.getResourceDependencies( jobMeta ) ).thenReturn( dependencies );
 
-    serializer.writeExternalResources( meta, json, provider );
+    serializer.writeExternalResources( DefaultBowl.getInstance(), meta, json, provider );
     verify( json ).writeArrayFieldStart( JobEntryBaseJsonSerializer.JSON_PROPERTY_EXTERNAL_RESOURCES );
     verify( json ).writeObject( any( IExternalResourceInfo.class ) );
     verify( json ).writeEndArray();

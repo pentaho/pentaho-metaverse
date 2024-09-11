@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
@@ -218,7 +219,8 @@ public class TransLineageHolderMapTest {
 
     when( input.environmentSubstitute( Mockito.<String>any() ) ).thenReturn( "/path/to/row/file" );
 
-    KettleAnalyzerUtil.getResourcesFromRow( input, rowMetaInterface, new String[] { "id", "name" } );
+    KettleAnalyzerUtil.getResourcesFromRow( DefaultBowl.getInstance(), input, rowMetaInterface,
+      new String[] { "id", "name" } );
 
     Field lineageHolderMapField = transLineageHolderMap.getClass().getDeclaredField( "lineageHolderMap" );
     lineageHolderMapField.setAccessible( true );
@@ -250,7 +252,8 @@ public class TransLineageHolderMapTest {
 
     when( input.environmentSubstitute( Mockito.<String>any() ) ).thenReturn( "/path/to/row/file" );
 
-    KettleAnalyzerUtil.getResourcesFromRow( input, rowMetaInterface, new String[] { "id", "name" } );
+    KettleAnalyzerUtil.getResourcesFromRow( DefaultBowl.getInstance(), input, rowMetaInterface,
+      new String[] { "id", "name" } );
 
     Field lineageHolderMapField = transLineageHolderMap.getClass().getDeclaredField( "lineageHolderMap" );
     lineageHolderMapField.setAccessible( true );

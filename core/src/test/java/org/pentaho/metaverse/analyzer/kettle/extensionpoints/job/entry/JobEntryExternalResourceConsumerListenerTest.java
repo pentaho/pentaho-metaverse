@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -73,7 +73,7 @@ public class JobEntryExternalResourceConsumerListenerTest {
 
 
     IJobEntryExternalResourceConsumer consumer = mock( IJobEntryExternalResourceConsumer.class );
-    when( consumer.getResourcesFromMeta( Mockito.any() ) ).thenReturn( Collections.emptyList() );
+    when( consumer.getResourcesFromMeta( Mockito.any(), Mockito.any() ) ).thenReturn( Collections.emptyList() );
     consumers.add( consumer );
     Job mockJob = mock( Job.class );
     when( jobEntryInterface.getParentJob() ).thenReturn( mockJob );

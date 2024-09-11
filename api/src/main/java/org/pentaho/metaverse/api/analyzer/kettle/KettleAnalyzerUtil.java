@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,6 +26,8 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.provider.UriParser;
 import org.pentaho.di.base.AbstractMeta;
+import org.pentaho.di.core.bowl.Bowl;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
@@ -79,13 +81,27 @@ public class KettleAnalyzerUtil {
    * Utility method for normalizing file paths used in Metaverse Id generation. It will convert a valid path into a
    * consistent path regardless of URI notation or filesystem absolute path.
    *
+   * @param bowl context for the file operations
+   * @param filePath full path to normalize
+   * @return the normalized path
+   * @deprecated use the version with the Bowl
+   */
+  @Deprecated
+  public static String normalizeFilePath( String filePath ) throws MetaverseException {
+    return normalizeFilePath( DefaultBowl.getInstance(), filePath );
+  }
+
+  /**
+   * Utility method for normalizing file paths used in Metaverse Id generation. It will convert a valid path into a
+   * consistent path regardless of URI notation or filesystem absolute path.
+   *
    * @param filePath full path to normalize
    * @return the normalized path
    */
-  public static String normalizeFilePath( String filePath ) throws MetaverseException {
+  public static String normalizeFilePath( Bowl bowl, String filePath ) throws MetaverseException {
     try {
       String path = filePath;
-      FileObject fo = KettleVFS.getFileObject( filePath );
+      FileObject fo = KettleVFS.getInstance( bowl ) .getFileObject( filePath );
       try {
         path = getDecodedUriString( fo.getURL().getPath() );
       } catch ( Throwable t ) {
@@ -103,10 +119,23 @@ public class KettleAnalyzerUtil {
    * @param filePath
    * @return
    * @throws MetaverseException
+   * @deprecated use the version with the Bowl
    */
+  @Deprecated
   public static String getFilePathScheme( String filePath ) throws MetaverseException {
+    return getFilePathScheme( DefaultBowl.getInstance(), filePath );
+  }
+
+  /**
+   *
+   * @param bowl
+   * @param filePath
+   * @return
+   * @throws MetaverseException
+   */
+  public static String getFilePathScheme( Bowl bowl, String filePath ) throws MetaverseException {
     try {
-      FileObject fo = KettleVFS.getFileObject( filePath );
+      FileObject fo = KettleVFS.getInstance( bowl ).getFileObject( filePath );
       return fo.getURI().getScheme();
     } catch ( KettleFileException e ) {
       throw new MetaverseException( e );
@@ -116,18 +145,34 @@ public class KettleAnalyzerUtil {
   /**
    * Normalizes the {@code filePath} safely, ignoring exceptions and returning the original string, if there is a
    * problem with the normalization.
+   * @deprecated use the version with the Bowl
    */
+  @Deprecated
   public static String normalizeFilePathSafely( String filePath ) {
+    return normalizeFilePathSafely( DefaultBowl.getInstance(), filePath );
+  }
+
+  /**
+   * Normalizes the {@code filePath} safely, ignoring exceptions and returning the original string, if there is a
+   * problem with the normalization.
+   */
+  public static String normalizeFilePathSafely( Bowl bowl, String filePath ) {
     try {
-      return normalizeFilePath( filePath );
+      return normalizeFilePath( bowl, filePath );
     } catch ( final MetaverseException e ) {
       log.error( e.getMessage() );
     }
     return filePath;
   }
 
+  @Deprecated
   public static Collection<IExternalResourceInfo> getResourcesFromMeta(
     final BaseStepMeta meta, final String[] filePaths ) {
+    return getResourcesFromMeta( DefaultBowl.getInstance(), meta, filePaths );
+  }
+
+  public static Collection<IExternalResourceInfo> getResourcesFromMeta(
+    final Bowl bowl, final BaseStepMeta meta, final String[] filePaths ) {
 
     ExternalResourceCache.Resources resources = rowResourceCache.get( meta );
     if ( resources == null ) {
@@ -140,7 +185,7 @@ public class KettleAnalyzerUtil {
           try {
 
             final IExternalResourceInfo resource = ExternalResourceInfoFactory
-              .createFileResource( KettleVFS.getFileObject( path ), true );
+              .createFileResource( KettleVFS.getInstance( bowl ).getFileObject( path ), true );
             if ( resource != null ) {
               resources.add( resource );
             } else {
@@ -157,8 +202,14 @@ public class KettleAnalyzerUtil {
     return resources.getInternal();
   }
 
+  @Deprecated
   public static Collection<IExternalResourceInfo> getResourcesFromRow(
     BaseFileInputStep step, RowMetaInterface rowMeta, Object[] row ) {
+    return getResourcesFromRow( DefaultBowl.getInstance(), step, rowMeta, row );
+  }
+
+  public static Collection<IExternalResourceInfo> getResourcesFromRow(
+    Bowl bowl, BaseFileInputStep step, RowMetaInterface rowMeta, Object[] row ) {
 
     // For some reason the step doesn't return the StepMetaInterface directly, so go around it
     BaseFileInputMeta meta = (BaseFileInputMeta) step.getStepMetaInterface();
@@ -176,7 +227,7 @@ public class KettleAnalyzerUtil {
       String filename = meta == null ? null : step.environmentSubstitute(
         rowMeta.getString( row, meta.getAcceptingField(), null ) );
       if ( !Utils.isEmpty( filename ) && ( KettleVFS.startsWithScheme( filename ) || FileUtil.isFullyQualified( filename ) ) ) {
-        FileObject fileObject = KettleVFS.getFileObject( filename, step );
+        FileObject fileObject = KettleVFS.getInstance( bowl ).getFileObject( filename, step );
         resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, true ) );
       }
     } catch ( KettleException kve ) {
@@ -237,7 +288,7 @@ public class KettleAnalyzerUtil {
     // couldn't find in repo or no repo present, look in file system
     if ( null == subTransMeta ) {
       try {
-        subTransMeta = getSubTransMeta( normalizeFilePathSafely( transPath ) );
+        subTransMeta = getSubTransMeta( normalizeFilePathSafely( parentTransMeta.getBowl(), transPath ) );
       } catch ( Exception e ) {
         throw new MetaverseAnalyzerException( Messages.getString( "ERROR.SubTransNotFoundInParentTrans",
           transPath, parentTransMeta.toString() ), e );
@@ -298,7 +349,8 @@ public class KettleAnalyzerUtil {
     }
     final TransMeta parentTransMeta = meta == null || meta.getParentStepMeta() == null ? null
       : meta.getParentStepMeta().getParentTransMeta();
-    transPath = normalizeFilePathSafely( parentTransMeta == null || transPath == null ? transPath
+    transPath = normalizeFilePathSafely( parentTransMeta == null ? DefaultBowl.getInstance() : parentTransMeta.getBowl(),
+      parentTransMeta == null || transPath == null ? transPath
       : parentTransMeta.environmentSubstitute( transPath ) );
     return transPath;
   }
@@ -340,7 +392,7 @@ public class KettleAnalyzerUtil {
     metaverseDocument.setMimeType( URLConnection.getFileNameMap().getContentTypeFor(
       meta instanceof TransMeta ? "trans.ktr" : "job.kjb" ) );
     metaverseDocument.setContext( new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
-    String normalizedPath = KettleAnalyzerUtil.normalizeFilePathSafely( id );
+    String normalizedPath = KettleAnalyzerUtil.normalizeFilePathSafely( meta.getBowl(), id );
     metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAME, meta.getName() );
     metaverseDocument.setProperty( DictionaryConst.PROPERTY_PATH, normalizedPath );
     metaverseDocument.setProperty( DictionaryConst.PROPERTY_NAMESPACE, namespace.getNamespaceId() );

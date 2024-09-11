@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.trans.TransMeta;
@@ -63,7 +64,7 @@ public class CsvFileInputExternalResourceConsumerTest {
     when( meta.getFilePaths( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
 
     assertFalse( consumer.isDataDriven( meta ) );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( meta );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta );
     assertFalse( resources.isEmpty() );
     assertEquals( 2, resources.size() );
 

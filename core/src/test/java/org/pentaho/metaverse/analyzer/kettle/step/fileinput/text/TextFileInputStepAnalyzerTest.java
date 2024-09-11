@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.fileinput.FileInputList;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -92,8 +93,11 @@ public class TextFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
     analyzer = new TextFileInputStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
 
+    lenient().when( transMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
     lenient().when( mockTextFileInput.getStepMetaInterface() ).thenReturn( meta );
     lenient().when( mockTextFileInput.getStepMeta() ).thenReturn( mockStepMeta );
+    lenient().when( mockTextFileInput.getTransMeta() ).thenReturn( transMeta );
+    lenient().when( mockStepMeta.getParentTransMeta() ).thenReturn( transMeta );
     lenient().when( mockStepMeta.getStepMetaInterface() ).thenReturn( meta );
   }
 
@@ -172,17 +176,17 @@ public class TextFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
     when( meta.getFilePaths( false) ).thenReturn( filePaths );
 
     when( meta.isAcceptingFilenames() ).thenReturn( true );
-    Collection<IExternalResourceInfo>  resources = consumer.getResourcesFromMeta( meta );
+    Collection<IExternalResourceInfo>  resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta );
     assertTrue( resources.isEmpty() );
 
     when( meta.isAcceptingFilenames() ).thenReturn( false );
-    resources = consumer.getResourcesFromMeta( meta );
+    resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta );
     assertFalse( resources.isEmpty() );
     assertEquals( 2, resources.size() );
 
     when( meta.isAcceptingFilenames() ).thenReturn( true );
     assertTrue( consumer.isDataDriven( meta ) );
-    resources = consumer.getResourcesFromMeta( meta );
+    resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta );
     // call to getResourcesFromMeta does not cache resources, only calls to getResourcesFromRow do
     assertTrue( resources.isEmpty() );
 

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.analyzer.kettle.step.jobexecutor;
 
 import org.apache.commons.lang.StringUtils;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.ProgressNullMonitorListener;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleMissingPluginsException;
@@ -99,9 +100,9 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
       case FILENAME:
         jobPath = parentTransMeta.environmentSubstitute( meta.getFileName() );
         try {
-          String normalized = KettleAnalyzerUtil.normalizeFilePath( jobPath );
+          String normalized = KettleAnalyzerUtil.normalizeFilePath( parentTransMeta.getBowl(), jobPath );
 
-          subJobMeta = getSubJobMeta( parentTransMeta, normalized );
+          subJobMeta = getSubJobMeta( parentTransMeta.getBowl(), parentTransMeta, normalized );
           jobPath = normalized;
 
         } catch ( Exception e ) {
@@ -196,9 +197,9 @@ public class JobExecutorStepAnalyzer extends StepAnalyzer<JobExecutorMeta> {
 
   }
 
-  protected JobMeta getSubJobMeta( VariableSpace variableSpace, String filePath )
+  protected JobMeta getSubJobMeta( Bowl bowl, VariableSpace variableSpace, String filePath )
     throws FileNotFoundException, KettleXMLException, KettleMissingPluginsException {
-    return new JobMeta( variableSpace, filePath, null, null, null );
+    return new JobMeta( bowl, variableSpace, filePath, null, null, null );
   }
 
   protected void connectToSubJobOutputFields( JobExecutorMeta meta, JobMeta subJobMeta,

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -308,7 +308,7 @@ public class JobRuntimeExtensionPoint extends BaseRuntimeExtensionPoint implemen
     String filePath = null;
     if ( job.getRep() == null ) {
       try {
-        filePath = KettleAnalyzerUtil.normalizeFilePath( filename );
+        filePath = KettleAnalyzerUtil.normalizeFilePath( jobMeta.getBowl(), filename );
       } catch ( Exception e ) {
         log.warn( "Couldn't normalize file path: " + filename, e );
         filePath = filename;

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,7 @@ package org.pentaho.metaverse.analyzer.kettle.step.textfileinput;
 
 import com.cronutils.utils.VisibleForTesting;
 import org.apache.commons.vfs2.FileObject;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
@@ -70,7 +71,8 @@ public class TextFileInputExternalResourceConsumer
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( TextFileInputMeta meta, IAnalysisContext context ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, TextFileInputMeta meta,
+    IAnalysisContext context ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not data-driven and there are no used variables in the
@@ -89,7 +91,7 @@ public class TextFileInputExternalResourceConsumer
                 try {
 
                   IExternalResourceInfo resource = ExternalResourceInfoFactory
-                    .createFileResource( KettleVFS.getFileObject( path ), true );
+                    .createFileResource( KettleVFS.getInstance( bowl ).getFileObject( path ), true );
                   if ( resource != null ) {
                     resources.add( resource );
                   } else {
@@ -120,7 +122,8 @@ public class TextFileInputExternalResourceConsumer
     try {
       String filename = meta == null ? null : rowMeta.getString( row, meta.getAcceptingField(), null );
       if ( !Const.isEmpty( filename ) ) {
-        FileObject fileObject = KettleVFS.getFileObject( filename );
+        FileObject fileObject = KettleVFS.getInstance( textFileInput.getTransMeta().getBowl() )
+          .getFileObject( filename );
         resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, true ) );
       }
     } catch ( KettleException kve ) {

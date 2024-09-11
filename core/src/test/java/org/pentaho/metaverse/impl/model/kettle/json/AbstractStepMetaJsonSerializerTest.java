@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -133,7 +134,7 @@ public class AbstractStepMetaJsonSerializerTest {
     verify( spySerializer ).writeFieldTransforms( spyMeta, json, provider );
     verify( json ).writeEndObject();
 
-    verify( spySerializer ).writeExternalResources( spyMeta, json, provider );
+    verify( spySerializer ).writeExternalResources( DefaultBowl.getInstance(), spyMeta, json, provider );
 
   }
 
@@ -224,7 +225,7 @@ public class AbstractStepMetaJsonSerializerTest {
     externalResources.add( info );
 
     IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );
-    when( consumer.getResourcesFromMeta( any() ) ).thenReturn( externalResources );
+    when( consumer.getResourcesFromMeta( any(), any() ) ).thenReturn( externalResources );
     consumers.add( consumer );
 
     Class<? extends BaseStepMeta> stepMetaClass = BaseStepMeta.class;
@@ -232,11 +233,11 @@ public class AbstractStepMetaJsonSerializerTest {
 
     serializer.setStepExternalResourceConsumerProvider( mockConsumerMap );
 
-    serializer.writeExternalResources( spyMeta, json, provider );
+    serializer.writeExternalResources( DefaultBowl.getInstance(), spyMeta, json, provider );
 
     verify( mockConsumerMap ).getExternalResourceConsumers( any( Collection.class ) );
     verify( json ).writeArrayFieldStart( AbstractStepMetaJsonSerializer.JSON_PROPERTY_EXTERNAL_RESOURCES );
-    verify( consumer ).getResourcesFromMeta( any() );
+    verify( consumer ).getResourcesFromMeta( any(), any() );
     verify( json, times( externalResources.size() ) ).writeObject( any( IExternalResourceInfo.class ) );
     verify( json ).writeEndArray();
   }

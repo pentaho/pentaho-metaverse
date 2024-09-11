@@ -27,6 +27,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.Bowl;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -76,6 +78,7 @@ public class ConnectionExternalResourceStepAnalyzerTest {
   @Mock TransMeta parentTransMeta;
   @Mock IAnalysisContext context;
   @Mock IMetaverseNode tableNode;
+
   @Before
   public void setUp() throws Exception {
     analyzer = spy( new ConnectionExternalResourceStepAnalyzer<BaseStepMeta>() {
@@ -111,6 +114,7 @@ public class ConnectionExternalResourceStepAnalyzerTest {
     analyzer.parentTransMeta = parentTransMeta;
     analyzer.parentStepMeta = parentStepMeta;
     analyzer.setMetaverseObjectFactory( new MetaverseObjectFactory() );
+    when( parentTransMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
   }
 
   @Test
@@ -136,7 +140,7 @@ public class ConnectionExternalResourceStepAnalyzerTest {
     IExternalResourceInfo resInfo = mock( IExternalResourceInfo.class );
     resources.add( resInfo );
 
-    when( erc.getResourcesFromMeta( meta, context ) ).thenReturn( resources );
+    when( erc.getResourcesFromMeta( DefaultBowl.getInstance(), meta, context ) ).thenReturn( resources );
 
     IMetaverseNode connectionNode = mock( IMetaverseNode.class );
     doReturn( connectionNode ).when( analyzer ).getConnectionNode();
