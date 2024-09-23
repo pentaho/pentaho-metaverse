@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
@@ -70,6 +71,11 @@ public class VfsLineageWriter implements ILineageWriter {
   private String outputStrategy = DEFAULT_OUTPUT_STRATEGY;
 
   protected static SimpleDateFormat dateFolderFormat = new SimpleDateFormat( "YYYYMMdd" );
+  private Bowl bowl;
+
+  public VfsLineageWriter( Bowl bowl ) {
+    this.bowl = bowl;
+  }
 
   public GraphCatalogWriter getCatalogWriter() {
     return catalogWriter;
@@ -265,7 +271,7 @@ public class VfsLineageWriter implements ILineageWriter {
     } else {
       dir += dateFolderFormat.format( new Date() );
     }
-    FileObject lineageRootFolder = KettleVFS.getFileObject( getOutputFolder() );
+    FileObject lineageRootFolder = KettleVFS.getInstance( bowl ).getFileObject( getOutputFolder() );
     FileObject dateFolder = lineageRootFolder.resolveFile( dir );
     return dateFolder;
   }

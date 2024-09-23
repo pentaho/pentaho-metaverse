@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -74,7 +74,7 @@ public class StepExternalResourceConsumerListenerTest {
     stepConsumerMap.put( bsm.getClass(), consumers );
     stepExtensionPoint.callExtensionPoint( null, stepCombi );
     IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );
-    when( consumer.getResourcesFromMeta( Mockito.any() ) ).thenReturn( Collections.emptyList() );
+    when( consumer.getResourcesFromMeta( Mockito.any(), Mockito.any() ) ).thenReturn( Collections.emptyList() );
     consumers.add( consumer );
     Trans mockTrans = mock( Trans.class );
     when( stepCombi.step.getTrans() ).thenReturn( mockTrans );

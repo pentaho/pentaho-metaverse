@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle;
 
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.metaverse.api.IAnalysisContext;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 
@@ -35,6 +36,6 @@ public interface IExternalResourceConsumer<T> extends MetaClassProvider<T>, Clon
 
   boolean isDataDriven( T consumer );
 
-  Collection<IExternalResourceInfo> getResourcesFromMeta( T consumer );
-  Collection<IExternalResourceInfo> getResourcesFromMeta( T consumer, IAnalysisContext context );
+  Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, T consumer );
+  Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, T consumer, IAnalysisContext context );
 }

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.analyzer.kettle.step.csvfileinput;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
@@ -61,7 +62,8 @@ public class CsvFileInputExternalResourceConsumer extends BaseStepExternalResour
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( CsvInputMeta meta, IAnalysisContext context ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, CsvInputMeta meta,
+    IAnalysisContext context ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not data-driven and there are no used variables in the
@@ -80,7 +82,7 @@ public class CsvFileInputExternalResourceConsumer extends BaseStepExternalResour
                 try {
 
                   IExternalResourceInfo resource = ExternalResourceInfoFactory
-                    .createFileResource( KettleVFS.getFileObject( path ), true );
+                    .createFileResource( KettleVFS.getInstance( bowl ).getFileObject( path ), true );
                   if ( resource != null ) {
                     resources.add( resource );
                   } else {

@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobMeta;
@@ -126,6 +127,7 @@ public class JobEntryAnalyzerTest {
     when( mockJobEntryInterface.getPluginId() ).thenReturn( "Base job entry" );
     when( mockJobEntryInterface.getParentJob() ).thenReturn( mockJob );
     when( mockJob.getJobMeta() ).thenReturn( mockJobMeta );
+    when( mockJobMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
   }
 
   /**

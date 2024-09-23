@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,7 @@ package org.pentaho.metaverse.analyzer.kettle.step.httpclient;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.ArrayUtils;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
@@ -66,7 +67,7 @@ public class HTTPClientExternalResourceConsumer
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( HTTPMeta meta, IAnalysisContext context ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, HTTPMeta meta, IAnalysisContext context ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not getting the url from a field

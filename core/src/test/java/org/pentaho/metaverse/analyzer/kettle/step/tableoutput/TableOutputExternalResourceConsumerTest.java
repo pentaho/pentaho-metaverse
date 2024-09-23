@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.TransMeta;
@@ -83,8 +84,8 @@ public class TableOutputExternalResourceConsumerTest {
 
     when( dbi.getPluginId() ).thenReturn( "POSTGRESQL" );
 
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( meta, new AnalysisContext(
-      DictionaryConst.CONTEXT_RUNTIME ) );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta,
+      new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
     assertEquals( 1, resources.size() );
     IExternalResourceInfo res = resources.iterator().next();
     assertEquals( "TestConnection", res.getName() );
@@ -115,8 +116,8 @@ public class TableOutputExternalResourceConsumerTest {
 
     when( dbi.getPluginId() ).thenReturn( "POSTGRESQL" );
 
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( meta, new AnalysisContext(
-      DictionaryConst.CONTEXT_STATIC ) );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta,
+      new AnalysisContext( DictionaryConst.CONTEXT_STATIC ) );
     assertEquals( 1, resources.size() );
     IExternalResourceInfo res = resources.iterator().next();
     assertEquals( "TestConnection", res.getName() );

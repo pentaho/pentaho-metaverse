@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -25,6 +25,7 @@ package org.pentaho.metaverse.api.analyzer.kettle.step;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -61,13 +62,13 @@ public class BaseStepExternalResourceConsumerTest {
     BaseStepMeta meta = null;
 
     // null meta
-    resources = consumer.getResourcesFromMeta( meta );
+    resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta );
     assertNotNull( resources );
     assertTrue( resources.isEmpty() );
 
     // non-file meta
     meta = Mockito.mock( BaseStepMeta.class );
-    resources = consumer.getResourcesFromMeta( meta );
+    resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta );
     assertNotNull( resources );
     assertTrue( resources.isEmpty() );
     Mockito.verify( meta, Mockito.times( 0 ) ).getParentStepMeta();
@@ -79,7 +80,7 @@ public class BaseStepExternalResourceConsumerTest {
     Mockito.when( ( (BaseFileMeta) meta ).writesToFile() ).thenReturn( true );
     Mockito.when( meta.getParentStepMeta() ).thenReturn( stepMeta );
     Mockito.when( stepMeta.getParentTransMeta() ).thenReturn( transMeta );
-    consumer.getResourcesFromMeta( meta );
+    consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta );
     Mockito.verify( meta, Mockito.times( 2 ) ).getParentStepMeta();
     Mockito.verify( (BaseFileMeta) meta, Mockito.times( 1 ) ).getFilePaths( false );
   }

@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
@@ -82,11 +83,13 @@ public class ExternalResourceCacheTest {
     when( spyMeta1.getParentTransMeta() ).thenReturn( transMeta );
     when( meta1.getParentStepMeta() ).thenReturn(spyMeta1);
     when( transMeta.getFilename() ).thenReturn( "my_file" );
+    when( transMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
 
     spyMeta2 = spy( new StepMeta( "test2", meta2) );
     when( spyMeta2.getParentTransMeta() ).thenReturn( transMeta2 );
     when( meta2.getParentStepMeta() ).thenReturn(spyMeta2);
     when( transMeta2.getFilename() ).thenReturn( "my_file2" );
+    when( transMeta2.getBowl() ).thenReturn( DefaultBowl.getInstance() );
 
     lenient().when( trans.getName() ).thenReturn( "my_trans" );
     lenient().when( trans.getFilename() ).thenReturn( "my_file" );

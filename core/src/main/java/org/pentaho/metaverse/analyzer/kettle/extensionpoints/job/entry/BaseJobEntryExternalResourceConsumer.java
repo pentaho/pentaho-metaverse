@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -22,6 +22,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.AnalysisContext;
@@ -45,12 +46,12 @@ public abstract class BaseJobEntryExternalResourceConsumer<T extends JobEntryBas
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( T meta ) {
-    return getResourcesFromMeta( meta, new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, T meta ) {
+    return getResourcesFromMeta( bowl, meta, new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( T consumer, IAnalysisContext context ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, T consumer, IAnalysisContext context ) {
     return Collections.emptyList();
   }
 }

@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -116,7 +116,7 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
     Date modifiedDate = new Date( node.get( TransMetaJsonSerializer.JSON_PROPERTY_LAST_MODIFIED_DATE ).asLong() );
     String path = node.get( TransMetaJsonSerializer.JSON_PROPERTY_PATH ).textValue();
 
-    transMeta = new TransMeta( null, name );
+    transMeta = new TransMeta( (String)null, name );
     transMeta.setDescription( desc );
 
     transMeta.setCreatedDate( createdDate );

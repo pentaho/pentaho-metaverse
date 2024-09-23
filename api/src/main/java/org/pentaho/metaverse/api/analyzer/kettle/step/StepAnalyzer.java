@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -909,7 +909,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     final Map<String, String> propsLookupMap = properties == null ? new HashMap() : new HashMap( properties );
     propsLookupMap.put( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP );
     final List<Vertex> potentialMatches = findVertices( propsLookupMap );
-    final String transPath = KettleAnalyzerUtil.normalizeFilePathSafely( transMeta.getFilename() );
+    final String transPath = KettleAnalyzerUtil.normalizeFilePathSafely( transMeta.getBowl(), transMeta.getFilename() );
     // inspect input "contains" links for each vertex, when a "containing" transformation with a matching path is
     // found, we have the  vertex we need
     for ( final Vertex potentialMatch : potentialMatches ) {
@@ -918,7 +918,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
       while ( containingVertices.hasNext() ) {
         final Vertex containingVertex = containingVertices.next();
         final String containingVertexPath = KettleAnalyzerUtil.normalizeFilePathSafely(
-          containingVertex.getProperty( DictionaryConst.PROPERTY_PATH ) );
+          transMeta.getBowl(), containingVertex.getProperty( DictionaryConst.PROPERTY_PATH ) );
         if ( transPath.equalsIgnoreCase( containingVertexPath ) ) {
           matchingNodes.add( potentialMatch );
         }

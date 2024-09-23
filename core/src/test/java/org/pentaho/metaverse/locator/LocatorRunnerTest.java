@@ -149,7 +149,7 @@ public class LocatorRunnerTest {
 
   @Test
   public void testProcessFileTransformationExtension() throws Exception {
-    doAnswer(
+    lenient().doAnswer(
         new Answer() {
           /**
            * @param invocation the invocation on the mock.

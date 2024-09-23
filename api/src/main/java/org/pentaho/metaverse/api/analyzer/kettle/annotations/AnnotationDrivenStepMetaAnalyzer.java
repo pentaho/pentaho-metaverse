@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -138,8 +138,8 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
     try {
       // analyze subtrans and generate lineage graph
       TransMeta subTransMeta = TransExecutorMeta
-        .loadMappingMeta( (StepWithMappingMeta) meta, parentTransMeta.getRepository(), parentTransMeta.getMetaStore(),
-          parentTransMeta );
+        .loadMappingMeta( parentTransMeta.getBowl(), (StepWithMappingMeta) meta, parentTransMeta.getRepository(),
+          parentTransMeta.getMetaStore(), parentTransMeta );
 
       IMetaverseNode subTransNode =
         KettleAnalyzerUtil.analyze( this, parentTransMeta, (ISubTransAwareMeta) meta, rootNode );

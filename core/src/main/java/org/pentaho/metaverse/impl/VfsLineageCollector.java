@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,6 +28,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSelector;
 import org.apache.commons.vfs2.FileSystemOptions;
 import org.apache.commons.vfs2.FileType;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.metaverse.api.ILineageCollector;
@@ -114,7 +115,8 @@ public class VfsLineageCollector implements ILineageCollector {
     List<String> paths = new ArrayList<>();
     try {
       FileSystemOptions opts = new FileSystemOptions();
-      FileObject lineageRootFolder = KettleVFS.getFileObject( getOutputFolder(), opts );
+      FileObject lineageRootFolder = KettleVFS.getInstance( DefaultBowl.getInstance() )
+        .getFileObject( getOutputFolder(), opts );
 
       FileSelector dateRangeFilter = new VfsDateRangeFilter( format, startingDate, endingDate );
       FileSelector depthFilter = new FileDepthSelector( 1, 256 );
@@ -154,7 +156,8 @@ public class VfsLineageCollector implements ILineageCollector {
 
     try {
       FileSystemOptions opts = new FileSystemOptions();
-      FileObject lineageRootFolder = KettleVFS.getFileObject( getOutputFolder(), opts );
+      FileObject lineageRootFolder = KettleVFS.getInstance( DefaultBowl.getInstance() )
+        .getFileObject( getOutputFolder(), opts );
 
       FileSelector dateRangeFilter = new VfsDateRangeFilter( format, startingDate, endingDate );
       FileSelector depthFilter = new FileDepthSelector( 1, 256 );
@@ -192,7 +195,7 @@ public class VfsLineageCollector implements ILineageCollector {
 
       zos = new ZipOutputStream( os );
       for ( String path : paths ) {
-        FileObject file = KettleVFS.getFileObject( path, opts );
+        FileObject file = KettleVFS.getInstance( DefaultBowl.getInstance() ).getFileObject( path, opts );
         try {
           // register the file as an entry in the zip file
           ZipEntry zipEntry = new ZipEntry( file.getName().getPath() );

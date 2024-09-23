@@ -23,6 +23,7 @@
 package org.pentaho.metaverse.api.analyzer.kettle;
 
 import org.junit.Test;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.ILogicalIdGenerator;
@@ -74,8 +75,8 @@ public class BaseKettleMetaverseComponentTest {
 
   @Test
   public void testCreateFileNode() throws Exception {
-    component.createFileNode( null, null );
-    assertNull( component.createFileNode( "/path/to/my/file", null ) );
+    component.createFileNode( DefaultBowl.getInstance(), null, null );
+    assertNull( component.createFileNode( DefaultBowl.getInstance(), "/path/to/my/file", null ) );
     IMetaverseBuilder metaverseBuilder = mock( IMetaverseBuilder.class );
     when( metaverseBuilder.getMetaverseObjectFactory() ).thenReturn( new MetaverseObjectFactory() );
     component.setMetaverseBuilder( metaverseBuilder );
@@ -83,7 +84,7 @@ public class BaseKettleMetaverseComponentTest {
     IComponentDescriptor descriptor = mock( IComponentDescriptor.class );
     INamespace ns = mock( INamespace.class );
     when( descriptor.getNamespace() ).thenReturn( ns );
-    assertNotNull( component.createFileNode( "/path/to/my/file", descriptor ) );
+    assertNotNull( component.createFileNode( DefaultBowl.getInstance(), "/path/to/my/file", descriptor ) );
   }
 
   @Test

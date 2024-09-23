@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.apache.commons.collections.MapUtils;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
@@ -194,7 +195,8 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
     throws IOException;
 
 
-  protected void writeExternalResources( T meta, JsonGenerator json, SerializerProvider serializerProvider )
+  @Override
+  protected void writeExternalResources( Bowl bowl, T meta, JsonGenerator json, SerializerProvider serializerProvider )
     throws IOException, JsonGenerationException {
     Set<Class<?>> metaClassSet = new HashSet<Class<?>>( 1 );
     metaClassSet.add( meta.getClass() );
@@ -210,7 +212,7 @@ public abstract class AbstractStepMetaJsonSerializer<T extends BaseStepMeta>
     if ( resourceConsumers != null ) {
       for ( IStepExternalResourceConsumer resourceConsumer : resourceConsumers ) {
 
-        Collection<IExternalResourceInfo> infos = resourceConsumer.getResourcesFromMeta( meta );
+        Collection<IExternalResourceInfo> infos = resourceConsumer.getResourcesFromMeta( bowl, meta );
         for ( IExternalResourceInfo info : infos ) {
           json.writeObject( info );
         }

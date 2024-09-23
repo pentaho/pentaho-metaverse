@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -62,7 +62,8 @@ public abstract class ExternalResourceStepAnalyzer<T extends BaseStepMeta> exten
       // Note that we should be fetching ALL resources here, from meta and from row, not just from meta - however,
       // due to constraints imposed by the current API, we are calling the getResourcesFromMeta, which has been
       // implemented to return ALL resources, from meta and those cached from row
-      Collection<IExternalResourceInfo> resources = getExternalResourceConsumer().getResourcesFromMeta( meta, context );
+      Collection<IExternalResourceInfo> resources =
+         getExternalResourceConsumer().getResourcesFromMeta( parentTransMeta.getBowl(), meta, context );
       for ( IExternalResourceInfo resource : resources ) {
         try {
           if ( isInput() ) {

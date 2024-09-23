@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,6 +24,7 @@ package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.metaverse.api.analyzer.kettle.IExternalResourceConsumer;
 
 import java.util.Collection;
@@ -51,7 +52,7 @@ public class BaseJobEntryExternalResourceConsumerTest {
 
   @Test
   public void testGetResourcesFromMeta() throws Exception {
-    Collection<IExternalResourceConsumer> resources = consumer.getResourcesFromMeta( null );
+    Collection<IExternalResourceConsumer> resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), null );
     assertNotNull( resources );
     assertTrue( resources.isEmpty() );
   }

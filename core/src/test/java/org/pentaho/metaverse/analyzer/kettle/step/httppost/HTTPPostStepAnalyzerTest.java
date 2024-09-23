@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -211,14 +212,14 @@ public class HTTPPostStepAnalyzerTest extends ClonableStepAnalyzerTest {
     when( this.meta.isUrlInField() ).thenReturn( false );
 
     assertTrue( consumer.isDataDriven( this.meta ) );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( this.meta );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), this.meta );
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
 
     when( this.meta.isUrlInField() ).thenReturn( true );
     assertTrue( consumer.isDataDriven( this.meta ) );
-    assertTrue( consumer.getResourcesFromMeta( this.meta ).isEmpty() );
+    assertTrue( consumer.getResourcesFromMeta( DefaultBowl.getInstance(), this.meta ).isEmpty() );
     when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.any(), Mockito.any() ) )
       .thenReturn( "/path/to/row/file" );
     resources = consumer.getResourcesFromRow( mockHTTPPost, mockRowMetaInterface, new String[]{ "id", "name" } );
