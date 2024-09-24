@@ -57,6 +57,14 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
     return false;
   }
 
+  // it's important that this method exists because there are subclasses that only implement
+  // getResourcesFromMeta( meta, IAnalysisContext), but call this method.
+  @Deprecated
+  @Override
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( final M meta ) {
+    return getResourcesFromMeta( meta, new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
+  }
+
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, final M meta ) {
     return getResourcesFromMeta( bowl, meta, new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );

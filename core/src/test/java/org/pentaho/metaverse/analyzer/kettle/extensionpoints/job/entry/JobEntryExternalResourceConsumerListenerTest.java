@@ -24,11 +24,13 @@ package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobExecutionExtension;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
+import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.JobLineageHolderMap;
 import org.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryExternalResourceConsumerProvider;
 import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryExternalResourceConsumer;
@@ -73,7 +75,8 @@ public class JobEntryExternalResourceConsumerListenerTest {
 
 
     IJobEntryExternalResourceConsumer consumer = mock( IJobEntryExternalResourceConsumer.class );
-    when( consumer.getResourcesFromMeta( Mockito.any(), Mockito.any() ) ).thenReturn( Collections.emptyList() );
+    when( consumer.getResourcesFromMeta( Mockito.any( Bowl.class ), Mockito.any( BaseStepMeta.class ) ) )
+      .thenReturn( Collections.emptyList() );
     consumers.add( consumer );
     Job mockJob = mock( Job.class );
     when( jobEntryInterface.getParentJob() ).thenReturn( mockJob );
