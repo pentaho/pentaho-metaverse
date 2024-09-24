@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
@@ -225,7 +226,8 @@ public class AbstractStepMetaJsonSerializerTest {
     externalResources.add( info );
 
     IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );
-    when( consumer.getResourcesFromMeta( any(), any() ) ).thenReturn( externalResources );
+    when( consumer.getResourcesFromMeta( any( Bowl.class ), any( BaseStepMeta.class ) ) )
+      .thenReturn( externalResources );
     consumers.add( consumer );
 
     Class<? extends BaseStepMeta> stepMetaClass = BaseStepMeta.class;
@@ -237,7 +239,7 @@ public class AbstractStepMetaJsonSerializerTest {
 
     verify( mockConsumerMap ).getExternalResourceConsumers( any( Collection.class ) );
     verify( json ).writeArrayFieldStart( AbstractStepMetaJsonSerializer.JSON_PROPERTY_EXTERNAL_RESOURCES );
-    verify( consumer ).getResourcesFromMeta( any(), any() );
+    verify( consumer ).getResourcesFromMeta( any( Bowl.class ), any( BaseStepMeta.class ) );
     verify( json, times( externalResources.size() ) ).writeObject( any( IExternalResourceInfo.class ) );
     verify( json ).writeEndArray();
   }

@@ -25,6 +25,7 @@ package org.pentaho.metaverse.analyzer.kettle.extensionpoints.job.entry;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.di.core.bowl.DefaultBowl;
+import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.metaverse.api.analyzer.kettle.IExternalResourceConsumer;
 
 import java.util.Collection;
@@ -52,7 +53,8 @@ public class BaseJobEntryExternalResourceConsumerTest {
 
   @Test
   public void testGetResourcesFromMeta() throws Exception {
-    Collection<IExternalResourceConsumer> resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), null );
+    Collection<IExternalResourceConsumer> resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(),
+      (JobEntryBase)null );
     assertNotNull( resources );
     assertTrue( resources.isEmpty() );
   }

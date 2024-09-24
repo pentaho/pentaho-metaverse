@@ -24,6 +24,7 @@ package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepInterface;
@@ -74,7 +75,8 @@ public class StepExternalResourceConsumerListenerTest {
     stepConsumerMap.put( bsm.getClass(), consumers );
     stepExtensionPoint.callExtensionPoint( null, stepCombi );
     IStepExternalResourceConsumer consumer = mock( IStepExternalResourceConsumer.class );
-    when( consumer.getResourcesFromMeta( Mockito.any(), Mockito.any() ) ).thenReturn( Collections.emptyList() );
+    when( consumer.getResourcesFromMeta( Mockito.any( Bowl.class ), Mockito.any( BaseStepMeta.class ) ) )
+      .thenReturn( Collections.emptyList() );
     consumers.add( consumer );
     Trans mockTrans = mock( Trans.class );
     when( stepCombi.step.getTrans() ).thenReturn( mockTrans );
