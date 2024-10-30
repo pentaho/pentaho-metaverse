@@ -178,7 +178,7 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
               null,
               null );
         }
-        transMeta.getDatabaseManagementInterface().addDatabase( dbMeta );
+        transMeta.getDatabaseManagementInterface().add( dbMeta );
       } catch ( Exception e ) {
         LOGGER.warn( Messages.getString( "WARNING.Deserialization.Trans.Connections",
             conn.getName(), transMeta.getName() ), e );
