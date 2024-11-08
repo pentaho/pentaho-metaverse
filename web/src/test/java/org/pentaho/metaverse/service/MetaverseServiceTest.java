@@ -37,10 +37,10 @@ import org.pentaho.metaverse.api.model.LineageRequest;
 import org.pentaho.metaverse.impl.MetaverseCompletionService;
 import org.pentaho.metaverse.messages.Messages;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
