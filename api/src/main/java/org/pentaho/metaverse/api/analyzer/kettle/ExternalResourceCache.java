@@ -15,7 +15,7 @@ package org.pentaho.metaverse.api.analyzer.kettle;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import org.eclipse.jetty.util.ConcurrentHashSet;
+import java.util.concurrent.ConcurrentHashMap;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -157,7 +157,7 @@ public class ExternalResourceCache {
    */
   public abstract class Resources<V> {
 
-    protected Set<V> internal = new ConcurrentHashSet();
+    protected Set<V> internal = ConcurrentHashMap.newKeySet();
 
     public void add( final V value ) {
       internal.add( value );
