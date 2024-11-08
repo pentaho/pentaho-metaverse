@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -27,14 +27,11 @@ import org.apache.commons.collections.IteratorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.metaverse.frames.DatasourceNode;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
-import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,11 +39,15 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.pentaho.dictionary.DictionaryConst.*;
+import static org.pentaho.dictionary.DictionaryConst.LINK_DERIVES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_POPULATES;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_DATASOURCE;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_DATA_COLUMN;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_DATA_TABLE;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS_FIELD;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
+@RunWith( MockitoJUnitRunner.class )
 // TODO: Ignore the test for now, as it will not run succesfully on a node that does not have the required DB configured
 @Ignore
 public class TableOutputValidationIT extends StepAnalyzerValidationIT {

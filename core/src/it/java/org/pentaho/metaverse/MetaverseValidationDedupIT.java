@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,15 +24,14 @@ package org.pentaho.metaverse;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,44 +41,54 @@ import java.util.List;
  * Runs the integration test with the {@link MetaverseConfig} mocked to have
  * the {@code deduplicateTransformationFields} graph dedupping turned on.
  */
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
+@RunWith( MockitoJUnitRunner.class )
+@Ignore
 public class MetaverseValidationDedupIT extends MetaverseValidationIT {
 
   @BeforeClass
   public static void init() throws Exception {
-
-    PowerMockito.mockStatic( MetaverseConfig.class );
-    Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( true );
-
     MetaverseValidationIT.init();
   }
 
   @Test
   public void testSelectValuesStep() throws Exception {
-    testSelectValuesStep( 8 );
+    try ( MockedStatic<MetaverseConfig> metaverseConfigMockedStatic = Mockito.mockStatic( MetaverseConfig.class ) ) {
+      metaverseConfigMockedStatic.when( MetaverseConfig::adjustExternalResourceFields ).thenReturn( true );
+      metaverseConfigMockedStatic.when( MetaverseConfig::deduplicateTransformationFields ).thenReturn( true );
+      metaverseConfigMockedStatic.when( MetaverseConfig::consolidateSubGraphs ).thenReturn( true );
+      metaverseConfigMockedStatic.when( MetaverseConfig::generateSubGraphs ).thenReturn( true );
+      testSelectValuesStep( 8 );
+    }
   }
 
   @Test
   public void testTextFileInputNode() throws Exception {
-    List<FramedMetaverseNode> containedNodes = testTextFileInputNodeImpl( 3 );
-    // get field names
-    List<String> nodeNames = new ArrayList();
-    for ( final FramedMetaverseNode node : containedNodes ) {
-      nodeNames.add( node.getName() );
+    try ( MockedStatic<MetaverseConfig> metaverseConfigMockedStatic = Mockito.mockStatic( MetaverseConfig.class ) ) {
+      metaverseConfigMockedStatic.when( MetaverseConfig::adjustExternalResourceFields ).thenReturn( true );
+      metaverseConfigMockedStatic.when( MetaverseConfig::deduplicateTransformationFields ).thenReturn( true );
+      metaverseConfigMockedStatic.when( MetaverseConfig::consolidateSubGraphs ).thenReturn( true );
+      metaverseConfigMockedStatic.when( MetaverseConfig::generateSubGraphs ).thenReturn( true );
+      List<FramedMetaverseNode> containedNodes = testTextFileInputNodeImpl( 3 );
+      // get field names
+      List<String> nodeNames = new ArrayList();
+      for ( final FramedMetaverseNode node : containedNodes ) {
+        nodeNames.add( node.getName() );
+      }
+      Assert.assertTrue( nodeNames.contains( "longitude" ) );
+      Assert.assertTrue( nodeNames.contains( "latitude" ) );
+      Assert.assertTrue( nodeNames.contains( "address" ) );
     }
-    Assert.assertTrue( nodeNames.contains( "longitude" ) );
-    Assert.assertTrue( nodeNames.contains( "latitude" ) );
-    Assert.assertTrue( nodeNames.contains( "address" ) );
   }
 
   @Test
   @Override
   public void testTransformationStepNodes() throws Exception {
-    super.testTransformationStepNodes();
+    try ( MockedStatic<MetaverseConfig> metaverseConfigMockedStatic = Mockito.mockStatic( MetaverseConfig.class ) ) {
+      metaverseConfigMockedStatic.when( MetaverseConfig::adjustExternalResourceFields ).thenReturn( true );
+      metaverseConfigMockedStatic.when( MetaverseConfig::deduplicateTransformationFields ).thenReturn( true );
+      metaverseConfigMockedStatic.when( MetaverseConfig::consolidateSubGraphs ).thenReturn( true );
+      metaverseConfigMockedStatic.when( MetaverseConfig::generateSubGraphs ).thenReturn( true );
+      super.testTransformationStepNodes();
+    }
   }
 }

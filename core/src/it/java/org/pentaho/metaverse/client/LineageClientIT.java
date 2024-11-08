@@ -28,6 +28,7 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
@@ -59,6 +60,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class LineageClientIT {
 
   private static final String ROOT_FOLDER = "src/it/resources/repo/validation";

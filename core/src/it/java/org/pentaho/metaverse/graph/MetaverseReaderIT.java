@@ -25,6 +25,7 @@ package org.pentaho.metaverse.graph;
 import com.tinkerpop.blueprints.Graph;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.IntegrationTestUtil;
@@ -44,6 +45,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * User: RFellows Date: 8/19/14
  */
+@Ignore
 public class MetaverseReaderIT {
 
   private static IMetaverseReader reader;

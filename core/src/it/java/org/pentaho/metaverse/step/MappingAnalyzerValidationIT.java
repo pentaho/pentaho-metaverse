@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2018-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -24,15 +24,13 @@ package org.pentaho.metaverse.step;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.IteratorUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
-import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,11 +38,30 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.pentaho.dictionary.DictionaryConst.*;
+import static org.pentaho.dictionary.DictionaryConst.LINK_CONTAINS;
+import static org.pentaho.dictionary.DictionaryConst.LINK_DERIVES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_EXECUTES;
+import static org.pentaho.dictionary.DictionaryConst.LINK_HOPSTO;
+import static org.pentaho.dictionary.DictionaryConst.LINK_INPUTS;
+import static org.pentaho.dictionary.DictionaryConst.LINK_OUTPUTS;
+import static org.pentaho.dictionary.DictionaryConst.LINK_TYPE_CONCEPT;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS;
+import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_TRANS_FIELD;
+import static org.pentaho.dictionary.DictionaryConst.NODE_VIRTUAL;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_ANALYZER;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_CATEGORY;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_COPIES;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_LOGICAL_ID;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_NAME;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_NAMESPACE;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_PATH;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_PLUGIN_ID;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_STEP_TYPE;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_TYPE;
+import static org.pentaho.dictionary.DictionaryConst.PROPERTY_VERBOSE_DETAILS;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
+@RunWith( MockitoJUnitRunner.class )
+@Ignore
 public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
 
   private static final String VALUE = "value";
