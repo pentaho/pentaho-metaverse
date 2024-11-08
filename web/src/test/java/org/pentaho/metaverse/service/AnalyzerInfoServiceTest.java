@@ -26,7 +26,7 @@ import org.pentaho.metaverse.api.analyzer.kettle.jobentry.IJobEntryAnalyzerProvi
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzer;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
