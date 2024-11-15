@@ -30,6 +30,7 @@
         <exclude>org.pentaho.*</exclude>
         <exclude>com.tinkerpop.blueprints:*</exclude>
         <exclude>pentaho:pentaho-metaverse-core:jar</exclude>
+        <exclude>org.codehaus.jettison:*</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
