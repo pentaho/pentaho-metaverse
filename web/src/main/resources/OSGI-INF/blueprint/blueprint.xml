@@ -37,7 +37,7 @@
 
     <jaxrs:server id="metaverseService" address="/lineage">
         <jaxrs:providers>
-            <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider"/>
+            <bean class="com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider"/>
         </jaxrs:providers>
         <jaxrs:serviceBeans>
             <ref component-id="metaverseServiceBean"/>
