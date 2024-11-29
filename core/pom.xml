@@ -59,6 +59,12 @@
       <artifactId>blueprints-core</artifactId>
       <version>${dependency.com.tinkerpop.blueprints.version}</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.codehaus.jettison</groupId>
+          <artifactId>jettison</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>commons-configuration</groupId>
