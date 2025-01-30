@@ -15,6 +15,7 @@ package org.pentaho.metaverse.impl.model.kettle;
 
 import org.pentaho.di.cluster.ClusterSchema;
 import org.pentaho.di.cluster.SlaveServer;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.Condition;
 import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.database.DatabaseMeta;
@@ -713,4 +714,10 @@ public class SimpleRepository implements Repository {
     // TODO - Implement this
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
+
+  @Override public Bowl getBowl() {
+    // TODO - Implement this
+    throw new UnsupportedOperationException( NOT_IMPLEMENTED );
+  }
+
 }
