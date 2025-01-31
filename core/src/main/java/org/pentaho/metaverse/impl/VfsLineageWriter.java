@@ -66,6 +66,7 @@ public class VfsLineageWriter implements ILineageWriter {
 
   public VfsLineageWriter( Bowl bowl ) {
     this.bowl = bowl;
+    this.setOutputStrategy( MetaverseConfig.getInstance().getExecutionGenerationStrategy() );
   }
 
   public GraphCatalogWriter getCatalogWriter() {
@@ -78,10 +79,6 @@ public class VfsLineageWriter implements ILineageWriter {
 
   private static enum VFS_Prefixes {
     BZIP2, FILE, FTP, FTPS, GZIP, HDFS, HTTP, HTTPS, JAR, RAM, RES, SFTP, TAR, TEMP, WEBDAV, ZIP
-  }
-
-  public VfsLineageWriter() {
-    this.setOutputStrategy( MetaverseConfig.getInstance().getExecutionGenerationStrategy() );
   }
 
   @Override
