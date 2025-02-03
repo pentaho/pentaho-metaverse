@@ -10,7 +10,6 @@
  * Change Date: 2029-07-20
  ******************************************************************************/
 
-
 package org.pentaho.metaverse.analyzer.kettle.step.csvfileinput;
 
 import org.junit.Before;
