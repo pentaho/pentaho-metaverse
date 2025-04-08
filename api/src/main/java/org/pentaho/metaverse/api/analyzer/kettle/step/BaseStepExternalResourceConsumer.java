@@ -13,6 +13,7 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle.step;
 
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -47,21 +48,29 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
     return false;
   }
 
+  // it's important that this method exists because there are subclasses that only implement
+  // getResourcesFromMeta( meta, IAnalysisContext), but call this method.
+  @Deprecated
   @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta( final M meta ) {
     return getResourcesFromMeta( meta, new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
   }
 
   @Override
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, final M meta ) {
+    return getResourcesFromMeta( bowl, meta, new AnalysisContext( DictionaryConst.CONTEXT_RUNTIME ) );
+  }
+
+  @Override
   public Collection<IExternalResourceInfo> getResourcesFromMeta(
-    final M meta, final IAnalysisContext context ) {
+    Bowl bowl, final M meta, final IAnalysisContext context ) {
 
     if ( !( meta instanceof BaseFileMeta ) || !fetchResources( meta ) ) {
       return new HashSet();
     }
 
-    return KettleAnalyzerUtil.getResourcesFromMeta(
-      meta, isDataDriven( meta ) ? new String[]{} : ( (BaseFileMeta) meta ).getFilePaths( false ) );
+    return KettleAnalyzerUtil.getResourcesFromMeta( bowl, meta,
+      isDataDriven( meta ) ? new String[]{} : ( (BaseFileMeta) meta ).getFilePaths( false ) );
   }
 
   @Override
@@ -71,6 +80,7 @@ public abstract class BaseStepExternalResourceConsumer<S extends BaseStep, M ext
     if ( !fetchResources( null ) || !( step instanceof BaseFileInputStep ) ) {
       return new HashSet();
     }
-    return KettleAnalyzerUtil.getResourcesFromRow( (BaseFileInputStep) step, rowMeta, row );
+    return KettleAnalyzerUtil.getResourcesFromRow( step.getTransMeta().getBowl(),
+      (BaseFileInputStep) step, rowMeta, row );
   }
 }

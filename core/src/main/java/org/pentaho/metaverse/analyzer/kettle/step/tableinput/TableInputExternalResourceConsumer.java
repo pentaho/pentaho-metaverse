@@ -14,6 +14,7 @@
 package org.pentaho.metaverse.analyzer.kettle.step.tableinput;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.steps.tableinput.TableInput;
 import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
@@ -48,7 +49,8 @@ public class TableInputExternalResourceConsumer extends BaseStepExternalResource
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( TableInputMeta meta, IAnalysisContext context ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, TableInputMeta meta,
+    IAnalysisContext context ) {
 
     Set<IExternalResourceInfo> resources = new HashSet<IExternalResourceInfo>();
     DatabaseMeta dbMeta = meta.getDatabaseMeta();

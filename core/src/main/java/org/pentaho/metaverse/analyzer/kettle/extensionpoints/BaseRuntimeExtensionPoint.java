@@ -17,6 +17,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.pentaho.di.connections.ConnectionDetails;
 import org.pentaho.di.connections.ConnectionManager;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.exception.KettlePluginException;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
@@ -84,7 +85,8 @@ public abstract class BaseRuntimeExtensionPoint implements ExtensionPointInterfa
   protected LogChannelInterface consoleLog;
 
   protected void setupLinageWriter() {
-    VfsLineageWriter lineageWriter = new VfsLineageWriter();
+    // DefaultBowl will only work with locally defined VFS connections, not Projects or Repository
+    VfsLineageWriter lineageWriter = new VfsLineageWriter( DefaultBowl.getInstance() );
     lineageWriter.setGraphWriter( new GraphMLWriter() );
     Supplier<ConnectionManager> connectionManagerSupplier = ConnectionManager::getInstance;
     String catalogConnectionName = System.getProperty( KETTLE_CATALOG_LINEAGE_CONNECTION_NAME, DEFAULT_CATALOG_CONNECTION_NAME );

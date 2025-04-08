@@ -15,6 +15,7 @@ package org.pentaho.metaverse.impl.model.kettle;
 
 import org.pentaho.di.cluster.ClusterSchema;
 import org.pentaho.di.cluster.SlaveServer;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.Condition;
 import org.pentaho.di.core.ProgressMonitorListener;
 import org.pentaho.di.core.database.DatabaseMeta;
@@ -37,7 +38,6 @@ import org.pentaho.di.repository.RepositoryObject;
 import org.pentaho.di.repository.RepositoryObjectType;
 import org.pentaho.di.repository.RepositorySecurityManager;
 import org.pentaho.di.repository.RepositorySecurityProvider;
-import org.pentaho.di.shared.SharedObjects;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.metastore.api.IMetaStore;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
@@ -173,7 +173,7 @@ public class SimpleRepository implements Repository {
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
 
-  @Override public SharedObjects readTransSharedObjects( TransMeta transMeta ) throws KettleException {
+  @Override public void readTransSharedObjects( TransMeta transMeta ) throws KettleException {
     // TODO - Implement this
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
@@ -207,7 +207,7 @@ public class SimpleRepository implements Repository {
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
 
-  @Override public SharedObjects readJobMetaSharedObjects( JobMeta jobMeta ) throws KettleException {
+  @Override public void readJobMetaSharedObjects( JobMeta jobMeta ) throws KettleException {
     // TODO - Implement this
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
@@ -714,4 +714,10 @@ public class SimpleRepository implements Repository {
     // TODO - Implement this
     throw new UnsupportedOperationException( NOT_IMPLEMENTED );
   }
+
+  @Override public Bowl getBowl() {
+    // TODO - Implement this
+    throw new UnsupportedOperationException( NOT_IMPLEMENTED );
+  }
+
 }

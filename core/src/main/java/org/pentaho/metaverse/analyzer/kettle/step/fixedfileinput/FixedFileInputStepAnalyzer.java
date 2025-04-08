@@ -46,7 +46,7 @@ public class FixedFileInputStepAnalyzer extends ExternalResourceStepAnalyzer<Fix
   }
 
   @Override public IMetaverseNode createResourceNode( IExternalResourceInfo resource ) throws MetaverseException {
-    return createFileNode( resource.getName(), descriptor );
+    return createFileNode( parentTransMeta.getBowl(), resource.getName(), descriptor );
   }
 
   @Override public String getResourceInputNodeType() {
