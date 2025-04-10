@@ -38,7 +38,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -88,9 +90,9 @@ public class JobLineageHolderMapTest {
   @Before
   public void setUp() throws Exception {
     ReflectionTestUtils.setField( JobLineageHolderMap.getInstance(), "lineageHolderMap",
-            Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
+      Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
     ReflectionTestUtils.setField( TransLineageHolderMap.getInstance(), "lineageHolderMap",
-            Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
+      Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
     jobLineageHolderMap = JobLineageHolderMap.getInstance();
     mockHolder = spy( new LineageHolder() );
     jobLineageHolderMap.setDefaultMetaverseBuilder( defaultBuilder );
@@ -116,7 +118,7 @@ public class JobLineageHolderMapTest {
 
     LineageHolder holder = jobLineageHolderMap.getLineageHolder( job );
     assertNotNull( holder ); // We always get a (perhaps empty) holder
-    assertFalse( holder == mockHolder );
+    assertNotSame( holder, mockHolder );
     assertNull( holder.getExecutionProfile() );
     assertNull( holder.getMetaverseBuilder() );
 
@@ -126,9 +128,9 @@ public class JobLineageHolderMapTest {
 
     holder = jobLineageHolderMap.getLineageHolder( job );
     assertNotNull( holder ); // We always get a (perhaps empty) holder
-    assertTrue( holder == mockHolder );
-    assertTrue( holder.getExecutionProfile() == mockExecutionProfile );
-    assertTrue( holder.getMetaverseBuilder() == mockBuilder );
+    assertSame( holder, mockHolder );
+    assertSame( holder.getExecutionProfile(), mockExecutionProfile );
+    assertSame( holder.getMetaverseBuilder(), mockBuilder );
   }
 
   @Test

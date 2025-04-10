@@ -75,8 +75,8 @@ public class StepFieldTest {
     stepField = new StepField( "testStep", "testField" );
     StepField stepField2 = new StepField( "testStep", "testField" );
     StepField stepField3 = new StepField( "testStep2", "testField" );
-    assertTrue( stepField.equals( stepField2 ) );
-    assertFalse( stepField.equals( stepField3 ) );
-    assertFalse( stepField2.equals( stepField3 ) );
+    assertEquals( stepField, stepField2 );
+    assertNotEquals( stepField, stepField3 );
+    assertNotEquals( stepField2, stepField3 );
   }
 }

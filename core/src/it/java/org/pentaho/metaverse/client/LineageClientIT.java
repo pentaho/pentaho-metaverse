@@ -104,18 +104,18 @@ public class LineageClientIT {
     Graph g = fg.get();
     assertNotNull( g );
     List<Vertex> targetFieldNodes =
-      client.getTargetFields( g, "Passthru", Arrays.asList( "COUNTRY_1" ) );
+      client.getTargetFields( g, "Passthru", List.of( "COUNTRY_1" ) );
     assertNotNull( targetFieldNodes );
     assertEquals( 1, targetFieldNodes.size() );
     Vertex targetStep = targetFieldNodes.get( 0 );
     assertNotNull( targetStep );
     assertEquals( "COUNTRY_1", targetStep.getProperty( DictionaryConst.PROPERTY_NAME ) );
 
-    targetFieldNodes = client.getTargetFields( g, "Select values", Arrays.asList( "COUNTRY_1" ) );
+    targetFieldNodes = client.getTargetFields( g, "Select values", List.of( "COUNTRY_1" ) );
     assertNotNull( targetFieldNodes );
     assertEquals( 0, targetFieldNodes.size() );
 
-    targetFieldNodes = client.getTargetFields( g, "Select values", Arrays.asList( "HELLO" ) );
+    targetFieldNodes = client.getTargetFields( g, "Select values", List.of( "HELLO" ) );
     assertNotNull( targetFieldNodes );
     assertEquals( 1, targetFieldNodes.size() );
 
@@ -127,7 +127,7 @@ public class LineageClientIT {
   @Test
   public void testGetOperationPaths() throws Exception {
     Map<String, Set<List<StepFieldOperations>>> operationPathMap =
-      client.getOperationPaths( transMeta, "Select values", Arrays.asList( "HELLO" ) );
+      client.getOperationPaths( transMeta, "Select values", List.of( "HELLO" ) );
 
     assertNotNull( operationPathMap );
     assertEquals( 1, operationPathMap.size() );
@@ -192,12 +192,13 @@ public class LineageClientIT {
       }
     }
   }
+
   @Test
   public void testGetOriginSteps() throws Exception {
     Set<StepField> originStepsSet;
     Map<String, Set<StepField>> originSteps;
 
-    originSteps = client.getOriginSteps( transMeta, "Select values", Arrays.asList( "HELLO" ) );
+    originSteps = client.getOriginSteps( transMeta, "Select values", List.of( "HELLO" ) );
     assertNotNull( originSteps );
     assertEquals( 1, originSteps.size() );
     originStepsSet = originSteps.get( "HELLO" );

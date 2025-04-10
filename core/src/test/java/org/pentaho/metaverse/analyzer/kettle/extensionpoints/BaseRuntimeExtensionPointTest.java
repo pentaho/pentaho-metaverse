@@ -62,11 +62,7 @@ public class BaseRuntimeExtensionPointTest {
       @Override
       public void callExtensionPoint( LogChannelInterface log, Object object ) throws KettleException {
         // trivial isRuntimeEnabled logic
-        if ( isRuntimeEnabled() ) {
-          called.set( true );
-        } else {
-          called.set( false );
-        }
+        called.set( isRuntimeEnabled() );
       }
 
       @Override
@@ -129,7 +125,7 @@ public class BaseRuntimeExtensionPointTest {
     JobLineageHolderMap.getInstance().getLineageHolder( job ).setExecutionProfile( null );
 
     final String logChannelId = "channel-id";
-    LogChannelInterface logChannelInterface = Mockito.mock( LogChannelInterface .class );
+    LogChannelInterface logChannelInterface = Mockito.mock( LogChannelInterface.class );
     when( logChannelInterface.getLogChannelId() ).thenReturn( logChannelId );
     profile = extensionPoint.createExecutionProfile( logChannelInterface, job );
     assertEquals( logChannelId, profile.getExecutionData().getLoggingChannelId() );
@@ -146,7 +142,7 @@ public class BaseRuntimeExtensionPointTest {
     TransLineageHolderMap.getInstance().getLineageHolder( trans ).setExecutionProfile( null );
 
     final String logChannelId = "channel-id";
-    LogChannelInterface logChannelInterface = Mockito.mock( LogChannelInterface .class );
+    LogChannelInterface logChannelInterface = Mockito.mock( LogChannelInterface.class );
     when( logChannelInterface.getLogChannelId() ).thenReturn( logChannelId );
     profile = extensionPoint.createExecutionProfile( logChannelInterface, trans );
     assertEquals( logChannelId, profile.getExecutionData().getLoggingChannelId() );
@@ -185,12 +181,12 @@ public class BaseRuntimeExtensionPointTest {
     String message = "I am test log message";
 
     // TEST case: consoleLog is null
-    extensionPoint.logMinimal(message);
+    extensionPoint.logMinimal( message );
     verify( logChannelMock, times( 0 ) ).logMinimal( any() );
 
     // TEST case: consoleLog is set
     extensionPoint.setConsoleLog( logChannelMock );
-    extensionPoint.logMinimal(message);
+    extensionPoint.logMinimal( message );
     verify( logChannelMock, times( 1 ) ).logMinimal( message );
 
   }

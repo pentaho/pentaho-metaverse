@@ -32,6 +32,7 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -130,10 +131,7 @@ public class MetaverseBuilderIT {
   }
 
   private void countTheEdgesByType( String label ) {
-    int count = 0;
-    for ( Edge e : readerGraph.getEdges( "text", label ) ) {
-      count++;
-    }
+    int count = (int) StreamSupport.stream(readerGraph.getEdges("text", label).spliterator(), false).count();
     if ( count > 0 ) {
       System.out.println( "Found " + count + " " + label + " links" );
     }
@@ -159,12 +157,8 @@ public class MetaverseBuilderIT {
       countTheEdgesByType( structuralLinkType );
     }
 
-    for ( Vertex v : readerGraph.getVertices() ) {
-      nodeCount++;
-    }
-    for ( Edge e : readerGraph.getEdges() ) {
-      edgeCount++;
-    }
+    nodeCount = (int) StreamSupport.stream( readerGraph.getVertices().spliterator(), false ).count();
+    edgeCount = (int) StreamSupport.stream( readerGraph.getEdges().spliterator(), false ).count();
 
     System.out.println( "\n===== SUMMARY =====" );
     System.out.println( "TOTAL NODES = " + nodeCount );

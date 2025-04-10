@@ -81,23 +81,23 @@ public class BlueprintsGraphMetaverseReaderTest {
 
     String export = metaverseReader.exportToXml();
     assertNotNull( "Export is null", export );
-    assertTrue( "Export content is wrong", export.indexOf( "<?xml" ) == 0 );
-    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "color" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( DictionaryConst.COLOR_DOCUMENT ) != -1 );
+    assertEquals( "Export content is wrong", 0, export.indexOf( "<?xml" ) );
+    assertTrue( "Export content is wrong", export.contains( "data.txt" ) );
+    assertTrue( "Export content is wrong", export.contains( "IP Addr" ) );
+    assertTrue( "Export content is wrong", export.contains( "City" ) );
+    assertTrue( "Export content is wrong", export.contains( "Sales" ) );
+    assertTrue( "Export content is wrong", export.contains( "trans1.ktr" ) );
+    assertTrue( "Export content is wrong", export.contains( "color" ) );
+    assertTrue( "Export content is wrong", export.contains( DictionaryConst.COLOR_DOCUMENT ) );
 
     export = metaverseReader.exportFormat( IMetaverseReader.FORMAT_XML );
     assertNotNull( "Export is null", export );
-    assertTrue( "Export content is wrong", export.indexOf( "<?xml" ) == 0 );
-    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
+    assertEquals( "Export content is wrong", 0, export.indexOf( "<?xml" ) );
+    assertTrue( "Export content is wrong", export.contains( "data.txt" ) );
+    assertTrue( "Export content is wrong", export.contains( "IP Addr" ) );
+    assertTrue( "Export content is wrong", export.contains( "City" ) );
+    assertTrue( "Export content is wrong", export.contains( "Sales" ) );
+    assertTrue( "Export content is wrong", export.contains( "trans1.ktr" ) );
 
   }
 
@@ -108,13 +108,13 @@ public class BlueprintsGraphMetaverseReaderTest {
 
     String export = metaverseReader.exportFormat( IMetaverseReader.FORMAT_JSON );
     assertNotNull( "Export is null", export );
-    assertTrue( "Export content is wrong", export.indexOf( "{" ) == 0 );
-    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( DictionaryConst.COLOR_DOCUMENT ) != -1 );
+    assertEquals( "Export content is wrong", 0, export.indexOf( "{" ) );
+    assertTrue( "Export content is wrong", export.contains( "data.txt" ) );
+    assertTrue( "Export content is wrong", export.contains( "IP Addr" ) );
+    assertTrue( "Export content is wrong", export.contains( "City" ) );
+    assertTrue( "Export content is wrong", export.contains( "Sales" ) );
+    assertTrue( "Export content is wrong", export.contains( "trans1.ktr" ) );
+    assertTrue( "Export content is wrong", export.contains( DictionaryConst.COLOR_DOCUMENT ) );
 
   }
 
@@ -125,12 +125,12 @@ public class BlueprintsGraphMetaverseReaderTest {
 
     String export = metaverseReader.exportFormat( IMetaverseReader.FORMAT_CSV );
     assertNotNull( "Export is null", export );
-    assertTrue( "Export content is wrong", export.indexOf( "\"SourceId\",\"SourceVirtual\"" ) == 0 );
-    assertTrue( "Export content is wrong", export.indexOf( "data.txt" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "IP Addr" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "City" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "Sales" ) != -1 );
-    assertTrue( "Export content is wrong", export.indexOf( "trans1.ktr" ) != -1 );
+    assertEquals( "Export content is wrong", 0, export.indexOf( "\"SourceId\",\"SourceVirtual\"" ) );
+    assertTrue( "Export content is wrong", export.contains( "data.txt" ) );
+    assertTrue( "Export content is wrong", export.contains( "IP Addr" ) );
+    assertTrue( "Export content is wrong", export.contains( "City" ) );
+    assertTrue( "Export content is wrong", export.contains( "Sales" ) );
+    assertTrue( "Export content is wrong", export.contains( "trans1.ktr" ) );
 
   }
 
@@ -156,8 +156,10 @@ public class BlueprintsGraphMetaverseReaderTest {
     assertNotNull( "Node is null", node );
     assertEquals( "Id is wrong", "trans1.ktr", node.getStringID() );
     assertEquals( "Type is wrong", DictionaryConst.NODE_TYPE_TRANS, node.getType() );
-    assertEquals( "Localized type is wrong", "Transformation", node.getProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED ) );
-    assertEquals( "Localized type is wrong", "Document", node.getProperty( DictionaryConst.PROPERTY_CATEGORY_LOCALIZED ) );
+    assertEquals( "Localized type is wrong", "Transformation",
+      node.getProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED ) );
+    assertEquals( "Localized type is wrong", "Document",
+      node.getProperty( DictionaryConst.PROPERTY_CATEGORY_LOCALIZED ) );
 
   }
 
@@ -166,7 +168,8 @@ public class BlueprintsGraphMetaverseReaderTest {
 
     IMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
 
-    List<IMetaverseNode> nodes = metaverseReader.findNodes( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_DATA_COLUMN );
+    List<IMetaverseNode> nodes =
+      metaverseReader.findNodes( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_DATA_COLUMN );
     assertNotNull( "Node is null", nodes );
     assertEquals( "Node count is wrong", 7, nodes.size() );
     Set<String> ids = new HashSet<String>();
@@ -184,7 +187,8 @@ public class BlueprintsGraphMetaverseReaderTest {
     nodes = metaverseReader.findNodes( DictionaryConst.PROPERTY_NAME, "Transformation: trans1.ktr" );
     assertNotNull( "Node is null", nodes );
     assertEquals( "Node count is wrong", 1, nodes.size() );
-    assertEquals( "Id is missing", "Transformation: trans1.ktr", nodes.get( 0 ).getProperty( DictionaryConst.PROPERTY_NAME ) );
+    assertEquals( "Id is missing", "Transformation: trans1.ktr",
+      nodes.get( 0 ).getProperty( DictionaryConst.PROPERTY_NAME ) );
 
   }
 
@@ -206,7 +210,8 @@ public class BlueprintsGraphMetaverseReaderTest {
   public void testFindLink() throws Exception {
     BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( graph );
 
-    IMetaverseLink link = metaverseReader.findLink( "datasource1.table1.field1", "populates", "trans2.ktr;field1", Direction.OUT );
+    IMetaverseLink link =
+      metaverseReader.findLink( "datasource1.table1.field1", "populates", "trans2.ktr;field1", Direction.OUT );
     assertNotNull( "Link is null", link );
     assertEquals( "Label is wrong", "populates", link.getLabel() );
     assertEquals( "Id is wrong", "datasource1.table1.field1", link.getFromNode().getStringID() );
@@ -315,32 +320,52 @@ public class BlueprintsGraphMetaverseReaderTest {
     Vertex textFile = createVertex( "data.txt", DictionaryConst.NODE_TYPE_FILE, "Text file: data.txt" );
     Vertex textField1 = createVertex( "data.txt;field1", DictionaryConst.NODE_TYPE_FILE_FIELD, "Text field: IP Addr" );
     Vertex textField2 = createVertex( "data.txt;field2", DictionaryConst.NODE_TYPE_FILE_FIELD, "Text field: Product" );
-    Vertex trans1 =  createVertex( "trans1.ktr", DictionaryConst.NODE_TYPE_TRANS, "Transformation: trans1.ktr" );
-    Vertex trans1Field1 = createVertex( "trans1.ktr;field1", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: IP Addr" );
-    Vertex trans1Field2 = createVertex( "trans1.ktr;field2", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: Product" );
-    Vertex trans1Field3 = createVertex( "trans1.ktr;field3", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: City" );
-    Vertex trans1Step1 = createVertex( "trans1.ktr;TextFileInput", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Read file" );
+    Vertex trans1 = createVertex( "trans1.ktr", DictionaryConst.NODE_TYPE_TRANS, "Transformation: trans1.ktr" );
+    Vertex trans1Field1 =
+      createVertex( "trans1.ktr;field1", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: IP Addr" );
+    Vertex trans1Field2 =
+      createVertex( "trans1.ktr;field2", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: Product" );
+    Vertex trans1Field3 =
+      createVertex( "trans1.ktr;field3", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: City" );
+    Vertex trans1Step1 =
+      createVertex( "trans1.ktr;TextFileInput", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Read file" );
     Vertex trans1Step2 = createVertex( "trans1.ktr;Calc", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Calc city" );
-    Vertex trans1Step3 = createVertex( "trans1.ktr;TableOutputStep", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Write temp table" );
-    Vertex datasource1 = createVertex( "datasource1", DictionaryConst.NODE_TYPE_DATASOURCE, "Datasource: Postgres staging" );
+    Vertex trans1Step3 =
+      createVertex( "trans1.ktr;TableOutputStep", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Write temp table" );
+    Vertex datasource1 =
+      createVertex( "datasource1", DictionaryConst.NODE_TYPE_DATASOURCE, "Datasource: Postgres staging" );
     Vertex table1 = createVertex( "datasource1.table1", DictionaryConst.NODE_TYPE_DATA_TABLE, "Table: temp table" );
-    Vertex table1field1 = createVertex( "datasource1.table1.field1", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Tmp IP Addr" );
-    Vertex table1field2 = createVertex( "datasource1.table1.field2", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Tmp Product" );
-    Vertex table1field3 = createVertex( "datasource1.table1.field3", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Tmp City" );
-    Vertex trans2 =  createVertex( "trans2.ktr", DictionaryConst.NODE_TYPE_TRANS, "Transformation: trans2.ktr" );
-    Vertex trans2Field1 = createVertex( "trans2.ktr;field1", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: IP Addr" );
-    Vertex trans2Field2 = createVertex( "trans2.ktr;field2", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: Product" );
-    Vertex trans2Field3 = createVertex( "trans2.ktr;field3", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: City" );
-    Vertex trans2Field4 = createVertex( "trans2.ktr;fiel4", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Transfield: Sales" );
-    Vertex trans2Step1 = createVertex( "trans2.ktr;TableInputStep", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Table input step" );
-    Vertex trans2Step2 = createVertex( "trans2.ktr;Javascript", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: calc sales" );
-    Vertex trans2Step3 = createVertex( "trans2.ktr;TableOuptutStep", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Write facttable" );
+    Vertex table1field1 =
+      createVertex( "datasource1.table1.field1", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Tmp IP Addr" );
+    Vertex table1field2 =
+      createVertex( "datasource1.table1.field2", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Tmp Product" );
+    Vertex table1field3 =
+      createVertex( "datasource1.table1.field3", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Tmp City" );
+    Vertex trans2 = createVertex( "trans2.ktr", DictionaryConst.NODE_TYPE_TRANS, "Transformation: trans2.ktr" );
+    Vertex trans2Field1 =
+      createVertex( "trans2.ktr;field1", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: IP Addr" );
+    Vertex trans2Field2 =
+      createVertex( "trans2.ktr;field2", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: Product" );
+    Vertex trans2Field3 =
+      createVertex( "trans2.ktr;field3", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: City" );
+    Vertex trans2Field4 =
+      createVertex( "trans2.ktr;fiel4", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Transfield: Sales" );
+    Vertex trans2Step1 =
+      createVertex( "trans2.ktr;TableInputStep", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Table input step" );
+    Vertex trans2Step2 =
+      createVertex( "trans2.ktr;Javascript", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: calc sales" );
+    Vertex trans2Step3 =
+      createVertex( "trans2.ktr;TableOuptutStep", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Write facttable" );
     Vertex table2 = createVertex( "datasource1.table2", DictionaryConst.NODE_TYPE_DATA_TABLE, "Table: fact table" );
     Vertex job1 = createVertex( "job1.kjb", DictionaryConst.NODE_TYPE_JOB, "Job: job1.kjb" );
-    Vertex table2field1 = createVertex( "datasource1.table2.field1", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Ip Addr" );
-    Vertex table2field2 = createVertex( "datasource1.table2.field2", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Product" );
-    Vertex table2field3 = createVertex( "datasource1.table2.field3", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: City" );
-    Vertex table2field4 = createVertex( "datasource1.table2.field4", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Sales" );
+    Vertex table2field1 =
+      createVertex( "datasource1.table2.field1", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Ip Addr" );
+    Vertex table2field2 =
+      createVertex( "datasource1.table2.field2", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Product" );
+    Vertex table2field3 =
+      createVertex( "datasource1.table2.field3", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: City" );
+    Vertex table2field4 =
+      createVertex( "datasource1.table2.field4", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Sales" );
     createVertex( "job2.kjb", DictionaryConst.NODE_TYPE_JOB, "Job: job2.kjb" );
 
     // these are the links

@@ -31,7 +31,9 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Matchers.anyString;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 
 public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
   @Mock ICatalogLineageClient mockCatalogLineageClient;
@@ -81,20 +83,20 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
 
     Mockito.verify( mockCatalogLineageClient ).processLineage( inputSourceCaptor.capture(), outputSourcesCaptor.capture() );
     List<LineageDataResource> inputSources = inputSourceCaptor.getValue();
-    Assert.assertNotNull( "input sources must not be null", inputSources );
+    assertNotNull( "input sources must not be null", inputSources );
     listContainsExpectedResource( personCsv, inputSources );
     listContainsExpectedResource( personDetailsCsv, inputSources );
     List<LineageDataResource> outputSources = outputSourcesCaptor.getValue();
-    Assert.assertNotNull( "output sources must not be null", outputSources );
+    assertNotNull( "output sources must not be null", outputSources );
     listContainsExpectedResource( outputTarget, outputSources );
   }
 
   private void listContainsExpectedResource( LineageDataResource resource, List<LineageDataResource> sourceList ) {
     sourceList.forEach( this::cleanVertexIds );
-    Assert.assertTrue( String.format( "did not find %s resource", resource.getName() ), sourceList.contains( resource ) );
+    assertTrue( String.format( "did not find %s resource", resource.getName() ), sourceList.contains( resource ) );
     List<FieldLevelRelationship> personCsvRelationshipsComputed = sourceList.stream().filter( r -> r.getName().equals( resource.getName() ) ).findFirst().get()
       .getFieldLevelRelationships();
-    Assert.assertTrue( String.format( "field relationships in %s resource incorrect", resource.getName() ),
+    assertTrue( String.format( "field relationships in %s resource incorrect", resource.getName() ),
       personCsvRelationshipsComputed.containsAll( resource.getFieldLevelRelationships() )
         && ( personCsvRelationshipsComputed.size() == resource.getFieldLevelRelationships().size() ) );
   }
@@ -147,7 +149,7 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
     List<LineageDataResource> inputSources = inputSourceCaptor.getValue();
     listContainsExpectedResource( personCsv, inputSources );
     List<LineageDataResource> outputSources = outputSourcesCaptor.getValue();
-    Assert.assertNotNull( "output sources must not be null", outputSources );
+    assertNotNull( "output sources must not be null", outputSources );
     listContainsExpectedResource( outputTarget, outputSources );
   }
 

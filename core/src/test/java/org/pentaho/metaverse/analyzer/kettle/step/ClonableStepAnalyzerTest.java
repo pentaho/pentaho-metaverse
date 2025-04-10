@@ -17,6 +17,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
 
+import static org.junit.Assert.assertNotEquals;
+
 public abstract class ClonableStepAnalyzerTest {
 
   protected abstract IClonableStepAnalyzer newInstance();
@@ -25,7 +27,7 @@ public abstract class ClonableStepAnalyzerTest {
   public void testCloneAnalyzer() {
     final IClonableStepAnalyzer analyzer = newInstance();
     // verify that cloneAnalyzer returns an instance that is different from the original
-    Assert.assertNotEquals( analyzer, analyzer.cloneAnalyzer() );
+    assertNotEquals( analyzer, analyzer.cloneAnalyzer() );
 
   }
 }

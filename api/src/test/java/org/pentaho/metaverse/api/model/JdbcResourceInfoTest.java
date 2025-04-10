@@ -68,7 +68,7 @@ public class JdbcResourceInfoTest {
   @Test
   public void testGetSetPort() throws Exception {
     assertNull( jdbcResourceInfo.getPort() );
-    Integer port = new Integer( 1000 );
+    Integer port = 1000;
     jdbcResourceInfo.setPort( port );
     assertEquals( port, jdbcResourceInfo.getPort() );
   }
@@ -100,7 +100,8 @@ public class JdbcResourceInfoTest {
   @Test
   public void testGetEncryptedPassword() {
     jdbcResourceInfo.setPassword( "1234567890" );
-    assertEquals( Encr.PASSWORD_ENCRYPTED_PREFIX + "2be98afc86aa7c3d6f84dfb2689caf68a", jdbcResourceInfo.getEncryptedPassword() );
+    assertEquals( Encr.PASSWORD_ENCRYPTED_PREFIX + "2be98afc86aa7c3d6f84dfb2689caf68a",
+      jdbcResourceInfo.getEncryptedPassword() );
   }
 
   @Test
@@ -114,7 +115,7 @@ public class JdbcResourceInfoTest {
   @Test
   public void testDbMetaVarPort() throws Exception {
     DatabaseMeta dbMeta = mock( DatabaseMeta.class );
-    DatabaseInterface dbInterface = mock( DatabaseInterface.class ); 
+    DatabaseInterface dbInterface = mock( DatabaseInterface.class );
     when( dbMeta.getDatabaseInterface() ).thenReturn( dbInterface );
     when( dbMeta.getAccessTypeDesc() ).thenReturn( "Native" );
 
@@ -122,14 +123,14 @@ public class JdbcResourceInfoTest {
     when( dbMeta.getDatabasePortNumberString() ).thenReturn( "${port_var}" );
     when( dbMeta.environmentSubstitute( any( String.class ) ) ).thenAnswer( new Answer<String>() {
       public String answer( InvocationOnMock invocation ) throws Throwable {
-        return vs.environmentSubstitute( (String) invocation.getArguments()[0] );
+        return vs.environmentSubstitute( (String) invocation.getArguments()[ 0 ] );
       }
     } );
 
     // check if var replaced
     vs.setVariable( "port_var", "4321" );
     JdbcResourceInfo jdbcResourceInfo = new JdbcResourceInfo( dbMeta );
-    assertEquals( jdbcResourceInfo.getPort(), new Integer( 4321 ) );
+    assertEquals( jdbcResourceInfo.getPort(), (Integer) 4321 );
 
     // check no exception when empty
     vs.setVariable( "port_var", "" );
