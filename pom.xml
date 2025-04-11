@@ -64,7 +64,7 @@
     <dependency.com.tinkerpop.blueprints.version>2.6.0</dependency.com.tinkerpop.blueprints.version>
     <dependency.commons-configuration.commons-configuration.version>1.9</dependency.commons-configuration.commons-configuration.version>
     <dependency.commons-collections.commons-collections.version>3.2.1</dependency.commons-collections.commons-collections.version>
-    <dependency.org.mockito.mockito-core.version>5.10.0</dependency.org.mockito.mockito-core.version>
+    <dependency.org.mockito.mockito-inline.version>5.2.0</dependency.org.mockito.mockito-inline.version>
     <dependency.pentaho-kettle.kettle-core.version>${project.version}</dependency.pentaho-kettle.kettle-core.version>
     <dependency.pentaho.pentaho-platform-core.version>${project.version}</dependency.pentaho.pentaho-platform-core.version>
     <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>

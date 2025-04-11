@@ -13,7 +13,6 @@
 
 package org.pentaho.metaverse;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +27,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
 
 /**
  * Runs the integration test with the {@link MetaverseConfig} mocked to have
@@ -59,13 +59,13 @@ public class MetaverseValidationDedupIT extends MetaverseValidationIT {
   public void testTextFileInputNode() throws Exception {
     List<FramedMetaverseNode> containedNodes = testTextFileInputNodeImpl( 3 );
     // get field names
-    List<String> nodeNames = new ArrayList();
+    List<String> nodeNames = new ArrayList<>();
     for ( final FramedMetaverseNode node : containedNodes ) {
       nodeNames.add( node.getName() );
     }
-    Assert.assertTrue( nodeNames.contains( "longitude" ) );
-    Assert.assertTrue( nodeNames.contains( "latitude" ) );
-    Assert.assertTrue( nodeNames.contains( "address" ) );
+    assertTrue( nodeNames.contains( "longitude" ) );
+    assertTrue( nodeNames.contains( "latitude" ) );
+    assertTrue( nodeNames.contains( "address" ) );
   }
 
   @Test

@@ -44,7 +44,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -101,13 +103,13 @@ public class TransLineageHolderMapTest {
   @Mock
   private RowMetaInterface rowMetaInterface;
 
-  private String path1 = "/path/to/file1";
-  private String path1a = "/another/path/to/file1a";
-  private String path2 = "/another/path/to/file2";
-  private String sharedPath = "/shared/file";
+  private final String path1 = "/path/to/file1";
+  private final String path1a = "/another/path/to/file1a";
+  private final String path2 = "/another/path/to/file2";
+  private final String sharedPath = "/shared/file";
 
-  private String[] filePaths = { path1, path1a, sharedPath };
-  private String[] filePaths2 = { path2, sharedPath };
+  private final String[] filePaths = { path1, path1a, sharedPath };
+  private final String[] filePaths2 = { path2, sharedPath };
 
   private StepMeta spyMeta;
   private StepMeta spyMeta2;
@@ -131,13 +133,13 @@ public class TransLineageHolderMapTest {
     lenient().when( meta.getParentStepMeta() ).thenReturn( spyMeta );
     lenient().when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
     lenient().when( meta.writesToFile() ).thenReturn( true );
-    lenient().when( meta.getFilePaths( false) ).thenReturn( filePaths );
+    lenient().when( meta.getFilePaths( false ) ).thenReturn( filePaths );
 
     spyMeta2 = spy( new StepMeta( "test2", meta2 ) );
     lenient().when( meta2.getParentStepMeta() ).thenReturn( spyMeta2 );
     lenient().when( spyMeta2.getParentTransMeta() ).thenReturn( transMeta );
     lenient().when( meta2.writesToFile() ).thenReturn( true );
-    lenient().when( meta2.getFilePaths( false) ).thenReturn( filePaths2 );
+    lenient().when( meta2.getFilePaths( false ) ).thenReturn( filePaths2 );
 
     lenient().when( transMeta.getSteps() ).thenReturn( Arrays.asList( new StepMeta[] { spyMeta, spyMeta2 } ) );
 
@@ -151,7 +153,7 @@ public class TransLineageHolderMapTest {
     ReflectionTestUtils.setField( JobLineageHolderMap.getInstance(), "lineageHolderMap",
       Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
     ReflectionTestUtils.setField( TransLineageHolderMap.getInstance(), "lineageHolderMap",
-            Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
+      Collections.synchronizedMap( new MapMaker().weakKeys().makeMap() ) );
     transLineageHolderMap = TransLineageHolderMap.getInstance();
     mockHolder = spy( new LineageHolder() );
     transLineageHolderMap.setDefaultMetaverseBuilder( defaultBuilder );
@@ -182,7 +184,7 @@ public class TransLineageHolderMapTest {
 
     LineageHolder holder = transLineageHolderMap.getLineageHolder( trans );
     assertNotNull( holder ); // We always get a (perhaps empty) holder
-    assertFalse( holder == mockHolder );
+    assertNotSame( holder, mockHolder );
     assertNull( holder.getExecutionProfile() );
     assertNull( holder.getMetaverseBuilder() );
 
@@ -192,9 +194,9 @@ public class TransLineageHolderMapTest {
 
     holder = transLineageHolderMap.getLineageHolder( trans );
     assertNotNull( holder ); // We always get a (perhaps empty) holder
-    assertTrue( holder == mockHolder );
-    assertTrue( holder.getExecutionProfile() == mockExecutionProfile );
-    assertTrue( holder.getMetaverseBuilder() == mockBuilder );
+    assertSame( holder, mockHolder );
+    assertSame( holder.getExecutionProfile(), mockExecutionProfile );
+    assertSame( holder.getMetaverseBuilder(), mockBuilder );
   }
 
   @Test

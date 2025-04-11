@@ -37,7 +37,7 @@ public class TestFileSystemLocator extends FileSystemLocator {
     if ( delay != 0 ) {
       try {
         Thread.sleep( delay );
-      } catch ( InterruptedException e ) {
+      } catch ( InterruptedException ignored ) {
       }
     }
     return super.getContents( file );

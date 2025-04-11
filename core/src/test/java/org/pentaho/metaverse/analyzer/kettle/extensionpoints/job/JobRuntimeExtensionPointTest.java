@@ -117,16 +117,18 @@ public class JobRuntimeExtensionPointTest {
     mockedKettleAnalyzerUtil = mockStatic( KettleAnalyzerUtil.class );
     setupMetaverseConfig( true, true );
 
-    connectionManager = spy (connectionManager );
-    lenient().when (  connectionManager.getConnectionDetails( BaseRuntimeExtensionPoint.DEFAULT_CATALOG_CONNECTION_NAME ) ).thenReturn( connectionDetails );
+    connectionManager = spy( connectionManager );
+    lenient().when(
+        connectionManager.getConnectionDetails( BaseRuntimeExtensionPoint.DEFAULT_CATALOG_CONNECTION_NAME ) )
+      .thenReturn( connectionDetails );
     Map<String, String> map = new HashMap<>();
-    map.put("url", "someurl" );
-    map.put("username", "devuser" );
-    map.put("password", "password" );
-    map.put("tokenUrl", "someurl" );
-    map.put("clientId", "id" );
-    map.put("clientSecret", "" );
-    lenient().when ( connectionDetails.getProperties() ).thenReturn( map );
+    map.put( "url", "someurl" );
+    map.put( "username", "devuser" );
+    map.put( "password", "password" );
+    map.put( "tokenUrl", "someurl" );
+    map.put( "clientId", "id" );
+    map.put( "clientSecret", "" );
+    lenient().when( connectionDetails.getProperties() ).thenReturn( map );
     jobExtensionPoint = new JobRuntimeExtensionPoint();
     jobExtensionPoint.setCatalogLineageClientProvider( clientProvider );
     jobExtensionPoint.setRuntimeEnabled( true );
@@ -162,7 +164,7 @@ public class JobRuntimeExtensionPointTest {
   }
 
   @After
-  public void teardown(){
+  public void teardown() {
     mockedMetaverseConfig.close();
     mockedKettleAnalyzerUtil.close();
   }
@@ -203,7 +205,7 @@ public class JobRuntimeExtensionPointTest {
     JobRuntimeExtensionPoint ext = spy( jobExtensionPoint );
     ext.jobFinished( null );
     verify( ext, never() ).populateExecutionProfile(
-            any( IExecutionProfile.class ), eq( job ) );
+      any( IExecutionProfile.class ), eq( job ) );
 
     ext.jobFinished( job );
     verify( ext, times( 1 ) ).populateExecutionProfile( any( IExecutionProfile.class ), eq( job ) );
@@ -230,7 +232,7 @@ public class JobRuntimeExtensionPointTest {
     final LineageHolder holder = Mockito.mock( LineageHolder.class );
     when( JobLineageHolderMap.getInstance().getLineageHolder( job ) ).thenReturn( holder );
 
-    try (MockedStatic<ExtensionPointHandler> mockedExtensionPointHandler = mockStatic( ExtensionPointHandler.class ) ) {
+    try ( MockedStatic<ExtensionPointHandler> ignored = mockStatic( ExtensionPointHandler.class ) ) {
       ext.jobFinished( job );
       verify( ext, times( 1 ) ).populateExecutionProfile( any( IExecutionProfile.class ), eq( job ) );
       verify( ext, times( 1 ) ).runAnalyzers( eq( job ) );

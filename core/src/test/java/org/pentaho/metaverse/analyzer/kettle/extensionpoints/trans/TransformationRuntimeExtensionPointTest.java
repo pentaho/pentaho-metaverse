@@ -118,16 +118,18 @@ public class TransformationRuntimeExtensionPointTest {
     mockedKettleAnalyzerUtil = mockStatic( KettleAnalyzerUtil.class );
     setupMetaverseConfig( true, true );
 
-    connectionManager = spy (connectionManager );
-    lenient().when (  connectionManager.getConnectionDetails( BaseRuntimeExtensionPoint.DEFAULT_CATALOG_CONNECTION_NAME ) ).thenReturn( connectionDetails );
+    connectionManager = spy( connectionManager );
+    lenient().when(
+        connectionManager.getConnectionDetails( BaseRuntimeExtensionPoint.DEFAULT_CATALOG_CONNECTION_NAME ) )
+      .thenReturn( connectionDetails );
     Map<String, String> map = new HashMap<>();
-    map.put("url", "someurl" );
-    map.put("username", "devuser" );
-    map.put("password", "password" );
-    map.put("tokenUrl", "someurl" );
-    map.put("clientId", "id" );
-    map.put("clientSecret", "" );
-    lenient().when ( connectionDetails.getProperties() ).thenReturn( map );
+    map.put( "url", "someurl" );
+    map.put( "username", "devuser" );
+    map.put( "password", "password" );
+    map.put( "tokenUrl", "someurl" );
+    map.put( "clientId", "id" );
+    map.put( "clientSecret", "" );
+    lenient().when( connectionDetails.getProperties() ).thenReturn( map );
 
     // (re)initialize the default state of MetaverseConfig
     setupMetaverseConfig( true, true );
@@ -169,7 +171,7 @@ public class TransformationRuntimeExtensionPointTest {
   }
 
   @After
-  public void teardown(){
+  public void teardown() {
     mockedMetaverseConfig.close();
     mockedKettleAnalyzerUtil.close();
   }
@@ -205,7 +207,8 @@ public class TransformationRuntimeExtensionPointTest {
     verify( ext, never() ).populateExecutionProfile(
       Mockito.any( IExecutionProfile.class ), eq( trans ) );
 
-    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) ).thenReturn( mock( IDocument.class ) );
+    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) )
+      .thenReturn( mock( IDocument.class ) );
     ext.transFinished( trans );
     verify( ext, times( 1 ) ).populateExecutionProfile( Mockito.any( IExecutionProfile.class ), eq( trans ) );
     verify( ext, times( 1 ) ).runAnalyzers( eq( trans ) );
@@ -230,7 +233,8 @@ public class TransformationRuntimeExtensionPointTest {
     verify( ext, times( 1 ) ).populateExecutionProfile( Mockito.any( IExecutionProfile.class ), eq( trans ) );
     verify( ext, never() ).runAnalyzers( eq( trans ) );
     verify( ext, times( 2 ) ).shouldCreateGraph( eq( trans ) );
-    verify( lineageWriter, never() ).outputLineageGraph( TransLineageHolderMap.getInstance().getLineageHolder( trans ) );
+    verify( lineageWriter, never() ).outputLineageGraph(
+      TransLineageHolderMap.getInstance().getLineageHolder( trans ) );
   }
 
   @Test
@@ -238,8 +242,10 @@ public class TransformationRuntimeExtensionPointTest {
     TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
     when( ext.allowedAsync() ).thenReturn( false );
 
-    try (MockedStatic<ExtensionPointHandler> mockedExtensionPointHandler = mockStatic( ExtensionPointHandler.class ) ) {
-      Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) ).thenReturn( mock( IDocument.class ) );
+    try (
+      MockedStatic<ExtensionPointHandler> ignored = mockStatic( ExtensionPointHandler.class ) ) {
+      Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) )
+        .thenReturn( mock( IDocument.class ) );
       ext.transFinished( trans );
       verify( ext ).createLineGraph( trans );
       verify( ext, never() ).createLineGraphAsync( trans );
@@ -270,7 +276,8 @@ public class TransformationRuntimeExtensionPointTest {
     Mockito.reset( lineageWriter );
 
     setupMetaverseConfig( true, true );
-    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) ).thenReturn( mock( IDocument.class ) );
+    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) )
+      .thenReturn( mock( IDocument.class ) );
     // set a parent trans  - since MetaverseConfig.generateSubGraph() returns true, lineageWriter.outputLineageGraph
     // should still get called
     trans.setParentTrans( new Trans() );
@@ -283,7 +290,8 @@ public class TransformationRuntimeExtensionPointTest {
     // configure MetaverseConfig.generateSubGraph() to returns false, lineageWriter.outputLineageGraph should never
     // be called
     setupMetaverseConfig( true, false );
-    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) ).thenReturn( mock( IDocument.class ) );
+    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) )
+      .thenReturn( mock( IDocument.class ) );
     ext.transFinished( trans );
     verify( lineageWriter, never() )
       .outputLineageGraph( TransLineageHolderMap.getInstance().getLineageHolder( trans ) );
@@ -293,7 +301,8 @@ public class TransformationRuntimeExtensionPointTest {
   public void testTransFinishedAsync() throws Exception {
     TransformationRuntimeExtensionPoint ext = spy( transExtensionPoint );
     when( ext.allowedAsync() ).thenReturn( true );
-    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) ).thenReturn( mock( IDocument.class ) );
+    Mockito.when( KettleAnalyzerUtil.buildDocument( any(), any(), any(), any() ) )
+      .thenReturn( mock( IDocument.class ) );
     ext.transFinished( trans );
 
     verify( ext ).createLineGraphAsync( trans );

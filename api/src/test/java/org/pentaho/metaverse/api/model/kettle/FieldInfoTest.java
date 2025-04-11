@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.row.ValueMetaInterface;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 
@@ -57,23 +58,23 @@ public class FieldInfoTest {
 
   @Test
   public void testGettersSetters() throws Exception {
-    assertEquals( null, fieldInfo.getDataType());
+    assertNull( fieldInfo.getDataType() );
     fieldInfo.setDataType( "String" );
     assertEquals( "String", fieldInfo.getDataType() );
 
-    assertEquals( null, fieldInfo.getLength() );
+    assertNull( fieldInfo.getLength() );
     fieldInfo.setLength( 45 );
     assertEquals( Integer.valueOf( 45 ), fieldInfo.getLength() );
 
-    assertEquals( null, fieldInfo.getPrecision() );
+    assertNull( fieldInfo.getPrecision() );
     fieldInfo.setPrecision( 4 );
     assertEquals( Integer.valueOf( 4 ), fieldInfo.getPrecision() );
 
-    assertEquals( null, fieldInfo.getName() );
+    assertNull( fieldInfo.getName() );
     fieldInfo.setName( "Name" );
     assertEquals( "Name", fieldInfo.getName() );
 
-    assertEquals( null, fieldInfo.getDescription() );
+    assertNull( fieldInfo.getDescription() );
     fieldInfo.setDescription( "Description" );
     assertEquals( "Description", fieldInfo.getDescription() );
   }

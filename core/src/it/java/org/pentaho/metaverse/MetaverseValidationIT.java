@@ -158,8 +158,8 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
     File folder = new File( ROOT_FOLDER );
 
     assertFileNameEquals(
-            FileUtils.listFiles( folder, new String[] { "ktr", "kjb" }, true ),
-            node.getDocuments());
+      FileUtils.listFiles( folder, new String[] { "ktr", "kjb" }, true ),
+      node.getDocuments() );
   }
 
   @Test
@@ -271,15 +271,15 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
       }
 
       assertEquals( "Not all transformation steps are modeled in the graph for [" + tm.getName() + "]",
-          transMetaSteps.size(), matchCount );
+        transMetaSteps.size(), matchCount );
 
-      Collection<String> expectedStepNames =  new TreeSet<>(
-          transMetaSteps.stream().map( sm -> sm.getName() )
-            .collect( Collectors.toList() )
+      Collection<String> expectedStepNames = new TreeSet<>(
+        transMetaSteps.stream().map( sm -> sm.getName() )
+          .collect( Collectors.toList() )
       );
-      Collection<String> actualStepNames =  new TreeSet<>(
-          StreamSupport.stream( transNode.getStepNodes().spliterator(), false )
-            .map( tsn -> tsn.asVertex().getProperty( "name" )
+      Collection<String> actualStepNames = new TreeSet<>(
+        StreamSupport.stream( transNode.getStepNodes().spliterator(), false )
+          .map( tsn -> tsn.asVertex().getProperty( "name" )
             .toString() ).collect( Collectors.toList() )
       );
 
@@ -308,7 +308,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
         assertNotNull( ops );
         List<IOperation> metadataOps = ops.get( ChangeType.METADATA );
         assertNotNull( metadataOps );
-        assertTrue( metadataOps.size() > 0 );
+        assertFalse( metadataOps.isEmpty() );
 
         // there should not be any data operations on nodes touched by this step
         assertNull( ops.get( ChangeType.DATA ) );
@@ -351,7 +351,8 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
       FieldNode fieldPopulatesMe = outField.getFieldPopulatesMe();
       assertNotNull( fieldPopulatesMe );
       assertEquals( DictionaryConst.NODE_TYPE_FILE_FIELD, fieldPopulatesMe.getType() );
-      assertEquals( fileInputStepNode.getProperty( "name" ), fieldPopulatesMe.getStepThatInputsMe().getProperty( "name" ) );
+      assertEquals( fileInputStepNode.getProperty( "name" ),
+        fieldPopulatesMe.getStepThatInputsMe().getProperty( "name" ) );
       fileFieldCount++;
     }
     assertEquals( countInputs, fileFieldCount );
@@ -488,7 +489,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   public void testTableOutputStepNode(
-          final TableOutputStepNode node, final String expectedTableName ) throws Exception {
+    final TableOutputStepNode node, final String expectedTableName ) throws Exception {
 
     // check the table that it writes to
     TableOutputMeta meta = (TableOutputMeta) getStepMeta( node );
@@ -503,22 +504,24 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
     Iterable<StreamFieldNode> outputs = node.getOutputStreamFields();
 
     Collection<String> expectedNames = new TreeSet<>(
-        StreamSupport.stream( inputs.spliterator(), false )
-          .map( sfn -> sfn.getProperty( "name" ).toString() )
-          .collect( Collectors.toList() )
+      StreamSupport.stream( inputs.spliterator(), false )
+        .map( sfn -> sfn.getProperty( "name" ).toString() )
+        .collect( Collectors.toList() )
     );
 
     expectedNames.addAll( Arrays.asList( meta.getFieldDatabase() ) );
 
     Collection<String> actualNames = new TreeSet<>(
-        StreamSupport.stream( outputs.spliterator(), false )
-          .map( sfn -> sfn.getProperty( "name" ).toString() )
-          .collect( Collectors.toList() )
+      StreamSupport.stream( outputs.spliterator(), false )
+        .map( sfn -> sfn.getProperty( "name" ).toString() )
+        .collect( Collectors.toList() )
     );
 
     actualNames = new TreeSet<>( actualNames );
 
-    assertEquals( "Stream field names do not match, meta field database fields: " + meta.getFieldDatabase() , expectedNames, actualNames );
+    assertEquals(
+      "Stream field names do not match, meta field database fields: " + Arrays.toString( meta.getFieldDatabase() ),
+      expectedNames, actualNames );
 
     for ( StreamFieldNode input : inputs ) {
       assertEquals( input.getName(), ( (FramedMetaverseNode) IteratorUtils.toList(
@@ -696,8 +699,8 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
       boolean isOnLeft = node.getJoinFieldsLeft().contains( usedField.getName() );
       boolean isOnRight = node.getJoinFieldsRight().contains( usedField.getName() );
       assertTrue( isOnLeft || isOnRight );
-      assertTrue( usedField.getFieldNodesThatIJoinTo() != null );
-      assertTrue( usedField.getFieldNodesThatJoinToMe() != null );
+      assertNotNull( usedField.getFieldNodesThatIJoinTo() );
+      assertNotNull( usedField.getFieldNodesThatJoinToMe() );
     }
 
     Iterable<StreamFieldNode> outputFields = node.getOutputStreamFields();
@@ -705,7 +708,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
 
     for ( StreamFieldNode outputField : outputFields ) {
       // these should have derives links
-      assertTrue( outputField.getFieldNodesThatDeriveMe() != null );
+      assertNotNull( outputField.getFieldNodesThatDeriveMe() );
     }
 
   }
@@ -727,9 +730,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
       StreamFieldNode outField = iter1.next();
       if ( expectations.contains( outField.getName() ) ) {
         assertEquals( 1, getIterableSize( outField.getFieldNodesThatDeriveMe() ) );
-        Iterator<StreamFieldNode> iter2 = outField.getFieldNodesThatDeriveMe().iterator();
-        while ( iter2.hasNext() ) {
-          StreamFieldNode derivedFromNode = iter2.next();
+        for ( StreamFieldNode derivedFromNode : outField.getFieldNodesThatDeriveMe() ) {
           assertTrue( expectations.contains( derivedFromNode.getName() ) );
         }
       }
@@ -1388,17 +1389,17 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   private void assertFileNameEquals( Collection<File> expectedFiles, Iterable<KettleNode> actualKettleNodes ) {
-    Set<String> expectedSet = getSortedSet(getFileNamesFromFile(expectedFiles));
-    Set<String> actualSet = getSortedSet(getFileNamesFromKettleNode(getCollection(actualKettleNodes)));
+    Set<String> expectedSet = getSortedSet( getFileNamesFromFile( expectedFiles ) );
+    Set<String> actualSet = getSortedSet( getFileNamesFromKettleNode( getCollection( actualKettleNodes ) ) );
 
     Iterator actualSetIterator = actualSet.iterator();
     while ( actualSetIterator.hasNext() ) {
-      expectedSet.remove( actualSetIterator.next());
+      expectedSet.remove( actualSetIterator.next() );
       actualSetIterator.remove();
     }
 
     assertTrue( "Missing expected files : " + expectedSet + " and/or Extra actual files: " + actualSet,
-            expectedSet.isEmpty() && actualSet.isEmpty() );
+      expectedSet.isEmpty() && actualSet.isEmpty() );
 
   }
 
@@ -1408,14 +1409,12 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
 
   private Collection<String> getFileNamesFromKettleNode( Collection<KettleNode> kettleNodes ) {
     return kettleNodes.stream().map( KettleNode::getPath )
-            .map( s -> s.substring( s.lastIndexOf( '/' ) + 1 ) )
-            .collect( Collectors.toList() );
+      .map( s -> s.substring( s.lastIndexOf( '/' ) + 1 ) )
+      .collect( Collectors.toList() );
   }
 
   private Set<String> getSortedSet( Collection<String> collection ) {
-    TreeSet<String> set = new TreeSet<>();
-    set.addAll( collection );
-    return set;
+    return new TreeSet<>( collection );
   }
 
 }

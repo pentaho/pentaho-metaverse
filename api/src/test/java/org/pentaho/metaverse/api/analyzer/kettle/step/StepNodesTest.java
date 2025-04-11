@@ -18,6 +18,9 @@ import org.junit.Test;
 
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class StepNodesTest {
 
   @Test
@@ -25,10 +28,10 @@ public class StepNodesTest {
     final Map<String, String> map = new StepNodes.LowerCaseKeyLinkedHashMap();
     map.put( "FOO", "FOO" );
 
-    Assert.assertEquals( map.get( "FOO" ), "FOO" );
-    Assert.assertEquals( map.get( "foo" ), "FOO" );
+    assertEquals( map.get( "FOO" ), "FOO" );
+    assertEquals( map.get( "foo" ), "FOO" );
 
-    Assert.assertTrue( map.containsKey( "FOO" ) );
-    Assert.assertTrue( map.containsKey( "foo" ) );
+    assertTrue( map.containsKey( "FOO" ) );
+    assertTrue( map.containsKey( "foo" ) );
   }
 }

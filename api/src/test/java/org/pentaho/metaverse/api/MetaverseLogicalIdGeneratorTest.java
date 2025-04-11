@@ -206,7 +206,7 @@ public class MetaverseLogicalIdGeneratorTest {
     String logicalId = idGenerator.generateId( node );
 
     // it should come out in alphabetical order by key
-    assertEquals( null, logicalId );
+    assertNull( logicalId );
 
     // make sure no call was made to add the logical id as a property since it should be null
     verify( node, never() ).setProperty( eq( DictionaryConst.PROPERTY_LOGICAL_ID ), anyString() );

@@ -33,6 +33,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class StepExternalConsumerRowListenerTest {
@@ -75,28 +78,28 @@ public class StepExternalConsumerRowListenerTest {
     listener.rowReadEvent( rmi, row1 );
     Map resourceMap = TransLineageHolderMap.getInstance().getLineageHolder( mockTrans ).getExecutionProfile()
       .getExecutionData().getExternalResources();
-    Assert.assertNotNull( resourceMap );
-    Assert.assertEquals( 1, resourceMap.size() );
-    Assert.assertNotNull( resourceMap.get( "my_step" ) );
-    Assert.assertTrue( resourceMap.get( "my_step" ) instanceof List );
+    assertNotNull( resourceMap );
+    assertEquals( 1, resourceMap.size() );
+    assertNotNull( resourceMap.get( "my_step" ) );
+    assertTrue( resourceMap.get( "my_step" ) instanceof List );
     List resources = (List) resourceMap.get( "my_step" );
-    Assert.assertNotNull( resources );
-    Assert.assertEquals( 2, resources.size() );
-    Assert.assertTrue( resources.contains( resource1 ) );
-    Assert.assertTrue( resources.contains( resource2 ) );
+    assertNotNull( resources );
+    assertEquals( 2, resources.size() );
+    assertTrue( resources.contains( resource1 ) );
+    assertTrue( resources.contains( resource2 ) );
 
     listener.rowReadEvent( rmi, row2 );
     resourceMap = TransLineageHolderMap.getInstance().getLineageHolder( mockTrans ).getExecutionProfile()
       .getExecutionData().getExternalResources();
-    Assert.assertNotNull( resourceMap );
-    Assert.assertEquals( 1, resourceMap.size() );
-    Assert.assertNotNull( resourceMap.get( "my_step" ) );
-    Assert.assertTrue( resourceMap.get( "my_step" ) instanceof List );
+    assertNotNull( resourceMap );
+    assertEquals( 1, resourceMap.size() );
+    assertNotNull( resourceMap.get( "my_step" ) );
+    assertTrue( resourceMap.get( "my_step" ) instanceof List );
     resources = (List) resourceMap.get( "my_step" );
-    Assert.assertNotNull( resources );
-    Assert.assertEquals( 3, resources.size() );
-    Assert.assertTrue( resources.contains( resource1 ) );
-    Assert.assertTrue( resources.contains( resource2 ) );
-    Assert.assertTrue( resources.contains( resource3 ) );
+    assertNotNull( resources );
+    assertEquals( 3, resources.size() );
+    assertTrue( resources.contains( resource1 ) );
+    assertTrue( resources.contains( resource2 ) );
+    assertTrue( resources.contains( resource3 ) );
   }
 }

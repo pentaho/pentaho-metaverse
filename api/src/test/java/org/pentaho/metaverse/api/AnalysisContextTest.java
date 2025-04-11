@@ -44,13 +44,13 @@ public class AnalysisContextTest {
     assertNotNull( context );
     assertEquals( "Name of context is not as expected!", "myContext", context.getContextName() );
 
-    context = new AnalysisContext( "myContext", new String( "myContextObject" ) );
+    context = new AnalysisContext( "myContext", "myContextObject" );
     assertNotNull( context );
     Object contextObject = context.getContextObject();
     assertNotNull( contextObject );
     assertEquals( contextObject.toString(), "myContextObject" );
 
-    context = new AnalysisContext( "myContext", new Integer( 5 ) );
+    context = new AnalysisContext( "myContext", 5 );
     contextObject = context.getContextObject();
     assertNotNull( contextObject );
     assertTrue( "Object is not of the expected type!", contextObject instanceof Integer );
@@ -76,7 +76,7 @@ public class AnalysisContextTest {
     assertTrue( "Context object is not of array type!", contextObject.getClass().isArray() );
     String[] contextArray = (String[]) contextObject;
     assertEquals( "Context object is array but not of correct size!", contextArray.length, 1 );
-    assertEquals( "Context object is array of correct size but wrong contents!", contextArray[0],
-        "testObjectContents" );
+    assertEquals( "Context object is array of correct size but wrong contents!", contextArray[ 0 ],
+      "testObjectContents" );
   }
 }

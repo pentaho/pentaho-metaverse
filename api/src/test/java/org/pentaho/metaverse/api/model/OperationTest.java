@@ -49,24 +49,23 @@ public class OperationTest {
 
   @Test
   public void testEquals() {
-    assertTrue( operation.equals( operation ) );
-    assertFalse( operation.equals( new Object() ) );
+    assertNotEquals( operation, new Object() );
 
     Operation operation2 = new Operation( "operationName", "operationDescription" );
-    assertTrue( operation.equals( operation2 ) );
+    assertEquals( operation, operation2 );
     operation2.setCategory( "Some other category" );
-    assertFalse( operation.equals( operation2 ) );
+    assertNotEquals( operation, operation2 );
 
     operation2 = new Operation( "operationName", "operationDescription" );
     operation2.setDescription( "Some other description" );
-    assertFalse( operation.equals( operation2 ) );
+    assertNotEquals( operation, operation2 );
 
     operation2 = new Operation( "operationName", "operationDescription" );
     operation2.setName( "Some other name" );
-    assertFalse( operation.equals( operation2 ) );
+    assertNotEquals( operation, operation2 );
 
     operation2 = new Operation( "operationName", "operationDescription" );
     operation2.setType( ChangeType.DATA );
-    assertFalse( operation.equals( operation2 ) );
+    assertNotEquals( operation, operation2 );
   }
 }

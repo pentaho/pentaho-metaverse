@@ -13,8 +13,9 @@
 
 package org.pentaho.metaverse.api.model.catalog;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class LineageDataResourceTest {
 
@@ -22,16 +23,16 @@ public class LineageDataResourceTest {
   public void testHdfsPathParser() {
     LineageDataResource dataResource = new LineageDataResource( "foo" );
     dataResource.parseHdfsPath( "/devuser:***@hdp31n1.pentaho.net:8020/user/devuser/waterline/sales_data.csv" );
-    Assert.assertEquals( "hdp31n1.pentaho.net", dataResource.getHdfsHost() );
-    Assert.assertEquals( "8020", dataResource.getHdfsPort() );
-    Assert.assertEquals( "/user/devuser/waterline/sales_data.csv", dataResource.getPath() );
+    assertEquals( "hdp31n1.pentaho.net", dataResource.getHdfsHost() );
+    assertEquals( "8020", dataResource.getHdfsPort() );
+    assertEquals( "/user/devuser/waterline/sales_data.csv", dataResource.getPath() );
   }
 
   @Test
   public void testS3PathParser() {
     LineageDataResource dataResource = new LineageDataResource( "foo" );
     dataResource.parseS3PvfsPath( "/bucketname/key/to/file.txt" );
-    Assert.assertEquals( "bucketname", dataResource.getS3Bucket() );
-    Assert.assertEquals( "key/to/file.txt", dataResource.getPath() );
+    assertEquals( "bucketname", dataResource.getS3Bucket() );
+    assertEquals( "key/to/file.txt", dataResource.getPath() );
   }
 }

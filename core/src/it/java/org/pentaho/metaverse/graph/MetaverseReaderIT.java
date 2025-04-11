@@ -28,6 +28,7 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -55,9 +56,10 @@ public class MetaverseReaderIT {
 
   @Test
   public void testSearch() throws Exception {
-    List<String> whatWeAreLookingFor = new ArrayList<String>( Arrays.asList( DictionaryConst.NODE_TYPE_TRANS ) );
-    List<IMetaverseNode> nodes = reader.findNodes( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_DATA_COLUMN );
-    List<String> startingPoint = new ArrayList<String>( Arrays.asList( nodes.get( 0 ).getStringID() ) );
+    List<String> whatWeAreLookingFor = new ArrayList<String>( List.of( DictionaryConst.NODE_TYPE_TRANS ) );
+    List<IMetaverseNode> nodes =
+      reader.findNodes( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_DATA_COLUMN );
+    List<String> startingPoint = new ArrayList<String>( Collections.singletonList( nodes.get( 0 ).getStringID() ) );
 
     System.out.println( "Looking for Transformations that write/read Database Column " + nodes.get( 0 ).getName() );
 

@@ -51,6 +51,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -139,7 +140,7 @@ public class JobAnalyzerTest {
 
     when( mockJob.getJobMeta() ).thenReturn( mockContent );
 
-    lenient().when( mockContent.listVariables() ).thenReturn( new String[] { } );
+    lenient().when( mockContent.listVariables() ).thenReturn( new String[] {} );
     final String PARAM = "param1";
     when( mockContent.listParameters() ).thenReturn( new String[] { PARAM } );
     when( mockContent.getParameterDefault( PARAM ) ).thenReturn( "default" );
@@ -195,11 +196,12 @@ public class JobAnalyzerTest {
 
     analyzer.setJobEntryAnalyzerProvider( jobEntryAnalyzerProvider );
     final Set<IJobEntryAnalyzer> jobEntryAnalyzers = null;
-    when( jobEntryAnalyzerProvider.getAnalyzers( any( Collection.class ) ) ).thenReturn( new ArrayList<IJobEntryAnalyzer>() {{
-      add(
+    when( jobEntryAnalyzerProvider.getAnalyzers( any( Collection.class ) ) ).thenReturn(
+      new ArrayList<IJobEntryAnalyzer>() {{
+        add(
           mock( IJobEntryAnalyzer.class )
-      );
-    }} );
+        );
+      }} );
     IMetaverseNode node = analyzer.analyze( descriptor, mockJobDoc );
     assertNotNull( node );
   }
@@ -226,8 +228,8 @@ public class JobAnalyzerTest {
     IDocument newMockJobDoc = mock( IDocument.class );
     lenient().when( newMockJobDoc.getType() ).thenReturn( DictionaryConst.NODE_TYPE_JOB );
     when( newMockJobDoc.getContent() ).thenReturn(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
-            "<job>This is not a valid JobMeta doc!" );
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
+        "<job>This is not a valid JobMeta doc!" );
     analyzer.analyze( descriptor, newMockJobDoc );
   }
 
@@ -251,6 +253,6 @@ public class JobAnalyzerTest {
   @Test
   public void testGetSupportedTypes() {
     Set<String> types = analyzer.getSupportedTypes();
-    assertTrue( types == JobAnalyzer.defaultSupportedTypes );
+    assertSame( types, JobAnalyzer.defaultSupportedTypes );
   }
 }
