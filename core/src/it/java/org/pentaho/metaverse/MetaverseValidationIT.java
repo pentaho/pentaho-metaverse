@@ -116,12 +116,12 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @AfterClass
-  public static void cleanUp() throws Exception {
+  public static void cleanUp() {
     IntegrationTestUtil.shutdownPentahoSystem();
   }
 
   @Test
-  public void testRootEntity() throws Exception {
+  public void testRootEntity() {
     assertEquals( DictionaryConst.NODE_TYPE_ROOT_ENTITY, root.getType() );
     assertEquals( "METAVERSE", root.getName() );
     assertEquals( "Engineering", root.getDivision() );
@@ -130,7 +130,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testEntity_Transformation() throws Exception {
+  public void testEntity_Transformation() {
     FramedMetaverseNode node = root.getEntity( DictionaryConst.NODE_TYPE_TRANS );
     assertEquals( DictionaryConst.NODE_TYPE_ENTITY, node.getType() );
     assertEquals( DictionaryConst.NODE_TYPE_TRANS, node.getName() );
@@ -138,7 +138,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testEntity_Job() throws Exception {
+  public void testEntity_Job() {
     FramedMetaverseNode node = root.getEntity( DictionaryConst.NODE_TYPE_JOB );
     assertEquals( DictionaryConst.NODE_TYPE_ENTITY, node.getType() );
     assertEquals( DictionaryConst.NODE_TYPE_JOB, node.getName() );
@@ -146,7 +146,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testEntity_FileSystemLocator() throws Exception {
+  public void testEntity_FileSystemLocator() {
     LocatorNode node =
       (LocatorNode) framedGraph.getVertex( "{\"name\":\"" + REPO_ID + "\",\"type\":\"Locator\"}", LocatorNode.class );
     assertEquals( DictionaryConst.NODE_TYPE_LOCATOR, node.getType() );
@@ -324,7 +324,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testTextFileInputStep() throws Exception {
+  public void testTextFileInputStep() {
     // this is testing a specific TextFileInputStep instance
     FileInputStepNode fileInputStepNode = (FileInputStepNode)
       root.getFileInputStepNode( "Populate Table From File", "Sacramento crime stats 2006 file" );
@@ -451,7 +451,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testDatasources() throws Exception {
+  public void testDatasources() {
     int countDatasources = getIterableSize( root.getDatasourceNodes() );
     for ( DatasourceNode ds : root.getDatasourceNodes() ) {
       // make sure at least one step uses the connection
@@ -469,7 +469,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testSampleDataConnection() throws Exception {
+  public void testSampleDataConnection() {
     DatasourceNode sampleData = root.getDatasourceNode( "Sampledata" );
     assertEquals( "Sampledata", sampleData.getName() );
     assertEquals( "-1", sampleData.getPort() );
@@ -714,7 +714,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testStreamLookupStepNode() throws Exception {
+  public void testStreamLookupStepNode() {
     StreamLookupStepNode node = root.getStreamLookupStepNode();
 
     assertEquals( 6, getIterableSize( node.getInputStreamFields() ) );
@@ -830,7 +830,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testCsvFileInputStep() throws Exception {
+  public void testCsvFileInputStep() {
     // this is testing a specific CsvFileInputStep instance
     CsvFileInputStepNode csvFileInputStepNode = root.getCsvFileInputStepNode();
     assertNotNull( csvFileInputStepNode );
@@ -934,7 +934,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testStringOperationsStepNode() throws Exception {
+  public void testStringOperationsStepNode() {
     TransformationStepNode node = root.getStepNode( "string_operations", "String operations" );
 
     // Make sure we have the right number of links used
@@ -953,7 +953,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testStringsCutStepNode() throws Exception {
+  public void testStringsCutStepNode() {
     TransformationStepNode node = root.getStepNode( "strings_cut", "Strings cut" );
 
     // Make sure we have the right number of links used, created and derived. Also,
@@ -973,7 +973,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testStringsReplaceStepNode() throws Exception {
+  public void testStringsReplaceStepNode() {
 
     TransformationStepNode node = root.getStepNode( "strings_replace", "Replace in string" );
 
@@ -1053,7 +1053,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testRowsToResultStepNode() throws Exception {
+  public void testRowsToResultStepNode() {
     RowsToResultStepNode rowsToResultStepNode = root.getRowsToResultStepNode();
     assertNotNull( rowsToResultStepNode );
 
@@ -1079,7 +1079,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testFixedFileInputStep() throws Exception {
+  public void testFixedFileInputStep() {
     // this is testing a specific FixedFileInputStep instance
     FixedFileInputStepNode fixedFileInputStepNode = root.getFixedFileInputStepNode();
     assertNotNull( fixedFileInputStepNode );
@@ -1205,7 +1205,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   }
 
   @Test
-  public void testHttpPostStep() throws Exception {
+  public void testHttpPostStep() {
     // this is testing a specific TextFileInputStep instance
     HttpPostStepNode node = root.getHttpPostStepNode();
     assertNotNull( node );

@@ -50,7 +50,7 @@ public class MetaverseReaderIT {
   }
 
   @AfterClass
-  public static void cleanUp() throws Exception {
+  public static void cleanUp() {
     IntegrationTestUtil.shutdownPentahoSystem();
   }
 
