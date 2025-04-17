@@ -123,7 +123,7 @@ public class ExternalResourceConsumerIT {
   }
 
   @AfterClass
-  public static void cleanUp() throws Exception {
+  public static void cleanUp() {
     IntegrationTestUtil.shutdownPentahoSystem();
   }
 

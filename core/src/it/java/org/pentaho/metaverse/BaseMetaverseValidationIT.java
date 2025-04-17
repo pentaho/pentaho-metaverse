@@ -99,12 +99,12 @@ public abstract class BaseMetaverseValidationIT {
   }
 
   @AfterClass
-  public static void cleanUpClass() throws Exception {
+  public static void cleanUpClass() {
     IntegrationTestUtil.shutdownPentahoSystem();
   }
 
   @After
-  public void cleanUpInstance() throws Exception {
+  public void cleanUpInstance() {
     if ( shouldCleanupInstance() ) {
       IntegrationTestUtil.shutdownPentahoSystem();
     }
