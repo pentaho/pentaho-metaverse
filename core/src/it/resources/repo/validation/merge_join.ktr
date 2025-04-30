@@ -124,8 +124,8 @@
     <name>SampleData</name>
     <server/>
     <type>H2</type>
-    <access>Native</access>
-    <database>&#x24;&#x7b;Internal.Transformation.Filename.Directory&#x7d;&#x2f;..&#x2f;SampleData</database>
+    <access>JNDI</access>
+    <database>SampleData</database>
     <port>-1</port>
     <username/>
     <password>Encrypted </password>
