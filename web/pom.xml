@@ -23,6 +23,7 @@
     <maven-surefire-plugin.argLine>
       --add-opens=java.base/java.lang=ALL-UNNAMED
     </maven-surefire-plugin.argLine>
+    <mockito-core.version>5.17.0</mockito-core.version>
   </properties>
   <dependencies>
     <!-- we are excluding javax.ws.rs:jsr311-api bellow,
@@ -119,6 +120,12 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
       <version>${dependency.org.mockito.mockito-inline.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito-core.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
