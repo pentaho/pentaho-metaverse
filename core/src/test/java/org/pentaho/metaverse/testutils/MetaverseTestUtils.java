@@ -44,14 +44,12 @@ public class MetaverseTestUtils {
   }
 
   public static IStepExternalResourceConsumerProvider getStepExternalResourceConsumerProvider() {
-    IStepExternalResourceConsumerProvider provider = mock( IStepExternalResourceConsumerProvider.class );
     // TODO
-    return provider;
+    return mock( IStepExternalResourceConsumerProvider.class );
   }
 
   public static IJobEntryExternalResourceConsumerProvider getJobEntryExternalResourceConsumerProvider() {
-    IJobEntryExternalResourceConsumerProvider provider = mock( IJobEntryExternalResourceConsumerProvider.class );
     // TODO
-    return provider;
+    return mock( IJobEntryExternalResourceConsumerProvider.class );
   }
 }

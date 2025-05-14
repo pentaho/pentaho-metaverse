@@ -13,7 +13,6 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +27,7 @@ import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 import org.pentaho.metaverse.util.MetaverseUtil;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -68,7 +68,7 @@ public class TransOpenedExtensionPointTest {
       TransOpenedExtensionPoint extensionPoint = new TransOpenedExtensionPoint();
       extensionPoint.callExtensionPoint( null, transMeta );
 
-      Assert.assertEquals( mockedMetaverseBuilderConstruction.constructed().size(), 0 );
+      assertEquals( mockedMetaverseBuilderConstruction.constructed().size(), 0 );
     }
   }
 }

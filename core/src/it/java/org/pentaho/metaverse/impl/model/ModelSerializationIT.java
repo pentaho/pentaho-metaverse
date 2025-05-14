@@ -63,8 +63,6 @@ public class ModelSerializationIT {
     jdbcResource.setInput( true );
 
     String json = mapper.writeValueAsString( jdbcResource );
-//    System.out.println( json );
-
     JdbcResourceInfo rehydrated = mapper.readValue( json, JdbcResourceInfo.class );
 
     assertEquals( jdbcResource.getServer(), rehydrated.getServer() );
@@ -74,7 +72,8 @@ public class ModelSerializationIT {
     assertEquals( jdbcResource.getPort(), rehydrated.getPort() );
     assertEquals( jdbcResource.isInput(), rehydrated.isInput() );
 
-    ExecutionProfile executionProfile = new ExecutionProfile( "run1", "some/path/to/a.ktl", "tranformation", "A test profile" );
+    ExecutionProfile executionProfile =
+      new ExecutionProfile( "run1", "some/path/to/a.ktl", "tranformation", "A test profile" );
 
     long currentMillis = System.currentTimeMillis();
     long futureMillis = currentMillis + 10000;
@@ -86,9 +85,12 @@ public class ModelSerializationIT {
     executionProfile.getExecutionData().setExecutorServer( "www.pentaho.com" );
     executionProfile.getExecutionData().setExecutorUser( "wseyler" );
     executionProfile.getExecutionData().setLoggingChannelId( "kettle.debug" );
-    executionProfile.getExecutionData().addParameter( new ParamInfo( "testParam1", "Larry", "Fine", "A Test Parameter" ) );
-    executionProfile.getExecutionData().addParameter( new ParamInfo( "testParam2", "Howard", "Moe", "Another Parameter" ) );
-    executionProfile.getExecutionData().addParameter( new ParamInfo( "testParam3", "Fine", "Curly", "A Third Parameter" ) );
+    executionProfile.getExecutionData()
+      .addParameter( new ParamInfo( "testParam1", "Larry", "Fine", "A Test Parameter" ) );
+    executionProfile.getExecutionData()
+      .addParameter( new ParamInfo( "testParam2", "Howard", "Moe", "Another Parameter" ) );
+    executionProfile.getExecutionData()
+      .addParameter( new ParamInfo( "testParam3", "Fine", "Curly", "A Third Parameter" ) );
 
     String externalResourceName = "prices.csv";
     String externalResourceDescription = "A test csv file";
@@ -116,23 +118,30 @@ public class ModelSerializationIT {
     executionProfile.getExecutionData().putArgument( 2, arg3 );
 
     json = mapper.writeValueAsString( executionProfile );
-//    System.out.println( json );
 
     ExecutionProfile rehydratedProfile = mapper.readValue( json, ExecutionProfile.class );
     assertEquals( executionProfile.getName(), rehydratedProfile.getName() );
     assertEquals( executionProfile.getPath(), rehydratedProfile.getPath() );
     assertEquals( executionProfile.getType(), rehydratedProfile.getType() );
     assertEquals( executionProfile.getDescription(), rehydratedProfile.getDescription() );
-    assertEquals( executionProfile.getExecutionData().getStartTime().compareTo( rehydratedProfile.getExecutionData().getStartTime() ), 0 );
-    assertEquals( executionProfile.getExecutionData().getEndTime().compareTo( rehydratedProfile.getExecutionData().getEndTime() ), 0 );
+    assertEquals( executionProfile.getExecutionData().getStartTime()
+      .compareTo( rehydratedProfile.getExecutionData().getStartTime() ), 0 );
+    assertEquals(
+      executionProfile.getExecutionData().getEndTime().compareTo( rehydratedProfile.getExecutionData().getEndTime() ),
+      0 );
     assertEquals( executionProfile.getExecutionData().getFailureCount(), 0 );
-    assertEquals( executionProfile.getExecutionData().getClientExecutor(), rehydratedProfile.getExecutionData().getClientExecutor() );
-    assertEquals( executionProfile.getExecutionData().getExecutorServer(), rehydratedProfile.getExecutionData().getExecutorServer() );
-    assertEquals( executionProfile.getExecutionData().getExecutorUser(), rehydratedProfile.getExecutionData().getExecutorUser() );
-    assertEquals( executionProfile.getExecutionData().getLoggingChannelId(), rehydratedProfile.getExecutionData().getLoggingChannelId() );
+    assertEquals( executionProfile.getExecutionData().getClientExecutor(),
+      rehydratedProfile.getExecutionData().getClientExecutor() );
+    assertEquals( executionProfile.getExecutionData().getExecutorServer(),
+      rehydratedProfile.getExecutionData().getExecutorServer() );
+    assertEquals( executionProfile.getExecutionData().getExecutorUser(),
+      rehydratedProfile.getExecutionData().getExecutorUser() );
+    assertEquals( executionProfile.getExecutionData().getLoggingChannelId(),
+      rehydratedProfile.getExecutionData().getLoggingChannelId() );
     assertEquals( rehydratedProfile.getExecutionData().getParameters().size(), 3 );
     assertEquals( rehydratedProfile.getExecutionData().getExternalResources().size(), 1 );
-    Map<Object, Object> attributes = rehydratedProfile.getExecutionData().getExternalResources().get( "testStep" ).get( 0 ).getAttributes();
+    Map<Object, Object> attributes =
+      rehydratedProfile.getExecutionData().getExternalResources().get( "testStep" ).get( 0 ).getAttributes();
     assertEquals( attributes.get( attributeName ), attributeValue );
     assertEquals( executionProfile.getExecutionData().getVariables().size(), 2 );
     assertTrue( executionProfile.getExecutionData().getVariables().containsKey( variable1Name ) );

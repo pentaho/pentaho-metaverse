@@ -51,14 +51,14 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.pentaho.dictionary.DictionaryConst.*;
 
-public abstract  class BaseMetaverseValidationIT {
+public abstract class BaseMetaverseValidationIT {
 
   protected static IMetaverseReader reader;
   protected static Graph graph;
   protected static FramedGraphFactory framedGraphFactory;
   protected static FramedGraph framedGraph;
   protected static RootNode root;
-  protected static Map<String, Concept> entityNodes = new HashMap();
+  protected static Map<String, Concept> entityNodes = new HashMap<>();
 
   public static final String REPO_ID = "FILE_SYSTEM_REPO"; // same as within pentahoObjects.spring.xml
 
@@ -99,12 +99,12 @@ public abstract  class BaseMetaverseValidationIT {
   }
 
   @AfterClass
-  public static void cleanUpClass() throws Exception {
+  public static void cleanUpClass() {
     IntegrationTestUtil.shutdownPentahoSystem();
   }
 
   @After
-  public void cleanUpInstance() throws Exception {
+  public void cleanUpInstance() {
     if ( shouldCleanupInstance() ) {
       IntegrationTestUtil.shutdownPentahoSystem();
     }
@@ -124,7 +124,7 @@ public abstract  class BaseMetaverseValidationIT {
   }
 
   protected static int getIterableSize( final Iterable<?> iterable ) {
-    return getCollection(iterable).size();
+    return getCollection( iterable ).size();
   }
 
   protected static Collection getCollection( final Iterable<?> iterable ) {
@@ -192,9 +192,10 @@ public abstract  class BaseMetaverseValidationIT {
   protected Map<String, FramedMetaverseNode> verifyNodes( final List<FramedMetaverseNode> nodes,
                                                           final TestLineageNode... expectedNodeArray ) {
     if ( expectedNodeArray == null ) {
-      assertEquals( 0,  nodes.size() );
+      assertEquals( 0, nodes.size() );
+    } else {
+      assertEquals( expectedNodeArray.length, nodes.size() );
     }
-    assertEquals( expectedNodeArray.length, nodes.size() );
     final List<TestLineageNode> expectedNodes = Arrays.asList(
       expectedNodeArray == null ? new TestLineageNode[] {} : expectedNodeArray );
     return verifyNodes( nodes, expectedNodes );
@@ -211,13 +212,13 @@ public abstract  class BaseMetaverseValidationIT {
   protected Map<String, FramedMetaverseNode> verifyNodes( final List<FramedMetaverseNode> nodes,
                                                           final List<TestLineageNode> expectedNodes ) {
     assertEquals( expectedNodes.size(), nodes.size() );
-    final Map<String, FramedMetaverseNode> nodeMap = new HashMap();
+    final Map<String, FramedMetaverseNode> nodeMap = new HashMap<>();
     for ( final FramedMetaverseNode node : nodes ) {
       boolean matchFound = false;
       for ( final TestLineageNode expectedNode : expectedNodes ) {
         if ( expectedNode.getName().equals( node.getName() ) && expectedNode.getType().equals( node.getType() )
-          && expectedNode.isVirtual() ==  node.isVirtual() ) {
-            matchFound = true;
+          && expectedNode.isVirtual() == node.isVirtual() ) {
+          matchFound = true;
           break;
         }
       }
@@ -249,8 +250,8 @@ public abstract  class BaseMetaverseValidationIT {
                                                             final List<String> expectedNodeNames ) {
     final List<String> expectedNodeNameClone = new ArrayList<>( expectedNodeNames );
     assertEquals( String.format( "Incorrect number of '%s' nodes", nodeType ),
-      expectedNodeNames.size(), nodes.size() ) ;
-    final Map<String, FramedMetaverseNode> nodeMap = new HashMap();
+      expectedNodeNames.size(), nodes.size() );
+    final Map<String, FramedMetaverseNode> nodeMap = new HashMap<>();
     for ( final FramedMetaverseNode node : nodes ) {
       assertTrue( String.format( "Node '%s' is not of type '%s'", node.getName(), nodeType ),
         expectedNodeNameClone.remove( node.getName() ) );
@@ -267,7 +268,7 @@ public abstract  class BaseMetaverseValidationIT {
       final String nodeType = nodeTypeMapEntry.getKey();
       // get the entity node corresponding to this type
       final Concept entityNode = entityNodes.get( nodeType );
-      assertNotNull( String.format( "Entity node for type '%s' not found", nodeType), entityNode );
+      assertNotNull( String.format( "Entity node for type '%s' not found", nodeType ), entityNode );
       final List<String> nodeNames = nodeTypeMapEntry.getValue();
       final List<FramedMetaverseNode> nodes = IteratorUtils.toList( entityNode.getConcreteNodes().iterator() );
       verifyNodeNames( nodes, nodeType, nodeNames );
@@ -311,7 +312,7 @@ public abstract  class BaseMetaverseValidationIT {
 
       final List<Concept> linkedNodes = IteratorUtils.toList(
         inputNode.getOutNodes( link.getLinkLabel() ).iterator() );
-      assertTrue( linkedNodes.size() > 0 );
+      assertFalse( linkedNodes.isEmpty() );
       // find a match
       boolean matchFound = false;
       for ( final Concept linkedNode : linkedNodes ) {
@@ -327,7 +328,7 @@ public abstract  class BaseMetaverseValidationIT {
   public List<FramedMetaverseNode> verifyLinkedNodes( final FramedMetaverseNode fromNode, final String linkLabel,
                                                       final String toNodeName ) {
     final List<FramedMetaverseNode> outNodes = IteratorUtils.toList( fromNode.getOutNodes( linkLabel ).iterator() );
-    List<FramedMetaverseNode> searchNodes = new ArrayList();
+    List<FramedMetaverseNode> searchNodes = new ArrayList<>();
     for ( final FramedMetaverseNode outNode : outNodes ) {
       if ( outNode.getName().equals( toNodeName ) ) {
         searchNodes.add( outNode );
@@ -346,8 +347,8 @@ public abstract  class BaseMetaverseValidationIT {
 
   public void verifyNodeProperties( final FramedMetaverseNode node, final Map<String, Object> expectedProperties ) {
     final List<String> propertyNames = IteratorUtils.toList( node.getPropertyNames().iterator() );
-    final Set<String> encounteredProperties = new HashSet();
-    final Set<String> badProperties = new HashSet();
+    final Set<String> encounteredProperties = new HashSet<>();
+    final Set<String> badProperties = new HashSet<>();
     for ( final String propertyName : propertyNames ) {
       final Object expectedValue = expectedProperties.get( propertyName );
       final Object actualValue = node.getProperty( propertyName );
@@ -361,13 +362,13 @@ public abstract  class BaseMetaverseValidationIT {
       }
       encounteredProperties.add( propertyName );
     }
-    final Set<String> missingProperties = new HashSet( expectedProperties.keySet() );
+    final Set<String> missingProperties = new HashSet<>( expectedProperties.keySet() );
     missingProperties.removeAll( encounteredProperties );
     assertEquals( String.format( "Missing expected properties: %s", String.join( ",", missingProperties ) ), 0,
       missingProperties.size() );
   }
 
-  private String toSafeStringSafely( final Object originalString) {
+  private String toSafeStringSafely( final Object originalString ) {
     return originalString == null ? "" : originalString.toString();
   }
 
@@ -421,9 +422,9 @@ public abstract  class BaseMetaverseValidationIT {
     return new TestColumnNode( name, virtual );
   }
 
-  protected TestLineageLink testLineageLink(  final TestLineageNode inputNode, final String linkLabel,
-                                           final TestLineageNode outputNode ) {
-    return new  TestLineageLink( inputNode, linkLabel, outputNode );
+  protected TestLineageLink testLineageLink( final TestLineageNode inputNode, final String linkLabel,
+                                             final TestLineageNode outputNode ) {
+    return new TestLineageLink( inputNode, linkLabel, outputNode );
   }
 
   protected TestLineageNode testLineageNode( final FramedMetaverseNode node ) {
@@ -510,6 +511,7 @@ public abstract  class BaseMetaverseValidationIT {
     private TestLineageNode inputNode;
     private String linkLabel;
     private TestLineageNode outputNode;
+
     public TestLineageLink( final TestLineageNode inputNode, final String linkLabel,
                             final TestLineageNode outputNode ) {
       this.inputNode = inputNode;

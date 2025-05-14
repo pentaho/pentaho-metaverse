@@ -13,6 +13,8 @@
 
 package org.pentaho.metaverse.impl;
 
+import java.util.stream.StreamSupport;
+
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
@@ -216,23 +218,16 @@ public class MetaverseBuilderTest {
     Vertex toResult = graph.getVertex( node2.getStringID() );
 
     // make sure the edge exits before we try to add it again
-    assertNotNull( graph.getEdge( builder.getEdgeId( fromResult, link.getLabel(), toResult ) ) );
+    assertNotNull( graph.getEdge( BaseMetaverseBuilder.getEdgeId( fromResult, link.getLabel(), toResult ) ) );
 
     // make sure we only added 1
-    int count = 0;
-    for ( Edge e : graph.getEdges() ) {
-      count++;
-    }
+    int count = (int) StreamSupport.stream( graph.getEdges().spliterator(), false ).count();
     assertEquals( originalEdgeCount + 1, count );
 
     // now lets add it again
     builder.addLink( link );
 
-    // make sure we still only have one edge
-    count = 0;
-    for ( Edge e : graph.getEdges() ) {
-      count++;
-    }
+    count = (int) StreamSupport.stream( graph.getEdges().spliterator(), false ).count();
     assertEquals( originalEdgeCount + 1, count );
 
   }
@@ -538,7 +533,7 @@ public class MetaverseBuilderTest {
   }
 
   @Test
-  public void testGetVertexForNodeWithDiffStringId(){
+  public void testGetVertexForNodeWithDiffStringId() {
     node.setStringID( "test string id" );
     node.setName( "test name" );
     node.setType( "test type" );

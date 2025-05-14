@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockedStatic;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -33,6 +34,8 @@ import org.pentaho.metaverse.api.MetaverseDocument;
 import org.pentaho.metaverse.api.MetaverseException;
 
 import java.io.File;
+import java.net.FileNameMap;
+import java.net.URLConnection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -42,8 +45,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class LocatorRunnerTest {
@@ -141,23 +146,24 @@ public class LocatorRunnerTest {
   @Test
   public void testProcessFileTransformationExtension() throws Exception {
     lenient().doAnswer(
-        new Answer() {
-          /**
-           * @param invocation the invocation on the mock.
-           * @return the value to be returned
-           * @throws Throwable the throwable to be thrown
-           */
-          @Override public Void answer( InvocationOnMock invocation ) throws Throwable {
-            IDocumentEvent event = (IDocumentEvent) invocation.getArguments()[0];
-            IDocument doc = event.getDocument();
-            assertNotNull( doc );
-            assertNull( doc.getMimeType() );
-            assertEquals( doc.getName(), "test.ktr" );
-            assertEquals( doc.getStringID(), "myKTR" );
-            return null;
-          }
+      new Answer() {
+        /**
+         * @param invocation the invocation on the mock.
+         * @return the value to be returned
+         * @throws Throwable the throwable to be thrown
+         */
+        @Override public Void answer( InvocationOnMock invocation ) throws Throwable {
+          IDocumentEvent event = (IDocumentEvent) invocation.getArguments()[ 0 ];
+          IDocument doc = event.getDocument();
+          assertNotNull( doc );
+          assertNull( doc.getMimeType() );
+          assertEquals( doc.getName(), "test.ktr" );
+          assertEquals( doc.getStringID(), "myKTR" );
+          return null;
         }
+      }
     ).when( baseLocator ).notifyListeners( any( IDocumentEvent.class ) );
+
     stringLocatorRunner.setLocator( baseLocator );
     File file = new File( "test.ktr" );
     File spyFile = spy( file );

@@ -150,7 +150,7 @@ public class LineageRepositoryTest {
   public void testGetStepAttributeString_codeNotFound() throws Exception {
     String code = "not found";
     String result = repo.getStepAttributeString( stepId, code );
-    assertEquals( null, result );
+    assertNull( result );
   }
   @Test
   public void testGetStepAttributeString_index() throws Exception {

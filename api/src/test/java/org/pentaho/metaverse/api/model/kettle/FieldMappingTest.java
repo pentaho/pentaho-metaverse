@@ -56,18 +56,18 @@ public class FieldMappingTest {
     mapping = new FieldMapping( "from", "to" );
     assertTrue( mapping.equals( mapping ) );
 
-    assertFalse( mapping.equals( "string" ) );
+    assertNotEquals( "string", mapping );
 
     FieldMapping anotherMapping = new FieldMapping( "source", "destination" );
-    assertFalse( mapping.equals( anotherMapping ) );
+    assertNotEquals( mapping, anotherMapping );
 
     anotherMapping = new FieldMapping( "from", "destination" );
-    assertFalse( mapping.equals( anotherMapping ) );
+    assertNotEquals( mapping, anotherMapping );
 
     anotherMapping = new FieldMapping( "source", "to" );
-    assertFalse( mapping.equals( anotherMapping ) );
+    assertNotEquals( mapping, anotherMapping );
 
     FieldMapping equivMapping = new FieldMapping( "from", "to" );
-    assertTrue( mapping.equals( equivMapping ) );
+    assertEquals( mapping, equivMapping );
   }
 }

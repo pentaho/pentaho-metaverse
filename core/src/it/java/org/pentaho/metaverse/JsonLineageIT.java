@@ -24,6 +24,7 @@ import org.pentaho.metaverse.impl.model.kettle.json.KettleObjectMapper;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -46,7 +47,7 @@ public class JsonLineageIT {
   }
 
   @AfterClass
-  public static void cleanUp() throws Exception {
+  public static void cleanUp() {
     IntegrationTestUtil.shutdownPentahoSystem();
   }
 
@@ -58,7 +59,7 @@ public class JsonLineageIT {
 
     String json = mapper.writeValueAsString( tm );
     File jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".json" ) );
-    FileUtils.writeStringToFile( jsonOut, json );
+    FileUtils.writeStringToFile( jsonOut, json, StandardCharsets.UTF_8 );
 
     // make sure that we got an external resource of file and DB type
     assertTrue( json.contains( "\"@class\" : \"org.pentaho.metaverse.api.model.BaseResourceInfo\"" ) );
@@ -71,7 +72,7 @@ public class JsonLineageIT {
 
     json = mapper.writeValueAsString( rehydrated );
     jsonOut = new File( IntegrationTestUtil.getOutputPath( tm.getName() + ".after.json" ) );
-    FileUtils.writeStringToFile( jsonOut, json );
+    FileUtils.writeStringToFile( jsonOut, json, StandardCharsets.UTF_8 );
   }
 
   @Test
