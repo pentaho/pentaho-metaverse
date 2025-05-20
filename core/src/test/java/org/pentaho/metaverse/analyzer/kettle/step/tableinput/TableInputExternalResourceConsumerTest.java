@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
@@ -67,7 +68,7 @@ public class TableInputExternalResourceConsumerTest {
   public void testGetResourcesFromMeta() throws Exception {
     when( meta.getSQL() ).thenReturn( "select * from table" );
     when( meta.getDatabaseMeta() ).thenReturn( dbMeta );
-    Collection<IExternalResourceInfo> resourceInfos = consumer.getResourcesFromMeta( meta, context );
+    Collection<IExternalResourceInfo> resourceInfos = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta, context );
     assertNotNull( resourceInfos );
 
     assertEquals( 1, resourceInfos.size() );
@@ -78,7 +79,7 @@ public class TableInputExternalResourceConsumerTest {
   @Test
   public void testGetResourcesFromMeta_nullDbMeta() throws Exception {
     when( meta.getDatabaseMeta() ).thenReturn( null );
-    Collection<IExternalResourceInfo> resourceInfos = consumer.getResourcesFromMeta( meta, context );
+    Collection<IExternalResourceInfo> resourceInfos = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta, context );
     assertNotNull( resourceInfos );
 
     assertEquals( 0, resourceInfos.size() );

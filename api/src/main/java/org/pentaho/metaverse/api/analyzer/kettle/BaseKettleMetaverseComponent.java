@@ -13,6 +13,7 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle;
 
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.ILogicalIdGenerator;
@@ -93,21 +94,21 @@ public abstract class BaseKettleMetaverseComponent implements IRequiresMetaverse
     return node;
   }
 
-  protected IMetaverseNode createFileNode( String fileName, IComponentDescriptor descriptor )
+  protected IMetaverseNode createFileNode( Bowl bowl, String fileName, IComponentDescriptor descriptor )
     throws MetaverseException {
-    return createFileNode( fileName, descriptor, DictionaryConst.NODE_TYPE_FILE );
+    return createFileNode( bowl, fileName, descriptor, DictionaryConst.NODE_TYPE_FILE );
   }
 
-  protected IMetaverseNode createFileNode( String fileName, IComponentDescriptor descriptor, String nodeType )
-    throws MetaverseException {
+  protected IMetaverseNode createFileNode( Bowl bowl, String fileName, IComponentDescriptor descriptor,
+    String nodeType ) throws MetaverseException {
 
     String normalized;
     String scheme;
     IMetaverseNode fileNode = null;
 
     if ( fileName != null && descriptor != null ) {
-      normalized = normalizeFilePath() ? KettleAnalyzerUtil.normalizeFilePath( fileName ) : fileName;
-      scheme = KettleAnalyzerUtil.getFilePathScheme( fileName );
+      normalized = normalizeFilePath() ? KettleAnalyzerUtil.normalizeFilePath( bowl, fileName ) : fileName;
+      scheme = KettleAnalyzerUtil.getFilePathScheme( bowl, fileName );
 
       INamespace ns = descriptor.getNamespace();
       INamespace parentNs = ns.getParentNamespace();

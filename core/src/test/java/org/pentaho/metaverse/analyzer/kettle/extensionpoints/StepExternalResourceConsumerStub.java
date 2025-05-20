@@ -13,6 +13,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints;
 
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.BaseStepMeta;
@@ -33,12 +34,12 @@ public class StepExternalResourceConsumerStub implements IStepExternalResourceCo
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( Object meta ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, Object meta ) {
     return null;
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( Object consumer, IAnalysisContext context ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, Object consumer, IAnalysisContext context ) {
     return null;
   }
 

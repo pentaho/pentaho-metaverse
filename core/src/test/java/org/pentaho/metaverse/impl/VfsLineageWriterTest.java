@@ -23,6 +23,7 @@ import org.apache.commons.vfs2.VFS;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.metaverse.api.IGraphWriter;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
@@ -70,7 +71,7 @@ public class VfsLineageWriterTest {
   public void setUp() throws Exception {
     String basePath = new File( "." ).getCanonicalPath();
 
-    writer = new VfsLineageWriter();
+    writer = new VfsLineageWriter( DefaultBowl.getInstance() );
     writer = spy( writer );
 
     holder = new LineageHolder();

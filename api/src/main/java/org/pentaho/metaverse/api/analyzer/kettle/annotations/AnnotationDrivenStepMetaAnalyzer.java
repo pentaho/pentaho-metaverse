@@ -129,8 +129,8 @@ public class AnnotationDrivenStepMetaAnalyzer extends StepAnalyzer<BaseStepMeta>
     try {
       // analyze subtrans and generate lineage graph
       TransMeta subTransMeta = TransExecutorMeta
-        .loadMappingMeta( (StepWithMappingMeta) meta, parentTransMeta.getRepository(), parentTransMeta.getMetaStore(),
-          parentTransMeta );
+        .loadMappingMeta( parentTransMeta.getBowl(), (StepWithMappingMeta) meta, parentTransMeta.getRepository(),
+          parentTransMeta.getMetaStore(), parentTransMeta );
 
       IMetaverseNode subTransNode =
         KettleAnalyzerUtil.analyze( this, parentTransMeta, (ISubTransAwareMeta) meta, rootNode );

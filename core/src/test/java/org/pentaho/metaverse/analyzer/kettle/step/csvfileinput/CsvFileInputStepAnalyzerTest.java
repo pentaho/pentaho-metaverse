@@ -10,17 +10,18 @@
  * Change Date: 2029-07-20
  ******************************************************************************/
 
-
 package org.pentaho.metaverse.analyzer.kettle.step.csvfileinput;
-
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.trans.step.BaseStepMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.csvinput.CsvInputMeta;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.step.ClonableStepAnalyzerTest;
 import org.pentaho.metaverse.api.IComponentDescriptor;
@@ -28,6 +29,7 @@ import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
@@ -57,7 +59,15 @@ public class CsvFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
     descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
     analyzer = spy( new CsvFileInputStepAnalyzer() );
     analyzer.setDescriptor( descriptor );
+    IMetaverseBuilder builder = mock( IMetaverseBuilder.class );
+    analyzer.setMetaverseBuilder( builder );
     analyzer.setObjectFactory( MetaverseTestUtils.getMetaverseObjectFactory() );
+    StepMeta mockStepMeta = mock( StepMeta.class );
+
+    when( meta.getParentStepMeta() ).thenReturn( mockStepMeta );
+    TransMeta mockTransMeta = mock( TransMeta.class );
+    when( mockStepMeta.getParentTransMeta() ).thenReturn( mockTransMeta );
+    when( mockTransMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
   }
 
   @Test
@@ -98,6 +108,8 @@ public class CsvFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
   public void testCreateResourceNode() throws Exception {
     IExternalResourceInfo res = mock( IExternalResourceInfo.class );
     when( res.getName() ).thenReturn( "file:///Users/home/tmp/xyz.ktr" );
+
+    analyzer.validateState( descriptor, meta );
     IMetaverseNode resourceNode = analyzer.createResourceNode( res );
     assertNotNull( resourceNode );
     assertEquals( DictionaryConst.NODE_TYPE_FILE, resourceNode.getType() );

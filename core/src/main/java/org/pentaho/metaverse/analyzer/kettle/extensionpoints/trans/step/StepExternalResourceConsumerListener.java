@@ -13,6 +13,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans.step;
 
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointInterface;
@@ -75,7 +76,8 @@ public class StepExternalResourceConsumerListener implements ExtensionPointInter
             if ( stepConsumers != null ) {
               for ( IStepExternalResourceConsumer stepConsumer : stepConsumers ) {
                 // We might know enough at this point, so call the consumer
-                Collection<IExternalResourceInfo> resources = stepConsumer.getResourcesFromMeta( meta );
+                Collection<IExternalResourceInfo> resources =
+                  stepConsumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta );
                 addExternalResources( resources, step );
 
                 // Add a RowListener if the step is data-driven

@@ -15,6 +15,7 @@ package org.pentaho.metaverse.analyzer.kettle.step.httppost;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.ArrayUtils;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
@@ -57,7 +58,8 @@ public class HTTPPostExternalResourceConsumer
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( HTTPPOSTMeta meta, IAnalysisContext context ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, HTTPPOSTMeta meta,
+    IAnalysisContext context ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not data-driven and there are no used variables in the

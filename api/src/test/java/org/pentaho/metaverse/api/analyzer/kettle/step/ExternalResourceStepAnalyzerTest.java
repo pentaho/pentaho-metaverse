@@ -19,6 +19,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.Bowl;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
@@ -110,6 +112,7 @@ public class ExternalResourceStepAnalyzerTest {
     analyzer.parentTransMeta = parentTransMeta;
     analyzer.parentStepMeta = parentStepMeta;
     analyzer.setMetaverseObjectFactory( new MetaverseObjectFactory() );
+    when( parentTransMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
   }
 
   @Test
@@ -135,7 +138,7 @@ public class ExternalResourceStepAnalyzerTest {
     when( analyzer.isInput() ).thenReturn( true );
     when( analyzer.isOutput() ).thenReturn( false );
 
-    when( erc.getResourcesFromMeta( eq( meta ), any() ) ).thenReturn( resources );
+    when( erc.getResourcesFromMeta( any( Bowl.class ), eq( meta ), any() ) ).thenReturn( resources );
 
     analyzer.customAnalyze( meta, node );
 
@@ -158,7 +161,7 @@ public class ExternalResourceStepAnalyzerTest {
     when( analyzer.isInput() ).thenReturn( false );
     when( analyzer.isOutput() ).thenReturn( true );
 
-    when( erc.getResourcesFromMeta( eq( meta ), any() ) ).thenReturn( resources );
+    when( erc.getResourcesFromMeta( any( Bowl.class ), eq( meta ), any() ) ).thenReturn( resources );
 
     analyzer.customAnalyze( meta, node );
 
