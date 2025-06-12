@@ -68,7 +68,7 @@ public class JobJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryJob> {
       case FILENAME:
         try {
           jobPath = parentJobMeta.environmentSubstitute( entry.getFilename() );
-          String normalized = KettleAnalyzerUtil.normalizeFilePath( jobPath );
+          String normalized = KettleAnalyzerUtil.normalizeFilePath( parentJobMeta.getBowl(), jobPath );
 
           subJobMeta = getSubJobMeta( normalized );
           jobPath = normalized;

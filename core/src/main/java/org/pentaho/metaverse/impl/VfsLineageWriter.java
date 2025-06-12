@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.vfs.KettleVFS;
@@ -61,6 +62,12 @@ public class VfsLineageWriter implements ILineageWriter {
   private String outputStrategy = DEFAULT_OUTPUT_STRATEGY;
 
   protected static SimpleDateFormat dateFolderFormat = new SimpleDateFormat( "YYYYMMdd" );
+  private Bowl bowl;
+
+  public VfsLineageWriter( Bowl bowl ) {
+    this.bowl = bowl;
+    this.setOutputStrategy( MetaverseConfig.getInstance().getExecutionGenerationStrategy() );
+  }
 
   public GraphCatalogWriter getCatalogWriter() {
     return catalogWriter;
@@ -72,10 +79,6 @@ public class VfsLineageWriter implements ILineageWriter {
 
   private static enum VFS_Prefixes {
     BZIP2, FILE, FTP, FTPS, GZIP, HDFS, HTTP, HTTPS, JAR, RAM, RES, SFTP, TAR, TEMP, WEBDAV, ZIP
-  }
-
-  public VfsLineageWriter() {
-    this.setOutputStrategy( MetaverseConfig.getInstance().getExecutionGenerationStrategy() );
   }
 
   @Override
@@ -256,7 +259,7 @@ public class VfsLineageWriter implements ILineageWriter {
     } else {
       dir += dateFolderFormat.format( new Date() );
     }
-    FileObject lineageRootFolder = KettleVFS.getFileObject( getOutputFolder() );
+    FileObject lineageRootFolder = KettleVFS.getInstance( bowl ).getFileObject( getOutputFolder() );
     FileObject dateFolder = lineageRootFolder.resolveFile( dir );
     return dateFolder;
   }

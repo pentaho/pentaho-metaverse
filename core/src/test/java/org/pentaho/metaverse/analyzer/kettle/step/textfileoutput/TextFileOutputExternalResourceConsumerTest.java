@@ -22,9 +22,12 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.bowl.Bowl;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.vfs.IKettleVFS;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -40,6 +43,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -68,8 +72,11 @@ public class TextFileOutputExternalResourceConsumerTest {
 
     when( tfo.getStepMeta() ).thenReturn( spyMeta );
     when( tfo.getStepDataInterface() ).thenReturn( data );
+    when( tfo.getTransMeta() ).thenReturn( transMeta );
 
     when( meta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
+    when( transMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
     when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
     when( meta.getFileName() ).thenReturn( null );
     when( meta.isFileNameInField() ).thenReturn( false );
@@ -77,7 +84,7 @@ public class TextFileOutputExternalResourceConsumerTest {
     when( meta.getFiles( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
 
     assertFalse( consumer.isDataDriven( meta ) );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( meta );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta );
     assertFalse( resources.isEmpty() );
     assertEquals( 2, resources.size() );
 
@@ -86,7 +93,7 @@ public class TextFileOutputExternalResourceConsumerTest {
     lenient().when( meta.getExtension() ).thenReturn( "txt" );
 
     assertTrue( consumer.isDataDriven( meta ) );
-    assertTrue( consumer.getResourcesFromMeta( meta ).isEmpty() );
+    assertTrue( consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta ).isEmpty() );
 
     data.fileName = "/path/to/row/file";
     when( tfo.buildFilename( Mockito.anyString(), Mockito.anyBoolean() ) )
@@ -102,8 +109,10 @@ public class TextFileOutputExternalResourceConsumerTest {
     assertFalse( resources.isEmpty() );
     assertEquals( 1, resources.size() );
 
+    IKettleVFS vfs = mock( IKettleVFS.class );
     try( MockedStatic<KettleVFS> mocked = mockStatic( KettleVFS.class ) ) {
-      mocked.when( () -> KettleVFS.getFileObject( any() ) ).thenThrow( new KettleFileException() );
+      mocked.when( () -> KettleVFS.getInstance( Mockito.<Bowl>any() ) ).thenReturn( vfs );
+      when( vfs.getFileObject( any() ) ).thenThrow( new KettleFileException() );
       resources = consumer.getResourcesFromRow( tfo, rmi, new String[]{ "id", "name" } );
       assertTrue( resources.isEmpty() );
     }

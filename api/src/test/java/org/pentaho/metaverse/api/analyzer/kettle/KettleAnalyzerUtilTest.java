@@ -21,11 +21,14 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.base.AbstractMeta;
+import org.pentaho.di.core.bowl.Bowl;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.core.vfs.IKettleVFS;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
@@ -55,6 +58,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -85,12 +89,13 @@ public class KettleAnalyzerUtilTest {
     } catch ( IOException ioe ) {
       // If this didn't work, we're running on a system where we can't create files, like CI perhaps.
       // In that case, use a RAM file. This test doesn't do much in that case, but it will pass.
-      FileObject f = KettleVFS.createTempFile( "This is a text file", ".txt", "ram://" );
+      FileObject f = KettleVFS.getInstance( DefaultBowl.getInstance() )
+        .createTempFile( "This is a text file", ".txt", "ram://" );
       input = f.getName().getPath();
       expected = f.getName().getPath();
     }
 
-    String result = KettleAnalyzerUtil.normalizeFilePath( input );
+    String result = KettleAnalyzerUtil.normalizeFilePath( DefaultBowl.getInstance(), input );
     assertEquals( expected, result );
 
   }
@@ -99,13 +104,16 @@ public class KettleAnalyzerUtilTest {
   public void testNormalizeFilePathSafely() throws Exception {
 
     final String path = "temp/foo";
-    assertNotEquals( "temp/foo", KettleAnalyzerUtil.normalizeFilePathSafely( path ) );
-    assertTrue( KettleAnalyzerUtil.normalizeFilePathSafely( path ).endsWith( "temp" + File.separator + "foo" ) );
+    assertNotEquals( "temp/foo", KettleAnalyzerUtil.normalizeFilePathSafely( DefaultBowl.getInstance(), path ) );
+    assertTrue( KettleAnalyzerUtil.normalizeFilePathSafely( DefaultBowl.getInstance(), path )
+      .endsWith( "temp" + File.separator + "foo" ) );
 
+    IKettleVFS vfs = mock( IKettleVFS.class );
     // verify that when an exception is thrown, the original value is returned
     try( MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
-      mockedKettleVFS.when( () -> KettleVFS.getFileObject( path ) ).thenThrow( new KettleFileException( "mockedException" ) );
-      assertEquals( "temp/foo", KettleAnalyzerUtil.normalizeFilePathSafely( path ) );
+      mockedKettleVFS.when( () -> KettleVFS.getInstance( Mockito.<Bowl>any() ) ).thenReturn( vfs );
+      when( vfs.getFileObject( path ) ).thenThrow( new KettleFileException( "mockedException" ) );
+      assertEquals( "temp/foo", KettleAnalyzerUtil.normalizeFilePathSafely( DefaultBowl.getInstance(), path ) );
     }
   }
 
@@ -113,6 +121,7 @@ public class KettleAnalyzerUtilTest {
   public void tesBuildDocument() throws MetaverseException {
     final IMetaverseBuilder builder = new BaseMetaverseBuilder( null );
     final AbstractMeta transMeta = Mockito.mock( TransMeta.class );
+    when( transMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
     final String transName = "MyTransMeta";
     Mockito.doReturn( transName ).when( transMeta ).getName();
     Mockito.doReturn( "ktr" ).when( transMeta ).getDefaultExtension();
@@ -131,8 +140,8 @@ public class KettleAnalyzerUtilTest {
     assertEquals( "ktr", document.getExtension() );
     assertEquals( DictionaryConst.CONTEXT_RUNTIME, document.getContext().getContextName() );
     assertEquals( document.getName(), document.getProperty( DictionaryConst.PROPERTY_NAME ) );
-    assertEquals( KettleAnalyzerUtil.normalizeFilePath( "path.ktr" ), document.getProperty( DictionaryConst
-      .PROPERTY_PATH ) );
+    assertEquals( KettleAnalyzerUtil.normalizeFilePath( DefaultBowl.getInstance(), "path.ktr" ),
+      document.getProperty( DictionaryConst.PROPERTY_PATH ) );
     assertEquals( namespaceId, document.getProperty( DictionaryConst.PROPERTY_NAMESPACE ) );
   }
 
@@ -203,6 +212,7 @@ public class KettleAnalyzerUtilTest {
 
     // mimic variable replacement where the variable present
     Mockito.doReturn( "myRootDir/dir/foe.ktr"  ).when( parentTransMeta ).environmentSubstitute( Mockito.anyString()  );
+    when( parentTransMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
     assertTrue( KettleAnalyzerUtil.getSubTransMetaPath( meta, subTransMeta ).endsWith(
       File.separator + "myRootDir" + File.separator + "dir" + File.separator + "foe.ktr" ) );
   }
@@ -252,6 +262,7 @@ public class KettleAnalyzerUtilTest {
   private void initMetas() {
 
     when( transMeta.getFilename() ).thenReturn( "my_file" );
+    when( transMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
 
     spyMeta = spy( new StepMeta( "test", meta ) );
     when( meta.getParentStepMeta() ).thenReturn( spyMeta );
@@ -271,17 +282,19 @@ public class KettleAnalyzerUtilTest {
     initMetas();
     lenient().when( meta.isAcceptingFilenames() ).thenReturn( false );
     Set<IExternalResourceInfo>
-      resources = (Set<IExternalResourceInfo>) KettleAnalyzerUtil.getResourcesFromMeta( meta, filePaths );
+      resources = (Set<IExternalResourceInfo>) KettleAnalyzerUtil.getResourcesFromMeta( DefaultBowl.getInstance(),
+        meta, filePaths );
     assertFalse( resources.isEmpty() );
     assertEquals( 3, resources.size() );
 
-    Set<IExternalResourceInfo> resources2 = (Set) KettleAnalyzerUtil.getResourcesFromMeta( meta2, filePaths2 );
+    Set<IExternalResourceInfo> resources2 = (Set) KettleAnalyzerUtil.getResourcesFromMeta( DefaultBowl.getInstance(),
+      meta2, filePaths2 );
     assertFalse( resources2.isEmpty() );
     assertEquals( 2, resources2.size() );
   }
 
   @Test
-  public void getResourcesFromRowFileContentTest() {
+  public void getResourcesFromRowFileContentTest() throws Exception {
     String filename = "filename";
     BaseFileInputStep step = mock( BaseFileInputStep.class );
     RowMetaInterface rowMeta = mock( RowMetaInterface.class );
@@ -289,8 +302,8 @@ public class KettleAnalyzerUtilTest {
     IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
 
     try(MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
-      mockedKettleVFS.when( () -> KettleVFS.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
-      assertFalse( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+      assertFalse( KettleAnalyzerUtil.getResourcesFromRow( DefaultBowl.getInstance(), step, rowMeta, row )
+        .contains( resourceInfo ) );
     }
   }
 
@@ -302,11 +315,14 @@ public class KettleAnalyzerUtilTest {
     Object[] row = new Object[]{};
     IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
 
+    IKettleVFS vfs = mock( IKettleVFS.class );
     try(MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
-      mockedKettleVFS.when( () -> KettleVFS.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
+      mockedKettleVFS.when( () -> KettleVFS.getInstance( Mockito.<Bowl>any() ) ).thenReturn( vfs );
+      when( vfs.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
       mockedKettleVFS.when( () -> KettleVFS.startsWithScheme( anyString() )).thenCallRealMethod();
       mockedKettleVFS.when( KettleVFS::getInstance ).thenCallRealMethod();
-      assertTrue( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+      assertTrue( KettleAnalyzerUtil.getResourcesFromRow( DefaultBowl.getInstance(), step, rowMeta, row )
+        .contains( resourceInfo ) );
     }
   }
 
@@ -319,8 +335,8 @@ public class KettleAnalyzerUtilTest {
     IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
 
     try(MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
-      mockedKettleVFS.when( () -> KettleVFS.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
-      assertFalse( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+      assertFalse( KettleAnalyzerUtil.getResourcesFromRow( DefaultBowl.getInstance(), step, rowMeta, row )
+        .contains( resourceInfo ) );
     }
   }
 
@@ -332,9 +348,12 @@ public class KettleAnalyzerUtilTest {
     Object[] row = new Object[]{};
     IExternalResourceInfo resourceInfo = initMocksForGetResourcesFromRowTest( filename, step );
 
+    IKettleVFS vfs = mock( IKettleVFS.class );
     try(MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
-      mockedKettleVFS.when( () -> KettleVFS.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
-      assertTrue( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
+      mockedKettleVFS.when( () -> KettleVFS.getInstance( Mockito.<Bowl>any() ) ).thenReturn( vfs );
+      when( vfs.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
+      assertTrue( KettleAnalyzerUtil.getResourcesFromRow( DefaultBowl.getInstance(), step, rowMeta, row )
+        .contains( resourceInfo ) );
     }
   }
 

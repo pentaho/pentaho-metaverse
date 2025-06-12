@@ -15,6 +15,7 @@ package org.pentaho.metaverse.analyzer.kettle.step.textfileoutput;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.vfs2.FileObject;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
@@ -58,7 +59,8 @@ public class TextFileOutputExternalResourceConsumer
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( TextFileOutputMeta meta, IAnalysisContext context ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, TextFileOutputMeta meta,
+    IAnalysisContext context ) {
     Collection<IExternalResourceInfo> resources = Collections.emptyList();
 
     // We only need to collect these resources if we're not data-driven and there are no used variables in the
@@ -77,7 +79,7 @@ public class TextFileOutputExternalResourceConsumer
                 try {
 
                   IExternalResourceInfo resource = ExternalResourceInfoFactory
-                    .createFileResource( KettleVFS.getFileObject( path ), false );
+                    .createFileResource( KettleVFS.getInstance( bowl ).getFileObject( path ), false );
                   if ( resource != null ) {
                     resources.add( resource );
                   } else {
@@ -112,7 +114,8 @@ public class TextFileOutputExternalResourceConsumer
       }
 
       if ( !Const.isEmpty( filename ) ) {
-        FileObject fileObject = KettleVFS.getFileObject( filename );
+        FileObject fileObject = KettleVFS.getInstance( textFileOutput.getTransMeta().getBowl() )
+          .getFileObject( filename );
         resources.add( ExternalResourceInfoFactory.createFileResource( fileObject, false ) );
       }
     } catch ( KettleException kve ) {

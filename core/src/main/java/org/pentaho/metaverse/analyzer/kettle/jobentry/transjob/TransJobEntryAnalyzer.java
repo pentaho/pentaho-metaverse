@@ -72,7 +72,7 @@ public class TransJobEntryAnalyzer extends JobEntryAnalyzer<JobEntryTrans> {
       case FILENAME:
         try {
           transPath = parentJobMeta.environmentSubstitute( entry.getFilename() );
-          String normalized = KettleAnalyzerUtil.normalizeFilePath( transPath );
+          String normalized = KettleAnalyzerUtil.normalizeFilePath( parentJobMeta.getBowl(), transPath );
 
           subTransMeta = getSubTransMeta( normalized );
           entry.copyVariablesFrom( subTransMeta );

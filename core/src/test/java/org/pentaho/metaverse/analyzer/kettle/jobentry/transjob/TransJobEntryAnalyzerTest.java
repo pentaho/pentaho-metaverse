@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
 import org.pentaho.di.core.exception.KettleException;
@@ -108,6 +109,7 @@ public class TransJobEntryAnalyzerTest {
     when( jobEntryTrans.getParentJob() ).thenReturn( mockParentJob );
     when( mockParentJob.getJobMeta() ).thenReturn( mockParentJobMeta );
     when( namespace.getParentNamespace() ).thenReturn( namespace );
+    when( mockParentJobMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
 
     when( mockParentJobMeta.environmentSubstitute( Mockito.<String>any() ) ).thenAnswer( new Answer<String>() {
       @Override

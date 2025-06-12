@@ -107,7 +107,7 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
     Date modifiedDate = new Date( node.get( TransMetaJsonSerializer.JSON_PROPERTY_LAST_MODIFIED_DATE ).asLong() );
     String path = node.get( TransMetaJsonSerializer.JSON_PROPERTY_PATH ).textValue();
 
-    transMeta = new TransMeta( null, name );
+    transMeta = new TransMeta( (String)null, name );
     transMeta.setDescription( desc );
 
     transMeta.setCreatedDate( createdDate );
@@ -169,7 +169,7 @@ public class TransMetaJsonDeserializer extends StdDeserializer<TransMeta> {
               null,
               null );
         }
-        transMeta.addDatabase( dbMeta );
+        transMeta.getDatabaseManagementInterface().add( dbMeta );
       } catch ( Exception e ) {
         LOGGER.warn( Messages.getString( "WARNING.Deserialization.Trans.Connections",
             conn.getName(), transMeta.getName() ), e );

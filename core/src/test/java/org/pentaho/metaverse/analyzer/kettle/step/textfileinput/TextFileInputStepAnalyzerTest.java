@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.variables.VariableSpace;
@@ -69,7 +70,7 @@ public class TextFileInputStepAnalyzerTest {
 
   private IMetaverseObjectFactory mockFactory;
 
-    @Before
+  @Before
   public void setUp() throws Exception {
 
     mockFactory = MetaverseTestUtils.getMetaverseObjectFactory();
@@ -79,8 +80,11 @@ public class TextFileInputStepAnalyzerTest {
     analyzer = new TextFileInputStepAnalyzer();
     analyzer.setMetaverseBuilder( mockBuilder );
 
+    lenient().when( transMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
     lenient().when( mockTextFileInput.getStepMetaInterface() ).thenReturn( meta );
     lenient().when( mockTextFileInput.getStepMeta() ).thenReturn( mockStepMeta );
+    lenient().when( mockTextFileInput.getTransMeta() ).thenReturn( transMeta );
+    lenient().when( mockStepMeta.getParentTransMeta() ).thenReturn( transMeta );
     lenient().when( mockStepMeta.getStepMetaInterface() ).thenReturn( meta );
   }
 
@@ -154,6 +158,7 @@ public class TextFileInputStepAnalyzerTest {
     StepMeta spyMeta = spy( new StepMeta( "test", meta ) );
 
     when( meta.getParentStepMeta() ).thenReturn( spyMeta );
+    when( transMeta.getBowl() ).thenReturn( DefaultBowl.getInstance() );
     lenient().when( spyMeta.getParentTransMeta() ).thenReturn( transMeta );
     lenient().when( meta.getFileName() ).thenReturn( null );
     when( meta.isAcceptingFilenames() ).thenReturn( false );
@@ -161,14 +166,14 @@ public class TextFileInputStepAnalyzerTest {
     when( meta.getFilePaths( Mockito.any( VariableSpace.class ) ) ).thenReturn( filePaths );
 
     assertFalse( consumer.isDataDriven( meta ) );
-    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( meta );
+    Collection<IExternalResourceInfo> resources = consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta );
     assertFalse( resources.isEmpty() );
     assertEquals( 2, resources.size() );
 
 
     when( meta.isAcceptingFilenames() ).thenReturn( true );
     assertTrue( consumer.isDataDriven( meta ) );
-    assertTrue( consumer.getResourcesFromMeta( meta ).isEmpty() );
+    assertTrue( consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta ).isEmpty() );
     when( mockRowMetaInterface.getString( Mockito.any( Object[].class ), Mockito.any(), Mockito.any() ) )
       .thenReturn( "/path/to/row/file" );
     when( mockTextFileInput.getStepMetaInterface() ).thenReturn( meta );

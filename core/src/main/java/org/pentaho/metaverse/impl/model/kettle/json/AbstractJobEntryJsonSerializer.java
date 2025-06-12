@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.job.JobMeta;
@@ -84,7 +85,8 @@ public abstract class AbstractJobEntryJsonSerializer<T extends JobEntryBase>
     }
 
   }
-  protected void writeExternalResources( T meta, JsonGenerator json, SerializerProvider serializerProvider )
+
+  protected void writeExternalResources( Bowl bowl, T meta, JsonGenerator json, SerializerProvider serializerProvider )
     throws IOException, JsonGenerationException {
 
     json.writeArrayFieldStart( JSON_PROPERTY_EXTERNAL_RESOURCES );

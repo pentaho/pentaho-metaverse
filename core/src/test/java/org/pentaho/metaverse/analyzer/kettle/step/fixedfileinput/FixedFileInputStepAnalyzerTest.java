@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.pentaho.di.core.bowl.DefaultBowl;
 import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.TransMeta;
@@ -32,6 +33,7 @@ import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IClonableStepAnalyzer;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.model.IExternalResourceInfo;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
@@ -44,6 +46,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -65,6 +68,8 @@ public class FixedFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
     descriptor = new MetaverseComponentDescriptor( "test", DictionaryConst.NODE_TYPE_TRANS_STEP, mockNamespace );
     analyzer = spy( new FixedFileInputStepAnalyzer() );
     analyzer.setDescriptor( descriptor );
+    IMetaverseBuilder builder = mock( IMetaverseBuilder.class );
+    analyzer.setMetaverseBuilder( builder );
     analyzer.setObjectFactory( MetaverseTestUtils.getMetaverseObjectFactory() );
   }
 
@@ -113,7 +118,7 @@ public class FixedFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
     when( meta.getFilename() ).thenReturn( null );
     
     assertFalse( consumer.isDataDriven( meta ) );
-    assertTrue( consumer.getResourcesFromMeta( meta ).isEmpty() );
+    assertTrue( consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta ).isEmpty() );
 
     lenient().when( rmi.getString( Mockito.any(), Mockito.any(), Mockito.any() ) )
       .thenThrow( KettleValueException.class );
@@ -134,7 +139,7 @@ public class FixedFileInputStepAnalyzerTest extends ClonableStepAnalyzerTest {
     when( meta.getFilename() ).thenReturn( "path/to/file.txt" );
 
     assertFalse( consumer.isDataDriven( meta ) );
-    assertFalse( consumer.getResourcesFromMeta( meta ).isEmpty() );
+    assertFalse( consumer.getResourcesFromMeta( DefaultBowl.getInstance(), meta ).isEmpty() );
 
     lenient().when( rmi.getString( Mockito.any( Object[].class ), Mockito.anyString(), Mockito.anyString() ) )
       .thenThrow( KettleValueException.class );

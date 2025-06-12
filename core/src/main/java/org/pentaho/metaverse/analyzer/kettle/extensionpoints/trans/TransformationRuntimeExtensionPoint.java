@@ -180,7 +180,7 @@ public class TransformationRuntimeExtensionPoint extends BaseRuntimeExtensionPoi
     String filePath = null;
     if ( trans.getRepository() == null ) {
       try {
-        filePath = KettleAnalyzerUtil.normalizeFilePath( filename );
+        filePath = KettleAnalyzerUtil.normalizeFilePath( transMeta.getBowl(), filename );
       } catch ( Exception e ) {
         log.warn( "Couldn't normalize file path: " + filename, e );
         filePath = filename;

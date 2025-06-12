@@ -14,6 +14,7 @@
 package org.pentaho.metaverse.analyzer.kettle.step.tableoutput;
 
 import com.cronutils.utils.VisibleForTesting;
+import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutput;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -50,7 +51,8 @@ public class TableOutputExternalResourceConsumer
   }
 
   @Override
-  public Collection<IExternalResourceInfo> getResourcesFromMeta( TableOutputMeta meta, IAnalysisContext context ) {
+  public Collection<IExternalResourceInfo> getResourcesFromMeta( Bowl bowl, TableOutputMeta meta,
+    IAnalysisContext context ) {
     Set<IExternalResourceInfo> resources = new HashSet<IExternalResourceInfo>();
     DatabaseMeta dbMeta = meta.getDatabaseMeta();
     if ( dbMeta != null ) {
