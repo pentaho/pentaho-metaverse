@@ -20,6 +20,7 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.service.ServiceProviderInterface;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.ILineageClient;
@@ -29,6 +30,7 @@ import org.pentaho.metaverse.api.StepFieldOperations;
 import org.pentaho.metaverse.api.model.Operations;
 import org.pentaho.metaverse.graph.LineageGraphMap;
 import org.pentaho.metaverse.util.MetaverseUtil;
+import org.pentaho.di.core.service.ServiceProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +47,8 @@ import java.util.concurrent.Future;
  * transformation steps have fields that contribute to other fields, what operations have been performed on fields in
  * a transformation, etc.
  */
-public class LineageClient implements ILineageClient {
+@ServiceProvider( id = "LineageClient", description = "Provides specific data and metadata-lineage information", provides = ILineageClient.class )
+public class LineageClient implements ILineageClient, ServiceProviderInterface<ILineageClient> {
 
   protected static final int MAX_LOOPS = 50;
 
