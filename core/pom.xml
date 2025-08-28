@@ -297,7 +297,7 @@
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${maven-pmd-plugin.version}</version>
         <configuration>
-          <targetJdk>${target.jdk.version}</targetJdk>
+          <targetJdk>${release.jdk.version}</targetJdk>
           <rulesets>
             <ruleset>${pmd.rulesets.url}/basic.xml</ruleset>
             <ruleset>${pmd.rulesets.url}/optimizations.xml</ruleset>
@@ -377,7 +377,7 @@
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${maven-pmd-plugin.version}</version>
         <configuration>
-          <targetJdk>${target.jdk.version}</targetJdk>
+          <targetJdk>${release.jdk.version}</targetJdk>
           <rulesets>
             <ruleset>${pmd.rulesets.url}/basic.xml</ruleset>
             <ruleset>${pmd.rulesets.url}/optimizations.xml</ruleset>
