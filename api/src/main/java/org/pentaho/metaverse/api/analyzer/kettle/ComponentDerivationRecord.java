@@ -13,8 +13,11 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import flexjson.JSONSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.pentaho.metaverse.api.ChangeType;
 import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.model.IInfo;
@@ -31,6 +34,8 @@ import java.util.List;
  */
 @JsonTypeInfo( use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = IInfo.JSON_PROPERTY_CLASS )
 public class ComponentDerivationRecord {
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   protected StepField originalField;
   protected StepField changedField;
@@ -212,6 +217,31 @@ public class ComponentDerivationRecord {
 
   @Override
   public String toString() {
-    return new JSONSerializer().include( "*" ).serialize( operations );
+    ObjectNode root = OBJECT_MAPPER.createObjectNode();
+
+    if ( operations != null ) {
+      for ( ChangeType changeType : ChangeType.values() ) {
+        List<IOperation> operationsForType = operations.get( changeType );
+        if ( operationsForType == null ) {
+          continue;
+        }
+
+        ArrayNode operationArray = root.putArray( changeType.toString() );
+        for ( IOperation operation : operationsForType ) {
+          ObjectNode operationNode = operationArray.addObject();
+          operationNode.put( "category", operation.getCategory() );
+          operationNode.put( "class", operation.getClass().getName() );
+          operationNode.put( "description", operation.getDescription() );
+          operationNode.put( "name", operation.getName() );
+          operationNode.put( "type", operation.getType() == null ? null : operation.getType().name() );
+        }
+      }
+    }
+
+    try {
+      return OBJECT_MAPPER.writeValueAsString( root );
+    } catch ( JsonProcessingException e ) {
+      throw new IllegalStateException( "Unable to serialize component derivation record", e );
+    }
   }
 }

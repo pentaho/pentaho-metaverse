@@ -13,11 +13,12 @@
 
 package org.pentaho.metaverse.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import flexjson.JSONDeserializer;
 import org.pentaho.di.core.Const;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.dictionary.DictionaryHelper;
@@ -43,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -53,6 +56,7 @@ import java.util.concurrent.Future;
 public class MetaverseUtil {
 
   private static final Logger log = LoggerFactory.getLogger( MetaverseUtil.class );
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public static final String MESSAGE_PREFIX_NODETYPE = "USER.nodetype.";
   public static final String MESSAGE_PREFIX_LINKTYPE = "USER.linktype.";
@@ -181,17 +185,45 @@ public class MetaverseUtil {
     Operations resultOps = null;
     if ( !Const.isEmpty( operations ) ) {
       try {
-        Map<String, List<IOperation>> rawOpsMap = new JSONDeserializer<Map<String, List<IOperation>>>().
-          use( "values.values", Operation.class ).
-          deserialize( operations );
+        JsonNode root = OBJECT_MAPPER.readTree( operations );
         resultOps = new Operations();
-        for ( String key : rawOpsMap.keySet() ) {
-          resultOps.put( ChangeType.forValue( key ), rawOpsMap.get( key ) );
+
+        if ( root != null && root.isObject() ) {
+          Iterator<Map.Entry<String, JsonNode>> fields = root.fields();
+          while ( fields.hasNext() ) {
+            Map.Entry<String, JsonNode> entry = fields.next();
+            ChangeType changeType = ChangeType.forValue( entry.getKey() );
+            if ( changeType == null || !entry.getValue().isArray() ) {
+              continue;
+            }
+
+            List<IOperation> typedOperations = new ArrayList<IOperation>();
+            for ( JsonNode operationNode : entry.getValue() ) {
+              String name = operationNode.path( "name" ).isMissingNode() ? null : operationNode.path( "name" ).asText();
+              String description = operationNode.path( "description" ).isMissingNode() ? null : operationNode.path( "description" ).asText();
+              String category = operationNode.path( "category" ).isMissingNode() ? null : operationNode.path( "category" ).asText();
+              String typeValue = operationNode.path( "type" ).isMissingNode() ? null : operationNode.path( "type" ).asText();
+
+              Operation operation = new Operation( name, description );
+              operation.setCategory( category );
+
+              if ( !Const.isEmpty( typeValue ) ) {
+                try {
+                  operation.setType( ChangeType.valueOf( typeValue ) );
+                } catch ( IllegalArgumentException ignored ) {
+                  operation.setType( null );
+                }
+              }
+
+              typedOperations.add( operation );
+            }
+
+            resultOps.put( changeType, typedOperations );
+          }
         }
       } catch ( Exception e ) {
         resultOps = null;
       }
-      //return new JSONDeserializer<Operations>().use(null, Operations.class).deserialize( operations );
     }
     return resultOps;
   }
