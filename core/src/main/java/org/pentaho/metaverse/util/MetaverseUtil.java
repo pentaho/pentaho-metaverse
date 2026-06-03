@@ -199,21 +199,27 @@ public class MetaverseUtil {
 
             List<IOperation> typedOperations = new ArrayList<IOperation>();
             for ( JsonNode operationNode : entry.getValue() ) {
-              String name = operationNode.path( "name" ).isMissingNode() ? null : operationNode.path( "name" ).asText();
-              String description = operationNode.path( "description" ).isMissingNode() ? null : operationNode.path( "description" ).asText();
-              String category = operationNode.path( "category" ).isMissingNode() ? null : operationNode.path( "category" ).asText();
-              String typeValue = operationNode.path( "type" ).isMissingNode() ? null : operationNode.path( "type" ).asText();
+              JsonNode nameNode = operationNode.get( "name" );
+              String name = nameNode == null || nameNode.isNull() ? null : nameNode.asText();
+              JsonNode descNode = operationNode.get( "description" );
+              String description = descNode == null || descNode.isNull() ? null : descNode.asText();
+              JsonNode catNode = operationNode.get( "category" );
+              String category = catNode == null || catNode.isNull() ? null : catNode.asText();
+              JsonNode typeNode = operationNode.get( "type" );
+              String typeValue = typeNode == null || typeNode.isNull() ? null : typeNode.asText();
+
+              ChangeType operationType = changeType;  // default to the map key
+              if ( !Const.isEmpty( typeValue ) ) {
+                try {
+                  operationType = ChangeType.valueOf( typeValue );
+                } catch ( IllegalArgumentException ignored ) {
+                  // keep default
+                }
+              }
 
               Operation operation = new Operation( name, description );
               operation.setCategory( category );
-
-              if ( !Const.isEmpty( typeValue ) ) {
-                try {
-                  operation.setType( ChangeType.valueOf( typeValue ) );
-                } catch ( IllegalArgumentException ignored ) {
-                  operation.setType( null );
-                }
-              }
+              operation.setType( operationType );
 
               typedOperations.add( operation );
             }
