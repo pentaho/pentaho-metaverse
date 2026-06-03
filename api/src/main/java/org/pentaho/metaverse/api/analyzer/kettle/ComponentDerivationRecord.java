@@ -220,13 +220,13 @@ public class ComponentDerivationRecord {
     ObjectNode root = OBJECT_MAPPER.createObjectNode();
 
     if ( operations != null ) {
-      for ( ChangeType changeType : ChangeType.values() ) {
-        List<IOperation> operationsForType = operations.get( changeType );
+      for ( ChangeType ct : ChangeType.values() ) {
+        List<IOperation> operationsForType = operations.get( ct );
         if ( operationsForType == null ) {
           continue;
         }
 
-        ArrayNode operationArray = root.putArray( changeType.toString() );
+        ArrayNode operationArray = root.putArray( ct.toString() );
         for ( IOperation operation : operationsForType ) {
           ObjectNode operationNode = operationArray.addObject();
           operationNode.put( "category", operation.getCategory() );
