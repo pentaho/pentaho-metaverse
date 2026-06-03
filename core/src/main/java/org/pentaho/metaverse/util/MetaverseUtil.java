@@ -183,7 +183,7 @@ public class MetaverseUtil {
 
   public static Operations convertOperationsStringToMap( String operations ) {
     Operations resultOps = null;
-    if ( !Const.isEmpty( operations ) ) {
+    if ( operations != null && !operations.isEmpty() ) {
       try {
         JsonNode root = OBJECT_MAPPER.readTree( operations );
         resultOps = new Operations();
@@ -197,34 +197,7 @@ public class MetaverseUtil {
               continue;
             }
 
-            List<IOperation> typedOperations = new ArrayList<IOperation>();
-            for ( JsonNode operationNode : entry.getValue() ) {
-              JsonNode nameNode = operationNode.get( "name" );
-              String name = nameNode == null || nameNode.isNull() ? null : nameNode.asText();
-              JsonNode descNode = operationNode.get( "description" );
-              String description = descNode == null || descNode.isNull() ? null : descNode.asText();
-              JsonNode catNode = operationNode.get( "category" );
-              String category = catNode == null || catNode.isNull() ? null : catNode.asText();
-              JsonNode typeNode = operationNode.get( "type" );
-              String typeValue = typeNode == null || typeNode.isNull() ? null : typeNode.asText();
-
-              ChangeType operationType = changeType;  // default to the map key
-              if ( !Const.isEmpty( typeValue ) ) {
-                try {
-                  operationType = ChangeType.valueOf( typeValue );
-                } catch ( IllegalArgumentException ignored ) {
-                  // keep default
-                }
-              }
-
-              Operation operation = new Operation( name, description );
-              operation.setCategory( category );
-              operation.setType( operationType );
-
-              typedOperations.add( operation );
-            }
-
-            resultOps.put( changeType, typedOperations );
+            processOperationNodeList( entry.getValue(), changeType, resultOps );
           }
         }
       } catch ( Exception e ) {
@@ -232,6 +205,46 @@ public class MetaverseUtil {
       }
     }
     return resultOps;
+  }
+
+  private static void processOperationNodeList( Iterable<JsonNode> operationNodes, ChangeType changeType,
+      Operations resultOps ) {
+    List<IOperation> typedOperations = new ArrayList<>();
+    for ( JsonNode operationNode : operationNodes ) {
+      IOperation operation = parseOperationNode( operationNode, changeType );
+      typedOperations.add( operation );
+    }
+    resultOps.put( changeType, typedOperations );
+  }
+
+  private static IOperation parseOperationNode( JsonNode operationNode, ChangeType changeType ) {
+    String name = extractStringValue( operationNode, "name" );
+    String description = extractStringValue( operationNode, "description" );
+    String category = extractStringValue( operationNode, "category" );
+    String typeValue = extractStringValue( operationNode, "type" );
+
+    ChangeType operationType = changeType;  // default to the map key
+    if ( typeValue != null && !typeValue.isEmpty() ) {
+      operationType = parseChangeType( typeValue, changeType );
+    }
+
+    Operation operation = new Operation( name, description );
+    operation.setCategory( category );
+    operation.setType( operationType );
+    return operation;
+  }
+
+  private static String extractStringValue( JsonNode node, String fieldName ) {
+    JsonNode fieldNode = node.get( fieldName );
+    return fieldNode == null || fieldNode.isNull() ? null : fieldNode.asText();
+  }
+
+  private static ChangeType parseChangeType( String typeValue, ChangeType defaultType ) {
+    try {
+      return ChangeType.valueOf( typeValue );
+    } catch ( IllegalArgumentException ignored ) {
+      return defaultType;
+    }
   }
 
   public static Runnable getAnalyzerRunner( final IDocumentAnalyzer analyzer, final IDocument document ) {
