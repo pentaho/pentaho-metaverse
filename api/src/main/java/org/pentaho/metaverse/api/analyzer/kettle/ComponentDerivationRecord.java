@@ -241,7 +241,9 @@ public class ComponentDerivationRecord {
     try {
       return OBJECT_MAPPER.writeValueAsString( root );
     } catch ( JsonProcessingException e ) {
-      throw new IllegalStateException( "Unable to serialize component derivation record", e );
+      // Return a safe fallback string instead of throwing, to avoid surprising failures
+      // in logging/debugging code paths that invoke toString()
+      return getClass().getSimpleName() + "@" + Integer.toHexString( hashCode() );
     }
   }
 }
