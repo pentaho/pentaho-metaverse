@@ -40,8 +40,8 @@ public class GraphUtilTest {
 
     assertNotNull( clone );
     assertEquals( original.getId(), clone.getId() );
-    assertEquals( original.getProperty( "name" ), clone.getProperty( "name" ) );
-    assertEquals( original.getProperty( "count" ), clone.getProperty( "count" ) );
+    assertEquals( (Object) original.getProperty( "name" ), (Object) clone.getProperty( "name" ) );
+    assertEquals( (Object) original.getProperty( "count" ), (Object) clone.getProperty( "count" ) );
     assertEquals( 1, countVertices( target ) );
   }
 
