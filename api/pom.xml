@@ -14,6 +14,7 @@
   <description>pentaho-metaverse-api OSGi bundle project.</description>
   <properties>
     <mockito-core.version>5.17.0</mockito-core.version>
+    <tinkerpop.version>3.7.3</tinkerpop.version>
   </properties>
   <dependencies>
     <dependency>
@@ -61,9 +62,9 @@
       <artifactId>jackson-annotations</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-configuration</groupId>
-      <artifactId>commons-configuration</artifactId>
-      <version>${dependency.commons-configuration.commons-configuration.version}</version>
+      <groupId>org.apache.tinkerpop</groupId>
+      <artifactId>gremlin-core</artifactId>
+      <version>${tinkerpop.version}</version>
     </dependency>
     <dependency>
       <groupId>com.tinkerpop.blueprints</groupId>
@@ -74,6 +75,10 @@
         <exclusion>
           <groupId>org.codehaus.jettison</groupId>
           <artifactId>jettison</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-configuration</groupId>
+          <artifactId>commons-configuration</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -146,6 +151,43 @@
       <groupId>org.osgi</groupId>
       <artifactId>osgi.core</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.tinkerpop</groupId>
+      <artifactId>pipes</artifactId>
+      <version>${dependency.com.tinkerpop.blueprints.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-configuration</groupId>
+          <artifactId>commons-configuration</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>com.tinkerpop.blueprints</groupId>
+      <artifactId>blueprints-core</artifactId>
+      <version>${dependency.com.tinkerpop.blueprints.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-configuration</groupId>
+          <artifactId>commons-configuration</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+    </dependency>
+
+    <!-- compile bridge for Blueprints 2.x binary signature -->
+    <dependency>
+      <groupId>commons-configuration</groupId>
+      <artifactId>commons-configuration</artifactId>
+      <version>${dependency.commons-configuration.commons-configuration.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 </project>

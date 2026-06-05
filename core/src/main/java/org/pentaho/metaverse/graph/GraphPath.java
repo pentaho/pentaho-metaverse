@@ -101,7 +101,7 @@ public class GraphPath {
       if ( vertex != null ) {
         VertexAdapter v = graph.getVertex( vertex.getId() );
         if ( v == null ) {
-          v = GraphUtil.cloneVertexIntoGraph( vertex, graph );
+          GraphUtil.cloneVertexIntoGraph( vertex, graph );
         }
       } else {
         EdgeAdapter edge = toEdgeAdapter( item );

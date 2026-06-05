@@ -74,7 +74,7 @@ public abstract class BaseGraphWriter implements IGraphWriter {
                                                                   final String name ) {
     final Iterator<VertexAdapter> allVertices = graph.getVertices().iterator();
 
-    final Set<VertexAdapter> documentElementVertices = new HashSet<VertexAdapter>();
+    final Set<VertexAdapter> documentElementVertices = new HashSet<>();
     while ( allVertices.hasNext() ) {
       final VertexAdapter vertex = allVertices.next();
       if ( ( category == null || category.equals( vertex.getProperty( DictionaryConst.PROPERTY_CATEGORY ) ) )
@@ -115,7 +115,7 @@ public abstract class BaseGraphWriter implements IGraphWriter {
       final List<VertexAdapter> inputFields = getLinkedVertices( documentElementVertex, DirectionAdapter.IN,
         DictionaryConst.LINK_INPUTS, DictionaryConst.CATEGORY_FIELD, true, DictionaryConst.NODE_TYPE_TRANS_FIELD,
         true );
-      final List<VertexAdapter> orphanedInputFields = new ArrayList<VertexAdapter>();
+      final List<VertexAdapter> orphanedInputFields = new ArrayList<>();
       for ( final VertexAdapter inputField : inputFields ) {
         if ( !inputField.getEdges( DirectionAdapter.IN, DictionaryConst.LINK_OUTPUTS ).iterator().hasNext() ) {
           orphanedInputFields.add( inputField );
@@ -180,7 +180,7 @@ public abstract class BaseGraphWriter implements IGraphWriter {
       documentElementVertex.getEdges( direction, linkLabel ).iterator() );
     // traverse the links and see if there are any that point to fields with the same names, if so, they need to be
     // merged
-    final Map<String, Set<VertexAdapter>> fieldMap = new HashMap<String, Set<VertexAdapter>>();
+    final Map<String, Set<VertexAdapter>> fieldMap = new HashMap<>();
     for ( final EdgeAdapter link : links ) {
       // get the vertex at the "other" end of this linnk ("this" end being the vertex itself)
       final VertexAdapter vertex = link.getVertex( direction.getOpposite() );
@@ -191,11 +191,8 @@ public abstract class BaseGraphWriter implements IGraphWriter {
         && isTransformationField == DictionaryConst.NODE_TYPE_TRANS_FIELD.equals( type ) ) {
         final String fieldName = vertex.getProperty( DictionaryConst.PROPERTY_NAME );
 
-        Set<VertexAdapter> fieldsWithSameName = fieldMap.get( fieldName );
-        if ( fieldsWithSameName == null ) {
-          fieldsWithSameName = new HashSet<VertexAdapter>();
-          fieldMap.put( fieldName, fieldsWithSameName );
-        }
+        Set<VertexAdapter> fieldsWithSameName =
+          fieldMap.computeIfAbsent( fieldName, k -> new HashSet<>() );
         fieldsWithSameName.add( vertex );
       }
     }
@@ -203,7 +200,7 @@ public abstract class BaseGraphWriter implements IGraphWriter {
     // traverse the map pf fields - for any field name, if more than one has been found, merge them into one
     final List<Map.Entry<String, Set<VertexAdapter>>> fields = IteratorUtils.toList( fieldMap.entrySet().iterator() );
     for ( final Map.Entry<String, Set<VertexAdapter>> fieldEntry : fields ) {
-      final List<VertexAdapter> fieldVertices = new ArrayList<VertexAdapter>( fieldEntry.getValue() );
+      final List<VertexAdapter> fieldVertices = new ArrayList<>( fieldEntry.getValue() );
       if ( fieldVertices.size() > 1 ) {
         // get the first vertex - we will keep this one and re-point links connected to all the rest back to this
         // original one, and then remove the remaining ones
@@ -264,7 +261,7 @@ public abstract class BaseGraphWriter implements IGraphWriter {
                                                         final boolean equalToCategory, final String linkedVertexType,
                                                         final boolean equalToType ) {
 
-    final List<VertexAdapter> linkedVertices = new ArrayList<VertexAdapter>();
+    final List<VertexAdapter> linkedVertices = new ArrayList<>();
     final Iterator<EdgeAdapter> links = originVertex.getEdges( edgeDirection, edgeLabel ).iterator();
     while ( links.hasNext() ) {
       final EdgeAdapter link = links.next();

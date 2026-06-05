@@ -88,7 +88,7 @@ public final class BlueprintsAdapters {
 
     @Override
     public Iterable<VertexAdapter> getVertices() {
-      final List<VertexAdapter> vertices = new ArrayList<VertexAdapter>();
+      final List<VertexAdapter> vertices = new ArrayList<>();
       for ( Vertex vertex : delegate.getVertices() ) {
         vertices.add( wrap( vertex ) );
       }
@@ -129,7 +129,7 @@ public final class BlueprintsAdapters {
 
     @Override
     public Iterable<EdgeAdapter> getEdges( DirectionAdapter direction, String... labels ) {
-      final List<EdgeAdapter> edges = new ArrayList<EdgeAdapter>();
+      final List<EdgeAdapter> edges = new ArrayList<>();
       for ( Edge edge : delegate.getEdges( unwrap( direction ), labels ) ) {
         edges.add( wrap( edge ) );
       }

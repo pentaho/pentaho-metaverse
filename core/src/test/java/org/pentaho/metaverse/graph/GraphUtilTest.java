@@ -46,7 +46,7 @@ public class GraphUtilTest {
   }
 
   @Test
-  public void testCloneVertexIntoGraphReturnsExistingVertex() throws Exception {
+  public void testCloneVertexIntoGraphReturnsExistingVertex() {
     Graph source = new TinkerGraph();
     Vertex original = source.addVertex( "v1" );
     original.setProperty( "name", "source-name" );

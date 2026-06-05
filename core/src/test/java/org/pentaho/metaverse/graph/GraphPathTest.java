@@ -10,7 +10,6 @@
  * Change Date: 2029-07-20
  ******************************************************************************/
 
-
 package org.pentaho.metaverse.graph;
 
 import com.tinkerpop.blueprints.Edge;
@@ -18,6 +17,7 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.Test;
+import org.pentaho.metaverse.graph.adapter.BlueprintsAdapters;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -53,6 +53,36 @@ public class GraphPathTest {
     assertEquals( "links", clonedE1.getLabel() );
     assertEquals( 2, countVertices( target ) );
     assertEquals( 1, countEdges( target ) );
+  }
+
+  @Test
+  public void testToStringSupportsWrappedVertices() {
+    Graph source = new TinkerGraph();
+    Vertex v1 = source.addVertex( "v1" );
+    Vertex v2 = source.addVertex( "v2" );
+
+    GraphPath path = new GraphPath();
+    path.add( BlueprintsAdapters.wrap( v1 ) );
+    path.add( BlueprintsAdapters.wrap( v2 ) );
+
+    assertEquals( "v1->v2", path.toString() );
+  }
+
+  @Test
+  public void testAddToGraphIgnoresUnsupportedObjects() {
+    Graph source = new TinkerGraph();
+    Vertex v1 = source.addVertex( "v1" );
+
+    GraphPath path = new GraphPath();
+    path.addVertex( v1 );
+    path.add( "not-a-graph-element" );
+
+    Graph target = new TinkerGraph();
+    path.addToGraph( target );
+
+    assertNotNull( target.getVertex( "v1" ) );
+    assertEquals( 1, countVertices( target ) );
+    assertEquals( 0, countEdges( target ) );
   }
 
   private int countVertices( Graph graph ) {
