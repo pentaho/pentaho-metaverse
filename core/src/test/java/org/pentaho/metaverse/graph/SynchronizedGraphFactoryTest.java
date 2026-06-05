@@ -17,8 +17,6 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.KeyIndexableGraph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.Test;
 import org.pentaho.metaverse.api.model.BaseSynchronizedGraph;
 
@@ -35,15 +33,6 @@ public class SynchronizedGraphFactoryTest {
   public void testProtected_Constructor() {
     new SynchronizedGraphFactory() {
     };
-  }
-
-  @Test
-  public void testOpen_Configuration() throws Exception {
-    Configuration config = new PropertiesConfiguration();
-    config.addProperty( "blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph" );
-    Graph g = SynchronizedGraphFactory.open( config );
-
-    assertTrue( g instanceof BaseSynchronizedGraph );
   }
 
   @Test

@@ -16,7 +16,10 @@ package org.pentaho.metaverse.impl.model.kettle.json;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.pentaho.di.core.KettleEnvironment;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.trans.TransMeta;
 
 import java.util.ArrayList;
@@ -25,6 +28,18 @@ import java.util.List;
 import static org.junit.Assert.assertNotNull;
 
 public class KettleObjectMapperTest {
+
+
+  @BeforeClass
+  public static void initKettle() {
+    try {
+      if ( !KettleEnvironment.isInitialized() ) {
+        KettleEnvironment.init();
+      }
+    } catch ( KettleException e ) {
+      throw new RuntimeException( "Failed to initialize KettleEnvironment for tests", e );
+    }
+  }
 
   private static final String TRANS_JSON = "{\n" +
     "  \"@class\" : \"org.pentaho.di.trans.TransMeta\",\n" +

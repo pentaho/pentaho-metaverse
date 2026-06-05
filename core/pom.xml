@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>pentaho</groupId>
@@ -23,6 +23,7 @@
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <enunciate.version>1.27</enunciate.version>
     <gremlin-java.version>2.6.0</gremlin-java.version>
+    <gremlin-groovy.version>2.6.0</gremlin-groovy.version>
     <pdi.plugin.name>pdi</pdi.plugin.name>
     <pentaho-mongodb-plugin.version>11.1.0.0-SNAPSHOT</pentaho-mongodb-plugin.version>
     <platform.version>11.1.0.0-SNAPSHOT</platform.version>
@@ -34,6 +35,7 @@
     <commons-lang.version>2.6</commons-lang.version>
     <dependency.com.tinkerpop.pipes.version>2.6.0</dependency.com.tinkerpop.pipes.version>
     <commons-collections.version>3.2.2</commons-collections.version>
+    <dependency.org.apache.commons.commons-configuration2.version>2.10.1</dependency.org.apache.commons.commons-configuration2.version>
   </properties>
   <dependencies>
     <dependency>
@@ -64,12 +66,16 @@
           <groupId>org.codehaus.jettison</groupId>
           <artifactId>jettison</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>commons-configuration</groupId>
+          <artifactId>commons-configuration</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>commons-configuration</groupId>
-      <artifactId>commons-configuration</artifactId>
-      <version>${dependency.commons-configuration.commons-configuration.version}</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+      <version>${dependency.org.apache.commons.commons-configuration2.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -133,6 +139,10 @@
         <exclusion>
           <groupId>commons-beanutils</groupId>
           <artifactId>commons-beanutils-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-configuration</groupId>
+          <artifactId>commons-configuration</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -322,11 +332,6 @@
         </executions>
         <dependencies>
           <dependency>
-            <groupId>com.tinkerpop.gremlin</groupId>
-            <artifactId>gremlin-groovy</artifactId>
-            <version>${gremlin-java.version}</version>
-          </dependency>
-          <dependency>
             <groupId>pentaho-kettle</groupId>
             <artifactId>kettle-ui-swt</artifactId>
             <version>${dependency.pentaho-kettle.kettle-core.version}</version>
@@ -341,10 +346,6 @@
           <classpathScope>test</classpathScope>
           <includeProjectDependencies>true</includeProjectDependencies>
           <includePluginDependencies>true</includePluginDependencies>
-          <executableDependency>
-            <groupId>com.tinkerpop.gremlin</groupId>
-            <artifactId>gremlin-groovy</artifactId>
-          </executableDependency>
           <mainClass>com.tinkerpop.gremlin.groovy.console.Console</mainClass>
           <arguments>
             <argument>src/it/resources/metaverse-pdi.groovy</argument>
