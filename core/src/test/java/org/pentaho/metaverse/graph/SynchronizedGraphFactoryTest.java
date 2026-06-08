@@ -17,10 +17,11 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.KeyIndexableGraph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.BaseConfiguration;
 import org.junit.Test;
 import org.pentaho.metaverse.api.model.BaseSynchronizedGraph;
+import org.pentaho.metaverse.api.model.BaseSynchronizedGraphFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,11 +40,12 @@ public class SynchronizedGraphFactoryTest {
 
   @Test
   public void testOpen_Configuration() throws Exception {
-    Configuration config = new PropertiesConfiguration();
-    config.addProperty( "blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph" );
-    Graph g = SynchronizedGraphFactory.open( config );
+    Configuration config = new BaseConfiguration();
+    config.setProperty("blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph");
 
-    assertTrue( g instanceof BaseSynchronizedGraph );
+    Graph graph = BaseSynchronizedGraphFactory.open(config);
+
+    assertTrue( graph instanceof BaseSynchronizedGraph );
   }
 
   @Test

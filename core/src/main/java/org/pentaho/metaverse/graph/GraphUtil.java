@@ -15,6 +15,9 @@ package org.pentaho.metaverse.graph;
 
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
+import org.pentaho.metaverse.graph.adapter.BlueprintsAdapters;
+import org.pentaho.metaverse.graph.adapter.GraphAdapter;
+import org.pentaho.metaverse.graph.adapter.VertexAdapter;
 
 import java.util.Set;
 
@@ -40,7 +43,12 @@ public class GraphUtil {
    * @return The vertex in the sub-graph
    */
   public static Vertex cloneVertexIntoGraph( Vertex vertex, Graph g ) {
-    Vertex clone = g.getVertex( vertex.getId() );
+    VertexAdapter clone = cloneVertexIntoGraph( BlueprintsAdapters.wrap( vertex ), BlueprintsAdapters.wrap( g ) );
+    return BlueprintsAdapters.unwrap( clone );
+  }
+
+  public static VertexAdapter cloneVertexIntoGraph( VertexAdapter vertex, GraphAdapter g ) {
+    VertexAdapter clone = g.getVertex( vertex.getId() );
     if ( clone != null ) {
       return clone;
     }
