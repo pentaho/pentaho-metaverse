@@ -13,14 +13,10 @@
 
 package org.pentaho.metaverse.graph;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
-import org.pentaho.metaverse.graph.adapter.BlueprintsAdapters;
-import org.pentaho.metaverse.graph.adapter.DirectionAdapter;
-import org.pentaho.metaverse.graph.adapter.EdgeAdapter;
-import org.pentaho.metaverse.graph.adapter.GraphAdapter;
-import org.pentaho.metaverse.graph.adapter.VertexAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,31 +90,27 @@ public class GraphPath {
    * @param g The graph to add this path to.
    */
   public void addToGraph( Graph g ) {
-    GraphAdapter graph = BlueprintsAdapters.wrap( g );
 
     for ( Object item : path ) {
-      VertexAdapter vertex = toVertexAdapter( item );
-      if ( vertex != null ) {
-        VertexAdapter v = graph.getVertex( vertex.getId() );
+      if ( item instanceof Vertex ) {
+        Vertex vertex = (Vertex) item;
+        Vertex v = g.getVertex( vertex.getId() );
         if ( v == null ) {
-          GraphUtil.cloneVertexIntoGraph( vertex, graph );
+          v = GraphUtil.cloneVertexIntoGraph( vertex, g );
         }
-      } else {
-        EdgeAdapter edge = toEdgeAdapter( item );
-        if ( edge == null ) {
-          continue;
-        }
-        EdgeAdapter e = graph.getEdge( edge.getId() );
+      } else if ( item instanceof Edge ) {
+        Edge edge = (Edge) item;
+        Edge e = g.getEdge( edge.getId() );
         if ( e == null ) {
-          VertexAdapter v1 = graph.getVertex( edge.getVertex( DirectionAdapter.OUT ).getId() );
+          Vertex v1 = g.getVertex( edge.getVertex( Direction.OUT ) );
           if ( v1 == null ) {
-            v1 = GraphUtil.cloneVertexIntoGraph( edge.getVertex( DirectionAdapter.OUT ), graph );
+            v1 = GraphUtil.cloneVertexIntoGraph( edge.getVertex( Direction.OUT ), g );
           }
-          VertexAdapter v2 = graph.getVertex( edge.getVertex( DirectionAdapter.IN ).getId() );
+          Vertex v2 = g.getVertex( edge.getVertex( Direction.IN ) );
           if ( v2 == null ) {
-            v2 = GraphUtil.cloneVertexIntoGraph( edge.getVertex( DirectionAdapter.IN ), graph );
+            v2 = GraphUtil.cloneVertexIntoGraph( edge.getVertex( Direction.IN ), g );
           }
-          graph.addEdge( edge.getId(), v1, v2, edge.getLabel() );
+          e = g.addEdge( edge.getId(), v1, v2, edge.getLabel() );
         }
       }
 
@@ -130,35 +122,14 @@ public class GraphPath {
   public String toString() {
     StringBuilder str = new StringBuilder();
     for ( Object obj : path ) {
-      if ( obj instanceof Vertex || obj instanceof VertexAdapter ) {
-        VertexAdapter vertex = toVertexAdapter( obj );
+      if ( obj instanceof Vertex ) {
         if ( str.length() > 0 ) {
           str.append( "->" );
         }
-        str.append( vertex.getId() );
+        str.append( ( (Vertex) obj ).getId() );
       }
     }
     return str.toString();
-  }
-
-  private VertexAdapter toVertexAdapter( Object item ) {
-    if ( item instanceof VertexAdapter ) {
-      return (VertexAdapter) item;
-    }
-    if ( item instanceof Vertex ) {
-      return BlueprintsAdapters.wrap( (Vertex) item );
-    }
-    return null;
-  }
-
-  private EdgeAdapter toEdgeAdapter( Object item ) {
-    if ( item instanceof EdgeAdapter ) {
-      return (EdgeAdapter) item;
-    }
-    if ( item instanceof Edge ) {
-      return BlueprintsAdapters.wrap( (Edge) item );
-    }
-    return null;
   }
 
 }

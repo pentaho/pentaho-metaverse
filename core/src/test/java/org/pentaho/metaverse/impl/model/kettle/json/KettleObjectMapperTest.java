@@ -16,10 +16,7 @@ package org.pentaho.metaverse.impl.model.kettle.json;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pentaho.di.core.KettleEnvironment;
-import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.trans.TransMeta;
 
 import java.util.ArrayList;
@@ -50,11 +47,6 @@ public class KettleObjectMapperTest {
   List<StdSerializer> serializers;
 
   List<StdDeserializer> deserializers;
-
-  @BeforeClass
-  public static void init() throws KettleException {
-    KettleEnvironment.init();
-  }
 
   @Before
   public void setUp() throws Exception {
