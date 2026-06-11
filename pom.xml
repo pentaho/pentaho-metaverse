@@ -61,7 +61,6 @@
     <dependency.net.sf.flexjson.flexjson.version>2.1</dependency.net.sf.flexjson.flexjson.version>
     <dependency.pentaho.pentaho-platform-repository.version>${project.version}</dependency.pentaho.pentaho-platform-repository.version>
     <dependency.junit.junit.version>4.13.2</dependency.junit.junit.version>
-    <dependency.com.tinkerpop.blueprints.version>2.6.0</dependency.com.tinkerpop.blueprints.version>
     <dependency.org.apache.tinkerpop.version>3.7.3</dependency.org.apache.tinkerpop.version>
     <dependency.org.apache.commons.commons-configuration2.version>2.11.0</dependency.org.apache.commons.commons-configuration2.version>
     <dependency.commons-collections.commons-collections.version>3.2.1</dependency.commons-collections.commons-collections.version>

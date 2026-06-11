@@ -78,23 +78,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <!-- Follow-up: replace legacy Blueprints API usage with TinkerPop 3 structure/traversal APIs, then remove this. -->
-      <groupId>com.tinkerpop.blueprints</groupId>
-      <artifactId>blueprints-core</artifactId>
-      <version>${dependency.com.tinkerpop.blueprints.version}</version>
-      <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-configuration</groupId>
-          <artifactId>commons-configuration</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.codehaus.jettison</groupId>
-          <artifactId>jettison</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>net.sf.flexjson</groupId>
       <artifactId>flexjson</artifactId>
       <version>${dependency.net.sf.flexjson.flexjson.version}</version>
