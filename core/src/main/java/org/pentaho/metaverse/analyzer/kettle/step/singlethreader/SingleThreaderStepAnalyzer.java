@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.singlethreader;
 
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.singlethreader.SingleThreaderMeta;

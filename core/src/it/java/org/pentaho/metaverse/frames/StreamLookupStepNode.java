@@ -13,10 +13,11 @@
 
 package org.pentaho.metaverse.frames;
 
-/**
- * @author wseyler
- *
- */
-public interface StreamLookupStepNode extends TransformationStepNode {
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
+public class StreamLookupStepNode extends TransformationStepNode {
+  public StreamLookupStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 }

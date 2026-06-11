@@ -44,8 +44,8 @@ public class JMSConsumerStepAnalyzerValidationIT extends StepAnalyzerValidationI
     final TransformationNode subTransNode = verifyTransformationNode( subTransNodeName, true );
 
     // assert that nodes/edges have expected quantities
-    assertEquals( "Unexpected number of nodes", 25, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( "Unexpected number of edges", 64, getIterableSize( framedGraph.getEdges() ) );
+    assertEquals( "Unexpected number of nodes", 25, getIterableSize( getVertices() ) );
+    assertEquals( "Unexpected number of edges", 64, getIterableSize( getEdges() ) );
 
     verifyNodesTypes( ImmutableMap.of(
       NODE_TYPE_TRANS, Arrays.asList( transNodeName, subTransNodeName ),

@@ -13,10 +13,10 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.pentaho.dictionary.DictionaryConst;
 
 import java.io.IOException;
@@ -34,8 +34,7 @@ public class GraphCsvWriter extends BaseGraphWriter {
   @Override
   public void outputGraphImpl( Graph graph, OutputStream out ) throws IOException {
 
-    Iterable<Edge> iterable = graph.getEdges();
-    Iterator<Edge> it = iterable.iterator();
+    Iterator<Edge> it = graph.edges();
     writeCSVField( "SourceId", out, true, false );
     writeCSVField( "SourceVirtual", out, false, false );
     writeCSVField( "SourceFileType", out, false, false );
@@ -51,21 +50,21 @@ public class GraphCsvWriter extends BaseGraphWriter {
     writeCSVField( "DestinationModified", out, false, true );
     while ( it.hasNext() ) {
       Edge edge = it.next();
-      Vertex fromV = edge.getVertex( Direction.OUT );
-      Vertex toV = edge.getVertex( Direction.IN );
-      writeCSVField( fromV.getId(), out, true, false );
-      writeCSVField( fromV.getProperty( DictionaryConst.NODE_VIRTUAL ), out, false, false );
-      writeCSVField( fromV.getProperty( DictionaryConst.PROPERTY_TYPE ), out, false, false );
-      writeCSVField( fromV.getProperty( DictionaryConst.PROPERTY_NAME ), out, false, false );
-      writeCSVField( fromV.getProperty( DictionaryConst.PROPERTY_AUTHOR ), out, false, false );
-      writeCSVField( fromV.getProperty( DictionaryConst.PROPERTY_LAST_MODIFIED ), out, false, false );
-      writeCSVField( edge.getLabel(), out, false, false );
-      writeCSVField( toV.getId(), out, false, false );
-      writeCSVField( toV.getProperty( DictionaryConst.NODE_VIRTUAL ), out, false, false );
-      writeCSVField( toV.getProperty( DictionaryConst.PROPERTY_TYPE ), out, false, false );
-      writeCSVField( toV.getProperty( DictionaryConst.PROPERTY_NAME ), out, false, false );
-      writeCSVField( toV.getProperty( DictionaryConst.PROPERTY_AUTHOR ), out, false, false );
-      writeCSVField( toV.getProperty( DictionaryConst.PROPERTY_LAST_MODIFIED ), out, false, true );
+      Vertex fromV = edge.outVertex();
+      Vertex toV = edge.inVertex();
+      writeCSVField( fromV.id(), out, true, false );
+      writeCSVField( fromV.property( DictionaryConst.NODE_VIRTUAL ).isPresent() ? fromV.value( DictionaryConst.NODE_VIRTUAL ) : null, out, false, false );
+      writeCSVField( fromV.property( DictionaryConst.PROPERTY_TYPE ).isPresent() ? fromV.value( DictionaryConst.PROPERTY_TYPE ) : null, out, false, false );
+      writeCSVField( fromV.property( DictionaryConst.PROPERTY_NAME ).isPresent() ? fromV.value( DictionaryConst.PROPERTY_NAME ) : null, out, false, false );
+      writeCSVField( fromV.property( DictionaryConst.PROPERTY_AUTHOR ).isPresent() ? fromV.value( DictionaryConst.PROPERTY_AUTHOR ) : null, out, false, false );
+      writeCSVField( fromV.property( DictionaryConst.PROPERTY_LAST_MODIFIED ).isPresent() ? fromV.value( DictionaryConst.PROPERTY_LAST_MODIFIED ) : null, out, false, false );
+      writeCSVField( edge.label(), out, false, false );
+      writeCSVField( toV.id(), out, false, false );
+      writeCSVField( toV.property( DictionaryConst.NODE_VIRTUAL ).isPresent() ? toV.value( DictionaryConst.NODE_VIRTUAL ) : null, out, false, false );
+      writeCSVField( toV.property( DictionaryConst.PROPERTY_TYPE ).isPresent() ? toV.value( DictionaryConst.PROPERTY_TYPE ) : null, out, false, false );
+      writeCSVField( toV.property( DictionaryConst.PROPERTY_NAME ).isPresent() ? toV.value( DictionaryConst.PROPERTY_NAME ) : null, out, false, false );
+      writeCSVField( toV.property( DictionaryConst.PROPERTY_AUTHOR ).isPresent() ? toV.value( DictionaryConst.PROPERTY_AUTHOR ) : null, out, false, false );
+      writeCSVField( toV.property( DictionaryConst.PROPERTY_LAST_MODIFIED ).isPresent() ? toV.value( DictionaryConst.PROPERTY_LAST_MODIFIED ) : null, out, false, true );
     }
 
   }

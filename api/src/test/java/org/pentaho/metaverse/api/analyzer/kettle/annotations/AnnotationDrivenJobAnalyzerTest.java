@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle.annotations;
 
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -48,7 +48,7 @@ public class AnnotationDrivenJobAnalyzerTest {
         return stepAnalyzer;
       }
     };
-    jobAnalyzer.setMetaverseBuilder( new BaseMetaverseBuilder( new TinkerGraph() ) );
+    jobAnalyzer.setMetaverseBuilder( new BaseMetaverseBuilder( TinkerGraph.open() ) );
     jobAnalyzer.analyze( new MetaverseComponentDescriptor( "root", "job", new Namespace( "names" ) ), jobEntry );
     Mockito.verify( stepAnalyzer ).customAnalyze( any( TestStepMeta.class ), any( MetaverseTransientNode.class ) );
   }

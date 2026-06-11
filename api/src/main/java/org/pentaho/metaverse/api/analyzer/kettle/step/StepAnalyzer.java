@@ -14,8 +14,8 @@
 package org.pentaho.metaverse.api.analyzer.kettle.step;
 
 import com.google.common.base.Joiner;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -815,7 +815,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
   }
 
   /**
-   * Finds {@link Vertex}es within the {@link com.tinkerpop.blueprints.Graph} associated with this analyzer's builder
+   * Finds {@link Vertex}es within the {@link org.apache.tinkerpop.gremlin.structure.Graph} associated with this analyzer's builder
    * with matching properties.
    *
    * @param properties a {@link Map} of lookup properties

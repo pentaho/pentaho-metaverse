@@ -13,8 +13,8 @@
 
 package org.pentaho.metaverse.analyzer.kettle.extensionpoints.trans;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
@@ -46,7 +46,7 @@ public class TransExtensionPointUtil {
     // Get the "natural" filename (repo-based if in repository, filesystem-based otherwise)
     String filename = getFilename( transMeta );
 
-    final Graph graph = new TinkerGraph();
+    final Graph graph = TinkerGraph.open();
     final IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
     final IMetaverseObjectFactory objFactory = MetaverseUtil.getDocumentController().getMetaverseObjectFactory();
 

@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Graph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,6 +32,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * User: RFellows Date: 8/19/14
@@ -68,9 +69,9 @@ public class MetaverseReaderIT {
     Graph g = reader.search( whatWeAreLookingFor, startingPoint, false );
 
     // make sure the Transformation node is in the resulting graph
-    assertNotNull( g.getVertices( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS ) );
+    assertTrue( g.traversal().V().has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS ).hasNext() );
     // make sure the starting point node is in the resulting graph
-    assertNotNull( g.getVertex( nodes.get( 0 ).getStringID() ) );
+    assertTrue( g.vertices( nodes.get( 0 ).getStringID() ).hasNext() );
 
     GraphMLWriter writer = new GraphMLWriter();
     writer.outputGraph( g, new FileOutputStream( IntegrationTestUtil.getOutputPath( "searchOut.graphml" ) ) );
