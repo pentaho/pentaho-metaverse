@@ -282,12 +282,15 @@ public class MetaverseNodeTest {
   @Test
   public void testGetLogicalId() {
     VertexProperty<Object> nameProperty = presentProperty( "testName" );
+    VertexProperty<Object> namespaceProperty = presentProperty( "" );
     VertexProperty<Object> typeProperty = presentProperty( "testType" );
     VertexProperty<Object> zzzProperty = presentProperty( "last" );
     when( v.property( "name" ) ).thenReturn( nameProperty );
+    when( v.property( "namespace" ) ).thenReturn( namespaceProperty );
     when( v.property( "type" ) ).thenReturn( typeProperty );
     when( v.property( "zzz" ) ).thenReturn( zzzProperty );
     when( v.value( "name" ) ).thenReturn( "testName" );
+    when( v.value( "namespace" ) ).thenReturn( "" );
     when( v.value( "type" ) ).thenReturn( "testType" );
     when( v.value( "zzz" ) ).thenReturn( "last" );
 
@@ -295,6 +298,7 @@ public class MetaverseNodeTest {
     doNothing().when( spyNode ).setProperty( eq( DictionaryConst.PROPERTY_LOGICAL_ID ), any() );
     when( spyNode.getPropertyKeys() ).thenReturn( new HashSet<String>() {{
       add( "name" );
+      add( "namespace" );
       add( "type" );
       add( "zzz" );
     }} );
