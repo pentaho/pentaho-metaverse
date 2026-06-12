@@ -6,20 +6,22 @@ metaversePlugin = plugins.findPluginWithId(ExtensionPointPluginType, 'transChang
 cl = plugins.getClassLoader(metaversePlugin)
 Thread.currentThread().setContextClassLoader(cl)
 LineageGraphMap = cl.loadClass('LineageGraphMap')
-Direction = cl.loadClass('com.tinkerpop.blueprints.Direction')
 GraphMLWriter = cl.loadClass('GraphMLWriter')
 
 transAnalysis = LineageGraphMap.getInstance().get( activeTrans );
 try {
   graph = transAnalysis.get();
-  graph.vertices.each { v ->
-    println( "Found node: ${v.getProperty('name')} (${v.getProperty('type') ?: ''}${v.getProperty('virtual') ? 'VIRTUAL' : ''})" );
+  graph.vertices().each { v ->
+    name = v.property('name').isPresent() ? v.value('name') : ''
+    type = v.property('type').isPresent() ? v.value('type') : ''
+    virtual = v.property('virtual').isPresent() && v.value('virtual')
+    println( "Found node: ${name} (${type}${virtual ? 'VIRTUAL' : ''})" );
   }
   println
-  graph.edges.each { e ->
-    inV = e.getVertex(Direction.IN).getProperty('name')
-    outV = e.getVertex(Direction.OUT)?.getProperty('name')
-    println( "Found edge: $outV -[ $e.label ]-> $inV" );
+  graph.edges().each { e ->
+    inV = e.inVertex().property('name').isPresent() ? e.inVertex().value('name') : ''
+    outV = e.outVertex().property('name').isPresent() ? e.outVertex().value('name') : ''
+    println( "Found edge: $outV -[ ${e.label()} ]-> $inV" );
   }
 } catch ( Exception e ) {
   println( "error during analysis", e );

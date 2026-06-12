@@ -28,12 +28,12 @@
       <useProjectArtifact>false</useProjectArtifact>
       <excludes>
         <exclude>org.pentaho.*</exclude>
-        <exclude>com.tinkerpop.blueprints:*</exclude>
+        <exclude>com.tinkerpop.*:*</exclude>
+        <exclude>commons-configuration:commons-configuration</exclude>
         <exclude>pentaho:pentaho-metaverse-core:jar</exclude>
         <exclude>org.codehaus.jettison:*</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
 </assembly>
-
 

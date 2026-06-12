@@ -13,8 +13,8 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNull;
 
 public class LineageGraphCompletionServiceTest {
 
-  public static final Graph GRAPH = new TinkerGraph();
+  public static final Graph GRAPH = TinkerGraph.open();
   LineageGraphCompletionService mcs = LineageGraphCompletionService.getInstance();
 
   @Before

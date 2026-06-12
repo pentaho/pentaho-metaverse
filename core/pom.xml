@@ -15,14 +15,12 @@
   <description>Provides data lineage capabilities</description>
   <url>http://www.pentaho.com</url>
   <properties>
-    <dependency.com.tinkerpop.frames.version>2.5.0</dependency.com.tinkerpop.frames.version>
     <exec-maven-plugin.version>1.3.2</exec-maven-plugin.version>
     <platform.plugin.name>platform</platform.plugin.name>
     <maven-pmd-plugin.version>3.2</maven-pmd-plugin.version>
     <pmd.rulesets.url>https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/pmd/rulesets/java</pmd.rulesets.url>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <enunciate.version>1.27</enunciate.version>
-    <gremlin-java.version>2.6.0</gremlin-java.version>
     <pdi.plugin.name>pdi</pdi.plugin.name>
     <pentaho-mongodb-plugin.version>11.1.0.0-SNAPSHOT</pentaho-mongodb-plugin.version>
     <platform.version>11.1.0.0-SNAPSHOT</platform.version>
@@ -32,7 +30,6 @@
     <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
 
     <commons-lang.version>2.6</commons-lang.version>
-    <dependency.com.tinkerpop.pipes.version>2.6.0</dependency.com.tinkerpop.pipes.version>
     <commons-collections.version>3.2.2</commons-collections.version>
   </properties>
   <dependencies>
@@ -55,21 +52,21 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.tinkerpop.blueprints</groupId>
-      <artifactId>blueprints-core</artifactId>
-      <version>${dependency.com.tinkerpop.blueprints.version}</version>
+      <groupId>org.apache.tinkerpop</groupId>
+      <artifactId>gremlin-core</artifactId>
+      <version>${dependency.org.apache.tinkerpop.version}</version>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.codehaus.jettison</groupId>
-          <artifactId>jettison</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
-      <groupId>commons-configuration</groupId>
-      <artifactId>commons-configuration</artifactId>
-      <version>${dependency.commons-configuration.commons-configuration.version}</version>
+      <groupId>org.apache.tinkerpop</groupId>
+      <artifactId>tinkergraph-gremlin</artifactId>
+      <version>${dependency.org.apache.tinkerpop.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+      <version>${dependency.org.apache.commons.commons-configuration2.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -126,25 +123,14 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.tinkerpop</groupId>
-      <artifactId>pipes</artifactId>
-      <version>${dependency.com.tinkerpop.pipes.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-beanutils</groupId>
-          <artifactId>commons-beanutils-core</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
       <version>${commons-collections.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.tinkerpop.gremlin</groupId>
-      <artifactId>gremlin-java</artifactId>
-      <version>${gremlin-java.version}</version>
+      <groupId>org.apache.tinkerpop</groupId>
+      <artifactId>gremlin-groovy</artifactId>
+      <version>${dependency.org.apache.tinkerpop.version}</version>
     </dependency>
     <dependency>
       <groupId>net.sf.flexjson</groupId>
@@ -214,12 +200,6 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.tinkerpop</groupId>
-      <artifactId>frames</artifactId>
-      <version>${dependency.com.tinkerpop.frames.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -322,9 +302,9 @@
         </executions>
         <dependencies>
           <dependency>
-            <groupId>com.tinkerpop.gremlin</groupId>
+            <groupId>org.apache.tinkerpop</groupId>
             <artifactId>gremlin-groovy</artifactId>
-            <version>${gremlin-java.version}</version>
+            <version>${dependency.org.apache.tinkerpop.version}</version>
           </dependency>
           <dependency>
             <groupId>pentaho-kettle</groupId>
@@ -342,10 +322,10 @@
           <includeProjectDependencies>true</includeProjectDependencies>
           <includePluginDependencies>true</includePluginDependencies>
           <executableDependency>
-            <groupId>com.tinkerpop.gremlin</groupId>
+            <groupId>org.apache.tinkerpop</groupId>
             <artifactId>gremlin-groovy</artifactId>
           </executableDependency>
-          <mainClass>com.tinkerpop.gremlin.groovy.console.Console</mainClass>
+          <mainClass>org.apache.tinkerpop.gremlin.console.Console</mainClass>
           <arguments>
             <argument>src/it/resources/metaverse-pdi.groovy</argument>
           </arguments>

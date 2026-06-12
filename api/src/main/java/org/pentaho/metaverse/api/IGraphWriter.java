@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.api;
 
-import com.tinkerpop.blueprints.Graph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 
 import java.io.IOException;
 import java.io.OutputStream;

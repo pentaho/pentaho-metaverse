@@ -14,7 +14,7 @@
 package org.pentaho.metaverse.api.analyzer.kettle.annotations;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.tinkerpop.blueprints.Direction;
+import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;

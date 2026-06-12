@@ -13,10 +13,10 @@
 
 package org.pentaho.metaverse.util;
 
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import flexjson.JSONDeserializer;
 import org.pentaho.di.core.Const;
 import org.pentaho.dictionary.DictionaryConst;
@@ -127,7 +127,7 @@ public class MetaverseUtil {
           }
           Runnable analyzerRunner = getAnalyzerRunner( analyzer, document );
 
-          Graph g = ( graph != null ) ? graph : new TinkerGraph();
+          Graph g = ( graph != null ) ? graph : TinkerGraph.open();
           Future<Graph> transAnalysis =
             LineageGraphCompletionService.getInstance().submit( analyzerRunner, g );
 
@@ -144,11 +144,11 @@ public class MetaverseUtil {
    * @param edge The edge to enhance
    */
   public static void enhanceEdge( Edge edge ) {
-    String type = edge.getLabel();
+    String type = edge.label();
     //localize the node type
     String localizedType = Messages.getString( MESSAGE_PREFIX_LINKTYPE + type );
     if ( !localizedType.startsWith( MESSAGE_FAILED_PREFIX ) ) {
-      edge.setProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localizedType );
+      edge.property( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localizedType );
     }
   }
 
@@ -158,22 +158,23 @@ public class MetaverseUtil {
    * @param vertex The vertex to enhance
    */
   public static void enhanceVertex( Vertex vertex ) {
-    String type = vertex.getProperty( DictionaryConst.PROPERTY_TYPE );
+    String type = vertex.property( DictionaryConst.PROPERTY_TYPE ).isPresent()
+      ? vertex.<String>value( DictionaryConst.PROPERTY_TYPE ) : null;
     //localize the node type
     String localizedType = Messages.getString( MESSAGE_PREFIX_NODETYPE + type );
     if ( !localizedType.startsWith( MESSAGE_FAILED_PREFIX ) ) {
-      vertex.setProperty( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localizedType );
+      vertex.property( DictionaryConst.PROPERTY_TYPE_LOCALIZED, localizedType );
     }
     // get the vertex category and set it
     String category = DictionaryHelper.getCategoryForType( type );
-    vertex.setProperty( DictionaryConst.PROPERTY_CATEGORY, category );
+    vertex.property( DictionaryConst.PROPERTY_CATEGORY, category );
     // get the vertex category color and set it
     String color = DictionaryHelper.getColorForCategory( category );
-    vertex.setProperty( DictionaryConst.PROPERTY_COLOR, color );
+    vertex.property( DictionaryConst.PROPERTY_COLOR, color );
     //localize the category
     String localizedCat = Messages.getString( MESSAGE_PREFIX_CATEGORY + category );
     if ( !localizedCat.startsWith( MESSAGE_FAILED_PREFIX ) ) {
-      vertex.setProperty( DictionaryConst.PROPERTY_CATEGORY_LOCALIZED, localizedCat );
+      vertex.property( DictionaryConst.PROPERTY_CATEGORY_LOCALIZED, localizedCat );
     }
   }
 

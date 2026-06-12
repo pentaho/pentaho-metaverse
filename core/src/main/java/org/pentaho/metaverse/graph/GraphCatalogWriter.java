@@ -13,12 +13,10 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.gremlin.Tokens;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.pentaho.dictionary.DictionaryConst;
@@ -108,23 +106,15 @@ public class GraphCatalogWriter extends BaseGraphWriter {
     ArrayList<LineageDataResource> outputTargets = new ArrayList<>();
 
     // Get input data sources and fields
-    GremlinPipeline<Graph, Vertex> inputNodesPipe =
-            new GremlinPipeline<Graph, Vertex>( graph )
-                    .V()
-                    .has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP )
-                    .in( DictionaryConst.LINK_READBY )
-                    .cast( Vertex.class );
-    List<Vertex> inputVertexes = inputNodesPipe.toList();
+    List<Vertex> inputVertexes = graph.traversal().V()
+      .has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP )
+      .in( DictionaryConst.LINK_READBY ).toList();
     inputVertexes.forEach( vertex -> processInputs( graph, inputSources, vertex ) );
 
     // Get output data sources and fields
-    GremlinPipeline<Graph, Vertex> outputNodesPipe =
-            new GremlinPipeline<Graph, Vertex>( graph )
-                    .V()
-                    .has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP )
-                    .out( DictionaryConst.LINK_WRITESTO )
-                    .cast( Vertex.class );
-    List<Vertex> outputVertexes = outputNodesPipe.toList();
+    List<Vertex> outputVertexes = graph.traversal().V()
+      .has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP )
+      .out( DictionaryConst.LINK_WRITESTO ).toList();
     outputVertexes.forEach( vertex -> processOutputs( graph, outputTargets, vertex ) );
 
     // Trace output fields to source fields
@@ -141,16 +131,19 @@ public class GraphCatalogWriter extends BaseGraphWriter {
 
   private void processOutputs( Graph graph, ArrayList<LineageDataResource> outputTargets, Vertex vertex ) {
     // handles resources written to by a step that have a PATH property
-    String pathProperty = vertex.getProperty( DictionaryConst.PROPERTY_PATH );
+    String pathProperty = vertex.property( DictionaryConst.PROPERTY_PATH ).isPresent()
+      ? vertex.<String>value( DictionaryConst.PROPERTY_PATH ) : null;
     if ( propertyPopulated( pathProperty ) ) {
       LineageDataResource dataResource =
         getLineageDataResourceFromFileVertex( graph, vertex, pathProperty );
       outputTargets.add( dataResource );
     }
     // handles tables written to by a step
-    String resourceType = vertex.getProperty( DictionaryConst.PROPERTY_TYPE );
+    String resourceType = vertex.property( DictionaryConst.PROPERTY_TYPE ).isPresent()
+      ? vertex.<String>value( DictionaryConst.PROPERTY_TYPE ) : null;
     if ( propertyPopulated( resourceType ) && resourceType.equals( DictionaryConst.NODE_TYPE_DATA_TABLE ) ) {
-      String tableName = vertex.getProperty( DictionaryConst.PROPERTY_TABLE );
+      String tableName = vertex.property( DictionaryConst.PROPERTY_TABLE ).isPresent()
+        ? vertex.<String>value( DictionaryConst.PROPERTY_TABLE ) : null;
       if ( propertyPopulated( tableName ) ) {
         LineageDataResource dataResource =
           getLineageDataResourceFromTableVertex( graph, vertex, tableName );
@@ -161,23 +154,26 @@ public class GraphCatalogWriter extends BaseGraphWriter {
 
   private LineageDataResource getLineageDataResourceFromTableVertex( Graph graph, Vertex vertex, String tableName ) {
     LineageDataResource dataResource = new LineageDataResource( tableName );
-    dataResource.setVertexId( vertex.getId() );
+    dataResource.setVertexId( vertex.id() );
     findDbConnectionProperties( vertex, dataResource, DictionaryConst.LINK_WRITESTO );
     dataResource.setFields( getTableFields( tableName, graph ) );
-    dataResource.setDbSchema( vertex.getProperty( DictionaryConst.PROPERTY_SCHEMA ) );
+    dataResource.setDbSchema( vertex.property( DictionaryConst.PROPERTY_SCHEMA ).isPresent()
+      ? vertex.<String>value( DictionaryConst.PROPERTY_SCHEMA ) : null );
     return dataResource;
   }
 
   private void processInputs( Graph graph, ArrayList<LineageDataResource> inputSources, Vertex vertex ) {
     // handles resources read by a step that have a PATH property
-    String pathProperty = vertex.getProperty( DictionaryConst.PROPERTY_PATH );
+    String pathProperty = vertex.property( DictionaryConst.PROPERTY_PATH ).isPresent()
+      ? vertex.<String>value( DictionaryConst.PROPERTY_PATH ) : null;
     if ( propertyPopulated( pathProperty ) ) {
       LineageDataResource dataResource =
         getLineageDataResourceFromFileVertex( graph, vertex, pathProperty );
       inputSources.add( dataResource );
     }
     // handles resources ready by a step that have a query property
-    String queryString = vertex.getProperty( DictionaryConst.PROPERTY_QUERY );
+    String queryString = vertex.property( DictionaryConst.PROPERTY_QUERY ).isPresent()
+      ? vertex.<String>value( DictionaryConst.PROPERTY_QUERY ) : null;
     if ( propertyPopulated( queryString ) ) {
       LineageDataResource dataResource = getLineageDataResourceFromQueryVertex( graph, vertex, queryString );
       inputSources.add( dataResource );
@@ -186,7 +182,7 @@ public class GraphCatalogWriter extends BaseGraphWriter {
 
   private LineageDataResource getLineageDataResourceFromQueryVertex( Graph graph, Vertex vertex, String queryString ) {
     LineageDataResource dataResource = new LineageDataResource( queryString );
-    dataResource.setVertexId( vertex.getId() );
+    dataResource.setVertexId( vertex.id() );
     findDbConnectionProperties( vertex, dataResource, DictionaryConst.LINK_READBY );
     dataResource.setFields( getQueryFields( queryString, graph ) );
     return dataResource;
@@ -194,7 +190,8 @@ public class GraphCatalogWriter extends BaseGraphWriter {
 
   private LineageDataResource getLineageDataResourceFromFileVertex( Graph graph, Vertex vertex, String path ) {
     LineageDataResource dataResource = new LineageDataResource( getSourceName( path ) );
-    String fileScheme = vertex.getProperty( DictionaryConst.PROPERTY_FILE_SCHEME );
+    String fileScheme = vertex.property( DictionaryConst.PROPERTY_FILE_SCHEME ).isPresent()
+      ? vertex.<String>value( DictionaryConst.PROPERTY_FILE_SCHEME ) : null;
     if ( null != fileScheme ) {
       switch ( fileScheme ) {
         case "hdfs":
@@ -211,7 +208,7 @@ public class GraphCatalogWriter extends BaseGraphWriter {
           break;
       }
     }
-    dataResource.setVertexId( vertex.getId() );
+    dataResource.setVertexId( vertex.id() );
     dataResource.setFields( getDatasourceFields( path, graph ) );
     return dataResource;
   }
@@ -219,27 +216,31 @@ public class GraphCatalogWriter extends BaseGraphWriter {
   private void findDbConnectionProperties( Vertex vertex, LineageDataResource dataResource, String readOrWrite ) {
     Direction stepNodeDirection = readOrWrite.equals( DictionaryConst.LINK_READBY ) ? Direction.IN : Direction.OUT;
     Direction stepEdgeDirection = readOrWrite.equals( DictionaryConst.LINK_READBY ) ? Direction.OUT : Direction.IN;
-    Iterator<Edge> queryEdges = vertex.getEdges( stepEdgeDirection ).iterator();
+    Iterator<Edge> queryEdges = vertex.edges( stepEdgeDirection );
     while ( queryEdges.hasNext() ) {
       Edge queryEdge = queryEdges.next();
+      Vertex stepNodeVertex = stepNodeDirection == Direction.IN ? queryEdge.inVertex() : queryEdge.outVertex();
       // find the step that reads this query
-      if ( queryEdge.getLabel().equals( readOrWrite )
-        && hasPropertyValue( queryEdge.getVertex( stepNodeDirection ),
+      if ( queryEdge.label().equals( readOrWrite )
+        && hasPropertyValue( stepNodeVertex,
           DictionaryConst.PROPERTY_TYPE,
           DictionaryConst.NODE_TYPE_TRANS_STEP ) ) {
-        Vertex tableStep = queryEdge.getVertex( stepNodeDirection );
-        Iterator<Edge> tableStepEdges = tableStep.getEdges( Direction.IN ).iterator();
+        Vertex tableStep = stepNodeVertex;
+        Iterator<Edge> tableStepEdges = tableStep.edges( Direction.IN );
         while ( tableStepEdges.hasNext() ) {
           Edge tableEdge = tableStepEdges.next();
           // find the DB connection that is a dependency of this table input step
-          if ( tableEdge.getLabel().equals( DictionaryConst.LINK_DEPENDENCYOF )
-            && hasPropertyValue( tableEdge.getVertex( Direction.OUT ),
+          if ( tableEdge.label().equals( DictionaryConst.LINK_DEPENDENCYOF )
+            && hasPropertyValue( tableEdge.outVertex(),
               DictionaryConst.PROPERTY_TYPE,
               DictionaryConst.NODE_TYPE_DATASOURCE ) ) {
-            Vertex dbNode = tableEdge.getVertex( Direction.OUT );
-            dataResource.setDbHost( dbNode.getProperty( DictionaryConst.PROPERTY_HOST_NAME ) );
-            dataResource.setDbName( dbNode.getProperty( DictionaryConst.PROPERTY_DATABASE_NAME ) );
-            dataResource.setDbPort( dbNode.getProperty( DictionaryConst.PROPERTY_PORT ) );
+            Vertex dbNode = tableEdge.outVertex();
+            dataResource.setDbHost( dbNode.property( DictionaryConst.PROPERTY_HOST_NAME ).isPresent()
+              ? dbNode.<String>value( DictionaryConst.PROPERTY_HOST_NAME ) : null );
+            dataResource.setDbName( dbNode.property( DictionaryConst.PROPERTY_DATABASE_NAME ).isPresent()
+              ? dbNode.<String>value( DictionaryConst.PROPERTY_DATABASE_NAME ) : null );
+            dataResource.setDbPort( dbNode.property( DictionaryConst.PROPERTY_PORT ).isPresent()
+              ? dbNode.<String>value( DictionaryConst.PROPERTY_PORT ) : null );
           }
         }
       }
@@ -259,41 +260,35 @@ public class GraphCatalogWriter extends BaseGraphWriter {
   }
 
   private List<String> getDatasourceFields( String sourceName, Graph graph ) {
-    GremlinPipeline<Graph, Vertex> inputFieldsPipe =
-            new GremlinPipeline<Graph, Vertex>( graph )
-                    .V()
-                    .has( DictionaryConst.PROPERTY_PATH, Tokens.T.eq, sourceName )
-                    .out( DictionaryConst.LINK_CONTAINS )
-                    .cast( Vertex.class );
-    List<Vertex> inputFieldVertexes = inputFieldsPipe.toList();
+    List<Vertex> inputFieldVertexes = graph.traversal().V()
+      .has( DictionaryConst.PROPERTY_PATH, sourceName )
+      .out( DictionaryConst.LINK_CONTAINS ).toList();
     ArrayList<String> fields = new ArrayList<>();
-    inputFieldVertexes.forEach( fieldVertex -> fields.add( fieldVertex.getProperty( DictionaryConst.PROPERTY_NAME ) ) );
+    inputFieldVertexes.forEach( fieldVertex -> fields.add(
+      fieldVertex.property( DictionaryConst.PROPERTY_NAME ).isPresent()
+        ? fieldVertex.<String>value( DictionaryConst.PROPERTY_NAME ) : null ) );
     return fields;
   }
 
   private List<String> getQueryFields( String sourceName, Graph graph ) {
-    GremlinPipeline<Graph, Vertex> inputFieldsPipe =
-      new GremlinPipeline<Graph, Vertex>( graph )
-        .V()
-        .has( DictionaryConst.PROPERTY_QUERY, Tokens.T.eq, sourceName )
-        .out( DictionaryConst.LINK_CONTAINS )
-        .cast( Vertex.class );
-    List<Vertex> inputFieldVertexes = inputFieldsPipe.toList();
+    List<Vertex> inputFieldVertexes = graph.traversal().V()
+      .has( DictionaryConst.PROPERTY_QUERY, sourceName )
+      .out( DictionaryConst.LINK_CONTAINS ).toList();
     ArrayList<String> fields = new ArrayList<>();
-    inputFieldVertexes.forEach( fieldVertex -> fields.add( fieldVertex.getProperty( DictionaryConst.PROPERTY_NAME ) ) );
+    inputFieldVertexes.forEach( fieldVertex -> fields.add(
+      fieldVertex.property( DictionaryConst.PROPERTY_NAME ).isPresent()
+        ? fieldVertex.<String>value( DictionaryConst.PROPERTY_NAME ) : null ) );
     return fields;
   }
 
   private List<String> getTableFields( String sourceName, Graph graph ) {
-    GremlinPipeline<Graph, Vertex> inputFieldsPipe =
-      new GremlinPipeline<Graph, Vertex>( graph )
-        .V()
-        .has( DictionaryConst.PROPERTY_TABLE, Tokens.T.eq, sourceName )
-        .out( DictionaryConst.LINK_CONTAINS )
-        .cast( Vertex.class );
-    List<Vertex> inputFieldVertexes = inputFieldsPipe.toList();
+    List<Vertex> inputFieldVertexes = graph.traversal().V()
+      .has( DictionaryConst.PROPERTY_TABLE, sourceName )
+      .out( DictionaryConst.LINK_CONTAINS ).toList();
     ArrayList<String> fields = new ArrayList<>();
-    inputFieldVertexes.forEach( fieldVertex -> fields.add( fieldVertex.getProperty( DictionaryConst.PROPERTY_NAME ) ) );
+    inputFieldVertexes.forEach( fieldVertex -> fields.add(
+      fieldVertex.property( DictionaryConst.PROPERTY_NAME ).isPresent()
+        ? fieldVertex.<String>value( DictionaryConst.PROPERTY_NAME ) : null ) );
     return fields;
   }
 
@@ -306,29 +301,20 @@ public class GraphCatalogWriter extends BaseGraphWriter {
    */
   private void linkTargetFieldsToSources( List<LineageDataResource> outputTargets, List<LineageDataResource> inputSources, Graph graph ) {
     for ( LineageDataResource outputTarget : outputTargets ) {
-      // returns all fields from previously identified output files
-      GremlinPipeline<Graph, Vertex> fileFieldsPipe =
-              new GremlinPipeline<Graph, Vertex>( graph )
-                      .V()
-                      .has( DictionaryConst.PROPERTY_PATH, Tokens.T.eq, outputTarget.getPath() )
-                      .out( DictionaryConst.LINK_CONTAINS )
-                      .cast( Vertex.class );
-      // returns all fields from all previously identified output tables
-      GremlinPipeline<Graph, Vertex> tableFieldsPipe =
-        new GremlinPipeline<Graph, Vertex>( graph )
-          .V()
-          .has( DictionaryConst.PROPERTY_TABLE, Tokens.T.eq, outputTarget.getName() )
-          .out( DictionaryConst.LINK_CONTAINS )
-          .cast( Vertex.class );
-      List<Vertex> allVertexes = fileFieldsPipe.toList();
-      allVertexes.addAll( tableFieldsPipe.toList() );
+      List<Vertex> allVertexes = graph.traversal().V()
+        .has( DictionaryConst.PROPERTY_PATH, outputTarget.getPath() )
+        .out( DictionaryConst.LINK_CONTAINS ).toList();
+      allVertexes.addAll( graph.traversal().V()
+        .has( DictionaryConst.PROPERTY_TABLE, outputTarget.getName() )
+        .out( DictionaryConst.LINK_CONTAINS ).toList() );
       allVertexes.forEach( vertex -> {
-        String outputTargetResourceField = vertex.getProperty( DictionaryConst.PROPERTY_NAME );
+        String outputTargetResourceField = vertex.property( DictionaryConst.PROPERTY_NAME ).isPresent()
+          ? vertex.<String>value( DictionaryConst.PROPERTY_NAME ) : null;
         List<List<Vertex>> paths = findOrigins( vertex, null );
         paths.forEach( path -> inputSources.forEach( inputSource -> {
-          if ( path.get( 0 ).getId().equals( inputSource.getVertexId() ) ) {
-
-            String inputSourceField = path.get( 1 ).getProperty( DictionaryConst.PROPERTY_NAME );
+          if ( path.get( 0 ).id().equals( inputSource.getVertexId() ) ) {
+            String inputSourceField = path.get( 1 ).property( DictionaryConst.PROPERTY_NAME ).isPresent()
+              ? path.get( 1 ).<String>value( DictionaryConst.PROPERTY_NAME ) : null;
             log.info( "Field path found: " + path );
             FieldLevelRelationship fieldRelationship = new FieldLevelRelationship();
             fieldRelationship.setInputSourceResource( inputSource );
@@ -361,13 +347,13 @@ public class GraphCatalogWriter extends BaseGraphWriter {
     }
     seenVertices.put( vertex, "" );
 
-    Iterator<Edge> edges = vertex.getEdges( Direction.IN ).iterator();
+    Iterator<Edge> edges = vertex.edges( Direction.IN );
     while ( edges.hasNext() ) {
       Edge edge = edges.next();
-      if ( edge.getLabel().equals( DictionaryConst.LINK_POPULATES )
-        || edge.getLabel().equals( DictionaryConst.LINK_DERIVES )
-        || edge.getLabel().equals( DictionaryConst.LINK_CONTAINS ) ) {
-        Vertex nextVertex = edge.getVertex( Direction.OUT );
+      if ( edge.label().equals( DictionaryConst.LINK_POPULATES )
+        || edge.label().equals( DictionaryConst.LINK_DERIVES )
+        || edge.label().equals( DictionaryConst.LINK_CONTAINS ) ) {
+        Vertex nextVertex = edge.outVertex();
         // this might not be the most efficient way to avoid processing a cycle, but it works
         if ( null == seenVertices.get( nextVertex ) ) {
           List<List<Vertex>> newPaths = findOrigins( nextVertex, seenVertices );
@@ -389,7 +375,7 @@ public class GraphCatalogWriter extends BaseGraphWriter {
   }
 
   private boolean hasPropertyValue( Vertex v, String propertyName, String propertyVal ) {
-    String vertexPropertyValue = v.getProperty( propertyName );
+    String vertexPropertyValue = v.property( propertyName ).isPresent() ? v.<String>value( propertyName ) : null;
     return propertyPopulated( vertexPropertyValue ) && vertexPropertyValue.equals( propertyVal );
   }
 

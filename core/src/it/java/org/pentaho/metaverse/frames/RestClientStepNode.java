@@ -13,8 +13,11 @@
 
 package org.pentaho.metaverse.frames;
 
-/**
- * Created by rfellows on 5/11/15.
- */
-public interface RestClientStepNode extends HttpClientStepNode {
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+public class RestClientStepNode extends HttpClientStepNode {
+  public RestClientStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 }

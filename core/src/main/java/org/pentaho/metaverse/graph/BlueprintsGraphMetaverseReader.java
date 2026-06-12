@@ -14,11 +14,12 @@
 package org.pentaho.metaverse.graph;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.dictionary.MetaverseLink;
@@ -84,10 +85,11 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   @Override
   public IMetaverseNode findNode( String id ) {
-    Vertex vertex = getGraph().getVertex( id );
-    if ( vertex == null ) {
+    Iterator<Vertex> it = getGraph().vertices( id );
+    if ( !it.hasNext() ) {
       return null;
     }
+    Vertex vertex = it.next();
     MetaverseUtil.enhanceVertex( vertex );
     MetaverseNode node = new MetaverseNode( vertex );
     return node;
@@ -95,14 +97,13 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   @Override
   public List<IMetaverseNode> findNodes( String property, String value ) {
-    Iterable<Vertex> vertices = getGraph().getVertices( property, value );
+    List<Vertex> vertices = getGraph().traversal().V().has( property, value ).toList();
     if ( vertices == null ) {
       return null;
     }
     List<IMetaverseNode> result = new ArrayList<IMetaverseNode>();
-    Iterator<Vertex> verticesIt = vertices.iterator();
-    while ( verticesIt.hasNext() ) {
-      MetaverseNode node = new MetaverseNode( verticesIt.next() );
+    for ( Vertex v : vertices ) {
+      MetaverseNode node = new MetaverseNode( v );
       result.add( node );
     }
     return result;
@@ -110,23 +111,24 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   @Override
   public IMetaverseLink findLink( String leftNodeID, String linkType, String rightNodeID, Direction direction ) {
-    Vertex vertex = getGraph().getVertex( leftNodeID );
-    if ( vertex == null ) {
+    Iterator<Vertex> vit = getGraph().vertices( leftNodeID );
+    if ( !vit.hasNext() ) {
       return null;
     }
-    Iterable<Edge> edges = linkType == null ? vertex.getEdges( direction ) : vertex.getEdges( direction, linkType );
+    Vertex vertex = vit.next();
+    Iterator<Edge> edges = linkType == null ? vertex.edges( direction ) : vertex.edges( direction, linkType );
     IMetaverseLink link = new MetaverseLink();
     IMetaverseNode node1 = new MetaverseNode( vertex );
     Direction opDirection = direction == Direction.IN ? Direction.OUT : Direction.IN;
     Vertex vertex2 = null;
     if ( rightNodeID != null ) {
-      Iterator<Edge> it = edges.iterator();
-      while ( it.hasNext() ) {
-        Edge edge = it.next();
-        if ( rightNodeID.equals( (String) edge.getVertex( opDirection ).getId() ) ) {
-          vertex2 = edge.getVertex( opDirection );
+      while ( edges.hasNext() ) {
+        Edge edge = edges.next();
+        Vertex oppV = direction == Direction.IN ? edge.outVertex() : edge.inVertex();
+        if ( rightNodeID.equals( oppV.id().toString() ) ) {
+          vertex2 = oppV;
           IMetaverseNode node2 = new MetaverseNode( vertex2 );
-          String label = edge.getLabel();
+          String label = edge.label();
           link.setLabel( label );
           String localized = Messages.getString( MetaverseUtil.MESSAGE_PREFIX_LINKTYPE + label );
           if ( !localized.startsWith( "!" ) ) {
@@ -206,12 +208,16 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
   @Override
   public Graph search( List<String> resultTypes, List<String> startNodeIDs, boolean shortestOnly ) {
 
-    Graph g = new TinkerGraph();
+    Graph g = TinkerGraph.open();
 
     for ( String startNodeID : startNodeIDs ) {
       if ( graph != null ) {
         // traverse look for paths to the results
-        Vertex startVertex = graph.getVertex( startNodeID );
+        Iterator<Vertex> startIt = graph.vertices( startNodeID );
+        if ( !startIt.hasNext() ) {
+          continue;
+        }
+        Vertex startVertex = startIt.next();
         GraphPath path = new GraphPath();
         Set<Object> done = new HashSet<Object>();
         Map<Object, GraphPath> shortestPaths = new HashMap<Object, GraphPath>();
@@ -233,20 +239,22 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   private void traverseGraph( Vertex startVertex, Graph subGraph, List<String> resultTypes, GraphPath path,
                               Set<Object> done, Map<Object, GraphPath> shortestPaths, Direction direction, boolean shortestOnly ) {
+    String startType = startVertex.property( DictionaryConst.PROPERTY_TYPE ).isPresent()
+      ? startVertex.<String>value( DictionaryConst.PROPERTY_TYPE ) : null;
     boolean isTargetType = resultTypes == null
       || resultTypes.size() == 0
-      || resultTypes.contains( startVertex.getProperty( DictionaryConst.PROPERTY_TYPE ) );
-    if ( !isTargetType && done.contains( startVertex.getId() ) ) {
+      || resultTypes.contains( startType );
+    if ( !isTargetType && done.contains( startVertex.id() ) ) {
       return;
     }
     path.addVertex( startVertex );
     if ( isTargetType ) {
       // this is one of our target types
       if ( shortestOnly ) {
-        GraphPath shortestPath = shortestPaths.get( startVertex.getId() );
+        GraphPath shortestPath = shortestPaths.get( startVertex.id() );
         if ( shortestPath == null || path.getLength() < shortestPath.getLength() ) {
-          shortestPaths.put( startVertex.getId(), path.clone() );
-          if ( done.contains( startVertex.getId() ) ) {
+          shortestPaths.put( startVertex.id(), path.clone() );
+          if ( done.contains( startVertex.id() ) ) {
             path.pop();
             return;
           }
@@ -255,42 +263,42 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
         shortestPaths.put( path.toString(), path.clone() );
       }
     }
-    done.add( startVertex.getId() );
+    done.add( startVertex.id() );
     if ( direction == Direction.IN ) {
-      Iterator<Edge> edges = startVertex.getEdges( Direction.IN ).iterator();
+      Iterator<Edge> edges = startVertex.edges( Direction.IN );
       while ( edges.hasNext() ) {
         Edge edge = edges.next();
-        if ( done.contains( edge.getId() ) ) {
+        if ( done.contains( edge.id() ) ) {
           continue;
         }
         path.addEdge( edge );
-        Vertex nextVertex = edge.getVertex( Direction.OUT );
+        Vertex nextVertex = edge.outVertex();
         traverseGraph( nextVertex, subGraph, resultTypes, path, done, shortestPaths, direction, shortestOnly );
         path.pop();
       }
     }
     if ( direction == Direction.OUT ) {
-      Iterator<Edge> edges = startVertex.getEdges( Direction.OUT ).iterator();
+      Iterator<Edge> edges = startVertex.edges( Direction.OUT );
       while ( edges.hasNext() ) {
         Edge edge = edges.next();
-        if ( done.contains( edge.getId() ) ) {
+        if ( done.contains( edge.id() ) ) {
           continue;
         }
         path.addEdge( edge );
-        Vertex nextVertex = edge.getVertex( Direction.IN );
+        Vertex nextVertex = edge.inVertex();
         traverseGraph( nextVertex, subGraph, resultTypes, path, done, shortestPaths, direction, shortestOnly );
         path.pop();
       }
       // go upstream to find structure
       if ( path.getLength() > 1 ) {
-        edges = startVertex.getEdges( Direction.IN ).iterator();
+        edges = startVertex.edges( Direction.IN );
         while ( edges.hasNext() ) {
           Edge edge = edges.next();
-          if ( done.contains( edge.getId() ) ) {
+          if ( done.contains( edge.id() ) ) {
             continue;
           }
           path.addEdge( edge );
-          Vertex nextVertex = edge.getVertex( Direction.OUT );
+          Vertex nextVertex = edge.outVertex();
           // go upstream to find structure
           traverseGraph( nextVertex, subGraph, resultTypes, path, done, shortestPaths, Direction.IN, shortestOnly );
           path.pop();
@@ -302,12 +310,12 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   @Override
   public Graph getGraph( String id ) {
-    Vertex root = getGraph().getVertex( id );
-    if ( root == null ) {
+    Iterator<Vertex> rootIt = getGraph().vertices( id );
+    if ( !rootIt.hasNext() ) {
       return null;
     }
-    Graph g = new TinkerGraph();
-    // find the upstream nodes
+    Vertex root = rootIt.next();
+    Graph g = TinkerGraph.open();
     Vertex clone = GraphUtil.cloneVertexIntoGraph( root, g );
     traceVertices( root, clone, Direction.IN, getGraph(), g, null );
     traceVertices( root, clone, Direction.OUT, getGraph(), g, null );
@@ -328,22 +336,23 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
   private void traceVertices( Vertex vertex, Vertex clone, Direction direction,
                               Graph graph1, Graph graph2, Set<String> edgeTypes ) {
     Direction opDirection = direction == Direction.IN ? Direction.OUT : Direction.IN;
-    Iterator<Edge> edges = vertex.getEdges( direction ).iterator();
+    Iterator<Edge> edges = vertex.edges( direction );
     while ( edges.hasNext() ) {
       Edge edge = edges.next();
-      if ( edgeTypes != null && !edgeTypes.contains( edge.getLabel() ) ) {
+      if ( edgeTypes != null && !edgeTypes.contains( edge.label() ) ) {
         continue;
       }
-      Vertex nextVertex = edge.getVertex( opDirection );
+      Vertex nextVertex = direction == Direction.IN ? edge.outVertex() : edge.inVertex();
       Vertex target = GraphUtil.cloneVertexIntoGraph( nextVertex, graph2 );
       Vertex node1 = direction == Direction.IN ? target : clone;
       Vertex node2 = direction == Direction.IN ? clone : target;
-      String edgeId = (String) node1.getId() + ">" + (String) node2.getId();
-      if ( graph2.getEdge( edgeId ) == null ) {
+      String edgeId = node1.id().toString() + ">" + node2.id().toString();
+      Iterator<Edge> existingEdge = graph2.edges( edgeId );
+      if ( !existingEdge.hasNext() ) {
         if ( direction == Direction.IN ) {
-          graph2.addEdge( edgeId, target, clone, edge.getLabel() );
+          target.addEdge( edge.label(), clone, T.id, edgeId );
         } else {
-          graph2.addEdge( edgeId, clone, target, edge.getLabel() );
+          clone.addEdge( edge.label(), target, T.id, edgeId );
         }
       }
       traceVertices( nextVertex, target, direction, graph1, graph2, edgeTypes );
@@ -353,23 +362,14 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
     }
   }
 
-  /**
-   * Adds localized types and categories, add node color information
-   *
-   * @param g The graph to enhance
-   * @return The enhanced graph
-   */
   protected Graph enhanceGraph( Graph g ) {
-
     // TODO should we clone the graph?
-    Iterator<Vertex> vertices = g.getVertices().iterator();
-    // enhance the vertixes
+    Iterator<Vertex> vertices = g.vertices();
     while ( vertices.hasNext() ) {
       Vertex vertex = vertices.next();
       MetaverseUtil.enhanceVertex( vertex );
     }
-    Iterator<Edge> edges = g.getEdges().iterator();
-    // enhance the vertixes
+    Iterator<Edge> edges = g.edges();
     while ( edges.hasNext() ) {
       Edge edge = edges.next();
       MetaverseUtil.enhanceEdge( edge );

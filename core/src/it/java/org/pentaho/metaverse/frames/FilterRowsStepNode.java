@@ -13,12 +13,16 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.frames.Property;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.pentaho.dictionary.DictionaryConst;
 
-public interface FilterRowsStepNode extends TransformationStepNode {
+public class FilterRowsStepNode extends TransformationStepNode {
+  public FilterRowsStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Property( DictionaryConst.PROPERTY_OPERATIONS )
-  public String getOperations();
-
+  public String getOperations() {
+    return getStringValue( DictionaryConst.PROPERTY_OPERATIONS );
+  }
 }

@@ -16,14 +16,7 @@ package org.pentaho.metaverse.graph;
 import org.pentaho.metaverse.api.model.BaseSynchronizedGraphFactory;
 
 /**
- * <p>
- * Thin wrapper around {@link com.tinkerpop.blueprints.GraphFactory}
- * that constructs {@link SynchronizedGraph} objects.
- * </p>
- * <p>
- * <strong>NOTE:</strong> The backing graph configured <em>must</em> implement
- * {@link com.tinkerpop.blueprints.KeyIndexableGraph}
- * </p>
+ * Thin wrapper around {@link BaseSynchronizedGraphFactory} that constructs {@link SynchronizedGraph} objects.
  */
 public class SynchronizedGraphFactory extends BaseSynchronizedGraphFactory {
 
