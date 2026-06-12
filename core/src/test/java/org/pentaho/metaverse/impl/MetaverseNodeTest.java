@@ -63,14 +63,16 @@ public class MetaverseNodeTest {
 
   @Test
   public void testGetName() {
-    when( v.property( "name" ) ).thenReturn( missingProperty() );
+    VertexProperty<Object> property = missingProperty();
+    when( v.property( "name" ) ).thenReturn( property );
     assertNull( node.getName() );
     verify( v ).property( "name" );
   }
 
   @Test
   public void testSetName() {
-    when( v.property( "name" ) ).thenReturn( presentProperty( "myName" ) );
+    VertexProperty<String> property = presentProperty( "myName" );
+    when( v.property( "name" ) ).thenReturn( property );
     when( v.value( "name" ) ).thenReturn( "myName" );
 
     node.setName( "myName" );
@@ -81,14 +83,16 @@ public class MetaverseNodeTest {
 
   @Test
   public void testGetType() {
-    when( v.property( "type" ) ).thenReturn( missingProperty() );
+    VertexProperty<Object> property = missingProperty();
+    when( v.property( "type" ) ).thenReturn( property );
     assertNull( node.getType() );
     verify( v ).property( "type" );
   }
 
   @Test
   public void testSetType() {
-    when( v.property( "type" ) ).thenReturn( presentProperty( "myType" ) );
+    VertexProperty<String> property = presentProperty( "myType" );
+    when( v.property( "type" ) ).thenReturn( property );
     when( v.value( "type" ) ).thenReturn( "myType" );
 
     node.setType( "myType" );
@@ -169,7 +173,8 @@ public class MetaverseNodeTest {
 
   @Test
   public void testGetProperty() {
-    when( v.property( "test" ) ).thenReturn( presentProperty( "value" ) );
+    VertexProperty<String> property = presentProperty( "value" );
+    when( v.property( "test" ) ).thenReturn( property );
     when( v.value( "test" ) ).thenReturn( "value" );
     assertEquals( "value", node.getProperty( "test" ) );
   }
@@ -250,7 +255,8 @@ public class MetaverseNodeTest {
 
   @Test
   public void testContainsKey() {
-    when( v.property( "test" ) ).thenReturn( presentProperty( "value" ) );
+    VertexProperty<String> property = presentProperty( "value" );
+    when( v.property( "test" ) ).thenReturn( property );
     when( v.value( "test" ) ).thenReturn( "value" );
     assertTrue( node.containsKey( "test" ) );
   }
@@ -274,9 +280,12 @@ public class MetaverseNodeTest {
 
   @Test
   public void testGetLogicalId() {
-    when( v.property( "name" ) ).thenReturn( presentProperty( "testName" ) );
-    when( v.property( "type" ) ).thenReturn( presentProperty( "testType" ) );
-    when( v.property( "zzz" ) ).thenReturn( presentProperty( "last" ) );
+    VertexProperty<String> nameProperty = presentProperty( "testName" );
+    VertexProperty<String> typeProperty = presentProperty( "testType" );
+    VertexProperty<String> zzzProperty = presentProperty( "last" );
+    when( v.property( "name" ) ).thenReturn( nameProperty );
+    when( v.property( "type" ) ).thenReturn( typeProperty );
+    when( v.property( "zzz" ) ).thenReturn( zzzProperty );
     when( v.value( "name" ) ).thenReturn( "testName" );
     when( v.value( "type" ) ).thenReturn( "testType" );
     when( v.value( "zzz" ) ).thenReturn( "last" );
@@ -314,7 +323,8 @@ public class MetaverseNodeTest {
   private void mockProperties( Map<String, Object> props ) {
     when( v.keys() ).thenReturn( props.keySet() );
     for ( Map.Entry<String, Object> entry : props.entrySet() ) {
-      when( v.property( entry.getKey() ) ).thenReturn( presentProperty( entry.getValue() ) );
+      VertexProperty<Object> property = presentProperty( entry.getValue() );
+      when( v.property( entry.getKey() ) ).thenReturn( property );
       when( v.value( entry.getKey() ) ).thenReturn( entry.getValue() );
     }
   }

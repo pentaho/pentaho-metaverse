@@ -77,7 +77,8 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getStringID() {
-    return ( v.id() == null ) ? null : v.id().toString();
+    final Object id = v.id();
+    return id == null ? null : id.toString();
   }
 
   /*
