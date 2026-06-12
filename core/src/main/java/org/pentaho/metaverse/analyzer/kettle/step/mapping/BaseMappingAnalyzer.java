@@ -102,7 +102,7 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
 
     // this step should not have any output fields, it only redirects fields between steps within the parent and the
     // sub-transformation
-    final Iterator<Vertex> outputFieldVertices =  stepVertex.vertices(
+    final Iterator<Vertex> outputFieldVertices = stepVertex.vertices(
       Direction.OUT, DictionaryConst.LINK_OUTPUTS );
     while ( outputFieldVertices.hasNext() ) {
       outputFieldVertices.next().remove();
