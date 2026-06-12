@@ -102,8 +102,8 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
 
     // this step should not have any output fields, it only redirects fields between steps within the parent and the
     // sub-transformation
-    final Iterator<Vertex> outputFieldVertices =  stepVertex.getVertices(
-      Direction.OUT, DictionaryConst.LINK_OUTPUTS ).iterator();
+    final Iterator<Vertex> outputFieldVertices =  stepVertex.vertices(
+      Direction.OUT, DictionaryConst.LINK_OUTPUTS );
     while ( outputFieldVertices.hasNext() ) {
       outputFieldVertices.next().remove();
     }
@@ -190,10 +190,10 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
     } else {
       // we are using the main data path - that means we need to find the step that this step hops to
       final Vertex thisVertex = findStepVertex( parentTransMeta, parentStepMeta.getName() );
-      final Iterator<Vertex> targetVertices = thisVertex.getVertices(
-        Direction.OUT, DictionaryConst.LINK_HOPSTO ).iterator();
+      final Iterator<Vertex> targetVertices = thisVertex.vertices(
+        Direction.OUT, DictionaryConst.LINK_HOPSTO );
       while ( targetVertices.hasNext() ) {
-        propsLookupMap.put( DictionaryConst.PROPERTY_NAME, targetVertices.next().getProperty( DictionaryConst
+        propsLookupMap.put( DictionaryConst.PROPERTY_NAME, targetVertices.next().value( DictionaryConst
           .PROPERTY_NAME ).toString() );
         vertices.add( findStepVertex( transMeta, propsLookupMap ) );
       }
@@ -211,7 +211,7 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
 
       final Vertex inputSourceVertex = getInputSourceStepVertex( parentTransMeta, inputMapping );
       final Vertex inputTargetVertex = getInputTargetStepVertex( subTransMeta, inputMapping );
-      final String inputTargetName = inputTargetVertex.getProperty( DictionaryConst.PROPERTY_NAME );
+      final String inputTargetName = inputTargetVertex.value( DictionaryConst.PROPERTY_NAME );
 
       final List<MappingValueRename> renames = inputMapping.getValueRenames();
       for ( final MappingValueRename rename : renames ) {
@@ -224,11 +224,11 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
       // for each field, if a rename exists, create a "derives" link from the field to the input target field with
       // the name defined in the "Fieldname to mapping input step" column; otherwise create a "derives" link to a
       // field with the same name
-      final Iterator<Vertex> inputSourceOutputFields = inputSourceVertex.getVertices( Direction.OUT,
-        DictionaryConst.LINK_OUTPUTS ).iterator();
+      final Iterator<Vertex> inputSourceOutputFields = inputSourceVertex.vertices( Direction.OUT,
+        DictionaryConst.LINK_OUTPUTS );
       while ( inputSourceOutputFields.hasNext() ) {
         final Vertex inputSourceOutputField = inputSourceOutputFields.next();
-        final String inputSourceOutputFieldName = inputSourceOutputField.getProperty( DictionaryConst.PROPERTY_NAME );
+        final String inputSourceOutputFieldName = inputSourceOutputField.value( DictionaryConst.PROPERTY_NAME );
         // is there a rename for this field?
         final MappingValueRename renameMapping = inputMapping.getValueRenames().stream().filter( rename ->
           inputSourceOutputFieldName.equals( rename.getSourceValueName() ) ).findAny().orElse( null );
@@ -236,13 +236,13 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
         // that is the target of the rename mapping ( defined within the "Fieldname to mapping input step" column);
         // we look for this field within the sub-transformation and within the context of the input target step
         final String derivedFieldName = renameMapping == null ? inputSourceOutputFieldName
-          : renameMapping.getTargetValueName();
+n          : renameMapping.getTargetValueName();
         final Vertex derivedField = findFieldVertex( subTransMeta, inputTargetName, derivedFieldName );
         // add an "inputs" link from the field of the input source step to the input target step
         metaverseBuilder.addLink( inputSourceOutputField, DictionaryConst.LINK_INPUTS, inputTargetVertex );
         if ( derivedField == null ) {
           LOGGER.debug( Messages.getString( "WARN.TargetInputFieldNotFound", meta.getName(),
-            inputSourceVertex.getProperty( DictionaryConst.PROPERTY_NAME ), inputSourceOutputField.getProperty(
+            inputSourceVertex.value( DictionaryConst.PROPERTY_NAME ), inputSourceOutputField.value(
               DictionaryConst.PROPERTY_NAME ), subTransMeta.getName(), inputTargetName ) );
         } else {
           // add a "derives" link from the field of the input source step to the output field of the input target step
@@ -260,12 +260,12 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
       // for each field, if a rename exists, create a "derives" link from the field to the input target field with
       // the name defined in the "Fieldname to mapping input step" column; otherwise create a "derives" link to a
       // field with the same name
-      final Iterator<Vertex> outputSourceFields = outputSourceVertex.getVertices( Direction.OUT,
-        DictionaryConst.LINK_OUTPUTS ).iterator();
+      final Iterator<Vertex> outputSourceFields = outputSourceVertex.vertices( Direction.OUT,
+        DictionaryConst.LINK_OUTPUTS );
 
       while ( outputSourceFields.hasNext() ) {
         final Vertex outputSourceField = outputSourceFields.next();
-        final String outputSourceFieldName = outputSourceField.getProperty( DictionaryConst.PROPERTY_NAME );
+        final String outputSourceFieldName = outputSourceField.value( DictionaryConst.PROPERTY_NAME );
         String derivedFieldName = outputSourceFieldName;
         // is there a rename mapping for this field?
         final MappingValueRename renameMapping = outputMapping.getValueRenames().stream().filter( rename ->
@@ -279,7 +279,7 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
           derivedFieldName = fieldRenames.get( outputSourceFieldName );
         }
         for ( final Vertex outputTargetVertex : outputTargetVertices ) {
-          final String outputTargetName = outputTargetVertex.getProperty( DictionaryConst.PROPERTY_NAME );
+          final String outputTargetName = outputTargetVertex.value( DictionaryConst.PROPERTY_NAME );
 
           final Vertex derivedField = findFieldVertex( parentTransMeta, outputTargetName, derivedFieldName );
           // add an "inputs" link from the field of the input source step to the input target step
@@ -287,7 +287,7 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
 
           if ( derivedField == null ) {
             LOGGER.debug( Messages.getString( "WARN.TargetInputFieldNotFound", meta.getName(),
-              outputSourceVertex.getProperty( DictionaryConst.PROPERTY_NAME ), outputSourceField.getProperty(
+              outputSourceVertex.value( DictionaryConst.PROPERTY_NAME ), outputSourceField.value(
                 DictionaryConst.PROPERTY_NAME ), subTransMeta.getName(), outputTargetName ) );
           } else {
             // add a "derives" link from the field of the output source step to the output field of the output target step
@@ -298,12 +298,12 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
           // them; these are the orphaned output steps of the mapping step that the base analyzer code wasn't able to
           // resolve, and since the mapping step should not have any output fields, these can be removed
           final List<Vertex> allOutputTargetInputFields = IteratorUtils.toList(
-            outputTargetVertex.getVertices( Direction.IN, DictionaryConst.LINK_INPUTS ).iterator() );
+            outputTargetVertex.vertices( Direction.IN, DictionaryConst.LINK_INPUTS ) );
           for ( final Vertex outputTargetInputField : allOutputTargetInputFields ) {
-            if ( "true".equals( outputTargetInputField.getProperty( DictionaryConst.NODE_VIRTUAL ).toString() ) ) {
+            if ( "true".equals( outputTargetInputField.value( DictionaryConst.NODE_VIRTUAL ).toString() ) ) {
               // check further that this field does not have a containing step that outputs it
-              final Iterator<Vertex> parentSteps = outputTargetInputField.getVertices(
-                Direction.IN, DictionaryConst.LINK_OUTPUTS ).iterator();
+              final Iterator<Vertex> parentSteps = outputTargetInputField.vertices(
+                Direction.IN, DictionaryConst.LINK_OUTPUTS );
               boolean hasParent = false;
               while ( parentSteps.hasNext() ) {
                 hasParent = true;
@@ -354,7 +354,7 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
    * Processes output mappings and returns a map of mapped fields ( parent source > sub-trans target ).
    */
   private Map<String, String> processOutputMappings( final TransMeta subTransMeta, final Vertex stepVertex,
-                                      final List<MappingIODefinition> mappings, final List<String> verboseProps ) {
+                                       final List<MappingIODefinition> mappings, final List<String> verboseProps ) {
     final Map<String, String> mappedOutputFields = new HashMap();
     int mappingIdx = 1;
     for ( final MappingIODefinition mapping : mappings ) {
@@ -392,7 +392,7 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
         String sourceStepName = mapping.getInputStepname();
         if ( mapping.isMainDataPath() ) {
           final Vertex sourceVertex = getOutputSourceStepVertex( subTransMeta, mapping );
-          sourceStepName = sourceVertex.getProperty( DictionaryConst.PROPERTY_NAME ).toString();
+          sourceStepName = sourceVertex.value( DictionaryConst.PROPERTY_NAME ).toString();
         }
         sourceStep = ( includeSubTransPrefix ? "[" + subTransMeta.getName() + "] " : "" ) + sourceStepName;
       }
@@ -408,7 +408,7 @@ public abstract class BaseMappingAnalyzer<T extends StepWithMappingMeta> extends
         String targetStepName = mapping.getOutputStepname();
         if ( mapping.isMainDataPath() ) {
           final Vertex targetVertex = getInputTargetStepVertex( subTransMeta, mapping );
-          targetStepName = targetVertex.getProperty( DictionaryConst.PROPERTY_NAME ).toString();
+          targetStepName = targetVertex.value( DictionaryConst.PROPERTY_NAME ).toString();
         }
         targetStep = ( includeSubTransPrefix ? "[" + subTransMeta.getName() + "] " : "" ) + targetStepName;
       } else {
