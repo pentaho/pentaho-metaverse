@@ -822,7 +822,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
    * @return a @{link List} of {@link Vertex} objects containing the requested properties
    */
   protected List<Vertex> findVertices( final Map<String, String> properties ) {
-    return findVertices( getMetaverseBuilder().getGraph().getVertices().iterator(), properties );
+    return findVertices( getMetaverseBuilder().getGraph().vertices(), properties );
   }
 
   /**
@@ -844,7 +844,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
           final Map.Entry<String, String> property = propsIter.next();
           final String propName = property.getKey();
           final String propValue = property.getValue();
-          if ( vertex.getProperty( propName ) == null || !vertex.getProperty( propName ).equals( propValue ) ) {
+          if ( !vertex.property( propName ).isPresent() || !vertex.value( propName ).equals( propValue ) ) {
             continue outer;
           }
         }
@@ -904,12 +904,12 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     // inspect input "contains" links for each vertex, when a "containing" transformation with a matching path is
     // found, we have the  vertex we need
     for ( final Vertex potentialMatch : potentialMatches ) {
-      final Iterator<Vertex> containingVertices = potentialMatch.getVertices( Direction.IN,
-        DictionaryConst.LINK_CONTAINS ).iterator();
+      final Iterator<Vertex> containingVertices = potentialMatch.vertices( Direction.IN,
+        DictionaryConst.LINK_CONTAINS );
       while ( containingVertices.hasNext() ) {
         final Vertex containingVertex = containingVertices.next();
         final String containingVertexPath = KettleAnalyzerUtil.normalizeFilePathSafely(
-          transMeta.getBowl(), containingVertex.getProperty( DictionaryConst.PROPERTY_PATH ) );
+          transMeta.getBowl(), containingVertex.value( DictionaryConst.PROPERTY_PATH ) );
         if ( transPath.equalsIgnoreCase( containingVertexPath ) ) {
           matchingNodes.add( potentialMatch );
         }
@@ -977,7 +977,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
 
     final Map<String, String> propsLookupMap = properties == null ? new HashMap() : new HashMap( properties );
     propsLookupMap.put( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_FIELD );
-    return findVertices( stepVertex.getVertices( Direction.OUT, DictionaryConst.LINK_OUTPUTS ).iterator(),
+    return findVertices( stepVertex.vertices( Direction.OUT, DictionaryConst.LINK_OUTPUTS ),
       propsLookupMap );
   }
 
@@ -989,10 +989,10 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
    */
   protected Vertex findVertexById( final String id ) {
 
-    final Iterator<Vertex> allVertices = getMetaverseBuilder().getGraph().getVertices().iterator();
+    final Iterator<Vertex> allVertices = getMetaverseBuilder().getGraph().vertices();
     while ( allVertices.hasNext() ) {
       final Vertex vertex = allVertices.next();
-      if ( vertex.getId().equals( id ) ) {
+      if ( vertex.id().equals( id ) ) {
         return vertex;
       }
     }
@@ -1022,7 +1022,7 @@ public abstract class StepAnalyzer<T extends BaseStepMeta> extends BaseKettleMet
     if ( vertex == null || propertyName == null || propertyValue == null ) {
       return false;
     }
-    vertex.setProperty( propertyName, propertyValue );
+    vertex.property( propertyName, propertyValue );
     return true;
   }
 }
