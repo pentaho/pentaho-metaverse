@@ -40,6 +40,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -291,6 +292,7 @@ public class MetaverseNodeTest {
     when( v.value( "zzz" ) ).thenReturn( "last" );
 
     MetaverseNode spyNode = spy( new MetaverseNode( v ) );
+    doNothing().when( spyNode ).setProperty( eq( DictionaryConst.PROPERTY_LOGICAL_ID ), any() );
     when( spyNode.getPropertyKeys() ).thenReturn( new HashSet<String>() {{
       add( "name" );
       add( "type" );
