@@ -18,6 +18,7 @@ import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Test;
 import org.pentaho.metaverse.api.model.BaseSynchronizedGraph;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.ListResourceBundle;
 import java.util.Map;
@@ -66,5 +67,29 @@ public class SynchronizedGraphFactoryTest {
     BaseSynchronizedGraph wrapped = (BaseSynchronizedGraph) SynchronizedGraphFactory.wrapGraph( graph );
     assertNotNull( wrapped );
     assertTrue( wrapped.getGraph() instanceof TinkerGraph );
+  }
+
+  /**
+   * Binary-compatibility guard: verifies that each static factory method is physically declared
+   * on {@link SynchronizedGraphFactory} itself (not merely inherited), so that callers compiled
+   * against {@code SynchronizedGraphFactory.*} continue to link at runtime.
+   */
+  @Test
+  public void testBinaryCompatibility_staticMethodsDeclaredOnSubclass() throws NoSuchMethodException {
+    // getDefaultGraph()
+    Method m1 = SynchronizedGraphFactory.class.getDeclaredMethod( "getDefaultGraph" );
+    assertNotNull( m1 );
+
+    // open(Map)
+    Method m2 = SynchronizedGraphFactory.class.getDeclaredMethod( "open", Map.class );
+    assertNotNull( m2 );
+
+    // open(ResourceBundle)
+    Method m3 = SynchronizedGraphFactory.class.getDeclaredMethod( "open", ResourceBundle.class );
+    assertNotNull( m3 );
+
+    // wrapGraph(TinkerGraph)
+    Method m4 = SynchronizedGraphFactory.class.getDeclaredMethod( "wrapGraph", TinkerGraph.class );
+    assertNotNull( m4 );
   }
 }
