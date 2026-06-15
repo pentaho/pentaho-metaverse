@@ -29,6 +29,8 @@
       <excludes>
         <exclude>org.pentaho.*</exclude>
         <exclude>com.tinkerpop.*:*</exclude>
+        <exclude>org.apache.tinkerpop:*</exclude>
+        <exclude>org.slf4j:slf4j-api</exclude>
         <exclude>commons-configuration:commons-configuration</exclude>
         <exclude>pentaho:pentaho-metaverse-core:jar</exclude>
         <exclude>org.codehaus.jettison:*</exclude>
