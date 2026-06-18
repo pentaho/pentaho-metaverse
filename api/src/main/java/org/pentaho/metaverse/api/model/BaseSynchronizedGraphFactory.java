@@ -13,29 +13,16 @@
 
 package org.pentaho.metaverse.api.model;
 
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.KeyIndexableGraph;
-import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
-import org.apache.commons.configuration.Configuration;
-import org.pentaho.metaverse.api.messages.Messages;
-
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
- * <p> Thin wrapper around {@link com.tinkerpop.blueprints.GraphFactory} that constructs {@link BaseSynchronizedGraph}
- * objects. </p> <p> <strong>NOTE:</strong> The backing graph configured <em>must</em> implement {@link
- * com.tinkerpop.blueprints.KeyIndexableGraph} </p>
+ * Factory for creating {@link BaseSynchronizedGraph} instances backed by {@link TinkerGraph}.
  */
 public class BaseSynchronizedGraphFactory {
-  private static final Map<String, String> configMap = new HashMap<>();
-
-  static {
-    configMap.put( "blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph" );
-  }
 
   /**
    * Hides the constructor so that this class cannot be instanced
@@ -44,77 +31,42 @@ public class BaseSynchronizedGraphFactory {
     throw new UnsupportedOperationException();
   }
 
-  public static Graph getDefaultGraph() {
-    return open( configMap );
-  }
-
   /**
-   * Opens a Graph based on a Configuration
+   * Returns the default synchronized graph (a new TinkerGraph).
    *
-   * @param configuration The graph configuration
-   * @return {@link BaseSynchronizedGraph} instance {@link com.tinkerpop.blueprints.KeyIndexableGraph}
-   * @see com.tinkerpop.blueprints.GraphFactory#open(org.apache.commons.configuration.Configuration)
+   * @return a {@link BaseSynchronizedGraph} wrapping a new {@link TinkerGraph}
    */
-  public static Graph open( final Configuration configuration ) {
-    Graph graph = com.tinkerpop.blueprints.GraphFactory.open( configuration );
-    return wrapGraph( graph );
+  public static Graph getDefaultGraph() {
+    return wrapGraph( TinkerGraph.open() );
   }
 
   /**
-   * Opens a Graph based on a Map configuration
+   * Opens a Graph. The configuration is ignored; a new TinkerGraph is always opened.
    *
-   * @param configuration The graph configuration
-   * @return {@link BaseSynchronizedGraph} instance {@link com.tinkerpop.blueprints.KeyIndexableGraph}
-   * @see com.tinkerpop.blueprints.GraphFactory#open(java.util.Map)
+   * @param configuration The graph configuration (ignored)
+   * @return a {@link BaseSynchronizedGraph} wrapping a new {@link TinkerGraph}
    */
   public static Graph open( final Map<String, String> configuration ) {
-    Graph graph = com.tinkerpop.blueprints.GraphFactory.open( configuration );
-    return wrapGraph( graph );
+    return wrapGraph( TinkerGraph.open() );
   }
 
   /**
-   * Opens Graph based on configuration defined in a file
+   * Opens a Graph. The configuration is ignored; a new TinkerGraph is always opened.
    *
-   * @param configurationFile The graph configuration file
-   * @return {@link BaseSynchronizedGraph} instance {@link com.tinkerpop.blueprints.KeyIndexableGraph}
-   * @see com.tinkerpop.blueprints.GraphFactory#open(String)
-   */
-  public static Graph open( final String configurationFile ) {
-    Graph graph = com.tinkerpop.blueprints.GraphFactory.open( configurationFile );
-    return wrapGraph( graph );
-  }
-
-  /**
-   * Opens Graph based on configuration defined in a {@link ResourceBundle}.
-   *
-   * @param configBundle The {@link ResourceBundle} containing the graph configuration
-   * @return {@link BaseSynchronizedGraph} instance {@link com.tinkerpop.blueprints.KeyIndexableGraph}
-   * @see com.tinkerpop.blueprints.GraphFactory#open(String)
+   * @param configBundle The graph configuration bundle (ignored)
+   * @return a {@link BaseSynchronizedGraph} wrapping a new {@link TinkerGraph}
    */
   public static Graph open( final ResourceBundle configBundle ) {
-    final Map<String, String> graphProps = new HashMap<>();
-    final Enumeration<String> keys = configBundle.getKeys();
-    while ( keys.hasMoreElements() ) {
-      final String key = keys.nextElement();
-      final String value = configBundle.getString( key );
-      graphProps.put( key, value );
-    }
-    return open( graphProps );
+    return wrapGraph( TinkerGraph.open() );
   }
 
   /**
-   * Wraps the underlying graph with a synchronized one
+   * Wraps a TinkerGraph with a synchronized graph wrapper.
    *
-   * @param graph The graph to wrap
-   * @return The synchronized graph
+   * @param graph The TinkerGraph to wrap
+   * @return a {@link BaseSynchronizedGraph}
    */
-  public static Graph wrapGraph( Graph graph ) {
-    if ( graph instanceof KeyIndexableGraph ) {
-      KeyIndexableGraph keyIndexableGraph = (KeyIndexableGraph) graph;
-      IdGraph<KeyIndexableGraph> idGraph = new IdGraph<>( keyIndexableGraph );
-      return new BaseSynchronizedGraph( idGraph );
-    } else {
-      throw new IllegalArgumentException( Messages.getString( "ERROR.BackingGraph.MustImplement.KeyIndexableGraph" ) );
-    }
+  public static Graph wrapGraph( TinkerGraph graph ) {
+    return new BaseSynchronizedGraph( graph );
   }
 }

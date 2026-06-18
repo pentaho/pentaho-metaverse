@@ -13,16 +13,25 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface DatabaseTableNode extends FramedMetaverseNode {
-  @Adjacency( label = "writesto", direction = Direction.IN )
-  public Iterable<TransformationStepNode> getStepNodes();
+public class DatabaseTableNode extends Concept {
+  public DatabaseTableNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Adjacency( label = "contains", direction = Direction.OUT )
-  public Iterable<DatabaseColumnNode> getDatabaseColumns();
+  public List<TransformationStepNode> getStepNodes() {
+    return wrapAs( vertex.vertices( Direction.IN, "writesto" ), v -> new TransformationStepNode( v, graph ) );
+  }
+
+  public List<DatabaseColumnNode> getDatabaseColumns() {
+    return wrapAs( vertex.vertices( Direction.OUT, "contains" ), v -> new DatabaseColumnNode( v, graph ) );
+  }
 }

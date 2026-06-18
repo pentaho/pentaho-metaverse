@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Graph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,10 +25,7 @@ public class GraphMLWriter extends BaseGraphWriter {
 
   @Override
   public void outputGraphImpl( Graph graph, OutputStream graphMLOutputStream ) throws IOException {
-    com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter writer =
-      new com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter( graph );
-
-    writer.setNormalize( true );
-    writer.outputGraph( graphMLOutputStream );
+    graph.io( org.apache.tinkerpop.gremlin.structure.io.IoCore.graphml() )
+      .writer().normalize( true ).create().writeGraph( graphMLOutputStream, graph );
   }
 }

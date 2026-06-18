@@ -13,22 +13,33 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface StreamFieldNode extends FieldNode {
-  @Adjacency( label = "derives", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getFieldNodesDerivedFromMe();
+public class StreamFieldNode extends FieldNode {
+  public StreamFieldNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Adjacency( label = "derives", direction = Direction.IN )
-  public Iterable<StreamFieldNode> getFieldNodesThatDeriveMe();
+  public List<StreamFieldNode> getFieldNodesDerivedFromMe() {
+    return wrapAs( vertex.vertices( Direction.OUT, "derives" ), v -> new StreamFieldNode( v, graph ) );
+  }
 
-  @Adjacency( label = "joins", direction = Direction.IN )
-  public Iterable<StreamFieldNode> getFieldNodesThatJoinToMe();
+  public List<StreamFieldNode> getFieldNodesThatDeriveMe() {
+    return wrapAs( vertex.vertices( Direction.IN, "derives" ), v -> new StreamFieldNode( v, graph ) );
+  }
 
-  @Adjacency( label = "joins", direction = Direction.OUT )
-  public Iterable<StreamFieldNode> getFieldNodesThatIJoinTo();
+  public List<StreamFieldNode> getFieldNodesThatJoinToMe() {
+    return wrapAs( vertex.vertices( Direction.IN, "joins" ), v -> new StreamFieldNode( v, graph ) );
+  }
+
+  public List<StreamFieldNode> getFieldNodesThatIJoinTo() {
+    return wrapAs( vertex.vertices( Direction.OUT, "joins" ), v -> new StreamFieldNode( v, graph ) );
+  }
 }

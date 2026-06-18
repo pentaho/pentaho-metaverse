@@ -13,8 +13,8 @@
 
 package org.pentaho.metaverse.api;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Graph;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 
 import java.util.List;
 

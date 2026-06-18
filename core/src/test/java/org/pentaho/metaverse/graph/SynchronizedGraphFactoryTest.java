@@ -13,21 +13,19 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.KeyIndexableGraph;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
-import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Test;
 import org.pentaho.metaverse.api.model.BaseSynchronizedGraph;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.ListResourceBundle;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 public class SynchronizedGraphFactoryTest {
 
@@ -38,47 +36,60 @@ public class SynchronizedGraphFactoryTest {
   }
 
   @Test
-  public void testOpen_Configuration() throws Exception {
-    Configuration config = new PropertiesConfiguration();
-    config.addProperty( "blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph" );
-    Graph g = SynchronizedGraphFactory.open( config );
-
-    assertTrue( g instanceof BaseSynchronizedGraph );
+  public void testGetDefaultGraph() {
+    Graph graph = SynchronizedGraphFactory.getDefaultGraph();
+    assertTrue( graph instanceof BaseSynchronizedGraph );
   }
 
   @Test
-  public void testOpen_Map() throws Exception {
+  public void testOpen_Map() {
     Map<String, String> config = new HashMap<String, String>();
-    config.put( "blueprints.graph", "com.tinkerpop.blueprints.impls.tg.TinkerGraph" );
-    Graph g = SynchronizedGraphFactory.open( config );
-
-    assertTrue( g instanceof BaseSynchronizedGraph );
+    config.put( "blueprints.graph", "ignored" );
+    Graph graph = SynchronizedGraphFactory.open( config );
+    assertTrue( graph instanceof BaseSynchronizedGraph );
   }
 
   @Test
-  public void testOpen_File() throws Exception {
-    String config = "src/test/resources/graph.properties";
-    Graph g = SynchronizedGraphFactory.open( config );
-
-    assertTrue( g instanceof BaseSynchronizedGraph );
-  }
-
-  @Test( expected = IllegalArgumentException.class )
-  public void testWrapGraph_NotAKeyIndexableGraph() throws Exception {
-    Graph g = mock( Graph.class );
-    SynchronizedGraphFactory.wrapGraph( g );
+  public void testOpen_ResourceBundle() {
+    ResourceBundle bundle = new ListResourceBundle() {
+      @Override
+      protected Object[][] getContents() {
+        return new Object[][] { { "blueprints.graph", "ignored" } };
+      }
+    };
+    Graph graph = SynchronizedGraphFactory.open( bundle );
+    assertTrue( graph instanceof BaseSynchronizedGraph );
   }
 
   @Test
-  public void testWrapGraph() throws Exception {
-    Graph g = new TinkerGraph();
-    BaseSynchronizedGraph wrapped = (BaseSynchronizedGraph) SynchronizedGraphFactory.wrapGraph( g );
-
+  public void testWrapGraph() {
+    TinkerGraph graph = TinkerGraph.open();
+    BaseSynchronizedGraph wrapped = (BaseSynchronizedGraph) SynchronizedGraphFactory.wrapGraph( graph );
     assertNotNull( wrapped );
-    assertTrue( wrapped.getGraph() instanceof IdGraph );
-    assertTrue( wrapped.getGraph() instanceof KeyIndexableGraph );
-
+    assertTrue( wrapped.getGraph() instanceof TinkerGraph );
   }
 
+  /**
+   * Binary-compatibility guard: verifies that each static factory method is physically declared
+   * on {@link SynchronizedGraphFactory} itself (not merely inherited), so that callers compiled
+   * against {@code SynchronizedGraphFactory.*} continue to link at runtime.
+   */
+  @Test
+  public void testBinaryCompatibility_staticMethodsDeclaredOnSubclass() throws NoSuchMethodException {
+    // getDefaultGraph()
+    Method m1 = SynchronizedGraphFactory.class.getDeclaredMethod( "getDefaultGraph" );
+    assertNotNull( m1 );
 
+    // open(Map)
+    Method m2 = SynchronizedGraphFactory.class.getDeclaredMethod( "open", Map.class );
+    assertNotNull( m2 );
+
+    // open(ResourceBundle)
+    Method m3 = SynchronizedGraphFactory.class.getDeclaredMethod( "open", ResourceBundle.class );
+    assertNotNull( m3 );
+
+    // wrapGraph(TinkerGraph)
+    Method m4 = SynchronizedGraphFactory.class.getDeclaredMethod( "wrapGraph", TinkerGraph.class );
+    assertNotNull( m4 );
+  }
 }

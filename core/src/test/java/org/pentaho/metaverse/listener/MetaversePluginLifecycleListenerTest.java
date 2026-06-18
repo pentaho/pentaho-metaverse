@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.listener;
 
-import com.tinkerpop.blueprints.Graph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +42,7 @@ public class MetaversePluginLifecycleListenerTest {
     metaversePluginLifecycleListener.setGraph( mockGraph );
     metaversePluginLifecycleListener.unLoaded();
 
-    verify( mockGraph, times ( 1 ) ).shutdown();
+    verify( mockGraph, times ( 1 ) ).close();
   }
 
   @Test
@@ -51,7 +51,7 @@ public class MetaversePluginLifecycleListenerTest {
     doReturn( null ).when( spyListener ).getGraph();
     spyListener.unLoaded();
 
-    verify( mockGraph, times ( 0 ) ).shutdown();
+    verify( mockGraph, times ( 0 ) ).close();
   }
 
   @Test

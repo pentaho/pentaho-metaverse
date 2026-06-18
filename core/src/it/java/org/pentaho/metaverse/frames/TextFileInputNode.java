@@ -13,12 +13,18 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-public interface TextFileInputNode extends TransformationStepNode {
+import java.util.List;
 
-  @Adjacency( label = "isreadby", direction = Direction.IN )
-  Iterable<FramedMetaverseNode> getInputFiles();
+public class TextFileInputNode extends TransformationStepNode {
+  public TextFileInputNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
+  public List<FramedMetaverseNode> getInputFiles() {
+    return wrapAsNodes( vertex.vertices( Direction.IN, "isreadby" ) );
+  }
 }

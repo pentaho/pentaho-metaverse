@@ -148,7 +148,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
   @Test
   public void testEntity_FileSystemLocator() {
     LocatorNode node =
-      (LocatorNode) framedGraph.getVertex( "{\"name\":\"" + REPO_ID + "\",\"type\":\"Locator\"}", LocatorNode.class );
+      wrapVertex( "{\"name\":\"" + REPO_ID + "\",\"type\":\"Locator\"}", v -> new LocatorNode( v, graph ) );
     assertEquals( DictionaryConst.NODE_TYPE_LOCATOR, node.getType() );
     assertEquals( REPO_ID, node.getName() );
     assertNotNull( node.getDescription() );
@@ -279,8 +279,7 @@ public abstract class MetaverseValidationIT extends BaseMetaverseValidationIT {
       );
       Collection<String> actualStepNames = new TreeSet<>(
         StreamSupport.stream( transNode.getStepNodes().spliterator(), false )
-          .map( tsn -> tsn.asVertex().getProperty( "name" )
-            .toString() ).collect( Collectors.toList() )
+          .map( tsn -> tsn.getName() ).collect( Collectors.toList() )
       );
 
       assertEquals( "Incorrect number of Steps in the graph for transformation ["

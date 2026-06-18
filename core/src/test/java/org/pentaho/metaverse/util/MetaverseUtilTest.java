@@ -13,10 +13,11 @@
 
 package org.pentaho.metaverse.util;
 
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -118,7 +119,7 @@ public class MetaverseUtilTest {
       .thenReturn( mock( IMetaverseNode.class ) );
     analyzers.add( documentAnalyzer );
 
-    Graph graph = new TinkerGraph();
+    Graph graph = TinkerGraph.open();
     MetaverseUtil.addLineageGraph( document, graph );
 
     MetaverseUtil.addLineageGraph( document, null );
@@ -126,17 +127,17 @@ public class MetaverseUtilTest {
 
   @Test
   public void testEnhanceEdge() {
-    Graph graph = new TinkerGraph();
-    Vertex v1 = graph.addVertex( 1 );
-    Vertex v2 = graph.addVertex( 2 );
-    Edge edge = graph.addEdge( 3, v1, v2, "testLabel" );
+    Graph graph = TinkerGraph.open();
+    Vertex v1 = graph.addVertex( T.id, 1 );
+    Vertex v2 = graph.addVertex( T.id, 2 );
+    Edge edge = v1.addEdge( "testLabel", v2, T.id, 3 );
     MetaverseUtil.enhanceEdge( edge );
   }
 
   @Test
   public void testEnhanceVertex() {
-    Graph graph = new TinkerGraph();
-    Vertex v1 = graph.addVertex( 1 );
+    Graph graph = TinkerGraph.open();
+    Vertex v1 = graph.addVertex( T.id, 1 );
     MetaverseUtil.enhanceVertex( v1 );
   }
 

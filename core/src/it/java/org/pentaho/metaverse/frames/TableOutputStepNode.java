@@ -13,29 +13,39 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.pentaho.metaverse.analyzer.kettle.step.tableoutput.TableOutputStepAnalyzer;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface TableOutputStepNode extends TransformationStepNode {
-  @Adjacency( label = "dependencyof", direction = Direction.IN )
-  public Iterable<DatasourceNode> getDatasources();
+public class TableOutputStepNode extends TransformationStepNode {
+  public TableOutputStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @GremlinGroovy( "it.in('dependencyof').has( 'name', T.eq, name )" )
-  public DatasourceNode getDatasource( @GremlinParam( "name") String name );
+  public List<DatasourceNode> getDatasources() {
+    return wrapAs( vertex.vertices( Direction.IN, "dependencyof" ), v -> new DatasourceNode( v, graph ) );
+  }
 
-  @Adjacency( label = "writesto", direction = Direction.OUT )
-  public DatabaseTableNode getDatabaseTable();
+  public DatasourceNode getDatasource( String name ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() ).in( "dependencyof" ).has( "name", name ).toList();
+    return result.isEmpty() ? null : new DatasourceNode( result.get( 0 ), graph );
+  }
 
-  @Property( "schema" )
-  public String getSchema();
+  public DatabaseTableNode getDatabaseTable() {
+    return wrapSingle( vertex.vertices( Direction.OUT, "writesto" ), v -> new DatabaseTableNode( v, graph ) );
+  }
 
-  @Property( TableOutputStepAnalyzer.TRUNCATE_TABLE )
-  public Boolean isTruncateTable();
+  public String getSchema() {
+    return getStringValue( "schema" );
+  }
+
+  public Boolean isTruncateTable() {
+    return getBooleanValue( TableOutputStepAnalyzer.TRUNCATE_TABLE );
+  }
 }

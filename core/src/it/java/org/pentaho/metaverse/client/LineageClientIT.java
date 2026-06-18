@@ -13,9 +13,9 @@
 
 package org.pentaho.metaverse.client;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -92,7 +92,7 @@ public class LineageClientIT {
       transMeta.getName(),
       "ktr",
       URLConnection.getFileNameMap().getContentTypeFor( transMeta.getFilename() ) );
-    Graph graph = new TinkerGraph();
+    Graph graph = TinkerGraph.open();
     MetaverseUtil.addLineageGraph( doc, graph );
   }
 
@@ -109,7 +109,7 @@ public class LineageClientIT {
     assertEquals( 1, targetFieldNodes.size() );
     Vertex targetStep = targetFieldNodes.get( 0 );
     assertNotNull( targetStep );
-    assertEquals( "COUNTRY_1", targetStep.getProperty( DictionaryConst.PROPERTY_NAME ) );
+    assertEquals( "COUNTRY_1", targetStep.value( DictionaryConst.PROPERTY_NAME ) );
 
     targetFieldNodes = client.getTargetFields( g, "Select values", List.of( "COUNTRY_1" ) );
     assertNotNull( targetFieldNodes );

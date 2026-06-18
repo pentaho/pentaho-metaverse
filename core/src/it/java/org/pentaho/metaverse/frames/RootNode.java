@@ -13,148 +13,225 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
+import org.apache.tinkerpop.gremlin.process.traversal.P;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface RootNode extends FramedMetaverseNode {
-  @Property( "division" )
-  String getDivision();
+public class RootNode extends Concept {
+  public RootNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Property( "project" )
-  String getProject();
+  public String getDivision() {
+    return getStringValue( "division" );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out('typeconcept').dedup" )
-  Iterable<TransformationNode> getTransformations();
+  public String getProject() {
+    return getStringValue( "project" );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out('typeconcept').has('name', T.eq, name)" )
-  Iterable<TransformationNode> getTransformations( @GremlinParam( "name" ) String name );
+  public List<TransformationNode> getTransformations() {
+    List<Vertex> result = graph.traversal().V( vertex.id() )
+      .out().has( "name", "Transformation" ).out( "typeconcept" ).dedup().toList();
+    return wrapAs( result.iterator(), v -> new TransformationNode( v, graph ) );
+  }
 
-  /**
-   * We only want to consider transformations connected to the "repo" node, transformation nodes not connected to the
-   * repo node might represent sub-transformations.
-   */
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out('typeconcept').has('name', T.eq, name).as"
-    + "('transformation').inE.hasNot('executes').back('transformation')" )
-  TransformationNode getTransformation( @GremlinParam( "name" ) String name );
+  public List<TransformationNode> getTransformations( String name ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() )
+      .out().has( "name", "Transformation" ).out( "typeconcept" ).has( "name", name ).toList();
+    return wrapAs( result.iterator(), v -> new TransformationNode( v, graph ) );
+  }
 
-  /**
-   * A transformation node that is NOT connected to the "repo" node.
-   */
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out('typeconcept').has('name', T.eq, name).as('transformation').in('executes').back('transformation')" )
-  TransformationNode getSubTransformation( @GremlinParam( "name" ) String name );
+  public TransformationNode getTransformation( String name ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() )
+      .out().has( "name", "Transformation" ).out( "typeconcept" ).has( "name", name )
+      .filter( tv -> !tv.get().edges( Direction.IN, "executes" ).hasNext() )
+      .toList();
+    return result.isEmpty() ? null : new TransformationNode( result.get( 0 ), graph );
+  }
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Job'}.out('typeconcept').dedup" )
-  Iterable<JobNode> getJobs();
+  public TransformationNode getSubTransformation( String name ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() )
+      .out().has( "name", "Transformation" ).out( "typeconcept" ).has( "name", name )
+      .filter( tv -> tv.get().edges( Direction.IN, "executes" ).hasNext() )
+      .toList();
+    return result.isEmpty() ? null : new TransformationNode( result.get( 0 ), graph );
+  }
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Job'}.out(){ it.object.name == name }.dedup" )
-  JobNode getJob( @GremlinParam( "name" ) String name );
+  public List<JobNode> getJobs() {
+    List<Vertex> list = graph.traversal().V( vertex.id() )
+      .repeat( __.out() ).emit( __.has( "name", "Job" ) ).until( __.loops().is( P.gte( 5 ) ) )
+      .out( "typeconcept" ).dedup().toList();
+    return wrapAs( list.iterator(), v -> new JobNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq,  stepName).as('step').in('contains').has('name', T.eq, transformationName).back('step')" )
-  TransformationStepNode getStepNode(
-    @GremlinParam( "transformationName" ) String transformationName,
-    @GremlinParam( "stepName" ) String stepName );
+  public JobNode getJob( String name ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() )
+      .repeat( __.out() ).emit( __.has( "name", "Job" ) ).until( __.loops().is( P.gte( 5 ) ) )
+      .out().has( "name", name ).dedup().toList();
+    return result.isEmpty() ? null : new JobNode( result.get( 0 ), graph );
+  }
 
-  @Adjacency( label = "", direction = Direction.IN )
-  Iterable<FramedMetaverseNode> getEntities();
+  public TransformationStepNode getStepNode( String transformationName, String stepName ) {
+    return getTransformationStepNode( transformationName, stepName, v -> new TransformationStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has( 'name', T.eq, name )" )
-  FramedMetaverseNode getEntity( @GremlinParam( "name" ) String name );
+  public List<FramedMetaverseNode> getEntities() {
+    return wrapAsNodes( vertex.vertices( Direction.OUT ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Select values').as('step').in('contains').has('name', T.eq, 'Populate Table From File').back('step')" )
-  SelectValuesTransStepNode getSelectValuesStepNode();
+  public FramedMetaverseNode getEntity( String name ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() ).out().has( "name", name ).toList();
+    return result.isEmpty() ? null : wrapNode( result.get( 0 ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq,  stepName).as('step').in('contains').has('name', T.eq, transformationName).back('step')" )
-  FileInputStepNode getFileInputStepNode(
-    @GremlinParam( "transformationName" ) String transformationName,
-    @GremlinParam( "stepName" ) String stepName );
+  public SelectValuesTransStepNode getSelectValuesStepNode() {
+    return getTransformationStepNode( "Populate Table From File", "Select values",
+      v -> new SelectValuesTransStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Get Customers').as('step').in('contains').has('name', T.eq, 'Old Textfile input - filename from field').back('step')" )
-  FileInputStepNode getOldTextFileInputStepNode_filenameFromField();
+  public FileInputStepNode getFileInputStepNode( String transformationName, String stepName ) {
+    return getTransformationStepNode( transformationName, stepName, v -> new FileInputStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Get Customers').as('step').in('contains').has('name', T.eq, 'Textfile input - filename from field').back('step')" )
-  FileInputStepNode getTextFileInputStepNode_filenameFromField();
+  public FileInputStepNode getOldTextFileInputStepNode_filenameFromField() {
+    return getTransformationStepNode( "Old Textfile input - filename from field", "Get Customers",
+      v -> new FileInputStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 5}{it.object.name == 'Database Connection'}.out()" )
-  Iterable<DatasourceNode> getDatasourceNodes();
+  public FileInputStepNode getTextFileInputStepNode_filenameFromField() {
+    return getTransformationStepNode( "Textfile input - filename from field", "Get Customers",
+      v -> new FileInputStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'External Connection').out.has('name', T.eq, 'Database Connection').out('typeconcept').has('name', T.eq, name)" )
-  DatasourceNode getDatasourceNode( @GremlinParam( "name" ) String name );
+  public List<DatasourceNode> getDatasourceNodes() {
+    List<Vertex> list = graph.traversal().V( vertex.id() )
+      .repeat( __.out() ).emit( __.has( "name", "Database Connection" ) ).until( __.loops().is( P.gte( 5 ) ) )
+      .out().toList();
+    return wrapAs( list.iterator(), v -> new DatasourceNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Sacramento crime stats 2006 file').as('step').in('contains').has('name', T"
-    + ".eq, 'Populate Table From File').back('step')" )
-  TextFileInputNode getTextFileInputNode();
+  public DatasourceNode getDatasourceNode( String name ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() )
+      .out().has( "name", "External Connection" ).out().has( "name", "Database Connection" )
+      .out( "typeconcept" ).has( "name", name ).toList();
+    return result.isEmpty() ? null : new DatasourceNode( result.get( 0 ), graph );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Demo table crime stats output [1]').as('step').in('contains').has('name', T"
-    + ".eq, 'Populate Table From File').back('step')" )
-  TableOutputStepNode getTableOutputStepNode1();
+  public TextFileInputNode getTextFileInputNode() {
+    return getTransformationStepNode( "Populate Table From File", "Sacramento crime stats 2006 file",
+      v -> new TextFileInputNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Demo table crime stats output [2]').as('step').in('contains').has('name', T"
-    + ".eq, 'Populate Table From File').back('step')" )
-  TableOutputStepNode getTableOutputStepNode2();
+  public TableOutputStepNode getTableOutputStepNode1() {
+    return getTransformationStepNode( "Populate Table From File", "Demo table crime stats output [1]",
+      v -> new TableOutputStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Table input').as('step').in('contains').has('name', T.eq, 'merge_join').back('step')" )
-  TableInputStepNode getTableInputStepNode();
+  public TableOutputStepNode getTableOutputStepNode2() {
+    return getTransformationStepNode( "Populate Table From File", "Demo table crime stats output [2]",
+      v -> new TableOutputStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq,  stepName).as('step').in('contains').has('name', T.eq, transformationName).back('step')" )
-  TextFileOutputStepNode getTextFileOutputStepNode(
-    @GremlinParam( "transformationName" ) String transformationName,
-    @GremlinParam( "stepName" ) String stepName );
+  public TableInputStepNode getTableInputStepNode() {
+    return getTransformationStepNode( "merge_join", "Table input", v -> new TableInputStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Merge Join').as('step').in('contains').has('name', T.eq, 'merge_join').back('step')" )
-  MergeJoinStepNode getMergeJoinStepNode();
+  public TextFileOutputStepNode getTextFileOutputStepNode( String transformationName, String stepName ) {
+    return getTransformationStepNode( transformationName, stepName, v -> new TextFileOutputStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq,  'Stream lookup').as('step').in('contains').has('name', T.eq, 'stream_lookup').back('step')" )
-  StreamLookupStepNode getStreamLookupStepNode();
+  public MergeJoinStepNode getMergeJoinStepNode() {
+    return getTransformationStepNode( "merge_join", "Merge Join", v -> new MergeJoinStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Calculator').as('step').in('contains').has('name', T.eq, 'calculator').back('step')" )
-  CalculatorStepNode getCalculatorStepNode();
+  public StreamLookupStepNode getStreamLookupStepNode() {
+    return getTransformationStepNode( "stream_lookup", "Stream lookup", v -> new StreamLookupStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'CSV file input').as('step').in('contains').has('name', T.eq, 'CSV Input').back('step')" )
-  CsvFileInputStepNode getCsvFileInputStepNode();
+  public CalculatorStepNode getCalculatorStepNode() {
+    return getTransformationStepNode( "calculator", "Calculator", v -> new CalculatorStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Group by').as('step').in('contains').has('name', T.eq, 'group_by').back('step')" )
-  GroupByStepNode getGroupByStepNode();
+  public CsvFileInputStepNode getCsvFileInputStepNode() {
+    return getTransformationStepNode( "CSV Input", "CSV file input", v -> new CsvFileInputStepNode( v, graph ) );
+  }
 
+  public GroupByStepNode getGroupByStepNode() {
+    return getTransformationStepNode( "group_by", "Group by", v -> new GroupByStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, stepName).as('step').in('contains').has('name', T.eq, 'splitFields').back('step')" )
-  SplitFieldsStepNode getSplitFieldsStepNodeByName( @GremlinParam( "stepName" ) String stepName );
+  public SplitFieldsStepNode getSplitFieldsStepNodeByName( String stepName ) {
+    return getTransformationStepNode( "splitFields", stepName, v -> new SplitFieldsStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Transformation Executor').as('step').in('contains').has('name', T.eq, 'trans-executor-parent').back('step')" )
-  TransExecutorStepNode getTransExecutorStepNode();
+  public TransExecutorStepNode getTransExecutorStepNode() {
+    return getTransformationStepNode( "trans-executor-parent", "Transformation Executor",
+      v -> new TransExecutorStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Copy rows to result').as('step').in('contains').has('name', T.eq, 'trans-executor-child').back('step')" )
-  RowsToResultStepNode getRowsToResultStepNode();
+  public RowsToResultStepNode getRowsToResultStepNode() {
+    return getTransformationStepNode( "trans-executor-child", "Copy rows to result",
+      v -> new RowsToResultStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'Fixed file input').as('step').in('contains').has('name', T.eq, 'fixed_file_input').back('step')" )
-  FixedFileInputStepNode getFixedFileInputStepNode();
+  public FixedFileInputStepNode getFixedFileInputStepNode() {
+    return getTransformationStepNode( "fixed_file_input", "Fixed file input",
+      v -> new FixedFileInputStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, name).as('step').in('contains').has('name', T.eq, 'get_xml_data').back('step')" )
-  GetXMLDataStepNode getGetXMLDataStepNode( @GremlinParam( "name" ) String name );
+  public GetXMLDataStepNode getGetXMLDataStepNode( String name ) {
+    return getTransformationStepNode( "get_xml_data", name, v -> new GetXMLDataStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.loop(1){it.loops < 20}{it.object.type == 'Transformation Step' && it.object.name == name}.as('step').in('contains').has('name', T.eq, 'filter_rows').back('step')" )
-  FilterRowsStepNode getFilterRowsStepNode( @GremlinParam( "name" ) String name );
+  public FilterRowsStepNode getFilterRowsStepNode( String name ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() )
+      .repeat( __.out() )
+      .emit( __.has( "type", "Transformation Step" ).has( "name", name ) )
+      .until( __.loops().is( P.gte( 20 ) ) )
+      .as( "step" ).in( "contains" ).has( "name", "filter_rows" ).select( "step" )
+      .toList();
+    return result.isEmpty() ? null : new FilterRowsStepNode( result.get( 0 ), graph );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'HTTP Client').as('step').in('contains').has('name', T.eq, 'HTTP_client').back('step')" )
-  HttpClientStepNode getHttpClientStepNode();
+  public HttpClientStepNode getHttpClientStepNode() {
+    return getTransformationStepNode( "HTTP_client", "HTTP Client", v -> new HttpClientStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'HTTP Client').as('step').in('contains').has('name', T.eq, 'HTTP_client - url from field').back('step')" )
-  HttpClientStepNode getHttpClientStepNode_urlFromField();
+  public HttpClientStepNode getHttpClientStepNode_urlFromField() {
+    return getTransformationStepNode( "HTTP_client - url from field", "HTTP Client",
+      v -> new HttpClientStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'HTTP Post').as('step').in('contains').has('name', T.eq, 'HTTP_Post').back('step')" )
-  HttpPostStepNode getHttpPostStepNode();
+  public HttpPostStepNode getHttpPostStepNode() {
+    return getTransformationStepNode( "HTTP_Post", "HTTP Post", v -> new HttpPostStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, 'HTTP Post').as('step').in('contains').has('name', T.eq, 'HTTP_Post - url from field').back('step')" )
-  HttpPostStepNode getHttpPostStepNode_urlFromField();
+  public HttpPostStepNode getHttpPostStepNode_urlFromField() {
+    return getTransformationStepNode( "HTTP_Post - url from field", "HTTP Post",
+      v -> new HttpPostStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out.has('name', T.eq, 'Transformation').out.has('name', T.eq, 'Transformation Step').out('typeconcept').has('name', T.eq, stepName).as('step').in('contains').has('name', T.eq, transformationName).back('step')" )
-  XMLOutputStepNode getXMLOutputStepNode(
-    @GremlinParam( "transformationName" ) String transformationName,
-    @GremlinParam( "stepName" ) String stepName );
+  public XMLOutputStepNode getXMLOutputStepNode( String transformationName, String stepName ) {
+    return getTransformationStepNode( transformationName, stepName, v -> new XMLOutputStepNode( v, graph ) );
+  }
 
+  private <T extends TransformationStepNode> T getTransformationStepNode( String transformationName, String stepName,
+                                                                          Function<Vertex, T> factory ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() )
+      .out().has( "name", "Transformation" )
+      .out().has( "name", "Transformation Step" )
+      .out( "typeconcept" ).has( "name", stepName )
+      .as( "step" ).in( "contains" ).has( "name", transformationName ).select( "step" )
+      .toList();
+    return result.isEmpty() ? null : factory.apply( result.get( 0 ) );
+  }
 }

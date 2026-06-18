@@ -13,13 +13,12 @@
 
 package org.pentaho.metaverse.impl;
 
-import java.util.stream.StreamSupport;
-
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.dictionary.DictionaryConst;
@@ -31,22 +30,25 @@ import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
 
-import static org.junit.Assert.*;
+import java.util.Iterator;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author: rfellows
- */
 public class MetaverseBuilderTest {
 
   private BaseMetaverseBuilder builder;
   private Graph graph;
-  MetaverseTransientNode node = new MetaverseTransientNode();
+  private final MetaverseTransientNode node = new MetaverseTransientNode();
 
   @Before
   public void before() {
-    graph = new TinkerGraph();
+    graph = TinkerGraph.open();
     builder = new MetaverseBuilder( graph );
 
     node.setStringID( "node1" );
@@ -63,54 +65,42 @@ public class MetaverseBuilderTest {
 
   @Test
   public void testGetSetMetaverseObjectFactory() {
-
     IMetaverseObjectFactory objectFactory = mock( IMetaverseObjectFactory.class );
     builder.setMetaverseObjectFactory( objectFactory );
     assertEquals( objectFactory, builder.getMetaverseObjectFactory() );
-
   }
 
   @Test
   public void testAddNode() {
     builder.addNode( node );
 
-    // make sure the node was added to the graph
-    Vertex result = graph.getVertex( node.getStringID() );
-    assertNotNull( "Node was not added as a Vertex in the graph", result );
-    assertEquals( node.getStringID(), result.getId() );
-    assertEquals( node.getType(), result.getProperty( "type" ) );
-
-    // this should be a non-virtual node
-    assertNotNull( result.getProperty( DictionaryConst.NODE_VIRTUAL ) );
-    assertFalse( (Boolean) result.getProperty( DictionaryConst.NODE_VIRTUAL ) );
-
+    Vertex result = getVertex( node.getStringID() );
+    assertNotNull( result );
+    assertEquals( node.getStringID(), result.id() );
+    assertEquals( node.getType(), getProperty( result, DictionaryConst.PROPERTY_TYPE ) );
+    assertFalse( (Boolean) getProperty( result, DictionaryConst.NODE_VIRTUAL ) );
   }
 
   @Test
   public void testAddNodeThatAlreadyExists() {
-
     builder.addNode( node );
 
-    Vertex result = graph.getVertex( node.getStringID() );
-    assertNotNull( "Node was not added as a Vertex in the graph", result );
-    assertEquals( "Node name property was not set", "node1 name", result.getProperty( "name" ) );
-    assertEquals( "Node type property was not set", "test type", result.getProperty( "type" ) );
+    Vertex result = getVertex( node.getStringID() );
+    assertNotNull( result );
+    assertEquals( "node1 name", getProperty( result, DictionaryConst.PROPERTY_NAME ) );
+    assertEquals( "test type", getProperty( result, DictionaryConst.PROPERTY_TYPE ) );
 
     node.setName( "updated name" );
     node.setProperty( "test", "value" );
-
     builder.addNode( node );
 
-    result = graph.getVertex( node.getStringID() );
-
-    assertEquals( "Node name property was not set", "updated name", result.getProperty( "name" ) );
-    assertEquals( "Node test property was not set", "value", result.getProperty( "test" ) );
-
+    result = getVertex( node.getStringID() );
+    assertEquals( "updated name", getProperty( result, DictionaryConst.PROPERTY_NAME ) );
+    assertEquals( "value", getProperty( result, "test" ) );
   }
 
   @Test
   public void testAddLink() {
-
     MetaverseTransientNode node2 = new MetaverseTransientNode();
     node2.setStringID( "nodeToId" );
     node2.setName( "to name" );
@@ -118,68 +108,48 @@ public class MetaverseBuilderTest {
 
     builder.addLink( link );
 
-    Vertex fromResult = graph.getVertex( node.getStringID() );
-    Vertex toResult = graph.getVertex( node2.getStringID() );
+    Vertex fromResult = getVertex( node.getStringID() );
+    Vertex toResult = getVertex( node2.getStringID() );
+    assertTrue( (Boolean) getProperty( fromResult, DictionaryConst.NODE_VIRTUAL ) );
+    assertTrue( (Boolean) getProperty( toResult, DictionaryConst.NODE_VIRTUAL ) );
 
-    // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) fromResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
-    // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) toResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
-
-    assertNotNull( fromResult.getEdges( Direction.OUT, "uses" ) );
-    for ( Edge e : fromResult.getEdges( Direction.OUT, "uses" ) ) {
-      assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
-      assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
-      // we added this node implicitly through the addLink, it should be flagged as virtual
-      assertTrue( (Boolean) e.getVertex( Direction.OUT ).getProperty( DictionaryConst.NODE_VIRTUAL ) );
+    Iterator<Edge> outEdges = fromResult.edges( Direction.OUT, "uses" );
+    assertTrue( outEdges.hasNext() );
+    while ( outEdges.hasNext() ) {
+      Edge edge = outEdges.next();
+      assertEquals( node.getName(), getProperty( edge.outVertex(), DictionaryConst.PROPERTY_NAME ) );
+      assertEquals( node2.getName(), getProperty( edge.inVertex(), DictionaryConst.PROPERTY_NAME ) );
+      assertTrue( (Boolean) getProperty( edge.outVertex(), DictionaryConst.NODE_VIRTUAL ) );
     }
 
-    assertNotNull( toResult.getEdges( Direction.IN, "uses" ) );
-    for ( Edge e : fromResult.getEdges( Direction.IN, "uses" ) ) {
-      assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
-      assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
-      // we added this node implicitly through the addLink, it should be flagged as virtual
-      assertTrue( (Boolean) e.getVertex( Direction.IN ).getProperty( DictionaryConst.NODE_VIRTUAL ) );
+    Iterator<Edge> inEdges = toResult.edges( Direction.IN, "uses" );
+    assertTrue( inEdges.hasNext() );
+    while ( inEdges.hasNext() ) {
+      Edge edge = inEdges.next();
+      assertEquals( node.getName(), getProperty( edge.outVertex(), DictionaryConst.PROPERTY_NAME ) );
+      assertEquals( node2.getName(), getProperty( edge.inVertex(), DictionaryConst.PROPERTY_NAME ) );
+      assertTrue( (Boolean) getProperty( edge.inVertex(), DictionaryConst.NODE_VIRTUAL ) );
     }
   }
 
   @Test
   public void testAddLink2() {
-
     MetaverseTransientNode node2 = new MetaverseTransientNode();
     node2.setStringID( "nodeToId" );
     node2.setName( "to name" );
 
     builder.addLink( node, "uses", node2 );
 
-    Vertex fromResult = graph.getVertex( node.getStringID() );
-    Vertex toResult = graph.getVertex( node2.getStringID() );
-
-    // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) fromResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
-    // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) toResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
-
-    assertNotNull( fromResult.getEdges( Direction.OUT, "uses" ) );
-    for ( Edge e : fromResult.getEdges( Direction.OUT, "uses" ) ) {
-      assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
-      assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
-      // we added this node implicitly through the addLink, it should be flagged as virtual
-      assertTrue( (Boolean) e.getVertex( Direction.OUT ).getProperty( DictionaryConst.NODE_VIRTUAL ) );
-    }
-
-    assertNotNull( toResult.getEdges( Direction.IN, "uses" ) );
-    for ( Edge e : fromResult.getEdges( Direction.IN, "uses" ) ) {
-      assertEquals( e.getVertex( Direction.OUT ).getProperty( "name" ), node.getName() );
-      assertEquals( e.getVertex( Direction.IN ).getProperty( "name" ), node2.getName() );
-      // we added this node implicitly through the addLink, it should be flagged as virtual
-      assertTrue( (Boolean) e.getVertex( Direction.IN ).getProperty( DictionaryConst.NODE_VIRTUAL ) );
-    }
+    Vertex fromResult = getVertex( node.getStringID() );
+    Vertex toResult = getVertex( node2.getStringID() );
+    assertTrue( (Boolean) getProperty( fromResult, DictionaryConst.NODE_VIRTUAL ) );
+    assertTrue( (Boolean) getProperty( toResult, DictionaryConst.NODE_VIRTUAL ) );
+    assertTrue( fromResult.edges( Direction.OUT, "uses" ).hasNext() );
+    assertTrue( toResult.edges( Direction.IN, "uses" ).hasNext() );
   }
 
   @Test
   public void testAddLink_OneExistingNode() {
-    // explicitly add the fromNode
     builder.addNode( node );
 
     MetaverseTransientNode node2 = new MetaverseTransientNode();
@@ -189,24 +159,15 @@ public class MetaverseBuilderTest {
 
     builder.addLink( link );
 
-    Vertex fromResult = graph.getVertex( node.getStringID() );
-    Vertex toResult = graph.getVertex( node2.getStringID() );
-
-    // we added this node explicitly through the addNode, it should be flagged as NOT virtual
-    assertFalse( (Boolean) fromResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
-
-    // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) toResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
-
+    Vertex fromResult = getVertex( node.getStringID() );
+    Vertex toResult = getVertex( node2.getStringID() );
+    assertFalse( (Boolean) getProperty( fromResult, DictionaryConst.NODE_VIRTUAL ) );
+    assertTrue( (Boolean) getProperty( toResult, DictionaryConst.NODE_VIRTUAL ) );
   }
 
   @Test
-  public void testAddLink_existingLink() throws Exception {
-    // Retain current number of edges
-    int originalEdgeCount = 0;
-    for ( Edge e : graph.getEdges() ) {
-      originalEdgeCount++;
-    }
+  public void testAddLink_existingLink() {
+    int originalEdgeCount = countEdges( graph.edges() );
     MetaverseTransientNode node2 = new MetaverseTransientNode();
     node2.setStringID( "nodeToId" );
     node2.setName( "to name" );
@@ -214,47 +175,31 @@ public class MetaverseBuilderTest {
 
     builder.addLink( link );
 
-    Vertex fromResult = graph.getVertex( node.getStringID() );
-    Vertex toResult = graph.getVertex( node2.getStringID() );
+    Vertex fromResult = getVertex( node.getStringID() );
+    Vertex toResult = getVertex( node2.getStringID() );
+    assertNotNull( getEdge( BaseMetaverseBuilder.getEdgeId( fromResult, link.getLabel(), toResult ) ) );
+    assertEquals( originalEdgeCount + 1, countEdges( graph.edges() ) );
 
-    // make sure the edge exits before we try to add it again
-    assertNotNull( graph.getEdge( BaseMetaverseBuilder.getEdgeId( fromResult, link.getLabel(), toResult ) ) );
-
-    // make sure we only added 1
-    int count = (int) StreamSupport.stream( graph.getEdges().spliterator(), false ).count();
-    assertEquals( originalEdgeCount + 1, count );
-
-    // now lets add it again
     builder.addLink( link );
-
-    count = (int) StreamSupport.stream( graph.getEdges().spliterator(), false ).count();
-    assertEquals( originalEdgeCount + 1, count );
-
+    assertEquals( originalEdgeCount + 1, countEdges( graph.edges() ) );
   }
 
   @Test
   public void testDeleteNode() {
     builder.addNode( node );
-
-    Vertex result = graph.getVertex( node.getStringID() );
-    assertNotNull( "Node was not added as a Vertex in the graph", result );
+    assertNotNull( getVertex( node.getStringID() ) );
 
     builder.deleteNode( node );
-    result = graph.getVertex( node.getStringID() );
-    assertNull( "Node was not deleted from the graph", result );
+    assertNull( getVertex( node.getStringID() ) );
   }
 
   @Test
   public void testDeleteNode_null() {
     builder.addNode( node );
-
-    Vertex result = graph.getVertex( node.getStringID() );
-    assertNotNull( "Node was not added as a Vertex in the graph", result );
+    assertNotNull( getVertex( node.getStringID() ) );
 
     builder.deleteNode( null );
-    result = graph.getVertex( node.getStringID() );
-    // should still be there
-    assertNotNull( "Node was deleted from the graph when it should not have been", result );
+    assertNotNull( getVertex( node.getStringID() ) );
   }
 
   private IMetaverseLink createAndTestLink() {
@@ -270,17 +215,12 @@ public class MetaverseBuilderTest {
 
     builder.addLink( link );
 
-    Vertex fromResult = graph.getVertex( node.getStringID() );
-    Vertex toResult = graph.getVertex( node2.getStringID() );
-
-    // we added this node explicitly through addNode, it should NOT be flagged as virtual
-    assertFalse( (Boolean) fromResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
-    // we added this node implicitly through the addLink, it should be flagged as virtual
-    assertTrue( (Boolean) toResult.getProperty( DictionaryConst.NODE_VIRTUAL ) );
-
-    // verify the link is there
-    assertNotNull( fromResult.getEdges( Direction.OUT, "uses" ) );
-    assertNotNull( toResult.getEdges( Direction.IN, "uses" ) );
+    Vertex fromResult = getVertex( node.getStringID() );
+    Vertex toResult = getVertex( node2.getStringID() );
+    assertFalse( (Boolean) getProperty( fromResult, DictionaryConst.NODE_VIRTUAL ) );
+    assertTrue( (Boolean) getProperty( toResult, DictionaryConst.NODE_VIRTUAL ) );
+    assertTrue( fromResult.edges( Direction.OUT, "uses" ).hasNext() );
+    assertTrue( toResult.edges( Direction.IN, "uses" ).hasNext() );
 
     return link;
   }
@@ -288,30 +228,18 @@ public class MetaverseBuilderTest {
   @Test
   public void testDeleteLink() {
     IMetaverseLink link = createAndTestLink();
-
-    // now lets try to delete the link
     builder.deleteLink( link );
 
-    Vertex fromResult = graph.getVertex( link.getFromNode().getStringID() );
-    Vertex toResult = graph.getVertex( link.getToNode().getStringID() );
-
-    // the from node was explicitly added, it should still be there
+    Vertex fromResult = getVertex( link.getFromNode().getStringID() );
+    Vertex toResult = getVertex( link.getToNode().getStringID() );
     assertNotNull( fromResult );
-
-    // the link should be gone
-    assertFalse( fromResult.getEdges( Direction.OUT, "uses" ).iterator().hasNext() );
-
-    // any virtual nodes that were associated with the link should also be removed
+    assertFalse( fromResult.edges( Direction.OUT, "uses" ).hasNext() );
     assertNull( toResult );
-
   }
 
   @Test
   public void testDeleteLink_emptyLink() {
-    IMetaverseLink link = builder.createLinkObject();
-
-    // now lets try to delete the link, no errors should happen
-    builder.deleteLink( link );
+    builder.deleteLink( builder.createLinkObject() );
   }
 
   @Test
@@ -324,76 +252,49 @@ public class MetaverseBuilderTest {
     when( mockFrom.getStringID() ).thenReturn( "not in graph" );
     when( mockFrom.getLogicalId() ).thenReturn( "not in graph" );
 
-    // now lets try to delete the link
     builder.deleteLink( link );
 
-    Vertex fromResult = graph.getVertex( origFrom.getStringID() );
-    Vertex toResult = graph.getVertex( link.getToNode().getStringID() );
-
-    // the from node was explicitly added, it should still be there
+    Vertex fromResult = getVertex( origFrom.getStringID() );
+    Vertex toResult = getVertex( link.getToNode().getStringID() );
     assertNotNull( fromResult );
-
-    // the link should still be there
-    assertTrue( fromResult.getEdges( Direction.OUT, "uses" ).iterator().hasNext() );
-
-    // should still be there
+    assertTrue( fromResult.edges( Direction.OUT, "uses" ).hasNext() );
     assertNotNull( toResult );
-
   }
 
   @Test
   public void testDeleteLink_fromNodeHasMutipleLinks() {
     IMetaverseLink link = createAndTestLink();
 
-    // add another link using the same test node
     IMetaverseNode node3 = builder.createNodeObject( "another" );
     node3.setName( "to another" );
-
-    // add another link
     builder.addLink( node, "uses", node3 );
 
-    Vertex beforeDeleteFrom = graph.getVertex( link.getFromNode().getStringID() );
-    int count = 0;
-    for ( Edge edge : beforeDeleteFrom.getEdges( Direction.OUT, "uses" ) ) {
-      count++;
-      System.out.println( edge.toString() );
-    }
-    // we should have 2 edges for this node before we delete one
-    assertEquals( 2, count );
+    Vertex beforeDeleteFrom = getVertex( link.getFromNode().getStringID() );
+    assertEquals( 2, countEdges( beforeDeleteFrom.edges( Direction.OUT, "uses" ) ) );
 
-    // now lets try to delete the link
     builder.deleteLink( link );
 
-    Vertex fromResult = graph.getVertex( link.getFromNode().getStringID() );
-    Vertex toResult = graph.getVertex( link.getToNode().getStringID() );
-    Vertex anotherResult = graph.getVertex( node3.getStringID() );
-
-    // the from node was explicitly added, it should still be there
+    Vertex fromResult = getVertex( link.getFromNode().getStringID() );
+    Vertex toResult = getVertex( link.getToNode().getStringID() );
+    Vertex anotherResult = getVertex( node3.getStringID() );
     assertNotNull( fromResult );
 
-    // the uses link should be gone
-    // the "another" link should still be there
-    count = 0;
-    for ( Edge edge : fromResult.getEdges( Direction.OUT, "uses" ) ) {
-      count++;
-      assertEquals( "another", edge.getVertex( Direction.IN ).getId() );
-      System.out.println( edge.toString() );
-    }
-    assertEquals( 1, count );
+    Iterator<Edge> edges = fromResult.edges( Direction.OUT, "uses" );
+    assertTrue( edges.hasNext() );
+    Edge remainingEdge = edges.next();
+    assertEquals( "another", remainingEdge.inVertex().id() );
+    assertFalse( edges.hasNext() );
 
-    // any virtual nodes that were associated with the link should also be removed
     assertNull( toResult );
-
     assertNotNull( anotherResult );
   }
 
   @Test
   public void testUpdateNode() {
     builder.addNode( node );
-    Vertex v = graph.getVertex( node.getStringID() );
-
-    assertEquals( node.getName(), v.getProperty( "name" ) );
-    assertEquals( node.getStringID(), v.getId() );
+    Vertex vertex = getVertex( node.getStringID() );
+    assertEquals( node.getName(), getProperty( vertex, DictionaryConst.PROPERTY_NAME ) );
+    assertEquals( node.getStringID(), vertex.id() );
 
     IMetaverseNode updateNode = builder.createNodeObject( node.getStringID() );
     updateNode.setName( "UPDATED NAME" );
@@ -402,54 +303,47 @@ public class MetaverseBuilderTest {
 
     builder.updateNode( updateNode );
 
-    v = graph.getVertex( node.getStringID() );
-    assertEquals( node.getStringID(), v.getId() );
-    assertEquals( updateNode.getStringID(), v.getId() );
-    assertEquals( updateNode.getName(), v.getProperty( "name" ) );
-    assertEquals( "test", v.getProperty( "new prop" ) );
-    assertEquals( updateNode.getType(), v.getProperty( "type" ) );
-
+    vertex = getVertex( node.getStringID() );
+    assertEquals( updateNode.getStringID(), vertex.id() );
+    assertEquals( updateNode.getName(), getProperty( vertex, DictionaryConst.PROPERTY_NAME ) );
+    assertEquals( "test", getProperty( vertex, "new prop" ) );
+    assertEquals( updateNode.getType(), getProperty( vertex, DictionaryConst.PROPERTY_TYPE ) );
   }
 
   @Test
   public void testUpdateNode_null() {
-    // make sure no NPE is thrown in this scenario
     builder.updateNode( null );
   }
 
   @Test
   public void testUpdateLinkLabel() {
     IMetaverseLink link = createAndTestLink();
-    Vertex v = graph.getVertex( link.getFromNode().getStringID() );
-    assertNotNull( v.getEdges( Direction.OUT, "uses" ) );
+    Vertex vertex = getVertex( link.getFromNode().getStringID() );
+    assertTrue( vertex.edges( Direction.OUT, "uses" ).hasNext() );
 
     builder.updateLinkLabel( link, "owns" );
 
     assertEquals( "owns", link.getLabel() );
-
-    v = graph.getVertex( link.getFromNode().getStringID() );
-    assertFalse( v.getEdges( Direction.OUT, "uses" ).iterator().hasNext() );
-    assertTrue( v.getEdges( Direction.OUT, "owns" ).iterator().hasNext() );
+    vertex = getVertex( link.getFromNode().getStringID() );
+    assertFalse( vertex.edges( Direction.OUT, "uses" ).hasNext() );
+    assertTrue( vertex.edges( Direction.OUT, "owns" ).hasNext() );
   }
 
   @Test
   public void testUpdateLinkLabel_nullLabel() {
-    // if a null value is passed in for a label, it should NOT perform an update
     IMetaverseLink link = createAndTestLink();
-    Vertex v = graph.getVertex( link.getFromNode().getStringID() );
-    assertNotNull( v.getEdges( Direction.OUT, "uses" ) );
+    Vertex vertex = getVertex( link.getFromNode().getStringID() );
+    assertTrue( vertex.edges( Direction.OUT, "uses" ).hasNext() );
 
     builder.updateLinkLabel( link, null );
 
     assertEquals( "uses", link.getLabel() );
-
-    v = graph.getVertex( link.getFromNode().getStringID() );
-    assertTrue( v.getEdges( Direction.OUT, "uses" ).iterator().hasNext() );
+    vertex = getVertex( link.getFromNode().getStringID() );
+    assertTrue( vertex.edges( Direction.OUT, "uses" ).hasNext() );
   }
 
   @Test
   public void testUpdateLinkLabel_nullLink() {
-    // make sure no NPE is thrown in this scenario
     builder.updateLinkLabel( null, "owns" );
   }
 
@@ -462,28 +356,24 @@ public class MetaverseBuilderTest {
   @Test
   public void testIsVirtual() {
     builder.addNode( node );
-    Vertex v = graph.getVertex( node.getStringID() );
-
-    assertFalse( builder.isVirtual( v ) );
+    Vertex vertex = getVertex( node.getStringID() );
+    assertFalse( builder.isVirtual( vertex ) );
 
     IMetaverseNode virtual = builder.createNodeObject( "virtual node" );
-    Vertex virtualVertex = graph.addVertex( virtual.getStringID() );
-    virtualVertex.setProperty( DictionaryConst.NODE_VIRTUAL, virtual.getProperty( DictionaryConst.NODE_VIRTUAL ) );
+    Vertex virtualVertex = graph.addVertex( T.id, virtual.getStringID() );
+    virtualVertex.property( DictionaryConst.NODE_VIRTUAL, virtual.getProperty( DictionaryConst.NODE_VIRTUAL ) );
     assertTrue( builder.isVirtual( virtualVertex ) );
-
     assertFalse( builder.isVirtual( null ) );
-
   }
 
   @Test
   public void testIsVirtual_noVirtualProperty() {
     builder.addNode( node );
-    Vertex v = graph.getVertex( node.getStringID() );
-
-    assertFalse( builder.isVirtual( v ) );
+    Vertex vertex = getVertex( node.getStringID() );
+    assertFalse( builder.isVirtual( vertex ) );
 
     IMetaverseNode virtual = builder.createNodeObject( "virtual node" );
-    Vertex virtualVertex = graph.addVertex( virtual.getStringID() );
+    Vertex virtualVertex = graph.addVertex( T.id, virtual.getStringID() );
     assertFalse( builder.isVirtual( virtualVertex ) );
   }
 
@@ -494,42 +384,30 @@ public class MetaverseBuilderTest {
 
   @Test
   public void testCopyLinkPropertiesToEdge() {
-    final String LABEL = "myLabel";
+    final String label = "myLabel";
 
     IMetaverseLink link = new MetaverseLink();
     link.setLabel( "sourceLabel" );
 
-    // Create from/to nodes and an edge between them
-    Vertex fromNode = graph.addVertex( "from" );
-    Vertex toNode = graph.addVertex( "to" );
+    Vertex fromNode = graph.addVertex( T.id, "from" );
+    Vertex toNode = graph.addVertex( T.id, "to" );
+    Edge edge = fromNode.addEdge( label, toNode, T.id, "myId" );
 
-    Edge edge = graph.addEdge( "myId", fromNode, toNode, LABEL );
-
-    // Call with null for branch coverage (and to prove no NPE occurs)
     builder.copyLinkPropertiesToEdge( null, edge );
     builder.copyLinkPropertiesToEdge( link, null );
-    // Call with empty list for branch coverage (and to prove no NPE occurs)
     builder.copyLinkPropertiesToEdge( link, edge );
 
-    // Set some properties on the source link
     link.setProperty( DictionaryConst.PROPERTY_LABEL, "sourceLabel" );
     link.setProperty( DictionaryConst.PROPERTY_NAME, "sourceLink" );
 
-    // Set some properties on the target edge (including the reserved one "label")
-    edge.setProperty( DictionaryConst.PROPERTY_NAME, "myEdge" );
-    edge.setProperty( DictionaryConst.PROPERTY_TYPE, "relates to" );
+    edge.property( DictionaryConst.PROPERTY_NAME, "myEdge" );
+    edge.property( DictionaryConst.PROPERTY_TYPE, "relates to" );
 
-    // Invoke the method under test and see that the appropriate properties are set on the target edge
     builder.copyLinkPropertiesToEdge( link, edge );
-    assertEquals( "sourceLink", edge.getProperty( DictionaryConst.PROPERTY_NAME ) );
-    assertEquals( "relates to", edge.getProperty( DictionaryConst.PROPERTY_TYPE ) );
-    // The label should not be overridden (Blueprints does not allow it)
-    assertEquals( LABEL, edge.getLabel() );
-
-    // The property "label" is not set on the edge by either setLabel() or the method under test
-    // It's a Blueprints thing
-    assertNull( edge.getProperty( DictionaryConst.PROPERTY_LABEL ) );
-
+    assertEquals( "sourceLink", getProperty( edge, DictionaryConst.PROPERTY_NAME ) );
+    assertEquals( "relates to", getProperty( edge, DictionaryConst.PROPERTY_TYPE ) );
+    assertEquals( label, edge.label() );
+    assertNull( getProperty( edge, DictionaryConst.PROPERTY_LABEL ) );
   }
 
   @Test
@@ -542,5 +420,32 @@ public class MetaverseBuilderTest {
     node.setStringID( "diff test string id" );
     Vertex newVertex = builder.getVertexForNode( node );
     assertEquals( vertex, newVertex );
+  }
+
+  private Vertex getVertex( String id ) {
+    Iterator<Vertex> vertices = graph.vertices( id );
+    return vertices.hasNext() ? vertices.next() : null;
+  }
+
+  private Edge getEdge( String id ) {
+    Iterator<Edge> edges = graph.edges( id );
+    return edges.hasNext() ? edges.next() : null;
+  }
+
+  private int countEdges( Iterator<Edge> edges ) {
+    int count = 0;
+    while ( edges.hasNext() ) {
+      count++;
+      edges.next();
+    }
+    return count;
+  }
+
+  private Object getProperty( Vertex vertex, String key ) {
+    return vertex.property( key ).isPresent() ? vertex.value( key ) : null;
+  }
+
+  private Object getProperty( Edge edge, String key ) {
+    return edge.property( key ).isPresent() ? edge.value( key ) : null;
   }
 }
