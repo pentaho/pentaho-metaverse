@@ -13,21 +13,29 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
 
 /**
  * Created by rfellows on 5/29/15.
  */
-public interface DatabaseQueryNode extends FramedMetaverseNode {
-  @Adjacency( label = "isreadby", direction = Direction.OUT )
-  public Iterable<TransformationStepNode> getStepNodes();
+public class DatabaseQueryNode extends Concept {
+  public DatabaseQueryNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Adjacency( label = "contains", direction = Direction.OUT )
-  public Iterable<DatabaseColumnNode> getDatabaseColumns();
+  public List<TransformationStepNode> getStepNodes() {
+    return wrapAs( vertex.vertices( Direction.OUT, "isreadby" ), v -> new TransformationStepNode( v, graph ) );
+  }
 
-  @Property( "query" )
-  public String getQuery();
+  public List<DatabaseColumnNode> getDatabaseColumns() {
+    return wrapAs( vertex.vertices( Direction.OUT, "contains" ), v -> new DatabaseColumnNode( v, graph ) );
+  }
 
+  public String getQuery() {
+    return getStringValue( "query" );
+  }
 }

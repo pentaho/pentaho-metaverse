@@ -57,8 +57,8 @@ public class TableOutputValidationIT extends StepAnalyzerValidationIT {
 
     // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
     // level nodes of expected types exist
-    assertEquals( 26, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( 62, getIterableSize( framedGraph.getEdges() ) );
+    assertEquals( 26, getIterableSize( getVertices() ) );
+    assertEquals( 62, getIterableSize( getEdges() ) );
     verifyNodesTypes( ImmutableMap.of(
       NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName } ),
       NODE_TYPE_DATASOURCE, Arrays.asList( new String[] { "Postgres - localhost" } ),
@@ -144,8 +144,8 @@ public class TableOutputValidationIT extends StepAnalyzerValidationIT {
 
     // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
     // level nodes of expected types exist
-    assertEquals( 28, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( 69, getIterableSize( framedGraph.getEdges() ) );
+    assertEquals( 28, getIterableSize( getVertices() ) );
+    assertEquals( 69, getIterableSize( getEdges() ) );
     verifyNodesTypes( ImmutableMap.of(
       NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName } ),
       NODE_TYPE_DATASOURCE, Arrays.asList( new String[] { "Postgres - localhost" } ),

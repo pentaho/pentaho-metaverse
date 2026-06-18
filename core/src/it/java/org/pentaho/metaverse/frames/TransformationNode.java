@@ -13,23 +13,39 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface TransformationNode extends KettleNode {
-  @GremlinGroovy( "it.out('contains').hasNot('virtual', true)" )
-  Iterable<TransformationStepNode> getStepNodes();
+public class TransformationNode extends KettleNode {
+  public TransformationNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @GremlinGroovy( "it.out('contains').has('virtual', true)" )
-  Iterable<TransformationStepNode> getVirtualStepNodes();
+  public List<TransformationStepNode> getStepNodes() {
+    List<Vertex> result = graph.traversal().V( vertex.id() ).out( "contains" )
+      .filter( tv -> !Boolean.TRUE.equals(
+        tv.get().property( "virtual" ).isPresent() ? tv.get().<Boolean>value( "virtual" ) : null ) )
+      .toList();
+    return wrapAs( result.iterator(), v -> new TransformationStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.out('contains').has( 'name', T.eq, name )" )
-  TransformationStepNode getStepNode( @GremlinParam( "name" ) String name );
+  public List<TransformationStepNode> getVirtualStepNodes() {
+    return wrapAs( graph.traversal().V( vertex.id() ).out( "contains" ).has( "virtual", true ).toList().iterator(),
+      v -> new TransformationStepNode( v, graph ) );
+  }
 
-  @GremlinGroovy( "it.in('contains').has( 'type', T.eq, 'JobEntry' )" )
-  Iterable<JobEntryNode> getJobEntriesThatExecuteMe();
+  public TransformationStepNode getStepNode( String name ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() ).out( "contains" ).has( "name", name ).toList();
+    return result.isEmpty() ? null : new TransformationStepNode( result.get( 0 ), graph );
+  }
+
+  public List<JobEntryNode> getJobEntriesThatExecuteMe() {
+    List<Vertex> result = graph.traversal().V( vertex.id() ).in( "contains" ).has( "type", "JobEntry" ).toList();
+    return wrapAs( result.iterator(), v -> new JobEntryNode( v, graph ) );
+  }
 }
-

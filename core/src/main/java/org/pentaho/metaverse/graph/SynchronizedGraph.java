@@ -13,8 +13,7 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.KeyIndexableGraph;
-import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.pentaho.metaverse.api.model.BaseSynchronizedGraph;
 
 /**
@@ -26,7 +25,7 @@ public class SynchronizedGraph extends BaseSynchronizedGraph {
    * Creates a new synchronized graph
    * @param graph The underlying graph
    */
-  public SynchronizedGraph( IdGraph<KeyIndexableGraph> graph ) {
+  public SynchronizedGraph( TinkerGraph graph ) {
     super( graph );
   }
 }

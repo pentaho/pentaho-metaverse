@@ -13,31 +13,34 @@
 
 package org.pentaho.metaverse.impl;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Vertex;
-import org.junit.After;
-import org.junit.AfterClass;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mock;
+import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.ILogicalIdGenerator;
 import org.pentaho.metaverse.api.MetaverseLogicalIdGenerator;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -45,321 +48,290 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author mburgess
- * 
- */
 public class MetaverseNodeTest {
 
-  MetaverseNode node;
+  private MetaverseNode node;
+  private Vertex v;
+  private Vertex v2;
 
-  @Mock
-  Vertex v;
-
-  @Mock
-  Vertex v2;
-
-  Map<String, Object> vertexProps;
-
-  /**
-   * @throws java.lang.Exception
-   */
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
-
-  /**
-   * @throws java.lang.Exception
-   */
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
-
-  /**
-   * @throws java.lang.Exception
-   */
   @Before
-  public void setUp() throws Exception {
-    v = (Vertex) mock( Vertex.class );
-    when( v.getId() ).thenReturn( "my.id" );
+  public void setUp() {
+    v = mock( Vertex.class );
+    v2 = mock( Vertex.class );
+    when( v.id() ).thenReturn( "my.id" );
     node = new MetaverseNode( v );
-  }
-
-  /**
-   * @throws java.lang.Exception
-   */
-  @After
-  public void tearDown() throws Exception {
   }
 
   @Test
   public void testGetName() {
+    VertexProperty<Object> property = missingProperty();
+    when( v.property( "name" ) ).thenReturn( property );
     assertNull( node.getName() );
-    verify( v, times( 1 ) ).getProperty( "name" );
+    verify( v ).property( "name" );
   }
 
   @Test
   public void testSetName() {
-    MetaverseNode myNode = new MetaverseNode( v );
-    when( v.getProperty( "name" ) ).thenReturn( "myName" );
-    myNode.setName( "myName" );
-    assertEquals( myNode.getName(), "myName" );
-    verify( v, times( 1 ) ).getProperty( "name" );
+    VertexProperty<Object> property = presentProperty( "myName" );
+    when( v.property( "name" ) ).thenReturn( property );
+    when( v.value( "name" ) ).thenReturn( "myName" );
+
+    node.setName( "myName" );
+
+    assertEquals( "myName", node.getName() );
+    verify( v ).property( "name", "myName" );
   }
 
   @Test
   public void testGetType() {
+    VertexProperty<Object> property = missingProperty();
+    when( v.property( "type" ) ).thenReturn( property );
     assertNull( node.getType() );
-    verify( v ).getProperty( "type" );
+    verify( v ).property( "type" );
   }
 
   @Test
   public void testSetType() {
-    MetaverseNode myNode = new MetaverseNode( v );
-    when( v.getProperty( "type" ) ).thenReturn( "myType" );
-    myNode.setType( "myType" );
-    assertEquals( myNode.getType(), "myType" );
-    verify( v, times( 1 ) ).getProperty( "type" );
+    VertexProperty<Object> property = presentProperty( "myType" );
+    when( v.property( "type" ) ).thenReturn( property );
+    when( v.value( "type" ) ).thenReturn( "myType" );
+
+    node.setType( "myType" );
+
+    assertEquals( "myType", node.getType() );
+    verify( v ).property( "type", "myType" );
+    verify( v ).property( eq( DictionaryConst.PROPERTY_CATEGORY ), any() );
   }
 
   @Test
   public void testGetStringID() {
-    when( v.getId() ).thenReturn( "my.id" );
-    assertNotNull( node.getStringID() );
-    verify( v, atLeastOnce() ).getId();
+    assertEquals( "my.id", node.getStringID() );
+    verify( v ).id();
   }
 
   @Test
   public void testGetID() {
-    when( v.getId() ).thenReturn( "my.id" );
-    assertNotNull( node.getId() );
-    verify( v, atLeastOnce() ).getId();
+    assertEquals( "my.id", node.getId() );
+    verify( v ).id();
   }
 
   @Test
   public void testGetStringID_null() {
-    when( v.getId() ).thenReturn( null );
+    when( v.id() ).thenReturn( null );
     assertNull( node.getStringID() );
-    verify( v ).getId();
+    verify( v ).id();
   }
 
   @Test
   public void testSetProperty() {
-    // verify delegate
     node.setProperty( "test", "test" );
-    verify( v ).setProperty( "test", "test" );
+    verify( v ).property( "test", "test" );
   }
 
   @Test
   public void testGetPropertyKeys() {
-    // verify delegate
-    when( v.getPropertyKeys() ).thenReturn( null );
-    node.getPropertyKeys();
-
-    verify( v ).getPropertyKeys();
+    when( v.keys() ).thenReturn( Collections.<String>emptySet() );
+    assertSame( Collections.<String>emptySet(), node.getPropertyKeys() );
+    verify( v ).keys();
   }
 
   @Test
   public void testRemoveProperty() {
-    // verify delegate
-    when( v.removeProperty( anyString() ) ).thenReturn( null );
-    node.removeProperty( "test" );
+    VertexProperty<Object> property = presentProperty( "value" );
+    when( v.property( "test" ) ).thenReturn( property );
+    when( v.value( "test" ) ).thenReturn( "value" );
 
-    verify( v ).removeProperty( "test" );
+    assertEquals( "value", node.removeProperty( "test" ) );
+    verify( property ).remove();
   }
 
   @Test
   public void testAddEdge() {
-    // verify delegate
-    when( v.addEdge( anyString(), any( Vertex.class ) ) ).thenReturn( null );
-    node.addEdge( "uses", v2 );
-
-    verify( v ).addEdge( "uses", v2 );
+    Edge edge = mock( Edge.class );
+    when( v.addEdge( "uses", v2 ) ).thenReturn( edge );
+    assertSame( edge, node.addEdge( "uses", v2 ) );
   }
 
   @Test
   public void testGetEdges() {
-    // verify delegate
-    when( v.getEdges( any( Direction.class ) ) ).thenReturn( null );
-    node.getEdges( Direction.BOTH );
-
-    verify( v ).getEdges( Direction.BOTH );
+    Iterator<Edge> edges = Collections.<Edge>emptyIterator();
+    when( v.edges( Direction.BOTH ) ).thenReturn( edges );
+    assertSame( edges, node.getEdges( Direction.BOTH ) );
   }
 
   @Test
   public void testGetVertices() {
-    // verify delegate
-    when( v.getVertices( any( Direction.class ), anyString() ) ).thenReturn( null );
-    node.getVertices( Direction.BOTH, "uses" );
-
-    verify( v ).getVertices( Direction.BOTH, "uses" );
-  }
-
-  @Test
-  public void testQuery() {
-    // verify delegate
-    when( v.query() ).thenReturn( null );
-    node.query();
-
-    verify( v ).query();
+    Iterator<Vertex> vertices = Collections.<Vertex>emptyIterator();
+    when( v.vertices( Direction.BOTH, "uses" ) ).thenReturn( vertices );
+    assertSame( vertices, node.getVertices( Direction.BOTH, "uses" ) );
   }
 
   @Test
   public void testRemove() {
-    // verify delegate
     node.remove();
     verify( v ).remove();
   }
 
   @Test
   public void testGetProperty() {
-    // verify delegate
-    when( v.getProperty( anyString() ) ).thenReturn( null );
-    node.getProperty( "test" );
-    verify( v ).getProperty( "test" );
+    VertexProperty<Object> property = presentProperty( "value" );
+    when( v.property( "test" ) ).thenReturn( property );
+    when( v.value( "test" ) ).thenReturn( "value" );
+    assertEquals( "value", node.getProperty( "test" ) );
   }
 
   @Test
-  public void testVertexDelegateCalls() {
-    // just test that we are delegating our calls to the underlying vertex (pass-through, called once)
-    when( v.getEdges( any( Direction.class ) ) ).thenReturn( null );
-    when( v.addEdge( anyString(), any( Vertex.class ) ) ).thenReturn( null );
-    when( v.getVertices( any( Direction.class ), anyString() ) ).thenReturn( null );
-    when( v.query() ).thenReturn( null );
-    when( v.getPropertyKeys() ).thenReturn( null );
-    when( v.getProperty( anyString() ) ).thenReturn( null );
-
-    node.getStringID();
-  }
-
-  @Test
-  public void testGetProperties() throws Exception {
-    Map<String, Object> props = new HashMap<String, Object>(){{
+  public void testGetProperties() {
+    Map<String, Object> props = new HashMap<String, Object>() {{
       put( "path", "/Users/home/admin" );
       put( "lastModified", new Date() );
     }};
+    mockProperties( props );
 
-    node.setProperties( props );
-    when( v.getPropertyKeys() ).thenReturn( props.keySet() );
     Map<String, Object> resultProps = node.getProperties();
-    assertEquals( props.size(), resultProps.size() );
-
-    for( String key : props.keySet() ) {
-      assertTrue( resultProps.containsKey( key ) );
-    }
+    assertEquals( props, resultProps );
   }
 
   @Test
-  public void testGetProperties_noProperyKeys() throws Exception {
-    when( v.getPropertyKeys() ).thenReturn( null );
+  public void testGetProperties_noPropertyKeys() {
+    when( v.keys() ).thenReturn( null );
     Map<String, Object> resultProps = node.getProperties();
-    assertEquals( 0, resultProps.size() );
+    assertTrue( resultProps.isEmpty() );
   }
 
   @Test
-  public void testGetProperties_withBaseVertex() throws Exception {
-
-    Map<String, Object> props = new HashMap<String, Object>();
-
-    vertexProps = new HashMap<String, Object>(){{
+  public void testGetProperties_withBaseVertex() {
+    Map<String, Object> props = new HashMap<String, Object>() {{
       put( "_NAME_", "name" );
     }};
-
-    when( v.getPropertyKeys() ).thenReturn( vertexProps.keySet() );
+    mockProperties( props );
 
     Map<String, Object> resultProps = node.getProperties();
-    assertEquals( vertexProps.size(), resultProps.size() );
-
-    for( String key : props.keySet() ) {
-      assertEquals( props.get( key ), resultProps.get( key ) );
-    }
+    assertEquals( props, resultProps );
   }
 
   @Test
-  public void testRemoveProperties() throws Exception {
-    Set<String> remove = new HashSet<String>() {{
+  public void testRemoveProperties() {
+    VertexProperty<Object> nameProperty = presentProperty( "name" );
+    VertexProperty<Object> ageProperty = presentProperty( "age" );
+    when( v.property( "name" ) ).thenReturn( nameProperty );
+    when( v.property( "age" ) ).thenReturn( ageProperty );
+
+    node.removeProperties( new HashSet<String>() {{
       add( "name" );
       add( "age" );
-    }};
-    node.removeProperties( remove );
-    verify( v ).removeProperty( eq( "name" ) );
-    verify( v ).removeProperty( eq( "age" ) ) ;
+    }} );
+
+    verify( nameProperty ).remove();
+    verify( ageProperty ).remove();
   }
 
   @Test
-  public void testremoveProperties_null() throws Exception {
+  public void testremoveProperties_null() {
     node.removeProperties( null );
-    verify( v, never() ).removeProperty( anyString() );
+    verify( v, never() ).property( anyString() );
   }
 
   @Test
-  public void testClearProperties() throws Exception {
-    Map<String, Object> props = new HashMap<String, Object>(){{
+  public void testClearProperties() {
+    Map<String, Object> props = new HashMap<String, Object>() {{
       put( "path", "/Users/home/admin" );
       put( "lastModified", new Date() );
     }};
-    when( v.getPropertyKeys() ).thenReturn( props.keySet() );
+    mockProperties( props );
 
-    node.setProperties( props );
     node.clearProperties();
 
     for ( String key : props.keySet() ) {
-      verify( v ).removeProperty( key );
+      verify( v, times( 2 ) ).property( key );
     }
   }
 
   @Test
-  public void testClearProperties_null() throws Exception {
+  public void testClearProperties_null() {
+    when( v.keys() ).thenReturn( null );
     node.clearProperties();
-    when( v.getPropertyKeys() ).thenReturn( null );
-    verify( v, never() ).removeProperty( anyString() );
+    verify( v, never() ).property( anyString(), any() );
   }
 
   @Test
-  public void testContainsKey() throws Exception {
-    node.containsKey( "test" );
-    verify( v ).getProperty( "test" );
+  public void testContainsKey() {
+    VertexProperty<Object> property = presentProperty( "value" );
+    when( v.property( "test" ) ).thenReturn( property );
+    when( v.value( "test" ) ).thenReturn( "value" );
+    assertTrue( node.containsKey( "test" ) );
   }
 
   @Test
-  public void testSetProperties_null() throws Exception {
+  public void testSetProperties_null() {
     node.setProperties( null );
-    verify( v, never() ).setProperty( anyString(), any() );
+    verify( v, never() ).property( anyString(), any() );
   }
 
   @Test
-  public void testSetProperties() throws Exception {
-    Map<String, Object> props = new HashMap<String, Object>(){{
+  public void testSetProperties() {
+    Map<String, Object> props = new HashMap<String, Object>() {{
       put( "path", "/Users/home/admin" );
       put( "lastModified", new Date() );
     }};
     node.setProperties( props );
-    verify( v, times( 1 ) ).setProperty( eq("path"), any() );
-    verify( v, times( 1 ) ).setProperty( eq("lastModified"), any() );
+    verify( v ).property( eq( "path" ), any() );
+    verify( v ).property( eq( "lastModified" ), any() );
   }
 
   @Test
-  public void testGetLogicalId() throws Exception {
-    MetaverseNode node = new MetaverseNode( v );
-    when( v.getProperty( "name" ) ).thenReturn( "testName" );
-    when( v.getProperty( "zzz" ) ).thenReturn( "last" );
-    when( v.getProperty( "type" ) ).thenReturn( "testType" );
+  public void testGetLogicalId() {
+    VertexProperty<Object> nameProperty = presentProperty( "testName" );
+    VertexProperty<Object> namespaceProperty = presentProperty( "" );
+    VertexProperty<Object> typeProperty = presentProperty( "testType" );
+    VertexProperty<Object> zzzProperty = presentProperty( "last" );
+    when( v.property( "name" ) ).thenReturn( nameProperty );
+    when( v.property( "namespace" ) ).thenReturn( namespaceProperty );
+    when( v.property( "type" ) ).thenReturn( typeProperty );
+    when( v.property( "zzz" ) ).thenReturn( zzzProperty );
+    when( v.value( "name" ) ).thenReturn( "testName" );
+    when( v.value( "namespace" ) ).thenReturn( "" );
+    when( v.value( "type" ) ).thenReturn( "testType" );
+    when( v.value( "zzz" ) ).thenReturn( "last" );
 
-    MetaverseNode spyNode = spy( node );
+    MetaverseNode spyNode = spy( new MetaverseNode( v ) );
+    doNothing().when( spyNode ).setProperty( eq( DictionaryConst.PROPERTY_LOGICAL_ID ), any() );
     when( spyNode.getPropertyKeys() ).thenReturn( new HashSet<String>() {{
       add( "name" );
+      add( "namespace" );
       add( "type" );
       add( "zzz" );
     }} );
-    // should be using the default logical id generator initially
+
     assertEquals( "{\"name\":\"testName\",\"namespace\":\"\",\"type\":\"testType\"}", spyNode.getLogicalId() );
 
     ILogicalIdGenerator idGenerator = new MetaverseLogicalIdGenerator( "type", "zzz", "name" );
     spyNode.setLogicalIdGenerator( idGenerator );
     assertNotNull( spyNode.logicalIdGenerator );
-
-    // logical id should be sorted based on key
     assertEquals( "{\"name\":\"testName\",\"type\":\"testType\",\"zzz\":\"last\"}", spyNode.getLogicalId() );
   }
 
+  @SuppressWarnings( "unchecked" )
+  private <T> VertexProperty<Object> presentProperty( T value ) {
+    VertexProperty<Object> property = mock( VertexProperty.class );
+    when( property.isPresent() ).thenReturn( true );
+    when( property.value() ).thenReturn( value );
+    return property;
+  }
+
+  @SuppressWarnings( "unchecked" )
+  private VertexProperty<Object> missingProperty() {
+    VertexProperty<Object> property = mock( VertexProperty.class );
+    when( property.isPresent() ).thenReturn( false );
+    return property;
+  }
+
+  private void mockProperties( Map<String, Object> props ) {
+    when( v.keys() ).thenReturn( props.keySet() );
+    for ( Map.Entry<String, Object> entry : props.entrySet() ) {
+      VertexProperty<Object> property = presentProperty( entry.getValue() );
+      when( v.property( entry.getKey() ) ).thenReturn( property );
+      when( v.value( entry.getKey() ) ).thenReturn( entry.getValue() );
+    }
+  }
 }

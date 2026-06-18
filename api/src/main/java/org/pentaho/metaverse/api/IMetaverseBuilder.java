@@ -14,8 +14,8 @@
 package org.pentaho.metaverse.api;
 
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 /**
  * The IMetaverseBuilder is a Builder that creates and maintains a metaverse model, which contains nodes and links.

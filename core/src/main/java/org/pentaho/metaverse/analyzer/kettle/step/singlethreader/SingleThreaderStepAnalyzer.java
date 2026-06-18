@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.singlethreader;
 
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.singlethreader.SingleThreaderMeta;
@@ -63,8 +63,8 @@ public class SingleThreaderStepAnalyzer extends StepAnalyzer<SingleThreaderMeta>
     final List<Vertex> injectorOutputFields = findFieldVertices( subTransMeta, injectStepName );
     for ( final Vertex outputField : singleThreaderOutputFields ) {
       for ( final Vertex derivedField : injectorOutputFields ) {
-        if ( outputField.getProperty( DictionaryConst.PROPERTY_NAME ).equals(
-          derivedField.getProperty( DictionaryConst.PROPERTY_NAME ) ) ) {
+        if ( outputField.value( DictionaryConst.PROPERTY_NAME ).equals(
+          derivedField.value( DictionaryConst.PROPERTY_NAME ) ) ) {
           getMetaverseBuilder().addLink( outputField, DictionaryConst.LINK_DERIVES, derivedField );
           break;
         }
@@ -77,8 +77,8 @@ public class SingleThreaderStepAnalyzer extends StepAnalyzer<SingleThreaderMeta>
     for ( final Vertex outputField : retrieverOutputFields ) {
 
       for ( final Vertex derivedField : singleThreaderOutputFields ) {
-        if ( outputField.getProperty( DictionaryConst.PROPERTY_NAME ).equals(
-          derivedField.getProperty( DictionaryConst.PROPERTY_NAME ) ) ) {
+        if ( outputField.value( DictionaryConst.PROPERTY_NAME ).equals(
+          derivedField.value( DictionaryConst.PROPERTY_NAME ) ) ) {
           getMetaverseBuilder().addLink( outputField, DictionaryConst.LINK_DERIVES, derivedField );
           break;
         }

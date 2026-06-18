@@ -13,8 +13,11 @@
 
 package org.pentaho.metaverse.frames;
 
-/**
- * User: RFellows Date: 9/4/14
- */
-public interface FileFieldNode extends FieldNode {
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+public class FileFieldNode extends FieldNode {
+  public FileFieldNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 }

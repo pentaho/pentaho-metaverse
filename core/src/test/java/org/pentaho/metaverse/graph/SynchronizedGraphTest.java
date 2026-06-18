@@ -13,113 +13,78 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.util.wrappers.id.IdGraph;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import java.util.Iterator;
 
-@RunWith( MockitoJUnitRunner.StrictStubs.class )
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 public class SynchronizedGraphTest {
 
   private SynchronizedGraph synchronizedGraph;
 
-  @Mock IdGraph mockGraph;
-  @Mock Vertex mockVertex;
-  @Mock Edge mockEdge;
-
   @Before
-  public void setUp() throws Exception {
-    synchronizedGraph = new SynchronizedGraph( mockGraph );
+  public void setUp() {
+    synchronizedGraph = new SynchronizedGraph( TinkerGraph.open() );
   }
 
   @Test
-  public void testAddVertex_nullId() throws Exception {
-    synchronizedGraph.addVertex( null );
-    verify( mockGraph, times( 1 ) ).addVertex( null );
+  public void testAddVertexWithExistingId() {
+    Vertex original = synchronizedGraph.addVertexWithId( "id" );
+    Vertex duplicate = synchronizedGraph.addVertexWithId( "id" );
+
+    assertSame( original, duplicate );
+    assertEquals( 1, countVertices( synchronizedGraph.vertices() ) );
   }
 
   @Test
-  public void testAddVertex_withExistingId() throws Exception {
-    when( mockGraph.getVertex( "id" ) ).thenReturn( mockVertex );
-    synchronizedGraph.addVertex( "id" );
-    verify( mockGraph, times( 1 ) ).getVertex( "id" );
-    verify( mockGraph, never() ).addVertex( anyString() );
+  public void testAddVertexWithNewId() {
+    Vertex vertex = synchronizedGraph.addVertexWithId( "id" );
+    assertNotNull( vertex );
+    assertEquals( "id", vertex.id() );
   }
 
   @Test
-  public void testAddVertex_withNewId() throws Exception {
-    when( mockGraph.getVertex( "id" ) ).thenReturn( null );
-    synchronizedGraph.addVertex( "id" );
-    verify( mockGraph, times( 1 ) ).getVertex( "id" );
-    verify( mockGraph, times( 1 ) ).addVertex( "id" );
+  public void testGraphDelegates() throws Exception {
+    Vertex source = synchronizedGraph.addVertex( T.id, "source" );
+    Vertex target = synchronizedGraph.addVertex( T.id, "target" );
+    Edge edge = source.addEdge( "self link", target, T.id, "edge-id" );
+
+    assertSame( source, synchronizedGraph.getVertex( "source" ) );
+    assertSame( edge, synchronizedGraph.getEdge( "edge-id" ) );
+    assertEquals( 2, countVertices( synchronizedGraph.vertices() ) );
+    assertEquals( 1, countEdges( synchronizedGraph.edges() ) );
+    assertEquals( 1, countEdges( synchronizedGraph.edges( "edge-id" ) ) );
+    assertNotNull( synchronizedGraph.variables() );
+    assertNotNull( synchronizedGraph.configuration() );
+    assertTrue( synchronizedGraph.getGraph() instanceof TinkerGraph );
+
+    synchronizedGraph.close();
   }
 
-  @Test
-  public void testAddEdge_nullId() throws Exception {
-    synchronizedGraph.addEdge( null, mockVertex, mockVertex, "self link" );
-    verify( mockGraph, times( 1 ) ).addEdge( null, mockVertex, mockVertex, "self link" );
+  private int countVertices( Iterator<Vertex> vertices ) {
+    int count = 0;
+    while ( vertices.hasNext() ) {
+      count++;
+      vertices.next();
+    }
+    return count;
   }
 
-  @Test
-  public void testAddEdge_withExistingId() throws Exception {
-    when( mockGraph.getEdge( "id" ) ).thenReturn( mockEdge );
-    synchronizedGraph.addEdge( "id", mockVertex, mockVertex, "self link" );
-    verify( mockGraph, times( 1 ) ).getEdge( "id" );
-    verify( mockGraph, never() ).addEdge( anyString(), eq(mockVertex), eq(mockVertex), anyString() );
-  }
-
-  @Test
-  public void testAddEdge_withNewId() throws Exception {
-    when( mockGraph.getEdge( "id" ) ).thenReturn( null );
-    synchronizedGraph.addEdge( "id", mockVertex, mockVertex, "self link" );
-    verify( mockGraph, times( 1 ) ).getEdge( "id" );
-    verify( mockGraph, times( 1 ) ).addEdge( "id", mockVertex, mockVertex, "self link" );
-  }
-
-  @Test
-  public void testDelegateMethodsAreCalled() throws Exception {
-    synchronizedGraph.removeVertex( mockVertex );
-    verify( mockGraph, times( 1 ) ).removeVertex( mockVertex );
-
-    synchronizedGraph.removeEdge( mockEdge );
-    verify( mockGraph, times( 1 ) ).removeEdge( mockEdge );
-
-    synchronizedGraph.getEdge( "id" );
-    verify( mockGraph, times( 1 ) ).getEdge( "id" );
-
-    synchronizedGraph.getEdges();
-    verify( mockGraph, times( 1 ) ).getEdges();
-
-    synchronizedGraph.getEdges( "key", "value" );
-    verify( mockGraph, times( 1 ) ).getEdges( "key", "value" );
-
-    synchronizedGraph.getFeatures();
-    verify( mockGraph, times( 1 ) ).getFeatures();
-
-    synchronizedGraph.getVertex( "id" );
-    verify( mockGraph, times( 1 ) ).getVertex( "id" );
-
-    synchronizedGraph.getVertices();
-    verify( mockGraph, times( 1 ) ).getVertices();
-
-    synchronizedGraph.getVertices( "key", "value" );
-    verify( mockGraph, times( 1 ) ).getVertices( "key", "value" );
-
-    synchronizedGraph.query();
-    verify( mockGraph, times( 1 ) ).query();
-
-    synchronizedGraph.shutdown();
-    verify( mockGraph, times( 1 ) ).shutdown();
+  private int countEdges( Iterator<Edge> edges ) {
+    int count = 0;
+    while ( edges.hasNext() ) {
+      count++;
+      edges.next();
+    }
+    return count;
   }
 }

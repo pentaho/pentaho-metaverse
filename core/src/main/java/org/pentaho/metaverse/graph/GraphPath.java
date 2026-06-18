@@ -13,12 +13,14 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -94,23 +96,21 @@ public class GraphPath {
     for ( Object item : path ) {
       if ( item instanceof Vertex ) {
         Vertex vertex = (Vertex) item;
-        Vertex v = g.getVertex( vertex.getId() );
-        if ( v == null ) {
-          v = GraphUtil.cloneVertexIntoGraph( vertex, g );
+        Iterator<Vertex> existing = g.vertices( vertex.id() );
+        if ( !existing.hasNext() ) {
+          GraphUtil.cloneVertexIntoGraph( vertex, g );
         }
       } else if ( item instanceof Edge ) {
         Edge edge = (Edge) item;
-        Edge e = g.getEdge( edge.getId() );
-        if ( e == null ) {
-          Vertex v1 = g.getVertex( edge.getVertex( Direction.OUT ) );
-          if ( v1 == null ) {
-            v1 = GraphUtil.cloneVertexIntoGraph( edge.getVertex( Direction.OUT ), g );
-          }
-          Vertex v2 = g.getVertex( edge.getVertex( Direction.IN ) );
-          if ( v2 == null ) {
-            v2 = GraphUtil.cloneVertexIntoGraph( edge.getVertex( Direction.IN ), g );
-          }
-          e = g.addEdge( edge.getId(), v1, v2, edge.getLabel() );
+        Iterator<Edge> existingEdge = g.edges( edge.id() );
+        if ( !existingEdge.hasNext() ) {
+          Vertex outV = edge.outVertex();
+          Vertex inV = edge.inVertex();
+          Iterator<Vertex> v1it = g.vertices( outV.id() );
+          Vertex v1 = v1it.hasNext() ? v1it.next() : GraphUtil.cloneVertexIntoGraph( outV, g );
+          Iterator<Vertex> v2it = g.vertices( inV.id() );
+          Vertex v2 = v2it.hasNext() ? v2it.next() : GraphUtil.cloneVertexIntoGraph( inV, g );
+          v1.addEdge( edge.label(), v2, T.id, edge.id() );
         }
       }
 
@@ -126,7 +126,7 @@ public class GraphPath {
         if ( str.length() > 0 ) {
           str.append( "->" );
         }
-        str.append( ( (Vertex) obj ).getId() );
+        str.append( ( (Vertex) obj ).id() );
       }
     }
     return str.toString();

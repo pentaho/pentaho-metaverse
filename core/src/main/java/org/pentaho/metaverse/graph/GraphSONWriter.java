@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Graph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,7 +26,8 @@ public class GraphSONWriter extends BaseGraphWriter {
 
   @Override
   public void outputGraphImpl( Graph graph, OutputStream graphSONOutputStream ) throws IOException {
-    com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter.outputGraph( graph, graphSONOutputStream );
+    graph.io( org.apache.tinkerpop.gremlin.structure.io.IoCore.graphson() )
+      .writer().create().writeGraph( graphSONOutputStream, graph );
   }
 
 }

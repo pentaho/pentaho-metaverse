@@ -13,18 +13,23 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.frames.Property;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.pentaho.dictionary.DictionaryConst;
 
 /**
  * Created by rfellows on 3/26/15.
  */
-public interface SplitFieldsStepNode extends TransformationStepNode {
+public class SplitFieldsStepNode extends TransformationStepNode {
+  public SplitFieldsStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Property( DictionaryConst.PROPERTY_DELIMITER )
-  public String getDelimiter();
+  public String getDelimiter() {
+    return getStringValue( DictionaryConst.PROPERTY_DELIMITER );
+  }
 
-  @Property( DictionaryConst.PROPERTY_ENCLOSURE )
-  public String getEnclosure();
-
+  public String getEnclosure() {
+    return getStringValue( DictionaryConst.PROPERTY_ENCLOSURE );
+  }
 }

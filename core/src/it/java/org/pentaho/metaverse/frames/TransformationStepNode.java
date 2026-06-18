@@ -13,51 +13,69 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface TransformationStepNode extends Concept {
-  @Property( "stepType" )
-  String getStepType();
+public class TransformationStepNode extends Concept {
+  public TransformationStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Adjacency( label = "contains", direction = Direction.IN )
-  TransformationNode getTransNode();
+  public String getStepType() {
+    return getStringValue( "stepType" );
+  }
 
-  @Adjacency( label = "deletes", direction = Direction.OUT )
-  Iterable<StreamFieldNode> getStreamFieldNodesDeletes();
+  public TransformationNode getTransNode() {
+    return wrapSingle( vertex.vertices( Direction.IN, "contains" ), v -> new TransformationNode( v, graph ) );
+  }
 
-  @Adjacency( label = "creates", direction = Direction.OUT )
-  Iterable<StreamFieldNode> getStreamFieldNodesCreates();
+  public List<StreamFieldNode> getStreamFieldNodesDeletes() {
+    return wrapAs( vertex.vertices( Direction.OUT, "deletes" ), v -> new StreamFieldNode( v, graph ) );
+  }
 
-  @Adjacency( label = "uses", direction = Direction.OUT )
-  Iterable<StreamFieldNode> getStreamFieldNodesUses();
+  public List<StreamFieldNode> getStreamFieldNodesCreates() {
+    return wrapAs( vertex.vertices( Direction.OUT, "creates" ), v -> new StreamFieldNode( v, graph ) );
+  }
 
-  @Adjacency( label = "hops_to", direction = Direction.OUT )
-  Iterable<TransformationStepNode> getNextSteps();
+  public List<StreamFieldNode> getStreamFieldNodesUses() {
+    return wrapAs( vertex.vertices( Direction.OUT, "uses" ), v -> new StreamFieldNode( v, graph ) );
+  }
 
-  @Adjacency( label = "hops_to", direction = Direction.IN )
-  Iterable<TransformationStepNode> getPreviousSteps();
+  public List<TransformationStepNode> getNextSteps() {
+    return wrapAs( vertex.vertices( Direction.OUT, "hops_to" ), v -> new TransformationStepNode( v, graph ) );
+  }
 
-  @Adjacency( label = "inputs", direction = Direction.IN )
-  Iterable<FieldNode> getInputFields();
+  public List<TransformationStepNode> getPreviousSteps() {
+    return wrapAs( vertex.vertices( Direction.IN, "hops_to" ), v -> new TransformationStepNode( v, graph ) );
+  }
 
-  @Adjacency( label = "inputs", direction = Direction.IN )
-  Iterable<StreamFieldNode> getInputStreamFields();
+  public List<FieldNode> getInputFields() {
+    return wrapAs( vertex.vertices( Direction.IN, "inputs" ), v -> new FieldNode( v, graph ) );
+  }
 
-  @Adjacency( label = "outputs", direction = Direction.OUT )
-  Iterable<StreamFieldNode> getOutputStreamFields();
+  public List<StreamFieldNode> getInputStreamFields() {
+    return wrapAs( vertex.vertices( Direction.IN, "inputs" ), v -> new StreamFieldNode( v, graph ) );
+  }
 
-  @Adjacency( label = "writesto", direction = Direction.OUT )
-  Iterable<Concept> getWritesToNodes();
+  public List<StreamFieldNode> getOutputStreamFields() {
+    return wrapAs( vertex.vertices( Direction.OUT, "outputs" ), v -> new StreamFieldNode( v, graph ) );
+  }
 
-  @Adjacency( label = "writesto", direction = Direction.OUT )
-  Iterable<FileNode> getWritesToFileNodes();
+  public List<Concept> getWritesToNodes() {
+    return wrapAsConcept( vertex.vertices( Direction.OUT, "writesto" ) );
+  }
 
-  @Adjacency( label = "isreadby", direction = Direction.IN )
-  Iterable<Concept> getReadByNodes();
+  public List<FileNode> getWritesToFileNodes() {
+    return wrapAs( vertex.vertices( Direction.OUT, "writesto" ), v -> new FileNode( v, graph ) );
+  }
 
+  public List<Concept> getReadByNodes() {
+    return wrapAsConcept( vertex.vertices( Direction.IN, "isreadby" ) );
+  }
 }

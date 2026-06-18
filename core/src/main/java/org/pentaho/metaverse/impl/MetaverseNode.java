@@ -13,16 +13,16 @@
 
 package org.pentaho.metaverse.impl;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.VertexQuery;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.metaverse.api.ILogicalIdGenerator;
 import org.pentaho.metaverse.api.IMetaverseNode;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,7 +67,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getName() {
-    return v.getProperty( DictionaryConst.PROPERTY_NAME );
+    return v.property( DictionaryConst.PROPERTY_NAME ).isPresent() ? v.<String>value( DictionaryConst.PROPERTY_NAME ) : null;
   }
 
   /*
@@ -77,7 +77,8 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getStringID() {
-    return ( v.getId() == null ) ? null : v.getId().toString();
+    final Object id = v.id();
+    return id == null ? null : id.toString();
   }
 
   /*
@@ -87,7 +88,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public String getType() {
-    return v.getProperty( DictionaryConst.PROPERTY_TYPE );
+    return v.property( DictionaryConst.PROPERTY_TYPE ).isPresent() ? v.<String>value( DictionaryConst.PROPERTY_TYPE ) : null;
   }
 
   /*
@@ -98,7 +99,7 @@ public class MetaverseNode implements IMetaverseNode {
   @Override
   public void setName( String name ) {
     dirty = true;
-    v.setProperty( DictionaryConst.PROPERTY_NAME, name );
+    v.property( DictionaryConst.PROPERTY_NAME, name );
   }
 
   /*
@@ -109,9 +110,9 @@ public class MetaverseNode implements IMetaverseNode {
   @Override
   public void setType( String type ) {
     dirty = true;
-    v.setProperty( DictionaryConst.PROPERTY_TYPE, type );
+    v.property( DictionaryConst.PROPERTY_TYPE, type );
     String category = DictionaryHelper.getCategoryForType( type );
-    v.setProperty( DictionaryConst.PROPERTY_CATEGORY, category );
+    v.property( DictionaryConst.PROPERTY_CATEGORY, category );
   }
 
   /*
@@ -121,7 +122,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public Set<String> getPropertyKeys() {
-    return v.getPropertyKeys();
+    return v.keys();
   }
 
   /**
@@ -134,7 +135,7 @@ public class MetaverseNode implements IMetaverseNode {
     Set<String> keys = getPropertyKeys();
     if ( keys != null ) {
       for ( String key : keys ) {
-        props.put( key, v.getProperty( key ) );
+        props.put( key, v.property( key ).isPresent() ? v.value( key ) : null );
       }
     }
     return props;
@@ -149,7 +150,7 @@ public class MetaverseNode implements IMetaverseNode {
     if ( properties != null ) {
       dirty = true;
       for ( Map.Entry<String, Object> property : properties.entrySet() ) {
-        v.setProperty( property.getKey(), property.getValue() );
+        v.property( property.getKey(), property.getValue() );
       }
     }
   }
@@ -163,7 +164,7 @@ public class MetaverseNode implements IMetaverseNode {
     if ( keys != null ) {
       dirty = true;
       for ( String key : keys ) {
-        v.removeProperty( key );
+        v.property( key ).remove();
       }
     }
   }
@@ -193,7 +194,7 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override
   public Object getProperty( String key ) {
-    return v.getProperty( key );
+    return v.property( key ).isPresent() ? v.value( key ) : null;
   }
 
   /*
@@ -204,7 +205,7 @@ public class MetaverseNode implements IMetaverseNode {
   @Override
   public void setProperty( String key, Object value ) {
     dirty = true;
-    v.setProperty( key, value );
+    v.property( key, value );
   }
 
   /**
@@ -215,7 +216,9 @@ public class MetaverseNode implements IMetaverseNode {
    */
   @Override public Object removeProperty( String key ) {
     dirty = true;
-    return v.removeProperty( key );
+    Object val = v.property( key ).isPresent() ? v.value( key ) : null;
+    v.property( key ).remove();
+    return val;
   }
 
   /**
@@ -236,8 +239,8 @@ public class MetaverseNode implements IMetaverseNode {
    * @param arg1 the arg1
    * @return the edges
    */
-  public Iterable<Edge> getEdges( Direction arg0, String... arg1 ) {
-    return v.getEdges( arg0, arg1 );
+  public Iterator<Edge> getEdges( Direction arg0, String... arg1 ) {
+    return v.edges( arg0, arg1 );
   }
 
   /**
@@ -246,7 +249,7 @@ public class MetaverseNode implements IMetaverseNode {
    * @return the id
    */
   public Object getId() {
-    return v.getId();
+    return v.id();
   }
 
   /**
@@ -256,17 +259,8 @@ public class MetaverseNode implements IMetaverseNode {
    * @param arg1 the arg1
    * @return the vertices
    */
-  public Iterable<Vertex> getVertices( Direction arg0, String... arg1 ) {
-    return v.getVertices( arg0, arg1 );
-  }
-
-  /**
-   * Query.
-   *
-   * @return the vertex query
-   */
-  public VertexQuery query() {
-    return v.query();
+  public Iterator<Vertex> getVertices( Direction arg0, String... arg1 ) {
+    return v.vertices( arg0, arg1 );
   }
 
   /**

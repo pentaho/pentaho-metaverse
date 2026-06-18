@@ -13,15 +13,21 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/23/14
  */
-public interface TextFileOutputStepNode extends TransformationStepNode {
+public class TextFileOutputStepNode extends TransformationStepNode {
+  public TextFileOutputStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Adjacency( label = "writesto", direction = Direction.OUT )
-  public Iterable<FramedMetaverseNode> getOutputFiles();
-
+  public List<FramedMetaverseNode> getOutputFiles() {
+    return wrapAsNodes( vertex.vertices( Direction.OUT, "writesto" ) );
+  }
 }
