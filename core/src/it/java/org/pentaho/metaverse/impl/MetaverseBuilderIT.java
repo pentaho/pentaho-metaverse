@@ -13,9 +13,8 @@
 
 package org.pentaho.metaverse.impl;
 
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -32,7 +31,6 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Set;
-import java.util.stream.StreamSupport;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -103,8 +101,8 @@ public class MetaverseBuilderIT {
   @Test
   public void testExport() throws Exception {
 
-    assertTrue( readerGraph.getVertices().iterator().hasNext() );
-    assertTrue( readerGraph.getEdges().iterator().hasNext() );
+    assertTrue( readerGraph.vertices().hasNext() );
+    assertTrue( readerGraph.edges().hasNext() );
 
     // write out the graph so we can look at it
     File exportFile = new File( IntegrationTestUtil.getOutputPath( "testGraph.graphml" ) );
@@ -120,18 +118,18 @@ public class MetaverseBuilderIT {
 
   private void testAndCountNodesByType( String type ) {
     int count = 0;
-    for ( Vertex v : readerGraph.getVertices( "type", type ) ) {
+    for ( Vertex v : readerGraph.traversal().V().has( "type", type ).toList() ) {
       count++;
-      assertNotNull( v.getId() );
-      assertNotNull( v.getProperty( "type" ) );
-      assertNotNull( v.getProperty( "name" ) );
+      assertNotNull( v.id() );
+      assertTrue( v.property( "type" ).isPresent() );
+      assertTrue( v.property( "name" ).isPresent() );
     }
 
     System.out.println( "Found " + count + " " + type + " nodes" );
   }
 
   private void countTheEdgesByType( String label ) {
-    int count = (int) StreamSupport.stream(readerGraph.getEdges("text", label).spliterator(), false).count();
+    int count = readerGraph.traversal().E().has( "text", label ).count().next().intValue();
     if ( count > 0 ) {
       System.out.println( "Found " + count + " " + label + " links" );
     }
@@ -157,8 +155,8 @@ public class MetaverseBuilderIT {
       countTheEdgesByType( structuralLinkType );
     }
 
-    nodeCount = (int) StreamSupport.stream( readerGraph.getVertices().spliterator(), false ).count();
-    edgeCount = (int) StreamSupport.stream( readerGraph.getEdges().spliterator(), false ).count();
+    nodeCount = readerGraph.traversal().V().count().next().intValue();
+    edgeCount = readerGraph.traversal().E().count().next().intValue();
 
     System.out.println( "\n===== SUMMARY =====" );
     System.out.println( "TOTAL NODES = " + nodeCount );

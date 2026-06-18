@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.locator;
 
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -96,7 +96,7 @@ public class FileSystemLocatorTest implements IDocumentListener {
   @Test
   public void testStartLocator() throws Exception {
 
-    TinkerGraph graph = new TinkerGraph();
+    TinkerGraph graph = TinkerGraph.open();
     IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
 
     spyLocator.setMetaverseBuilder( metaverseBuilder );
@@ -170,7 +170,7 @@ public class FileSystemLocatorTest implements IDocumentListener {
   @Test
   public void testStopLocatorScan() throws Exception {
 
-    TinkerGraph graph = new TinkerGraph();
+    TinkerGraph graph = TinkerGraph.open();
     IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
 
     spyLocator.setRepositoryId( "test_repo" );

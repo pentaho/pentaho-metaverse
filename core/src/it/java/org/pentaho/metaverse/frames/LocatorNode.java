@@ -13,20 +13,29 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface LocatorNode extends FramedMetaverseNode {
-  @Property( "lastScan" )
-  public String getLastScan();
+public class LocatorNode extends Concept {
+  public LocatorNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Property( "url" )
-  public String getUrl();
+  public String getLastScan() {
+    return getStringValue( "lastScan" );
+  }
 
-  @Adjacency( label = "contains", direction = Direction.OUT )
-  public Iterable<KettleNode> getDocuments();
+  public String getUrl() {
+    return getStringValue( "url" );
+  }
+
+  public List<KettleNode> getDocuments() {
+    return wrapAs( vertex.vertices( Direction.OUT, "contains" ), v -> new KettleNode( v, graph ) );
+  }
 }

@@ -13,10 +13,16 @@
 
 package org.pentaho.metaverse.frames;
 
-  import com.tinkerpop.frames.Property;
-  import org.pentaho.dictionary.DictionaryConst;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.pentaho.dictionary.DictionaryConst;
 
-public interface FileNode extends Concept {
-  @Property( DictionaryConst.PROPERTY_PATH )
-  String getPath();
+public class FileNode extends Concept {
+  public FileNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
+
+  public String getPath() {
+    return getStringValue( DictionaryConst.PROPERTY_PATH );
+  }
 }

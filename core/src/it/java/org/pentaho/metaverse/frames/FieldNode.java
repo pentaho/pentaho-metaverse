@@ -13,36 +13,50 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.pentaho.dictionary.DictionaryConst;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface FieldNode extends Concept {
-  @Property( DictionaryConst.PROPERTY_KETTLE_TYPE )
-  String getKettleType();
+public class FieldNode extends Concept {
+  public FieldNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Property( DictionaryConst.PROPERTY_OPERATIONS )
-  String getOperations();
+  public String getKettleType() {
+    return getStringValue( DictionaryConst.PROPERTY_KETTLE_TYPE );
+  }
 
-  @Adjacency( label = "uses", direction = Direction.IN )
-  Iterable<TransformationStepNode> getStepsThatUseMe();
+  public String getOperations() {
+    return getStringValue( DictionaryConst.PROPERTY_OPERATIONS );
+  }
 
-  @Adjacency( label = "deletes", direction = Direction.IN )
-  TransformationStepNode getStepThatDeletesMe();
+  public List<TransformationStepNode> getStepsThatUseMe() {
+    return wrapAs( vertex.vertices( Direction.IN, "uses" ), v -> new TransformationStepNode( v, graph ) );
+  }
 
-  @Adjacency( label = "creates", direction = Direction.IN )
-  TransformationStepNode getStepThatCreatesMe();
+  public TransformationStepNode getStepThatDeletesMe() {
+    return wrapSingle( vertex.vertices( Direction.IN, "deletes" ), v -> new TransformationStepNode( v, graph ) );
+  }
 
-  @Adjacency( label = "outputs", direction = Direction.IN )
-  TransformationStepNode getStepThatOutputsMe();
+  public TransformationStepNode getStepThatCreatesMe() {
+    return wrapSingle( vertex.vertices( Direction.IN, "creates" ), v -> new TransformationStepNode( v, graph ) );
+  }
 
-  @Adjacency( label = "inputs", direction = Direction.OUT )
-  TransformationStepNode getStepThatInputsMe();
+  public TransformationStepNode getStepThatOutputsMe() {
+    return wrapSingle( vertex.vertices( Direction.IN, "outputs" ), v -> new TransformationStepNode( v, graph ) );
+  }
 
-  @Adjacency( label = "populates", direction = Direction.IN )
-  FieldNode getFieldPopulatesMe();
+  public TransformationStepNode getStepThatInputsMe() {
+    return wrapSingle( vertex.vertices( Direction.OUT, "inputs" ), v -> new TransformationStepNode( v, graph ) );
+  }
+
+  public FieldNode getFieldPopulatesMe() {
+    return wrapSingle( vertex.vertices( Direction.IN, "populates" ), v -> new FieldNode( v, graph ) );
+  }
 }

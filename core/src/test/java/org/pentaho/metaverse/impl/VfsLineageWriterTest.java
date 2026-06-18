@@ -13,8 +13,8 @@
 
 package org.pentaho.metaverse.impl;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
@@ -102,7 +102,7 @@ public class VfsLineageWriterTest {
 
   @Test
   public void testOutputLineageGraph() throws Exception {
-    Graph g = new TinkerGraph();
+    Graph g = TinkerGraph.open();
     IMetaverseBuilder builder = new MetaverseBuilder( g );
     holder.setMetaverseBuilder( builder );
 

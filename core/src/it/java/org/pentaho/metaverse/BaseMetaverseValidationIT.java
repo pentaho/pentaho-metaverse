@@ -13,12 +13,9 @@
 
 package org.pentaho.metaverse;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -55,8 +52,6 @@ public abstract class BaseMetaverseValidationIT {
 
   protected static IMetaverseReader reader;
   protected static Graph graph;
-  protected static FramedGraphFactory framedGraphFactory;
-  protected static FramedGraph framedGraph;
   protected static RootNode root;
   protected static Map<String, Concept> entityNodes = new HashMap<>();
 
@@ -82,15 +77,13 @@ public abstract class BaseMetaverseValidationIT {
     graph = IntegrationTestUtil.buildMetaverseGraph( provider );
     reader = PentahoSystem.get( IMetaverseReader.class );
 
-    framedGraphFactory = new FramedGraphFactory( new GremlinGroovyModule(), new JavaHandlerModule() );
-    framedGraph = framedGraphFactory.create( graph );
-    root = (RootNode) framedGraph.getVertex( "entity", RootNode.class );
-    final List<Vertex> allVertices = IteratorUtils.toList( framedGraph.getVertices().iterator() );
+    root = wrapVertex( "entity", v -> new RootNode( v, graph ) );
+    final List<Vertex> allVertices = IteratorUtils.toList( graph.vertices() );
     for ( final Vertex vertex : allVertices ) {
-      final String vertexId = vertex.getId().toString();
+      final String vertexId = vertex.id().toString();
       if ( vertexId.startsWith( "entity_" ) ) {
         entityNodes.put( vertexId.replace( "entity_", "" ),
-          (Concept) framedGraph.getVertex( vertexId, Concept.class ) );
+          wrapVertex( vertexId, v -> new Concept( v, graph ) ) );
       }
     }
 
@@ -115,6 +108,20 @@ public abstract class BaseMetaverseValidationIT {
    * annotation) rather than just when the class is being torn down (within the method annotated with @AfterClass)
    */
   protected abstract boolean shouldCleanupInstance();
+
+
+  protected static Iterable<Vertex> getVertices() {
+    return () -> graph.vertices();
+  }
+
+  protected static Iterable<Edge> getEdges() {
+    return () -> graph.edges();
+  }
+
+  protected static <T> T wrapVertex( Object vertexId, java.util.function.Function<Vertex, T> factory ) {
+    java.util.Iterator<Vertex> vertices = graph.vertices( vertexId );
+    return vertices.hasNext() ? factory.apply( vertices.next() ) : null;
+  }
 
   protected static String normalizeFilePath( final String tilePath ) {
     if ( StringUtils.isBlank( tilePath ) ) {

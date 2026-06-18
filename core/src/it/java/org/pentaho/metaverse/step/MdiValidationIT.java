@@ -191,8 +191,8 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
 
     // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
     // level nodes of expected types exist
-    assertEquals( "Unexpected number of nodes", 35, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( "Unexpected number of edges", 96, getIterableSize( framedGraph.getEdges() ) );
+    assertEquals( "Unexpected number of nodes", 35, getIterableSize( getVertices() ) );
+    assertEquals( "Unexpected number of edges", 96, getIterableSize( getEdges() ) );
     verifyNodesTypes( ImmutableMap.of(
       NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, subTransNodeName } ),
       NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "File Name", "Separator", "Field Name", "Type",
@@ -345,8 +345,8 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
 
     // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
     // level nodes of expected types exist
-    assertEquals( "Unexpected number of nodes", 40, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( "Unexpected number of edges", 113, getIterableSize( framedGraph.getEdges() ) );
+    assertEquals( "Unexpected number of nodes", 40, getIterableSize( getVertices() ) );
+    assertEquals( "Unexpected number of edges", 113, getIterableSize( getEdges() ) );
     verifyNodesTypes( ImmutableMap.of(
       NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, subTransNodeName } ),
       NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "File Name", "Separator", "Field Name", "Type",
@@ -476,8 +476,8 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
 
     // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
     // level nodes of expected types exist
-    assertEquals( "Unexpected number of nodes", 38, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( "Unexpected number of edges", 99, getIterableSize( framedGraph.getEdges() ) );
+    assertEquals( "Unexpected number of nodes", 38, getIterableSize( getVertices() ) );
+    assertEquals( "Unexpected number of edges", 99, getIterableSize( getEdges() ) );
     verifyNodesTypes( ImmutableMap.of(
       NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, subTransNodeName } ),
       NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "File Name", "Separator", "Field Name", "Trim Type",

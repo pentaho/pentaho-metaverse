@@ -13,10 +13,11 @@
 
 package org.pentaho.metaverse.api.model;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.metaverse.api.IMetaverseBuilder;
@@ -27,6 +28,7 @@ import org.pentaho.metaverse.api.MetaverseObjectFactory;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * This is the reference implementation for IMetaverseBuilder, offering the ability to add nodes, links, etc. to an
@@ -60,6 +62,33 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
 
   protected void registerStaticNodes() {
     DictionaryHelper.registerEntityTypes();
+  }
+
+  /**
+   * Helper method: look up a vertex by id.
+   */
+  private Vertex getVertex( Object id ) {
+    Iterator<Vertex> it = graph.vertices( id );
+    return it.hasNext() ? it.next() : null;
+  }
+
+  /**
+   * Helper method: look up an edge by id.
+   */
+  private Edge getEdge( Object id ) {
+    Iterator<Edge> it = graph.edges( id );
+    return it.hasNext() ? it.next() : null;
+  }
+
+  /**
+   * Helper method: get-or-create a vertex with the given id.
+   */
+  private Vertex getOrCreateVertex( Object id ) {
+    Vertex v = getVertex( id );
+    if ( v == null ) {
+      v = graph.addVertex( T.id, id );
+    }
+    return v;
   }
 
   /**
@@ -98,7 +127,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
     if ( fromVertex == null ) {
       fromVertex = addVertex( link.getFromNode() );
       // set the virtual node property to true since this is an implicit adding of a node
-      fromVertex.setProperty( DictionaryConst.NODE_VIRTUAL, true );
+      fromVertex.property( DictionaryConst.NODE_VIRTUAL, true );
     }
     // update the vertex properties from the fromNode
     copyNodePropertiesToVertex( link.getFromNode(), fromVertex );
@@ -107,7 +136,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
     if ( toVertex == null ) {
       toVertex = addVertex( link.getToNode() );
       // set the virtual node property to true since this is an implicit adding of a node
-      toVertex.setProperty( DictionaryConst.NODE_VIRTUAL, true );
+      toVertex.property( DictionaryConst.NODE_VIRTUAL, true );
     }
     // update the to vertex properties from the toNode
     copyNodePropertiesToVertex( link.getToNode(), toVertex );
@@ -127,7 +156,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
    * @return the String edge ID
    */
   public static String getEdgeId( Vertex fromVertex, String label, Vertex toVertex ) {
-    return fromVertex.getId() + SEPARATOR + label + SEPARATOR + toVertex.getId();
+    return fromVertex.id() + SEPARATOR + label + SEPARATOR + toVertex.id();
   }
 
   /**
@@ -147,7 +176,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
     }
 
     // adding this node means that it is no longer a virtual node
-    v.setProperty( DictionaryConst.NODE_VIRTUAL, false );
+    v.property( DictionaryConst.NODE_VIRTUAL, false );
 
     copyNodePropertiesToVertex( node, v );
 
@@ -162,7 +191,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
    */
   private Vertex addVertex( IMetaverseNode node ) {
 
-    Vertex v = graph.addVertex( node.getStringID() );
+    Vertex v = getOrCreateVertex( node.getStringID() );
 
     if ( DictionaryHelper.isEntityType( node.getType() ) ) {
 
@@ -192,17 +221,17 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
     }
 
     // the node is an entity, so link it to its entity type node
-    Vertex entityType = graph.getVertex( ENTITY_PREFIX + entityName );
+    Vertex entityType = getVertex( ENTITY_PREFIX + entityName );
     if ( entityType == null ) {
       // the entity type node does not exist, so create it
-      entityType = graph.addVertex( ENTITY_PREFIX + entityName );
-      entityType.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ENTITY );
-      entityType.setProperty( DictionaryConst.PROPERTY_NAME, entityName );
+      entityType = getOrCreateVertex( ENTITY_PREFIX + entityName );
+      entityType.property( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ENTITY );
+      entityType.property( DictionaryConst.PROPERTY_NAME, entityName );
 
       // TODO move this to a map of types to strings or something
       if ( entityName.equals( DictionaryConst.NODE_TYPE_TRANS ) || entityName
         .equals( DictionaryConst.NODE_TYPE_JOB ) ) {
-        entityType.setProperty( DictionaryConst.PROPERTY_DESCRIPTION, DictionaryConst.EXECUTION_ENGINE_NAME );
+        entityType.property( DictionaryConst.PROPERTY_DESCRIPTION, DictionaryConst.EXECUTION_ENGINE_NAME );
       }
 
       // get all available entity link types
@@ -227,16 +256,16 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
    */
   public Vertex createRootEntity() {
 
-    Vertex rootEntity = graph.getVertex( ENTITY_NODE_ID );
+    Vertex rootEntity = getVertex( ENTITY_NODE_ID );
     if ( rootEntity == null ) {
-      rootEntity = graph.addVertex( ENTITY_NODE_ID );
-      rootEntity.setProperty( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ROOT_ENTITY );
-      rootEntity.setProperty( DictionaryConst.PROPERTY_NAME, "METAVERSE" );
+      rootEntity = getOrCreateVertex( ENTITY_NODE_ID );
+      rootEntity.property( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ROOT_ENTITY );
+      rootEntity.property( DictionaryConst.PROPERTY_NAME, "METAVERSE" );
 
       // TODO get these properties from somewhere else
-      rootEntity.setProperty( "division", "Engineering" );
-      rootEntity.setProperty( "project", "Pentaho Data Lineage" );
-      rootEntity.setProperty( "description",
+      rootEntity.property( "division", "Engineering" );
+      rootEntity.property( "project", "Pentaho Data Lineage" );
+      rootEntity.property( "description",
         "Data lineage is tracing the path that data has traveled upstream from its destination, through Pentaho "
           + "systems and artifacts as well as external systems and artifacts." );
     }
@@ -255,10 +284,12 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
     Boolean nodeIsVirtual = (Boolean) node.getProperty( DictionaryConst.NODE_VIRTUAL );
     nodeIsVirtual = nodeIsVirtual == null ? true : nodeIsVirtual;
 
-    Boolean vertexIsVirtual = v.getProperty( DictionaryConst.NODE_VIRTUAL );
+    Boolean vertexIsVirtual = v.property( DictionaryConst.NODE_VIRTUAL ).isPresent()
+      ? v.<Boolean>value( DictionaryConst.NODE_VIRTUAL ) : false;
     vertexIsVirtual = vertexIsVirtual == null ? false : vertexIsVirtual;
 
-    String vertexLogicalId = v.getProperty( DictionaryConst.PROPERTY_LOGICAL_ID );
+    String vertexLogicalId = v.property( DictionaryConst.PROPERTY_LOGICAL_ID ).isPresent()
+      ? v.<String>value( DictionaryConst.PROPERTY_LOGICAL_ID ) : null;
     boolean skipLogicalId = false;
     if ( vertexLogicalId != null && nodeIsVirtual && !vertexIsVirtual ) {
       skipLogicalId = true;
@@ -271,7 +302,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
         && !( skipLogicalId && propertyKey.equals( DictionaryConst.PROPERTY_LOGICAL_ID ) ) ) {
         Object value = node.getProperty( propertyKey );
         if ( value != null ) {
-          v.setProperty( propertyKey, value );
+          v.property( propertyKey, value );
         }
       }
     }
@@ -292,7 +323,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
         if ( !DictionaryConst.PROPERTY_LABEL.equals( propertyKey ) ) {
           Object value = link.getProperty( propertyKey );
           if ( value != null ) {
-            e.setProperty( propertyKey, value );
+            e.property( propertyKey, value );
           }
         }
       }
@@ -308,11 +339,12 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
   public Vertex getVertexForNode( IMetaverseNode node ) {
     if ( node != null ) {
       String logicalId = node.getLogicalId();
-      Vertex vertex = graph.getVertex( node.getStringID() );
+      Vertex vertex = getVertex( node.getStringID() );
 
       if ( vertex == null && !logicalId.equals( node.getStringID() ) ) {
         // check for matching logicalIds
-        Iterable<Vertex> logicalMatches = graph.getVertices( DictionaryConst.PROPERTY_LOGICAL_ID, logicalId );
+        List<Vertex> logicalMatches = graph.traversal().V()
+          .has( DictionaryConst.PROPERTY_LOGICAL_ID, logicalId ).toList();
         for ( Vertex match : logicalMatches ) {
           // just return the first match for now
           vertex = match;
@@ -353,10 +385,12 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
     if ( fromVertex != null ) {
 
       // find all of the OUT linked Vertex's from this node
-      for ( Edge edge : fromVertex.getEdges( Direction.OUT, link.getLabel() ) ) {
+      Iterator<Edge> fromEdges = fromVertex.edges( Direction.OUT, link.getLabel() );
+      while ( fromEdges.hasNext() ) {
+        Edge edge = fromEdges.next();
         // if the IN vertex's id matches the toNode's id, then we have a matching edge
-        toVertex = edge.getVertex( Direction.IN );
-        if ( toVertex.getId().equals( link.getToNode().getStringID() ) ) {
+        toVertex = edge.inVertex();
+        if ( toVertex.id().equals( link.getToNode().getStringID() ) ) {
           // matching link found
           deleteMe = edge;
           break;
@@ -364,7 +398,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
       }
 
       if ( deleteMe != null ) {
-        graph.removeEdge( deleteMe );
+        deleteMe.remove();
         result = true;
       }
 
@@ -373,7 +407,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
         Vertex[] fromAndTo = new Vertex[] { fromVertex, toVertex };
         for ( Vertex v : fromAndTo ) {
           if ( isVirtual( v ) ) {
-            graph.removeVertex( v );
+            v.remove();
           }
         }
       }
@@ -385,7 +419,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
   public IMetaverseBuilder deleteNode( IMetaverseNode node ) {
     Vertex v = getVertexForNode( node );
     if ( v != null ) {
-      graph.removeVertex( v );
+      v.remove();
     }
     return this;
   }
@@ -473,12 +507,12 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
 
   private Edge addEdge( final Vertex fromVertex, final String label, Vertex toVertex, final boolean addLabel ) {
     String edgeId = getEdgeId( fromVertex, label, toVertex );
-    Edge edge = graph.getEdge( edgeId );
+    Edge edge = getEdge( edgeId );
     // only add the link if the edge doesn't already exist
     if ( edge == null ) {
-      edge = graph.addEdge( edgeId, fromVertex, toVertex, label );
+      edge = fromVertex.addEdge( label, toVertex, T.id, edgeId );
       if ( addLabel ) {
-        edge.setProperty( "text", label );
+        edge.property( "text", label );
       }
     }
     return edge;
@@ -496,7 +530,8 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
       return false;
     }
 
-    Boolean isVirtual = vertex.getProperty( DictionaryConst.NODE_VIRTUAL );
+    Boolean isVirtual = vertex.property( DictionaryConst.NODE_VIRTUAL ).isPresent()
+      ? vertex.<Boolean>value( DictionaryConst.NODE_VIRTUAL ) : null;
     return isVirtual == null ? false : isVirtual;
   }
 

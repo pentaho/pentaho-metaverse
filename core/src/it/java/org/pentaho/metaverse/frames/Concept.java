@@ -13,12 +13,21 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface Concept extends FramedMetaverseNode {
-  @GremlinGroovy( "it.in.has( 'type', T.eq, 'Entity' )" )
-  FramedMetaverseNode getEntity();
+public class Concept extends FramedMetaverseNode {
+  public Concept( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
+
+  public FramedMetaverseNode getEntity() {
+    List<Vertex> result = graph.traversal().V( vertex.id() ).in().has( "type", "Entity" ).toList();
+    return result.isEmpty() ? null : wrapNode( result.get( 0 ) );
+  }
 }

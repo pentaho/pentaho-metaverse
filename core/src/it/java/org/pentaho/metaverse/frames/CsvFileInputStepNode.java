@@ -13,13 +13,21 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface CsvFileInputStepNode extends TransformationStepNode {
-  @Adjacency( label = "isreadby", direction = Direction.IN )
-  public Iterable<FramedMetaverseNode> getInputFiles();
+public class CsvFileInputStepNode extends TransformationStepNode {
+  public CsvFileInputStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
+
+  public List<FramedMetaverseNode> getInputFiles() {
+    return wrapAsNodes( vertex.vertices( Direction.IN, "isreadby" ) );
+  }
 }

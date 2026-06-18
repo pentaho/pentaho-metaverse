@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.listener;
 
-import com.tinkerpop.blueprints.Graph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.pentaho.metaverse.messages.Messages;
 import org.pentaho.platform.api.engine.IPluginLifecycleListener;
 import org.pentaho.platform.api.engine.PluginLifecycleException;
@@ -59,7 +59,7 @@ public class MetaversePluginLifecycleListener implements IPluginLifecycleListene
     Graph graph = getGraph();
     if ( graph != null ) {
       LOG.info( Messages.getString( "INFO.PluginUnload.ShutdownGraph" ) );
-      graph.shutdown();
+      try { graph.close(); } catch ( Exception e ) { /* ignore */ }
     }
   }
 }

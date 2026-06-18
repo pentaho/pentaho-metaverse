@@ -13,10 +13,10 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.commons.collections.IteratorUtils;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IGraphWriter;
@@ -66,13 +66,17 @@ public abstract class BaseGraphWriter implements IGraphWriter {
 
   private static Set<Vertex> getVerticesByCategoryAndName( final Graph graph, final String category,
                                                            final String name ) {
-    final Iterator<Vertex> allVertices = graph.getVertices().iterator();
+    final Iterator<Vertex> allVertices = graph.vertices();
 
     final Set<Vertex> documentElementVertices = new HashSet();
     while ( allVertices.hasNext() ) {
       final Vertex vertex = allVertices.next();
-      if ( ( category == null || category.equals( vertex.getProperty( DictionaryConst.PROPERTY_CATEGORY ) ) )
-        && ( name == null || name.equals( vertex.getProperty( DictionaryConst.PROPERTY_NAME ) ) ) ) {
+      final String vCat = vertex.property( DictionaryConst.PROPERTY_CATEGORY ).isPresent()
+        ? vertex.<String>value( DictionaryConst.PROPERTY_CATEGORY ) : null;
+      final String vName = vertex.property( DictionaryConst.PROPERTY_NAME ).isPresent()
+        ? vertex.<String>value( DictionaryConst.PROPERTY_NAME ) : null;
+      if ( ( category == null || category.equals( vCat ) )
+        && ( name == null || name.equals( vName ) ) ) {
         documentElementVertices.add( vertex );
       }
     }
@@ -111,7 +115,7 @@ public abstract class BaseGraphWriter implements IGraphWriter {
         true );
       final List<Vertex> orphanedInputFields = new ArrayList();
       for ( final Vertex inputField : inputFields ) {
-        if ( !inputField.getEdges( Direction.IN, DictionaryConst.LINK_OUTPUTS ).iterator().hasNext() ) {
+        if ( !inputField.edges( Direction.IN, DictionaryConst.LINK_OUTPUTS ).hasNext() ) {
           orphanedInputFields.add( inputField );
         }
       }
@@ -123,15 +127,16 @@ public abstract class BaseGraphWriter implements IGraphWriter {
         // when the first match is found, merge the two fields, all subsequent matches need to have the "input" link
         // added from the output field to the orphaned field
         for ( final Vertex orphanedInputField : orphanedInputFields ) {
-          final String orphanedInputFieldName = orphanedInputField.getProperty( DictionaryConst.PROPERTY_NAME );
+          final String orphanedInputFieldName = orphanedInputField.property( DictionaryConst.PROPERTY_NAME ).isPresent()
+            ? orphanedInputField.<String>value( DictionaryConst.PROPERTY_NAME ) : null;
           int matchCount = 0;
           for ( final Vertex inputStep : inputSteps ) {
             final List<Vertex> inputStepOutputFields = getLinkedVertices( inputStep, Direction.OUT,
               DictionaryConst.LINK_OUTPUTS, DictionaryConst.CATEGORY_FIELD, true,
               DictionaryConst.NODE_TYPE_TRANS_FIELD, true );
             for ( final Vertex inputStepOutputField : inputStepOutputFields ) {
-              final String inputStepOutputFieldName = inputStepOutputField.getProperty( DictionaryConst
-                .PROPERTY_NAME );
+              final String inputStepOutputFieldName = inputStepOutputField.property( DictionaryConst.PROPERTY_NAME ).isPresent()
+                ? inputStepOutputField.<String>value( DictionaryConst.PROPERTY_NAME ) : null;
               if ( inputStepOutputFieldName.equals( orphanedInputFieldName ) ) {
                 // we have a match - if this is the first match, merge the fields
                 if ( matchCount == 0 ) {
@@ -143,8 +148,11 @@ public abstract class BaseGraphWriter implements IGraphWriter {
                   // otherwise add an input link from the inputStepOutputField to the parent step of the orphaned field
                   final String newLinkId = BaseMetaverseBuilder.getEdgeId( inputStepOutputField,
                     DictionaryConst.LINK_INPUTS, documentElementVertex );
-                  graph.addEdge( newLinkId, inputStepOutputField, documentElementVertex, DictionaryConst.LINK_INPUTS )
-                    .setProperty( "text", DictionaryConst.LINK_INPUTS );
+                  if ( graph.edges( newLinkId ) == null || !graph.edges( newLinkId ).hasNext() ) {
+                    inputStepOutputField.addEdge( DictionaryConst.LINK_INPUTS, documentElementVertex,
+                      org.apache.tinkerpop.gremlin.structure.T.id, newLinkId )
+                      .property( "text", DictionaryConst.LINK_INPUTS );
+                  }
                 }
                 matchCount++;
               }
@@ -170,19 +178,22 @@ public abstract class BaseGraphWriter implements IGraphWriter {
                                    final String linkLabel, boolean isTransformationField ) {
     // get all edges corresponding to the requested direction and with the requested label
     final List<Edge> links = IteratorUtils.toList(
-      documentElementVertex.getEdges( direction, linkLabel ).iterator() );
+      documentElementVertex.edges( direction, linkLabel ) );
     // traverse the links and see if there are any that point to fields with the same names, if so, they need to be
     // merged
     final Map<String, Set<Vertex>> fieldMap = new HashMap();
     for ( final Edge link : links ) {
-      // get the vertex at the "other" end of this linnk ("this" end being the vertex itself)
-      final Vertex vertex = link.getVertex( direction == Direction.IN ? Direction.OUT : Direction.IN );
-      final String category = vertex.getProperty( DictionaryConst.PROPERTY_CATEGORY );
-      final String type = vertex.getProperty( DictionaryConst.PROPERTY_TYPE );
+      // get the vertex at the "other" end of this link ("this" end being the vertex itself)
+      final Vertex vertex = direction == Direction.IN ? link.outVertex() : link.inVertex();
+      final String category = vertex.property( DictionaryConst.PROPERTY_CATEGORY ).isPresent()
+        ? vertex.<String>value( DictionaryConst.PROPERTY_CATEGORY ) : null;
+      final String type = vertex.property( DictionaryConst.PROPERTY_TYPE ).isPresent()
+        ? vertex.<String>value( DictionaryConst.PROPERTY_TYPE ) : null;
       // verify that the vertex is a field of the desired type
       if ( DictionaryConst.CATEGORY_FIELD.equals( category )
         && isTransformationField == DictionaryConst.NODE_TYPE_TRANS_FIELD.equals( type ) ) {
-        final String fieldName = vertex.getProperty( DictionaryConst.PROPERTY_NAME );
+        final String fieldName = vertex.property( DictionaryConst.PROPERTY_NAME ).isPresent()
+          ? vertex.<String>value( DictionaryConst.PROPERTY_NAME ) : null;
 
         Set<Vertex> fieldsWithSameName = fieldMap.get( fieldName );
         if ( fieldsWithSameName == null ) {
@@ -214,23 +225,26 @@ public abstract class BaseGraphWriter implements IGraphWriter {
 
   private static void rewireEdges( final Graph graph, final Vertex vertexToKeep, final Vertex vertexToMerge,
                                    final Direction direction ) {
-    final Iterator<Edge> links = vertexToMerge.getEdges( direction ).iterator();
+    final Iterator<Edge> links = vertexToMerge.edges( direction );
     while ( links.hasNext() ) {
       // remove this edge and recreate one that points to 'fieldVertexToKeep' instead of 'fieldVertexToMerge',
       // where it pointed originally
       final Edge originalLink = links.next();
       final String newLinkId = direction == Direction.OUT
         ? BaseMetaverseBuilder.getEdgeId(
-        vertexToKeep, originalLink.getLabel(), originalLink.getVertex( Direction.IN ) )
+        vertexToKeep, originalLink.label(), originalLink.inVertex() )
         : BaseMetaverseBuilder.getEdgeId(
-        originalLink.getVertex( Direction.OUT ), originalLink.getLabel(), vertexToKeep );
-      if ( graph.getEdge( newLinkId ) == null ) {
+        originalLink.outVertex(), originalLink.label(), vertexToKeep );
+      Iterator<Edge> existingEdge = graph.edges( newLinkId );
+      if ( !existingEdge.hasNext() ) {
         if ( direction == Direction.OUT ) {
-          graph.addEdge( newLinkId, vertexToKeep, originalLink.getVertex( Direction.IN ), originalLink.getLabel() )
-            .setProperty( "text", originalLink.getLabel() );
+          vertexToKeep.addEdge( originalLink.label(), originalLink.inVertex(),
+            org.apache.tinkerpop.gremlin.structure.T.id, newLinkId )
+            .property( "text", originalLink.label() );
         } else {
-          graph.addEdge( newLinkId, originalLink.getVertex( Direction.OUT ), vertexToKeep,
-            originalLink.getLabel() ).setProperty( "text", originalLink.getLabel() );
+          originalLink.outVertex().addEdge( originalLink.label(), vertexToKeep,
+            org.apache.tinkerpop.gremlin.structure.T.id, newLinkId )
+            .property( "text", originalLink.label() );
         }
       }
       // remove the original link
@@ -258,13 +272,15 @@ public abstract class BaseGraphWriter implements IGraphWriter {
                                                  final String linkedVertexType, final boolean equalToType ) {
 
     final List<Vertex> linkedVertices = new ArrayList();
-    final Iterator<Edge> links = originVertex.getEdges( edgeDirection, edgeLabel ).iterator();
+    final Iterator<Edge> links = originVertex.edges( edgeDirection, edgeLabel );
     while ( links.hasNext() ) {
       final Edge link = links.next();
       // get the vertex at the opposite end of the edge
-      final Vertex vertex = link.getVertex( edgeDirection == Direction.IN ? Direction.OUT : Direction.IN );
-      final String category = vertex.getProperty( DictionaryConst.PROPERTY_CATEGORY );
-      final String type = vertex.getProperty( DictionaryConst.PROPERTY_TYPE );
+      final Vertex vertex = edgeDirection == Direction.IN ? link.outVertex() : link.inVertex();
+      final String category = vertex.property( DictionaryConst.PROPERTY_CATEGORY ).isPresent()
+        ? vertex.<String>value( DictionaryConst.PROPERTY_CATEGORY ) : null;
+      final String type = vertex.property( DictionaryConst.PROPERTY_TYPE ).isPresent()
+        ? vertex.<String>value( DictionaryConst.PROPERTY_TYPE ) : null;
       if ( ( linkedVertexCategory == null
         || ( category != null && equalToCategory == category.equals( linkedVertexCategory ) ) )
         && ( linkedVertexType == null
@@ -326,10 +342,12 @@ public abstract class BaseGraphWriter implements IGraphWriter {
     for ( final Vertex fieldVertex : fieldVertices ) {
       final String newLinkId = BaseMetaverseBuilder.getEdgeId(
         externalResourceVertex, DictionaryConst.LINK_CONTAINS, fieldVertex );
-      if ( graph.getEdge( newLinkId ) == null ) {
+      Iterator<Edge> existing = graph.edges( newLinkId );
+      if ( !existing.hasNext() ) {
         // add a "contains" link from the external resource to the field, if one doesn't already exist
-        graph.addEdge( newLinkId, externalResourceVertex, fieldVertex, DictionaryConst.LINK_CONTAINS )
-          .setProperty( "text", DictionaryConst.LINK_CONTAINS );
+        externalResourceVertex.addEdge( DictionaryConst.LINK_CONTAINS, fieldVertex,
+          org.apache.tinkerpop.gremlin.structure.T.id, newLinkId )
+          .property( "text", DictionaryConst.LINK_CONTAINS );
       }
     }
   }

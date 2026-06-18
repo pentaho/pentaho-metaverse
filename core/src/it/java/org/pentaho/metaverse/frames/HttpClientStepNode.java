@@ -13,15 +13,21 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
+import java.util.List;
 
 /**
  * User: wseyler Date: 5/11/15
  */
-public interface HttpClientStepNode extends TransformationStepNode {
-  
-  @Adjacency( label = "isreadby", direction = Direction.IN )
-  public Iterable<FramedMetaverseNode> getInputUrls();
+public class HttpClientStepNode extends TransformationStepNode {
+  public HttpClientStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
+
+  public List<FramedMetaverseNode> getInputUrls() {
+    return wrapAsNodes( vertex.vertices( Direction.IN, "isreadby" ) );
+  }
 }

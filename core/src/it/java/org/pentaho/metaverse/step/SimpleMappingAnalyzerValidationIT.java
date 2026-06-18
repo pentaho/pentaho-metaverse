@@ -52,8 +52,8 @@ public class SimpleMappingAnalyzerValidationIT extends StepAnalyzerValidationIT 
 
     // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
     // level nodes of expected types exist
-    assertEquals( "Unexpected number of nodes", 21, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( "Unexpected number of edges", 53, getIterableSize( framedGraph.getEdges() ) );
+    assertEquals( "Unexpected number of nodes", 21, getIterableSize( getVertices() ) );
+    assertEquals( "Unexpected number of edges", 53, getIterableSize( getEdges() ) );
     verifyNodesTypes( ImmutableMap.of(
       NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, "simple_sub" } ),
       NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { RANDOM_VALUE, RANDOM_VALUE, VALUE, VALUE, VALUE,

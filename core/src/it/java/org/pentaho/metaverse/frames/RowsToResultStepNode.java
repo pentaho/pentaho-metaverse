@@ -13,8 +13,11 @@
 
 package org.pentaho.metaverse.frames;
 
-/**
- * Created by rfellows on 4/3/15.
- */
-public interface RowsToResultStepNode extends TransformationStepNode {
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+public class RowsToResultStepNode extends TransformationStepNode {
+  public RowsToResultStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 }

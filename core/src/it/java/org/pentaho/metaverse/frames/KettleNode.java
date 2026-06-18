@@ -13,43 +13,59 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.pentaho.dictionary.DictionaryConst;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface KettleNode extends Concept {
-  @Property( DictionaryConst.PROPERTY_PATH )
-  public String getPath();
+public class KettleNode extends Concept {
+  public KettleNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @Property( DictionaryConst.PROPERTY_ARTIFACT_VERSION )
-  public String getVersion();
+  public String getPath() {
+    return getStringValue( DictionaryConst.PROPERTY_PATH );
+  }
 
-  @Property( "extendedDescription" )
-  public String getExtendedDescription();
+  public String getVersion() {
+    return getStringValue( DictionaryConst.PROPERTY_ARTIFACT_VERSION );
+  }
 
-  @Property( DictionaryConst.PROPERTY_STATUS )
-  public String getStatus();
+  public String getExtendedDescription() {
+    return getStringValue( "extendedDescription" );
+  }
 
-  @Property( DictionaryConst.PROPERTY_LAST_MODIFIED )
-  public String getLastModified();
+  public String getStatus() {
+    return getStringValue( DictionaryConst.PROPERTY_STATUS );
+  }
 
-  @Property( DictionaryConst.PROPERTY_LAST_MODIFIED_BY )
-  public String getLastModifiedBy();
+  public String getLastModified() {
+    return getStringValue( DictionaryConst.PROPERTY_LAST_MODIFIED );
+  }
 
-  @Property( DictionaryConst.PROPERTY_CREATED )
-  public String getCreated();
+  public String getLastModifiedBy() {
+    return getStringValue( DictionaryConst.PROPERTY_LAST_MODIFIED_BY );
+  }
 
-  @Property( DictionaryConst.PROPERTY_CREATED_BY )
-  public String getCreatedBy();
+  public String getCreated() {
+    return getStringValue( DictionaryConst.PROPERTY_CREATED );
+  }
 
-  @GremlinGroovy( "it.in('contains').has( 'type', T.eq, 'Locator' )" )
-  public LocatorNode getLocator();
+  public String getCreatedBy() {
+    return getStringValue( DictionaryConst.PROPERTY_CREATED_BY );
+  }
 
-  @GremlinGroovy( value="it.property(paramKey).collect()[0]", frame=false )
-  public String getParameter( @GremlinParam( "paramKey" ) String paramKey );
+  public LocatorNode getLocator() {
+    List<Vertex> result = graph.traversal().V( vertex.id() ).in( "contains" ).has( "type", "Locator" ).toList();
+    return result.isEmpty() ? null : new LocatorNode( result.get( 0 ), graph );
+  }
 
+  public String getParameter( String paramKey ) {
+    Object value = getProperty( paramKey );
+    return value == null ? null : value.toString();
+  }
 }

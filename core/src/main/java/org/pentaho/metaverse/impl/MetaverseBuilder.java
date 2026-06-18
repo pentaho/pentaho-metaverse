@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.impl;
 
-import com.tinkerpop.blueprints.Graph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
 import org.pentaho.metaverse.graph.SynchronizedGraphFactory;
 

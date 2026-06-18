@@ -13,10 +13,11 @@
 
 package org.pentaho.metaverse.frames;
 
-/**
- * @author wseyler
- *
- */
-public interface CalculatorStepNode extends TransformationStepNode {
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
+public class CalculatorStepNode extends TransformationStepNode {
+  public CalculatorStepNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 }

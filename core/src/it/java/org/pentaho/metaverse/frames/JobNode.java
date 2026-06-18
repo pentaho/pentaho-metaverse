@@ -13,19 +13,26 @@
 
 package org.pentaho.metaverse.frames;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-import com.tinkerpop.frames.annotations.gremlin.GremlinParam;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+
+import java.util.List;
 
 /**
  * User: RFellows Date: 9/4/14
  */
-public interface JobNode extends KettleNode {
-  @Adjacency( label = "contains", direction = Direction.OUT )
-  public Iterable<JobEntryNode> getJobEntryNodes();
+public class JobNode extends KettleNode {
+  public JobNode( Vertex vertex, Graph graph ) {
+    super( vertex, graph );
+  }
 
-  @GremlinGroovy( "it.out('contains').has( 'name', T.eq, name )" )
-  public JobEntryNode getJobEntryNode( @GremlinParam( "name" ) String name );
+  public List<JobEntryNode> getJobEntryNodes() {
+    return wrapAs( vertex.vertices( Direction.OUT, "contains" ), v -> new JobEntryNode( v, graph ) );
+  }
 
+  public JobEntryNode getJobEntryNode( String name ) {
+    List<Vertex> result = graph.traversal().V( vertex.id() ).out( "contains" ).has( "name", name ).toList();
+    return result.isEmpty() ? null : new JobEntryNode( result.get( 0 ), graph );
+  }
 }

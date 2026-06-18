@@ -13,8 +13,8 @@
 
 package org.pentaho.metaverse.impl;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.metaverse.api.IGraphWriter;
@@ -71,7 +71,7 @@ public class FileSystemLineageWriterTest {
 
   @Test
   public void testOutputLineageGraph() throws Exception {
-    Graph g = new TinkerGraph();
+    Graph g = TinkerGraph.open();
     IMetaverseBuilder builder = new MetaverseBuilder( g );
     holder.setMetaverseBuilder( builder );
 

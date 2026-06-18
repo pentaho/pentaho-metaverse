@@ -46,8 +46,8 @@ public class SingleThreaderStepAnalyzerValidationIT extends StepAnalyzerValidati
 
     // smoke test - verify that the right number of nodes and edges exist in the graph and that the expected top
     // level nodes of expected types exist
-    assertEquals( "Unexpected number of nodes", 30, getIterableSize( framedGraph.getVertices() ) );
-    assertEquals( "Unexpected number of edges", 87, getIterableSize( framedGraph.getEdges() ) );
+    assertEquals( "Unexpected number of nodes", 30, getIterableSize( getVertices() ) );
+    assertEquals( "Unexpected number of edges", 87, getIterableSize( getEdges() ) );
     verifyNodesTypes( ImmutableMap.of(
       NODE_TYPE_TRANS, Arrays.asList( new String[] { transNodeName, subTransNodeName } ),
       NODE_TYPE_TRANS_FIELD, Arrays.asList( new String[] { "strTest", "strTest", "strTest", "strTest", "strTest",

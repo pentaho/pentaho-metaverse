@@ -13,8 +13,8 @@
 
 package org.pentaho.metaverse.client;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.metaverse.graph.LineageGraphMap;
@@ -28,7 +28,7 @@ public class LineageClientTest {
   @Before
   public void setUp() throws Exception {
     lineageClient = new LineageClient();
-    g = new TinkerGraph();
+    g = TinkerGraph.open();
     LineageGraphMap.getInstance().clear();
   }
 

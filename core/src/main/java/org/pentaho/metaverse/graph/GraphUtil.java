@@ -13,9 +13,11 @@
 
 package org.pentaho.metaverse.graph;
 
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.Vertex;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -40,15 +42,17 @@ public class GraphUtil {
    * @return The vertex in the sub-graph
    */
   public static Vertex cloneVertexIntoGraph( Vertex vertex, Graph g ) {
-    Vertex clone = g.getVertex( vertex.getId() );
-    if ( clone != null ) {
-      return clone;
+    Iterator<Vertex> existing = g.vertices( vertex.id() );
+    if ( existing.hasNext() ) {
+      return existing.next();
     }
-    clone = g.addVertex( vertex.getId() );
-    Set<String> keys = vertex.getPropertyKeys();
+    Vertex clone = g.addVertex( T.id, vertex.id() );
+    Set<String> keys = vertex.keys();
     for ( String key : keys ) {
-      Object value = vertex.getProperty( key );
-      clone.setProperty( key, value );
+      Object value = vertex.property( key ).isPresent() ? vertex.value( key ) : null;
+      if ( value != null ) {
+        clone.property( key, value );
+      }
     }
     return clone;
   }
