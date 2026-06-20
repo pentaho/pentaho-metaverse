@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.fileinput.text;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta;
 import org.pentaho.dictionary.DictionaryConst;
