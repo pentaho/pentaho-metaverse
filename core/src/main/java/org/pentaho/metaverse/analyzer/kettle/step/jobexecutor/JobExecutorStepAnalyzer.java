@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.jobexecutor;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.ProgressNullMonitorListener;
 import org.pentaho.di.core.exception.KettleException;

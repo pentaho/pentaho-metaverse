@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.api.analyzer.kettle.step;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.metaverse.api.analyzer.kettle.DatabaseConnectionAnalyzer;

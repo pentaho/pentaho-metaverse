@@ -14,7 +14,7 @@
 package org.pentaho.metaverse.analyzer.kettle.step.httpclient;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.pentaho.di.core.bowl.Bowl;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;

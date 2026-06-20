@@ -15,7 +15,7 @@ package org.pentaho.metaverse.step;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
