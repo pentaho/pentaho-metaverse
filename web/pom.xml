@@ -19,7 +19,7 @@
     <enunciate.version>1.27</enunciate.version>
     <maven-pmd-plugin.version>3.2</maven-pmd-plugin.version>
     <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
-    <commons-lang3.version>3.12.0</commons-lang3.version>
+    <commons-lang3.version>3.18.0</commons-lang3.version>
     <maven-surefire-plugin.argLine>
       --add-opens=java.base/java.lang=ALL-UNNAMED
     </maven-surefire-plugin.argLine>
