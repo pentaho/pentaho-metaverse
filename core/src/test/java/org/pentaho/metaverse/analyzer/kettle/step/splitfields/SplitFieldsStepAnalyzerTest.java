@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.analyzer.kettle.step.splitfields;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
