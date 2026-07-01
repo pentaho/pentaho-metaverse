@@ -61,7 +61,12 @@
     <dependency.net.sf.flexjson.flexjson.version>2.1</dependency.net.sf.flexjson.flexjson.version>
     <dependency.pentaho.pentaho-platform-repository.version>${project.version}</dependency.pentaho.pentaho-platform-repository.version>
     <dependency.junit.junit.version>4.13.2</dependency.junit.junit.version>
-    <dependency.org.apache.tinkerpop.version>3.7.3</dependency.org.apache.tinkerpop.version>
+    <!-- 3.7.4+ relocates Jackson multi-release classes (TINKERPOP-3067), removing the
+         non-shaded com.fasterxml.jackson.* classes previously left under META-INF/versions/*
+         in gremlin-shaded. Note: the embedded jackson-databind is still 2.15.2 across all
+         3.7.x releases, so scanners keying on the embedded pom.xml metadata are not cleared
+         by this bump alone. -->
+    <dependency.org.apache.tinkerpop.version>3.7.6</dependency.org.apache.tinkerpop.version>
     <dependency.org.apache.commons.commons-configuration2.version>2.11.0</dependency.org.apache.commons.commons-configuration2.version>
     <dependency.commons-collections.commons-collections.version>3.2.1</dependency.commons-collections.commons-collections.version>
     <dependency.org.mockito.mockito-inline.version>5.2.0</dependency.org.mockito.mockito-inline.version>
