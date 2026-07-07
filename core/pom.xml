@@ -145,6 +145,12 @@
       <groupId>com.tinkerpop.gremlin</groupId>
       <artifactId>gremlin-java</artifactId>
       <version>${gremlin-java.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>jline</groupId>
+          <artifactId>jline</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>net.sf.flexjson</groupId>
@@ -325,6 +331,12 @@
             <groupId>com.tinkerpop.gremlin</groupId>
             <artifactId>gremlin-groovy</artifactId>
             <version>${gremlin-java.version}</version>
+            <exclusions>
+              <exclusion>
+                <groupId>jline</groupId>
+                <artifactId>jline</artifactId>
+              </exclusion>
+            </exclusions>
           </dependency>
           <dependency>
             <groupId>pentaho-kettle</groupId>
