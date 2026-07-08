@@ -63,7 +63,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-configuration2</artifactId>
-      <version>${dependency.org.apache.commons.commons-configuration2.version}</version>
+      <version>${commons-configuration2.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.tinkerpop</groupId>
