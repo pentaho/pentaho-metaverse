@@ -29,7 +29,7 @@
     <!--<pdi.version>${project.version}</pdi.version>-->
     <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
 
-    <commons-lang.version>2.6</commons-lang.version>
+    <commons-lang3.version>3.18.0</commons-lang3.version>
     <commons-collections.version>3.2.2</commons-collections.version>
   </properties>
   <dependencies>
@@ -56,6 +56,12 @@
       <artifactId>gremlin-core</artifactId>
       <version>${dependency.org.apache.tinkerpop.version}</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-configuration2</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.tinkerpop</groupId>
@@ -112,9 +118,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>${commons-lang.version}</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -135,6 +141,10 @@
         <exclusion>
           <groupId>jline</groupId>
           <artifactId>jline</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-lang3</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -321,7 +331,7 @@
           <dependency>
             <groupId>pentaho-kettle</groupId>
             <artifactId>kettle-ui-swt</artifactId>
-            <version>11.0.0.2-294-CUST-316</version>
+            <version>11.0.0.2-294</version>
           </dependency>
           <dependency>
             <groupId>pentaho</groupId>
