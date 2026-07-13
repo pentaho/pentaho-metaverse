@@ -9,7 +9,7 @@
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>sample-metaverse-bundle</artifactId>
-  <version>11.0.0.2-294</version>
+  <version>11.0.0.2-294-CUST-316</version>
   <packaging>bundle</packaging>
   <name>sample-metaverse-bundle Bundle</name>
   <description>sample-metaverse-bundle OSGi bundle project.</description>
@@ -28,12 +28,12 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <version>11.0.0.2-294</version>
     </dependency>
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-engine</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <version>11.0.0.2-294</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

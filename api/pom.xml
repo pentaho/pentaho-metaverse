@@ -19,7 +19,7 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <version>11.0.0.2-294</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -35,7 +35,7 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-engine</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <version>11.0.0.2-294</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -91,7 +91,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <version>${dependency.pentaho.pentaho-platform-core.version}</version>
+      <version>11.0.0.2-294</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -131,14 +131,14 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.2-294</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.2-294</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>

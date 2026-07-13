@@ -128,9 +128,9 @@
       <version>${commons-collections.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.tinkerpop.gremlin</groupId>
-      <artifactId>gremlin-java</artifactId>
-      <version>${gremlin-java.version}</version>
+      <groupId>org.apache.tinkerpop</groupId>
+      <artifactId>gremlin-groovy</artifactId>
+      <version>${dependency.org.apache.tinkerpop.version}</version>
       <exclusions>
         <exclusion>
           <groupId>jline</groupId>
@@ -152,7 +152,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
-      <version>${dependency.pentaho.pentaho-platform-core.version}</version>
+      <version>11.0.0.2-294</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -164,7 +164,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-repository</artifactId>
-      <version>${dependency.pentaho.pentaho-platform-repository.version}</version>
+      <version>11.0.0.2-294</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -188,7 +188,7 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <version>11.0.0.2-294</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -200,7 +200,7 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-engine</artifactId>
-      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <version>11.0.0.2-294</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -260,7 +260,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-mongo-utils</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.2-294</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -272,7 +272,7 @@
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.2-294</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
@@ -310,7 +310,7 @@
           <dependency>
             <groupId>org.apache.tinkerpop</groupId>
             <artifactId>gremlin-groovy</artifactId>
-            <version>${gremlin-java.version}</version>
+            <version>${dependency.org.apache.tinkerpop.version}</version>
             <exclusions>
               <exclusion>
                 <groupId>jline</groupId>
@@ -321,7 +321,7 @@
           <dependency>
             <groupId>pentaho-kettle</groupId>
             <artifactId>kettle-ui-swt</artifactId>
-            <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+            <version>11.0.0.2-294-CUST-316</version>
           </dependency>
           <dependency>
             <groupId>pentaho</groupId>
