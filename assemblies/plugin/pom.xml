@@ -21,7 +21,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-metaverse-core</artifactId>
-      <version>${project.version}</version>
+      <version>11.0.0.2-294-CUST-316</version>
       <exclusions>
         <exclusion>
           <groupId>pentaho</groupId>
@@ -48,8 +48,12 @@
           <artifactId>jackson-annotations</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>commons-configuration</groupId>
+          <groupId>org.apache.commons</groupId>
           <artifactId>commons-configuration</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-configuration2</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
