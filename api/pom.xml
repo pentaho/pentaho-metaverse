@@ -9,7 +9,7 @@
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>pentaho-metaverse-api</artifactId>
-  <version>11.0.0.2-294-CUST-316</version>
+  <version>11.0.0.2-294</version>
   <name>pentaho-metaverse-api Bundle</name>
   <description>pentaho-metaverse-api OSGi bundle project.</description>
   <properties>
