@@ -13,6 +13,7 @@
 
 package org.pentaho.metaverse.impl.model.kettle.json;
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.junit.Before;
@@ -84,5 +85,15 @@ public class KettleObjectMapperTest {
     serializers.add( serializer );
     mapper = new KettleObjectMapper( serializers, null );
     mapper.writeValueAsString( new TransMeta() );
+  }
+
+  @Test( expected = UnrecognizedPropertyException.class )
+  public void testReadValueRejectsUnknownProperties() throws Exception {
+    mapper = new KettleObjectMapper( null, null );
+    mapper.readValue( "{\"known\":\"value\",\"unexpected\":true}", TestModel.class );
+  }
+
+  public static class TestModel {
+    public String known;
   }
 }

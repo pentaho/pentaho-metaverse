@@ -15,7 +15,6 @@ package org.pentaho.metaverse.impl.model.kettle.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -65,7 +64,6 @@ public class KettleObjectMapper {
 
   private void doInit( List<StdSerializer> serializers, List<StdDeserializer> deserializers ) {
     mapper = new ObjectMapper();
-    mapper.disable( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES );
     mapper.enable( SerializationFeature.INDENT_OUTPUT );
     mapper.disable( SerializationFeature.FAIL_ON_EMPTY_BEANS );
     mapper.enable( SerializationFeature.WRAP_EXCEPTIONS );
