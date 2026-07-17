@@ -21,7 +21,7 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-metaverse-core</artifactId>
-      <version>11.0.0.2-294-CUST-316</version>
+      <version>${project.version}</version>
       <exclusions>
         <exclusion>
           <groupId>pentaho</groupId>
