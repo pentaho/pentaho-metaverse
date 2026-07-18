@@ -2,22 +2,23 @@
  *
  * Pentaho
  *
- * Copyright (C) 2024 by Hitachi Vantara, LLC : http://www.pentaho.com
+ * Copyright (C) 2024 - 2026 by Pentaho Canada Inc. : http://www.pentaho.com
  *
  * Use of this software is governed by the Business Source License included
  * in the LICENSE.TXT file.
  *
- * Change Date: 2029-07-20
+ * Change Date: 2030-06-15
  ******************************************************************************/
+
 
 
 package org.pentaho.metaverse.api.model;
 
 /**
- * The IExecutionEngine interface describes a Hitachi Vantara execution engine.
+ * The IExecutionEngine interface describes a Pentaho execution engine.
  *
- * A Hitachi Vantara execution engine is any product that can operate on Hitachi Vantara documents/artifacts. For example,
- * Pentaho Data Integration is a Hitachi Vantara execution engine as it operates on Transformations and Jobs.
+ * A Pentaho execution engine is any product that can operate on Pentaho documents/artifacts. For example,
+ * Pentaho Data Integration is a Pentaho execution engine as it operates on Transformations and Jobs.
  */
 public interface IExecutionEngine extends IVersionInfo {
 
