@@ -2,13 +2,14 @@
  *
  * Pentaho
  *
- * Copyright (C) 2024 by Hitachi Vantara, LLC : http://www.pentaho.com
+ * Copyright (C) 2024 - 2026 by Pentaho Canada Inc. : http://www.pentaho.com
  *
  * Use of this software is governed by the Business Source License included
  * in the LICENSE.TXT file.
  *
- * Change Date: 2029-07-20
+ * Change Date: 2030-06-15
  ******************************************************************************/
+
 
 
 package org.pentaho.dictionary;
@@ -73,7 +74,7 @@ import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_USER_CONTENT;
 import static org.pentaho.dictionary.DictionaryConst.NODE_TYPE_WEBSERVICE;
 
 /**
- * A helper class for the Hitachi Vantara Dictionary
+ * A helper class for the Pentaho Dictionary
  *
  * @author jdixon
  */

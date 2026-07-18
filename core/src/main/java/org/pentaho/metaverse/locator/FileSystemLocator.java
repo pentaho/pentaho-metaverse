@@ -2,13 +2,14 @@
  *
  * Pentaho
  *
- * Copyright (C) 2024 by Hitachi Vantara, LLC : http://www.pentaho.com
+ * Copyright (C) 2024 - 2026 by Pentaho Canada Inc. : http://www.pentaho.com
  *
  * Use of this software is governed by the Business Source License included
  * in the LICENSE.TXT file.
  *
- * Change Date: 2029-07-20
+ * Change Date: 2030-06-15
  ******************************************************************************/
+
 
 
 package org.pentaho.metaverse.locator;
@@ -25,7 +26,7 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * An abstract implementation of a document locator for Hitachi Vantara repositories
+ * An abstract implementation of a document locator for Pentaho repositories
  * @author jdixon
  *
  */
