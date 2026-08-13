@@ -144,6 +144,10 @@
       <version>${dependency.org.apache.tinkerpop.version}</version>
       <exclusions>
         <exclusion>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-lang3</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>jline</groupId>
           <artifactId>jline</artifactId>
         </exclusion>
