@@ -11,22 +11,16 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.step;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.IteratorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.pentaho.metaverse.frames.DatasourceNode;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
-import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,9 +30,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.pentaho.dictionary.DictionaryConst.*;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
 // TODO: Ignore the test for now, as it will not run succesfully on a node that does not have the required DB configured
 @Ignore
 public class TableOutputValidationIT extends StepAnalyzerValidationIT {
