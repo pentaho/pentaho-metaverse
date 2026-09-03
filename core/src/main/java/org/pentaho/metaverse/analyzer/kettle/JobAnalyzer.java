@@ -10,8 +10,6 @@
  * Change Date: 2030-06-15
  ******************************************************************************/
 
-
-
 package org.pentaho.metaverse.analyzer.kettle;
 
 import org.pentaho.di.base.AbstractMeta;
@@ -25,7 +23,6 @@ import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.jobentry.GenericJobEntryMetaAnalyzer;
-import org.pentaho.metaverse.analyzer.kettle.jobentry.JobEntryAnalyzerProvider;
 import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
@@ -52,9 +49,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * The JobAnalyzer class is responsible for gathering job metadata, creating links
- * to form relationships between the job and its child collaborators (ie, entries, dbMetas), and
- * calling the analyzers responsible for providing the metadata for the child collaborators.
+ * The JobAnalyzer class is responsible for gathering job metadata, creating links to form relationships between the job
+ * and its child collaborators (ie, entries, dbMetas), and calling the analyzers responsible for providing the metadata
+ * for the child collaborators.
  */
 public class JobAnalyzer extends BaseDocumentAnalyzer {
 
@@ -66,7 +63,7 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
   /**
    * A reference to the job entry analyzer provider
    */
-  private IJobEntryAnalyzerProvider jobEntryAnalyzerProvider = JobEntryAnalyzerProvider.getInstance();
+  private IJobEntryAnalyzerProvider jobEntryAnalyzerProvider;
 
   private static final Logger log = LoggerFactory.getLogger( JobAnalyzer.class );
 
@@ -94,7 +91,8 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
       jobMeta = (JobMeta) repoObject;
     }
 
-    // construct a dummy job based on our JobMeta so we get out VariableSpace set properly
+    // construct a dummy job based on our JobMeta so we get out VariableSpace set
+    // properly
     jobMeta.setFilename( document.getStringID() );
 
     IComponentDescriptor documentDescriptor = new MetaverseComponentDescriptor( document.getStringID(),
@@ -112,9 +110,9 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
   }
 
   @Override
-  public synchronized IMetaverseNode analyze(
-    final IComponentDescriptor documentDescriptor, final AbstractMeta meta, final IMetaverseNode node,
-    final String documentPath ) throws MetaverseAnalyzerException {
+  public synchronized IMetaverseNode analyze( final IComponentDescriptor documentDescriptor, final AbstractMeta meta,
+                                              final IMetaverseNode node, final String documentPath )
+    throws MetaverseAnalyzerException {
 
     final JobMeta jobMeta = (JobMeta) meta;
     Job j = new Job( null, jobMeta );
@@ -199,9 +197,9 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
           if ( jobEntryAnalyzers != null && !jobEntryAnalyzers.isEmpty() ) {
             for ( IJobEntryAnalyzer jobEntryAnalyzer : jobEntryAnalyzers ) {
               // the analyzers provided by the provider are singletons created at startup time - in order to be able
-              // to analyze multiple jobs concurrently, we need to clone the analyzer, such that each job entry has
-              // its own dedicated analyzer with a metaverseBuilder that is unique to the job execution and does not
-              // change while the job is being analyzed
+              // to analyze multiple jobs concurrently, we need to clone the analyzer, such that each
+              // job entry has its own dedicated analyzer with a metaverseBuilder that is unique to the
+              // job execution and does not change while the job is being analyzed
               if ( jobEntryAnalyzer instanceof IClonableJobEntryAnalyzer ) {
                 jobEntryAnalyzer = ( (IClonableJobEntryAnalyzer) jobEntryAnalyzer ).cloneAnalyzer();
                 ( (IClonableJobEntryAnalyzer) jobEntryAnalyzer ).setDocumentAnalyzer( this );
@@ -215,23 +213,24 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
             }
           } else if ( new AnnotatedClassFields( jobEntryInterface, jobEntryInterface.getParentJobMeta() )
             .hasMetaverseAnnotations() ) {
-            AnnotationDrivenJobAnalyzer annotationDrivenJobAnalyzer = new AnnotationDrivenJobAnalyzer( jobEntryInterface );
-            annotationDrivenJobAnalyzer.setMetaverseBuilder( metaverseBuilder );
-            annotationDrivenJobAnalyzer.setDocumentAnalyzer( this );
-            annotationDrivenJobAnalyzer.setDocumentDescriptor( documentDescriptor );
-            annotationDrivenJobAnalyzer.setDocumentPath( documentPath );
-            jobEntryNode = annotationDrivenJobAnalyzer.analyze( entryDescriptor, jobEntryInterface );
-          } else {
-            GenericJobEntryMetaAnalyzer defaultJobEntryAnalyzer = new GenericJobEntryMetaAnalyzer();
-            defaultJobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
-            jobEntryNode = defaultJobEntryAnalyzer.analyze( entryDescriptor, jobEntryInterface );
-          }
+              AnnotationDrivenJobAnalyzer annotationDrivenJobAnalyzer = new AnnotationDrivenJobAnalyzer(
+                jobEntryInterface );
+              annotationDrivenJobAnalyzer.setMetaverseBuilder( metaverseBuilder );
+              annotationDrivenJobAnalyzer.setDocumentAnalyzer( this );
+              annotationDrivenJobAnalyzer.setDocumentDescriptor( documentDescriptor );
+              annotationDrivenJobAnalyzer.setDocumentPath( documentPath );
+              jobEntryNode = annotationDrivenJobAnalyzer.analyze( entryDescriptor, jobEntryInterface );
+            } else {
+              GenericJobEntryMetaAnalyzer defaultJobEntryAnalyzer = new GenericJobEntryMetaAnalyzer();
+              defaultJobEntryAnalyzer.setMetaverseBuilder( metaverseBuilder );
+              jobEntryNode = defaultJobEntryAnalyzer.analyze( entryDescriptor, jobEntryInterface );
+            }
           if ( jobEntryNode != null ) {
             metaverseBuilder.addLink( node, DictionaryConst.LINK_CONTAINS, jobEntryNode );
           }
         }
       } catch ( Exception mae ) {
-        //Don't throw an exception, just log and carry on
+        // Don't throw an exception, just log and carry on
         log.warn( Messages.getString( "ERROR.ErrorDuringAnalysis", entry.getName(),
           Const.NVL( mae.getLocalizedMessage(), "Unspecified" ) ) );
         log.debug( Messages.getString( "ERROR.ErrorDuringAnalysisStackTrace" ), mae );
@@ -304,9 +303,9 @@ public class JobAnalyzer extends BaseDocumentAnalyzer {
   }
 
   /**
-   * Retrieves the step analyzer provider. This is used to find step-specific analyzers
+   * Retrieves job-entry analyzer provider used to find job-entry-specific analyzers.
    *
-   * @return the IKettleStepAnalyzer provider instance that provides step-specific analyzers
+   * @return the job-entry analyzer provider
    */
   public IJobEntryAnalyzerProvider getJobEntryAnalyzerProvider() {
     if ( jobEntryAnalyzerProvider != null ) {

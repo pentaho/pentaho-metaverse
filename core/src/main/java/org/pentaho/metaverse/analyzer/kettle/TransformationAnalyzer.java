@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.analyzer.kettle;
 
 import org.pentaho.di.base.AbstractMeta;
@@ -26,7 +25,6 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.analyzer.kettle.step.GenericStepMetaAnalyzer;
-import org.pentaho.metaverse.analyzer.kettle.step.StepAnalyzerProvider;
 import org.pentaho.metaverse.api.IClonableDocumentAnalyzer;
 import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
@@ -75,7 +73,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
     }
   };
 
-  private IStepAnalyzerProvider stepAnalyzerProvider = StepAnalyzerProvider.getInstance();
+  private IStepAnalyzerProvider stepAnalyzerProvider;
 
   private static final Logger log = LoggerFactory.getLogger( TransformationAnalyzer.class );
 
@@ -119,9 +117,9 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
   }
 
   @Override
-  public synchronized IMetaverseNode analyze(
-    final IComponentDescriptor documentDescriptor, final AbstractMeta meta, final IMetaverseNode node,
-    final String documentPath ) throws MetaverseAnalyzerException {
+  public synchronized IMetaverseNode analyze( final IComponentDescriptor documentDescriptor, final AbstractMeta meta,
+                                              final IMetaverseNode node, final String documentPath )
+    throws MetaverseAnalyzerException {
 
     final TransMeta transMeta = (TransMeta) meta;
     Trans t = new Trans( transMeta );
@@ -189,7 +187,7 @@ public class TransformationAnalyzer extends BaseDocumentAnalyzer {
         }
       }
     }
-    final List<AnalyzerHolder> analyzerHolders = new ArrayList();
+    final List<AnalyzerHolder> analyzerHolders = new ArrayList<>();
 
     // handle the step
     for ( int stepNr = 0; stepNr < transMeta.nrSteps(); stepNr++ ) {
