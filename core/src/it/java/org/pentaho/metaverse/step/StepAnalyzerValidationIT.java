@@ -11,34 +11,37 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.step;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import org.pentaho.metaverse.BaseMetaverseValidationIT;
 import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
 public abstract class StepAnalyzerValidationIT extends BaseMetaverseValidationIT {
+
+  private MockedStatic<MetaverseConfig> metaverseConfigMock;
 
   @Before
   public void init() throws Exception {
 
-    PowerMockito.mockStatic( MetaverseConfig.class );
-    Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( true );
+    metaverseConfigMock = Mockito.mockStatic( MetaverseConfig.class, Mockito.CALLS_REAL_METHODS );
+    metaverseConfigMock.when( MetaverseConfig::adjustExternalResourceFields ).thenReturn( true );
+    metaverseConfigMock.when( MetaverseConfig::deduplicateTransformationFields ).thenReturn( true );
+    metaverseConfigMock.when( MetaverseConfig::consolidateSubGraphs ).thenReturn( true );
+    metaverseConfigMock.when( MetaverseConfig::generateSubGraphs ).thenReturn( true );
 
+  }
+
+  @After
+  public void tearDownMock() {
+    if ( metaverseConfigMock != null ) {
+      metaverseConfigMock.close();
+      metaverseConfigMock = null;
+    }
   }
 
   @Override
@@ -48,11 +51,11 @@ public abstract class StepAnalyzerValidationIT extends BaseMetaverseValidationIT
 
   protected void initTest( final String transNodeName ) throws Exception {
     BaseMetaverseValidationIT.init( getRootFolder() + "/" + transNodeName,
-      getOutputFileRoot() + "/" + transNodeName + ".graphml");
+      getOutputFileRoot() + "/" + transNodeName + ".graphml" );
   }
 
   protected String getRootFolder() {
-    return  "src/it/resources/repo/" + getClass().getSimpleName();
+    return "src/it/resources/repo/" + getClass().getSimpleName();
   }
 
   protected String getOutputFileRoot() {

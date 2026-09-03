@@ -2,9 +2,12 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"
        default-lazy-init="true">
 
-  <!-- Configure our graph using the SynchronizedGraphFactory and a configuration file -->
+  <!-- Configure our graph using the SynchronizedGraphFactory; the configuration is ignored,
+       a new TinkerGraph is always opened (see SynchronizedGraphFactory.open) -->
   <bean id="MetaverseGraphImpl" class="org.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open">
-    <constructor-arg value="src/it/resources/graph.properties"/>
+    <constructor-arg>
+      <map/>
+    </constructor-arg>
   </bean>
 
   <bean id="IMetaverseBuilder" class="org.pentaho.metaverse.impl.MetaverseBuilder" scope="singleton">

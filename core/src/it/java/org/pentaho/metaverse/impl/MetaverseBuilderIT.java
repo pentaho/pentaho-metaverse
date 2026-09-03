@@ -72,6 +72,9 @@ public class MetaverseBuilderIT {
 
   @AfterClass
   public static void cleanUp() throws Exception {
+    // drain async lineage analysis before tearing down PentahoSystem; otherwise worker threads
+    // keep analyzing against a torn-down system and can race export readers in the same fork JVM
+    org.pentaho.metaverse.graph.LineageGraphCompletionService.getInstance().waitTillEmpty();
     IntegrationTestUtil.shutdownPentahoSystem();
   }
 

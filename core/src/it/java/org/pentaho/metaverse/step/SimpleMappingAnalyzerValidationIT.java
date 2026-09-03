@@ -11,20 +11,14 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.step;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.IteratorUtils;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
-import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -32,9 +26,6 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.pentaho.dictionary.DictionaryConst.*;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
 public class SimpleMappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
 
   private static final String VALUE = "value";
@@ -111,8 +102,9 @@ public class SimpleMappingAnalyzerValidationIT extends StepAnalyzerValidationIT 
       .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
       .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
       .put( PROPERTY_PATH, SKIP ).put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
-      .put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] update field names,input [1] rename [1],output [1],output [1] "
-        + "update field names,output [1] rename [1]" )
+      .put( PROPERTY_VERBOSE_DETAILS,
+        "input [1],input [1] update field names,input [1] rename [1],output [1],output [1] "
+          + "update field names,output [1] rename [1]" )
       .put( "input [1]", "Generate random integer > [simple_sub] Input parity" )
       .put( "input [1] update field names", "true" )
       .put( "input [1] rename [1]", "randomValue > value" )

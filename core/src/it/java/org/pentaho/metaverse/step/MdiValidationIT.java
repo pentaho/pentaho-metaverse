@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.step;
 
 import com.google.common.collect.ImmutableMap;
@@ -19,16 +18,11 @@ import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.pentaho.metaverse.frames.FileNode;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.StreamFieldNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
-import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,9 +32,6 @@ import java.util.Map;
 import static org.junit.Assert.*;
 import static org.pentaho.dictionary.DictionaryConst.*;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
 // TODO: Ignored for now, remove the @Ignore annotation once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved
 @Ignore
 public class MdiValidationIT extends StepAnalyzerValidationIT {
@@ -118,8 +109,8 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
     final List<StreamFieldNode> inputFields = IteratorUtils.toList(
       textFileOutputNode.getInputStreamFields().iterator() );
     assertEquals( mdiOutputFields.size(), inputFields.size() );
-    final List<StreamFieldNode> tempalteReadFromStepOutputFields = templateReadFromStepNode == null
-      ? new ArrayList() : IteratorUtils.toList( templateReadFromStepNode.getOutputStreamFields().iterator() );
+    final List<StreamFieldNode> templateReadFromStepOutputFields = templateReadFromStepNode == null ? new ArrayList() :
+      IteratorUtils.toList( templateReadFromStepNode.getOutputStreamFields().iterator() );
 
     for ( final StreamFieldNode field : inputFields ) {
       assertTrue( mdiOutputFields.contains( field ) );
@@ -132,7 +123,7 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
         final StreamFieldNode derivingField = (StreamFieldNode) IteratorUtils.toList(
           field.getFieldNodesThatDeriveMe().iterator() ).get( 0 );
         assertTrue( mdiInputFields.contains( derivingField ) );
-        assertTrue( tempalteReadFromStepOutputFields.contains( derivingField ) );
+        assertTrue( templateReadFromStepOutputFields.contains( derivingField ) );
         assertEquals( field.getName(), derivingField.getName() );
       }
     }
@@ -457,8 +448,10 @@ public class MdiValidationIT extends StepAnalyzerValidationIT {
       .put( "streamTargetStepname", SKIP ).put( "streamSourceStepname", SKIP ).put( "targetFile", SKIP )
       .put( "sourceStepName", SKIP )
       .put( PROPERTY_VERBOSE_DETAILS, "mapping [1],ignored mapping [1],mapping [2],ignored mapping [2]" )
-      .put( "mapping [1]", "Text Output: Separator > [template_stream_different_than_mapping] My Text file output: SEPARATOR" )
-      .put( "mapping [2]", "Text Output: File Name > [template_stream_different_than_mapping] My Text file output: FILENAME" )
+      .put( "mapping [1]",
+        "Text Output: Separator > [template_stream_different_than_mapping] My Text file output: SEPARATOR" )
+      .put( "mapping [2]",
+        "Text Output: File Name > [template_stream_different_than_mapping] My Text file output: FILENAME" )
       .put( "ignored mapping [1]", "Text Output - Fields: Trim Type > [template_stream_different_than_mapping]"
         + " My Text file output: OUTPUT_TRIM" )
       .put( "ignored mapping [2]", "Text Output - Fields: Field Name > [template_stream_different_than_mapping]"

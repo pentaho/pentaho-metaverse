@@ -11,39 +11,42 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Runs the integration test with the {@link MetaverseConfig} mocked to have
  * the {@code deduplicateTransformationFields} graph dedupping turned off.
  */
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
 public class MetaverseValidationSkipDedupIT extends MetaverseValidationIT {
+
+  private static MockedStatic<MetaverseConfig> metaverseConfigMock;
 
   @BeforeClass
   public static void init() throws Exception {
 
-    PowerMockito.mockStatic( MetaverseConfig.class );
+    metaverseConfigMock = Mockito.mockStatic( MetaverseConfig.class, Mockito.CALLS_REAL_METHODS );
     // expecting to deduplicate by default - need to mock to return false
-    Mockito.when( MetaverseConfig.adjustExternalResourceFields() ).thenReturn( false );
-    Mockito.when( MetaverseConfig.deduplicateTransformationFields() ).thenReturn( false );
-    Mockito.when( MetaverseConfig.consolidateSubGraphs() ).thenReturn( true );
-    Mockito.when( MetaverseConfig.generateSubGraphs() ).thenReturn( true );
+    metaverseConfigMock.when( MetaverseConfig::adjustExternalResourceFields ).thenReturn( false );
+    metaverseConfigMock.when( MetaverseConfig::deduplicateTransformationFields ).thenReturn( false );
+    metaverseConfigMock.when( MetaverseConfig::consolidateSubGraphs ).thenReturn( true );
+    metaverseConfigMock.when( MetaverseConfig::generateSubGraphs ).thenReturn( true );
 
     MetaverseValidationIT.init();
+  }
+
+  @AfterClass
+  public static void tearDownMock() {
+    if ( metaverseConfigMock != null ) {
+      metaverseConfigMock.close();
+      metaverseConfigMock = null;
+    }
   }
 
   @Test

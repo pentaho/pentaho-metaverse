@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.frames;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -69,14 +68,16 @@ public class RootNode extends Concept {
 
   public List<JobNode> getJobs() {
     List<Vertex> list = graph.traversal().V( vertex.id() )
-      .repeat( __.out() ).emit( __.has( "name", "Job" ) ).until( __.loops().is( P.gte( 5 ) ) )
+      .repeat( __.out() ).until( __.has( "name", "Job" ).or().loops().is( P.gte( 5 ) ) )
+      .has( "name", "Job" )
       .out( "typeconcept" ).dedup().toList();
     return wrapAs( list.iterator(), v -> new JobNode( v, graph ) );
   }
 
   public JobNode getJob( String name ) {
     List<Vertex> result = graph.traversal().V( vertex.id() )
-      .repeat( __.out() ).emit( __.has( "name", "Job" ) ).until( __.loops().is( P.gte( 5 ) ) )
+      .repeat( __.out() ).until( __.has( "name", "Job" ).or().loops().is( P.gte( 5 ) ) )
+      .has( "name", "Job" )
       .out().has( "name", name ).dedup().toList();
     return result.isEmpty() ? null : new JobNode( result.get( 0 ), graph );
   }
@@ -115,7 +116,8 @@ public class RootNode extends Concept {
 
   public List<DatasourceNode> getDatasourceNodes() {
     List<Vertex> list = graph.traversal().V( vertex.id() )
-      .repeat( __.out() ).emit( __.has( "name", "Database Connection" ) ).until( __.loops().is( P.gte( 5 ) ) )
+      .repeat( __.out() ).until( __.has( "name", "Database Connection" ).or().loops().is( P.gte( 5 ) ) )
+      .has( "name", "Database Connection" )
       .out().toList();
     return wrapAs( list.iterator(), v -> new DatasourceNode( v, graph ) );
   }
@@ -196,9 +198,9 @@ public class RootNode extends Concept {
   public FilterRowsStepNode getFilterRowsStepNode( String name ) {
     List<Vertex> result = graph.traversal().V( vertex.id() )
       .repeat( __.out() )
-      .emit( __.has( "type", "Transformation Step" ).has( "name", name ) )
-      .until( __.loops().is( P.gte( 20 ) ) )
-      .as( "step" ).in( "contains" ).has( "name", "filter_rows" ).select( "step" )
+      .until( __.has( "type", "Transformation Step" ).has( "name", name ).or().loops().is( P.gte( 20 ) ) )
+      .has( "type", "Transformation Step" ).has( "name", name )
+      .as( "step" ).in( "contains" ).has( "name", "filter_rows" ).<Vertex>select( "step" )
       .toList();
     return result.isEmpty() ? null : new FilterRowsStepNode( result.get( 0 ), graph );
   }
@@ -231,7 +233,7 @@ public class RootNode extends Concept {
       .out().has( "name", "Transformation" )
       .out().has( "name", "Transformation Step" )
       .out( "typeconcept" ).has( "name", stepName )
-      .as( "step" ).in( "contains" ).has( "name", transformationName ).select( "step" )
+      .as( "step" ).in( "contains" ).has( "name", transformationName ).<Vertex>select( "step" )
       .toList();
     return result.isEmpty() ? null : factory.apply( result.get( 0 ) );
   }

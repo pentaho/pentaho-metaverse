@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.client;
 
 import org.apache.tinkerpop.gremlin.structure.Graph;
@@ -79,7 +78,10 @@ public class LineageClientIT {
   }
 
   @AfterClass
-  public static void cleanUp() {
+  public static void cleanUp() throws Exception {
+    // drain async lineage analysis before tearing down PentahoSystem; otherwise worker threads
+    // keep analyzing against a torn-down system and race the next test class in the shared fork JVM
+    org.pentaho.metaverse.graph.LineageGraphCompletionService.getInstance().waitTillEmpty();
     IntegrationTestUtil.shutdownPentahoSystem();
   }
 
