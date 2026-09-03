@@ -11,16 +11,15 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.analyzer.kettle;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
@@ -44,6 +43,7 @@ import org.pentaho.metaverse.api.MetaverseAnalyzerException;
 import org.pentaho.metaverse.api.MetaverseComponentDescriptor;
 import org.pentaho.metaverse.api.analyzer.kettle.step.IStepAnalyzerProvider;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -52,7 +52,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -60,8 +60,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 /**
- * @See com.pentaho.analyzer.kettle.MetaverseDocumentAnalyzerTest for base TransformationAnalyzer tests. Tests here
- * are specific to the TransformationAnalyzer.
+ * @see com.pentaho.analyzer.kettle.MetaverseDocumentAnalyzerTest for base TransformationAnalyzer tests. Tests here
+ *      are specific to the TransformationAnalyzer.
  */
 @RunWith( MockitoJUnitRunner.StrictStubs.class )
 public class TransformationAnalyzerTest {
@@ -111,13 +111,6 @@ public class TransformationAnalyzerTest {
   /**
    * @throws Exception
    */
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
-
-  /**
-   * @throws Exception
-   */
   @Before
   public void setUp() throws Exception {
     IMetaverseObjectFactory factory = MetaverseTestUtils.getMetaverseObjectFactory();
@@ -136,23 +129,16 @@ public class TransformationAnalyzerTest {
     when( mockStepMeta.getStepMetaInterface() ).thenReturn( mockGenRowsStepMeta );
     when( mockStepMeta.getParentTransMeta() ).thenReturn( mockContent );
 
-    when( mockContent.listVariables() ).thenReturn( new String[]{} );
+    when( mockContent.listVariables() ).thenReturn( new String[] {} );
     final String PARAM = "param1";
-    when( mockContent.listParameters() ).thenReturn( new String[]{ PARAM } );
+    when( mockContent.listParameters() ).thenReturn( new String[] { PARAM } );
     when( mockContent.nrSteps() ).thenReturn( 1 );
     when( mockContent.getStep( 0 ) ).thenReturn( mockStepMeta );
     when( mockContent.getParameterDefault( PARAM ) ).thenReturn( "default" );
-    when( mockContent.getNextStepNames( mockStepMeta ) ).thenReturn( new String[] {"previousStepName"} );
+    when( mockContent.getNextStepNames( mockStepMeta ) ).thenReturn( new String[] { "previousStepName" } );
 
     descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_TRANS, namespace );
 
-  }
-
-  /**
-   * @throws Exception
-   */
-  @After
-  public void tearDown() throws Exception {
   }
 
   @Test
@@ -186,7 +172,7 @@ public class TransformationAnalyzerTest {
     StepMeta mockToStepMeta = mock( StepMeta.class );
     when( mockToStepMeta.getStepMetaInterface() ).thenReturn( mockSelectValuesStepMeta );
     StepIOMetaInterface stepIO = mock( StepIOMetaInterface.class );
-    when( stepIO.getInfoStepnames() ).thenReturn( new String[]{} );
+    when( stepIO.getInfoStepnames() ).thenReturn( new String[] {} );
     when( mockSelectValuesStepMeta.getStepIOMeta() ).thenReturn( stepIO );
 
     when( mockToStepMeta.getParentTransMeta() ).thenReturn( mockContent );
@@ -268,6 +254,18 @@ public class TransformationAnalyzerTest {
   }
 
   @Test
+  public void testGetStepAnalyzerProviderFallsBackToPentahoSystem() {
+    IStepAnalyzerProvider registeredProvider = mock( IStepAnalyzerProvider.class );
+
+    try ( MockedStatic<PentahoSystem> pentahoSystem = Mockito.mockStatic( PentahoSystem.class ) ) {
+      pentahoSystem.when( () -> PentahoSystem.get( IStepAnalyzerProvider.class ) )
+        .thenReturn( registeredProvider );
+
+      assertSame( registeredProvider, new TransformationAnalyzer().getStepAnalyzerProvider() );
+    }
+  }
+
+  @Test
   public void testGetStepAnalyzersWithNullBaseStepMeta() {
     TransformationAnalyzer spyAnalyzer = spy( analyzer );
     when( spyAnalyzer.getBaseStepMetaFromStepMeta( mockStepMeta ) ).thenReturn( null );
@@ -287,6 +285,6 @@ public class TransformationAnalyzerTest {
   @Test
   public void testGetSupportedTypes() {
     Set<String> types = analyzer.getSupportedTypes();
-    assertTrue( types == TransformationAnalyzer.defaultSupportedTypes );
+    assertSame( TransformationAnalyzer.defaultSupportedTypes, types );
   }
 }

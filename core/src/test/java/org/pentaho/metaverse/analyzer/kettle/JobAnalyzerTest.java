@@ -11,11 +11,8 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.analyzer.kettle;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,7 +50,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -61,7 +57,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * @See com.pentaho.analyzer.kettle.MetaverseDocumentAnalyzerTest for base JobAnalyzer tests. Tests here
+ * @see com.pentaho.analyzer.kettle.MetaverseDocumentAnalyzerTest for base JobAnalyzer tests. Tests here
  * are specific to the JobAnalyzer.
  */
 @RunWith( MockitoJUnitRunner.StrictStubs.class )
@@ -112,13 +108,6 @@ public class JobAnalyzerTest {
   /**
    * @throws Exception
    */
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
-
-  /**
-   * @throws Exception
-   */
   @Before
   public void setUp() throws Exception {
 
@@ -147,13 +136,6 @@ public class JobAnalyzerTest {
     when( mockContent.getParameterDefault( PARAM ) ).thenReturn( "default" );
 
     descriptor = new MetaverseComponentDescriptor( "name", DictionaryConst.NODE_TYPE_JOB, namespace );
-  }
-
-  /**
-   * @throws Exception
-   */
-  @After
-  public void tearDown() throws Exception {
   }
 
   @Test
@@ -196,13 +178,14 @@ public class JobAnalyzerTest {
   public void testAnalyzerWithEntriesSpecificAnalyzer() throws MetaverseAnalyzerException {
 
     analyzer.setJobEntryAnalyzerProvider( jobEntryAnalyzerProvider );
-    final Set<IJobEntryAnalyzer> jobEntryAnalyzers = null;
     when( jobEntryAnalyzerProvider.getAnalyzers( any( Collection.class ) ) ).thenReturn(
-      new ArrayList<IJobEntryAnalyzer>() {{
-        add(
-          mock( IJobEntryAnalyzer.class )
-        );
-      }} );
+      new ArrayList<IJobEntryAnalyzer>() {
+        {
+          add(
+            mock( IJobEntryAnalyzer.class )
+          );
+        }
+      } );
     IMetaverseNode node = analyzer.analyze( descriptor, mockJobDoc );
     assertNotNull( node );
   }
@@ -254,6 +237,6 @@ public class JobAnalyzerTest {
   @Test
   public void testGetSupportedTypes() {
     Set<String> types = analyzer.getSupportedTypes();
-    assertSame( types, JobAnalyzer.defaultSupportedTypes );
+    assertSame( JobAnalyzer.defaultSupportedTypes, types );
   }
 }
