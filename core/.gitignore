@@ -9,6 +9,7 @@
 *.graphml
 tinkergraph-metadata.dat
 SampleData*.db
+SampleData*.properties
 *test*.json
 *test*.graphjson
 testGraph.csv
