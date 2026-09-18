@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse;
 
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -51,12 +50,12 @@ import static org.pentaho.dictionary.DictionaryConst.*;
 
 public abstract class BaseMetaverseValidationIT {
 
+  public static final String REPO_ID = "FILE_SYSTEM_REPO"; // same as within pentahoObjects.spring.xml
+  public static final String SKIP = "SKIP_COMPARISON";
   protected static IMetaverseReader reader;
   protected static Graph graph;
   protected static RootNode root;
   protected static Map<String, Concept> entityNodes = new HashMap<>();
-
-  public static final String REPO_ID = "FILE_SYSTEM_REPO"; // same as within pentahoObjects.spring.xml
 
   /**
    * Call in the child class's BeforeClass method.
@@ -94,22 +93,15 @@ public abstract class BaseMetaverseValidationIT {
 
   @AfterClass
   public static void cleanUpClass() {
+    if ( graph != null ) {
+      graph.traversal().V().drop().iterate();
+      graph = null;
+    }
+    reader = null;
+    root = null;
+    entityNodes.clear();
     IntegrationTestUtil.shutdownPentahoSystem();
   }
-
-  @After
-  public void cleanUpInstance() {
-    if ( shouldCleanupInstance() ) {
-      IntegrationTestUtil.shutdownPentahoSystem();
-    }
-  }
-
-  /**
-   * Returns true if the test cleaup should occur after every test instance (within the method marked with the @After
-   * annotation) rather than just when the class is being torn down (within the method annotated with @AfterClass)
-   */
-  protected abstract boolean shouldCleanupInstance();
-
 
   protected static Iterable<Vertex> getVertices() {
     return () -> graph.vertices();
@@ -145,6 +137,19 @@ public abstract class BaseMetaverseValidationIT {
     return col;
   }
 
+  @After
+  public void cleanUpInstance() {
+    if ( shouldCleanupInstance() ) {
+      IntegrationTestUtil.shutdownPentahoSystem();
+    }
+  }
+
+  /**
+   * Returns true if the test cleaup should occur after every test instance (within the method marked with the @After
+   * annotation) rather than just when the class is being torn down (within the method annotated with @AfterClass)
+   */
+  protected abstract boolean shouldCleanupInstance();
+
   /**
    * Verifies that the transformation node with the given name exists in the graph.
    *
@@ -156,8 +161,8 @@ public abstract class BaseMetaverseValidationIT {
   protected TransformationNode verifyTransformationNode( final String transformationName, final boolean isSubTrans ) {
     // verify the existence of two transformation nodes - one for the injector and one for the sub-transformation
     final List<TransformationNode> allTransformations = IteratorUtils.toList( root.getTransformations().iterator() );
-    final TransformationNode node = isSubTrans ? root.getSubTransformation( transformationName )
-      : root.getTransformation( transformationName );
+    final TransformationNode node =
+      isSubTrans ? root.getSubTransformation( transformationName ) : root.getTransformation( transformationName );
     assertNotNull( node );
     assertTrue( allTransformations.contains( node ) );
     assertEquals( "{\"name\":\"" + REPO_ID + "\",\"type\":\"Locator\"}",
@@ -174,7 +179,9 @@ public abstract class BaseMetaverseValidationIT {
    * @return a {@link Map} of step name to stepNode, for convenient lookup by the caller.
    */
   protected Map<String, FramedMetaverseNode> verifyTransformationSteps(
-    final TransformationNode transNode, final String[] stepNames, final boolean isVirtual ) {
+    final TransformationNode transNode,
+    final String[] stepNames,
+    final boolean isVirtual ) {
 
     final List<FramedMetaverseNode> stepNodes = IteratorUtils.toList(
       ( isVirtual ? transNode.getVirtualStepNodes() : transNode.getStepNodes() ).iterator() );
@@ -283,7 +290,6 @@ public abstract class BaseMetaverseValidationIT {
     }
   }
 
-
   protected void verifyStepIOLinks( final TransformationStepNode stepNode, final TestLineageLink... links ) {
     final List<TestLineageLink> linkList = Arrays.asList( links == null ? new TestLineageLink[] {} : links );
     verifyStepIOLinks( stepNode, linkList );
@@ -351,8 +357,6 @@ public abstract class BaseMetaverseValidationIT {
     return verifyLinkedNodes( fromNode, linkLabel, toNodeName ).get( 0 );
   }
 
-  public static final String SKIP = "SKIP_COMPARISON";
-
   public void verifyNodeProperties( final FramedMetaverseNode node, final Map<String, Object> expectedProperties ) {
     final List<String> propertyNames = IteratorUtils.toList( node.getPropertyNames().iterator() );
     final Set<String> encounteredProperties = new HashSet<>();
@@ -395,7 +399,7 @@ public abstract class BaseMetaverseValidationIT {
   }
 
 
-  ///// ----------------- Helper wrapper node objects and methods
+  /// // ----------------- Helper wrapper node objects and methods
 
 
   protected TestTransformationNode testTransformationNode( final String name, final boolean virtual ) {
