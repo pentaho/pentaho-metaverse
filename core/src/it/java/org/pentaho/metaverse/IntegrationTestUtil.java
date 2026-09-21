@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse;
 
 import org.apache.tinkerpop.gremlin.structure.Graph;
@@ -78,7 +77,7 @@ public class IntegrationTestUtil {
 
       Thread.currentThread().setContextClassLoader( MetaverseUtil.class.getClassLoader() );
       IPentahoObjectFactory pentahoObjectFactory = new StandaloneSpringPentahoObjectFactory();
-      pentahoObjectFactory.init( solutionPath,PentahoSystem.getApplicationContext() );
+      pentahoObjectFactory.init( solutionPath, PentahoSystem.getApplicationContext() );
       PentahoSystem.registerObjectFactory( pentahoObjectFactory );
 
       // Restore context classloader
@@ -105,8 +104,9 @@ public class IntegrationTestUtil {
     final Map<Class<?>, String> classMap = new HashMap<Class<?>, String>( 1 );
     classMap.put( StepMetaInterface.class, metaClassName );
 
-    Plugin plugin = new Plugin( new String[]{ pluginId }, StepPluginType.class, StepMetaInterface.class, pluginCategory,
-      stepName, null, null, false, false, classMap, Collections.emptyList(), null, null );
+    Plugin plugin =
+      new Plugin( new String[] { pluginId }, StepPluginType.class, StepMetaInterface.class, pluginCategory, stepName,
+        null, null, false, false, classMap, Collections.emptyList(), null, null );
     PluginRegistry.getInstance().registerPlugin( StepPluginType.class, plugin );
   }
 
