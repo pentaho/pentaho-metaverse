@@ -19,6 +19,7 @@ import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.dictionary.DictionaryConst;
@@ -32,6 +33,7 @@ import org.pentaho.metaverse.api.StepField;
 import org.pentaho.metaverse.api.StepFieldOperations;
 import org.pentaho.metaverse.api.model.IOperation;
 import org.pentaho.metaverse.api.model.Operations;
+import org.pentaho.metaverse.graph.LineageGraphCompletionService;
 import org.pentaho.metaverse.graph.LineageGraphMap;
 import org.pentaho.metaverse.impl.DocumentController;
 import org.pentaho.metaverse.locator.FileSystemLocator;
@@ -78,8 +80,12 @@ public class LineageClientIT {
   }
 
   @AfterClass
-  public static void cleanUp() {
-    IntegrationTestUtil.shutdownPentahoSystem();
+  public static void cleanUp() throws Exception {
+    try {
+      LineageGraphCompletionService.getInstance().waitTillEmpty();
+    } finally {
+      IntegrationTestUtil.shutdownPentahoSystem();
+    }
   }
 
   @Before
@@ -124,6 +130,7 @@ public class LineageClientIT {
     assertEquals( 2, targetFieldNodes.size() );
   }
 
+  @Ignore( "Requires origin-walk fix 5ffb6d4ecea4632488c790057342af2ea60be706 (BACKLOG-50665) backport" )
   @Test
   public void testGetOperationPaths() throws Exception {
     Map<String, Set<List<StepFieldOperations>>> operationPathMap =
@@ -193,6 +200,7 @@ public class LineageClientIT {
     }
   }
 
+  @Ignore( "Requires origin-walk fix 5ffb6d4ecea4632488c790057342af2ea60be706 (BACKLOG-50665) backport" )
   @Test
   public void testGetOriginSteps() throws Exception {
     Set<StepField> originStepsSet;

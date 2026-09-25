@@ -13,7 +13,6 @@
 
 package org.pentaho.metaverse.impl;
 
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 import org.apache.commons.io.FileUtils;
@@ -26,6 +25,7 @@ import org.pentaho.metaverse.IntegrationTestUtil;
 import org.pentaho.metaverse.api.IDocumentController;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
 import org.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.graph.LineageGraphCompletionService;
 import org.pentaho.metaverse.util.MetaverseUtil;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
@@ -73,7 +73,11 @@ public class MetaverseBuilderIT {
 
   @AfterClass
   public static void cleanUp() throws Exception {
-    IntegrationTestUtil.shutdownPentahoSystem();
+    try {
+      LineageGraphCompletionService.getInstance().waitTillEmpty();
+    } finally {
+      IntegrationTestUtil.shutdownPentahoSystem();
+    }
   }
 
   /**
@@ -131,7 +135,7 @@ public class MetaverseBuilderIT {
   }
 
   private void countTheEdgesByType( String label ) {
-    int count = (int) StreamSupport.stream(readerGraph.getEdges("text", label).spliterator(), false).count();
+    int count = (int) StreamSupport.stream( readerGraph.getEdges( "text", label ).spliterator(), false ).count();
     if ( count > 0 ) {
       System.out.println( "Found " + count + " " + label + " links" );
     }

@@ -13,7 +13,7 @@
 
 package org.pentaho.metaverse.graph;
 
-import org.junit.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,17 +34,33 @@ import java.util.List;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
-  @Mock ICatalogLineageClient mockCatalogLineageClient;
-  @Captor ArgumentCaptor<List<LineageDataResource>> inputSourceCaptor;
-  @Captor ArgumentCaptor<List<LineageDataResource>> outputSourcesCaptor;
-  @Mock ICatalogLineageClientProvider mockCatalogLineageClientProvider;
+  private AutoCloseable mocks;
+  @Mock
+  ICatalogLineageClient mockCatalogLineageClient;
+  @Captor
+  ArgumentCaptor<List<LineageDataResource>> inputSourceCaptor;
+  @Captor
+  ArgumentCaptor<List<LineageDataResource>> outputSourcesCaptor;
+  @Mock
+  ICatalogLineageClientProvider mockCatalogLineageClientProvider;
 
   @Before
   public void setup() {
-    Mockito.when( mockCatalogLineageClientProvider.getCatalogLineageClient( anyString(), anyString(), anyString(), anyString(), anyString(), anyString() ) )
+    mocks = openMocks( this );
+    Mockito.when( mockCatalogLineageClientProvider.getCatalogLineageClient( anyString(), anyString(), anyString(),
+        anyString(), anyString(), anyString() ) )
       .thenReturn( mockCatalogLineageClient );
+  }
+
+  @After
+  public void tearDownMocks() throws Exception {
+    if ( mocks != null ) {
+      mocks.close();
+      mocks = null;
+    }
   }
 
   @Test
@@ -58,8 +74,8 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
 
     graphCatalogWriter.outputGraphImpl( graph, null );
 
-    Path personCsvPath = Paths.get("src", "it", "resources", "person.csv");
-    Path personDetailsCsvPath = Paths.get("src", "it", "resources", "person_details.csv");
+    Path personCsvPath = Paths.get( "src", "it", "resources", "person.csv" );
+    Path personDetailsCsvPath = Paths.get( "src", "it", "resources", "person_details.csv" );
 
     LineageDataResource personCsv = new LineageDataResource( "person.csv" );
     personCsv.setPath( personCsvPath.toAbsolutePath().toString() );
@@ -70,7 +86,8 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
     List<String> personDetailsFields = Arrays.asList( "gender", "ip_address", "id", "age", "email" );
     personDetailsCsv.setFields( personDetailsFields );
     LineageDataResource outputTarget = new LineageDataResource( "CombinedCsvToTextOut.csv" );
-    outputTarget.setPath( "/Users/aramos/Documents/Hitachi/REPOS/R2D2-DEV/CatalogTestKTR/out/CombinedCsvToTextOut.csv" );
+    outputTarget.setPath(
+      "/Users/aramos/Documents/Hitachi/REPOS/R2D2-DEV/CatalogTestKTR/out/CombinedCsvToTextOut.csv" );
     List<String> outputFields = Arrays.asList( "GIVEN", "HOST", "SUR", "SPAN", "USERNAME", "LONG_LEGAL", "SSN", "SEX" );
     outputTarget.setFields( outputFields );
     addRelationship( personCsv, outputTarget, "first_name", "GIVEN" );
@@ -81,7 +98,8 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
     addRelationship( personDetailsCsv, outputTarget, "email", "USERNAME" );
     addRelationship( personDetailsCsv, outputTarget, "gender", "SEX" );
 
-    Mockito.verify( mockCatalogLineageClient ).processLineage( inputSourceCaptor.capture(), outputSourcesCaptor.capture() );
+    Mockito.verify( mockCatalogLineageClient ).processLineage( inputSourceCaptor.capture(), outputSourcesCaptor
+      .capture() );
     List<LineageDataResource> inputSources = inputSourceCaptor.getValue();
     assertNotNull( "input sources must not be null", inputSources );
     listContainsExpectedResource( personCsv, inputSources );
@@ -94,7 +112,8 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
   private void listContainsExpectedResource( LineageDataResource resource, List<LineageDataResource> sourceList ) {
     sourceList.forEach( this::cleanVertexIds );
     assertTrue( String.format( "did not find %s resource", resource.getName() ), sourceList.contains( resource ) );
-    List<FieldLevelRelationship> personCsvRelationshipsComputed = sourceList.stream().filter( r -> r.getName().equals( resource.getName() ) ).findFirst().get()
+    List<FieldLevelRelationship> personCsvRelationshipsComputed = sourceList.stream().filter( r -> r.getName().equals(
+        resource.getName() ) ).findFirst().get()
       .getFieldLevelRelationships();
     assertTrue( String.format( "field relationships in %s resource incorrect", resource.getName() ),
       personCsvRelationshipsComputed.containsAll( resource.getFieldLevelRelationships() )
@@ -129,7 +148,7 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
 
     graphCatalogWriter.outputGraphImpl( graph, null );
 
-    Path personCsvPath = Paths.get("src", "it", "resources", "person.csv");
+    Path personCsvPath = Paths.get( "src", "it", "resources", "person.csv" );
     LineageDataResource personCsv = new LineageDataResource( "person.csv" );
     personCsv.setPath( personCsvPath.toAbsolutePath().toString() );
     List<String> personFields = Arrays.asList( "first_name", "id", "last_name" );
@@ -145,7 +164,8 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
     addRelationship( personCsv, outputTarget, "last_name", "NAME2" );
     addRelationship( personCsv, outputTarget, "id", "SSN" );
 
-    Mockito.verify( mockCatalogLineageClient ).processLineage( inputSourceCaptor.capture(), outputSourcesCaptor.capture() );
+    Mockito.verify( mockCatalogLineageClient ).processLineage( inputSourceCaptor.capture(), outputSourcesCaptor
+      .capture() );
     List<LineageDataResource> inputSources = inputSourceCaptor.getValue();
     listContainsExpectedResource( personCsv, inputSources );
     List<LineageDataResource> outputSources = outputSourcesCaptor.getValue();
@@ -153,7 +173,8 @@ public class GraphCatalogWriterIT extends StepAnalyzerValidationIT {
     listContainsExpectedResource( outputTarget, outputSources );
   }
 
-  private void addRelationship( LineageDataResource input, LineageDataResource output, String inputField, String outputField ) {
+  private void addRelationship( LineageDataResource input, LineageDataResource output, String inputField,
+                                String outputField ) {
     FieldLevelRelationship r1 = new FieldLevelRelationship();
     r1.setInputSourceResource( input );
     r1.setOutputTargetResource( output );

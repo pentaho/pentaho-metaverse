@@ -16,14 +16,9 @@ package org.pentaho.metaverse.step;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.IteratorUtils;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.pentaho.metaverse.frames.FramedMetaverseNode;
 import org.pentaho.metaverse.frames.TransformationNode;
 import org.pentaho.metaverse.frames.TransformationStepNode;
-import org.pentaho.metaverse.impl.MetaverseConfig;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,9 +28,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.pentaho.dictionary.DictionaryConst.*;
 
-@RunWith( PowerMockRunner.class )
-@PowerMockIgnore( "jdk.internal.reflect.*" )
-@PrepareForTest( MetaverseConfig.class )
 public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
 
   private static final String VALUE = "value";
@@ -68,7 +60,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     // verify individual step nodes
     final Map<String, FramedMetaverseNode> parentStepNodeMap = verifyTransformationSteps( transformationNode,
       new String[] { "Data grid", "Write to log - Data grid", "mapping - calc checksum",
-        "Write to log - mapping - calc checksum", "Write to log Checksum" },  false );
+        "Write to log - mapping - calc checksum", "Write to log Checksum" }, false );
 
     final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
       new String[] { "Input checksum", "calc checksum", "output checksum", "Write to log - Input checksum",
@@ -157,7 +149,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ), testStepNode(
       calcChecksumSubTrans.getName() ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ),
-      testStepNode(  writeToLogOutputChecksum.getName() ) );
+      testStepNode( writeToLogOutputChecksum.getName() ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ),
       testFieldNode( CHECKSUM ), testFieldNode( VALUE ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ),
@@ -239,7 +231,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     // verify individual step nodes
     final Map<String, FramedMetaverseNode> parentStepNodeMap = verifyTransformationSteps( transformationNode,
       new String[] { "Data grid", "Write to log - Data grid", "mapping - calc checksum",
-        "Write to log - mapping - calc checksum", "Write to log Checksum" },  false );
+        "Write to log - mapping - calc checksum", "Write to log Checksum" }, false );
 
     final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
       new String[] { "Input checksum", "calc checksum", "output checksum", "Write to log - Input checksum",
@@ -327,7 +319,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ), testStepNode(
       calcChecksumSubTrans.getName() ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ),
-      testStepNode(  writeToLogOutputChecksum.getName() ) );
+      testStepNode( writeToLogOutputChecksum.getName() ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ),
       testFieldNode( CHECKSUM ), testFieldNode( VALUE ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ),
@@ -411,8 +403,8 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
         "Write to log - mapping - calc checksum" }, false );
 
     final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
-      new String[] { "Input checksum", "calc checksum", "output checksum" , "Write to log - Input checksum",
-        "Write to log - calc checksum", "Write to log - output checksum"}, false );
+      new String[] { "Input checksum", "calc checksum", "output checksum", "Write to log - Input checksum",
+        "Write to log - calc checksum", "Write to log - output checksum" }, false );
 
     final TransformationStepNode dataGrid = (TransformationStepNode) parentStepNodeMap.get(
       "Data grid" );
@@ -436,7 +428,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     // ---------- Data grid
     verifyNodes( IteratorUtils.toList( dataGrid.getPreviousSteps().iterator() ) );
     verifyNodes( IteratorUtils.toList( dataGrid.getNextSteps().iterator() ), testLineageNode( calcChecksum ),
-      testLineageNode( writeToLogDataGrid ));
+      testLineageNode( writeToLogDataGrid ) );
     verifyNodes( IteratorUtils.toList( dataGrid.getOutputStreamFields().iterator() ),
       testFieldNode( VALUE ) );
     assertEquals( 2, getIterableSize( dataGrid.getAllInNodes() ) );
@@ -468,7 +460,8 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
       .put( PROPERTY_ANALYZER, SKIP ).put( PROPERTY_CATEGORY, SKIP ).put( PROPERTY_COPIES, SKIP )
       .put( PROPERTY_LOGICAL_ID, SKIP ).put( PROPERTY_NAME, SKIP ).put( PROPERTY_NAMESPACE, SKIP )
       .put( PROPERTY_PATH, SKIP ).put( NODE_VIRTUAL, SKIP ).put( "subTransformation", SKIP )
-      .put( PROPERTY_VERBOSE_DETAILS, "input [1],input [1] update field names,output [1],output [1] update field names" )
+      .put( PROPERTY_VERBOSE_DETAILS,
+        "input [1],input [1] update field names,output [1],output [1] update field names" )
       .put( "input [1]", "Data grid > [sub] Input checksum" )
       .put( "input [1] update field names", "false" )
       .put( "output [1]", "[sub] output checksum > Write to log Checksum" )
@@ -494,7 +487,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ),
       testStepNode( calcChecksumSubTrans.getName() ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ),
-      testStepNode( writeToLogOutputChecksum.getName() ));
+      testStepNode( writeToLogOutputChecksum.getName() ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ),
       testFieldNode( CHECKSUM ), testFieldNode( VALUE ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ),
@@ -576,8 +569,8 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
         "Write to log - mapping - calc checksum" }, false );
 
     final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
-      new String[] { "Input checksum", "calc checksum", "output checksum" , "Write to log - Input checksum",
-        "Write to log - calc checksum", "Write to log - output checksum"}, false );
+      new String[] { "Input checksum", "calc checksum", "output checksum", "Write to log - Input checksum",
+        "Write to log - calc checksum", "Write to log - output checksum" }, false );
 
     final TransformationStepNode dataGrid = (TransformationStepNode) parentStepNodeMap.get(
       "Data grid" );
@@ -601,7 +594,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     // ---------- Data grid
     verifyNodes( IteratorUtils.toList( dataGrid.getPreviousSteps().iterator() ) );
     verifyNodes( IteratorUtils.toList( dataGrid.getNextSteps().iterator() ), testLineageNode( calcChecksum ),
-      testLineageNode( writeToLogDataGrid ));
+      testLineageNode( writeToLogDataGrid ) );
     verifyNodes( IteratorUtils.toList( dataGrid.getOutputStreamFields().iterator() ),
       testFieldNode( VALUE ) );
     assertEquals( 2, getIterableSize( dataGrid.getAllInNodes() ) );
@@ -659,7 +652,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ),
       testStepNode( calcChecksumSubTrans.getName() ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ),
-      testStepNode( writeToLogOutputChecksum.getName() ));
+      testStepNode( writeToLogOutputChecksum.getName() ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ),
       testFieldNode( CHECKSUM ), testFieldNode( VALUE ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ),
@@ -738,7 +731,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
 
     // verify individual step nodes
     final Map<String, FramedMetaverseNode> parentStepNodeMap = verifyTransformationSteps( transformationNode,
-      new String[] { "Data grid", "calc parity & checksum",  "Write to log Checksum", "Write to log Parity",
+      new String[] { "Data grid", "calc parity & checksum", "Write to log Checksum", "Write to log Parity",
         "Write to log Dummy", "Write to log - Data grid" }, false );
 
     final Map<String, FramedMetaverseNode> subTransStepNodeMap = verifyTransformationSteps( subTransNode,
@@ -825,7 +818,7 @@ public class MappingAnalyzerValidationIT extends StepAnalyzerValidationIT {
     verifyNodes( IteratorUtils.toList( outputChecksum.getPreviousSteps().iterator() ),
       testStepNode( calcChecksum.getName() ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getNextSteps().iterator() ),
-      testStepNode( writeToLogOutputChecksum.getName()  ) );
+      testStepNode( writeToLogOutputChecksum.getName() ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getInputStreamFields().iterator() ),
       testFieldNode( CHECKSUM ), testFieldNode( VALUE ) );
     verifyNodes( IteratorUtils.toList( outputChecksum.getOutputStreamFields().iterator() ),
