@@ -3,7 +3,7 @@
        default-lazy-init="true">
 
   <!-- Configure our graph using the SynchronizedGraphFactory and a configuration file -->
-  <bean id="MetaverseGraphImpl" class="org.pentaho.metaverse.graph.SynchronizedGraphFactory" factory-method="open">
+  <bean id="MetaverseGraphImpl" class="org.pentaho.metaverse.api.model.BaseSynchronizedGraphFactory" factory-method="open">
     <constructor-arg value="src/it/resources/graph.properties"/>
   </bean>
 
@@ -13,8 +13,14 @@
 
   <bean id="IMetaverseObjectFactory" class="org.pentaho.metaverse.api.MetaverseObjectFactory" scope="singleton"/>
 
-  <bean id="TransformationAnalyzer" class="org.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer"/>
-  <bean id="JobAnalyzer" class="org.pentaho.metaverse.analyzer.kettle.JobAnalyzer"/>
+  <!-- 11.0 analyzers default to empty static providers. Remove explicit injection after backporting
+       5ffb6d4ecea4632488c790057342af2ea60be706 (BACKLOG-50665), which removes those defaults. -->
+  <bean id="TransformationAnalyzer" class="org.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer">
+    <property name="stepAnalyzerProvider" ref="IStepAnalyzerProvider"/>
+  </bean>
+  <bean id="JobAnalyzer" class="org.pentaho.metaverse.analyzer.kettle.JobAnalyzer">
+    <property name="jobEntryAnalyzerProvider" ref="IJobEntryAnalyzerProvider"/>
+  </bean>
 
   <bean id="stepDatabaseConnectionAnalyzer"
         class="org.pentaho.metaverse.api.analyzer.kettle.step.StepDatabaseConnectionAnalyzer">
@@ -305,14 +311,14 @@
     <property name="rootFolder" value="src/it/resources/repo"/>
   </bean>
 
-  <bean id="IDocumentLocatorProvider" class="org.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider"
+      <bean id="IDocumentLocatorProvider" class="org.pentaho.metaverse.impl.MetaverseDocumentLocatorProvider"
         scope="singleton">
-    <constructor-arg>
+    <property name="documentLocators">
       <set>
         <!--<ref bean="DIRepositoryLocator"/>-->
         <ref bean="FileSystemLocator"/>
       </set>
-    </constructor-arg>
+    </property>
   </bean>
 
 
@@ -344,7 +350,8 @@
     </bean>
   -->
 
-  <bean id="MetaverseGraphImplPrototype" class="org.pentaho.metaverse.graph.SynchronizedGraphFactory" scope="prototype">
+    <bean id="MetaverseGraphImplPrototype" class="org.pentaho.metaverse.api.model.BaseSynchronizedGraphFactory"
+      factory-method="open" scope="prototype">
     <constructor-arg>
       <map>
         <entry key="blueprints.graph" value="com.tinkerpop.blueprints.impls.tg.TinkerGraph"/>

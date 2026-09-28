@@ -77,7 +77,7 @@ public class IntegrationTestUtil {
 
       Thread.currentThread().setContextClassLoader( MetaverseUtil.class.getClassLoader() );
       IPentahoObjectFactory pentahoObjectFactory = new StandaloneSpringPentahoObjectFactory();
-      pentahoObjectFactory.init( solutionPath,PentahoSystem.getApplicationContext() );
+      pentahoObjectFactory.init( solutionPath, PentahoSystem.getApplicationContext() );
       PentahoSystem.registerObjectFactory( pentahoObjectFactory );
 
       // Restore context classloader
@@ -87,6 +87,7 @@ public class IntegrationTestUtil {
     }
     PentahoSystem.init( appContext );
     PentahoSessionHolder.setSession( new StandaloneSession() );
+    PentahoSystem.getObjectFactory().get( IDocumentLocatorProvider.class, PentahoSessionHolder.getSession() );
 
     registerKettlePlugins();
 
@@ -104,7 +105,8 @@ public class IntegrationTestUtil {
     final Map<Class<?>, String> classMap = new HashMap<Class<?>, String>( 1 );
     classMap.put( StepMetaInterface.class, metaClassName );
 
-    Plugin plugin = new Plugin( new String[]{ pluginId }, StepPluginType.class, StepMetaInterface.class, pluginCategory,
+    Plugin plugin = new Plugin( new String[] { pluginId }, StepPluginType.class, StepMetaInterface.class,
+      pluginCategory,
       stepName, null, null, false, false, classMap, Collections.emptyList(), null, null );
     PluginRegistry.getInstance().registerPlugin( StepPluginType.class, plugin );
   }
@@ -141,5 +143,4 @@ public class IntegrationTestUtil {
   public static synchronized Graph buildMetaverseGraph() throws Exception {
     return buildMetaverseGraph( PentahoSystem.get( IDocumentLocatorProvider.class ) );
   }
-
 }
