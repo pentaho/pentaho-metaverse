@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.graph;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -27,6 +26,7 @@ import org.pentaho.dictionary.MetaverseLink;
 import org.pentaho.metaverse.api.IMetaverseLink;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.model.BaseSynchronizedGraph;
 import org.pentaho.metaverse.impl.MetaverseNode;
 import org.pentaho.metaverse.messages.Messages;
 import org.pentaho.metaverse.util.MetaverseUtil;
@@ -70,8 +70,7 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
    *
    * @param graph the Graph to read from
    */
-  @VisibleForTesting
-  BlueprintsGraphMetaverseReader( Graph graph ) {
+  @VisibleForTesting BlueprintsGraphMetaverseReader( Graph graph ) {
     this.graph = graph;
   }
 
@@ -86,14 +85,15 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   @Override
   public IMetaverseNode findNode( String id ) {
-    Iterator<Vertex> it = getGraph().vertices( id );
-    if ( !it.hasNext() ) {
-      return null;
-    }
-    Vertex vertex = it.next();
-    MetaverseUtil.enhanceVertex( vertex );
-    MetaverseNode node = new MetaverseNode( vertex );
-    return node;
+    return BaseSynchronizedGraph.write( getGraph(), () -> {
+      Iterator<Vertex> it = getGraph().vertices( id );
+      if ( !it.hasNext() ) {
+        return null;
+      }
+      Vertex vertex = it.next();
+      MetaverseUtil.enhanceVertex( vertex );
+      return new MetaverseNode( vertex );
+    } );
   }
 
   @Override
@@ -164,16 +164,14 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
   @Override
   public String exportFormat( String format ) {
     OutputStream out = new ByteArrayOutputStream();
-    try {
-      exportToStream( format, out );
-    } catch ( IOException e ) {
-      LOGGER.error( Messages.getString( "ERROR.Graph.Export" ), e );
-    } finally {
+    try ( out ) {
       try {
-        out.close();
+        exportToStream( format, out );
       } catch ( IOException e ) {
         LOGGER.error( Messages.getString( "ERROR.Graph.Export" ), e );
       }
+    } catch ( IOException e ) {
+      LOGGER.error( Messages.getString( "ERROR.Graph.Export" ), e );
     }
     return out.toString();
   }
@@ -220,14 +218,12 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
         }
         Vertex startVertex = startIt.next();
         GraphPath path = new GraphPath();
-        Set<Object> done = new HashSet<Object>();
-        Map<Object, GraphPath> shortestPaths = new HashMap<Object, GraphPath>();
+        Set<Object> done = new HashSet<>();
+        Map<Object, GraphPath> shortestPaths = new HashMap<>();
         traverseGraph( startVertex, graph, resultTypes, path, done, shortestPaths, Direction.IN, shortestOnly );
-        done = new HashSet<Object>();
+        done = new HashSet<>();
         traverseGraph( startVertex, graph, resultTypes, path, done, shortestPaths, Direction.OUT, shortestOnly );
-        Iterator<Map.Entry<Object, GraphPath>> paths = shortestPaths.entrySet().iterator();
-        while ( paths.hasNext() ) {
-          Map.Entry<Object, GraphPath> entry = paths.next();
+        for ( Map.Entry<Object, GraphPath> entry : shortestPaths.entrySet() ) {
           GraphPath shortPath = entry.getValue();
           shortPath.addToGraph( g );
         }
@@ -239,11 +235,12 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
   }
 
   private void traverseGraph( Vertex startVertex, Graph subGraph, List<String> resultTypes, GraphPath path,
-                              Set<Object> done, Map<Object, GraphPath> shortestPaths, Direction direction, boolean shortestOnly ) {
-    String startType = startVertex.property( DictionaryConst.PROPERTY_TYPE ).isPresent()
-      ? startVertex.<String>value( DictionaryConst.PROPERTY_TYPE ) : null;
+                              Set<Object> done, Map<Object, GraphPath> shortestPaths, Direction direction,
+                              boolean shortestOnly ) {
+    String startType = startVertex.property( DictionaryConst.PROPERTY_TYPE ).isPresent() ? startVertex.<String>value(
+      DictionaryConst.PROPERTY_TYPE ) : null;
     boolean isTargetType = resultTypes == null
-      || resultTypes.size() == 0
+      || resultTypes.isEmpty()
       || resultTypes.contains( startType );
     if ( !isTargetType && done.contains( startVertex.id() ) ) {
       return;
@@ -364,18 +361,20 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
   }
 
   protected Graph enhanceGraph( Graph g ) {
-    // TODO should we clone the graph?
-    Iterator<Vertex> vertices = g.vertices();
-    while ( vertices.hasNext() ) {
-      Vertex vertex = vertices.next();
-      MetaverseUtil.enhanceVertex( vertex );
-    }
-    Iterator<Edge> edges = g.edges();
-    while ( edges.hasNext() ) {
-      Edge edge = edges.next();
-      MetaverseUtil.enhanceEdge( edge );
-    }
-    return g;
+    return BaseSynchronizedGraph.write( g, () -> {
+      // TODO should we clone the graph?
+      Iterator<Vertex> vertices = g.vertices();
+      while ( vertices.hasNext() ) {
+        Vertex vertex = vertices.next();
+        MetaverseUtil.enhanceVertex( vertex );
+      }
+      Iterator<Edge> edges = g.edges();
+      while ( edges.hasNext() ) {
+        Edge edge = edges.next();
+        MetaverseUtil.enhanceEdge( edge );
+      }
+      return g;
+    } );
   }
 
 

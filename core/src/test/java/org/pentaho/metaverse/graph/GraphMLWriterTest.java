@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.graph;
 
 import org.apache.tinkerpop.gremlin.structure.Graph;
@@ -35,5 +34,20 @@ public class GraphMLWriterTest {
     assertNotNull( writer );
     writer.outputGraph( g, outStream );
     assertNotNull( outStream.toString() );
+  }
+
+  @Test
+  public void testAdjustGraphWaitsForWriteLock() throws Exception {
+    Graph g = SynchronizedGraphFactory.getDefaultGraph();
+    g.addVertex( T.id, "v1" );
+    SynchronizedGraphTest.assertWaitsForWriteLock( g, () -> BaseGraphWriter.adjustGraph( g ) );
+  }
+
+  @Test
+  public void testOutputGraphWaitsForWriteLock() throws Exception {
+    Graph g = SynchronizedGraphFactory.getDefaultGraph();
+    g.addVertex( T.id, "v1" );
+    SynchronizedGraphTest.assertWaitsForWriteLock( g,
+      () -> new GraphMLWriter().outputGraph( g, new ByteArrayOutputStream() ) );
   }
 }

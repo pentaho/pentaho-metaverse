@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.impl;
 
 import org.apache.tinkerpop.gremlin.structure.Graph;
@@ -22,18 +21,37 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.dictionary.DictionaryHelper;
+import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.TransHopMeta;
+import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.steps.rowgenerator.RowGeneratorMeta;
+import org.pentaho.di.trans.steps.dummytrans.DummyTransMeta;
 import org.pentaho.metaverse.IntegrationTestUtil;
+import org.pentaho.metaverse.analyzer.kettle.TransformationAnalyzer;
+import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentController;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
 import org.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.Namespace;
+import org.pentaho.metaverse.graph.LineageGraphMap;
 import org.pentaho.metaverse.util.MetaverseUtil;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class MetaverseBuilderIT {
@@ -118,6 +136,116 @@ public class MetaverseBuilderIT {
     File exportCsv = new File( IntegrationTestUtil.getOutputPath( "testGraph.csv" ) );
     FileUtils.writeStringToFile( exportCsv, reader.exportFormat( IMetaverseReader.FORMAT_CSV ), "UTF-8" );
 
+  }
+
+  @Test
+  public void testConcurrentTransformationAnalysisKeepsGraphsSeparate() throws Exception {
+    IDocumentController originalController = MetaverseUtil.getDocumentController();
+    MetaverseBuilder originalBuilder = new MetaverseBuilder();
+    DocumentController controller = new DocumentController( originalBuilder );
+    TransformationAnalyzer analyzer = new TransformationAnalyzer();
+    controller.addAnalyzer( analyzer );
+    CountDownLatch bothAnalyzing = new CountDownLatch( 2 );
+    TransMeta first = concurrentTransformation( "first", bothAnalyzing );
+    TransMeta second = concurrentTransformation( "second", bothAnalyzing );
+    List<Future<Graph>> analyses = new ArrayList<>();
+    ExecutionException taskFailure = null;
+    try {
+      MetaverseUtil.setDocumentController( controller );
+      for ( TransMeta transformation : new TransMeta[] { first, second } ) {
+        IDocument document = MetaverseUtil.createDocument( new Namespace( "concurrent-analysis" ), transformation,
+          transformation.getFilename(), transformation.getName(), "ktr", "application/xml" );
+        MetaverseUtil.addLineageGraph( document, null );
+        Future<Graph> analysis = LineageGraphMap.getInstance().get( transformation );
+        assertNotNull( analysis );
+        analyses.add( analysis );
+      }
+      assertTrue( "Both real analyzers must enter before either can write", bothAnalyzing.await( 30,
+        TimeUnit.SECONDS ) );
+      Graph firstGraph = analyses.get( 0 ).get( 60, TimeUnit.SECONDS );
+      Graph secondGraph = analyses.get( 1 ).get( 60, TimeUnit.SECONDS );
+      assertTransformationGraph( firstGraph, "first", "second" );
+      assertTransformationGraph( secondGraph, "second", "first" );
+      assertSame( originalBuilder, controller.getMetaverseBuilder() );
+      assertSame( controller, analyzer.getMetaverseBuilder() );
+      assertFalse( originalBuilder.getGraph().vertices().hasNext() );
+    } finally {
+      while ( bothAnalyzing.getCount() > 0 ) {
+        bothAnalyzing.countDown();
+      }
+      try {
+        for ( Future<Graph> analysis : analyses ) {
+          try {
+            analysis.get( 60, TimeUnit.SECONDS ).close();
+          } catch ( ExecutionException failure ) {
+            if ( taskFailure == null ) {
+              taskFailure = failure;
+            } else {
+              taskFailure.addSuppressed( failure );
+            }
+          }
+        }
+      } finally {
+        for ( Future<Graph> analysis : analyses ) {
+          analysis.cancel( true );
+        }
+        LineageGraphMap.getInstance().remove( first );
+        LineageGraphMap.getInstance().remove( second );
+        MetaverseUtil.setDocumentController( originalController );
+        originalBuilder.getGraph().close();
+      }
+    }
+    if ( taskFailure != null ) {
+      throw taskFailure;
+    }
+  }
+
+  private TransMeta concurrentTransformation( String name, CountDownLatch bothAnalyzing ) {
+    TransMeta transformation = new TransMeta() {
+      @Override
+      public String getDescription() {
+        bothAnalyzing.countDown();
+        try {
+          assertTrue( "Timed out waiting for overlapping transformation analysis",
+            bothAnalyzing.await( 30, TimeUnit.SECONDS ) );
+        } catch ( InterruptedException exception ) {
+          Thread.currentThread().interrupt();
+          throw new AssertionError( "Transformation analysis interrupted", exception );
+        }
+        return super.getDescription();
+      }
+    };
+    transformation.setName( name );
+    transformation.setFilename( name + ".ktr" );
+    RowGeneratorMeta generator = new RowGeneratorMeta();
+    generator.setDefault();
+    generator.allocate( 1 );
+    generator.getFieldName()[ 0 ] = name + "_field";
+    generator.getFieldType()[ 0 ] = "String";
+    generator.getValue()[ 0 ] = name;
+    StepMeta source = new StepMeta( "RowGenerator", name + "_source", generator );
+    StepMeta sink = new StepMeta( "Dummy", name + "_sink", new DummyTransMeta() );
+    transformation.addStep( source );
+    transformation.addStep( sink );
+    transformation.addTransHop( new TransHopMeta( source, sink ) );
+    return transformation;
+  }
+
+  private void assertTransformationGraph( Graph graph, String expected, String other ) {
+    assertEquals( "Wrong transformation node count for " + expected, 1L,
+      graph.traversal().V().has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS )
+        .has( DictionaryConst.PROPERTY_NAME, expected ).count().next().longValue() );
+    assertEquals( 2L, graph.traversal().V().has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS )
+      .has( DictionaryConst.PROPERTY_NAME, expected ).out( DictionaryConst.LINK_CONTAINS )
+      .has( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_TRANS_STEP ).count().next().longValue() );
+    for ( String name : new String[] { expected + "_source", expected + "_sink", expected + "_field" } ) {
+      assertTrue( "Missing lineage node: " + name,
+        graph.traversal().V().has( DictionaryConst.PROPERTY_NAME, name ).hasNext() );
+    }
+    for ( String name : new String[] { other, other + "_source", other + "_sink", other + "_field" } ) {
+      assertFalse( "Lineage leaked from the other transformation: " + name,
+        graph.traversal().V().has( DictionaryConst.PROPERTY_NAME, name ).hasNext() );
+    }
   }
 
   private void testAndCountNodesByType( String type ) {

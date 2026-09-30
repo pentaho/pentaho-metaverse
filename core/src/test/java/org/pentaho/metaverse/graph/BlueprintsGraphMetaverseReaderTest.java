@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.graph;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -27,6 +26,7 @@ import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IMetaverseLink;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.model.BaseSynchronizedGraph;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -76,6 +76,36 @@ public class BlueprintsGraphMetaverseReaderTest {
 
     assertEquals( 30, countVertices( metaverse ) );
     assertEquals( 35, countEdges( metaverse ) );
+  }
+
+  @Test
+  public void testEnhanceGraphWaitsForWriteLock() throws Exception {
+    Graph synchronizedGraph = SynchronizedGraphFactory.wrapGraph( (TinkerGraph) graph );
+    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( synchronizedGraph );
+    SynchronizedGraphTest.assertWaitsForWriteLock( synchronizedGraph,
+      () -> metaverseReader.enhanceGraph( synchronizedGraph ) );
+  }
+
+  @Test
+  public void testFindNodeWaitsForWriteLock() throws Exception {
+    Graph synchronizedGraph = SynchronizedGraphFactory.wrapGraph( (TinkerGraph) graph );
+    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( synchronizedGraph );
+    SynchronizedGraphTest.assertWaitsForWriteLock( synchronizedGraph,
+      () -> assertNotNull( metaverseReader.findNode( "trans1.ktr" ) ) );
+  }
+
+  @Test
+  public void testFindNodeLooksUpVertexWhileLocked() {
+    Graph synchronizedGraph = new BaseSynchronizedGraph( (TinkerGraph) graph ) {
+      @Override
+      public Iterator<Vertex> vertices( Object... vertexIds ) {
+        assertTrue( "vertex lookup must hold the graph write lock", Thread.holdsLock( getGraph() ) );
+        return super.vertices( vertexIds );
+      }
+    };
+    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( synchronizedGraph );
+    assertNotNull( metaverseReader.findNode( "trans1.ktr" ) );
+    assertNull( metaverseReader.findNode( "missing" ) );
   }
 
   @Test
@@ -205,7 +235,8 @@ public class BlueprintsGraphMetaverseReaderTest {
     assertNull( metaverseReader.findLink( "bogus", "populates", "trans2.ktr;field1", Direction.OUT ) );
     assertNull( metaverseReader.findLink( "datasource1.table1.field1", "bogus", "trans2.ktr;field1", Direction.OUT ) );
     assertNull( metaverseReader.findLink( "datasource1.table1.field1", "populates", "bogus", Direction.OUT ) );
-    assertNull( metaverseReader.findLink( "datasource1.table1.field1", "populates", "trans2.ktr;field1", Direction.IN ) );
+    assertNull( metaverseReader.findLink( "datasource1.table1.field1", "populates", "trans2.ktr;field1",
+      Direction.IN ) );
     assertNull( metaverseReader.findLink( "job2.kjb", "populates", "trans2.ktr;field1", Direction.OUT ) );
 
     link = metaverseReader.findLink( "trans2.ktr;field1", "populates", "datasource1.table1.field1", Direction.IN );
@@ -288,31 +319,51 @@ public class BlueprintsGraphMetaverseReaderTest {
     Vertex textField1 = createVertex( "data.txt;field1", DictionaryConst.NODE_TYPE_FILE_FIELD, "Text field: IP Addr" );
     Vertex textField2 = createVertex( "data.txt;field2", DictionaryConst.NODE_TYPE_FILE_FIELD, "Text field: Product" );
     Vertex trans1 = createVertex( "trans1.ktr", DictionaryConst.NODE_TYPE_TRANS, "Transformation: trans1.ktr" );
-    Vertex trans1Field1 = createVertex( "trans1.ktr;field1", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: IP Addr" );
-    Vertex trans1Field2 = createVertex( "trans1.ktr;field2", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: Product" );
-    Vertex trans1Field3 = createVertex( "trans1.ktr;field3", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: City" );
-    Vertex trans1Step1 = createVertex( "trans1.ktr;TextFileInput", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Read file" );
+    Vertex trans1Field1 = createVertex( "trans1.ktr;field1", DictionaryConst.NODE_TYPE_TRANS_FIELD,
+      "Trans field: IP Addr" );
+    Vertex trans1Field2 = createVertex( "trans1.ktr;field2", DictionaryConst.NODE_TYPE_TRANS_FIELD,
+      "Trans field: Product" );
+    Vertex trans1Field3 = createVertex( "trans1.ktr;field3", DictionaryConst.NODE_TYPE_TRANS_FIELD,
+      "Trans field: City" );
+    Vertex trans1Step1 = createVertex( "trans1.ktr;TextFileInput", DictionaryConst.NODE_TYPE_TRANS_STEP,
+      "Step: Read file" );
     Vertex trans1Step2 = createVertex( "trans1.ktr;Calc", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Calc city" );
-    Vertex trans1Step3 = createVertex( "trans1.ktr;TableOutputStep", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Write temp table" );
-    Vertex datasource1 = createVertex( "datasource1", DictionaryConst.NODE_TYPE_DATASOURCE, "Datasource: Postgres staging" );
+    Vertex trans1Step3 = createVertex( "trans1.ktr;TableOutputStep", DictionaryConst.NODE_TYPE_TRANS_STEP,
+      "Step: Write temp table" );
+    Vertex datasource1 = createVertex( "datasource1", DictionaryConst.NODE_TYPE_DATASOURCE,
+      "Datasource: Postgres staging" );
     Vertex table1 = createVertex( "datasource1.table1", DictionaryConst.NODE_TYPE_DATA_TABLE, "Table: temp table" );
-    Vertex table1field1 = createVertex( "datasource1.table1.field1", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Tmp IP Addr" );
-    Vertex table1field2 = createVertex( "datasource1.table1.field2", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Tmp Product" );
-    Vertex table1field3 = createVertex( "datasource1.table1.field3", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Tmp City" );
+    Vertex table1field1 = createVertex( "datasource1.table1.field1", DictionaryConst.NODE_TYPE_DATA_COLUMN,
+      "Table field: Tmp IP Addr" );
+    Vertex table1field2 = createVertex( "datasource1.table1.field2", DictionaryConst.NODE_TYPE_DATA_COLUMN,
+      "Table field: Tmp Product" );
+    Vertex table1field3 = createVertex( "datasource1.table1.field3", DictionaryConst.NODE_TYPE_DATA_COLUMN,
+      "Table field: Tmp City" );
     Vertex trans2 = createVertex( "trans2.ktr", DictionaryConst.NODE_TYPE_TRANS, "Transformation: trans2.ktr" );
-    Vertex trans2Field1 = createVertex( "trans2.ktr;field1", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: IP Addr" );
-    Vertex trans2Field2 = createVertex( "trans2.ktr;field2", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: Product" );
-    Vertex trans2Field3 = createVertex( "trans2.ktr;field3", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Trans field: City" );
-    Vertex trans2Field4 = createVertex( "trans2.ktr;fiel4", DictionaryConst.NODE_TYPE_TRANS_FIELD, "Transfield: Sales" );
-    Vertex trans2Step1 = createVertex( "trans2.ktr;TableInputStep", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Table input step" );
-    Vertex trans2Step2 = createVertex( "trans2.ktr;Javascript", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: calc sales" );
-    Vertex trans2Step3 = createVertex( "trans2.ktr;TableOuptutStep", DictionaryConst.NODE_TYPE_TRANS_STEP, "Step: Write facttable" );
+    Vertex trans2Field1 = createVertex( "trans2.ktr;field1", DictionaryConst.NODE_TYPE_TRANS_FIELD,
+      "Trans field: IP Addr" );
+    Vertex trans2Field2 = createVertex( "trans2.ktr;field2", DictionaryConst.NODE_TYPE_TRANS_FIELD,
+      "Trans field: Product" );
+    Vertex trans2Field3 = createVertex( "trans2.ktr;field3", DictionaryConst.NODE_TYPE_TRANS_FIELD,
+      "Trans field: City" );
+    Vertex trans2Field4 = createVertex( "trans2.ktr;fiel4", DictionaryConst.NODE_TYPE_TRANS_FIELD,
+      "Transfield: Sales" );
+    Vertex trans2Step1 = createVertex( "trans2.ktr;TableInputStep", DictionaryConst.NODE_TYPE_TRANS_STEP,
+      "Step: Table input step" );
+    Vertex trans2Step2 = createVertex( "trans2.ktr;Javascript", DictionaryConst.NODE_TYPE_TRANS_STEP,
+      "Step: calc sales" );
+    Vertex trans2Step3 = createVertex( "trans2.ktr;TableOuptutStep", DictionaryConst.NODE_TYPE_TRANS_STEP,
+      "Step: Write facttable" );
     Vertex table2 = createVertex( "datasource1.table2", DictionaryConst.NODE_TYPE_DATA_TABLE, "Table: fact table" );
     Vertex job1 = createVertex( "job1.kjb", DictionaryConst.NODE_TYPE_JOB, "Job: job1.kjb" );
-    Vertex table2field1 = createVertex( "datasource1.table2.field1", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Ip Addr" );
-    Vertex table2field2 = createVertex( "datasource1.table2.field2", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Product" );
-    Vertex table2field3 = createVertex( "datasource1.table2.field3", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: City" );
-    Vertex table2field4 = createVertex( "datasource1.table2.field4", DictionaryConst.NODE_TYPE_DATA_COLUMN, "Table field: Sales" );
+    Vertex table2field1 = createVertex( "datasource1.table2.field1", DictionaryConst.NODE_TYPE_DATA_COLUMN,
+      "Table field: Ip Addr" );
+    Vertex table2field2 = createVertex( "datasource1.table2.field2", DictionaryConst.NODE_TYPE_DATA_COLUMN,
+      "Table field: Product" );
+    Vertex table2field3 = createVertex( "datasource1.table2.field3", DictionaryConst.NODE_TYPE_DATA_COLUMN,
+      "Table field: City" );
+    Vertex table2field4 = createVertex( "datasource1.table2.field4", DictionaryConst.NODE_TYPE_DATA_COLUMN,
+      "Table field: Sales" );
     createVertex( "job2.kjb", DictionaryConst.NODE_TYPE_JOB, "Job: job2.kjb" );
 
     addEdge( job1, trans1, DictionaryConst.LINK_EXECUTES );
