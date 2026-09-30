@@ -55,14 +55,13 @@ import java.util.concurrent.Future;
  */
 public class MetaverseUtil {
 
-  private static final Logger log = LoggerFactory.getLogger( MetaverseUtil.class );
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
   public static final String MESSAGE_PREFIX_NODETYPE = "USER.nodetype.";
   public static final String MESSAGE_PREFIX_LINKTYPE = "USER.linktype.";
   public static final String MESSAGE_PREFIX_CATEGORY = "USER.category.";
   public static final String MESSAGE_FAILED_PREFIX = "!";
-
+  private static final Logger log = LoggerFactory.getLogger( MetaverseUtil.class );
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final Object SHARED_ANALYZER_LOCK = new Object();
   protected static IDocumentController documentController = null;
 
   public static IDocumentController getDocumentController() {
@@ -81,13 +80,8 @@ public class MetaverseUtil {
     documentController = docController;
   }
 
-  public static IDocument createDocument(
-    INamespace namespace,
-    Object content,
-    String id,
-    String name,
-    String extension,
-    String mimeType ) {
+  public static IDocument createDocument( INamespace namespace, Object content, String id, String name,
+                                          String extension, String mimeType ) {
 
     IDocument metaverseDocument = getDocumentController().getMetaverseObjectFactory().createDocumentObject();
 
@@ -123,21 +117,14 @@ public class MetaverseUtil {
     IDocumentController docController = MetaverseUtil.getDocumentController();
     if ( docController != null ) {
 
-      // Create a new builder, setting it on the DocumentController if possible
       IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( sharedGraph );
 
-      docController.setMetaverseBuilder( metaverseBuilder );
       List<IDocumentAnalyzer> matchingAnalyzers = docController.getDocumentAnalyzers( "ktr" );
 
       if ( matchingAnalyzers != null ) {
         for ( IDocumentAnalyzer analyzer : matchingAnalyzers ) {
 
-          if ( analyzer instanceof IClonableDocumentAnalyzer ) {
-            analyzer = ( (IClonableDocumentAnalyzer) analyzer ).cloneAnalyzer();
-          } else {
-            log.debug( Messages.getString( "WARNING.CannotCloneAnalyzer" ), analyzer );
-          }
-          Runnable analyzerRunner = getAnalyzerRunner( analyzer, document );
+          Runnable analyzerRunner = getAnalyzerRunner( analyzer, document, metaverseBuilder );
 
           Future<Graph> transAnalysis =
             LineageGraphCompletionService.getInstance().submit( analyzerRunner, sharedGraph );
@@ -253,6 +240,34 @@ public class MetaverseUtil {
     } catch ( IllegalArgumentException ignored ) {
       return defaultType;
     }
+  }
+
+  private static Runnable getAnalyzerRunner( final IDocumentAnalyzer<?> analyzer, final IDocument document,
+                                             final IMetaverseBuilder builder ) {
+    IDocumentAnalyzer<?> taskAnalyzer =
+      analyzer instanceof IClonableDocumentAnalyzer<?> clonableAnalyzer ? clonableAnalyzer.cloneAnalyzer() : analyzer;
+    if ( taskAnalyzer != analyzer ) {
+      taskAnalyzer.setMetaverseBuilder( builder );
+      return getAnalyzerRunner( taskAnalyzer, document );
+    }
+
+    if ( log.isDebugEnabled() ) {
+      log.debug( Messages.getString( "WARNING.CannotCloneAnalyzer" ), analyzer );
+    }
+
+    Runnable runner = getAnalyzerRunner( analyzer, document );
+    
+    return () -> {
+      synchronized ( SHARED_ANALYZER_LOCK ) {
+        IMetaverseBuilder originalBuilder = analyzer.getMetaverseBuilder();
+        try {
+          analyzer.setMetaverseBuilder( builder );
+          runner.run();
+        } finally {
+          analyzer.setMetaverseBuilder( originalBuilder );
+        }
+      }
+    };
   }
 
   public static Runnable getAnalyzerRunner( final IDocumentAnalyzer analyzer, final IDocument document ) {

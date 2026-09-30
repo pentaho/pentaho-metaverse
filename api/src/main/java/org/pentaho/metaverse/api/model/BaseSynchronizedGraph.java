@@ -38,8 +38,6 @@ public class BaseSynchronizedGraph implements Graph {
     R apply() throws E;
   }
 
-  private final Object writeLock = new Object();
-
   /**
    * The underlying graph
    */
@@ -55,14 +53,14 @@ public class BaseSynchronizedGraph implements Graph {
   }
 
   /**
-   * Runs a mutation of this graph while holding its write lock.
+   * Runs a mutation while holding the underlying graph's monitor, shared by all wrappers of that graph.
    *
    * @param action the mutation
    * @return the mutation result
    * @throws E the mutation's checked exception
    */
   public <R, E extends Exception> R write( GraphWrite<R, E> action ) throws E {
-    synchronized ( writeLock ) {
+    synchronized ( graph ) {
       return action.apply();
     }
   }

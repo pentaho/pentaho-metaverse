@@ -26,6 +26,7 @@ import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.IMetaverseLink;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.IMetaverseReader;
+import org.pentaho.metaverse.api.model.BaseSynchronizedGraph;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -91,6 +92,20 @@ public class BlueprintsGraphMetaverseReaderTest {
     BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( synchronizedGraph );
     SynchronizedGraphTest.assertWaitsForWriteLock( synchronizedGraph,
       () -> assertNotNull( metaverseReader.findNode( "trans1.ktr" ) ) );
+  }
+
+  @Test
+  public void testFindNodeLooksUpVertexWhileLocked() {
+    Graph synchronizedGraph = new BaseSynchronizedGraph( (TinkerGraph) graph ) {
+      @Override
+      public Iterator<Vertex> vertices( Object... vertexIds ) {
+        assertTrue( "vertex lookup must hold the graph write lock", Thread.holdsLock( getGraph() ) );
+        return super.vertices( vertexIds );
+      }
+    };
+    BlueprintsGraphMetaverseReader metaverseReader = new BlueprintsGraphMetaverseReader( synchronizedGraph );
+    assertNotNull( metaverseReader.findNode( "trans1.ktr" ) );
+    assertNull( metaverseReader.findNode( "missing" ) );
   }
 
   @Test

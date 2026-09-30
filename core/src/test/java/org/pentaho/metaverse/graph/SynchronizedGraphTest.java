@@ -86,6 +86,16 @@ public class SynchronizedGraphTest {
     assertNotNull( synchronizedGraph.getVertex( "locked" ) );
   }
 
+  @Test
+  public void testWrappersOfSameGraphShareWriteLock() throws Exception {
+    TinkerGraph graph = TinkerGraph.open();
+    Graph firstWrapper = SynchronizedGraphFactory.wrapGraph( graph );
+    try ( BaseSynchronizedGraph secondWrapper = new BaseSynchronizedGraph( graph ) ) {
+      assertWaitsForWriteLock( firstWrapper, () -> secondWrapper.addVertexWithId( "shared" ) );
+      assertSame( firstWrapper.vertices( "shared" ).next(), secondWrapper.getVertex( "shared" ) );
+    }
+  }
+
   @Test( expected = AssertionError.class )
   public void testLockAssertionRejectsUnlockedAction() throws Exception {
     assertWaitsForWriteLock( synchronizedGraph, () -> {

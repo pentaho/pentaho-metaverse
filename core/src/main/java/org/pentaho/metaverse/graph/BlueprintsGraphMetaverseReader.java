@@ -85,16 +85,15 @@ public class BlueprintsGraphMetaverseReader implements IMetaverseReader {
 
   @Override
   public IMetaverseNode findNode( String id ) {
-    Iterator<Vertex> it = getGraph().vertices( id );
-    if ( !it.hasNext() ) {
-      return null;
-    }
-    Vertex vertex = it.next();
-    BaseSynchronizedGraph.write( getGraph(), () -> {
+    return BaseSynchronizedGraph.write( getGraph(), () -> {
+      Iterator<Vertex> it = getGraph().vertices( id );
+      if ( !it.hasNext() ) {
+        return null;
+      }
+      Vertex vertex = it.next();
       MetaverseUtil.enhanceVertex( vertex );
-      return null;
+      return new MetaverseNode( vertex );
     } );
-    return new MetaverseNode( vertex );
   }
 
   @Override
