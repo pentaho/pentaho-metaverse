@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.impl;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -23,6 +22,7 @@ import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.dictionary.DictionaryConst;
+import org.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.dictionary.MetaverseLink;
 import org.pentaho.dictionary.MetaverseTransientNode;
 import org.pentaho.metaverse.api.IDocument;
@@ -30,8 +30,17 @@ import org.pentaho.metaverse.api.IMetaverseLink;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.IMetaverseObjectFactory;
 import org.pentaho.metaverse.api.model.BaseMetaverseBuilder;
+import org.pentaho.metaverse.graph.SynchronizedGraphFactory;
+import org.pentaho.metaverse.graph.SynchronizedGraphTest;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -421,6 +430,59 @@ public class MetaverseBuilderTest {
     node.setStringID( "diff test string id" );
     Vertex newVertex = builder.getVertexForNode( node );
     assertEquals( vertex, newVertex );
+  }
+
+  @Test
+  public void testWritesWaitForGraphWriteLock() throws Exception {
+    graph = SynchronizedGraphFactory.getDefaultGraph();
+    builder = new MetaverseBuilder( graph );
+    builder.addNode( node );
+    node.setName( "updated name" );
+    SynchronizedGraphTest.assertWaitsForWriteLock( graph, () -> builder.addNode( node ) );
+    assertEquals( "updated name", getProperty( getVertex( node.getStringID() ), DictionaryConst.PROPERTY_NAME ) );
+  }
+
+  @Test
+  public void testConcurrentAddNodeKeepsAllEntityEdges() throws Exception {
+    final String[] types = { DictionaryConst.NODE_TYPE_TRANS, DictionaryConst.NODE_TYPE_JOB };
+    final int nodesPerType = 20;
+    final ExecutorService executor = Executors.newFixedThreadPool( types.length );
+    try {
+      for ( int round = 0; round < 500; round++ ) {
+        graph = SynchronizedGraphFactory.getDefaultGraph();
+        builder = new MetaverseBuilder( graph );
+        final CyclicBarrier barrier = new CyclicBarrier( types.length );
+        final List<Future<?>> futures = new ArrayList<>();
+        for ( final String type : types ) {
+          futures.add( executor.submit( () -> {
+            barrier.await();
+            for ( int i = 0; i < nodesPerType; i++ ) {
+              MetaverseTransientNode n = new MetaverseTransientNode( type + i );
+              n.setName( type + i );
+              n.setType( type );
+              builder.addNode( n );
+            }
+            return null;
+          } ) );
+        }
+        for ( Future<?> future : futures ) {
+          future.get( 30, TimeUnit.SECONDS );
+        }
+
+        Vertex root = getVertex( "entity" );
+        assertNotNull( root );
+        for ( String type : types ) {
+          Vertex entity = getVertex( "entity_" + type );
+          assertNotNull( "round " + round + ": missing entity " + type, entity );
+          assertTrue( "round " + round + ": root not linked to entity " + type,
+            graph.traversal().V( root.id() ).out().hasId( entity.id() ).hasNext() );
+          assertEquals( "round " + round + ": lost typeconcept edges for " + type, nodesPerType,
+            countEdges( entity.edges( Direction.OUT, DictionaryHelper.getNonEntityToEntityLinkType() ) ) );
+        }
+      }
+    } finally {
+      executor.shutdownNow();
+    }
   }
 
   private Vertex getVertex( String id ) {

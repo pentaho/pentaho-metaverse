@@ -11,16 +11,14 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.pentaho.di.core.Const;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.dictionary.DictionaryHelper;
 import org.pentaho.metaverse.api.ChangeType;
@@ -38,15 +36,16 @@ import org.pentaho.metaverse.api.model.Operation;
 import org.pentaho.metaverse.api.model.Operations;
 import org.pentaho.metaverse.graph.LineageGraphCompletionService;
 import org.pentaho.metaverse.graph.LineageGraphMap;
+import org.pentaho.metaverse.graph.SynchronizedGraphFactory;
 import org.pentaho.metaverse.impl.MetaverseBuilder;
 import org.pentaho.metaverse.impl.MetaverseConfig;
 import org.pentaho.metaverse.messages.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -109,6 +108,14 @@ public class MetaverseUtil {
     if ( document == null ) {
       throw new MetaverseException( Messages.getString( "ERROR.Document.IsNull" ) );
     }
+    final Graph sharedGraph;
+    if ( graph == null ) {
+      sharedGraph = SynchronizedGraphFactory.getDefaultGraph();
+    } else if ( graph instanceof TinkerGraph tinkerGraph ) {
+      sharedGraph = SynchronizedGraphFactory.wrapGraph( tinkerGraph );
+    } else {
+      sharedGraph = graph;
+    }
 
     // Find the transformation analyzer(s) and create Futures to analyze the transformation.
     // Right now we expect a single transformation analyzer in the system. If we need to support more,
@@ -117,7 +124,7 @@ public class MetaverseUtil {
     if ( docController != null ) {
 
       // Create a new builder, setting it on the DocumentController if possible
-      IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( graph );
+      IMetaverseBuilder metaverseBuilder = new MetaverseBuilder( sharedGraph );
 
       docController.setMetaverseBuilder( metaverseBuilder );
       List<IDocumentAnalyzer> matchingAnalyzers = docController.getDocumentAnalyzers( "ktr" );
@@ -132,9 +139,8 @@ public class MetaverseUtil {
           }
           Runnable analyzerRunner = getAnalyzerRunner( analyzer, document );
 
-          Graph g = ( graph != null ) ? graph : TinkerGraph.open();
           Future<Graph> transAnalysis =
-            LineageGraphCompletionService.getInstance().submit( analyzerRunner, g );
+            LineageGraphCompletionService.getInstance().submit( analyzerRunner, sharedGraph );
 
           // Save this Future, the client will call it when the analysis is needed
           LineageGraphMap.getInstance().put( document.getContent(), transAnalysis );
@@ -163,8 +169,8 @@ public class MetaverseUtil {
    * @param vertex The vertex to enhance
    */
   public static void enhanceVertex( Vertex vertex ) {
-    String type = vertex.property( DictionaryConst.PROPERTY_TYPE ).isPresent()
-      ? vertex.<String>value( DictionaryConst.PROPERTY_TYPE ) : null;
+    String type = vertex.property( DictionaryConst.PROPERTY_TYPE ).isPresent() ? vertex.<String>value(
+      DictionaryConst.PROPERTY_TYPE ) : null;
     //localize the node type
     String localizedType = Messages.getString( MESSAGE_PREFIX_NODETYPE + type );
     if ( !localizedType.startsWith( MESSAGE_FAILED_PREFIX ) ) {
@@ -210,7 +216,7 @@ public class MetaverseUtil {
   }
 
   private static void processOperationNodeList( Iterable<JsonNode> operationNodes, ChangeType changeType,
-      Operations resultOps ) {
+                                                Operations resultOps ) {
     List<IOperation> typedOperations = new ArrayList<>();
     for ( JsonNode operationNode : operationNodes ) {
       IOperation operation = parseOperationNode( operationNode, changeType );

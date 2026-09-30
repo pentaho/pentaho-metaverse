@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.api.model;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -119,33 +118,34 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
    */
   @Override
   public IMetaverseBuilder addLink( IMetaverseLink link ) {
+    return BaseSynchronizedGraph.write( graph, () -> {
+      // make sure the from and to nodes exist in the graph
+      Vertex fromVertex = getVertexForNode( link.getFromNode() );
+      Vertex toVertex = getVertexForNode( link.getToNode() );
 
-    // make sure the from and to nodes exist in the graph
-    Vertex fromVertex = getVertexForNode( link.getFromNode() );
-    Vertex toVertex = getVertexForNode( link.getToNode() );
+      // add the "from" vertex to the graph if it wasn't found
+      if ( fromVertex == null ) {
+        fromVertex = addVertex( link.getFromNode() );
+        // set the virtual node property to true since this is an implicit adding of a node
+        fromVertex.property( DictionaryConst.NODE_VIRTUAL, true );
+      }
+      // update the vertex properties from the fromNode
+      copyNodePropertiesToVertex( link.getFromNode(), fromVertex );
 
-    // add the "from" vertex to the graph if it wasn't found
-    if ( fromVertex == null ) {
-      fromVertex = addVertex( link.getFromNode() );
-      // set the virtual node property to true since this is an implicit adding of a node
-      fromVertex.property( DictionaryConst.NODE_VIRTUAL, true );
-    }
-    // update the vertex properties from the fromNode
-    copyNodePropertiesToVertex( link.getFromNode(), fromVertex );
+      // add the "to" vertex to the graph if it wasn't found
+      if ( toVertex == null ) {
+        toVertex = addVertex( link.getToNode() );
+        // set the virtual node property to true since this is an implicit adding of a node
+        toVertex.property( DictionaryConst.NODE_VIRTUAL, true );
+      }
+      // update the to vertex properties from the toNode
+      copyNodePropertiesToVertex( link.getToNode(), toVertex );
 
-    // add the "to" vertex to the graph if it wasn't found
-    if ( toVertex == null ) {
-      toVertex = addVertex( link.getToNode() );
-      // set the virtual node property to true since this is an implicit adding of a node
-      toVertex.property( DictionaryConst.NODE_VIRTUAL, true );
-    }
-    // update the to vertex properties from the toNode
-    copyNodePropertiesToVertex( link.getToNode(), toVertex );
+      final Edge edge = addEdge( fromVertex, link.getLabel(), toVertex );
+      copyLinkPropertiesToEdge( link, edge );
 
-    final Edge edge = addEdge( fromVertex, link.getLabel(), toVertex );
-    copyLinkPropertiesToEdge( link, edge );
-
-    return this;
+      return this;
+    } );
   }
 
   /**
@@ -168,20 +168,22 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
    */
   @Override
   public IMetaverseBuilder addNode( IMetaverseNode node ) {
-    // does the node already exist?
-    Vertex v = getVertexForNode( node );
+    return BaseSynchronizedGraph.write( graph, () -> {
+      // does the node already exist?
+      Vertex v = getVertexForNode( node );
 
-    if ( v == null ) {
-      // it's a new node, add it to the graph
-      v = addVertex( node );
-    }
+      if ( v == null ) {
+        // it's a new node, add it to the graph
+        v = addVertex( node );
+      }
 
-    // adding this node means that it is no longer a virtual node
-    v.property( DictionaryConst.NODE_VIRTUAL, false );
+      // adding this node means that it is no longer a virtual node
+      v.property( DictionaryConst.NODE_VIRTUAL, false );
 
-    copyNodePropertiesToVertex( node, v );
+      copyNodePropertiesToVertex( node, v );
 
-    return this;
+      return this;
+    } );
   }
 
   /**
@@ -221,56 +223,57 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
       return null;
     }
 
-    // the node is an entity, so link it to its entity type node
-    Vertex entityType = getVertex( ENTITY_PREFIX + entityName );
-    if ( entityType == null ) {
-      // the entity type node does not exist, so create it
-      entityType = getOrCreateVertex( ENTITY_PREFIX + entityName );
-      entityType.property( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ENTITY );
-      entityType.property( DictionaryConst.PROPERTY_NAME, entityName );
+    return BaseSynchronizedGraph.write( graph, () -> {
+      // the node is an entity, so link it to its entity type node
+      Vertex entityType = getVertex( ENTITY_PREFIX + entityName );
+      if ( entityType == null ) {
+        // the entity type node does not exist, so create it
+        entityType = getOrCreateVertex( ENTITY_PREFIX + entityName );
+        entityType.property( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ENTITY );
+        entityType.property( DictionaryConst.PROPERTY_NAME, entityName );
 
-      // TODO move this to a map of types to strings or something
-      if ( entityName.equals( DictionaryConst.NODE_TYPE_TRANS ) || entityName
-        .equals( DictionaryConst.NODE_TYPE_JOB ) ) {
-        entityType.property( DictionaryConst.PROPERTY_DESCRIPTION, DictionaryConst.EXECUTION_ENGINE_NAME );
-      }
+        // TODO move this to a map of types to strings or something
+        if ( entityName.equals( DictionaryConst.NODE_TYPE_TRANS ) || entityName
+          .equals( DictionaryConst.NODE_TYPE_JOB ) ) {
+          entityType.property( DictionaryConst.PROPERTY_DESCRIPTION, DictionaryConst.EXECUTION_ENGINE_NAME );
+        }
 
-      // get all available entity link types
-      final Iterator<String> entityLinkTypeIter = DictionaryHelper.getEntityLinkTypes().iterator();
-      while ( entityLinkTypeIter.hasNext() ) {
-        final String entityLinkType = entityLinkTypeIter.next();
-        // check if there is a parent node for the given node entityName with the current link type
-        final String parentEntityNode = DictionaryHelper.getParentEntityNodeType( entityLinkType, entityName );
-        // if the node exists, add it and add a link to it
-        if ( parentEntityNode != null ) {
-          addEdge( addEntityType( parentEntityNode ), entityLinkType, entityType );
-        } else if ( DictionaryHelper.linksToRoot( entityLinkType, entityName ) ) {
-          addEdge( createRootEntity(), entityLinkType, entityType );
+        // get all available entity link types
+        for ( String entityLinkType : DictionaryHelper.getEntityLinkTypes() ) {
+          // check if there is a parent node for the given node entityName with the current link type
+          final String parentEntityNode = DictionaryHelper.getParentEntityNodeType( entityLinkType, entityName );
+          // if the node exists, add it and add a link to it
+          if ( parentEntityNode != null ) {
+            addEdge( addEntityType( parentEntityNode ), entityLinkType, entityType );
+          } else if ( DictionaryHelper.linksToRoot( entityLinkType, entityName ) ) {
+            addEdge( createRootEntity(), entityLinkType, entityType );
+          }
         }
       }
-    }
-    return entityType;
+      return entityType;
+    } );
   }
 
   /**
    * Creates the root entity for this metaverse.
    */
   public Vertex createRootEntity() {
+    return BaseSynchronizedGraph.write( graph, () -> {
+      Vertex rootEntity = getVertex( ENTITY_NODE_ID );
+      if ( rootEntity == null ) {
+        rootEntity = getOrCreateVertex( ENTITY_NODE_ID );
+        rootEntity.property( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ROOT_ENTITY );
+        rootEntity.property( DictionaryConst.PROPERTY_NAME, "METAVERSE" );
 
-    Vertex rootEntity = getVertex( ENTITY_NODE_ID );
-    if ( rootEntity == null ) {
-      rootEntity = getOrCreateVertex( ENTITY_NODE_ID );
-      rootEntity.property( DictionaryConst.PROPERTY_TYPE, DictionaryConst.NODE_TYPE_ROOT_ENTITY );
-      rootEntity.property( DictionaryConst.PROPERTY_NAME, "METAVERSE" );
-
-      // TODO get these properties from somewhere else
-      rootEntity.property( "division", "Engineering" );
-      rootEntity.property( "project", "Pentaho Data Lineage" );
-      rootEntity.property( "description",
-        "Data lineage is tracing the path that data has traveled upstream from its destination, through Pentaho "
-          + "systems and artifacts as well as external systems and artifacts." );
-    }
-    return rootEntity;
+        // TODO get these properties from somewhere else
+        rootEntity.property( "division", "Engineering" );
+        rootEntity.property( "project", "Pentaho Data Lineage" );
+        rootEntity.property( "description",
+          "Data lineage is tracing the path that data has traveled upstream from its destination, through Pentaho "
+            + "systems and artifacts as well as external systems and artifacts." );
+      }
+      return rootEntity;
+    } );
   }
 
   /**
@@ -285,16 +288,13 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
     Boolean nodeIsVirtual = (Boolean) node.getProperty( DictionaryConst.NODE_VIRTUAL );
     nodeIsVirtual = nodeIsVirtual == null ? true : nodeIsVirtual;
 
-    Boolean vertexIsVirtual = v.property( DictionaryConst.NODE_VIRTUAL ).isPresent()
-      ? v.<Boolean>value( DictionaryConst.NODE_VIRTUAL ) : false;
+    Boolean vertexIsVirtual = v.property( DictionaryConst.NODE_VIRTUAL ).isPresent() ? v.<Boolean>value(
+      DictionaryConst.NODE_VIRTUAL ) : false;
     vertexIsVirtual = vertexIsVirtual == null ? false : vertexIsVirtual;
 
-    String vertexLogicalId = v.property( DictionaryConst.PROPERTY_LOGICAL_ID ).isPresent()
-      ? v.<String>value( DictionaryConst.PROPERTY_LOGICAL_ID ) : null;
-    boolean skipLogicalId = false;
-    if ( vertexLogicalId != null && nodeIsVirtual && !vertexIsVirtual ) {
-      skipLogicalId = true;
-    }
+    String vertexLogicalId = v.property( DictionaryConst.PROPERTY_LOGICAL_ID ).isPresent() ? v.value(
+      DictionaryConst.PROPERTY_LOGICAL_ID ) : null;
+    boolean skipLogicalId = vertexLogicalId != null && nodeIsVirtual && !vertexIsVirtual;
 
     // set all of the properties, except the id and virtual (since that is an internally set prop)
     for ( String propertyKey : node.getPropertyKeys() ) {
@@ -361,7 +361,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
 
   @Override
   public IMetaverseBuilder deleteLink( IMetaverseLink link ) {
-    deleteLink( link, true );
+    BaseSynchronizedGraph.write( graph, () -> deleteLink( link, true ) );
     return this;
   }
 
@@ -418,11 +418,13 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
 
   @Override
   public IMetaverseBuilder deleteNode( IMetaverseNode node ) {
-    Vertex v = getVertexForNode( node );
-    if ( v != null ) {
-      v.remove();
-    }
-    return this;
+    return BaseSynchronizedGraph.write( graph, () -> {
+      Vertex v = getVertexForNode( node );
+      if ( v != null ) {
+        v.remove();
+      }
+      return this;
+    } );
   }
 
   /*
@@ -433,11 +435,13 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
    */
   @Override
   public IMetaverseBuilder updateLinkLabel( IMetaverseLink link, String label ) {
-    if ( label != null && deleteLink( link, false ) ) {
-      link.setLabel( label );
-      addLink( link );
-    }
-    return this;
+    return BaseSynchronizedGraph.write( graph, () -> {
+      if ( label != null && deleteLink( link, false ) ) {
+        link.setLabel( label );
+        addLink( link );
+      }
+      return this;
+    } );
   }
 
   @Override
@@ -470,13 +474,14 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
    */
   @Override
   public IMetaverseBuilder updateNode( IMetaverseNode node ) {
+    return BaseSynchronizedGraph.write( graph, () -> {
+      Vertex v = getVertexForNode( node );
+      if ( v != null ) {
+        copyNodePropertiesToVertex( node, v );
+      }
 
-    Vertex v = getVertexForNode( node );
-    if ( v != null ) {
-      copyNodePropertiesToVertex( node, v );
-    }
-
-    return this;
+      return this;
+    } );
   }
 
   /**
@@ -499,7 +504,7 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
   }
 
   public void addLink( Vertex fromVertex, String label, Vertex toVertex ) {
-    addEdge( fromVertex, label, toVertex );
+    BaseSynchronizedGraph.write( graph, () -> addEdge( fromVertex, label, toVertex ) );
   }
 
   private Edge addEdge( Vertex fromVertex, String label, Vertex toVertex ) {
@@ -531,9 +536,9 @@ public class BaseMetaverseBuilder extends MetaverseObjectFactory implements IMet
       return false;
     }
 
-    Boolean isVirtual = vertex.property( DictionaryConst.NODE_VIRTUAL ).isPresent()
-      ? vertex.<Boolean>value( DictionaryConst.NODE_VIRTUAL ) : null;
-    return isVirtual == null ? false : isVirtual;
+    Boolean isVirtual = vertex.property( DictionaryConst.NODE_VIRTUAL ).isPresent() ? vertex.<Boolean>value(
+      DictionaryConst.NODE_VIRTUAL ) : null;
+    return isVirtual != null && isVirtual;
   }
 
 }

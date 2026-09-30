@@ -11,7 +11,6 @@
  ******************************************************************************/
 
 
-
 package org.pentaho.metaverse.util;
 
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -21,6 +20,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.pentaho.dictionary.DictionaryConst;
 import org.pentaho.metaverse.api.ChangeType;
@@ -28,13 +28,16 @@ import org.pentaho.metaverse.api.IComponentDescriptor;
 import org.pentaho.metaverse.api.IDocument;
 import org.pentaho.metaverse.api.IDocumentAnalyzer;
 import org.pentaho.metaverse.api.IDocumentController;
+import org.pentaho.metaverse.api.IMetaverseBuilder;
 import org.pentaho.metaverse.api.IMetaverseNode;
 import org.pentaho.metaverse.api.INamespace;
 import org.pentaho.metaverse.api.IRequiresMetaverseBuilder;
 import org.pentaho.metaverse.api.MetaverseException;
+import org.pentaho.metaverse.api.model.BaseSynchronizedGraph;
 import org.pentaho.metaverse.api.model.IOperation;
 import org.pentaho.metaverse.api.model.Operation;
 import org.pentaho.metaverse.api.model.Operations;
+import org.pentaho.metaverse.graph.LineageGraphMap;
 import org.pentaho.metaverse.testutils.MetaverseTestUtils;
 
 import java.util.ArrayList;
@@ -43,7 +46,10 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -85,9 +91,9 @@ public class MetaverseUtilTest {
 
     assertEquals( document.getNamespace(), namespace );
     assertEquals( document.getContent(), content );
-    assertEquals( document.getStringID(), "myID" );
-    assertEquals( document.getName(), "myName" );
-    assertEquals( document.getMimeType(), "application/text" );
+    assertEquals( "myID", document.getStringID() );
+    assertEquals( "myName", document.getName() );
+    assertEquals( "application/text", document.getMimeType() );
 
   }
 
@@ -106,7 +112,7 @@ public class MetaverseUtilTest {
 
     IDocumentController documentController =
       mock( IDocumentController.class, withSettings().extraInterfaces( IRequiresMetaverseBuilder.class ) );
-    List<IDocumentAnalyzer> analyzers = new ArrayList<IDocumentAnalyzer>();
+    List<IDocumentAnalyzer> analyzers = new ArrayList<>();
     when( documentController.getDocumentAnalyzers( Mockito.anyString() ) ).thenReturn( analyzers );
 
     MetaverseUtil.documentController = documentController;
@@ -124,6 +130,34 @@ public class MetaverseUtilTest {
     MetaverseUtil.addLineageGraph( document, graph );
 
     MetaverseUtil.addLineageGraph( document, null );
+  }
+
+  @Test
+  public void testAddLineageGraphSharesSynchronizedGraph() throws Exception {
+    assertSharedLineageGraph( TinkerGraph.open() );
+    assertSharedLineageGraph( new BaseSynchronizedGraph( TinkerGraph.open() ) );
+    assertSharedLineageGraph( null );
+  }
+
+  private void assertSharedLineageGraph( Graph inputGraph ) throws Exception {
+    IDocument document = mock( IDocument.class );
+    when( document.getContent() ).thenReturn( new Object() );
+    IDocumentController documentController = mock( IDocumentController.class );
+    when( documentController.getDocumentAnalyzers( Mockito.anyString() ) )
+      .thenReturn( List.of( mock( IDocumentAnalyzer.class ) ) );
+    MetaverseUtil.documentController = documentController;
+
+    MetaverseUtil.addLineageGraph( document, inputGraph );
+
+    ArgumentCaptor<IMetaverseBuilder> builder = ArgumentCaptor.forClass( IMetaverseBuilder.class );
+    verify( documentController ).setMetaverseBuilder( builder.capture() );
+    Graph builderGraph = builder.getValue().getGraph();
+    assertTrue( builderGraph instanceof BaseSynchronizedGraph );
+    if ( inputGraph instanceof BaseSynchronizedGraph ) {
+      assertSame( inputGraph, builderGraph );
+    }
+    assertSame( builderGraph, LineageGraphMap.getInstance().get( document.getContent() )
+      .get( 10, java.util.concurrent.TimeUnit.SECONDS ) );
   }
 
   @Test
