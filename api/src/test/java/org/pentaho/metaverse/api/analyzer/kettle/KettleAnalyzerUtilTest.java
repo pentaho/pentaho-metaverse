@@ -304,8 +304,8 @@ public class KettleAnalyzerUtilTest {
 
     try(MockedStatic<KettleVFS> mockedKettleVFS = mockStatic( KettleVFS.class ) ) {
       mockedKettleVFS.when( () -> KettleVFS.getFileObject( Mockito.<String>any(), Mockito.<VariableSpace>any() ) ).thenReturn( fileObject );
-      mockedKettleVFS.when( () -> KettleVFS.startsWithScheme( anyString() )).thenCallRealMethod();
-      mockedKettleVFS.when( KettleVFS::getInstance ).thenCallRealMethod();
+      mockedKettleVFS.when( () -> KettleVFS.getScheme( anyString() ) ).thenReturn( "file" );
+      mockedKettleVFS.when( () -> KettleVFS.startsWithScheme( anyString() ) ).thenReturn( true );
       assertTrue( KettleAnalyzerUtil.getResourcesFromRow( step, rowMeta, row ).contains( resourceInfo ) );
     }
   }
