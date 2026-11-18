@@ -242,6 +242,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.pentaho.di.plugins</groupId>
+      <artifactId>script-values-mod-plugins-impl</artifactId>
+      <version>${dependency.pentaho-kettle.kettle-core.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <version>${spring.version}</version>
