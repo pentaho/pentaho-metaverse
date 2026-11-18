@@ -18,6 +18,7 @@ import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettlePluginException;
 import org.pentaho.di.core.plugins.Plugin;
+import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.trans.step.StepMetaInterface;
@@ -48,6 +49,10 @@ import java.util.Set;
 public class IntegrationTestUtil {
 
   public static final String OUTPUT_FOLDER = "target/outputfiles/";
+
+  private static final String SCRIPT_VALUES_META_CLASS =
+    "org.pentaho.di.trans.steps.scriptvalues_mod.ScriptValuesMetaMod";
+  private static PluginInterface scriptValuePlugin;
 
   public static String getOutputPath( String fileName ) {
     File f = new File( OUTPUT_FOLDER );
@@ -112,6 +117,17 @@ public class IntegrationTestUtil {
   }
 
   private static void registerKettlePlugins() throws KettlePluginException {
+    PluginRegistry registry = PluginRegistry.getInstance();
+    if ( registry.findPluginWithId( StepPluginType.class, "ScriptValueMod" ) == null ) {
+      try {
+        Class.forName( SCRIPT_VALUES_META_CLASS, false, IntegrationTestUtil.class.getClassLoader() );
+        registerKettlePlugin( SCRIPT_VALUES_META_CLASS, "ScriptValueMod", "Scripting", "Script Values" );
+        scriptValuePlugin = registry.findPluginWithId( StepPluginType.class, "ScriptValueMod" );
+      } catch ( ClassNotFoundException e ) {
+        System.err.println( "Optional ScriptValueMod plugin is unavailable; tests requiring it cannot run: "
+          + SCRIPT_VALUES_META_CLASS );
+      }
+    }
     // TODO: uncomment below once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved
     //registerKettlePlugin( MetaInjectMeta.class.getName(), "MetaInject", "Flow", "ETL metadata injection" );
     //registerKettlePlugin( CheckSumMeta.class.getName(), "CheckSum", "Transform", "Add a checksum" );
@@ -119,10 +135,17 @@ public class IntegrationTestUtil {
   }
 
   public static void shutdownPentahoSystem() {
-    PentahoSystem.refreshSettings();
-    PentahoSystem.clearGlobals();
-    PentahoSystem.clearObjectFactory();
-    PentahoSystem.shutdown();
+    try {
+      PentahoSystem.refreshSettings();
+      PentahoSystem.clearGlobals();
+      PentahoSystem.clearObjectFactory();
+      PentahoSystem.shutdown();
+    } finally {
+      if ( scriptValuePlugin != null ) {
+        PluginRegistry.getInstance().removePlugin( StepPluginType.class, scriptValuePlugin );
+        scriptValuePlugin = null;
+      }
+    }
   }
 
   public static synchronized Graph buildMetaverseGraph( IDocumentLocatorProvider provider ) throws Exception {
