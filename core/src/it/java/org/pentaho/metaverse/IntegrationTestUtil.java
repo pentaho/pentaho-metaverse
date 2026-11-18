@@ -22,7 +22,6 @@ import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.trans.steps.scriptvalues_mod.ScriptValuesMetaMod;
 import org.pentaho.metaverse.api.IDocumentLocator;
 import org.pentaho.metaverse.api.IDocumentLocatorProvider;
 import org.pentaho.metaverse.api.IMetaverseReader;
@@ -51,6 +50,8 @@ public class IntegrationTestUtil {
 
   public static final String OUTPUT_FOLDER = "target/outputfiles/";
 
+  private static final String SCRIPT_VALUES_META_CLASS =
+    "org.pentaho.di.trans.steps.scriptvalues_mod.ScriptValuesMetaMod";
   private static PluginInterface scriptValuePlugin;
 
   public static String getOutputPath( String fileName ) {
@@ -117,8 +118,14 @@ public class IntegrationTestUtil {
   private static void registerKettlePlugins() throws KettlePluginException {
     PluginRegistry registry = PluginRegistry.getInstance();
     if ( registry.findPluginWithId( StepPluginType.class, "ScriptValueMod" ) == null ) {
-      registerKettlePlugin( ScriptValuesMetaMod.class.getName(), "ScriptValueMod", "Scripting", "Script Values" );
-      scriptValuePlugin = registry.findPluginWithId( StepPluginType.class, "ScriptValueMod" );
+      try {
+        Class.forName( SCRIPT_VALUES_META_CLASS, false, IntegrationTestUtil.class.getClassLoader() );
+        registerKettlePlugin( SCRIPT_VALUES_META_CLASS, "ScriptValueMod", "Scripting", "Script Values" );
+        scriptValuePlugin = registry.findPluginWithId( StepPluginType.class, "ScriptValueMod" );
+      } catch ( ClassNotFoundException e ) {
+        System.err.println( "Optional ScriptValueMod plugin is unavailable; tests requiring it cannot run: "
+          + SCRIPT_VALUES_META_CLASS );
+      }
     }
     // TODO: uncomment below once https://jira.pentaho.com/browse/ENGOPS-4612 is resolved
     //registerKettlePlugin( MetaInjectMeta.class.getName(), "MetaInject", "Flow", "ETL metadata injection" );
