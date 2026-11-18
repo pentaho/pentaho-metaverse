@@ -34,6 +34,12 @@ mvn integration-test
 **Install integration test**
 
 *Note that the big-data-plugin/kettle-plugin/kafka project's integration tests rely on this project's integration test artifacts.
+
+Downstream integration-test consumers using `ScriptValueMod` must provide its plugin, for example as a test-scoped
+`org.pentaho.di.plugins:script-values-mod-plugins-impl` dependency matching their Pentaho Data Integration version.
+If the plugin is not already registered and its implementation is absent, the shared test harness emits a warning and
+leaves the step unregistered; consumers that do not use the step can still initialize the harness.
+
 ```
 mvn install -DrunITs
 ```
@@ -108,4 +114,3 @@ core
 │       └── resources
 └── target                     # generated stuff (compiled classes, reports, assembled artifacts, ...)
 ```
-
